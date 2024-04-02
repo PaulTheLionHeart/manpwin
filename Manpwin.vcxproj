@@ -1,0 +1,513 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8253B6B5-D533-470C-B39B-6E7E35B9CB70}</ProjectGuid>
+    <RootNamespace>Manpwin</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <ProjectName>Manpwin64</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v141</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>15.0.26323.1</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(MPFR_DIR)\$(IntDir);$(MPIR_DIR)\$(IntDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(MPIR_DIR))\$(IntDir);$(MPFR_DIR)\$(IntDir);$(LibraryPath)</LibraryPath>
+    <TargetName>Manpwin</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(LibraryPath)</LibraryPath>
+    <TargetName>$(ProjectName)</TargetName>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(MPFR_DIR)$(Platform)\$(IntDir);$(MPIR_DIR)$(Platform)\$(IntDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(MPIR_DIR)$(Platform)\$(IntDir);$(MPFR_DIR)$(Platform)\$(IntDir);$(LibraryPath)</LibraryPath>
+    <TargetName>Manpwin</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(LibraryPath)</LibraryPath>
+    <TargetName>$(ProjectName)</TargetName>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Debug/Manpwin.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_NON_CONFORMING_SWPRINTFS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderOutputFile>.\Debug/Manpwin.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0c09</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>oldnames.lib;odbc32.lib;mpir.lib;mpfr.lib;odbccp32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>
+      </StackReserveSize>
+      <StackCommitSize>
+      </StackCommitSize>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug/Manpwin.bsc</OutputFile>
+    </Bscmake>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TypeLibraryName>.\Debug/Manpwin.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_DEPRECATE;_CRT_NON_CONFORMING_SWPRINTFS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderOutputFile>.\Debug/Manpwin.pch</PrecompiledHeaderOutputFile>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0c09</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:MSVCRTD.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>oldnames.lib;odbc32.lib;odbccp32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>.\Debug/Manpwin.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>
+      </StackReserveSize>
+      <StackCommitSize>
+      </StackCommitSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>NotSet</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug/Manpwin.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Release/Manpwin.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_DEPRECATE; _CRT_NON_CONFORMING_SWPRINTFS; _CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>.\Release/Manpwin.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0c09</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMT.lib D:\c\ManpWINMpfr\Win32\Release\mpfr.lib D:\c\ManpWINMpfr\Win32\Release\mpir.lib </AdditionalOptions>
+      <AdditionalDependencies>oldnames.lib;odbc32.lib;odbccp32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>
+      </StackReserveSize>
+      <StackCommitSize>
+      </StackCommitSize>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <DataExecutionPrevention>true</DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release/Manpwin.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TypeLibraryName>.\Release/Manpwin.tlb</TypeLibraryName>
+      <HeaderFileName>
+      </HeaderFileName>
+    </Midl>
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_DEPRECATE; _CRT_NON_CONFORMING_SWPRINTFS; _CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>.\Release/Manpwin.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
+      <BrowseInformation>true</BrowseInformation>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0c09</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMT.lib /LTCG %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>oldnames.lib;odbc32.lib;odbccp32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <ProgramDatabaseFile>.\Release/Manpwin.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <StackReserveSize>
+      </StackReserveSize>
+      <StackCommitSize>
+      </StackCommitSize>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>NotSet</TargetMachine>
+    </Link>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release/Manpwin.bsc</OutputFile>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AniInvert.cpp" />
+    <ClCompile Include="AniJulia.cpp" />
+    <ClCompile Include="anim.cpp" />
+    <ClCompile Include="ant.cpp" />
+    <ClCompile Include="Apollonius.cpp" />
+    <ClCompile Include="Approximation.cpp" />
+    <ClCompile Include="Bif.cpp" />
+    <ClCompile Include="BigComplex.cpp" />
+    <ClCompile Include="BigDouble.cpp" />
+    <ClCompile Include="BigFunctions.cpp" />
+    <ClCompile Include="BigMandelDerivatives.cpp" />
+    <ClCompile Include="BigNumStuff.cpp" />
+    <ClCompile Include="BigPixel.cpp" />
+    <ClCompile Include="BigTrig.cpp" />
+    <ClCompile Include="BigTZ.cpp" />
+    <ClCompile Include="Bt.cpp" />
+    <ClCompile Include="BuddhaBrot.cpp" />
+    <ClCompile Include="CalcMode.cpp" />
+    <ClCompile Include="Circle.cpp" />
+    <ClCompile Include="Clipbord.cpp" />
+    <ClCompile Include="Colour.cpp" />
+    <ClCompile Include="Colour1.cpp" />
+    <ClCompile Include="ColourMethod.cpp" />
+    <ClCompile Include="Complex.cpp" />
+    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="Cross.cpp" />
+    <ClCompile Include="Curves.cpp" />
+    <ClCompile Include="Decomp.cpp" />
+    <ClCompile Include="Default.cpp" />
+    <ClCompile Include="DerivSlope.cpp" />
+    <ClCompile Include="Dib.cpp" />
+    <ClCompile Include="Dither.cpp" />
+    <ClCompile Include="Dl3quant.cpp" />
+    <ClCompile Include="Dostereo.cpp" />
+    <ClCompile Include="EditPal.cpp" />
+    <ClCompile Include="EditPalDlg.cpp" />
+    <ClCompile Include="ExpComplex.cpp" />
+    <ClCompile Include="FDimension.cpp" />
+    <ClCompile Include="FFT.cpp" />
+    <ClCompile Include="fibonaci.cpp" />
+    <ClCompile Include="filter.cpp" />
+    <ClCompile Include="FilterData.cpp" />
+    <ClCompile Include="fourier.cpp" />
+    <ClCompile Include="Fract.cpp" />
+    <ClCompile Include="FractalMaps.cpp" />
+    <ClCompile Include="fractalp.cpp" />
+    <ClCompile Include="FractintFilters.cpp" />
+    <ClCompile Include="FractintFunctions.cpp" />
+    <ClCompile Include="FractintTrig.cpp" />
+    <ClCompile Include="FracZoom.cpp" />
+    <ClCompile Include="FrameCalculator.cpp" />
+    <ClCompile Include="FrantPAR.cpp" />
+    <ClCompile Include="Functions.cpp" />
+    <ClCompile Include="FwdDiff.cpp" />
+    <ClCompile Include="Genline.cpp" />
+    <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="GIFwrite.cpp" />
+    <ClCompile Include="Guess.cpp" />
+    <ClCompile Include="Henon.cpp" />
+    <ClCompile Include="htmlhelp.cpp" />
+    <ClCompile Include="Ikeda.cpp" />
+    <ClCompile Include="KallesPAR.cpp" />
+    <ClCompile Include="Keyboard.cpp" />
+    <ClCompile Include="Kleinian.cpp" />
+    <ClCompile Include="KnotOsc.cpp" />
+    <ClCompile Include="Knots.cpp" />
+    <ClCompile Include="Line3d.cpp" />
+    <ClCompile Include="Lorenz.cpp" />
+    <ClCompile Include="Lsys.cpp" />
+    <ClCompile Include="Malthus.cpp" />
+    <ClCompile Include="MandelDerivatives.cpp" />
+    <ClCompile Include="MandelDerivativesFN.cpp" />
+    <ClCompile Include="Maninit.cpp" />
+    <ClCompile Include="Manp.cpp" />
+    <ClCompile Include="Manpdlg.cpp" />
+    <ClCompile Include="Manpfile.cpp" />
+    <ClCompile Include="Manpmain.cpp" />
+    <ClCompile Include="Manpwin.cpp" />
+    <ClCompile Include="Matrix.cpp" />
+    <ClCompile Include="Miscfrac.cpp" />
+    <ClCompile Include="Mountain.cpp" />
+    <ClCompile Include="MPEGWrite.cpp" />
+    <ClCompile Include="OscAnim.cpp" />
+    <ClCompile Include="OscDatabase.cpp" />
+    <ClCompile Include="Oscillators.cpp" />
+    <ClCompile Include="OscMorph.cpp" />
+    <ClCompile Include="OscProcess.cpp" />
+    <ClCompile Include="OtherFunctions.cpp" />
+    <ClCompile Include="ParamAnim.cpp" />
+    <ClCompile Include="parser\fpu087.cpp" />
+    <ClCompile Include="Pascal.cpp" />
+    <ClCompile Include="PertFN.cpp" />
+    <ClCompile Include="PertFNFloatExp.cpp" />
+    <ClCompile Include="Perturbation.cpp" />
+    <ClCompile Include="Pixel.cpp" />
+    <ClCompile Include="Plot.cpp" />
+    <ClCompile Include="png.cpp" />
+    <ClCompile Include="Polygon.cpp" />
+    <ClCompile Include="Popcorn.cpp" />
+    <ClCompile Include="Potential.cpp" />
+    <ClCompile Include="preview.cpp" />
+    <ClCompile Include="Rotate.cpp" />
+    <ClCompile Include="RTJulia.cpp" />
+    <ClCompile Include="Savefile.cpp" />
+    <ClCompile Include="SaveVars.cpp" />
+    <ClCompile Include="Script.cpp" />
+    <ClCompile Include="SierpinskiFlowers.cpp" />
+    <ClCompile Include="Slope.cpp" />
+    <ClCompile Include="SlopeMT.cpp" />
+    <ClCompile Include="SprottLinz.cpp" />
+    <ClCompile Include="SprottMaps.cpp" />
+    <ClCompile Include="SprottOsc.cpp" />
+    <ClCompile Include="Stereo.cpp" />
+    <ClCompile Include="Surfaces.cpp" />
+    <ClCompile Include="Sym.cpp" />
+    <ClCompile Include="SymPlot.cpp" />
+    <ClCompile Include="Tess.cpp" />
+    <ClCompile Include="Tetration.cpp" />
+    <ClCompile Include="tierazon.cpp" />
+    <ClCompile Include="TierazonFunctions.cpp" />
+    <ClCompile Include="Triangles.cpp" />
+    <ClCompile Include="trig.cpp" />
+    <ClCompile Include="TZFilterDLG.cpp" />
+    <ClCompile Include="undo.cpp" />
+    <ClCompile Include="Update.cpp" />
+    <ClCompile Include="User.cpp" />
+    <ClCompile Include="Zigzag.cpp" />
+    <ClCompile Include="Zoom.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Manpwin.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="anim.h" />
+    <ClInclude Include="Bif.h" />
+    <ClInclude Include="Big.h" />
+    <ClInclude Include="BigComplex.h" />
+    <ClInclude Include="BigDouble.h" />
+    <ClInclude Include="BigTrig.h" />
+    <ClInclude Include="CodeVersion.h" />
+    <ClInclude Include="colour.h" />
+    <ClInclude Include="Complex.h" />
+    <ClInclude Include="Dib.h" />
+    <ClInclude Include="EditPal.h" />
+    <ClInclude Include="ExpComplex.h" />
+    <ClInclude Include="Filter.h" />
+    <ClInclude Include="floatexp.h" />
+    <ClInclude Include="fract.h" />
+    <ClInclude Include="fractalp.h" />
+    <ClInclude Include="Fractype.h" />
+    <ClInclude Include="FrameCalculator.h" />
+    <ClInclude Include="Manp.h" />
+    <ClInclude Include="Manpwin.h" />
+    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="menu.h" />
+    <ClInclude Include="OscProcess.h" />
+    <ClInclude Include="OtherFunctions.h" />
+    <ClInclude Include="Pixel.h" />
+    <ClInclude Include="Plot.h" />
+    <ClInclude Include="Polygon.h" />
+    <ClInclude Include="Potential.h" />
+    <ClInclude Include="Preview.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Slope.h" />
+    <ClInclude Include="Tetration.h" />
+    <ClInclude Include="Zoom.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
+    <Image Include="Manpwin.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="mpeg\mpeg.vcxproj">
+      <Project>{3368bc86-428c-4c62-97c5-a4f4898a2ef0}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="parser\parser.vcxproj">
+      <Project>{1ce26221-302f-4ef9-a9b2-9445d4f67732}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="PNGLib\PNGLib.vcxproj">
+      <Project>{f6928c87-5beb-4aaa-af5d-0368d9e66309}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="ZLib\ZLib.vcxproj">
+      <Project>{f2152412-3ec2-4b1b-ac9e-7e10aeb22c26}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\mpfr\build.vc15\lib\x64\Release\mpfr.lib" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
+  </ImportGroup>
+</Project>
