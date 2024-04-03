@@ -1,0 +1,601 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 14">
+<meta name=Originator content="Microsoft Word 14">
+<link rel=File-List href="manp7w1d_files/filelist.xml">
+<link rel=Edit-Time-Data href="manp7w1d_files/editdata.mso">
+<!--[if !mso]>
+<style>
+v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style>
+<![endif]-->
+<title>3D Plotting</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>root</o:Author>
+  <o:Template>Normal</o:Template>
+  <o:LastAuthor>Paul</o:LastAuthor>
+  <o:Revision>32</o:Revision>
+  <o:TotalTime>172</o:TotalTime>
+  <o:Created>2011-08-24T07:23:00Z</o:Created>
+  <o:LastSaved>2021-09-18T01:34:00Z</o:LastSaved>
+  <o:Pages>2</o:Pages>
+  <o:Words>849</o:Words>
+  <o:Characters>4841</o:Characters>
+  <o:Lines>40</o:Lines>
+  <o:Paragraphs>11</o:Paragraphs>
+  <o:CharactersWithSpaces>5679</o:CharactersWithSpaces>
+  <o:Version>14.00</o:Version>
+ </o:DocumentProperties>
+ <o:OfficeDocumentSettings>
+  <o:AllowPNG/>
+ </o:OfficeDocumentSettings>
+</xml><![endif]-->
+<link rel=themeData href="manp7w1d_files/themedata.thmx">
+<link rel=colorSchemeMapping href="manp7w1d_files/colorschememapping.xml">
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:Zoom>130</w:Zoom>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:TrackMoves>false</w:TrackMoves>
+  <w:TrackFormatting/>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:DoNotPromoteQF/>
+  <w:LidThemeOther>EN-AU</w:LidThemeOther>
+  <w:LidThemeAsian>X-NONE</w:LidThemeAsian>
+  <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SplitPgBreakAndParaMark/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+  <m:mathPr>
+   <m:mathFont m:val="Cambria Math"/>
+   <m:brkBin m:val="before"/>
+   <m:brkBinSub m:val="&#45;-"/>
+   <m:smallFrac m:val="off"/>
+   <m:dispDef/>
+   <m:lMargin m:val="0"/>
+   <m:rMargin m:val="0"/>
+   <m:defJc m:val="centerGroup"/>
+   <m:wrapIndent m:val="1440"/>
+   <m:intLim m:val="subSup"/>
+   <m:naryLim m:val="undOvr"/>
+  </m:mathPr>  <u1:mathPr>
+   <u1:mathFont u1:val="Cambria Math"/>
+   <u1:brkBin u1:val="before"/>
+   <u1:brkBinSub u1:val="--"/>
+   <u1:smallFrac u1:val="off"/>
+   <u1:dispDef/>
+   <u1:lMargin u1:val="0"/>
+   <u1:rMargin u1:val="0"/>
+   <u1:defJc u1:val="centerGroup"/>
+   <u1:wrapIndent u1:val="1440"/>
+   <u1:intLim u1:val="subSup"/>
+   <u1:naryLim u1:val="undOvr"/>
+  </u1:mathPr>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" DefUnhideWhenUsed="false"
+  DefSemiHidden="false" DefQFormat="false" LatentStyleCount="267">
+  <w:LsdException Locked="false" Priority="1" Name="Default Paragraph Font"/>
+  <w:LsdException Locked="false" Priority="99" Name="No List"/>
+  <w:LsdException Locked="false" Priority="99" Name="Balloon Text"/>
+  <w:LsdException Locked="false" Priority="99" SemiHidden="true"
+   Name="Placeholder Text"/>
+  <w:LsdException Locked="false" Priority="1" QFormat="true" Name="No Spacing"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 1"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="99" SemiHidden="true" Name="Revision"/>
+  <w:LsdException Locked="false" Priority="34" QFormat="true"
+   Name="List Paragraph"/>
+  <w:LsdException Locked="false" Priority="29" QFormat="true" Name="Quote"/>
+  <w:LsdException Locked="false" Priority="30" QFormat="true"
+   Name="Intense Quote"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 1"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 1"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 2"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 2"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 2"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 3"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 3"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 3"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 4"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 4"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 4"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 5"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 5"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 5"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 6"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 6"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 6"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="19" QFormat="true"
+   Name="Subtle Emphasis"/>
+  <w:LsdException Locked="false" Priority="21" QFormat="true"
+   Name="Intense Emphasis"/>
+  <w:LsdException Locked="false" Priority="31" QFormat="true"
+   Name="Subtle Reference"/>
+  <w:LsdException Locked="false" Priority="32" QFormat="true"
+   Name="Intense Reference"/>
+  <w:LsdException Locked="false" Priority="33" QFormat="true" Name="Book Title"/>
+  <w:LsdException Locked="false" Priority="37" SemiHidden="true"
+   UnhideWhenUsed="true" Name="Bibliography"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="TOC Heading"/>
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-520081665 -1073717157 41 0 66047 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+p
+	{mso-style-noshow:yes;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-link:"Balloon Text Char";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Balloon Text";
+	mso-ansi-font-size:8.0pt;
+	mso-bidi-font-size:8.0pt;
+	font-family:"Tahoma","sans-serif";
+	mso-ascii-font-family:Tahoma;
+	mso-fareast-font-family:"Times New Roman";
+	mso-hansi-font-family:Tahoma;
+	mso-bidi-font-family:Tahoma;
+	color:black;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	mso-default-props:yes;
+	font-size:10.0pt;
+	mso-ansi-font-size:10.0pt;
+	mso-bidi-font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 72.0pt 72.0pt 72.0pt;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman","serif";}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="1026"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body bgcolor=white lang=EN-AU style='tab-interval:36.0pt'>
+
+<div class=WordSection1>
+
+<p><b>Animation Menu</b> </p>
+
+<p>Currently, animation runs of up to 100,000 frames can be made. Creating 1024
+frames of 640*480 pixels requires I <span class=SpellE>GByte</span> of memory
+if all frames are loaded into memory. It is not recommended to load more than this
+number of frames into memory and it is recommended that creation of MPEG files
+be done by either saving individual frames as PNG files and writing a list of
+files to a *.<span class=SpellE>lst</span> file or writing the MPEG file
+directly. These are options for Fourier, Julia and <span class=GramE>zoom</span>
+animations. The default is set to loading all frames into memory.</p>
+
+<p>Note that the fractal that is to be animated must be loaded before
+animating. If the appropriate fractal is not loaded, the user is prompted to
+select the fractal required.</p>
+
+<p><b style='mso-bidi-font-weight:normal'>Zoom animation<span style='mso-tab-count:
+1'>         </span></b><span style='mso-tab-count:2'>                        </span>(<span
+class=SpellE>Ctrl+A</span>)</p>
+
+<p>This option creates a script file to generate a sequence of PNG images
+starting with a width of 4.0 zooming in to the final image. The centre of the
+screen remains the same. The threshold level can be varied from the starting
+frame to the final frame and changes geometrically.</p>
+
+<p>The Palette Shift parameter allows the movement of the palette as the zoom
+proceeds. The colours will move inwards for positive values and out for
+negative values. The value of 0 inhibits the movement. A value of 3 gives a
+good movement if 1000 frames are being generated.</p>
+
+<p><b style='mso-bidi-font-weight:normal'>Setup Julia animation<span
+style='mso-tab-count:1'>            </span></b><span style='mso-tab-count:1'>            </span>(key
+J)</p>
+
+<p>Any location on the Mandelbrot set is a seed point that creates a unique
+Julia set. Three methods for creating a sequence of Julia sets are available:
+Linear, circle and cardioid. A “test” button allows the user to see the path
+through the Mandelbrot set that the Julia sets will follow. For example, this
+is the cardioid shape within the Mandelbrot set that creates wonderful Julia
+set animation.</p>
+
+<p><span style='mso-no-proof:yes'><!--[if gte vml 1]><v:shapetype id="_x0000_t75"
+ coordsize="21600,21600" o:spt="75" o:preferrelative="t" path="m@4@5l@4@11@9@11@9@5xe"
+ filled="f" stroked="f">
+ <v:stroke joinstyle="miter"/>
+ <v:formulas>
+  <v:f eqn="if lineDrawn pixelLineWidth 0"/>
+  <v:f eqn="sum @0 1 0"/>
+  <v:f eqn="sum 0 0 @1"/>
+  <v:f eqn="prod @2 1 2"/>
+  <v:f eqn="prod @3 21600 pixelWidth"/>
+  <v:f eqn="prod @3 21600 pixelHeight"/>
+  <v:f eqn="sum @0 0 1"/>
+  <v:f eqn="prod @6 1 2"/>
+  <v:f eqn="prod @7 21600 pixelWidth"/>
+  <v:f eqn="sum @8 21600 0"/>
+  <v:f eqn="prod @7 21600 pixelHeight"/>
+  <v:f eqn="sum @10 21600 0"/>
+ </v:formulas>
+ <v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>
+ <o:lock v:ext="edit" aspectratio="t"/>
+</v:shapetype><v:shape id="Picture_x0020_4" o:spid="_x0000_i1027" type="#_x0000_t75"
+ style='width:232.2pt;height:217.2pt;visibility:visible;mso-wrap-style:square'>
+ <v:imagedata src="manp7w1d_files/image001.jpg" o:title=""/>
+</v:shape><![endif]--><![if !vml]><img width=387 height=362
+src="manp7w1d_files/image001.jpg" v:shapes="Picture_x0020_4"><![endif]></span></p>
+
+<p>Some great circle Julia animations can be made at [-1.0, 0 radius 0.25],
+[-0.125, 0.75 radius 0.1], [-1.309, 0 radius 0.0595], [0.281, 0.5313 radius
+0.044]</p>
+
+<p>These animations assume that the Mandelbrot set is being used. Other powers
+of <span class=SpellE>Z^n</span> can be used, but give different results. For
+example, a cubic and a quartic will give a different epicycloid than the
+cardioid generated for the Mandelbrot set.<span style='mso-spacerun:yes'> 
+</span></p>
+
+<p><span style='mso-no-proof:yes'><!--[if gte vml 1]><v:shape id="Picture_x0020_2"
+ o:spid="_x0000_i1026" type="#_x0000_t75" style='width:201pt;height:264.6pt;
+ visibility:visible;mso-wrap-style:square'>
+ <v:imagedata src="manp7w1d_files/image002.jpg" o:title=""/>
+</v:shape><![endif]--><![if !vml]><img width=335 height=441
+src="manp7w1d_files/image002.jpg" v:shapes="Picture_x0020_2"><![endif]></span><span
+style='mso-spacerun:yes'>  </span><span style='mso-no-proof:yes'><!--[if gte vml 1]><v:shape
+ id="Picture_x0020_3" o:spid="_x0000_i1025" type="#_x0000_t75" style='width:204.6pt;
+ height:263.4pt;visibility:visible;mso-wrap-style:square'>
+ <v:imagedata src="manp7w1d_files/image003.jpg" o:title=""/>
+</v:shape><![endif]--><![if !vml]><img width=341 height=439
+src="manp7w1d_files/image003.jpg" v:shapes="Picture_x0020_3"><![endif]></span></p>
+
+<p><b style='mso-bidi-font-weight:normal'>Setup Fourier animation</b><span
+style='mso-tab-count:2'>                    </span>(<span class=SpellE>Shft+F</span>)</p>
+
+<p><span class=GramE>Creates an animation of the rotating vectors representing
+the harmonics of a waveform.</span></p>
+
+<p><b style='mso-bidi-font-weight:normal'>Setup Malthus Rate animation</b><span
+style='mso-tab-count:1'>         </span>(key M)</p>
+
+<p><span class=GramE>Creates an animation by changing the rate parameter.</span></p>
+
+<p><b style='mso-bidi-font-weight:normal'>Setup Ikeda animation</b><span
+style='mso-tab-count:2'>                      </span>(<span class=SpellE>Ctrl+I</span>)</p>
+
+<p><span class=GramE>Creates an animation by changing the rate ‘b’ parameter.</span></p>
+
+<p><b style='mso-bidi-font-weight:normal'>Setup Inversion animation<span
+style='mso-tab-count:1'>    </span></b><span style='mso-tab-count:1'>            </span>(<span
+class=SpellE>Shft+I</span>)</p>
+
+<p>Any location on the Mandelbrot set can be the centre of a radius that
+generates the inverse of a fractal. As in the Julia set animation, three
+methods for creating an animation sequence are available: Linear, circle and
+cardioid. A test button allows the user to see the path through the Mandelbrot
+set that the inversion centre will follow.</p>
+
+<p><b style='mso-bidi-font-weight:normal'>Setup Parameter animation</b><span
+style='mso-tab-count:2'>              </span>(key P)</p>
+
+<p>Most fractals can be animated by selecting a particular parameter to vary
+between specific values. “Parameter number to animate” specifies the specific
+parameter to change starting at 0 and all the way to the maximum number of
+parameters for that fractal – 1. All the current values of each parameter <span
+class=GramE>is</span> shown and may be modified. Once the parameter to be
+varied is specified, the start and end values for that parameter can be set.
+Allow parameter animations to oscillate back and forwards through the frames by
+checking the “Return” option. </p>
+
+<p><b style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Setup Chaotic Oscillator, Fractal Map, Surface, Knot or Curve animation</span></b><span
+style='mso-tab-count:1'>          </span>(<span class=SpellE>Ctrl+O</span>)</p>
+
+<p class=MsoNormal>The user can choose one of two options, rotation animation
+or evolution animation. </p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>The default is rotation animation which creates an animation
+through 360 degrees. The user may choose the axis of rotation. Note that more
+than one axis may be chosen simultaneously.<span style='mso-spacerun:yes'> 
+</span>Other fractals, such as all the 3D Lorenz attractors, 3D <span
+class=SpellE>Kamtorus</span>, <span class=SpellE>Pickover</span> and <span
+class=SpellE>Rossler</span> may be rotated. Many of the remaining fractals
+generate a warning, &quot;Fractal type is not a Chaotic Oscillator or <span
+class=GramE>a 3D</span> Fractal Map! Do you wish to change the fractal type
+first?&quot; If the user responds with “No”, then an attempt will still be made
+to rotate the fractal using colour information for the transformation. </p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>The alternative allows the user to watch the Oscillator or
+Fractal Map to evolve. The value of iteration count is critical in getting the
+best range. Some experimentation may be required. Often it is best to start
+with a lower iteration count than the <span class=GramE>default .</span></p>
+
+<p><b style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Setup Morphing between pairs of axes in Chaotic Oscillator, Fractal Map,
+Knot or Curve animation</span></b><span style='mso-tab-count:1'>        </span>(<span
+class=SpellE>Shft+M</span>)</p>
+
+<p class=MsoNormal>This is similar to other animations except that one can
+allow the animation to pause when a new pair of axes is reached. The delay can
+be set by the user. Note that chaotic oscillators and curves can have points
+far from the centre and causes morphing to go “off the scale”. Fractal Maps and
+knots are much better behaved. More investigation is required to get a better
+algorithm for oscillators and curves.</p>
+
+<p><b style='mso-bidi-font-weight:normal'>Stop animation Generation</b><span
+style='mso-tab-count:2'>               </span>(<span class=SpellE>Shft+S</span>)
+or <span lang=EN-US style='mso-ansi-language:EN-US'>(key ESC)</span></p>
+
+<p><b style='mso-bidi-font-weight:normal'>Commands while animation is running:<o:p></o:p></b></p>
+
+<p>Once the animation is seen on the screen, a number of options are available:</p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Increase speed of the animation</span></b><span lang=EN-US
+style='mso-ansi-language:EN-US'> <span style='mso-tab-count:2'>                  </span>(key
++)<span style='mso-tab-count:1'>            </span><o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Decrease speed of the animation</span></b><span lang=EN-US
+style='mso-ansi-language:EN-US'> <span style='mso-tab-count:2'>                </span>(key
+-)<span style='mso-tab-count:1'> </span><o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Suspend/resume animation</span></b><span lang=EN-US style='mso-ansi-language:
+EN-US'> <span style='mso-tab-count:3'>                          </span>(S' key)
+<o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Escape from animation</span></b><span lang=EN-US style='mso-ansi-language:
+EN-US'><span style='mso-tab-count:3'>                                  </span>(key
+ESC) <o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Single step through animation</span></b><span lang=EN-US
+style='mso-ansi-language:EN-US'><span style='mso-tab-count:2'>                      </span>(space
+bar)<o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Resume single step</span></b><span lang=EN-US style='mso-ansi-language:
+EN-US'> <span style='mso-tab-count:3'>                                       </span>(‘S’
+key twice)<o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><span lang=EN-US
+style='mso-ansi-language:EN-US'>These speeds are written to GIF files only and
+have no effect on MPEG frame rate.<o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Reverse direction of animation</span></b><span lang=EN-US
+style='mso-ansi-language:EN-US'> <span style='mso-tab-count:2'>                   </span>(key
+R)<o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Save all frames as PNG files</span></b><span lang=EN-US
+style='mso-ansi-language:EN-US'> <span style='mso-tab-count:2'>                       </span>(key
+A)<span style='mso-tab-count:1'>            </span><o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Save frames in an animated GIF file</span></b><span lang=EN-US
+style='mso-ansi-language:EN-US'><span style='mso-tab-count:1'>            </span>(key
+G) <o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Save frames in a MPEG-2 file</span></b><span lang=EN-US
+style='mso-ansi-language:EN-US'><span style='mso-tab-count:2'>                      </span>(key
+M) <o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><span lang=EN-US
+style='mso-ansi-language:EN-US'>Note that the MPEG frame rate is set at 25
+frames a second.<o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'><o:p>&nbsp;</o:p></span></b></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-ansi-language:
+EN-US'>Escape from GIF and MPEG creation</span></b><span lang=EN-US
+style='mso-ansi-language:EN-US'><span style='mso-tab-count:1'>         </span>(key
+ESC) <o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt;tab-stops:144.0pt'><span lang=EN-US
+style='mso-ansi-language:EN-US'><o:p>&nbsp;</o:p></span></p>
+
+</div>
+
+</body>
+
+</html>

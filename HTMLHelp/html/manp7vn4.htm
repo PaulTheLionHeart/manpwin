@@ -1,0 +1,182 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
+<TITLE>Parameter files</TITLE>
+</HEAD>
+
+<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+
+<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+	<PARAM NAME="Keyword" VALUE="Parameter files">
+	<PARAM NAME="Keyword" VALUE="Command line options">
+</OBJECT>
+
+<P><A NAME="pg410"></A><B>Parameter Files and Command Line Options</B> </P>
+
+<P>Parameter files are used to save favourite areas and parameters for fractals currently being processed. Their main advantage is that they take very little room to store.  </P>
+
+<P>The main parameters are:  </P>
+
+<P>-cScreen dimensions Xleft, Ytop, Height </P>
+
+<P>-mScreen processing method: </P>
+
+<P>1=1pass </P>
+
+<P>2=2pass </P>
+
+<P>G=Guessing followed by passes </P>
+
+<P>B=Boundary Tracing </P>
+
+<P>T=Terresal </P>
+
+<P>H=Horizontal Blinds </P>
+
+<P>V=Vertical Blinds </P>
+
+<P>-jIf present indicates Julia set. x,y location follows flag </P>
+
+<P>-tThreshold beyond which iteration halts 1 - 32000 </P>
+
+<P>-iThe 'inside' colour: 0 - 255 </P>
+
+<P>-3Plot as 3D. This is followed by: </P>
+
+<P>Scaling x </P>
+
+<P>Scaling y </P>
+
+<P>Scaling z </P>
+
+<P>Rotation x (deg) </P>
+
+<P>Rotation y (deg) </P>
+
+<P>Rotation z (deg) </P>
+
+<P>-uTrue Colour Palette. This is followed by: </P>
+
+<P>Start Red Colour </P>
+
+<P>Start Green Colour </P>
+
+<P>Start Blue Colour </P>
+
+<P>Red Increment value </P>
+
+<P>Green Increment value </P>
+
+<P>Blue Increment value </P>
+
+<P>-sSaveAs filename (in PNG foprmat) </P>
+
+<P>-oStereo pairs </P>
+
+<P>-eExit after completion </P>
+
+<P>-pPeriodicity </P>
+
+<P>-rAutoStereo depth </P>
+
+<P>-bBiomorph colour </P>
+
+<P>-kNumber of decomposition colours (power of 2) </P>
+
+<P>-lLogarithmic palette (followed by starting value) </P>
+
+<P>-aPalette filename </P>
+
+<P>The following are ManpWIN fractal types: </P>
+
+<P>000Mandelbrot fractal </P>
+
+<P>078Newton fractal followed by the power </P>
+
+<P>048Bifurcation fractal followed by the type </P>
+
+<P>049Cubic fractal followed by the type and 'special colour' </P>
+
+<P>050Power fractal followed by the power </P>
+
+<P>052Circle Squared fractal </P>
+
+<P>053Special Newton </P>
+
+<P>054Rational Maps followed by type </P>
+
+<P>055Sin fractal </P>
+
+<P>056Exponentialfractal </P>
+
+<P>057'MATEIN' fractal </P>
+
+<P>The following fractal types from Fractint are supported by ManpWIN:  </P>
+
+<P>013Barnsley1 </P>
+
+<P>015Barnsley2 </P>
+
+<P>028Barnsley3 </P>
+
+<P>128Cellular </P>
+
+<P>129Frothy Basin </P>
+
+<P>090Ginger Bread Man </P>
+
+<P>120Hopalong </P>
+
+<P>040Kamtorus </P>
+
+<P>042Kamtorus 3D </P>
+
+<P>010Lambda Exponent </P>
+
+<P>063Lorenz </P>
+
+<P>084Lorenz 3D 1 </P>
+
+<P>124Lorenz 3D 2 </P>
+
+<P>125Lorenz 3D 3 </P>
+
+<P>126Lorenz 3D 4 </P>
+
+<P>123Lyapunov </P>
+
+<P>127Mandel Cloud </P>
+
+<P>082MandelLambda </P>
+
+<P>122Martin </P>
+
+<P>089Picover </P>
+
+<P>007Plasma </P>
+
+<P>086Rossler </P>
+
+<P>012Sierpinski </P>
+
+<P>093Spider </P>
+
+<P>092Unity </P>
+
+<P>130Walk </P>
+
+<P>These codes can be found by selecting the fractal and saving a parameter file.  </P>
+
+<P>Example 1:  </P>
+
+<P>-c-1.593327993602331,-0.401367434793618,1.818688275512788 -t250 -i246 -M1 -f049B5 Corner; threshold; inside colour; 1 pass; fractal type 49 (cubic) of type B with a special colour of 5  </P>
+
+<P>-u60,120,30,100,255,200 -30.900000,0.900000,0.600000,10.000000,5.000000,0.000000 -p0 True colour palette; 3D params; periodicity level  </P>
+
+<P>Example 2 (Julia):  </P>
+
+<P>-c-2.66667,-2.0000,4.00000 -t250 -i246 -MG2 -J-0.752109827,0.10027855 -u60,120,30,100,255,200 -p0  </P>
+
+</BODY>
+</HTML>

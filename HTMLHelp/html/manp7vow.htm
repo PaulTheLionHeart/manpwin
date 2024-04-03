@@ -1,0 +1,2199 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 15">
+<meta name=Originator content="Microsoft Word 15">
+<link rel=File-List href="manp7vow_files/filelist.xml">
+<link rel=Edit-Time-Data href="manp7vow_files/editdata.mso">
+<!--[if !mso]>
+<style>
+v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style>
+<![endif]-->
+<title>Mandelbrot</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>root</o:Author>
+  <o:Template>Normal</o:Template>
+  <o:LastAuthor>Paul</o:LastAuthor>
+  <o:Revision>57</o:Revision>
+  <o:TotalTime>436</o:TotalTime>
+  <o:Created>2011-08-23T07:51:00Z</o:Created>
+  <o:LastSaved>2023-11-23T06:10:00Z</o:LastSaved>
+  <o:Pages>11</o:Pages>
+  <o:Words>3024</o:Words>
+  <o:Characters>17239</o:Characters>
+  <o:Lines>143</o:Lines>
+  <o:Paragraphs>40</o:Paragraphs>
+  <o:CharactersWithSpaces>20223</o:CharactersWithSpaces>
+  <o:Version>16.00</o:Version>
+ </o:DocumentProperties>
+ <o:OfficeDocumentSettings>
+  <o:AllowPNG/>
+ </o:OfficeDocumentSettings>
+</xml><![endif]-->
+<link rel=themeData href="manp7vow_files/themedata.thmx">
+<link rel=colorSchemeMapping href="manp7vow_files/colorschememapping.xml">
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:View>Print</w:View>
+  <w:Zoom>134</w:Zoom>
+  <w:SpellingState>Clean</w:SpellingState>
+  <w:TrackMoves>false</w:TrackMoves>
+  <w:TrackFormatting/>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:DoNotPromoteQF/>
+  <w:LidThemeOther>EN-AU</w:LidThemeOther>
+  <w:LidThemeAsian>X-NONE</w:LidThemeAsian>
+  <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SplitPgBreakAndParaMark/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+  <m:mathPr>
+   <m:mathFont m:val="Cambria Math"/>
+   <m:brkBin m:val="before"/>
+   <m:brkBinSub m:val="&#45;-"/>
+   <m:smallFrac m:val="off"/>
+   <m:dispDef/>
+   <m:lMargin m:val="0"/>
+   <m:rMargin m:val="0"/>
+   <m:defJc m:val="centerGroup"/>
+   <m:wrapIndent m:val="1440"/>
+   <m:intLim m:val="subSup"/>
+   <m:naryLim m:val="undOvr"/>
+  </m:mathPr>  <u1:mathPr>
+   <u1:mathFont u1:val="Cambria Math"/>
+   <u1:brkBin u1:val="before"/>
+   <u1:brkBinSub u1:val="--"/>
+   <u1:smallFrac u1:val="off"/>
+   <u1:dispDef/>
+   <u1:lMargin u1:val="0"/>
+   <u1:rMargin u1:val="0"/>
+   <u1:defJc u1:val="centerGroup"/>
+   <u1:wrapIndent u1:val="1440"/>
+   <u1:intLim u1:val="subSup"/>
+   <u1:naryLim u1:val="undOvr"/>
+  </u1:mathPr>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" DefUnhideWhenUsed="false"
+  DefSemiHidden="false" DefQFormat="false" LatentStyleCount="371">
+  <w:LsdException Locked="false" QFormat="true" Name="Normal"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="heading 7"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="heading 8"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="heading 9"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 6"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 7"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 8"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index 9"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="toc 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="toc 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="toc 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="toc 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="toc 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="toc 6"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="toc 7"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="toc 8"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="toc 9"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Normal Indent"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="footnote text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="annotation text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="header"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="footer"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="index heading"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="caption"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="table of figures"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="envelope address"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="envelope return"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="footnote reference"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="annotation reference"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="line number"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="page number"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="endnote reference"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="endnote text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="table of authorities"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="macro"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="toa heading"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Bullet 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Number 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Closing"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Signature"/>
+  <w:LsdException Locked="false" Priority="1" SemiHidden="true"
+   UnhideWhenUsed="true" Name="Default Paragraph Font"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text Indent"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="List Continue 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Message Header"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text First Indent 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Note Heading"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text Indent 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Body Text Indent 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Block Text"/>
+  <w:LsdException Locked="false" Priority="99" SemiHidden="true"
+   UnhideWhenUsed="true" Name="Hyperlink"/>
+  <w:LsdException Locked="false" Priority="99" SemiHidden="true"
+   UnhideWhenUsed="true" Name="FollowedHyperlink"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Document Map"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Plain Text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="E-mail Signature"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Top of Form"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Bottom of Form"/>
+  <w:LsdException Locked="false" Priority="99" SemiHidden="true"
+   UnhideWhenUsed="true" Name="Normal (Web)"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Acronym"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Address"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Cite"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Code"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Definition"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Keyboard"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Preformatted"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Sample"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Typewriter"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="HTML Variable"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Normal Table"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="annotation subject"/>
+  <w:LsdException Locked="false" Priority="99" SemiHidden="true"
+   UnhideWhenUsed="true" Name="No List"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Outline List 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Outline List 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Outline List 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Simple 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Simple 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Simple 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Classic 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Classic 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Classic 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Classic 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Colorful 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Colorful 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Colorful 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Columns 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 6"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 7"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Grid 8"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 4"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 5"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 6"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 7"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table List 8"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table 3D effects 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table 3D effects 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table 3D effects 3"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Contemporary"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Elegant"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Professional"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Subtle 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Subtle 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Web 1"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Web 2"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Web 3"/>
+  <w:LsdException Locked="false" Priority="99" SemiHidden="true"
+   UnhideWhenUsed="true" Name="Balloon Text"/>
+  <w:LsdException Locked="false" SemiHidden="true" UnhideWhenUsed="true"
+   Name="Table Theme"/>
+  <w:LsdException Locked="false" Priority="99" SemiHidden="true"
+   Name="Placeholder Text"/>
+  <w:LsdException Locked="false" Priority="1" QFormat="true" Name="No Spacing"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 1"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="99" SemiHidden="true" Name="Revision"/>
+  <w:LsdException Locked="false" Priority="34" QFormat="true"
+   Name="List Paragraph"/>
+  <w:LsdException Locked="false" Priority="29" QFormat="true" Name="Quote"/>
+  <w:LsdException Locked="false" Priority="30" QFormat="true"
+   Name="Intense Quote"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 1"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 1"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 2"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 2"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 2"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 3"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 3"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 3"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 4"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 4"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 4"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 5"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 5"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 5"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="60" Name="Light Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="61" Name="Light List Accent 6"/>
+  <w:LsdException Locked="false" Priority="62" Name="Light Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="63" Name="Medium Shading 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="64" Name="Medium Shading 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="65" Name="Medium List 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="66" Name="Medium List 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="67" Name="Medium Grid 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="68" Name="Medium Grid 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="69" Name="Medium Grid 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="70" Name="Dark List Accent 6"/>
+  <w:LsdException Locked="false" Priority="71" Name="Colorful Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="72" Name="Colorful List Accent 6"/>
+  <w:LsdException Locked="false" Priority="73" Name="Colorful Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="19" QFormat="true"
+   Name="Subtle Emphasis"/>
+  <w:LsdException Locked="false" Priority="21" QFormat="true"
+   Name="Intense Emphasis"/>
+  <w:LsdException Locked="false" Priority="31" QFormat="true"
+   Name="Subtle Reference"/>
+  <w:LsdException Locked="false" Priority="32" QFormat="true"
+   Name="Intense Reference"/>
+  <w:LsdException Locked="false" Priority="33" QFormat="true" Name="Book Title"/>
+  <w:LsdException Locked="false" Priority="37" SemiHidden="true"
+   UnhideWhenUsed="true" Name="Bibliography"/>
+  <w:LsdException Locked="false" Priority="39" SemiHidden="true"
+   UnhideWhenUsed="true" QFormat="true" Name="TOC Heading"/>
+  <w:LsdException Locked="false" Priority="41" Name="Plain Table 1"/>
+  <w:LsdException Locked="false" Priority="42" Name="Plain Table 2"/>
+  <w:LsdException Locked="false" Priority="43" Name="Plain Table 3"/>
+  <w:LsdException Locked="false" Priority="44" Name="Plain Table 4"/>
+  <w:LsdException Locked="false" Priority="45" Name="Plain Table 5"/>
+  <w:LsdException Locked="false" Priority="40" Name="Grid Table Light"/>
+  <w:LsdException Locked="false" Priority="46" Name="Grid Table 1 Light"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark"/>
+  <w:LsdException Locked="false" Priority="51" Name="Grid Table 6 Colorful"/>
+  <w:LsdException Locked="false" Priority="52" Name="Grid Table 7 Colorful"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 1"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 1"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 1"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 1"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 1"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 2"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 2"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 2"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 2"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 2"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 3"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 3"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 3"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 3"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 3"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 4"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 4"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 4"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 4"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 4"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 5"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 5"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 5"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 5"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 5"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="Grid Table 1 Light Accent 6"/>
+  <w:LsdException Locked="false" Priority="47" Name="Grid Table 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="48" Name="Grid Table 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="49" Name="Grid Table 4 Accent 6"/>
+  <w:LsdException Locked="false" Priority="50" Name="Grid Table 5 Dark Accent 6"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="Grid Table 6 Colorful Accent 6"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="Grid Table 7 Colorful Accent 6"/>
+  <w:LsdException Locked="false" Priority="46" Name="List Table 1 Light"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark"/>
+  <w:LsdException Locked="false" Priority="51" Name="List Table 6 Colorful"/>
+  <w:LsdException Locked="false" Priority="52" Name="List Table 7 Colorful"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 1"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 1"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 1"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 1"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 1"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 2"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 2"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 2"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 2"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 2"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 3"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 3"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 3"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 3"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 3"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 4"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 4"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 4"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 4"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 4"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 5"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 5"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 5"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 5"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 5"/>
+  <w:LsdException Locked="false" Priority="46"
+   Name="List Table 1 Light Accent 6"/>
+  <w:LsdException Locked="false" Priority="47" Name="List Table 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="48" Name="List Table 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="49" Name="List Table 4 Accent 6"/>
+  <w:LsdException Locked="false" Priority="50" Name="List Table 5 Dark Accent 6"/>
+  <w:LsdException Locked="false" Priority="51"
+   Name="List Table 6 Colorful Accent 6"/>
+  <w:LsdException Locked="false" Priority="52"
+   Name="List Table 7 Colorful Accent 6"/>
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Wingdings;
+	panose-1:5 0 0 0 0 0 0 0 0 0;
+	mso-font-charset:2;
+	mso-generic-font-family:auto;
+	mso-font-pitch:variable;
+	mso-font-signature:0 268435456 0 0 -2147483648 0;}
+@font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;
+	mso-font-charset:1;
+	mso-generic-font-family:roman;
+	mso-font-pitch:variable;
+	mso-font-signature:0 0 0 0 0 0;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-469750017 -1073732485 9 0 511 0;}
+@font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-520081665 -1073717157 41 0 66047 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+a:link, span.MsoHyperlink
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	color:blue;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	color:purple;}
+p
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+p.MsoAcetate, li.MsoAcetate, div.MsoAcetate
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-link:"Balloon Text Char";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:8.0pt;
+	font-family:"Tahoma",sans-serif;
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+p.msonormal0, li.msonormal0, div.msonormal0
+	{mso-style-name:msonormal;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-margin-top-alt:auto;
+	margin-right:0cm;
+	mso-margin-bottom-alt:auto;
+	margin-left:0cm;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman",serif;
+	mso-fareast-font-family:"Times New Roman";
+	color:black;}
+span.BalloonTextChar
+	{mso-style-name:"Balloon Text Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"Balloon Text";
+	mso-ansi-font-size:8.0pt;
+	mso-bidi-font-size:8.0pt;
+	font-family:"Tahoma",sans-serif;
+	mso-ascii-font-family:Tahoma;
+	mso-fareast-font-family:"Times New Roman";
+	mso-hansi-font-family:Tahoma;
+	mso-bidi-font-family:Tahoma;
+	color:black;}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	mso-default-props:yes;
+	font-size:10.0pt;
+	mso-ansi-font-size:10.0pt;
+	mso-bidi-font-size:10.0pt;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 72.0pt 72.0pt 72.0pt;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:995035175;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-340616218 201916417 201916419 201916421 201916417 201916419 201916421 201916417 201916419 201916421;}
+@list l0:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l0:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l0:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l0:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l0:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l0:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l0:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l0:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l0:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l1
+	{mso-list-id:1351177929;
+	mso-list-type:hybrid;
+	mso-list-template-ids:739151952 201916417 201916419 201916421 201916417 201916419 201916421 201916417 201916419 201916421;}
+@list l1:level1
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l1:level2
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l1:level3
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l1:level4
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l1:level5
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l1:level6
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+@list l1:level7
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0B7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Symbol;}
+@list l1:level8
+	{mso-level-number-format:bullet;
+	mso-level-text:o;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:"Courier New";}
+@list l1:level9
+	{mso-level-number-format:bullet;
+	mso-level-text:\F0A7;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	text-indent:-18.0pt;
+	font-family:Wingdings;}
+ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Table Normal";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman",serif;}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="1027"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+</head>
+
+<body bgcolor=white lang=EN-AU link=blue vlink=purple style='tab-interval:36.0pt'>
+
+<div class=WordSection1>
+
+<p><a name=pg420></a><b>Fractal Types Supported</b> </p>
+
+<p><span style='mso-no-proof:yes'><img width=392 height=301 id="_x0000_i1028"
+src="../images/mandel3d.gif"
+alt="Description: Description: Description: Description: Description: Description: Description: Description: Description: Description: D:\c\ManpWin\HTMLHelp\images\mandel3d.gif"></span></p>
+
+<p>Fractals are selected from the Fractals Menu or by pressing ‘T’.</p>
+
+<p><b style='mso-bidi-font-weight:normal'><span style='font-size:16.0pt'>A Note
+about Multi-Threading:<o:p></o:p></span></b></p>
+
+<p>Multi-threading can greatly improve calculation speed as it breaks the image
+up into columns and can use different processor cores to do the calculations in
+parallel. At this stage, multi-threading is only available on perturbation and
+slope fractals. This will improve as the legacy code is upgraded. </p>
+
+<p>When the multi-thread setup dialogue box is selected, a number of delays are
+offered. These should not need to be changed, however, on rare occasions, a
+crash may occur and these can be increased. This will slow down the
+calculations. Internal perturbation delay greater than zero will cause the
+screen to be updated continuously. </p>
+
+<p>As the screen memory is accessed by different threads at the same time,
+sometimes there is a clash and pixels may be coloured incorrectly. Using a <span
+class=SpellE>Mutex</span> to block simultaneous access, this can be overcome at
+the cost of speed.</p>
+
+<p><b style='mso-bidi-font-weight:normal'><span style='font-size:16.0pt'>Specific
+<span class=SpellE>ManpWIN</span> fractals:<o:p></o:p></span></b></p>
+
+<p><b style='mso-bidi-font-weight:normal'>Mandelbrot</b> The original fractal.
+Refer to Scientific American August 1985. It has the basic driving equation
+Zn+1 = Zn^2 + C where<span style='mso-spacerun:yes'>  </span>Zn+1 in the next
+value of Z, Zn is the current value and C is the position on the screen. Z is a
+complex number of the form <span class=SpellE>A+iB</span> where ‘<span
+class=SpellE>i</span>’ is the square root of -1.</p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='color:windowtext;mso-no-proof:yes'>Pertubation</span></b><b><span
+style='color:windowtext'>:<o:p></o:p></span></b></p>
+
+<p class=MsoNormal><span style='mso-bidi-font-weight:bold'>Recently a new
+method was developed to render Mandelbrot fractal images from a reference point
+rather than calculating the escape-speed for each pixel. Since lower precision
+then can be used, the time to render images decreases significantly. Compared
+with the fastest programs using the old method, this program is more than 100
+times faster on zoom levels around e100! For details see <a
+href="http://www.superfractalthing.co.nf/sft_maths.pdf"><u>sft_maths.pdf</u></a>.
+<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-bidi-font-weight:bold'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-bidi-font-weight:bold'>Most of the
+Mandelbrot derivatives described below are included as perturbation fractals.
+Some filters, including all the <span class=SpellE>Tierazon</span> filters and <span
+class=SpellE>Tierazon</span> Colour schemes, are also provided for perturbation
+fractals. <o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-bidi-font-weight:bold'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-bidi-font-weight:bold'>Perturbation
+fractals now allow slope calculations. There are two methods offered, analytic
+derivative and forward differencing. Only Mandelbrot and power offer derivative
+method as other fractals offered do not have continuous derivatives. Slope is
+discussed later in this section.</span><span style='color:windowtext;
+mso-bidi-font-weight:bold'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='color:windowtext;mso-no-proof:yes'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='color:windowtext;mso-no-proof:yes'>Mandelbrot Derivatives</span></b><b><span
+style='color:windowtext'>:</span></b><b style='mso-bidi-font-weight:normal'><span
+style='color:windowtext'><o:p></o:p></span></b></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='color:windowtext;mso-no-proof:yes'>These equations are found by taking
+the absolute value of combinations of real and or imaginary parts of Z. These
+include:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='color:windowtext;mso-no-proof:yes'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><b
+style='mso-bidi-font-weight:normal'><span style='color:windowtext;mso-no-proof:
+yes'><span style='mso-tab-count:1'>            </span>Quadratic Variations:<o:p></o:p></span></b></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><b
+style='mso-bidi-font-weight:normal'><span style='color:windowtext;mso-no-proof:
+yes'><o:p>&nbsp;</o:p></span></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b>Burning Ship:</b><span
+style='font-size:11.0pt;font-family:"Calibri",sans-serif'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>The Burning Ship <a
+href="http://en.wikipedia.org/wiki/Fractal" title=Fractal><u><span
+style='color:windowtext'>fractal</span></u></a>, first described and created by
+Michael <span class=SpellE>Michelitsch</span> and <a
+href="http://en.wikipedia.org/wiki/Otto_E._R%C3%B6ssler" title="Otto E. Rössler"><u><span
+style='color:windowtext'>Otto E. <span class=SpellE>Rössler</span></span></u></a>
+in 1992, is generated by iterating the function:</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = abs(<span class=SpellE>zr</span> * <span class=SpellE>zi</span>)
+* 2.0 - <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> – <span class=SpellE>zisqr</span> + <span
+class=SpellE>JuliaR</span>;</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>in the <a
+href="http://en.wikipedia.org/wiki/Complex_plane" title="Complex plane"><u><span
+style='color:windowtext'>complex plane</span></u></a> <!--[if mso & !supportInlineShapes & supportFields]><span
+style='mso-element:field-begin;mso-field-lock:yes'></span><span
+style='mso-spacerun:yes'> </span>SHAPE <span
+style='mso-spacerun:yes'> </span>\* MERGEFORMAT <span style='mso-element:field-separator'></span><![endif]--><!--[if gte vml 1]><v:rect
+ id="Picture_x0020_6" o:spid="_x0000_s1026" alt="Description: Description: Description: Description: Description: Description: \mathbb{C}"
+ style='width:10.5pt;height:10.5pt;visibility:visible;mso-wrap-style:square;
+ mso-left-percent:-10001;mso-top-percent:-10001;mso-position-horizontal:absolute;
+ mso-position-horizontal-relative:char;mso-position-vertical:absolute;
+ mso-position-vertical-relative:line;mso-left-percent:-10001;mso-top-percent:-10001;
+ v-text-anchor:top' o:gfxdata="UEsDBBQABgAIAAAAIQC2gziS/gAAAOEBAAATAAAAW0NvbnRlbnRfVHlwZXNdLnhtbJSRQU7DMBBF
+90jcwfIWJU67QAgl6YK0S0CoHGBkTxKLZGx5TGhvj5O2G0SRWNoz/78nu9wcxkFMGNg6quQqL6RA
+0s5Y6ir5vt9lD1JwBDIwOMJKHpHlpr69KfdHjyxSmriSfYz+USnWPY7AufNIadK6MEJMx9ApD/oD
+OlTrorhX2lFEilmcO2RdNtjC5xDF9pCuTyYBB5bi6bQ4syoJ3g9WQ0ymaiLzg5KdCXlKLjvcW893
+SUOqXwnz5DrgnHtJTxOsQfEKIT7DmDSUCaxw7Rqn8787ZsmRM9e2VmPeBN4uqYvTtW7jvijg9N/y
+JsXecLq0q+WD6m8AAAD//wMAUEsDBBQABgAIAAAAIQA4/SH/1gAAAJQBAAALAAAAX3JlbHMvLnJl
+bHOkkMFqwzAMhu+DvYPRfXGawxijTi+j0GvpHsDYimMaW0Yy2fr2M4PBMnrbUb/Q94l/f/hMi1qR
+JVI2sOt6UJgd+ZiDgffL8ekFlFSbvV0oo4EbChzGx4f9GRdb25HMsYhqlCwG5lrLq9biZkxWOiqY
+22YiTra2kYMu1l1tQD30/bPm3wwYN0x18gb45AdQl1tp5j/sFB2T0FQ7R0nTNEV3j6o9feQzro1i
+OWA14Fm+Q8a1a8+Bvu/d/dMb2JY5uiPbhG/ktn4cqGU/er3pcvwCAAD//wMAUEsDBBQABgAIAAAA
+IQDRUP3hygIAABYGAAAOAAAAZHJzL2Uyb0RvYy54bWysVN9vmzAQfp+0/8HyOwUS8gNUUnUhTJO6
+rVK3t704xgRrYHu2E9pV/d93NkmatC/TOh7A5zPffXf3+S6v7rsW7Zg2XIocxxcRRkxQWXGxyfH3
+b2Uwx8hYIirSSsFy/MAMvlq8f3fZq4yNZCPbimkEIMJkvcpxY63KwtDQhnXEXEjFBDhrqTtiwdSb
+sNKkB/SuDUdRNA17qSulJWXGwG4xOPHC49c1o/ZrXRtmUZtj4Gb9W/v32r3DxSXJNpqohtM9DfIP
+LDrCBQQ9QhXEErTV/BVUx6mWRtb2gsoulHXNKfM5QDZx9CKbu4Yo5nOB4hh1LJP5f7D0y+5WI15B
+7zASpIMW3XJqt5qhKUYVMxSKVbgPVxZ6nKE3Gz+glc16/bh8ctXvlcmAxJ261a5+Rt1I+tMgIZcN
+ERt2bRT0cGB32NJa9g0jFZQhdhDhGYYzDKChdf9ZVpAP2Vrpe3Nf687FgKqjey+Bh6ME2L1FFDbj
+8Xg8AaFQcO3XLgLJDj8rbexHJjvkFjnWwM6Dk92NscPRwxEXS8iSty3sk6wVZxuAOexAaPjV+RwJ
+L5rHNEpX89U8CZLRdBUkUVEE1+UyCaZlPJsU42K5LOInFzdOsoZXFRMuzEHAcfJ3AtlfpUF6Rwkb
+2fLKwTlKRm/Wy1ajHYELVPrHlxw8z8fCcxq+XpDLi5TiURJ9GKVBOZ3PgqRMJkE6i+ZBFKcf0mmU
+pElRnqd0wwV7e0qoz3E6GU18l05Iv8gt8s/r3EjWcQsjquVdjufHQyRzClyJyrfWEt4O65NSOPrP
+pYB2Hxrt9eokOqh/LasHkKuWICdQHgxTWDRS/8aoh8GUY/NrSzTDqP0kQPJpnCRuknkjmcxGYOhT
+z/rUQwQFqBxbjIbl0g7Tb6s03zQQKfaFEfIarknNvYTdFRpY7S8XDB+fyX5Quul2avtTz+N88QcA
+AP//AwBQSwMEFAAGAAgAAAAhABKNE7/YAAAAAwEAAA8AAABkcnMvZG93bnJldi54bWxMj0FLw0AQ
+he+C/2EZwYvYTXsQidkUKYhFhGKqPU+z0yQ0O5tmt0n894560MsMjze8+V62nFyrBupD49nAfJaA
+Ii69bbgy8L59ur0HFSKyxdYzGfikAMv88iLD1PqR32goYqUkhEOKBuoYu1TrUNbkMMx8RyzewfcO
+o8i+0rbHUcJdqxdJcqcdNiwfauxoVVN5LM7OwFhuht329VlvbnZrz6f1aVV8vBhzfTU9PoCKNMW/
+Y/jGF3TIhWnvz2yDag1IkfgzxVvMRe1/t84z/Z89/wIAAP//AwBQSwECLQAUAAYACAAAACEAtoM4
+kv4AAADhAQAAEwAAAAAAAAAAAAAAAAAAAAAAW0NvbnRlbnRfVHlwZXNdLnhtbFBLAQItABQABgAI
+AAAAIQA4/SH/1gAAAJQBAAALAAAAAAAAAAAAAAAAAC8BAABfcmVscy8ucmVsc1BLAQItABQABgAI
+AAAAIQDRUP3hygIAABYGAAAOAAAAAAAAAAAAAAAAAC4CAABkcnMvZTJvRG9jLnhtbFBLAQItABQA
+BgAIAAAAIQASjRO/2AAAAAMBAAAPAAAAAAAAAAAAAAAAACQFAABkcnMvZG93bnJldi54bWxQSwUG
+AAAAAAQABADzAAAAKQYAAAAA
+" filled="f" stroked="f">
+ <o:lock v:ext="edit" aspectratio="t"/>
+ <w:wrap type="none"/>
+ <w:anchorlock/>
+</v:rect><![endif]--><!--[if gte vml 1]><v:shapetype id="_x0000_t75"
+ coordsize="21600,21600" o:spt="75" o:preferrelative="t" path="m@4@5l@4@11@9@11@9@5xe"
+ filled="f" stroked="f">
+ <v:stroke joinstyle="miter"/>
+ <v:formulas>
+  <v:f eqn="if lineDrawn pixelLineWidth 0"/>
+  <v:f eqn="sum @0 1 0"/>
+  <v:f eqn="sum 0 0 @1"/>
+  <v:f eqn="prod @2 1 2"/>
+  <v:f eqn="prod @3 21600 pixelWidth"/>
+  <v:f eqn="prod @3 21600 pixelHeight"/>
+  <v:f eqn="sum @0 0 1"/>
+  <v:f eqn="prod @6 1 2"/>
+  <v:f eqn="prod @7 21600 pixelWidth"/>
+  <v:f eqn="sum @8 21600 0"/>
+  <v:f eqn="prod @7 21600 pixelHeight"/>
+  <v:f eqn="sum @10 21600 0"/>
+ </v:formulas>
+ <v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>
+ <o:lock v:ext="edit" aspectratio="t"/>
+</v:shapetype><![endif]--><!--[if mso & !supportInlineShapes & supportFields]><v:shape
+ id="_x0000_i1027" type="#_x0000_t75" style='width:10.5pt;height:10.5pt'>
+ <v:imagedata croptop="-65520f" cropbottom="65520f"/>
+</v:shape><span style='mso-element:field-end'></span><![endif]-->which will
+either escape or remain bounded. The difference between this calculation and
+that for the <a href="http://en.wikipedia.org/wiki/Mandelbrot_set"
+title="Mandelbrot set"><u><span style='color:windowtext'>Mandelbrot set</span></u></a>
+is that the real and imaginary components are set to their respective absolute
+values before squaring at each iteration. The mapping is non-analytic because
+its real and imaginary parts do not obey the <a
+href="http://en.wikipedia.org/wiki/Cauchy%E2%80%93Riemann_equations"
+title="Cauchy–Riemann equations"><u><span style='color:windowtext'>Cauchy–Riemann
+equations</span></u></a>.</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b>Burning Ship N &gt; 2:</b><span
+style='font-size:11.0pt;font-family:"Calibri",sans-serif'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>The Burning Ship <a
+href="http://en.wikipedia.org/wiki/Fractal" title=Fractal><u><span
+style='color:windowtext'>fractal</span></u></a> is also implemented for powers
+greater than 2:</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='color:windowtext'>The function that is
+iterated to generate this fractal can be generalised to any arbitrary power:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='color:windowtext'><span style='mso-tab-count:
+1'>            </span>z = [|Re(z)| + <span class=SpellE>i</span> |<span
+class=SpellE>Im</span>(z)|]^N + c<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='color:windowtext'>As with the Mandelbrot set,
+this creates shapes that resemble the original shape but have increasingly many
+attached arms or buds. With N=2 we get the Burning Ship. The N=3 version has
+been called the &quot;Bird of Prey.&quot;<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='color:windowtext'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='color:windowtext'>The odd powers are
+symmetric around an axes that are oriented at +/- 45 degrees.<span
+style='mso-spacerun:yes'>  </span>This is probably due to the symmetry of the
+absolute value functions. This property has been mentioned at this site
+(external link) back in 1999.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='color:windowtext'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='color:windowtext'>These images are all
+centred at (0,0) in the complex number plane, and all have a size of 5
+horizontally and 4 vertically. This size is a bit too big and results in a lot
+of blank space in the images, but the N=2 fractal is offset from the origin, so
+the larger size is needed to have all the images drawn with a consistent
+location and size so they can be compared accurately.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='color:windowtext'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='color:windowtext'>Here are a few images of
+the Cubic Burning Ship. The &quot;bug&quot; images are named because they look
+like actual bugs, not because of a software error! These are the first deep
+zoom images ever published of the cubic Burning Ship fractal.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><u><span style='color:windowtext'><a
+href="http://www.hpdz.net/StillImages/BurningShip.htm">http://www.hpdz.net/StillImages/BurningShip.htm</a><o:p></o:p></span></u></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>The following fractals were
+inspired by <span class=SpellE>Kalles</span> <span class=SpellE>Frakteler</span>.</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'><span style='color:windowtext;mso-no-proof:yes'>Perpendicular
+Mandelbrot</span></b><b><span style='color:windowtext'>:</span></b><b
+style='mso-bidi-font-weight:normal'><span style='color:windowtext'><o:p></o:p></span></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='color:windowtext;mso-no-proof:yes'>The
+equation is very similar to burning ship (see above) except one “absolutes”
+just the real factor when calculating the imaginary side.<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = abs(<span class=SpellE>zr</span>) * <span
+class=SpellE>zi</span> * -2.0 + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> – <span class=SpellE>zisqr</span> + <span
+class=SpellE>JuliaR</span>;</p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'><span style='color:windowtext;mso-no-proof:yes'>Perpendicular </span><span
+style='mso-bidi-font-weight:bold'>Burning Ship:</span></b><span
+style='font-size:11.0pt;font-family:"Calibri",sans-serif'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>The equation is very similar to
+burning ship except you absolute just the imaginary factor instead of the real
+factor when calculating the imaginary side.</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = <span class=SpellE>zr</span> * abs(<span class=SpellE>zi</span>)
+* -2.0 + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> – <span class=SpellE>zisqr</span> + <span
+class=SpellE>JuliaR</span>;</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'><span style='color:windowtext;mso-no-proof:yes'>Buffalo</span><span
+style='mso-bidi-font-weight:bold'>:</span></b><span style='font-size:11.0pt;
+font-family:"Calibri",sans-serif'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>A derivative of the Burning Ship,
+the Buffalo fractal was composed as follows:</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>Let z' = |Re(<span class=SpellE>z<sub>n</sub></span>)|
++ <span class=SpellE>i</span> |<span class=SpellE>Im</span>(<span class=SpellE>z<sub>n</sub></span>)|</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>z<sub>n+1</sub> = z'<sup>2</sup>
+- z' + c</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>Cubic Buffalo - Z = abs(Z^3) +C,
+The abs() function is applied separately to both the real and imaginary
+portions of Z^3.</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>Note that any integer power of Z may
+be used. Only powers of 2 and 3 have been tested against the <span
+class=SpellE>Kalles</span> <span class=SpellE>Frakteler</span> program.</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'><span style='color:windowtext;mso-no-proof:yes'>Perpendicular Buffalo</span><span
+style='mso-bidi-font-weight:bold'>:</span></b><span style='font-size:11.0pt;
+font-family:"Calibri",sans-serif'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>The equation is very similar to
+buffalo except you absolute just the imaginary factor instead of the real
+factor when calculating the imaginary side.</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = <span class=SpellE>zr</span> * abs(<span class=SpellE>zi</span>)
+* -2.0 + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaR</span>;<br style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'><span style='color:windowtext;mso-no-proof:yes'>Mandelbar (Tricorn)</span><span
+style='mso-bidi-font-weight:bold'>:</span></b><span style='font-size:11.0pt;
+font-family:"Calibri",sans-serif'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = <span class=SpellE>zr</span> * <span class=SpellE>zi</span>
+* -2.0 + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span> + <span
+class=SpellE>JuliaR</span>;</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>Note that higher powers can be
+calculated and parameter 4 allows rotation of the image by Pi/n where n is the
+power.<br style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'><span style='color:windowtext;mso-no-proof:yes'>Celtic</span><span
+style='mso-bidi-font-weight:bold'>:</span></b><span style='font-size:11.0pt;
+font-family:"Calibri",sans-serif'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = <span class=SpellE>zr</span> * <span class=SpellE>zi</span>
+* -2.0 + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = -abs(<span
+class=SpellE>zrsqr</span> – <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaR</span>;</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><span class=SpellE><b
+style='mso-bidi-font-weight:normal'>Mandelbar</b></span><b style='mso-bidi-font-weight:
+normal'> Celtic</b>:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zi</span> = <span
+class=SpellE>zr</span> * <span class=SpellE>zi</span> * -2.0 + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Perpendicular Celtic</b>:</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = abs(<span class=SpellE>zr</span>) * <span
+class=SpellE>zi</span> * -2.0 + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaR</span>;<br style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]><b style='mso-bidi-font-weight:normal'><o:p></o:p></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'>Cubic Flying Squirrel (Buffalo Imaginary):<o:p></o:p></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>This one was found by accident
+and was recognised as a fractal in the <span class=SpellE>Kalles</span> <span
+class=SpellE>Frakteler</span> program.</p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = abs(((<span class=SpellE>zrsqr</span> * 3.0) – <span
+class=SpellE>zisqr</span>) * <span class=SpellE>zi</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = (<span
+class=SpellE>zrsqr</span> – (<span class=SpellE>zisqr</span> * 3.0)) * <span
+class=SpellE>zr</span> + <span class=SpellE>JuliaR</span>;<br style='mso-special-character:
+line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'>Heart Mandelbrot:<o:p></o:p></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = abs(<span class=SpellE>zr</span>) * <span
+class=SpellE>zi</span> * 2.0 + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span> + <span
+class=SpellE>JuliaR</span>;<br style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'>Celtic Heart:<o:p></o:p></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = abs(<span class=SpellE>zr</span>) * <span
+class=SpellE>zi</span> * 2.0 + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaR</span>;<br style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><b
+style='mso-bidi-font-weight:normal'><span style='color:windowtext;mso-no-proof:
+yes'><span style='mso-tab-count:1'>            </span>Cubic Variations:<o:p></o:p></span></b></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='color:windowtext;mso-no-proof:yes'><span style='mso-tab-count:2'>                        </span>Note
+that for each one of these:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:72.0pt;mso-layout-grid-align:none;
+text-autospace:none'>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zisqr</span>
+= <span class=SpellE>zi</span> * <span class=SpellE>zi</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zrsqr</span> = <span
+class=SpellE>zr</span> * <span class=SpellE>zr</span>;<br style='mso-special-character:
+line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]><b style='mso-bidi-font-weight:normal'><span style='color:windowtext;
+mso-no-proof:yes'><o:p></o:p></span></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'>Partial Cubic Burning Ship Real:<o:p></o:p></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = ((<span class=SpellE>zrsqr</span> * 3.0) – <span
+class=SpellE>zisqr</span>) * <span class=SpellE>zi</span> + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = (<span
+class=SpellE>zrsqr</span> – (<span class=SpellE>zisqr</span> * 3.0)) * abs(<span
+class=SpellE>zr</span>) + <span class=SpellE>JuliaR</span>;<br
+style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'>Partial Cubic Burning Ship Imaginary:<o:p></o:p></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = ((<span class=SpellE>zrsqr</span> * 3.0) – <span
+class=SpellE>zisqr</span>) * abs(<span class=SpellE>zi</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = (<span
+class=SpellE>zrsqr</span> – (<span class=SpellE>zisqr</span> * 3.0)) * <span
+class=SpellE>zr</span> + <span class=SpellE>JuliaR</span>;<br style='mso-special-character:
+line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'>Partial Cubic Buffalo Real (Celtic):<o:p></o:p></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = ((<span class=SpellE>zrsqr</span> * 3.0) – <span
+class=SpellE>zisqr</span>) * <span class=SpellE>zi</span> + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = abs((<span
+class=SpellE>zrsqr</span> – (<span class=SpellE>zisqr</span> * 3.0)) * <span
+class=SpellE>zr</span>) + <span class=SpellE>JuliaR</span>;<br
+style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'>Cubic Quasi Burning Ship (Buffalo Burning Ship Hybrid):<o:p></o:p></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = -abs(((<span class=SpellE>zrsqr</span> * 3.0) – <span
+class=SpellE>zisqr</span>) * <span class=SpellE>zi</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = (<span
+class=SpellE>zrsqr</span> – (<span class=SpellE>zisqr</span> * 3.0)) * abs(<span
+class=SpellE>zr</span>) + <span class=SpellE>JuliaR</span>;<br
+style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'>Cubic Quasi Perpendicular:<o:p></o:p></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = -abs((<span class=SpellE>zrsqr</span> * 3.0) – <span
+class=SpellE>zisqr</span>) * <span class=SpellE>zi</span> + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = (<span
+class=SpellE>zrsqr</span> – (<span class=SpellE>zisqr</span> * 3.0)) * abs(<span
+class=SpellE>zr</span>) + <span class=SpellE>JuliaR</span>;<br
+style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'>Cubic Quasi Heart:<o:p></o:p></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span
+class=SpellE>zi</span> = abs((<span class=SpellE>zrsqr</span> * 3.0) – <span
+class=SpellE>zisqr</span>) * <span class=SpellE>zi</span> + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class=SpellE>zr</span> = (<span
+class=SpellE>zrsqr</span> – (<span class=SpellE>zisqr</span> * 3.0)) * abs(<span
+class=SpellE>zr</span>) + <span class=SpellE>JuliaR</span>;<br
+style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='text-indent:36.0pt'><b style='mso-bidi-font-weight:
+normal'>4th Order ABS Mandelbrot Variations</b> (Complete Set by <a
+href="http://stardust4ever.deviantart.com/"><u>stardust4ever</u></a>)<b
+style='mso-bidi-font-weight:normal'>:</b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'>***Non ABS Variations (2)<br>
+</b><br>
+<b style='mso-bidi-font-weight:normal'>Mandelbrot 4th Order:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 * <span
+class=SpellE>zr</span> * <span class=SpellE>zi</span> * (<span class=SpellE>zrsqr</span>
+- <span class=SpellE>zisqr</span>) + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span> +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<span class=SpellE><b style='mso-bidi-font-weight:normal'>Mandelbar</b></span><b
+style='mso-bidi-font-weight:normal'> 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -4 * <span
+class=SpellE>zr</span> * <span class=SpellE>zi</span> * (<span class=SpellE>zrsqr</span>
+- <span class=SpellE>zisqr</span>) + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span> +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>***Straight ABS Variations (16)<br>
+</b><br>
+<b style='mso-bidi-font-weight:normal'>Burning Ship 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 *
+abs(<span class=SpellE>zr</span> * <span class=SpellE>zi</span>) * (<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span> +<span
+class=SpellE>JuliaR</span>;<br style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><b style='mso-bidi-font-weight:
+normal'>Burning Ship 4th Partial <span class=SpellE>Imag</span>:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 * <span
+class=SpellE>zr</span> * abs(<span class=SpellE>zi</span>) * (<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span> +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Burning Ship 4th Partial Real:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 *
+abs(<span class=SpellE>zr</span>) * <span class=SpellE>zi</span> * (<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span> +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Burning Ship 4th Partial Real Mbar:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -4 *
+abs(<span class=SpellE>zr</span>) * <span class=SpellE>zi</span> * (<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span> +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic Burning Ship 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 *
+abs(<span class=SpellE>zr</span> * <span class=SpellE>zi</span>) * (<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic Burning Ship 4th Partial <span
+class=SpellE>Imag</span>:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 * <span
+class=SpellE>zr</span> * abs(<span class=SpellE>zi</span>) * (<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic Burning Ship 4th Partial Real:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 *
+abs(<span class=SpellE>zr</span>) * <span class=SpellE>zi</span> * (<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic Burning Ship 4th Partial Real
+Mbar:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -4 *
+abs(<span class=SpellE>zr</span>) * <span class=SpellE>zi</span> * (<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Buffalo 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = abs(4
+* <span class=SpellE>zr</span> * <span class=SpellE>zi</span> * (<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>)) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Buffalo 4th Partial <span class=SpellE>Imag</span>:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = abs(4
+* <span class=SpellE>zr</span> * <span class=SpellE>zi</span> * (<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>)) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span> +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic (Buffalo 4th Partial Real):<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 * <span
+class=SpellE>zr</span> * <span class=SpellE>zi</span> * (<span class=SpellE>zrsqr</span>
+- <span class=SpellE>zisqr</span>) + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic 4th Mbar:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -4 * <span
+class=SpellE>zr</span> * <span class=SpellE>zi</span> * (<span class=SpellE>zrsqr</span>
+- <span class=SpellE>zisqr</span>) + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>***Quasi ABS Variations (10)<br>
+</b><br>
+<b style='mso-bidi-font-weight:normal'>False Quasi Perpendicular 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -4 * <span
+class=SpellE>zr</span> * <span class=SpellE>zi</span> * abs(<span class=SpellE>zrsqr</span>
+- <span class=SpellE>zisqr</span>) + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span> +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>False Quasi Heart 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 * <span
+class=SpellE>zr</span> * <span class=SpellE>zi</span> * abs(<span class=SpellE>zrsqr</span>
+- <span class=SpellE>zisqr</span>) + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span> +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic False Quasi Perpendicular 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -4 * <span
+class=SpellE>zr</span> * <span class=SpellE>zi</span> * abs(<span class=SpellE>zrsqr</span>
+- <span class=SpellE>zisqr</span>) + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic False Quasi Heart 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 * <span
+class=SpellE>zr</span> * <span class=SpellE>zi</span> * abs(<span class=SpellE>zrsqr</span>
+- <span class=SpellE>zisqr</span>) + <span class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<span class=SpellE><b style='mso-bidi-font-weight:normal'>Imag</b></span><b
+style='mso-bidi-font-weight:normal'> Quasi Perpendicular / Heart 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 * <span
+class=SpellE>zr</span> * abs(<span class=SpellE>zi</span>) * abs(<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span> +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Real Quasi Perpendicular 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -4 *
+abs(<span class=SpellE>zr</span>) * <span class=SpellE>zi</span> * abs(<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span> +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Real Quasi Heart 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 *
+abs(<span class=SpellE>zr</span>) * <span class=SpellE>zi</span> * abs(<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span> +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic <span class=SpellE>Imag</span>
+Quasi Perpendicular / Heart 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 * <span
+class=SpellE>zr</span> * abs(<span class=SpellE>zi</span>) * abs(<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic Real Quasi Perpendicular 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -4 *
+abs(<span class=SpellE>zr</span>) * <span class=SpellE>zi</span> * abs(<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic Real Quasi Heart 4th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = 4 *
+abs(<span class=SpellE>zr</span>) * <span class=SpellE>zi</span> * abs(<span
+class=SpellE>zrsqr</span> - <span class=SpellE>zisqr</span>) + <span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span> + <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span> - 6 * <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>) +<span
+class=SpellE>JuliaR</span>;<br style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></p>
+
+<p class=MsoNormal style='text-indent:36.0pt'><b style='mso-bidi-font-weight:
+normal'>5th Order ABS Mandelbrot Variations</b> (Complete Set by <a
+href="http://stardust4ever.deviantart.com/"><u>stardust4ever</u></a>)<b
+style='mso-bidi-font-weight:normal'>:</b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-indent:36.0pt;mso-layout-grid-align:
+none;text-autospace:none'><span style='color:windowtext;mso-no-proof:yes'>Stardust4ever
+gives this following description:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:72.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='font-size:10.0pt'>5th Order Mandelbrot
+Variations. These formula share remarkable similarities to my previous 3rd
+order formulas. The 5th Order polynomials each have six terms. Because i^2 is
+in the real domain, every even term is real and every odd term is imaginary.
+When <span class=SpellE>Zi</span> and <span class=SpellE>Zr</span> are factored
+out, that leaves all forth power terms remaining. To optimize the code for
+computational efficiency, additional variables are created for (Zr^2)^2,
+(Zi^2)^2 and (Zi^2)*(Zr^2). Each of these terms appears twice in the equation,
+reducing the number of necessary <span class=SpellE>bignum</span>
+multiplication operations significantly. It may be possible to further optimize
+code in software but this is beyond my scope.<br style='mso-special-character:
+line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]></span><span style='font-size:10.0pt;color:windowtext;mso-no-proof:
+yes'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='mso-layout-grid-align:none;text-autospace:none'><span
+style='color:windowtext;mso-no-proof:yes'><span style='mso-tab-count:1'>            </span>Note
+that for each one of these:<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zisqr</span>
+= <span class=SpellE>zi</span> * <span class=SpellE>zi</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zrsqr</span> = <span
+class=SpellE>zr</span> * <span class=SpellE>zr</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zisqrsqr</span> = <span
+class=SpellE>zisqr</span> * <span class=SpellE>zisqr</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zrsqrsqr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zrsqr</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zrzisqr</span> = <span
+class=SpellE>zrsqr</span> * <span class=SpellE>zisqr</span>;</p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><br>
+<b style='mso-bidi-font-weight:normal'>Mandelbrot 5th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = <span
+class=SpellE>zi</span> * (5 * <span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zr</span> * (<span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + 5 * <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<span class=SpellE><b style='mso-bidi-font-weight:normal'>Mandelbar</b></span><b
+style='mso-bidi-font-weight:normal'> 5th (Vertical):<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -<span
+class=SpellE>zi</span> * (5 * <span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = <span
+class=SpellE>zr</span> * (<span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + 5 * <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<span class=SpellE><b style='mso-bidi-font-weight:normal'>Mandelbar</b></span><b
+style='mso-bidi-font-weight:normal'> 5th (horizontal):<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = <span
+class=SpellE>zi</span> * (5 * <span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = -<span
+class=SpellE>zr</span> * (<span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + 5 * <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Burning Ship 5th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = abs(<span
+class=SpellE>zi</span>) * (5 * <span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zr</span>) * (<span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + 5 * <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Buffalo 5th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = abs(<span
+class=SpellE>zi</span> * (5 * <span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + <span class=SpellE>zisqrsqr</span>)) +<span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zr</span> * (<span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + 5 * <span class=SpellE>zisqrsqr</span>)) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Burning Ship 5th Partial:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = <span
+class=SpellE>zi</span> * (5 * <span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zr</span>) * (<span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + 5 * <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaR</span>;</p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><br>
+<b style='mso-bidi-font-weight:normal'>Burning Ship 5th Partial Mbar:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -<span
+class=SpellE>zi</span> * (5 * <span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zr</span>) * (<span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + 5 * <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic 5th (Buffalo 5th Partial):<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = <span
+class=SpellE>zi</span> * (5 * <span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zr</span> * (<span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + 5 * <span class=SpellE>zisqrsqr</span>)) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<b style='mso-bidi-font-weight:normal'>Celtic 5th Mbar:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -<span
+class=SpellE>zi</span> * (5 * <span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zr</span> * (<span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + 5 * <span class=SpellE>zisqrsqr</span>)) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<span class=SpellE><b style='mso-bidi-font-weight:normal'>Quazi</b></span><b
+style='mso-bidi-font-weight:normal'> Burning Ship 5th (BS/Buffalo Hybrid):<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -abs(<span
+class=SpellE>zi</span> * (5 * <span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + <span class=SpellE>zisqrsqr</span>)) +<span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zr</span>) * (<span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + 5 * <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaR</span>;</p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><br>
+<span class=SpellE><b style='mso-bidi-font-weight:normal'>quazi</b></span><b
+style='mso-bidi-font-weight:normal'> Perpendicular 5th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = -<span
+class=SpellE>zi</span> * abs(5 * <span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zr</span>) * (<span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + 5 * <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaR</span>;<br>
+<br>
+<span class=SpellE><b style='mso-bidi-font-weight:normal'>Quazi</b></span><b
+style='mso-bidi-font-weight:normal'> Heart 5th:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zi</span> = <span
+class=SpellE>zi</span> * abs(5 * <span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaI</span>;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span class=SpellE>zr</span> = abs(<span
+class=SpellE>zr</span>) * (<span class=SpellE>zrsqrsqr</span> - 10 * <span
+class=SpellE>zrzisqr</span> + 5 * <span class=SpellE>zisqrsqr</span>) +<span
+class=SpellE>JuliaR</span>;<br style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]><b style='mso-bidi-font-weight:normal'><o:p></o:p></b></p>
+
+<p class=MsoNormal style='text-indent:36.0pt'><b style='mso-bidi-font-weight:
+normal'>Other ABS Mandelbrot Variations</b> (by <a
+href="http://www.fractalforums.com/index.php?action=profile;u=6528"><u>Simon
+Snake</u></a>)<b style='mso-bidi-font-weight:normal'>:<o:p></o:p></b></p>
+
+<p class=MsoNormal style='text-indent:36.0pt'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span class=SpellE><b style='mso-bidi-font-weight:normal'>SimonBrot</b></span><b
+style='mso-bidi-font-weight:normal'>:<br>
+</b>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;z=<span class=SpellE>z^n</span> *
+|z|^2 + c<br style='mso-special-character:line-break'>
+<![if !supportLineBreakNewLine]><br style='mso-special-character:line-break'>
+<![endif]><span style='color:windowtext;mso-no-proof:yes'><o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><b style='mso-bidi-font-weight:normal'><span
+style='color:windowtext;mso-no-proof:yes'>Kung Fu Panda</span></b><b
+style='mso-bidi-font-weight:normal'><span style='color:windowtext'>:<o:p></o:p></span></b></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='color:windowtext;mso-no-proof:yes'><span
+style='mso-spacerun:yes'>      </span>z = abs(z*z)<o:p></o:p></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;mso-layout-grid-align:none;
+text-autospace:none'><span style='color:windowtext;mso-no-proof:yes'><span
+style='mso-spacerun:yes'>      </span>z = z * z + p<o:p></o:p></span></p>
+
+<p><b style='mso-bidi-font-weight:normal'>Newton</b> A plot of the roots of the
+equation <span class=SpellE>Z^n</span> = 1 where n is the order of the function</p>
+
+<p><b style='mso-bidi-font-weight:normal'>Power</b> Zn+1 = <span class=SpellE>Zn^p</span>
++ C where p is the power.</p>
+
+<p><b style='mso-bidi-font-weight:normal'>Circle Squared</b> Another classic
+taken from Scientific American September 1986.</p>
+
+<p><b style='mso-bidi-font-weight:normal'>Sine Function</b> Zn+1 = sin(Zn) * C </p>
+
+<p><b style='mso-bidi-font-weight:normal'>Exponential</b> Zn+1 = <span
+class=SpellE>exp</span>(Zn) * C </p>
+
+<p><b style='mso-bidi-font-weight:normal'>Fibonacci Spirals</b> An experiment
+in analysing nature using the Fibonacci series </p>
+
+<p><b style='mso-bidi-font-weight:normal'>Mountain Landscape</b> A bit of fun
+from Creative Computing July 1985.</p>
+
+<p><b style='mso-bidi-font-weight:normal'>Fourier Analysis</b> Demonstrates the
+vectors of the harmonics that create various wave forms</p>
+
+<p><b style='mso-bidi-font-weight:normal'>Fast Fourier Transform</b> Shows the
+spectrum created by various waveforms </p>
+
+<p><span class=SpellE><b style='mso-bidi-font-weight:normal'>Henon</b></span><b
+style='mso-bidi-font-weight:normal'> Mapping</b> Taken from BYTE magazine
+December 1986.</p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'>Numeric Gargoyles</b>
+Thanks to &quot;The Loom of God&quot; by Clifford A. <span class=SpellE>Pickover</span>
+pp 266-267.<b> <o:p></o:p></b></p>
+
+<p class=MsoNormal><b><o:p>&nbsp;</o:p></b></p>
+
+<p class=MsoNormal><span class=SpellE><b style='mso-bidi-font-weight:normal'>BuddhaBrot</b></span><b
+style='mso-bidi-font-weight:normal'>:</b></p>
+
+<p class=MsoNormal><span style='color:windowtext'>Refer: <a
+href="http://en.wikipedia.org/wiki/User_talk:Evercat/Buddhabrot.c"><u>http://en.wikipedia.org/wiki/User_talk:Evercat/Buddhabrot.c</u></a><o:p></o:p></span></p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal><b>Thorn Fractal:</b><span style='font-size:11.0pt;
+font-family:"Calibri",sans-serif'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='color:windowtext;mso-no-proof:yes'>Fractal
+attributed to Andrew Wayne Graff, alternatively named the &quot;Secant
+Sea&quot;</span><span style='color:windowtext'>.<o:p></o:p></span></p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal><b>Red Shift Rider Fractal:</b><span style='font-size:11.0pt;
+font-family:"Calibri",sans-serif'><o:p></o:p></span></p>
+
+<p class=MsoNormal>&quot;<span class=SpellE>TheRedShifter</span>&quot; formulas
+are updated with an arbitrary constant for the Power 2 part in the formula
+a*z^2 +/- <span class=SpellE>z^n</span> + c.</p>
+
+<p class=MsoNormal><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal><b>Popcorn Fractal:</b><span style='font-size:11.0pt;
+font-family:"Calibri",sans-serif'><o:p></o:p></span></p>
+
+<p class=MsoNormal>Popcorn fractals are instances of Integrated Fractal Systems
+involving trigonometric functions. In this program, we study the effect of
+spherical, swirl and pseudo-horseshoe functions on popcorn fractals to produce
+talismanic and tantric designs.</p>
+
+<p><b style='mso-bidi-font-weight:normal'><span style='font-size:16.0pt'>FRACTINT
+fractals:<o:p></o:p></span></b></p>
+
+<p>Refer to <a href="manp7fra.htm"><u>FRACTINT documentation</u></a> for a
+description of each fractal. There are a number of fractals that take on a
+range of functions. </p>
+
+<p>A number of forms of <b style='mso-bidi-font-weight:normal'>Bifurcation</b>
+taken from FRACTINT </p>
+
+<p>Parameter files (.par) from FRACTINT are supported by <span class=SpellE>ManpWIN</span>.
+However, because they are in a different format to <span class=SpellE>ManpWIN</span>
+parameter files, they are accessed through the fractal type dialogue box.</p>
+
+<p><span class=SpellE><b style='mso-bidi-font-weight:normal'>Lyapunov</b></span><b
+style='mso-bidi-font-weight:normal'> Fractals: </b><span class=SpellE>ManpWIN</span>
+allow a much easier way to set the iteration sequence by using AB and C. For
+more information refer to <a
+href="https://en.wikipedia.org/wiki/Lyapunov_fractal"><span class=SpellE><u>Lyapunov</u></span><u>
+fractal (Wikipedia)</u></a>.</p>
+
+<p><b style='mso-bidi-font-weight:normal'><span style='font-size:16.0pt'>Direct
+fractal formula parser:<o:p></o:p></span></b></p>
+
+<p>Any function that can be expressed in the form <span class=SpellE>Fn</span>(z)+c
+can be typed into <span class=SpellE>ManpWIN</span> and the fractal function
+interpreted. This is based on the <span class=SpellE>Fractint</span> formula
+parser but does not need a file to be read. The fields are loaded with a double
+click. A single click will run the currently loaded formula. Julia and Real
+Time Julia do not work on direct formula parser because one needs to change the
+initial conditions to create a Julia set.</p>
+
+<p>Documentation is supplied in <a href="manp7for.htm"><u>Formula documentation</u></a>
+by Mark Peterson.</p>
+
+<p><b style='mso-bidi-font-weight:normal'><span style='font-size:16.0pt'>Art-Matrix
+fractals:<o:p></o:p></span></b></p>
+
+<p><b style='mso-bidi-font-weight:normal'><span style='mso-no-proof:yes'><!--[if gte vml 1]><v:shape
+ id="_x0000_i1026" type="#_x0000_t75" style='width:208.8pt;height:156.6pt;
+ visibility:visible;mso-wrap-style:square'>
+ <v:imagedata src="manp7vow_files/image003.gif" o:title=""/>
+</v:shape><![endif]--><![if !vml]><img border=0 width=278 height=209
+src="manp7vow_files/image003.gif" v:shapes="_x0000_i1026"><![endif]></span><o:p></o:p></b></p>
+
+<p><b style='mso-bidi-font-weight:normal'>Cubic</b> A nice set of fractals </p>
+
+<p><b style='mso-bidi-font-weight:normal'>“Special” Newton</b> </p>
+
+<p><b style='mso-bidi-font-weight:normal'>“<span class=SpellE>Matein</span>”</b>
+Fractal </p>
+
+<p><b style='mso-bidi-font-weight:normal'>Rational Maps <o:p></o:p></b></p>
+
+<p><span class=SpellE><b style='mso-bidi-font-weight:normal'><span
+style='font-size:16.0pt'>TieraZon</span></b></span><b style='mso-bidi-font-weight:
+normal'><span style='font-size:16.0pt'> fractals:<o:p></o:p></span></b></p>
+
+<p>The full list of <span class=SpellE>TieraZon</span> fractals is available.
+Some <span class=SpellE>TeiraZon</span> fractals may be selected directly.</p>
+
+<p><span class=SpellE><b style='mso-bidi-font-weight:normal'><span
+style='font-size:16.0pt'>Flarium</span></b></span><b style='mso-bidi-font-weight:
+normal'><span style='font-size:16.0pt'> fractals:<o:p></o:p></span></b></p>
+
+<p>There are a lot of similarities between <span class=SpellE>TieraZon</span>
+fractals and <span class=SpellE>Flarium</span> fractals. Those that are unique
+to <span class=SpellE>Flarium</span> are added after the full list of <span
+class=SpellE>Tierazon</span> fractals.</p>
+
+<p><b style='mso-bidi-font-weight:normal'><span style='font-size:16.0pt'>Marcus
+fractals:<o:p></o:p></span></b></p>
+
+<p><span style='color:windowtext'>A number of interesting fractals were
+contributed by Marcus </span><span class=SpellE>Rezende</span><span
+style='color:windowtext'>. Some are his own creation and others were found from
+various sources. Documentation in his own style can be found in </span><a
+href="manp7mar.htm"><u>Marcus Fractals</u></a>.</p>
+
+<p><b style='mso-bidi-font-weight:normal'><span style='font-size:16.0pt'>Slope
+fractals:<o:p></o:p></span></b></p>
+
+<p><b style='mso-bidi-font-weight:normal'><span style='font-size:16.0pt;
+mso-no-proof:yes'><!--[if gte vml 1]><v:shape id="Picture_x0020_2" o:spid="_x0000_i1025"
+ type="#_x0000_t75" style='width:376.8pt;height:211.8pt;visibility:visible;
+ mso-wrap-style:square'>
+ <v:imagedata src="manp7vow_files/image001.jpg" o:title=""/>
+</v:shape><![endif]--><![if !vml]><img border=0 width=502 height=282
+src="manp7vow_files/image001.jpg" v:shapes="Picture_x0020_2"><![endif]></span></b><b
+style='mso-bidi-font-weight:normal'><span style='font-size:16.0pt'><o:p></o:p></span></b></p>
+
+<p><span style='color:windowtext'>These methods give a 3D look to fractals. The
+slope is calculated and a light source illuminates different parts of the
+fractal differently. There are two methods offered: Analytic derivative and
+forward differencing. <o:p></o:p></span></p>
+
+<p><span style='color:windowtext'>Here are some advantages of each method of
+calculating a slope.<o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt'><span style='color:windowtext'>Analytic
+derivative:<o:p></o:p></span></p>
+
+<p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:36.0pt;
+margin-bottom:.0001pt;text-indent:-18.0pt;mso-list:l1 level1 lfo2'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;color:windowtext'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style='color:windowtext'>more accurate<o:p></o:p></span></p>
+
+<p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:36.0pt;
+margin-bottom:.0001pt;text-indent:-18.0pt;mso-list:l1 level1 lfo2'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;color:windowtext'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style='color:windowtext'>more efficient
+computation<o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt'><span style='color:windowtext'><o:p>&nbsp;</o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt'><span style='color:windowtext'>Forward
+differencing:<o:p></o:p></span></p>
+
+<p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:36.0pt;
+margin-bottom:.0001pt;text-indent:-18.0pt;mso-list:l0 level1 lfo4'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;color:windowtext'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style='color:windowtext'>works for
+formulas with no analytic derivative (<span class=SpellE>eg</span> any formula
+with abs)<o:p></o:p></span></p>
+
+<p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:36.0pt;
+margin-bottom:.0001pt;text-indent:-18.0pt;mso-list:l0 level1 lfo4'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;color:windowtext'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style='color:windowtext'>works for any
+measure<o:p></o:p></span></p>
+
+<p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:36.0pt;
+margin-bottom:.0001pt;text-indent:-18.0pt;mso-list:l0 level1 lfo4'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;color:windowtext'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style='color:windowtext'>can include textures,
+field lines, or anything else that colouring might use<o:p></o:p></span></p>
+
+<p style='margin-top:0cm;margin-right:0cm;margin-bottom:0cm;margin-left:36.0pt;
+margin-bottom:.0001pt;text-indent:-18.0pt;mso-list:l0 level1 lfo4'><![if !supportLists]><span
+style='font-family:Symbol;mso-fareast-font-family:Symbol;mso-bidi-font-family:
+Symbol;color:windowtext'><span style='mso-list:Ignore'>·<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span></span><![endif]><span style='color:windowtext'>can use different
+measures in exterior, interior, in set, orbit trap regions, etc.<o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt'><span style='color:windowtext'><o:p>&nbsp;</o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt'><span style='color:windowtext'>Both
+methods are also offered in perturbation fractals. However, only <span
+class=SpellE>Mandlebrot</span> set and power fractals are available for the
+analytical derivative method because they have continuous derivatives. <o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt'><span style='color:windowtext'><o:p>&nbsp;</o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt'><span class=SpellE><span
+style='color:windowtext'>ManpWIN</span></span><span style='color:windowtext'>
+now offers forward differencing on many of the raster based fractals. However,
+these are still slow as they need to calculate every pixel and, as yet, are not
+multi-threading. Not all give accurate slope calculations as there are
+difficulties in getting the best continuous iteration count for some fractals.
+Refer </span><b style='mso-bidi-font-weight:normal'><a href="manp7w1f.htm"><u>Fractal
+Options</u></a></b><span style='color:windowtext'><o:p></o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt'><span style='color:windowtext'><o:p>&nbsp;</o:p></span></p>
+
+<p style='margin:0cm;margin-bottom:.0001pt'><span style='color:windowtext'>There
+is some experimental algorithm to allow a moving palette in forward
+differencing. Set Palette Shift (<span class=SpellE>Fwd</span> Diff) to a small
+integer greater than 0.<o:p></o:p></span></p>
+
+<p>Look at <a href="manp7hgw.htm"><u>Acknowledgments</u></a> for information
+about contributions to source code. </p>
+
+</div>
+
+</body>
+
+</html>

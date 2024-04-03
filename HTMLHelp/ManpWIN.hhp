@@ -1,0 +1,40 @@
+[OPTIONS]
+Compatibility=1.1 or later
+Compiled file=ManpWIN.chm
+Contents file=Manpwin.hhc
+Default topic=html\manp4c6w.htm
+Display compile progress=No
+Index file=manphelp.hhk
+Language=0xc09 English (Australia)
+
+
+[FILES]
+html\manp4c6w.htm
+html\manp7r74.htm
+html\manp7r3k.htm
+html\manp7r1s.htm
+html\manp8els.htm
+html\manp7r00.htm
+html\manp7qy8.htm
+html\manp7w1e.htm
+html\manp7vn4.htm
+html\manp7vow.htm
+html\manp7vzk.htm
+html\manp7w1c.htm
+html\manp7yr4.htm
+html\manp7yuo.htm
+html\manp7w1h.htm
+html\manp7w1f.htm
+html\manp9s8g.htm
+html\manp7vzp.htm
+html\manp7sfk.htm
+html\manp7sog.htm
+html\manp7hgw.htm
+html\manp7r5c.htm
+html\manp7vzm.htm
+html\manp7r8w.htm
+html\manp7vlc.htm
+html\manp7for.htm
+
+[INFOTYPES]
+
