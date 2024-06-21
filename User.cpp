@@ -21,6 +21,9 @@
 #include	"BigDouble.h"
 #include	"OscProcess.h"
 #include	"Plot.h"
+#include	"Pixel.h"
+#include	"Matrix.h"
+#include	"BigMatrix.h"
 #include	".\parser\TrigFn.h"
 
 /**************** Big Number Globals *********************/
@@ -50,40 +53,43 @@ extern	WORD	type;			// M=mand, N=Newton etc
 extern	int	subtype;		
 extern	int	PaletteShift;		// fractional palette addressing
 extern	int	height, xdots, ydots, width, bits_per_pixel;
+extern	double	ScreenRatio;		// ratio of width / height for the screen
 
 extern	WORD	special;		// special colour, phase etc
 extern	WORD	degree;			// power
-extern	int	cycles;			/* Bif types, num cycles before plot */
-extern	int	period_level;		/* 0 for no periodicity checking */
-extern	BYTE	screenflag;		/* replay saved screen */
-extern	int	biomorph;		/* biomorph colour */
-extern	BYTE	cycleflag;		/* do colour cycling */
-extern	int	decomp;			/* number of decomposition colours */
-extern	BYTE	_3dflag;		/* replay saved file 3D */
+extern	int	cycles;			// Bif types, num cycles before plot
+extern	int	period_level;		// 0 for no periodicity checking
+extern	BYTE	screenflag;		// replay saved screen
+extern	int	biomorph;		// biomorph colour
+extern	BYTE	cycleflag;		// do colour cycling
+extern	int	decomp;			// number of decomposition colours
+extern	BYTE	_3dflag;		// replay saved file 3D
 extern	BYTE	PerspectiveFlag;	// display using perspective
 extern	BOOL	ZoomEdge;		// Zooming process
-extern	BYTE	orbit_flag;		/* display orbits? */
-extern	BYTE	exitflag;		/* exit on completion */
-extern	BYTE	juliaflag;		/* Julia implementation of fractal */
+extern	BYTE	orbit_flag;		// display orbits?
+extern	BYTE	exitflag;		// exit on completion
+extern	BYTE	juliaflag;		// Julia implementation of fractal
 extern	BYTE	RealTimeJuliaFlag;	// Display Julia set in real time
-extern	char	floatflag;		/* floating point maths */
-extern	BYTE	grayflag;		/* use grey value not colour number */
-extern	BYTE	pairflag;		/* stereo pair flag and window size */
-extern	BYTE	calcmode;		/* trace type B, G, 1, 2 */
+extern	char	floatflag;		// floating point maths
+extern	BYTE	grayflag;		// use grey value not colour number
+extern	BYTE	pairflag;		// stereo pair flag and window size
+extern	BYTE	calcmode;		// trace type B, G, 1, 2
 extern	BYTE	oldcalcmode;		// store values during 3D transformations etc
-extern	int	logval;			/* log colour map starting value */
+extern	int	logval;			// log colour map starting value
 
 extern	long    fillcolor;		// tesseral fillcolor: -1=normal 0 means don't fill     
 extern	BOOL	RunAnimation;		// are we in the middle of an animation run?
 extern	WORD	UpdateDelay;		// delay in milliseconds
 
-extern	long	threshold;		/* maximum iterations */
-extern	int	AutoStereo_value;	/* AutoStereo depth value */
-extern	int	eye_dots;		/* eye dots for AutoStereo */
+extern	long	threshold;		// maximum iterations
+extern	int	AutoStereo_value;	// AutoStereo depth value
+extern	int	eye_dots;		// eye dots for AutoStereo
 extern	int	stereo_sign;
 extern	double	HenonA, HenonXStart, HenonYStart, HenonStep;
 extern	int	HenonPoints;
-extern	int	method;			// inside and outside filters
+//extern	int	method;			// inside and outside filters
+extern	int	InsideMethod;		// the number of the inside filter
+extern	int	OutsideMethod;		// the number of the outside filter
 extern	int	FilterType;		// data for Tierazon filters
 extern	int	ColourMethod;		// Tierazon colour methods
 
@@ -91,27 +97,27 @@ extern	BOOL	RGBFilter;		// If true, we use the plotting routine for RGB filters 
 extern	int	PlotType;
 extern	double	CurrentDelay;		// delay in milliseconds for rotation
 
-extern	double	x_rot;			/* angle display plane to x axis */
-extern	double	y_rot;			/* angle display plane to y axis */
-extern	double	z_rot;			/* angle display plane to z axis */
-extern	double	sclx, scly, sclz;	/* scale */
+extern	double	x_rot;			// angle display plane to x axis
+extern	double	y_rot;			// angle display plane to y axis
+extern	double	z_rot;			// angle display plane to z axis
+extern	double	sclx, scly, sclz;	// scale
 
-extern	double	hor;			/* horizontal address */
-extern	double	vert;			/* vertical address */
-extern	double	mandel_width;		/* width of display */
-extern	double	closenuff;		/* periodicity bailout */
+extern	double	hor;			// horizontal address
+extern	double	vert;			// vertical address
+extern	double	mandel_width;		// width of display
+extern	double	closenuff;		// periodicity bailout
 extern	double	dStrands;		// for Tierazon filters
 extern	int	nFDOption;		// Fractal Dimension option for Tierazon filters
 extern	BOOL	UseCurrentPalette;	// do we use the ManpWIN palette for Tierazon filters? If false, generate internal filter palette
 
-extern	double	c_imag;			/* imaginary part of offset */
-extern	long	c_imag_int;		/* imaginary part of offset */
+extern	double	c_imag;			// imaginary part of offset/
+//extern	long	c_imag_int;		// imaginary part of offset
 
-extern	int	ixstart, ixstop, iystart, iystop;	/* start, stop here */
-extern	int	xxstart,xxstop;			/* these are same as worklist, */
-extern	int	yystart,yystop,yybegin;		/* declared as separate items  */
+extern	int	ixstart, ixstop, iystart, iystop;	// start, stop here
+extern	int	xxstart,xxstop;			// these are same as worklist,
+extern	int	yystart,yystop,yybegin;		// declared as separate items
 
-extern	int	blockindex;		/* for solid guessing blocksize */
+extern	int	blockindex;		// for solid guessing blocksize
 extern	int	lsys_ptr;
 
 extern	WORD	steps, NumHarmonics;	// for Fourier Analysis
@@ -120,15 +126,14 @@ extern	BOOL	NonStandardImage;	// has user changed image size?
 extern	BOOL	AutoExitFlag;
 extern	BOOL	AutoSaveFlag;
 extern	int	time_to_restart;	// time to restart?
-//extern	int	time_to_reinit;		// time to initialise?
 
 extern	RECT 	WARect;			// this is the usable screen taking taskbar into account
 extern	double	rqlim;			// bailout limit
+extern	int	BailoutTestType;	// type of bailout test
 extern	double	param[];
 
 extern	int	StartColourCycling;	// we can start the colour cycling from any point..good for cycling animations
 	BOOL	invert = FALSE;		// invert fractal
-extern	int	orientation;		// 0, 90, 180 or 270 degrees
 extern	double	f_radius, f_xcenter, f_ycenter;	// inversion radius, center 
 extern	int	xAxis, yAxis, zAxis;	// numerical values for axes for chaotic oscillators
 extern	int	MaxDimensions;
@@ -160,7 +165,8 @@ extern	double	bumpMappingDepth;
 extern	double	bumpMappingStrength;
 extern	int	SlopeType;
 extern	double	LightHeight;
-extern	double	RotationAngle;		// rotate image in degrees
+extern	int	RotationAngle;		// rotate image in degrees
+extern	Complex	RotationCentre;		// centre of rotation
 extern	int	PalOffset;		// begin palette here
 extern	double	IterDiv;		// divide ieration by this amount
 extern	int	PertColourMethod;	// some ideas from Kalles
@@ -169,7 +175,7 @@ extern	void	AnalysePalette(char *);
 extern	void	AnalyseDistEst(char *s);
 
 extern	void	Axes2Text(char *text, int x, int y, int z);
-extern 	void	set_palette(void), get_julia_loc(char *), analyse_3d(char *), analyse_inside(char *), 
+extern 	void	set_palette(void), get_julia_loc(char *), analyse_3d(char *), AnalyseRotation(char *s), analyse_inside(char *),
 		draw3D(HWND), stereo_init(void), AnalyseMethod(char *);
 
 extern	int	analyse_corner(char *);
@@ -202,12 +208,14 @@ extern	int	setup_Perturbation(void);		// count how many Perturbation fractals th
 int	GetParamData(HWND, LPSTR, LPSTR, LPSTR, BOOL);
 void	BasicFractData(char *, BOOL);
 
-//extern	double 	*wpixels;				// an array of doubles holding slope modified iteration counts
-extern	CDib	Dib;
-extern	CPlot	Plot;					// image plotting routines 
-extern	CFract	Fractal;
+//extern	double 	*wpixels;			// an array of doubles holding slope modified iteration counts
+extern	CDib		Dib;
+extern	CPlot		Plot;				// image plotting routines 
+extern	CFract		Fractal;
 extern	COscProcess	OscProcess;
-extern	Complex	j;
+extern	CMatrix		Mat;				// transformation and roatation matrix
+extern	CBigMatrix	BigMat;				// transformation and roatation matrix
+extern	Complex		j;
 
 static	bool OldPertFormat;				// used to get param values for old format perturbation par files
 
@@ -479,6 +487,10 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	case BURNINGSHIP:
 	case THORN:
 	case POPCORN:
+	case FPPOPCORN:
+	case LPOPCORN:
+	case FPPOPCORNJUL:
+	case LPOPCORNJUL:
 //	case BUFFALO:
 //	case PERPBUFFALO:
 	case MANDELBAR:
@@ -741,6 +753,8 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 		strcpy(LSYSFile, str + 9);
 	    break;
 	case SCREENFORMULA:				// On Screen Formula fractals
+	case FORMULA:					// formula files
+	case FFORMULA:
 	    if (*SaveString)				// there are spaces in the string and therefore we have already captured the formula string
 		strcpy(FormulaString, SaveString);
 	    else
@@ -783,14 +797,16 @@ void	setup_defaults(void)
     int	i;
 
     UpdateDelay = (type == FIBONACCI || type == FOURIER) ? 10 : 1000;
-    method = NONE;
+//    method = NONE;
+    InsideMethod = NONE;
+    OutsideMethod = NONE;
     special = GREEN;
     degree = 3;
 //    cycles = 50;				// cycles before display
     subtype = 0;
 //    subtype = ' ';
     exitflag = FALSE;
-    orientation = NORMAL;
+    RotationAngle = NORMAL;
 //    PaletteFileFlag = FALSE;
 //    TrueColourFlag = FALSE;
     TrueCol.RandomDivisor = 128;
@@ -814,7 +830,7 @@ void	setup_defaults(void)
     PlotType = NOSYM;
     FilterType = 1;
     ColourMethod = 1;				// Tierazon colour methods
-
+    BailoutTestType = BAIL_MOD;
     calcmode = 'G';
 #ifdef TESTFWDDIFF
     calcmode = 'F';
@@ -830,7 +846,6 @@ void	setup_defaults(void)
     IterDiv = 1.0;
     PalOffset = 0;
     PertColourMethod = 0;
-    RotationAngle = 0.0;
     PalOffset = 0;
     oldcalcmode = calcmode;
     cycleflag = FALSE;
@@ -1026,6 +1041,29 @@ void	GetParamsList(char *s)
     else
 	Fractal.NumParam = sscanf(t, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", Fractal.ParamValue[0], Fractal.ParamValue[1], Fractal.ParamValue[2], Fractal.ParamValue[3], Fractal.ParamValue[4], 
 										Fractal.ParamValue[5], Fractal.ParamValue[6], Fractal.ParamValue[7], Fractal.ParamValue[8], Fractal.ParamValue[9]);
+    }
+
+/**************************************************************************
+	Get Parameters
+**************************************************************************/
+
+void	GetBailout(char *s)
+
+    {
+    char	*t;
+    int		count;
+
+    t = s;
+    while (*s)
+	{
+	if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-' && *s != 'e' && *s != 'E')
+	    *s = ' ';
+	s++;
+	}
+
+    count = sscanf(t, "%lf %d", &rqlim, &BailoutTestType);
+    if (count == 1)
+	BailoutTestType = BAIL_MOD;
     }
 
 /**************************************************************************
@@ -1245,14 +1283,14 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 		    break;
 		case 'D':							// method
 		    AnalyseMethod(token + 2);
-		    if (method > TIERAZONFILTERS && method < TIERAZONCOLOURS)	// tierazon filters
+		    if (InsideMethod > TIERAZONFILTERS && InsideMethod < TIERAZONCOLOURS)	// tierazon filters
 			{
-			FilterType = method - TIERAZONFILTERS;
+			FilterType = InsideMethod - TIERAZONFILTERS;
 			RGBFilter = (TierazonFilter[FilterType].rgb) ? TRUE : FALSE;
 			}
-		    else if (method > TIERAZONCOLOURS)				// tierazon colours)
+		    else if (InsideMethod > TIERAZONCOLOURS)				// tierazon colours)
 			{
-			ColourMethod = method - TIERAZONCOLOURS;
+			ColourMethod = InsideMethod - TIERAZONCOLOURS;
 			RGBFilter = (TierazonColour[ColourMethod].rgb) ? TRUE : FALSE;
 			}
 
@@ -1348,8 +1386,10 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 		case 'N':				// functions
 		    GetFunctions(token + 2);
 		    break;
-		case 'O':				// stereo pairs
-		    orientation = atoi(token + 2);
+		case 'O':				// rotation angle
+		    RotationAngle = atoi(token + 2);
+		    if (RotationAngle != 0 && RotationAngle != 90 && RotationAngle != 180 && RotationAngle != 270)		// get original rotation centre otherwise we can simply remap
+			AnalyseRotation(token + 2);
 		    break;
 		case 'P':				// periodicity
 		    period_level = atoi(token + 2);
@@ -1398,7 +1438,7 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 #endif
 		    break;
 		case 'V':				// bailout limit
-		    sscanf(token + 2, "%lf", &rqlim);	
+		    GetBailout(token + 2);
 		    break;
 		case 'W':				// parameter list
 		    GetParamsList(token + 2);
@@ -1457,6 +1497,18 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 #endif
 	    }
 	token = strtok(NULL, seps);
+	}
+
+    RotationAngle = RotationAngle % 360;
+    if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
+	RotationCentre = 0.0;
+    else
+	{
+	z_rot = (double)(RotationAngle % 360);
+	if (BigNumFlag)
+	    BigMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
+	else
+	    Mat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
 	}
     if (logval)
 	if (threshold >= MAXTHRESHOLD)
@@ -1575,22 +1627,27 @@ void	BasicFractData(char *info, BOOL CreateAnim)
 	strcat(info, s);
 	}
     		
-    if (method)
+    if (InsideMethod)
 	{
-	sprintf(s, " -D%03d", method);	// display method
+	sprintf(s, " -DI%03d", InsideMethod);	// display method
 	strcat(info, s);
-	if (method > TIERAZONFILTERS)
+	if (InsideMethod > TIERAZONFILTERS)
 	    {
 	    sprintf(s, ",%f,%d,%d", dStrands, nFDOption, UseCurrentPalette);	// Parameters for the Tierazon filters
 	    strcat(info, s);
 	    }
-	else if (method == POTENTIAL)
+	else if (InsideMethod == POTENTIAL)
 	    {
 	    sprintf(s, ",%f,%f,%f", potparam[0], potparam[1], potparam[2]);	// Parameters for potential
 	    strcat(info, s);
 	    }
 	}
-//    if (palette_flag && !CreateAnim)
+    if (OutsideMethod)
+	{
+	sprintf(s, " -DO%03d", OutsideMethod);	// display method
+	strcat(info, s);
+	}
+    //    if (palette_flag && !CreateAnim)
 //	{
 //	sprintf(s, " -a\"%s\"", MAPFile);
 //	strcat(info, s);
@@ -1626,6 +1683,10 @@ void	BasicFractData(char *info, BOOL CreateAnim)
 	case BUDDHABROT:
 	case THORN:
 	case POPCORN:
+	case FPPOPCORN:
+	case LPOPCORN:
+	case FPPOPCORNJUL:
+	case LPOPCORNJUL:
 //	case PERPBURNINGSHIP:
 	    sprintf(s, " -f%03d", type);
 	    break;					// default
@@ -1644,6 +1705,8 @@ void	BasicFractData(char *info, BOOL CreateAnim)
 	case APOLLONIUSIFS:
 	case SIERPINSKIFLOWERS:
 	case MANDELDERIVATIVES:
+	    sprintf(s, " -f%03d%d", type, subtype);
+	    break;					// default
 	case PERTURBATION:
 	    FindSubtypeName(SubTypeName, type, subtype);
 	    sprintf(s, " -f%03d\"%s\",%d,%lf,%lf,%lf,%d", type, SubTypeName, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart);
@@ -1688,6 +1751,8 @@ void	BasicFractData(char *info, BOOL CreateAnim)
 	    sprintf(s, " -f%03d%03d", type, subtype);
 	    break;
 	case SCREENFORMULA:				// On Screen Formula fractals
+	case FORMULA:					// formula files
+	case FFORMULA:
 	    sprintf(s, " -f%03d\"%s\"", type, FormulaString);
 	    break;
 	case IFS:					// IFS fractals
@@ -1712,9 +1777,12 @@ void	BasicFractData(char *info, BOOL CreateAnim)
 	sprintf(s, " -h%d", pairflag);
 	strcat(info, s);
 	}
-    if (orientation != NORMAL)
+    if (RotationAngle != NORMAL)
 	{
-	sprintf(s, " -o%d", orientation);
+	if (RotationAngle != 90 && RotationAngle != 180 && RotationAngle != 270)
+	    sprintf(s, " -o%d,%lf,%lf", RotationAngle, RotationCentre.x, RotationCentre.y);
+	else
+	    sprintf(s, " -o%d", RotationAngle);
 	strcat(info, s);
 	}
     if (AutoStereo_value != 75)
@@ -1822,7 +1890,7 @@ void	BasicFractData(char *info, BOOL CreateAnim)
 	    strcat(info, s);
 	    }
 	}
-    sprintf(s, " -v%lf", *Fractal.rqlim);
+    sprintf(s, " -v%lf,%d", *Fractal.rqlim, BailoutTestType);
     strcat(info, s);
     }
 

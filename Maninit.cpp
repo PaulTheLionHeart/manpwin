@@ -57,6 +57,9 @@ extern	double	y_rot;			/* angle display plane to y axis */
 extern	double	z_rot;			/* angle display plane to z axis */
 extern	double	sclx, scly, sclz;	/* scale */
 
+extern	int	RotationAngle;		// rotate image in degrees
+extern	Complex	RotationCentre;		// centre of rotation
+
 //extern	WORD	RedStartInt, GreenStartInt, BlueStartInt, RedIncInt, GreenIncInt, BlueIncInt;
 
 extern	double	hor;			/* horizontal address */
@@ -74,7 +77,8 @@ extern	double	ygap;			/* gap between pixels */
 
 extern	int	xdots, ydots, bits_per_pixel;
 
-extern	int	method;			// inside and outside filters
+extern	int	InsideMethod;		// inside filters
+extern	int	OutsideMethod;		// outside filters
 extern	double	dStrands;		// for Tierazon filters
 extern	int	nFDOption;		// Fractal Dimension option for Tierazon filters
 extern	BOOL	UseCurrentPalette;	// do we use the ManpWIN palette for Tierazon filters? If false, generate internal filter palette
@@ -414,11 +418,11 @@ void	AnalyseDistEst(char *s)
 void	analyse_3d(char *s)
 
     {
-    char	*t;      
+    char	*t;
     int	r;
 
     t = s;
-    while(*s)
+    while (*s)
 	{
 	if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-')
 	    *s = ' ';
@@ -428,6 +432,27 @@ void	analyse_3d(char *s)
     }
 
 /**************************************************************************
+	Get 3D parameters
+**************************************************************************/
+
+void	AnalyseRotation(char *s)
+
+    {
+    char	*t;
+    int		r;
+
+    t = s;
+    while (*s)
+	{
+	if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-')
+	    *s = ' ';
+	s++;
+	}
+    r = sscanf(t, "%d %lf %lf", &RotationAngle, &RotationCentre.x, &RotationCentre.y);
+    }
+
+
+/**************************************************************************
 	Get filter parameters
 **************************************************************************/
 
@@ -435,17 +460,24 @@ void	AnalyseMethod(char *s)
 
     {
     char	*t;      
-    int	r;
+    int		r, method;
+    bool	IsInside;
+    IsInside = (*s == 'I');
 
-    t = s;
+    t = s + 1;
     while(*s)
 	{
 	if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-')
 	    *s = ' ';
 	s++;
 	}
+
     method = atoi(t);
-    if (method == POTENTIAL)	
+    if (IsInside)
+	InsideMethod = method;
+    else
+	OutsideMethod = method;
+    if (method == POTENTIAL)
 	r = sscanf(t+3, "%lf %lf %lf", &potparam[0], &potparam[1], &potparam[2]);
     else
 	r = sscanf(t+3, "%lf %d %d", &dStrands, &nFDOption, &UseCurrentPalette);

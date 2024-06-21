@@ -31,6 +31,7 @@
 //#include "port.h"
 #include "prototyp.h"
 #include "..\complex.h"
+#include "..\fract.h"
 
 
 #ifdef WATCH_MP
@@ -54,12 +55,15 @@ enum MATH_TYPE MathType = D_MATH;
 #define far_strlen(a)		strlen(a)
 
 #define stopmsg pstopmsg
-HWND	GlobalHwnd;			// to allow passing of hwnd to find_file_item()
+HWND	GlobalHwnd;			// to allow passing of hwnd 
 extern	char	lsys_type[];
 
 extern	double	hor;			// horizontal address
 extern	double	vert;			// vertical address 
 extern	double	mandel_width;		// width of display
+
+extern	CFract	Fractal;		// current fractal stuff
+void	insertFunctionNames(char *FormStr, CFract Fractal);		// insert function names in place of literal "fn1", "fn2"
 
 extern	char	lptr[][100];
 extern	int	lsys_num;
@@ -234,7 +238,7 @@ static	int real_count;
 
 void (far * far *f)(void) = (void(far * far *)(void))0; /* static CAE fp */
 
-static	short int ismand = 1;
+	short int ismand = 1;
 
 static	unsigned int posp, vsp, LastOp;     /* CAE fp made non-static */
 static	unsigned int n, NextOp, InitN;
@@ -1268,6 +1272,8 @@ struct SYMETRY {
    {"",              0}
 };
 
+extern	char	FormulaString[];	// used to hold the full formula
+
 static int ParseStr(char *Str, int pass) {
    struct ConstArg far *c;
    int ModFlag = 999, Len, Equals = 0, Mod[20], mdstk = 0;
@@ -1275,6 +1281,8 @@ static int ParseStr(char *Str, int pass) {
    double const_pi, const_e;
    double Xctr, Yctr, Xmagfactor, Rotation, Skew;
    LDBL Magnification;
+
+   strcpy(FormulaString, Str);		// needed to save formula to par file
    SetRandom = Randomized = 0;
    uses_jump = 0;
    jump_index = 0;
@@ -1362,10 +1370,10 @@ static int ParseStr(char *Str, int pass) {
    v[12].a.d.y = 0;
    v[13].a.d.x = (double)ismand;
    v[13].a.d.y = 0;
-   v[14].a.d.x = hor + (mandel_width * 1.3333333333333) / 2.0;
+   v[14].a.d.x = hor + (mandel_width * 1.777777777778) / 2.0;
    v[14].a.d.y = vert + mandel_width / 2.0;
    v[15].a.d.x = (double)1.0 / mandel_width;
-   v[15].a.d.y = vert / (hor * 1.33333333333);
+   v[15].a.d.y = vert / (hor * 1.777777777778);
    v[16].a.d.x = 0.0;
    v[16].a.d.y = 0.0;
 
@@ -1675,14 +1683,13 @@ int form_per_pixel(void) {
    v[10].a.d.x = (double)col;
    v[10].a.d.y = (double)row;
 
-	{
-	v[1].a.d.x = param[0];
-	v[1].a.d.y = param[1];
-	}
-
-   v[2].a.d.x = param[2];
-   v[2].a.d.y = param[3];
-				// end added PHD 2017-11-03
+    v[1].a.d.x = param[0];
+    v[1].a.d.y = param[1];
+    v[2].a.d.x = param[2];
+    v[2].a.d.y = param[3];
+    v[3].a.d.x = param[4];
+    v[3].a.d.y = param[5];
+	// end added PHD 2017-11-03
 
    switch(MathType) {
    case D_MATH:
@@ -2393,7 +2400,7 @@ int frm_check_name_and_sym (FILE * open_file, int report_bad_sym)
      /* first, test name */
    done = at_end_of_name = i = 0;
    while(!done) {
-      switch (c = getc(open_file)) {
+      switch (c = fgetc(open_file)) {
          case EOF: case '\032':
             stopmsg(0,ParseErrs(PE_UNEXPECTED_EOF));
             return 0;
@@ -2629,6 +2636,8 @@ int RunForm(char *Name, int from_prompts1c) {  /*  returns 1 if an error occurre
    if(FormStr)  /*  No errors while making string */
    {
       parser_allocate();  /*  ParseStr() will test if this alloc worked  */
+      if (str_find_ci(FormStr, "fn1") || str_find_ci(FormStr, "fn2"))
+	  insertFunctionNames(FormStr, Fractal);		// insert function names in place of literal "fn1", "fn2"
       if (ParseStr(FormStr,1))
          return 1;   /*  parse failed, don't change fn pointers  */
       else
@@ -3823,13 +3832,60 @@ int frm_prescan (FILE * open_file)
 }
 
 /**************************************************************************
+	Insert function names into Formula String
+**************************************************************************/
+
+void	insertFunctionNames(char *FormStr, CFract Fractal)		// insert function names in place of literal "fn1", "fn2"
+    {
+    char	*tok, *p, *q, *fn1ptr, *fn2ptr, *buffer;
+    int		i;
+    size_t	FnLen1, FnLen2, FormStrLen;
+
+    FnLen1 = strlen(Fractal.Fn1);
+    FnLen2 = strlen(Fractal.Fn2);
+    FormStrLen = strlen(FormStr) + 50;					// additional 50 chars to allow for additional length of function names
+    buffer = new char[FormStrLen];
+    p = FormStr;
+    q = buffer;
+    while (tok = str_find_ci(p, "fn1"))
+	{
+	fn1ptr = Fractal.Fn1;
+	while (p < tok - 3)
+	    *q++ = *p++;
+	for (i = 0 ; i < FnLen1; i++)					// replace "fn1" with first 3 chars of function 1 name
+	    *q++ = *fn1ptr++;
+//	for (i = 0; i <  - 3; i++)				// insert the next chars of function name if needed
+//	    *q++ = *fn1ptr++;
+	p = tok;							// go past the chars "fn1"
+	}
+    strcpy(q, p);							// copy the rest
+    strcpy(FormStr, buffer);
+    p = FormStr;
+    q = buffer;
+    while (tok = str_find_ci(p, "fn2"))
+	{
+	fn2ptr = Fractal.Fn2;
+	while (p < tok - 3)
+	    *q++ = *p++;
+	for (i = 0; i < FnLen2; i++)					// replace "fn1" with first 3 chars of function 2 name
+	    *q++ = *fn2ptr++;
+//	for (i = 0; i < FnLen2 - 3; i++)				// insert the next chars of function name if needed
+//	    *q++ = *fn2ptr++;
+	p = tok;							// go past the chars "fn2"
+	}
+    strcpy(q, p);							// copy the rest
+    strcpy(FormStr, buffer);
+    if (buffer) { delete[] buffer; buffer = NULL; }
+    }
+
+/**************************************************************************
 	Process Formula String
 **************************************************************************/
 
 int	ProcessFormulaString(char *FormulaString)
     {
-    FormStr = FormulaString;		// this is a bit of a cludge to use the string parser ofrom Fractint to parse our strings
-    strcpy(FormName,"OnScreen");	// fool the parser into thinking it got a real formula from a file to get round vaidation checks
+    FormStr = FormulaString;		// this is a bit of a cludge to use the string parser from Fractint to parse our strings
+    strcpy(FormName,"OnScreen");	// fool the parser into thinking it got a real formula from a file to get round validation checks
 //    sprintf(FormStr, "c = z = 1 / pixel:z = sqr(z) + c,|z| <= 4");
 //    sprintf(FormStr, "c = z = pixel:z = z*z*z + c,|z| <= 4");
 //    sprintf(FormStr, "c = pixel,z=1:z=z-((z*z*z*z-z)/(4*z*z*z-z)+c,|z| <= 4");
@@ -3837,7 +3893,12 @@ int	ProcessFormulaString(char *FormulaString)
 //    sprintf(FormStr, "c=z=pixel:x=abs(real(z)),y=-abs(imag(z)), z = x+flip(y), z=z*z+ c,|z|<=4");
 //    sprintf(FormStr, "z = pixel:z = z*z + c + p1,|z| <= 4");
 //    sprintf(FormStr, "z = P1:z = (pixel ^ z) + p1,|z| <= (P2 + 3)");
-
+//    sprintf(FormStr, "p1 = 1.618, p2 = -4.76,e=p1, a=imag(p2)+100,  p=real(p2)+PI,  q=2*PI*fn1(p/(2*PI)),  r=real(p2)+PI-q,  Z=C=Pixel: Z=log(Z) , IF(imag(Z)>r), Z=Z+flip(2*PI), ENDIF, Z=exp(e*(Z+flip(q)))+C;  |Z|<a ");
+//    sprintf(FormStr, "a=real(p1), b=imag(p1), d=real(p2), f=imag(p2),,g=1/f, h=1/d, j=1/(f-b), z=(-a*b*g*h)^j,,k=real(p3)+1, l=imag(p3)+100, c=fn1(pixel):z=k*((a*(z^b))+(d*(z^f)))+c,,|z| < l  ");
+//    sprintf(FormStr, "a=11, b=-1.2, d=4.3, f=-6,g=1/f, h=1/d, j=1/(f-b), z=(-a*b*g*h)^j,k=0+1, l=1e+100+100, c=fn1(pixel):z=k*((a*(z^b))+(d*(z^f)))+c,|z| < l  ");
+//    sprintf(FormStr, "Z=C=Pixel:Z=log(Z),,Z=exp(1.414213562373*(Z+flip(real(p1))))+C,,|Z|<36");
+    if (str_find_ci(FormStr, "fn1") || str_find_ci(FormStr, "fn2"))
+	insertFunctionNames(FormStr, Fractal);		// insert function names in place of literal "fn1", "fn2"
     if(FormStr)				//  No errors while making string
 	{
 	parser_allocate();		//  ParseStr() will test if this alloc worked 
@@ -3891,7 +3952,7 @@ int get_formula_names(HWND hwnd, char *filename)	// get the fractal formula name
 	    for (j = 0; s[j]; ++j)
 		if (s[j] == '{' || s[j] == '\n' || s[j] == ' ' || s[j] == '(')
 		    s[j] = '\0';
-	    s[20] = '\0';
+	    s[60] = '\0';
 	    if (s[0] && (s[0] != ';' && s[0] != ' ' && s[0] != '\n'))
 		{
 		strcpy(lptr[lsys_num], s + i);

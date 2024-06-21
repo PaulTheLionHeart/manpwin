@@ -9789,6 +9789,44 @@ int	DoChen(void)
     }
 
 /**************************************************************************
+	Chen Circuit-Like Model: High Periodicity Leading to Chaotic Dynamics
+	Sk Sarif Hassan and Sujay Goldar August 26, 2023
+	https://www.researchgate.net/publication/374482027....DOI: 10.1142/S0218127423501444
+	Corresponding author sujaygoldar@pinglacollege.ac.in
+***************************************************************************/
+
+int	DoChenCircuitLikeModel(void)
+
+    {
+    double	i, c1[3], cn[3], a, b, c, d;
+
+    c1[0] = param[10];	// x
+    c1[1] = param[11];	// y
+    c1[2] = param[12];	// z
+
+    a = param[0];
+    b = param[1];
+    c = param[2];
+    d = param[3];
+    totpasses = 10;
+
+    InitOscillator(c1, 3);						// pass in number of dimensions
+    for (i = 0; i < iterations; i++)
+	{
+	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	    return -1;
+	curpass = (int)(i * totpasses / iterations);
+	cn[0] = a * (c1[1] - c1[0]);
+	cn[1] = c1[0] - b * c1[0] * c1[2] + c * c1[1];
+	cn[2] = c1[0] * c1[1] + sqr(c1[0]) * c1[2] - d * c1[2];
+	if (DisplayOscillator(c1, cn, dt, ((DWORD)(i / 5.0) % threshold), i, 3, 0) < 0)
+	    break;
+	}
+    PlotExtras();
+    return 0;
+    }
+
+/**************************************************************************
 	Chen-Lee Chaotic Attractor Images
 ***************************************************************************/
 
@@ -14856,6 +14894,43 @@ int	DoDynamicalAnalysis(void)
     }
 
 /**************************************************************************
+	Dynamical Analysis of a Quadratic Megastable Chaotic Oscillator and Its Application in Biometric Fingerprint Image Encryption
+	Rajeskannan Subramanian, Serdar CiCek, Akif Akgul, Girma Adam, Anitha Karthikeyan and Karthikeyan Rajagopal
+	26 Mar 2024
+	https://www.hindawi.com/journals/complexity/2024/2005801/...... https://doi.org/10.1155/2024/2005801
+***************************************************************************/
+
+int	DoDynamicalAnalysisQuadraticMegastableChaoticOscillator(void)
+
+    {
+    double	i, c1[3], cn[3], a, b, azao;
+
+    c1[0] = param[10];	// x
+    c1[1] = param[11];	// y
+    c1[2] = param[12];	// z
+
+    a = param[0];
+    b = param[1];
+    azao = param[2];
+    totpasses = 10;
+
+    InitOscillator(c1, 3);						// pass in number of dimensions
+    for (i = 0; i < iterations; i++)
+	{
+	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	    return -1;
+	curpass = (int)(i * totpasses / iterations);
+	cn[0] = c1[1];
+	cn[1] = -b * tanh(azao * c1[0]) + a * sin(c1[2]);
+	cn[2] = -c1[0];
+	if (DisplayOscillator(c1, cn, dt, ((DWORD)i % threshold), i, 3, 0) < 0)
+	    break;
+	}
+    PlotExtras();
+    return 0;
+    }
+
+/**************************************************************************
 	Dynamical Chaos and Uniformly Hyperbolic Attractors from Mathematics to Physics
 	S P Kuznetsov 2011
 ***************************************************************************/
@@ -18286,7 +18361,6 @@ int	DoFourMemristor(void)
 /**************************************************************************
 	Four-Wing Chaotic Attractor Generated from a New 3-D Quadratic Autonomous System
 	Guoyuan Qi, Guanrong Chen, Michae¨l Antonie van Wyk, Barend Jacobus van Wyk and Yuhui Zhang 2 January 2007
-	https://www.researchgate.net/publication/220264916_A_Generalized_3-d_Four-Wing_Chaotic_System
 ***************************************************************************/
 
 int	DoFourWingChaoticAttractor(void)

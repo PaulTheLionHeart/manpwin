@@ -13,6 +13,8 @@ This program is written in "standard" C.Hardware dependant code
 #include	"complex.h"
 #include	"big.h"
 #include	"fractalp.h"
+#include	"manp.h"
+#include	"BigMatrix.h"
 
 #define max(a,b)    (((a) > (b)) ? (a) : (b))
 
@@ -27,6 +29,9 @@ extern	double	rqlim;			// bailout level
 
 extern	Complex	c;
 extern	Complex	z, q;
+extern	CBigMatrix	BigMat;		// matrix applications for rotation and translation
+extern	Complex	RotationCentre;		// centre of rotation
+extern	int	RotationAngle;		// in degrees
 
 extern	HWND	PixelHwnd;		// pointer to window handle
 extern	WORD	type;			// M=mand, J=Julia 1,2,4->
@@ -280,6 +285,12 @@ int	calcfracinit(void)
 //	if (init_big_dec(decimals) < 0)
 //	    return -1;
 	FloatCornerstoBig();
+	if (RotationAngle != NORMAL && RotationAngle != 90 && RotationAngle != 180 && RotationAngle != 270)
+	    {
+	    double  z_rot = (double)RotationAngle;
+	    BigMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
+	    }
+
 	}
     return 0;
     }

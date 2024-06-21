@@ -32,7 +32,7 @@ static	BOOL	ShowRTOrbits = TRUE;			// show julia orbits for each image
 extern	PAINTSTRUCT 	ps;
 extern	WORD		type;				// M=mand, J=Julia 1,2,4->
 extern	BYTE		juliaflag;
-extern	int		orientation;			// 0, 90, 180 or 270 degrees
+extern	int		RotationAngle;			// in degrees
 extern	double		param[];
 extern	BOOL		invert;				// invert fractal
 extern	RGBTRIPLE	OrbitColour;			// Indexed colour for the orbit displays in Julia sets
@@ -142,7 +142,7 @@ int	DrawJulia(HWND hwnd, POINTS ptCurrent)
     RTJuliaActive = TRUE;			// block any moire requests until calcs complete
     TempJuliaFlag = Pix.juliaflag;			// force julia calc
     Pix.juliaflag = TRUE;
-    switch (orientation)
+    switch (RotationAngle)
 	{
 	case 0:							// normal
 	    Pix.q->x = Pix.mandel_width * (double)ptCurrent.x / (double)ydots + Pix.hor;

@@ -126,24 +126,30 @@ int	CPixel::bifurcation(int user_data(HWND hwnd))
 		return -1;
 	    switch (type)
 		{
+		case LBIFURCATION:
 		case BIFURCATION:
 		    result = BifurcVerhulstTrig(Rate, &Population, &TrigFn);
 		    break;
+		case LBIFLAMBDA:
 		case BIFLAMBDA:
 		    result = BifurcLambdaTrig(Rate, &Population, &TrigFn);
 		    break;
+		case LBIFADSINPI:
 		case BIFADSINPI:
 		    result = BifurcAddTrigPi(Rate, &Population, &TrigFn);
 		    break;
+		case LBIFEQSINPI:
 		case BIFEQSINPI:
 		    result = BifurcSetTrigPi(Rate, &Population, &TrigFn);
 		    break;
+		case LBIFSTEWART:
 		case BIFSTEWART:
 		    result = BifurcStewartTrig(Rate, &Population, &TrigFn);
 		    break;
 		case QUADMAND:
 		    result = BifQuadMandel(Rate, &Population);
 		    break;
+		case LBIFMAY:
 		case BIFMAY:
 		    result = BifurcMay(Rate, &Population, beta);
 		    break;

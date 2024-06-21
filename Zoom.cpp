@@ -28,8 +28,9 @@ extern	double	yymax;				// vert + width
 extern	BOOL	bTrack;				// TRUE if user is selecting a region
 extern	BOOL	ZoomEdge;			// Zooming process
 extern	int	xdots, ydots;
-extern	double	RotationAngle;
+//extern	double	RotationAngle;
 extern	double	ScreenRatio;
+//extern	double	z_rot;				// angle display plane to z axis 
 
 extern	BOOL	NonStandardImage;
 
@@ -39,9 +40,6 @@ static	RECT	oldRect;
 int	ClearSelection(HWND, LPRECT, int);
 extern	int	calcfracinit(void);
 extern	void	SaveUndo(BOOL);
-extern	int	BackupVars(void);
-extern	int	RestoreVars(void);
-//extern	int	analyse_corner(char *);
 
 // Big num declarations **********************************************************
 extern	int dec;
@@ -302,10 +300,6 @@ int	ZoomIn(HWND hwnd, RECT *Rect)
     double	hor_factor, vert_factor, width_factor;
     int		ytop, ybottom, xleft, xright;
     BYTE	WasBigNum = FALSE;
-    double	xCentreOld, yCentreOld;
-    double	xCentreNew, yCentreNew;
-    double	SinOrientation = sin(RotationAngle / 57.29577);	// Convert to radians
-    double	CosOrientation = cos(RotationAngle / 57.29577);
 
     // End the selection
     bTrack = FALSE;
@@ -331,12 +325,6 @@ int	ZoomIn(HWND hwnd, RECT *Rect)
     vert_factor = (double) (ydots - ybottom) / (double) ydots;
     width_factor = (double) (abs(ybottom - ytop)) / (double) ydots;
 
-    if (RotationAngle != 0)		// we have to work out where we are in rotated space
-	{
-	// let's get the original centre of rotation first
-	xCentreOld = hor + mandel_width * ScreenRatio / 2;
-	yCentreOld = -vert - mandel_width / 2;
-	}
     if (BigNumFlag)
 	{
 //    ShowBignum(BigWidth, "BigWidth 1");
@@ -352,23 +340,6 @@ int	ZoomIn(HWND hwnd, RECT *Rect)
 	hor = hor + mandel_width * hor_factor;
 	vert = vert + mandel_width * vert_factor;
 	mandel_width = mandel_width * width_factor;
-	}
-
-    if (RotationAngle != 0)		// we have to work out where we are in rotated space
-	{
-	double	cx, cy;
-	// let's get the new centre of screen 
-	cx = hor + mandel_width * ScreenRatio / 2;
-	cy = -vert - mandel_width / 2;
-	// rotate the new centre around the old centre
-	xCentreNew = xCentreOld + CosOrientation * (-cx + xCentreOld) + SinOrientation * (-cy + yCentreOld);
-	yCentreNew = yCentreOld + SinOrientation * (-cx + xCentreOld) + CosOrientation * (-cy + yCentreOld);
-//    double dbD0r = mr + m_C * (xpos - mr) + m_S * (nYPos - mi);
-//    double dbD0i = mi - m_S * (xpos - mr) + m_C * (nYPos - mi);
-	// calculate the new values
-	hor = xCentreNew - mandel_width * ScreenRatio / 2;
-	vert = -yCentreNew - mandel_width / 2;
-//	mandel_width *= CosOrientation;
 	}
 
     if (calcfracinit() < 0)				// purely to make sure we have enough precision

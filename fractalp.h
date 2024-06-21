@@ -264,7 +264,7 @@ extern	int	mountain(PMYVARIABLES);
 extern	int	DoPoly(PMYVARIABLES);
 extern	int	InitTalisPower(PMYVARIABLES);
 extern	int	doTalisPower(PMYVARIABLES);
-
+extern	int	DoPopcornFractal(PMYVARIABLES);
 extern	int	do_exp_df(PMYVARIABLES);
 //extern	int	do_sin_df(PMYVARIABLES);
 extern	int	do_mandel_df(PMYVARIABLES);
@@ -1672,6 +1672,8 @@ extern	int	DoMultiFoldedHiddenChuasAttractors30(PMYVARIABLES);
 extern	int	DoMultiFoldedHiddenChuasAttractors33(PMYVARIABLES);
 extern	int	DoAConservativeMemristiveChaoticSystem(PMYVARIABLES);
 extern	int	DoBouali3(PMYVARIABLES);
+extern	int	DoDynamicalAnalysisQuadraticMegastableChaoticOscillator(PMYVARIABLES);
+extern	int	DoChenCircuitLikeModel(PMYVARIABLES);
 
 
 
@@ -1890,6 +1892,8 @@ extern	int	DoGingerbreadManVariations(PMYVARIABLES);
 extern	int	DoCoexistenceThreadSheetChaoticAttractors(PMYVARIABLES);
 extern	int	DoExplorePotentialDeepLearningMap(PMYVARIABLES);
 extern	int	DoDynamicFractalMap(PMYVARIABLES);
+extern	int	DoComplexDynamics2DSineBoundedMemristiveMap(PMYVARIABLES);
+extern	int	DoFurtherStudyontheRulkovNeuronMap(PMYVARIABLES);
 
 
 // Sprott Maps
@@ -2166,6 +2170,18 @@ extern	int	DoKyleHavensSurface(PMYVARIABLES);
 extern	int	DoFanoPlanes(PMYVARIABLES);
 extern	int	DoHeartSurfaceI(PMYVARIABLES);
 extern	int	DoHeartSurfaceII(PMYVARIABLES);
+extern	int	DoAsteroidEllipsoidII(PMYVARIABLES);
+extern	int	DoBryantsSurface(PMYVARIABLES);
+extern	int	DoStaircase(PMYVARIABLES);
+extern	int	DoContourPlot(PMYVARIABLES);
+extern	int	DoBalloonParametricEq(PMYVARIABLES);
+extern	int	DoEllipticParaboloid(PMYVARIABLES);
+extern	int	DoTwister(PMYVARIABLES);
+extern	int	DoTwistedCones(PMYVARIABLES);
+extern	int	DoPoweroid(PMYVARIABLES);
+extern	int	DoDividedParallelepipoid(PMYVARIABLES);
+extern	int	DoParametricPlot3D1(PMYVARIABLES);
+extern	int	DoLinkedTori(PMYVARIABLES);
 
 
 

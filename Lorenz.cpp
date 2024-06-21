@@ -16,6 +16,8 @@
 #include "colour.h"
 #include "Matrix.h"
 #include "Complex.h"
+#include "Fract.h"
+#include ".\parser\TrigFn.h"
 
 #define NUMIFS	  32	 /* number of ifs functions in ifs array */
 #define IFSPARM    7	 /* number of ifs parameters */
@@ -24,13 +26,19 @@
 #define YROT	  y_rot		/* rotate y-axis 90 degrees */
 #define ZROT	  z_rot		/* rotate x-axis  0 degrees */
 
+#define COSB   dx
+#define SINABC dy
+
+#define	sign(x)		(((x)>0)?1:((x)<0)?-1:0)
+
 extern	double	x_rot;			/* angle display plane to x axis */
 extern	double	y_rot;			/* angle display plane to y axis */
 extern	double	z_rot;			/* angle display plane to z axis */
 
 extern	int	xdots, ydots;
+extern	CFract	Fractal;			// current fractal stuff
 
-extern	HWND	GlobalHwnd;		// to allow passing of hwnd to find_file_item()
+extern	HWND	GlobalHwnd;		// to allow passing of hwnd 
 extern	char	*str_find_ci(char *, char *);
 extern	CPlot	Plot;		// image plotting routines 
 
@@ -166,7 +174,7 @@ double siny, cosy;
 
 extern	int	user_data(HWND);
 //extern	void	identity(MATRIXPTR);
-extern	int	find_file_item(HWND, char *,char *,FILE **);
+	int	find_file_item(HWND, char *,char *,FILE **);
 
 /******************************************************************/
 /*		   zoom box conversion functions		  */
@@ -307,7 +315,7 @@ int orbit3dfloatsetup()
    waste = 100;
    ProjectionPlane = 2;
 
-   if(type==FPHENON || type==FPPICKOVER || type==FPGINGERBREAD || type == LATOO || type == KAMFP || type == KAM3DFP || type == FPHOPALONG)
+   if(type==FPHENON || type==FPPICKOVER || type==FPGINGERBREAD || type == LATOO || type == KAMFP || type == KAM3DFP || type == FPHOPALONG || type == INVERSEJULIAFP)
       WFconnect=0;
    if (type == FPLORENZ3D || type==FPLORENZ3D1 || type==FPLORENZ3D3 || type==FPLORENZ3D4)
       waste = 750;
@@ -326,6 +334,15 @@ int orbit3dfloatsetup()
 //      initorbit[0] = -0.1;	/* initial conditions */
 //      initorbit[1] = 0.0;
    }
+/*
+   if (type == ICON || type == ICON3D)        // DMF
+       {
+       initorbit[0] = 0.01;  // initial conditions
+       initorbit[1] = 0.003;
+//       connect = 0;
+//       waste = 2000;
+       }
+*/
    if(type==FPHENON || type==FPPICKOVER)
    {
       a =  param[0];
@@ -337,6 +354,18 @@ int orbit3dfloatsetup()
 //      c =  -0.65;
 //      d =  -2.43;
    }
+   else if (type == ICON || type == ICON3D)        // DMF
+       {
+       initorbit[0] = 0.01;  // initial conditions
+       initorbit[1] = 0.003;
+       WFconnect = 0;
+       waste = 2000;
+	// Initialize parameters
+       a = param[0];
+       b = param[1];
+       c = param[2];
+       d = param[3];
+       }
    else if(type==KAMFP || type==KAM3DFP)
    {
 //       a = HenonA;
@@ -359,7 +388,7 @@ int orbit3dfloatsetup()
       cosx = cos(a);
       orbit = 0;
       initorbit[0] = initorbit[1] = initorbit[2] = 0;
-   } else if(type==FPHOPALONG || type==FPMARTIN)
+   } else if(type == FPHOPALONG || type == FPMARTIN || type == CHIP || type == QUADRUPTWO || type == THREEPLY)
 
    {
       initorbit[0] = 0;  /* initial conditions */
@@ -371,12 +400,19 @@ int orbit3dfloatsetup()
       b =  param[1];
       c =  param[2];
       d =  param[3];
+      if (type == THREEPLY)
+	  {
+	  COSB = cos(b);
+	  SINABC = sin(a + b + c);
+	  }
+
 
 //      a =  (type == FPHOPALONG) ? 0.4 : 3.14;
 //      b =  1.0;
 //      c =  0.0;
 //      d =  0.0;
-   } else
+   } 
+   else
    {
       dt = param[0];
       a =  param[1];
@@ -453,6 +489,41 @@ int lorenz3d3floatorbit(double *x, double *y, double *z)
       *z += dz;
       return(0);
 }
+
+/* from Michael Peters and HOP */
+int chip2dfloatorbit(double *x, double *y, double *z)
+    {
+    double tmp;
+    *z = *x; /* for warning only */
+    tmp = *y - sign(*x) * cos(sqr(log(fabs(b*(*x) - c))))
+	* atan(sqr(log(fabs(c*(*x) - b))));
+    *y = a - *x;
+    *x = tmp;
+    return(0);
+    }
+
+/* from Michael Peters and HOP */
+int quadruptwo2dfloatorbit(double *x, double *y, double *z)
+    {
+    double tmp;
+    *z = *x; /* for warning only */
+    tmp = *y - sign(*x) * sin(log(fabs(b*(*x) - c)))
+	* atan(sqr(log(fabs(c*(*x) - b))));
+    *y = a - *x;
+    *x = tmp;
+    return(0);
+    }
+
+/* from Michael Peters and HOP */
+int threeply2dfloatorbit(double *x, double *y, double *z)
+    {
+    double tmp;
+    *z = *x; /* for warning only */
+    tmp = *y - sign(*x)*(fabs(sin(*x)*COSB + c - (*x)*SINABC));
+    *y = a - *x;
+    *x = tmp;
+    return(0);
+    }
 
 int lorenz3d4floatorbit(double *x, double *y, double *z)
 {
@@ -595,9 +666,59 @@ Complex	SelectTrig(Complex in, int TrigType)
 	    return in.CCosh();
 	case 5:
 	    return in.CTan();
+	case 6:
+	    return in.CLog();
+	case 7:
+	    return in.CSqr();
+	case 8:
+	    return in.CSqrt();
+	case 9:
+	    return in.CCube();
 	}
     return in.CSin();
     }
+
+// dmf
+#undef  LAMBDA
+#define LAMBDA  param[0]
+#define ALPHA   param[1]
+#define BETA    param[2]
+#define GAMMA   param[3]
+#define OMEGA   param[4]
+#define DEGREE  param[5]
+
+int iconfloatorbit(double *x, double *y, double *z)
+    {
+    double oldx, oldy, zzbar, zreal, zimag, za, zb, zn, p;
+    int i;
+
+    oldx = *x;
+    oldy = *y;
+
+    zzbar = oldx * oldx + oldy * oldy;
+    zreal = oldx;
+    zimag = oldy;
+
+    for (i = 1; i <= DEGREE - 2; i++) {
+	za = zreal * oldx - zimag * oldy;
+	zb = zimag * oldx + zreal * oldy;
+	zreal = za;
+	zimag = zb;
+	}
+    zn = oldx * zreal - oldy * zimag;
+    p = LAMBDA + ALPHA * zzbar + BETA * zn;
+    *x = p * oldx + GAMMA * zreal - OMEGA * oldy;
+    *y = p * oldy - GAMMA * zimag + OMEGA * oldx;
+
+    *z = zzbar;
+    return(0);
+    }
+#ifdef LAMBDA  // Tim says this will make me a "good citizen"
+#undef LAMBDA  // Yeah, but you were bad, Dan - LAMBDA was already
+#undef ALPHA   // defined! <grin!> TW 
+#undef BETA
+#undef GAMMA
+#endif
 
 #define PAR_A   param[0]
 #define PAR_B   param[1]
@@ -608,7 +729,7 @@ Complex	NewZ, OldZ;
 
 int latoofloatorbit(double *x, double *y, double *z)
     {
-
+    CTrigFn	TrigFn;
     double xold, yold, tmp;
 
     xold = *z; /* for warning only */
@@ -616,28 +737,26 @@ int latoofloatorbit(double *x, double *y, double *z)
     xold = *x;
     yold = *y;
 
-    /*    *x = sin(yold * PAR_B) + PAR_C * sin(xold * PAR_B); */
+    //    *x = sin(yold * PAR_B) + PAR_C * sin(xold * PAR_B);
     OldZ.x = yold * PAR_B;
-    OldZ.y = 0;          /* old = (y * B) + 0i (in the complex)*/
-//    CMPLXtrig0(OldZ, NewZ);
-    NewZ = SelectTrig(OldZ, (int)param[4]);
+    OldZ.y = 0;          // old = (y * B) + 0i (in the complex)
+    TrigFn.CMPLXtrig(&OldZ, &NewZ, Fractal.Fn1Index);	// how do we make this work? #include	".\parser\mpmath.h" of course... loads globals
     tmp = (double)NewZ.x;
     OldZ.x = xold * PAR_B;
-    OldZ.y = 0;          /* old = (x * B) + 0i */
-//    CMPLXtrig1(OldZ, NewZ);
-    NewZ = SelectTrig(OldZ, (int)param[5]);
+    OldZ.y = 0;          // old = (x * B) + 0i
+    TrigFn.CMPLXtrig(&OldZ, &NewZ, Fractal.Fn1Index);	// how do we make this work? #include	".\parser\mpmath.h" of course... loads globals
     *x = PAR_C * NewZ.x + tmp;
 
-    /*    *y = sin(xold * PAR_A) + PAR_D * sin(yold * PAR_A); */
+    //    *y = sin(xold * PAR_A) + PAR_D * sin(yold * PAR_A);
     OldZ.x = xold * PAR_A;
     OldZ.y = 0;          /* old = (y * A) + 0i (in the complex)*/
 //    CMPLXtrig2(OldZ, NewZ);
-    NewZ = SelectTrig(OldZ, (int)param[6]);
+    NewZ = SelectTrig(OldZ, (int)param[4]);
     tmp = (double)NewZ.x;
     OldZ.x = yold * PAR_A;
     OldZ.y = 0;          /* old = (x * B) + 0i */
 //    CMPLXtrig3(OldZ, NewZ);
-    NewZ = SelectTrig(OldZ, (int)param[7]);
+    NewZ = SelectTrig(OldZ, (int)param[5]);
     *y = PAR_D * NewZ.x + tmp;
 
     return(0);
@@ -770,10 +889,10 @@ int orbit2dfloat(void)
 	    break;
 	}
       else if (type == FPGINGERBREAD)
-	{
-	if (gingerbreadfloatorbit(p0, p1, p2))
-	    break;
-	}
+	  {
+	  if (gingerbreadfloatorbit(p0, p1, p2))
+	      break;
+	  }
       else if (type == KAMFP)
 	  {
 	  if (kamtorusfloatorbit(p0, p1, p2))
@@ -784,8 +903,28 @@ int orbit2dfloat(void)
 	  if (latoofloatorbit(p0, p1, p2))
 	      break;
 	  }
+      else if (type == CHIP)
+	  {
+	  if (chip2dfloatorbit(p0, p1, p2))
+	      break;
+	  }
+      else if (type == ICON)
+	  {
+	  if (iconfloatorbit(p0, p1, p2))
+	      break;
+	  }
+      else if (type == QUADRUPTWO)
+	  {
+	  if (quadruptwo2dfloatorbit(p0, p1, p2))
+	      break;
+	  }
+      else if (type == THREEPLY)
+	  {
+	  if (threeply2dfloatorbit(p0, p1, p2))
+	      break;
+	  }
 
-//      if(/*curfractalspecific->*/orbitcalc(p0, p1, p2))
+ //      if(/*curfractalspecific->*/orbitcalc(p0, p1, p2))
 //	 break;
 //      if(fp)
 //	  fprintf(fp,orbitsave_format,*p0,*p1,0.0);
@@ -888,13 +1027,21 @@ int orbit3dfloatcalc(void)
    return(ret);
 }
 
-int euler = 0;	    /* use implicit euler approximation for dynamic system */
+/*
+ * This is the routine called to perform a time-discrete dynamical
+ * system image.
+ * The starting positions are taken by stepping across the image in steps
+ * of parameter1 pixels.  maxit differential equation steps are taken, with
+ * a step size of parameter2.
+ */
+
+int euler = 0;			// use implicit euler approximation for dynamic system
 
 int dynam2dfloatsetup()
 {
    WFconnect = 0;
    euler = 0;
-   d = param[0]; /* number of intervals */
+   d = param[0];		// number of intervals 
 //   d = threshold;
    if (d<0) {
       d = -d;
@@ -904,11 +1051,10 @@ int dynam2dfloatsetup()
       d = 1;
    }
 
-   if (type==TEST) {
-//   if (type==DYNAMICFP) {
-       a = param[2]; // parameter
-       b = param[3]; // parameter
-       dt = param[1]; // step size
+   if (type== DYNAMICFP) {
+       a = param[2];		// parameter
+       b = param[3];		// parameter
+       dt = param[1];		// step size
        if (dt<0) {
 	  dt = -dt;
 	  euler = 1;
@@ -918,33 +1064,51 @@ int dynam2dfloatsetup()
    return(1);
 }
 
-/*
- * This is the routine called to perform a time-discrete dynamical
- * system image.
- * The starting positions are taken by stepping across the image in steps
- * of parameter1 pixels.  maxit differential equation steps are taken, with
- * a step size of parameter2.
- */
-
 #define BAD_PIXEL 10000L
+//#define  CMPLXtrig0(arg, out) Arg1->d = (arg); dtrig0(); (out) = Arg1->d
+
+int dynamfloat(double *x, double *y, double * /*z*/)
+    {
+    Complex	cp, tmp;
+    double	newx, newy;
+    CTrigFn	TrigFn;
+    cp.x = b * *x;
+    cp.y = 0;
+//    CMPLXtrig0(cp, tmp);
+    TrigFn.CMPLXtrig(&cp, &tmp, Fractal.Fn1Index);	// how do we make this work? #include	".\parser\mpmath.h" of course... loads globals
+    newy = *y + dt * sin(*x + a * tmp.x);
+    if (euler)
+	{
+	*y = newy;
+	}
+
+    cp.x = b * *y;
+    cp.y = 0;
+//    CMPLXtrig0(cp, tmp);
+    TrigFn.CMPLXtrig(&cp, &tmp, Fractal.Fn1Index);
+    newx = *x - dt * sin(*y + a * tmp.x);
+    *x = newx;
+    *y = newy;
+    return 0;
+    }
 
 int dynam2dfloat()
 {
 //   FILE *fp;
 //   double *soundvar;
-   double x,y/*,z*/;
+   double x,y,z=0.0;
    int color,col,row;
    int count;
    int oldrow, oldcol;
    double *p0,*p1;
    struct affine cvt;
    int ret;
-   int xstep, ystep; /* The starting position step number */
-   double xpixel, ypixel; /* Our pixel position on the screen */
+   int xstep, ystep;				// The starting position step number
+   double xpixel, ypixel;			// Our pixel position on the screen
    double delxx, delyy, delxx2, delyy2;
 
 //   fp = open_orbitsave();
-   /* setup affine screen coord conversion */
+   // setup affine screen coord conversion
    setup_convert_to_screen(&cvt);
 
    p0 = &x;
@@ -983,10 +1147,8 @@ int dynam2dfloat()
       delxx = (xxmax - xxmin) / (xdots-1);
       delyy = (yymax - yymin) / (ydots-1);
       delxx2 = delyy2 = 0.0;
-//      xpixel = dxsize*(xstep+.5)/d;
-//      ypixel = dysize*(ystep+.5)/d;
-      xpixel = (xdots - 1)*(xstep+.5)/d;
-      ypixel = (ydots - 1)*(ystep+.5)/d;
+      xpixel = (xdots - 1)*(xstep+0.5)/d;
+      ypixel = (ydots - 1)*(ystep+0.5)/d;
       x = (xxmin+delxx*xpixel) + (delxx2*ypixel);
       y = (yymax-delyy*ypixel) + (-delyy2*xpixel);
       if (type==MANDELCLOUD) {
@@ -995,15 +1157,13 @@ int dynam2dfloat()
       }
       oldcol = -1;
 
-      if (++color >= colors)   /* another color to switch to? */
-	  color = 1;	/* (don't use the background color) */
+      if (++color >= colors)	// another color to switch to?
+	  color = 1;		// (don't use the background color)
 
       for (count=0;count<threshold;count++) {
 
 	  col = (int)(cvt.a*x + cvt.b*y + cvt.e);
 	  row = (int)(cvt.c*x + cvt.d*y + cvt.f);
-//	  col = cvt.a*x + cvt.b*y + cvt.e;
-//	  row = cvt.c*x + cvt.d*y + cvt.f;
 	  if ( col >= 0 && col < xdots && row >= 0 && row < ydots )
 	  {
 //	     if (count>=orbit_delay) {
@@ -1020,7 +1180,7 @@ int dynam2dfloat()
 	     oldcol = col;
 	     oldrow = row;
 	  }
-	  else if((long)abs(row) + (long)abs(col) > BAD_PIXEL) /* sanity check */
+	  else if((long)abs(row) + (long)abs(col) > BAD_PIXEL) // sanity check 
             return(ret);
 	  else
 	     oldrow = oldcol = -1;
@@ -1030,8 +1190,8 @@ int dynam2dfloat()
 		if (mandelcloudfloat(p0, p1, NULL))
 		    break;
 		}
-//	  if(curfractalspecific->orbitcalc(p0, p1, NULL))
-//	     break;
+	  if(dynamfloat(p0, p1, NULL))
+	     break;
 //	  if(fp)
 //	      fprintf(fp,orbitsave_format,*p0,*p1,0.0);
 	}
@@ -1464,12 +1624,12 @@ int ifsload(HWND hwnd, char *filename)
 int find_file_item(HWND hwnd, char *filename,char *itemname,FILE **infile)
 
     {
-    char	tmpname[41];
+    char	tmpname[64];
     long	notepoint;
     char	buf[201];
     int	c;
 
-    if ((*infile = fopen(filename,"rt")) == NULL) 
+    if ((*infile = fopen(filename,"rb")) == NULL) 
 	{
 	wsprintf(buf, "Can't Open File: <%s>", filename);
 	MessageBox (hwnd, buf, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
@@ -1478,13 +1638,13 @@ int find_file_item(HWND hwnd, char *filename,char *itemname,FILE **infile)
 
     while (TRUE) 
 	{
-	while ((c = getc(*infile)) == ' ' || c == '\t' || c == '\n') 
+	while ((c = fgetc(*infile)) == ' ' || c == '\t' || c == '\n' || c == '\r')
 	    { }
 	if (c == EOF)
 	    break;
 	if (c == ';')
 	    {
-	    while ((c = fgetc(*infile)) != '\n' && c != EOF)
+	    while ((c = fgetc(*infile)) != '\n' && c != '\r' && c != EOF)
 		{ }
 	    if (c == EOF)
 		break;
@@ -1492,9 +1652,9 @@ int find_file_item(HWND hwnd, char *filename,char *itemname,FILE **infile)
 	    }
 	notepoint = ftell(*infile) - 1;
 	ungetc(c,*infile);
-	if (fscanf(*infile," %40[^ \n\t({]",tmpname) == EOF)
+	if (fscanf(*infile," %60[^ \n\t({]",tmpname) == EOF)
 	    break;
-	while ((c = getc(*infile)) != EOF && c != '{' && c != '\n')
+	while ((c = fgetc(*infile)) != EOF && c != '{' && c != '\n' && c != '\r')
 	    { }
 	if (c == EOF)
 	    break;
@@ -1505,9 +1665,20 @@ int find_file_item(HWND hwnd, char *filename,char *itemname,FILE **infile)
 		fseek(*infile,notepoint,SEEK_SET);
 		return(0);
 		}
-	    while ((c = getc(*infile)) != '}' && c != EOF)
-		{ }
-	    if (c == EOF)
+	    bool in_comment{};
+	    do
+		{
+		c = fgetc(*infile);
+		if (c == EOF)
+		    break;
+		if (in_comment)
+		    in_comment = c != '\n';
+		else if (c == ';')
+		    in_comment = true;
+		else if (c == '}')
+		    break;
+		} while (true);
+		if (c == EOF)
 		break;
 	    }
 	}
@@ -1542,11 +1713,11 @@ int find_file_item(HWND hwnd, char *filename,char *itemname,FILE **infile)
 	}
 
     lsys_num = 0;
-    while(fscanf(File, " %20[^ \n\t({]", lptr[lsys_num]) != EOF)
+    while(fscanf(File, " %60[^ \n\t({]", lptr[lsys_num]) != EOF)
 	{
 	int c;
 
-	while(c = getc(File)) 
+	while(c = fgetc(File)) 
 	    {
 	    if(c == EOF || c == '{' || c == '\n')
 		break;
@@ -1561,7 +1732,7 @@ int find_file_item(HWND hwnd, char *filename,char *itemname,FILE **infile)
 skipcomments:
 	    if(fscanf(File, "%200[^}]", tempstring) == EOF) 
 		break;
-	    if (getc(File) != '}') 
+	    if (fgetc(File) != '}') 
 		goto skipcomments;
 	    if (stricmp(lptr[lsys_num - 1],"") == 0 || stricmp(lptr[lsys_num - 1],"comment") == 0)
 		lsys_num--;

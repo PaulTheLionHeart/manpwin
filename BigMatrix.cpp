@@ -1,5 +1,5 @@
 /*
-    MATRIX.CPP a program to do matrix manipulations
+    BIGMATRIX.CPP a program to do matrix manipulations on Bignum
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
 
@@ -7,13 +7,13 @@
     (console drivers & serial I/O) is in separate machine libraries.
 */
 
-#include "matrix.h"
+#include "BigMatrix.h"
 
 /***************************************************************************
 	Initialise a matrix and set to identity matrix
 ***************************************************************************/
 
-void	CMatrix::identity(MATRIXPTR m)
+void	CBigMatrix::identity(BIGMATRIXPTR m)
 
     {
     int	i, j;
@@ -31,10 +31,10 @@ void	CMatrix::identity(MATRIXPTR m)
 	in case parameter mat3 == mat2 or mat 1 
 ***************************************************************************/
 
-void	CMatrix::mat_mul(MATRIXPTR mat1, MATRIXPTR mat2, MATRIXPTR mat3)
+void	CBigMatrix::mat_mul(BIGMATRIXPTR mat1, BIGMATRIXPTR mat2, BIGMATRIXPTR mat3)
 
     {
-    MATRIX	New;
+    BIGMATRIX	New;
     int	i, j;
 
     for (i = 0; i < 4; i++)
@@ -42,7 +42,7 @@ void	CMatrix::mat_mul(MATRIXPTR mat1, MATRIXPTR mat2, MATRIXPTR mat3)
 	    New[j][i] = mat1[j][0] * mat2[0][i] + mat1[j][1] * mat2[1][i] 
 			    + mat1[j][2] * mat2[2][i] + mat1[j][3]*mat2[3][i];
 
-     // should replace this with memcpy 
+     // should replace this with MPFR calls
     for (i = 0; i < 4; i++)
 	for (j = 0; j < 4; j++)
 	    mat3[j][i] = New[j][i];
@@ -52,10 +52,10 @@ void	CMatrix::mat_mul(MATRIXPTR mat1, MATRIXPTR mat2, MATRIXPTR mat3)
 	Multiply a matrix by a scalar
 ***************************************************************************/
 
-void	CMatrix::scale(double sx, double sy, double sz, MATRIXPTR m)
+void	CBigMatrix::scale(double sx, double sy, double sz, BIGMATRIXPTR m)
 
     {
-    MATRIX	scale;
+    BIGMATRIX	scale;
 
     identity(scale);
     scale[0][0] = sx;
@@ -68,10 +68,10 @@ void	CMatrix::scale(double sx, double sy, double sz, MATRIXPTR m)
 	Rotate about X axis
 ***************************************************************************/
 
-void	CMatrix::xrot(double theta, MATRIXPTR m)
+void	CBigMatrix::xrot(double theta, BIGMATRIXPTR m)
 
     {
-    MATRIX	rot;
+    BIGMATRIX	rot;
     double	sintheta, costheta;
 
     sintheta = sin(theta);
@@ -88,10 +88,10 @@ void	CMatrix::xrot(double theta, MATRIXPTR m)
 	Rotate about Y axis
 ***************************************************************************/
 
-void	CMatrix::yrot(double theta, MATRIXPTR m)
+void	CBigMatrix::yrot(double theta, BIGMATRIXPTR m)
 
     {
-    MATRIX	rot;
+    BIGMATRIX	rot;
     double	sintheta, costheta;
 
     sintheta = sin(theta);
@@ -108,10 +108,10 @@ void	CMatrix::yrot(double theta, MATRIXPTR m)
 	Rotate about Z axis
 ***************************************************************************/
 
-void	CMatrix::zrot(double theta, MATRIXPTR m)
+void	CBigMatrix::zrot(double theta, BIGMATRIXPTR m)
 
     {
-    MATRIX rot;
+    BIGMATRIX rot;
     double sintheta, costheta;
 
     sintheta = sin(theta);
@@ -128,10 +128,10 @@ void	CMatrix::zrot(double theta, MATRIXPTR m)
 	Translate matrix
 ***************************************************************************/
 
-void	CMatrix::trans(double tx, double ty, double tz, MATRIXPTR m)
+void	CBigMatrix::trans(BigDouble tx, BigDouble ty, BigDouble tz, BIGMATRIXPTR m)
 
     {
-    MATRIX	trans;
+    BIGMATRIX	trans;
 
     identity(trans);
     trans[3][0] = tx;
@@ -144,10 +144,10 @@ void	CMatrix::trans(double tx, double ty, double tz, MATRIXPTR m)
 	Multiply source vector s by matrix m, result in target t
 ***************************************************************************/
 
-int	CMatrix::vmult(VECTORPTR s, MATRIXPTR m, VECTORPTR t)
+int	CBigMatrix::vmult(BIGVECTORPTR s, BIGMATRIXPTR m, BIGVECTORPTR t)
 
     {
-    VECTOR	tmp;
+    BIGVECTOR	tmp;
     int	i, j;
 
     for (j = 0; j < 3; j++)
@@ -168,7 +168,7 @@ int	CMatrix::vmult(VECTORPTR s, MATRIXPTR m, VECTORPTR t)
 	Initialise transformation Matrix
 ***************************************************************************/
 
-void	CMatrix::InitTransformation(double tx, double ty, double tz, double x_rot, double y_rot, double z_rot)
+void	CBigMatrix::InitTransformation(BigDouble tx, BigDouble ty, BigDouble tz, double x_rot, double y_rot, double z_rot)
 
     {
     double	xval, yval, zval;
@@ -192,10 +192,10 @@ void	CMatrix::InitTransformation(double tx, double ty, double tz, double x_rot, 
 	Implement transformation Matrix
 ***************************************************************************/
 
-void	CMatrix::DoTransformation(double *x1, double *y1, double *z1, double x, double y, double z)
+void	CBigMatrix::DoTransformation(BigDouble *x1, BigDouble *y1, BigDouble *z1, BigDouble x, BigDouble y, BigDouble z)
 
     {
-    VECTOR	w;
+    BIGVECTOR	w;
 
     w[0] = x;
     w[1] = y;

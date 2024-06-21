@@ -24,6 +24,7 @@
 #include "fractype.h"
 #include "colour.h"
 #include "Anim.h"
+#include "Matrix.h"
 
 // norty globals
 extern	PAINTSTRUCT 	ps;
@@ -32,9 +33,9 @@ extern	int	xdots, ydots, width, height;
 extern	int	user_data(HWND);
 extern	void	ClearScreen(void);
 extern	void	DisplayStatusBarInfo(int, char *);
-extern	void	InitTransformation(double tx, double ty, double tz);
+//extern	void	InitTransformation(double tx, double ty, double tz);
 extern	double	GetNumFrames(void);
-extern	void	DoTransformation(double *x1, double *y1, double *z1, double x, double y, double z);
+//extern	void	DoTransformation(double *x1, double *y1, double *z1, double x, double y, double z);
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -55,8 +56,8 @@ COscProcess::~COscProcess()
 void	COscProcess::InitOscProc(int dimensions, double InMandel_width, double InScreenRatio, int InxDots, int InyDots, WORD InType, int InSubType, ProcessType OscAnimProc, int *InxAxis, int *InyAxis, int *InzAxis, int InFindCentre, 
 	CDib *Dib, double c1[], BYTE PerspectiveFlag, double InIterations, RGBTRIPLE InOscBackGround, double *x_rot, double *y_rot, double *z_rot, BOOL *InRemoveHiddenPixels, HWND hwndIn, double *wpixelsIn, CTrueCol *TrueColIn)
     {
-    int	    j;
-
+    int		j;
+    
     type = InType;
     subtype = InSubType;
     iterations = InIterations;
@@ -127,9 +128,9 @@ void	COscProcess::InitOscProc(int dimensions, double InMandel_width, double InSc
     if (OscAnimProc == RUNANIM)
 	{
 	if (FindCentre == BOUNDARY)
-	    InitTransformation((cMax[*xAxis] + cMin[*xAxis]) / 2, (cMax[*yAxis] + cMin[*yAxis]) / 2, (cMax[*zAxis] + cMin[*zAxis]) / 2);	// translate to the centre of the object
+	    Mat.InitTransformation((cMax[*xAxis] + cMin[*xAxis]) / 2, (cMax[*yAxis] + cMin[*yAxis]) / 2, (cMax[*zAxis] + cMin[*zAxis]) / 2, *x_rot, *y_rot, *z_rot);	// translate to the centre of the object
 	else
-	    InitTransformation(xSum / iterations, ySum / iterations, zSum / iterations);	// translate to the centre of the object
+	    Mat.InitTransformation(xSum / iterations, ySum / iterations, zSum / iterations, *x_rot, *y_rot, *z_rot);	// translate to the centre of the object
 	}
 
     Dib->ClearDib(OscBackGround.rgbtRed, OscBackGround.rgbtGreen, OscBackGround.rgbtBlue);	// set background colour
@@ -193,7 +194,7 @@ int	COscProcess::DisplayOscillator(double c1[], double cn[], double dt, DWORD co
 
     if (OscAnimProc == RUNANIM)
 	{
-	DoTransformation(&x1, &y1, &z1, x, y, z * zBias);							// 3D rotation transformations
+	Mat.DoTransformation(&x1, &y1, &z1, x, y, z * zBias);							// 3D rotation transformations
 	if (FindCentre == BOUNDARY)										// all points are close to centre
 	    {
 	    if (xSign > 0)											// axis sign
@@ -449,24 +450,24 @@ void	COscProcess::PlotAxes(void)
 	yCentre = ySum / iterations;
 	zCentre = zSum / iterations;
 	}
-    DoTransformation(&x0[0], &x0[1], &x0[2], cMin[*xAxis], yCentre, zCentre);
-    DoTransformation(&x1[0], &x1[1], &x1[2], cMax[*xAxis], yCentre, zCentre);
+    Mat.DoTransformation(&x0[0], &x0[1], &x0[2], cMin[*xAxis], yCentre, zCentre);
+    Mat.DoTransformation(&x1[0], &x1[1], &x1[2], cMax[*xAxis], yCentre, zCentre);
     u0 = (int)((x0[0] - xCentre + mandel_width * ScreenRatio / 2) * xscale);
     v0 = (int)((yCentre * VertBias + mandel_width / 2 - x0[1] * VertBias) * yscale);
     u1 = (int)((x1[0] - xCentre + mandel_width * ScreenRatio / 2) * xscale);
     v1 = (int)((yCentre * VertBias + mandel_width / 2 - x1[1] * VertBias) * yscale);
     Plot.genline(u0, v0, u1, v1, 0x0000ff00);
 
-    DoTransformation(&y0[0], &y0[1], &y0[2], xCentre, cMin[*yAxis], zCentre);
-    DoTransformation(&y1[0], &y1[1], &y1[2], xCentre, cMax[*yAxis], zCentre);
+    Mat.DoTransformation(&y0[0], &y0[1], &y0[2], xCentre, cMin[*yAxis], zCentre);
+    Mat.DoTransformation(&y1[0], &y1[1], &y1[2], xCentre, cMax[*yAxis], zCentre);
     u0 = (int)((y0[0] - xCentre + mandel_width * ScreenRatio / 2) * xscale);
     v0 = (int)((yCentre * VertBias + mandel_width / 2 - y0[1] * VertBias) * yscale);
     u1 = (int)((y1[0] - xCentre + mandel_width * ScreenRatio / 2) * xscale);
     v1 = (int)((yCentre * VertBias + mandel_width / 2 - y1[1] * VertBias) * yscale);
     Plot.genline(u0, v0, u1, v1, 0x00ffffff);
 
-    DoTransformation(&z0[0], &z0[1], &z0[2], xCentre, yCentre, cMin[*zAxis]);
-    DoTransformation(&z1[0], &z1[1], &z1[2], xCentre, yCentre, cMax[*zAxis]);
+    Mat.DoTransformation(&z0[0], &z0[1], &z0[2], xCentre, yCentre, cMin[*zAxis]);
+    Mat.DoTransformation(&z1[0], &z1[1], &z1[2], xCentre, yCentre, cMax[*zAxis]);
     u0 = (int)((z0[0] - xCentre + mandel_width * ScreenRatio / 2) * xscale);
     v0 = (int)((yCentre * VertBias + mandel_width / 2 - z0[1] * VertBias) * yscale);
     u1 = (int)((z1[0] - xCentre + mandel_width * ScreenRatio / 2) * xscale);

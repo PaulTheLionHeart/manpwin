@@ -133,8 +133,13 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	case FPJULTRIGPLUSZSQRD:			// to handle fractint par file references:
 	case LMANTRIGPLUSZSQRD:				// to handle fractint par file references
 	case LJULTRIGPLUSZSQRD:				// to handle fractint par file references
+	case LJULFNFN:
+	case FPJULFNFN:
 	case FPMANFNFN:					// z = trig0(z)+p1 if mod(old) < p2.x and trig1(z)+p1 if mod(old) >= p2.x
 	case LMANFNFN:
+	case LMANLAMFNFN:
+	case LLAMBDAFNFN:
+	case FPLAMBDAFNFN:
 	case FPMANLAMFNFN:				// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
 	    t = (invert) ? invertz2(*c) : *c;
 	    temp.x = param[0];
@@ -159,8 +164,6 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	case SCREENFORMULA:
 	    form_per_pixel1(z, q);
 	    break;
-
-
 
 
 
@@ -218,16 +221,14 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 	    temp2.x += q->x;
 	    temp2.y += q->y;
 	    *z = temp2;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case FNPLUSFNPIXFP:				//  Richard8 {c = z = pixel: z=sin(z)+sin(pixel),|z|<=50}
 	case FNPLUSFNPIXLONG:
 	    TrigFn.CMPLXtrig(z, &temp3, Fn1Index);
 	    temp3 += temp1;
 	    *z = temp3;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case TRIGSQRFP:					// { z=pixel: z=trig(z*z), |z|<TEST }
 	case TRIGSQR:					// to handle fractint par files
@@ -237,8 +238,7 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 	    temp1.x = sqr.x - sqr.y;
 	    TrigFn.CMPLXtrig(&temp1, &temp3, Fn1Index);
 	    *z = temp3;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case TRIGXTRIGFP:				// z = trig0(z)*trig1(z)
 	case TRIGXTRIG:					// to handle fractint par files
@@ -247,8 +247,7 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 	    temp3 = *z * temp1;
 	    *z = *z * temp1;
 	    *z = temp3;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case ZXTRIGPLUSZFP:
 	case ZXTRIGPLUSZ:				// to handle fractint par files
@@ -268,8 +267,7 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 	    TrigFn.CMPLXtrig(z, z, Fn2Index);
 	    *z = *z * temp2;
 	    *z = temp1 + *z;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case MANDELTRIGFP:						// we split the routine to allow for different bailout routines
 	case LAMBDATRIG:						// to handle fractint par file references
@@ -336,8 +334,7 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 	    temp1.x += tmpexp * cosy + t.x;
 	    temp1.y += tmpexp * siny + t.y;
 	    *z = temp1;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 	    }
 
 	case FPMANTRIGPLUSZSQRD:			// From Scientific American, July 1989 A Biomorph: z(n+1) = trig(z(n))+z(n)**2+C
@@ -350,10 +347,11 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 	    temp1.x += sqr.x - sqr.y + t.x;
 	    temp1.y += 2.0 * z->x * z->y + t.y;
 	    *z = temp1;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 
+	case LJULFNFN:
+	case FPJULFNFN:
 	case FPMANFNFN:					// z = trig0(z)+p1 if mod(old) < p2.x and trig1(z)+p1 if mod(old) >= p2.x
 	case LMANFNFN:
 	    if (z->CSumSqr() < temp2.x)
@@ -366,9 +364,11 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 		TrigFn.CMPLXtrig(z, z, Fn2Index);
 		*z = t + *z;
 		}
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
+	case LLAMBDAFNFN:
+	case FPLAMBDAFNFN:
+	case LMANLAMFNFN:
 	case FPMANLAMFNFN:				// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
 	    if (z->CSumSqr() < temp2.x)
 		{
@@ -380,25 +380,20 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 		TrigFn.CMPLXtrig(z, z, Fn2Index);
 		*z = t * *z;
 		}
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case SQRTRIGFP:					// SZSB(XYAXIS) { z=pixel, TEST=(p1+3): z=sin(z)*sin(z), |z|<TEST}
 	case SQRTRIG:					// to handle fractint par files
 	    TrigFn.CMPLXtrig(z, &temp1, Fn1Index);
 	    *z = temp1.CSqr();
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case SQR1OVERTRIGFP:				// z = sqr(1/trig(z))
 	case SQR1OVERTRIG:				// to handle fractint par files
 	    TrigFn.CMPLXtrig(z, z, Fn1Index);
 	    *z = z->CInvert();
 	    *z = z->CSqr();
-//	    CMPLXrecip(*z, *z);
-//	    CMPLXsqr(*z, *z);
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case SCREENFORMULA:
 	    return(Formula1(z, q));
@@ -418,8 +413,7 @@ int	CPixel::ZXTrigPlusZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn)	// z =
     temp3 = *z * temp1;			// tmp2 = p1*old*trig(old)
     temp1 = *z * temp2;			// tmp  = p2*old
     *z = temp1 + temp3;			// New  = p1*trig(old) + p2*old
-    d = z->CSumSqr();
-    return (d >= rqlim);
+    return FractintBailoutTest(z);
     }
 
 int	CPixel::ScottZXTrigPlusZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn)    // z = (z*trig(z))+z
@@ -427,8 +421,7 @@ int	CPixel::ScottZXTrigPlusZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn)  
     TrigFn->CMPLXtrig(z, &temp1, Fn1Index); 	// tmp	= trig(old)
     temp3 = *z * temp1;			// New  = old*trig(old)
     *z = *z + temp3;			// New  = trig(old) + old
-    d = z->CSumSqr();
-    return (d >= rqlim);
+    return FractintBailoutTest(z);
     }
 
 int	CPixel::SkinnerZXTrigSubZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn)
@@ -437,8 +430,7 @@ int	CPixel::SkinnerZXTrigSubZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn)
     TrigFn->CMPLXtrig(z, &temp1, Fn1Index); 	// tmp	= trig(old)
     temp3 = *z * temp1;			// New  = old*trig(old)
     *z = temp - *z;			// New  = trig(old) + old
-    d = z->CSumSqr();
-    return (d >= rqlim);
+    return FractintBailoutTest(z);
     }
 
 

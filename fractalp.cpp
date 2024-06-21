@@ -51,8 +51,10 @@ static char timestep[]	   = "Time Step";
 /* for formula */
 static char p1real[] = "Real portion of p1";
 static char p2real[] = "Real portion of p2";
+static char p3real[] = "Real portion of p3";
 static char p1imag[] = "Imaginary portion of p1";
 static char p2imag[] = "Imaginary portion of p2";
+static char p3imag[] = "Imaginary portion of p3";
 
 /* trig functions */
 static char recoeftrg1[] = "Real Coefficient First Function";
@@ -759,19 +761,31 @@ struct fractalspecificstuff fractalspecific[]=
    },
 
    {
+/*
    t_popcorn, step, ES, ES,ES,ES,ES,ES, ES, ES, ES, 0.05,0,0,0,0,0,0,0,0,0,
 //   -3.0,  3.0, -2.2,  2.2, 0, NOFRACTAL, NOFRACTAL, LPOPCORN,  NOPLOT,
 //   PopcornFractal, otherjuliafp_per_pixel,  JuliafpSetup,  popcorn,STDBAILOUT,
    -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
    init_mandel_df, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+*/
+
+   t_popcorn,  "Step Size", "c real", "c imag", ES, ES, ES, ES, ES, ES, ES, {0.05, 3.0, 0.0, 0.0, 0,0,0,0,0,0,},
+   -4.5, -2.5, 5.0, 0, JULIAFP, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
+   init_mandel_df, DoPopcornFractal, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
+/*
    t_popcorn+1, step, ES, ES,ES,ES,ES,ES, ES, ES, ES, 0.05,0,0,0,0,0,0,0,0,0,
 //   -3.0,  3.0, -2.2,  2.2, 16, NOFRACTAL, NOFRACTAL, FPPOPCORN,  NOPLOT,
 //   LPopcornFractal,   long_julia_per_pixel, JulialongSetup,popcorn,STDBAILOUT,
    -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
    init_mandel_df, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+*/
+
+   t_popcorn + 1,  "Step Size", "c real", "c imag", ES, ES, ES, ES, ES, ES, ES, {0.05, 3.0, 0.0, 0.0, 0,0,0,0,0,0,},
+   -4.5, -2.5, 5.0, 0, JULIAFP, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
+   init_mandel_df, DoPopcornFractal, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
@@ -844,18 +858,18 @@ struct fractalspecificstuff fractalspecific[]=
    },
 
    {
-   t_formula+1, p1real, p1imag, p2real, p2imag,ES,ES, ES, ES, ES, ES, 0,0,.0,0,0,0,0,0,0,0,
+   t_formula+1, p1real, p1imag, p2real, p2imag,p3real, p3imag, ES, ES, ES, ES, 0,0,.0,0,0,0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
-   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, 0, XAXIS, 4.0,
+   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 8, 2, "ident", "ident", 0, NOSYM, 4.0,
    form_per_pixel, Formula, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
-   t_formula, p1real, p1imag, p2real, p2imag,ES,ES, ES, ES, ES, ES, 0,0,0.0,0,0,0,0,0,0,0,
+   t_formula, p1real, p1imag, p2real, p2imag,p3real, p3imag, ES, ES, ES, ES, 0,0,0.0,0,0,0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 0, NOFRACTAL, NOFRACTAL, FORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, fpFormulaSetup, StandardFractal, 0,
-   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, 0, SETUP_SYM, 4.0,
+   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 8, 2, "ident", "ident", 0, SETUP_SYM, 4.0,
    form_per_pixel, Formula, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -1110,24 +1124,34 @@ struct fractalspecificstuff fractalspecific[]=
    t_bifeqsinpi,filt,seed,ES,ES,ES,ES,ES, ES, ES, ES, 1000.0,0.66,0,0,0,0,0,0,0,0,
 //   -2.5, 2.5, -3.5, 3.5, 0, NOFRACTAL, NOFRACTAL, LBIFEQSINPI,	 NOSYM,
 //   BifurcSetTrigPi, NULL, StandaloneSetup, Bifurcation, NOBAILOUT,
-   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 1, "sin", NULL, 0, NOSYM, 4.0,
+   -2.7, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 2, 1, "sin", NULL, 0, NOSYM, 4.0,
    NullSetup, bifurcation, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
+/*
    t_popcornjul, step, ES, ES,ES,ES,ES,ES, ES, ES, ES, 0.05,0,0,0,0,0,0,0,0,0,
 //   -3.0,  3.0, -2.2,  2.2, 0, NOFRACTAL, NOFRACTAL, LPOPCORNJUL,  ORIGIN,
 //   PopcornFractal, otherjuliafp_per_pixel,  JuliafpSetup,StandardFractal,STDBAILOUT,
    -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
    init_mandel_df, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+*/
+   t_popcornjul,  "Step Size", "c real", "c imag", ES, ES, ES, ES, ES, ES, ES, {0.05, 3.0, 0.0, 0.0, 0,0,0,0,0,0,},
+   -2.6, -2.5, 5.0, 0, JULIAFP, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
+   init_mandel_df, DoPopcornFractal, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
+/*
    t_popcornjul+1, step, ES, ES,ES,ES,ES,ES, ES, ES, ES, 0.05,0,0,0,0,0,0,0,0,0,
 //   -3.0,  3.0, -2.2,  2.2, 16, NOFRACTAL, NOFRACTAL, FPPOPCORNJUL,  ORIGIN,
 //   LPopcornFractal,   long_julia_per_pixel, JulialongSetup,  StandardFractal,STDBAILOUT,
    -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
    init_mandel_df, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+*/
+   t_popcornjul + 1,  "Step Size", "c real", "c imag", ES, ES, ES, ES, ES, ES, ES, {0.05, 3.0, 0.0, 0.0, 0,0,0,0,0,0,},
+   -2.6, -2.5, 5.0, 0, JULIAFP, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
+   init_mandel_df, DoPopcornFractal, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
@@ -1312,8 +1336,8 @@ struct fractalspecificstuff fractalspecific[]=
    t_julia_fnorfn_+1, realparm, imagparm, shiftval, ES,ES,ES,ES, ES, ES, ES, 0,0,8,0,0,0,0,0,0,0,
 //   -4.0,  4.0, -3.0,  3.0, 16, NOFRACTAL, LMANFNFN, FPJULFNFN,XAXIS,
 //   JuliaTrigOrTrigFractal, long_julia_per_pixel, JuliaTrigOrTrigSetup, StandardFractal,LTRIGBAILOUT,
-   -2.7,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   NULL, NULL, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+   -2.7,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, TRIGINPIXEL, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
@@ -1390,11 +1414,11 @@ struct fractalspecificstuff fractalspecific[]=
    },
 
    {
-   "dynamic","+# of intervals (<0 = connect)","time step (<0 = Euler",A,B,ES,ES, ES, ES, ES, ES, 50,.1,1,3,0,0,0,0,0,0,
+   "dynamic","+# of intervals (<0 = connect)","time step (<0 = Euler)",A,B,ES,ES, ES, ES, ES, ES, 50,0.1,1,3,0,0,0,0,0,0,
 //   -20.0,  20.0,  -20.0,   20.0, 0, NOFRACTAL, NOFRACTAL, NOFRACTAL, NOSYM,
 //   dynamfloat, NULL, dynam2dfloatsetup, dynam2dfloat, NOBAILOUT,
-   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, 0, NOSYM, 4.0,
-   dynam2dfloatsetup, dynam2dfloat, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+   -27.0,  -20.0,  26.0, 0, NOFRACTAL, NOFRACTAL, 4, 1, "sin", NULL, 0, NOSYM, 4.0,
+   dynam2dfloatsetup, dynam2dfloat, "SelectFracParams", (DLGPROC)SelectFracParams, NOBAILOUT
    },
 
    {
@@ -1475,7 +1499,7 @@ struct fractalspecificstuff fractalspecific[]=
 
    {
    "mandelcloud","+# of intervals (<0 = connect)",ES,ES,ES,ES,ES,ES, ES, ES, ES,
-   50,0,0,0,0,0,0,0,0,0,
+   100,0,0,0,0,0,0,0,0,0,
 //   -2.5,  1.5,  -1.5,   1.5, 0, NOFRACTAL, NOFRACTAL, NOFRACTAL, NOSYM,
 //   mandelcloudfloat, NULL, dynam2dfloatsetup, dynam2dfloat, NOBAILOUT,
 //   -6.63, -3.87, 7.2, 0, MANDELFP, NOFRACTAL, 1, 0, NULL, NULL, 0, NOSYM, 4.0,
@@ -1586,21 +1610,21 @@ struct fractalspecificstuff fractalspecific[]=
 
    {
    // dmf
-   "icons", lambda, alpha,beta,gamma2,ES,ES, ES, ES, ES, ES, -2.34, 2.0, 0.2, 0.1,0,0,0,0,0,0,
+   "icons", lambda, alpha,beta,gamma2,"omega","degree", ES, ES, ES, ES, -2.34, 2.0, 0.2, 0.1,0,3,0,0,0,0,
 //   -2.0,  2.0, -1.5,  1.5, 0, NOFRACTAL, NOFRACTAL,  NOFRACTAL, NOSYM,
 //   iconfloatorbit, NULL, orbit3dfloatsetup,  orbit2dfloat, NOBAILOUT,
-   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   orbit3dfloatsetup, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+   -2.4,  -1.4,  2.8, 0, NOFRACTAL, NOFRACTAL, 6, 0, NULL, NULL, 0, XAXIS, 4.0,
+   orbit3dfloatsetup, orbit2dfloat, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
 //#define ICON3D                 160
    // dmf 
-   "icons3d", lambda, alpha,beta,gamma2,ES,ES, ES, ES, ES, ES, -2.34, 2.0, 0.2, 0.1,0,0,0,0,0,0,
+   "icons3d", lambda, alpha,beta,gamma2,"omega","degree", ES, ES, ES, ES, -2.34, 2.0, 0.2, 0.1,0,3,0,0,0,0,
 //   -2.0,  2.0, -1.5,  1.5, 0, NOFRACTAL, NOFRACTAL,  NOFRACTAL, NOSYM,
 //   iconfloatorbit, NULL, orbit3dfloatsetup,  orbit3dfloat, NOBAILOUT,
-   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   orbit3dfloatsetup, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 6, 0, NULL, NULL, 0, XAXIS, 4.0,
+   orbit3dfloatsetup, orbit2dfloat, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
@@ -1664,8 +1688,8 @@ struct fractalspecificstuff fractalspecific[]=
 //      0, NOFRACTAL, NOFRACTAL, NOFRACTAL, NOSYM,
 //      (VF)chip2dfloatorbit, NULL, orbit3dfloatsetup, orbit2dfloat,
 //      NOBAILOUT
-   -2.7, -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   orbit3dfloatsetup, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+   -450.0, -260.0,  520.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
+   orbit3dfloatsetup, orbit2dfloat, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
@@ -1676,8 +1700,8 @@ struct fractalspecificstuff fractalspecific[]=
 //      0, NOFRACTAL, NOFRACTAL, NOFRACTAL, NOSYM,
 //      (VF)quadruptwo2dfloatorbit, NULL, orbit3dfloatsetup, orbit2dfloat,
 //      NOBAILOUT
-   -2.7, -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   orbit3dfloatsetup, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+   -70.0, -35.0,  100.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
+   orbit3dfloatsetup, orbit2dfloat, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
@@ -1688,8 +1712,8 @@ struct fractalspecificstuff fractalspecific[]=
 //      0, NOFRACTAL, NOFRACTAL, NOFRACTAL, NOSYM,
 //      (VF)threeply2dfloatorbit, NULL, orbit3dfloatsetup, orbit2dfloat,
 //      NOBAILOUT
-   -2.7, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   orbit3dfloatsetup, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+   -4500.0, -2600.0, 5200.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
+   orbit3dfloatsetup, orbit2dfloat, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
@@ -1722,14 +1746,13 @@ struct fractalspecificstuff fractalspecific[]=
 
    {
    "latoocarfian",
-      A, B, C, D, "1st Trig: 0=sin,1=cos,2=exp,3=sinh,4=cosh, 5=tan", "2nd Trig: 0=sin,1=cos,2=exp,3=sinh,4=cosh,5=tan", 
-	    "3rd Trig: 0=sin,1=cos,2=exp,3=sinh,4=cosh,5=tan", "4th Trig: 0=sin,1=cos,2=exp,3=sinh,4=cosh,5=tan", 
-	    ES, ES, -0.966918, 2.879879, 0.765145, 0.744728, 0, 0,0,0,0,0,
+      A, B, C, D, "3rd Trig: 0=sin,1=cos,2=exp,3=sinh,4=cosh,5=tan,6=log", "4th Trig: 0=sin,1=cos,2=exp,3=sinh,4=cosh,5=tan,6=log", 
+	    ES, ES, ES, ES, -0.966918, 2.879879, 0.765145, 0.744728, 0, 0,0,0,0,0,
 //      (float)-2.0, (float)2.0, (float)-1.5, (float)1.5,
 //      0, NOFRACTAL, NOFRACTAL, NOFRACTAL, NOSYM,
 //      (VF)latoofloatorbit, NULL, orbit3dfloatsetup, orbit2dfloat,
 //      NOBAILOUT
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 8, 0, NULL, NULL, 0, XAXIS, 4.0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 6, 2, "sin", "sin", 0, XAXIS, 4.0,
 //   orbit3dfloatsetup, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
     orbit3dfloatsetup, orbit2dfloat, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
     },
@@ -2052,10 +2075,10 @@ struct fractalspecificstuff fractalspecific[]=
 
    {
 //#define SCREENFORMULA	       206	// interpret fractal directly on screen
-   "On Screen Formula", p1real, p1imag, p2real, p2imag, "Keep Init for Julia: 0 = no, 1 = yes",ES,ES, ES, ES, ES, 0,0,0.0,0,0,0,0,0,0,0,
+   "On Screen Formula", p1real, p1imag, p2real, p2imag, p3real, p3imag,"Keep Init for Julia: 0 = no, 1 = yes", ES, ES, ES, 0,0,0.0,0,0,0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
-   -2.7, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, TRIGINPIXEL, NOSYM, 4.0,
+   -2.7, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 9, 2, "ident", "ident", TRIGINPIXEL, NOSYM, 4.0,
    form_per_pixel, Formula, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -2250,7 +2273,7 @@ struct fractalspecificstuff fractalspecific[]=
    },
    {
 //#define POPCORN		230
-   "Popcorn",  "Threshold", "Variation (0 to 5)", "h", "a real", "a imag", ES, ES, ES, ES, ES, {50.0, 0.0, 0.05, 3.0, 0,0,0,0,0,0,},
+   "Popcorn",  "Threshold", "Variation (0 to 5)", "h", "a real", "a imag", ES, ES, ES, ES, ES, {50.0, 2.0, 0.05, 3.0, 0,0,0,0,0,0,},
    -2.6, -1.8, 3.6, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, 0, XAXIS, 4.0,
    init_mandel_df, DoPopcorn, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
@@ -4071,7 +4094,7 @@ struct BigFractalStuff BigFractalSpecific[]=
 char	*InitCond[] = 
 
     {
-    "z=pixel","z=c=pixel","z=c=1/pixel","c=pixel,z=1/c","z=pixel,c=log(1+z)","z=pixel,c=z*z","z=pixel,c=z/(z+1)","z=pixel,c=z/(z*z+1)","z=p1",
+    "z=pixel","z=c=pixel","z=0,c=pixel","z=c=1/pixel","c=pixel,z=1/c","z=pixel,c=log(1+z)","z=pixel,c=z*z","z=pixel,c=z/(z+1)","z=pixel,c=z/(z*z+1)","z=p1",
     "z = c = pixel , zc = 0",
     "z = pixel, z2 = z*z, z3 = z*z2",
     "z=atanh(pixel)",
@@ -4144,6 +4167,16 @@ char	*DirectFormula[] =
     "cx = real(c), cy = imag(c), x = real(z), y = imag(z), z2 = -cy*x + cx*y - y*y*y, z = flip(z2) + y + p1; Duffing Fractal: use bailout of 1000",
     "cx = real(c), cy = imag(c), x = real(z), y = imag(z), t = 0.4 - 6.0 / (1.0 + x*x + y*y), st = sin(t), ct = cos(t), z2 = cy*(x*st + y*ct), z = flip(z2) + 1.0 + cx*(x*ct - y*st) + p1; Ikeda Fractal: use bailout of 1000",
     "cx = real(c), cy = imag(c), x = real(z), y = imag(z), z2 = cy*sin(x), z1 = flip(z2) + cx*y, z = z + z1 + p1; Chirikov Fractal: use bailout of 1000",
+    "e = p1, a = imag(p2) + 100, p = real(p2) + PI, q = 2 * PI*fn1(p / (2 * PI)), r = real(p2) + PI - q, Z = C = Pixel: Z = log(Z), IF(imag(Z) > r), Z = Z + flip(2 * PI), ENDIF, Z = exp(e*(Z + flip(q))) + C, | Z | < a ;frm:MandelbrotBC3   ; by several Fractint users",
+    "p1 = 1.618, p2 = -4.76, e = p1, a = imag(p2) + 100, p = real(p2) + PI, q = 2 * PI*fn1(p / (2 * PI)), r = real(p2) + PI - q, Z = C = Pixel: Z = log(Z), IF(imag(Z) > r), Z = Z + flip(2 * PI), ENDIF, Z = exp(e*(Z + flip(q))) + C, | Z | < a ;as above but with FOTD120807 params",
+    "z=z^1.045+(.02*z^(-2))+c ; set escape to |z| < 100",
+//    "z=pixel-0.025,x=real(z),y=imag(z),text=0,if(y>-0.225&&y<0.225),x1=x*1.8,x3=3*x,ty2=y<0.025&&y>-0.025||y>0.175,if(x<-1.2||ty2&&x>-1.25&&x<-1),text=1,elseif(x<-0.9||ty2&&x>-0.95&&x<-0.8\
+//    ||(cabs(sqrt(|z+(0.8,-0.1)|)-0.1)<0.025&&x>-0.8)||(y<-x1-1.44&&y>-x1-1.53&&y<0.025)),text=1,elseif(y>x3+1.5||y>-x3-1.2||(y>-0.125&&y<-0.075)&&y<x3+1.65&&y<-x3-1.05),text=1,elseif(cabs(sqrt(|z+0.05|)-0.2)<0.025&&x<0.05),\
+//    text=1,elseif((x>0.225&&x<0.275||y>0.175)&&x>0.1&&x<0.4),text=1,elseif(x>0.45&&x<0.5),text=1,elseif(x<0.6||x>0.8||((y>-x1+1.215)&&(y<-x1+1.305))&&x>0.55&&x<0.85),text=1,elseif(x>1.025&&x<1.075||y>0.175&&x>0.9&&x<1.2),\
+//    text=1,endif,endif,z=1+(0.0,-0.65)/(pixel+(0.0,.75)):if(text==0),z2=z*z,z4=z2*z2,n=z4*z2-1,z=z-n/(6*z4*z),if(|n|>=0.0001),continue=1,else,continue=0,endif,endif,continue",
+    "z=atanh(pixel):z=z*z*z + c, |z| < 12",
+    "z = c = pixel:  z = z ^ 1000 * (c ^ (-1002)) + c,  | z| <= 10000 ; FracFern by Jim Muth",
+    "z = 1 / (z*z + c);",
     NULL
     };
 
@@ -4870,6 +4903,12 @@ struct OscillatorSpecificStuff FractalMapSpecific[]=
 	    NullSetup, DoCoexistingInfiniteOrbits, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
+	"Complex Dynamics and Initial State Effects in a Two-Dimensional Sine-Bounded Memristive Map", "a", "b", "Colour Factor", ES, ES, ES, ES, ES, ES, ES, 2.0, 2.0, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.1, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -2.57, -1.43, 2.76, 1, 2, 3, 3, 3, 3, NULL, 1, YAXIS, 1000000.0,
+	    NullSetup, DoComplexDynamics2DSineBoundedMemristiveMap, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 0.7, 1.0
+	},
+	{
 	"Complex Dynamics in Generalised Hénon Map I", "a", "b", "c", "d", "e", "Colour Factor", ES, ES, ES, ES, -1.5, 0.3, 0.8, 0.1, 0.1, 100.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.2, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -7.0, -4.4, 8.0, 1, 2, 3, 6, 3, 3, NULL, 1, YAXIS, 100000.0,
@@ -5098,6 +5137,12 @@ struct OscillatorSpecificStuff FractalMapSpecific[]=
 	    NullSetup, DoFractionalFormNew3DGeneralisedHénonMap, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
+	"Further Study on the Rulkov Neuron: Geometric Control, Circuit Realisation and Chaos Encryption Map", "a", "b", "c", "d", "Colour Factor", ES, ES, ES, ES, ES, 4.0, 0.25, -1.0, 1.0, 750.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -5.5, -5.8, 5.0, 1, 2, 3, 5, 3, 3, NULL, 1, YAXIS, 100000.0,
+	    NullSetup, DoFurtherStudyontheRulkovNeuronMap, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
 	"Gingerbread Man based on Fractint. Variation 1 - Matryoshka Presentation", "Variation", "Colour Factor", ES, ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, -0.5, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -0.21, 0.883, 0.24, 1, 2, 3, 2, 3, 3, NULL, 1, YAXIS, 100000.0,
@@ -5113,6 +5158,12 @@ struct OscillatorSpecificStuff FractalMapSpecific[]=
 	"Gingerbread Man based on Fractint. Variation 3 - 'One Inverted Signal'", "Variation", "Colour Factor", ES, ES, ES, ES, ES, ES, ES, ES, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, -0.5, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -12.0, -7.2, 13.3, 1, 2, 3, 2, 3, 3, NULL, 1, YAXIS, 100000.0,
+	    NullSetup, DoGingerbreadManVariations, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
+	"Gingerbread Man based on Fractint. Variation 4 - Gingerbreadmanikin", "Variation", "Colour Factor", "b", "c", "d", ES, ES, ES, ES, ES, 3.0, 0.0, 1.0, 1.0, 8.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -923.0, -620.0, 923.0, 1, 2, 3, 5, 3, 3, NULL, 1, YAXIS, 100000.0,
 	    NullSetup, DoGingerbreadManVariations, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
@@ -8853,14 +8904,26 @@ struct OscillatorSpecificStuff SurfaceSpecific[]=
 	{
 	"Asteroid Ellipsoid", "x start", "x end", "y start", "y end", "a", "b", "c", "Colour Factor", ES, ES, 0.0, 2 * PI, 0.0, 2 * PI, 1.0, 1.0, 1.0, 6.5, 0.0, 0.0,
 	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-	    -1.4, -1.3, 2.5, 1, 2, 3, 7, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 1600.0,
+	    -1.4, -1.3, 2.5, 1, 2, 3, 8, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 1600.0,
 	    SurfaceSetup, DoAsteroidEllipsoid, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
+	"Asteroid Ellipsoid II", "x start", "x end", "y start", "y end", "Colour Factor", ES, ES, ES, ES, ES, -3 * PI, 3 * PI, -1 * PI, 3 * PI, 6.5, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -16.0, -8.0, 16.0, 2, 3, 1, 5, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 1600.0,
+	    SurfaceSetup, DoAsteroidEllipsoidII, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 0.2, 1.0
 	},
 	{
 	"Asteroid Torus", "x start", "x end", "y start", "y end", "R", "r", "Colour Factor", ES, ES, ES, 0.0, 2*PI, 0.0, 2*PI, 5.0, 2.0, 6.5, 0.0, 0.0, 0.0,
 	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -8.0, -5.0, 10.0, 1, 2, 3, 7, 3, 3, NULL, 1+PERSPECTIVE, YAXIS, 1600.0,
 	    SurfaceSetup, DoAsteroidTorus, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
+	"Balloon Surface using Parametric Equations", "x start", "x end", "y start", "y end", "Colour Factor", ES, ES, ES, ES, ES, 0.0, 2 * PI, 0.0, PI, 5.0, 2.0, 6.5, 0.0, 0.0, 0.0,
+	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -1.4, -1.2, 2.4, 1, 3, 2, 5, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 1600.0,
+	    SurfaceSetup, DoBalloonParametricEq, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Astroceras (Snails and Shells)", "x start", "x end", "y start", "y end", "a", "b", "c", "h", "k", "w", -40.0, -1.0, 0.0, 2*PI, 1.25, 1.25, 1.0, 3.5, 0.0, 0.12,
@@ -9043,6 +9106,12 @@ struct OscillatorSpecificStuff SurfaceSpecific[]=
 	    SurfaceSetup, DoBreatherSurface, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
+	"Bryant's Surface", "x start", "x end", "y start", "y end", "a", "Colour Factor", ES, ES, ES, ES, -2 * PI, 2 * PI, -2 * PI, 2 * PI, 6.5, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -812.0, -403.0, 824.0, 1, 3, 2, 5, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 2000.0,
+	    SurfaceSetup, DoBryantsSurface, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
 	"Bullet Nose", "x start", "x end", "y start", "y end", "a", "b", "Cutoff", "Colour Factor", ES, ES, 0.0, 2*PI, 0.0, PI/2, 2.0, 3.0, -12.0, 6.5, 0.0, 0.0,
 	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -33.0, -10.0, 18.0, 1, 2, 3, 8, 3, 3, NULL, 1+PERSPECTIVE, YAXIS, 1600.0,
@@ -9108,14 +9177,17 @@ struct OscillatorSpecificStuff SurfaceSpecific[]=
 	    -15.0, -4.0, 8.0, 1, 3, 4, 5, 4, 4, NULL, 1 + PERSPECTIVE, YAXIS, 1200.0,
 	    SurfaceSetup, DoClawsonBottle4D, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
-
-
-
 	{
 	"Cone (Body of Revolution)", "x start", "x end", "y start", "y end", "slope", "Colour Factor", ES, ES, ES, ES, 1.0, 6.0, 0.0, 2*PI, 0.5, 5.0, 0.0, 0.0, 0.0, 0.0,
 	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -3.6, -4.0, 8.0, 1, 2, 3, 6, 3, 3, NULL, 1+PERSPECTIVE, YAXIS, 1600.0,
 	    SurfaceSetup, DoCone, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
+	"Contour Plot 3D: fn = (x ^ 3 + y ^ 2 - z ^ 2 = 0)", "x start", "x end", "y start", "y end", "Colour Factor", ES, ES, ES, ES, ES, -2.0, 2.0, -2.0, 2.0, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -1.2, -3.0, 6.0, 1, 2, 3, 5, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 1600.0,
+	    SurfaceSetup, DoContourPlot, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Cornucopia", "x start", "x end", "y start", "y end", "a (sensitive)", "b (sensitive)", "Colour Factor", ES, ES, ES, 0.0, 2*PI, -PI, PI, 1.0, 1.0, 5.0, 0.0, 0.0, 0.0,
@@ -9196,6 +9268,12 @@ struct OscillatorSpecificStuff SurfaceSpecific[]=
 	    SurfaceSetup, DoDinisSurface, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 0.2, 1.0
 	},
 	{
+	"Divided Parallelepipoid", "x start", "x end", "y start", "y end", "Colour Factor", ES, ES, ES, ES, ES, -2 * PI, 2 * PI, -2 * PI, 2 * PI, 2 * PI, 6.0, 0.0, 0.0, 0.0, 0.0,
+	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -4.5, -1.65, 5.0, 1, 2, 3, 5, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 1500.0,
+	    SurfaceSetup, DoDividedParallelepipoid, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
 	"Double Ball", "x start", "x end", "y start", "y end", "R1", "R2", "d", "Colour Factor", ES, ES, 0.0, 2.0*PI, 0.0, 2.0*PI, 6.0, 4.0, 7.0, 7.0, 0.0, 0.0,
 	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -13.0, -5.0, 24.0, 1, 2, 3, 8, 3, 3, NULL, 1+PERSPECTIVE, YAXIS, 1500.0,
@@ -9244,6 +9322,12 @@ struct OscillatorSpecificStuff SurfaceSpecific[]=
 	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -4.0, -2.5, 5.0, 1, 2, 3, 8, 3, 3, NULL, 1+PERSPECTIVE, YAXIS, 1500.0,
 	    SurfaceSetup, DoEllipsoid, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
+	"Elliptic Paraboloid", "x start", "x end", "y start", "y end", "Colour Factor", ES, ES, ES, ES, ES, -15.0, 15.0, -15.0, 15.0, 6.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -14.0, -15.0, 30.0, 2, 3, 1, 5, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 1500.0,
+	    SurfaceSetup, DoEllipticParaboloid, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Elliptical Torus", "x start", "x end", "y start", "y end", "a", "Colour Factor", ES, ES, ES, ES, 0.0, 2*PI, 0.0, 2*PI, 2.0, 6.0, 0.0, 0.0, 0.0, 0.0,
@@ -9715,6 +9799,12 @@ struct OscillatorSpecificStuff SurfaceSpecific[]=
 	    SurfaceSetup, DoLimpetTorus, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
+	"Linked Tori", "x start", "x end", "y start", "y end", "a", "b", "c", "Colour Factor", ES, ES, 0.0, 2 * PI, 0.0, 2 * PI, 4.0, 4.0, 8.0, 6.0, 0.0, 0.0,
+	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -11.0, -5.0, 12.0, 1, 3, 2, 8, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 1500.0,
+	    SurfaceSetup, DoLinkedTori, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
 	"Logarithmic Spiral", "x start", "x end", "y start", "y end", "a", "height", "Colour Factor", ES, ES, ES, -1.0, 60.0, -1.0, 1.0, 0.05, 2.0, 8.0, 0.0, 0.0, 0.0,
 	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -15.0, -7.0, 30.0, 1, 2, 3, 7, 3, 3, NULL, 1+PERSPECTIVE, YAXIS, 1800.0,
@@ -9834,6 +9924,13 @@ struct OscillatorSpecificStuff SurfaceSpecific[]=
 	    SurfaceSetup, DoParaboloid, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
+	"Parametric Plot 3D: [cos(u), sin(u) + cos(v), sin(v)]",
+	    "x start", "x end", "y start", "y end", "Colour Factor", ES, ES, ES, ES, ES, -PI, PI, 0.0, 2*PI, 7.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -5.6, -3.4, 3.8, 1, 3, 2, 5, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 1500.0,
+	    SurfaceSetup, DoParametricPlot3D1, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
 	"Pillow Shape",  
 	    "x start", "x end", "y start", "y end", "a", "Colour Factor", ES, ES, ES, ES, 0.0, PI, -PI, PI, 0.4, 6.0, 0.0, 0.0, 0.0, 0.0,
 	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -9870,6 +9967,12 @@ struct OscillatorSpecificStuff SurfaceSpecific[]=
 	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -4.0, -2.3, 4.6, 1, 2, 3, 5, 3, 3, NULL, 1+PERSPECTIVE, YAXIS, 1500.0,
 	    SurfaceSetup, DoPlückersConoid, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
+	"Poweroid", "x start", "x end", "y start", "y end", "a0", "alpha", "Colour Factor", ES, ES, ES, -12.0, 11.0, -12.0, 12.0, -5.0, 4.0, 7.0, 0.0, 0.0, 0.0,
+	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -40.0, -32.0, 48.0, 2, 3, 1, 7, 3, 3, NULL, 1, YAXIS, 1500.0,
+	    SurfaceSetup, DoPoweroid, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 0.04, 1.0
 	},
 	{
 	"Product Surface", "x start", "x end", "y start", "y end", "Colour Factor", ES, ES, ES, ES, ES, -PI / 2, PI / 2, -PI, PI, 7.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -10159,6 +10262,12 @@ struct OscillatorSpecificStuff SurfaceSpecific[]=
 	    SurfaceSetup, DoSpring, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
+	"Staircase", "x start", "x end", "y start", "y end", "Colour Factor", ES, ES, ES, ES, ES, -PI * 2.0, PI*2.0, -PI * 2.0, PI*2.0, 8.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -9.6, -7.0, 14.0, 1, 3, 2, 5, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 2000.0,
+	    SurfaceSetup, DoStaircase, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
 	"Steinbach Screw", "start", "end", "max angle", "Colour Factor", ES, ES, ES, ES, ES, ES, -4.0, 4.0, 2*PI, 7.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -12.0, -7.0, 14.0, 2, 3, 1, 4, 3, 3, NULL, 1, YAXIS, 1500.0,
@@ -10327,6 +10436,13 @@ struct OscillatorSpecificStuff SurfaceSpecific[]=
 	    SurfaceSetup, DoTriplePointTwist, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 0.5
 	},
 	{
+	"Twisted Cones",
+	    "x start", "x end", "y start", "y end", "Colour Factor", ES, ES, ES, ES, ES, 0.0, PI*2.0, 0.0, PI*2.0, 3.0, 1.0, 7.0, 0.0, 0.0, 0.0,
+	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -18.0, -11.0, 22.0, 1, 2, 3, 5, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 1500.0,
+	    SurfaceSetup, DoTwistedCones, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
 	"Twisted Eight Torus",  
 	    "x start", "x end", "y start", "y end", "R", "r", "Colour Factor", ES, ES, ES, 0.0, PI*2.0, 0.0, PI*2.0, 3.0, 1.0, 7.0, 0.0, 0.0, 0.0,
 	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -10373,6 +10489,12 @@ struct OscillatorSpecificStuff SurfaceSpecific[]=
 	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -1.3, -0.7, 1.8, 1, 2, 3, 5, 3, 3, NULL, 1, YAXIS, 1500.0,
 	    SurfaceSetup, DoTwistedTriaxial, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
+	"Twister Parametric Surface",  "x start", "x end", "y start", "y end", "Colour Factor", ES, ES, ES, ES, ES, 1, 2*PI, 0, 2*PI, 6.5, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "     N/A", "     N/A", "     N/A", ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -21.0, -12.0, 24.0, 1, 2, 3, 5, 3, 3, NULL, 1 + PERSPECTIVE, YAXIS, 1500.0,
+	    SurfaceSetup, DoTwister, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 0.5, 1.0
 	},
 	{
 	"Two Torus",  

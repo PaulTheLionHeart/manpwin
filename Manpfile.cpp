@@ -28,6 +28,7 @@ extern	char	MAPPath[];		// path for MAP files
 extern	char	SCIPath[];		// path for SCI files
 extern	char	PARPath[];		// path for PAR files
 extern	char	KFRPath[];		// path for KFR files
+extern	char	FracPARPath[];		// path for Fractint par files
 extern	char	IFSPath[];		// path for IFS files
 extern	char	LSYSPath[];		// path for LSYS files
 extern	char	FRMPath[];		// path for formula files

@@ -22,7 +22,7 @@ extern	void	ConvertRGB2ASCII(BYTE, BYTE, BYTE, char *);
 extern	char	*GenerateMPEGFileName (char *, char *);
 extern	char	*GenerateAnimFileName (char *, char *);
 extern	char	*AnimData(void);
-extern	int	GenMalthusScript(HWND hwnd, char *filename);
+//extern	int	GenMalthusScript(HWND hwnd, char *filename);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
 
 extern	BOOL	WritePNGFrames;			// write frames to PNG files
@@ -39,7 +39,7 @@ extern	char	PNGName[];			// base name for PNG file sequence
 extern	char	ScriptFileName[];		// base name for script file 
 
 extern	char	PNGName[];			// base name for PNG file sequence
-extern	CTrueCol    TrueCol;		// palette info
+extern	CTrueCol    TrueCol;			// palette info
 //extern	BYTE	*PalettePtr;			// points to true colour palette
 extern	BOOL	StartImmediately;		// immediate start of animation generation
 //extern	BYTE	ScriptPaletteFlag;		// Display palette 
@@ -52,11 +52,11 @@ extern	double	vert;				// vertical address
 extern	WORD	type;				// fractal type
 extern	int	subtype;
 
-extern	double	x_rot;			/* angle display plane to x axis */
-extern	double	y_rot;			/* angle display plane to y axis */
-extern	double	z_rot;			/* angle display plane to z axis */
-static	MATRIX	m;			/* transformation matrice */
-//extern	BYTE	_3dflag;		/* replay saved file 3D */
+extern	double	x_rot;				// angle display plane to x axis 
+extern	double	y_rot;				// angle display plane to y axis 
+extern	double	z_rot;				// angle display plane to z axis 
+static	MATRIX	m;				// transformation matrice 
+//extern	BYTE	_3dflag;		// replay saved file 3D
 
 extern	void	ClearScreen(void);
 //extern	CPixel	Pix;			// routines for projection and 3D transforms
@@ -86,6 +86,7 @@ extern	COscProcess	OscProcess;
 	Initialise transformation Matrix
 ***************************************************************************/
 
+/*
 void	InitTransformation(double tx, double ty, double tz)
 
     {
@@ -100,17 +101,19 @@ void	InitTransformation(double tx, double ty, double tz)
     yval = y_rot / 57.29577;
     zval = z_rot / 57.29577;
     Mat.identity(m);						// start with identity 
-    Mat.trans(-tx, -ty, -tz, m);					// translate so origin is in centre, so that we rotate through the centre
+    Mat.trans(-tx, -ty, -tz, m);				// translate so origin is in centre, so that we rotate through the centre
     Mat.xrot(xval, m);						// rotate in each axis
     Mat.yrot(yval, m);
     Mat.zrot(zval, m);
     Mat.trans(tx, ty, tz, m);					// translate back
     }
+*/
 
 /**************************************************************************
 	Implement transformation Matrix
 ***************************************************************************/
 
+/*
 void	DoTransformation(double *x1, double *y1, double *z1, double x, double y, double z)
 
     {
@@ -125,6 +128,7 @@ void	DoTransformation(double *x1, double *y1, double *z1, double x, double y, do
     *y1 = w[1];
     *z1 = w[2];
     }
+*/
 
 /**************************************************************************
 	Oscillator and Fractal Map script generator
@@ -420,10 +424,7 @@ DLGPROC FAR PASCAL OscillatorAnimDlg (HWND hDlg, UINT message, UINT wParam, LONG
 			CentrePixels = GetDlgItemInt(hDlg, IDC_RADIUS, &bTrans, TRUE);
 			if (CentrePixels <= 0)
 			    frames = 1;
-			if (type == MALTHUS && !RotateAnim)
-			    GenMalthusScript(hDlg, ScriptFileName);
-			else
-			    GenOscillatorScript(hDlg, ScriptFileName);
+			GenOscillatorScript(hDlg, ScriptFileName);
 			EndDialog (hDlg, TRUE);
 			return (DLGPROC)TRUE;
 

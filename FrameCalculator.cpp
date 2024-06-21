@@ -36,7 +36,7 @@ int calculateFrame::initialiseCalculateFrame(CDib *DibIn, CSlope *Slope, int Wid
     BigWidth = BigWidthIn;
     ZoomRadius = mpfr_get_d(BigWidth.x, MPFR_RNDN);
     BigZoomRadius = BigWidth;
-    method = TZfilter->method;
+    InsideMethod = TZfilter->method;
     hwnd = hwndIn;
     thread = ThreadIn;
     ReferenceNumber = 0;
@@ -77,7 +77,7 @@ int calculateFrame::initialiseCalculateFrame(CDib *DibIn, CSlope *Slope, int Wid
 // Full frame calculation
 //////////////////////////////////////////////////////////////////////
 
-int calculateFrame::calculateOneFrame(double bailout, char* StatusBarInfo, int powerin, int methodIn, int biomorphin, int subtypein, Complex rsrAin, bool rsrSignIn,
+int calculateFrame::calculateOneFrame(double bailout, char* StatusBarInfo, int powerin, int InsideMethodIn, int OutsideMethodIn, int biomorphin, int subtypein, Complex rsrAin, bool rsrSignIn,
 							int user_data(HWND hwnd), int xdotsIn, CTZfilter *TZfilter, CTrueCol *TrueCol, int *pPertProgress, bool *ThreadComplete, bool Multi, int delay, char *PertErrorMessage, HANDLE ghMutex)
 
     {
@@ -100,7 +100,8 @@ int calculateFrame::calculateOneFrame(double bailout, char* StatusBarInfo, int p
 	power = 2;
     if (power > MAXPOWER)
 	power = MAXPOWER;
-    method = methodIn;
+    InsideMethod = InsideMethodIn;
+    OutsideMethod = OutsideMethodIn;
     subtype = subtypein;
     biomorph = biomorphin;
 
@@ -468,7 +469,7 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
     double	min_orbit;			// orbit value closest to origin
     long	min_index;			// iteration of min_orbit
     dc = 0.0;
-    if (method == BOF60 || method == BOF61)
+    if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	{
 	BOFmagnitude = 0.0;
 	min_orbit = 100000.0;
@@ -488,7 +489,7 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
 	}
 #endif
 
-    if (method >= TIERAZONFILTERS)
+    if (InsideMethod >= TIERAZONFILTERS)
 	TZfilter->LoadFilterQ(DeltaSub0);		// initialise the constants used by Tierazon filters
 
     Plot.InitPlot(MaxIteration, TrueCol, wpixels, xdots, height, xdots, height, Dib->BitsPerPixel, Dib, USEPALETTE);
@@ -523,12 +524,12 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
 		CalculateDerivativeSlope(&dc, temp1);
 	    }
 
-	if (method >= TIERAZONFILTERS)
+	if (InsideMethod >= TIERAZONFILTERS)
 	    {
 	    Complex z = *(XSubN + iteration) + DeltaSubN;
 	    TZfilter->DoTierazonFilter(z, (long *)&iteration);
 	    }
-	else if (method == BOF60 || method == BOF61)
+	else if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	    {
 	    Complex z = *(XSubN + iteration) + DeltaSubN;
 	    BOFmagnitude = z.CSumSqr();
@@ -643,22 +644,17 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
 		    index = iteration % 256;
 		}
 	    }
+	else if (OutsideMethod == NONE && InsideMethod == NONE)		// no filter
+	    {
+	    if (iteration == MaxIteration)
+		index = MaxIteration;
+	    else
+		index = iteration;
+	    }
 	else
 	    {
-	    switch (method)
+	    switch (OutsideMethod)
 		{
-		case NONE:						// no filter
-		    if (iteration == MaxIteration)
-			index = MaxIteration;
-		    else
-			{
-//			if (abs(PaletteShift) <= 1)
-			    index = iteration;
-//			else
-//			    index = (BYTE)(((long)(FloatIteration * abs(PaletteShift))) % 256);
-//			index = iteration % 256;
-			}
-		    break;
 		case PERT1:						// something Shirom Makkad added
 		    if (iteration == MaxIteration)
 			index = MaxIteration;
@@ -670,25 +666,6 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
 			index = MaxIteration;
 		    else
 			index = (int)(iteration - (log(0.5*(ZCoordinateMagnitudeSquared)) - log(0.5*log(256))) / log(2)) % 256;
-		    break;
-		case ZMAG:
-		    if (iteration == MaxIteration)			// Zmag
-			index = (int)((w.CSumSqr()) * (MaxIteration >> 1) + 1);
-		    else
-			index = iteration;
-//			index = iteration % 256;
-		    break;
-		case BOF60:
-		    if (iteration == MaxIteration)
-			index = (int)(sqrt(min_orbit) * 75.0);
-		    else
-			index = iteration;
-		    break;
-		case BOF61:
-		    if (iteration == MaxIteration)
-			index = min_index;
-		    else
-			index = iteration;
 		    break;
 		case REAL:						// "real"
 		    if (iteration == MaxIteration)
@@ -720,27 +697,54 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
 		    else
 			index = (long)fabs(atan2(w.y, w.x)*180.0 / PI);
 		    break;
+		default:						// make sure we set all the inside pixels unless there is an inside filter (later on in the next switch)
+		    if (iteration == MaxIteration)
+			index = MaxIteration;
+		    else
+			{
+//			if (abs(PaletteShift) <= 1)
+			index = iteration;
+//			else
+//			    index = (BYTE)(((long)(FloatIteration * abs(PaletteShift))) % 256);
+//			index = iteration % 256;
+			}
+		    break;
+		}
+	    switch (InsideMethod)
+		{
+		case ZMAG:
+		    if (iteration == MaxIteration)			// Zmag
+			index = (int)((w.CSumSqr()) * (MaxIteration >> 1) + 1);
+//		    else
+//			index = iteration;
+		    //			index = iteration % 256;
+		    break;
+		case BOF60:
+		    if (iteration == MaxIteration)
+			index = (int)(sqrt(min_orbit) * 75.0);
+//		    else
+//			index = iteration;
+		    break;
+		case BOF61:
+		    if (iteration == MaxIteration)
+			index = min_index;
+//		    else
+//			index = iteration;
+		    break;
 		case POTENTIAL:
 		    magnitude = sqr(w.x) + sqr(w.y);
 		    index = Pot.potential(magnitude, iteration, MaxIteration, TrueCol, 256, potparam);
 		    break;
 		default:
-		    if (method >= TIERAZONFILTERS)			// suite of Tierazon filters and colouring schemes
+		    if (InsideMethod >= TIERAZONFILTERS)		// suite of Tierazon filters and colouring schemes
 			{
 			TZfilter->EndTierazonFilter(w, (long *)&iteration, TrueCol);
 			index = iteration;
 			}
-		    else						// no filter
-			{
-			if (iteration == MaxIteration)
-			    index = MaxIteration;
-			else
-//			    index = iteration % 256;
-			    index = iteration % TrueCol->ColoursInPALFile;
-			}
 		    break;
 		}
 	    }
+
 	if (SlopeType != DERIVSLOPE)
 	    {
 	    if (*PlotType == FILTERPLOT)
@@ -789,7 +793,7 @@ int	calculateFrame::BigCalculatePoint(int x, int y, ExpComplex ExpDeltaSub0, dou
     FloatIteration = 0.0;
     bool glitched = false;
 
-    if (method >= TIERAZONFILTERS)
+    if (InsideMethod >= TIERAZONFILTERS)
 	{
 	Complex	tempComplex;
 
@@ -817,7 +821,7 @@ int	calculateFrame::BigCalculatePoint(int x, int y, ExpComplex ExpDeltaSub0, dou
 	ExpTemp = ExpDeltaSubN + *(ExpXSubN + iteration);
 	ExpZCoordinateMagnitudeSquared = ExpTemp.CSumSqr();
 
-	if (method >= TIERAZONFILTERS)
+	if (InsideMethod >= TIERAZONFILTERS)
 	    {
 	    Complex	tempComplex;
 	    ExpTemp = ExpDeltaSubN + *(ExpXSubN + iteration);
@@ -906,7 +910,7 @@ int	calculateFrame::BigCalculatePoint(int x, int y, ExpComplex ExpDeltaSub0, dou
 	else
 	    {
 	    floatexp	temp = 0.0;
-	    switch (method)
+	    switch (OutsideMethod)
 		{
 		case NONE:						// no filter
 		    if (iteration == MaxIteration)
@@ -987,7 +991,7 @@ int	calculateFrame::BigCalculatePoint(int x, int y, ExpComplex ExpDeltaSub0, dou
 		    index = Pot.potential(magnitude, iteration, MaxIteration, TrueCol, 256, potparam);
 		    break;
 		default:
-		    if (method >= TIERAZONFILTERS)			// suite of Tierazon filters and colouring schemes
+		    if (InsideMethod >= TIERAZONFILTERS)			// suite of Tierazon filters and colouring schemes
 			{
 			Complex	tempComplex;
 

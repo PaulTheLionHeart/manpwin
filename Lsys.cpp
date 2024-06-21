@@ -546,10 +546,7 @@ static	int	readLSystemFile(HWND hwnd, char *str, char *filename)
 	if ((word = strchr(InLine,';')))	// strip comment
 	    *word = 0;
 	strlwr(InLine);
-
-        
-        
-        
+      
 	word = strtok(InLine," =\011\n");
 	if (!word || !strcmp(word, ";;"));
 	else if (!strcmp(word, "axiom"))
@@ -863,7 +860,7 @@ int	load_lsystems(HWND hwnd, char *filename)
 	    for (j = 0; s[j]; ++j)
 		if (s[j] == '{' || s[j] == '\n' || s[j] == ' ')
 		    s[j] = '\0';
-	    s[20] = '\0';
+	    s[56] = '\0';
 	    strcpy(lptr[lsys_num], s + i);
 	    if (lsys_num < 64)
 		++lsys_num;

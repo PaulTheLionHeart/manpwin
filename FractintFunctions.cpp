@@ -158,7 +158,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    croot.y = param[3];
 	    cdegree.x = param[0];
 	    cdegree.y = param[1];
-		    thresh = 0.3 * PI / cdegree.x;	// less than half distance between roots
+	    thresh = 0.3 * PI / cdegree.x;		// less than half distance between roots
 	    *z = *q;
 	    subtype = ((int)param[4] == 0.0) ? 'N' : 'B';
 	    break;
@@ -588,7 +588,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    z->x = sqr.x - sqr.y;
 	    z->y = real_imag + real_imag;
 	    *z = Coefficient * *z + *q;
-	    return ((sqr.x + sqr.y) >= rqlim);
+	    return BailoutTest(z, sqr);
 
 	case SPIDERFP:						// Spider(XAXIS) { c=z=pixel: z=z*z+c; c=c/2+z, |z|<=4 }
 	    sqr.x = sqr(z->x);
@@ -598,7 +598,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    z->y = 2 * real_imag + temp.y;
 	    temp.x = temp.x / 2 + z->x;
 	    temp.y = temp.y / 2 + z->y;
-	    return ((sqr.x + sqr.y) >= rqlim);
+	    return BailoutTest(z, sqr);
 
 	case MANOWARFP:						// From Art Matrix via Lee Skinner
 	case MANOWARJFP:					// to handle fractint par files
@@ -611,7 +611,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    temp1 = *z;
 	    d = z->CSumSqr();
 	    *z = temp3;
-	    return (d >= rqlim);
+	    return BailoutTest(z, sqr);
 
 	case BARNSLEYM1:					// Barnsley's Mandelbrot type M1 from "Fractals Everywhere" by Michael Barnsley, p. 322
 	case BARNSLEYJ1:
@@ -627,19 +627,19 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		{
 //		z->x = (foldxinitx - q->x - foldyinity + param[0]);
 //		z->y = (foldyinitx - q->y + foldxinity + param[1]);
-		temp1.x = foldxinitx - temp.x - foldyinity + param[0];
-		temp1.y = foldyinitx - temp.y + foldxinity + param[1];
+		temp1.x = foldxinitx - temp.x - foldyinity/* + param[0]*/;	// param removed as it splatters julia
+		temp1.y = foldyinitx - temp.y + foldxinity/* + param[1]*/;
 		}
 	    else
 		{
 //		z->x = (foldxinitx + q->x - foldyinity + param[0]);
 //		z->y = (foldyinitx + q->y + foldxinity + param[1]);
-		temp1.x = foldxinitx + temp.x - foldyinity + param[0];
-		temp1.y = foldyinitx + temp.y + foldxinity + param[1];
+		temp1.x = foldxinitx + temp.x - foldyinity/* + param[0]*/;
+		temp1.y = foldyinitx + temp.y + foldxinity/* + param[1]*/;
 		}
 	    *z = temp1;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+
+	    return FractintBailoutTest(z);
 
 	case BARNSLEYM2:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 331, example 4.2
 	case BARNSLEYJ2:
@@ -654,17 +654,16 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		// orbit calculation
 	    if (foldxinity + foldyinitx >= 0)
 		{
-		temp1.x = foldxinitx - temp.x - foldyinity + param[0];
-		temp1.y = foldyinitx - temp.y + foldxinity + param[1];
+		temp1.x = foldxinitx - temp.x - foldyinity/* + param[0]*/;	// param removed as it splatters julia
+		temp1.y = foldyinitx - temp.y + foldxinity/* + param[1]*/;
 		}
 	    else
 		{
-		temp1.x = foldxinitx + temp.x - foldyinity + param[0];
-		temp1.y = foldyinitx + temp.y + foldxinity + param[1];
+		temp1.x = foldxinitx + temp.x - foldyinity/* + param[0]*/;
+		temp1.y = foldyinitx + temp.y + foldxinity/* + param[1]*/;
 		}
 	    *z = temp1;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 
 	case BARNSLEYM3:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 292, example 4.1 
@@ -679,20 +678,19 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    // orbit calculation
 	    if (z->x > 0)
 		{
-		temp1.x = foldxinitx - foldyinity - 1.0 + param[0];
-		temp1.y = foldxinity * 2 + param[1];
+		temp1.x = foldxinitx - foldyinity - 1.0/* + param[0]*/;	// param removed as it splatters julia
+		temp1.y = foldxinity * 2/* + param[1]*/;
 		}
 	    else
 		{
-		temp1.x = foldxinitx - foldyinity - 1.0 + temp.x * z->x + param[0];
-		temp1.y = foldxinity * 2 + param[1];
+		temp1.x = foldxinitx - foldyinity - 1.0 + temp.x * z->x/* + param[0]*/;
+		temp1.y = foldxinity * 2/* + param[1]*/;
 
 		// This term added by Tim Wegner to make dependent on the imaginary part of the parameter. (Otherwise Mandelbrot is uninteresting).
 		temp1.y += temp.y * z->x;
 		}
 	    *z = temp1;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case COMPLEXNEWTON:
 	case COMPLEXBASIN:
@@ -776,8 +774,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    if (testsize > rqlim)
 		{
 		*z = temp;
-		d = z->CSumSqr();
-		return (d >= rqlim);					// point not in target set
+		return FractintBailoutTest(z);
 		}
 	    else							// make distinct level sets if point stayed in target set
 		{
@@ -800,8 +797,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 
 	    z->x = temp.x * sqr.x - temp.y * sqr.y;
 	    z->y = temp.x * sqr.y + temp.y * sqr.x;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return BailoutTest(z, sqr);
 
 	case PHOENIXFP:
 	case PHOENIX:
@@ -832,8 +828,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    *z = *z ^ temp2;
 	    z->x += q->x + param[0];
 	    z->y += q->y + param[1];
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case FPMANZTOZPLUSZPWR:
 	case FPJULZTOZPLUSZPWR:
@@ -841,8 +836,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    *z = *z ^ *z;
 	    z->x = temp.x + z->x + q->x + param[0];
 	    z->y = temp.y + z->y + q->y + param[1];
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case MARKSMANDELFP:				// Mark Peterson's variation of "lambda" function
 	case MARKSMANDEL:
@@ -857,8 +851,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    temp1.x = Coefficient.x * temp.x - Coefficient.y * temp.y + t.x;
 	    temp1.y = Coefficient.x * temp.y + Coefficient.y * temp.x + t.y;
 	    *z = temp1;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return BailoutTest(z, sqr);
 
 	case QUATFP:
 	case QUATJULFP:
@@ -895,13 +888,11 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		temp.x = temp.x - 1;
 	    // end barnsley code
 	    *z = temp;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case TETRATEFP:					// Tetrate(XAXIS) { c=z=pixel: z=c^z, |z|<=(P1+3)
 	    *z = *q ^ *z;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case UNITYFP:					// Unity Fractal - brought to you by Mark Peterson - you won't find this in any fractal books unless they saw it here first - Mark invented it!
 	    temp.x = sqr(z->x) + sqr(z->y);
@@ -927,9 +918,8 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    temp.x = z->x + half * (u + (a - ab));
 	    temp.y = z->y + half * (w + (-b + ab));
 	    *z = temp;
-	    d = z->CSumSqr();
-	    return (d >= rqlim);
-	    }
+	    return FractintBailoutTest(z);
+	}
 
 
 	case MAGNET1M:
@@ -1169,8 +1159,7 @@ int	CPixel::PhoenixFractal(Complex *z, Complex *q)
     temp4.y = (temp1.x + temp1.x) + (temp.y * temp3.y);
     temp3 = *z;							// set temp3 to Y value
     *z = temp4;
-    d = z->CSumSqr();
-    return (d >= rqlim);
+    return BailoutTest(z, sqr);
     }
 
 int	CPixel::PhoenixPlusFractal(Complex *z, Complex *q)
@@ -1190,8 +1179,7 @@ int	CPixel::PhoenixPlusFractal(Complex *z, Complex *q)
     temp4.y = newminus.y + (temp.y * temp3.y);
     temp3 = *z;							// set temp3 to Y value
     *z = temp4;
-    d = z->CSumSqr();
-    return (d >= rqlim);
+    return FractintBailoutTest(z);
     }
 
 int	CPixel::PhoenixMinusFractal(Complex *z, Complex *q)
@@ -1210,8 +1198,7 @@ int	CPixel::PhoenixMinusFractal(Complex *z, Complex *q)
     temp4.y = newminus.y + (temp.y * temp3.y);
     temp3 = *z;							// set temp3 to Y value
     *z = temp4;
-    d = z->CSumSqr();
-    return (d >= rqlim);
+    return FractintBailoutTest(z);
     }
 
 int	CPixel::PhoenixFractalcplx(Complex *z, Complex *q)
@@ -1224,8 +1211,7 @@ int	CPixel::PhoenixFractalcplx(Complex *z, Complex *q)
     temp4.y = (temp1.x + temp1.x) + q->y + (temp2.x * temp3.y) + (temp2.y * temp3.x);
     temp3 = *z;							// set tmp3 to Y value
     *z = temp4;
-    d = z->CSumSqr();
-    return (d >= rqlim);
+    return BailoutTest(z, sqr);
     }
 
 int	CPixel::PhoenixCplxPlusFractal(Complex *z, Complex *q)
@@ -1246,8 +1232,7 @@ int	CPixel::PhoenixCplxPlusFractal(Complex *z, Complex *q)
     temp4.y = newminus.y + temp1.y;
     temp3 = *z;							// set temp3 to Y value
     *z = temp4;
-    d = z->CSumSqr();
-    return (d >= rqlim);
+    return FractintBailoutTest(z);
     }
 
 int	CPixel::PhoenixCplxMinusFractal(Complex *z, Complex *q)
@@ -1270,8 +1255,7 @@ int	CPixel::PhoenixCplxMinusFractal(Complex *z, Complex *q)
     temp4.y = newminus.y + temp1.y;
     temp3 = *z;							// set tmp2 to Y value
     *z = temp4;
-    d = z->CSumSqr();
-    return (d >= rqlim);
+    return FractintBailoutTest(z);
     }
 
 /**************************************************************************
@@ -1370,6 +1354,59 @@ void	CPixel::set_Froth_palette(HWND hwnd)
 		mapname = froth3_16c;
 	    }
 //	rotate(1);
+	}
+    }
+
+/**************************************************************************
+    Bailout Test
+**************************************************************************/
+
+bool	CPixel::FractintBailoutTest(Complex *z)
+    {
+    Complex TempSqr;
+    double  magnitude;
+    double  manhmag;
+    double  manrmag;
+
+    switch (BailoutTestType)
+	{
+	case BAIL_MOD:
+	    TempSqr.x = sqr(z->x);
+	    TempSqr.y = sqr(z->y);
+	    magnitude = TempSqr.x + TempSqr.y;
+	    return (magnitude >= rqlim);
+
+	case BAIL_REAL:
+	    TempSqr.x = sqr(z->x);
+	    return (TempSqr.x >= rqlim);
+	
+	case BAIL_IMAG:
+	    TempSqr.y = sqr(z->y);
+	    return (TempSqr.y >= rqlim);
+
+	case BAIL_OR:
+	    TempSqr.x = sqr(z->x);
+	    TempSqr.y = sqr(z->y);
+	    return (TempSqr.x >= rqlim || TempSqr.y >= rqlim);
+	
+	case BAIL_AND:
+	    TempSqr.x = sqr(z->x);
+	    TempSqr.y = sqr(z->y);
+	    return (TempSqr.x >= rqlim && TempSqr.y >= rqlim);
+
+	case MANH:
+	    manhmag = fabs(z->x) + fabs(z->y);
+	    return ((manhmag * manhmag) >= rqlim);
+
+	case MANR:
+	    manrmag = z->x + z->y;	    // don't need abs() since we square it next
+	    return ((manrmag * manrmag) >= rqlim);
+
+	default:
+	    TempSqr.x = sqr(z->x);
+	    TempSqr.y = sqr(z->y);
+	    magnitude = TempSqr.x + TempSqr.y;
+	    return (magnitude >= rqlim);
 	}
     }
 

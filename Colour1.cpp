@@ -48,7 +48,7 @@ extern	BYTE	default_palette[];		// default VGA colour palette
 extern	double 	*wpixels;			// an array of doubles holding slope modified iteration counts
 extern	WORD	type;				// M=mand, J=Julia 1,2,4->
 extern	int	time_to_reinit;			// time to reinitialize?
-extern	int	method;				// inside and outside filters
+extern	int	InsideMethod;			// inside filters
 
 DLGPROC FAR PASCAL DisplayRGBDlg(HWND hDlg, UINT message, UINT wParam, LONG lParam);
 
@@ -81,7 +81,7 @@ void	DisplayPalette(HWND hwnd, BOOL DisplayFlag)
     long	LocalThreshold;
     int		tempflags = Plot.flags;
 
-    if (method >= TIERAZONFILTERS)
+    if (InsideMethod >= TIERAZONFILTERS)
 	return;					// many Tierazon filters and colours don't use the palette, so why display it?
 
     Plot.flags -= USEWPIXELS;			// we don't want to write to wpixels

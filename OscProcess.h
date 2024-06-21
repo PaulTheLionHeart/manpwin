@@ -1,6 +1,7 @@
 #include "Manp.h"
 #include "Dib.h"
 #include "Plot.h"
+#include "Matrix.h"
 
 #pragma once
 
@@ -84,4 +85,5 @@ class COscProcess
 
     private:
 	CPlot		Plot;
+	CMatrix		Mat;
     };

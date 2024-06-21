@@ -41,7 +41,7 @@ extern	WORD	degree;			// special colour, phase etc
 extern	int	subtype;		// B=basin, S=stripe, N=normal 
 extern	struct	FractintFilterStuff	FractintFilter[];	// default values for each 
 extern	double	IterDiv;		// divide ieration by this amount
-extern	double	RotationAngle;		// rotate image in degrees
+extern	int	RotationAngle;		// rotate image in degrees
 extern	int	SlopeType;
 extern	double	lightDirectionDegrees;
 extern	double	bumpMappingDepth;
@@ -751,7 +751,7 @@ int	ReadKallesFile(HWND hwnd, char *filename)
     
     SlopeType = 0;
     IterDiv = 1.0;
-    RotationAngle = 0.0;
+    RotationAngle = 0;
     if ((fp = fopen(filename, "r")) == NULL)
 	{
 	wsprintf(s, "Can't Open Kalles File: <%s>", filename);
@@ -797,7 +797,7 @@ int	ReadKallesFile(HWND hwnd, char *filename)
 	if (length = Strlicmp(buffer, "Rotate: "))
 	    {
 	    strcpy(s, buffer + length);
-	    sscanf(s, "%lf", &RotationAngle);
+	    sscanf(s, "%d", &RotationAngle);
 	    }
 	if (length = Strlicmp(buffer, "MultiColors: "))
 	    {

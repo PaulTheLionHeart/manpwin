@@ -41,6 +41,7 @@ static	char	ManpPath[_MAX_PATH] = "";		// path for ManpWin.EXE where needed
 	char	SCIPath[_MAX_PATH] = "";		// path for SCI files
 	char	PARPath[_MAX_PATH] = "";		// path for PAR files
 	char	KFRPath[_MAX_PATH] = "";		// path for KFR files
+	char	FracPARPath[_MAX_PATH] = "";		// path for Fractint par files
 	char	IFSPath[_MAX_PATH] = "";		// path for IFS files
 	char	LSYSPath[_MAX_PATH] = "";		// path for LSYS files
 	char	FRMPath[_MAX_PATH] = "";		// path for Formula files
@@ -175,6 +176,7 @@ int	ReadConfig(HWND hwnd)
 	sprintf(SCIPath, "%s\\sci", ManpINIFoundDir);		// path for SCI files
 	sprintf(PARPath, "%s\\par", ManpINIFoundDir);		// path for PAR files
 	sprintf(KFRPath, "%s\\kfr", ManpINIFoundDir);		// path for KFR files
+	sprintf(FracPARPath, "%s\\frantpar", ManpINIFoundDir);	// path for Fractint par files
 	sprintf(IFSPath, "%s\\ifs", ManpINIFoundDir);		// path for IFS files
 	sprintf(LSYSPath, "%s\\lsys", ManpINIFoundDir);		// path for LSYS files
 	sprintf(FRMPath, "%s\\frm", ManpINIFoundDir);		// path for formula files
@@ -191,7 +193,8 @@ int	ReadConfig(HWND hwnd)
 	sprintf(MAPPath, "%smap", ManpPath);			// path for MAP files
 	sprintf(SCIPath, "%ssci", ManpPath);			// path for SCI files
 	sprintf(PARPath, "%spar", ManpPath);			// path for PAR files
-	sprintf(PARPath, "%skfr", ManpPath);			// path for KFR files
+	sprintf(KFRPath, "%skfr", ManpPath);			// path for KFR files
+	sprintf(FracPARPath, "%sfrantpar", ManpPath);	// path for Fractint par files
 	sprintf(IFSPath, "%sifs", ManpPath);			// path for IFS files
 	sprintf(LSYSPath, "%slsys", ManpPath);			// path for LSYS files
 	sprintf(FRMPath, "%sfrm", ManpPath);			// path for formula files
@@ -350,6 +353,15 @@ int	ReadConfigFile(HWND hwnd, char *filename)
 		strcpy(KFRPath, buf + length);
 		trailing(KFRPath);				// remove trailing spaces or newlines
 		t = KFRPath + strlen(KFRPath) - 1;
+		if (*t == '\\')					// remove any backslash to the path if required
+		    *t = '\0';
+		continue;
+		}
+	    if (length = Strlicmp(buf, "FracPARPath="))		// Check for path to Fractint PAR files
+		{
+		strcpy(FracPARPath, buf + length);
+		trailing(FracPARPath);				// remove trailing spaces or newlines
+		t = FracPARPath + strlen(FracPARPath) - 1;
 		if (*t == '\\')					// remove any backslash to the path if required
 		    *t = '\0';
 		continue;
@@ -554,6 +566,8 @@ void	WriteManpINI(HWND hwnd, FILE *fp)
     fprintf(fp, "PARPath=%s\n", PARPath);
     fprintf(fp, "; Path for KFR files\n");
     fprintf(fp, "KFRPath=%s\n", KFRPath);
+    fprintf(fp, "; Path for Fractint PAR files\n");
+    fprintf(fp, "FracPARPath=%s\n", FracPARPath);
     fprintf(fp, "; Path for IFS files\n");
     fprintf(fp, "IFSPath=%s\n", IFSPath);
     fprintf(fp, "; Path for Lsys files\n");
@@ -690,6 +704,7 @@ DLGPROC FAR PASCAL CreateDirDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 		SetDlgItemText(hDlg, IDC_MAP, *(MAPPath) ? MAPPath : "map");
 		SetDlgItemText(hDlg, IDC_PAR, *(PARPath) ? PARPath : "par");
 		SetDlgItemText(hDlg, IDC_KFR, *(KFRPath) ? KFRPath : "kfr");
+		SetDlgItemText(hDlg, IDC_FRACTPAR, *(FracPARPath) ? FracPARPath : "frantpar");
 		SetDlgItemText(hDlg, IDC_SCI, *(SCIPath) ? SCIPath : "sci");
 		SetDlgItemText(hDlg, IDC_GIF, *(GIFPath) ? GIFPath : "gif");
 		SetDlgItemText(hDlg, IDC_MPG, *(MPGPath) ? MPGPath : "mpg");
@@ -723,7 +738,9 @@ DLGPROC FAR PASCAL CreateDirDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 			GetDlgItemText(hDlg, IDC_PAR, PARPath, _MAX_PATH + 1);
 			SetManpWINDir(hDlg, PARPath);
 			GetDlgItemText(hDlg, IDC_KFR, KFRPath, _MAX_PATH + 1);
-			SetManpWINDir(hDlg, PARPath);
+			SetManpWINDir(hDlg, KFRPath);
+			GetDlgItemText(hDlg, IDC_FRACTPAR, FracPARPath, _MAX_PATH + 1);
+			SetManpWINDir(hDlg, FracPARPath);
 			GetDlgItemText(hDlg, IDC_SCI, SCIPath, _MAX_PATH + 1);
 			SetManpWINDir(hDlg, SCIPath );
 			GetDlgItemText(hDlg, IDC_GIF, GIFPath, _MAX_PATH + 1);

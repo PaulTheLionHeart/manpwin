@@ -42,7 +42,9 @@ extern	double	rqlim;				// bailout level
 extern	int	decimals;
 extern	double	param[];
 extern	double	potparam[];			// potential parameters
-extern	int	method;				// inside and outside filters
+//extern	int	method;				// inside and outside filters
+extern	int	InsideMethod;			// inside filters
+extern	int	OutsideMethod;			// outside filters
 extern	int	nFDOption;			// Fractal Dimension option for Tierazon filters
 extern	WORD	degree;				// power
 extern	int	biomorph;			// biomorph colour
@@ -89,7 +91,7 @@ char	PertErrorMessage[200];
 bool	UseMutex = false;			// trade off speed for accuracy
 double	IterDiv = 1.0;				// divide ieration by this amount
 int	PalOffset = 0;				// Start Palette here
-double	RotationAngle = 0.0;			// rotate image in radians
+int	RotationAngle = 0;			// rotate image in degrees
 
 static	int	PerturbationPtr = 0, PerturbationNum = 0;
 	int	NumberThreads = 0;		// set the default to 0. Multi=threading is for experimentation only
@@ -141,7 +143,7 @@ DWORD	WINAPI PertFunction(LPVOID lpParam)
     pDataArray = (PMYDATA)lpParam;
     int(*UserData)(HWND) = user_data;
 
-    ReturnValue = frameCalculator[pDataArray->i].calculateOneFrame(rqlim, PertStatus, degree, method, biomorph, subtype, pDataArray->RSRA, pDataArray->IsPositive, UserData, xdots, 
+    ReturnValue = frameCalculator[pDataArray->i].calculateOneFrame(rqlim, PertStatus, degree, InsideMethod, OutsideMethod, biomorph, subtype, pDataArray->RSRA, pDataArray->IsPositive, UserData, xdots,
 		pDataArray->TZfilter, pDataArray->TrueCol, pDataArray->pPertProgress, &ThreadComplete[pDataArray->i], (NumberThreads > 0), ThreadPertDelay, PertErrorMessage, pDataArray->ghMutex);
     if (ReturnValue < 0)
 	{
@@ -194,20 +196,20 @@ int	InitPerturbation(void)
 
     if (NumberThreads > MAXTHREADS)
 	NumberThreads = MAXTHREADS;
-    if (method > 0 || biomorph >= 0)								// can't have it both ways
+    if (InsideMethod > 0 || OutsideMethod > 0 || biomorph >= 0)					// can't have it both ways
 	SlopeType = NOSLOPE;
     if (NumberThreads <= 0)									// no multi-threading
 	BigCentrex = BigHor + (BigWidth * ((double)Dib.DibWidth / (double)(2 * Dib.DibHeight)));
     BigCentrey = -(BigVert + (BigWidth / 2.0));							// negative because of screen layout
-    if (method >= TIERAZONFILTERS)
+    if (InsideMethod >= TIERAZONFILTERS)
 	for (i = 0; i < NumberThreads; i++)
-	    TZfilter[i].InitFilter(method, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
+	    TZfilter[i].InitFilter(InsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
 //    if (BigNumFlag)
 //	mandel_width = mpfr_get_d(BigWidth.x, MPFR_RNDN);
     if (NumberThreads <= 0)									// no multi-threading
 	{
-	if (method >= TIERAZONFILTERS)
-	    TZfilter[0].InitFilter(method, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
+	if (InsideMethod >= TIERAZONFILTERS)
+	    TZfilter[0].InitFilter(InsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
 	frameCalculator[0].initialiseCalculateFrame(&Dib, &Slope, (int)Dib.DibWidth, (int)Dib.DibHeight, threshold, BigCentrex, BigCentrey, BigWidth / 2, decimals, &TZfilter[0], GlobalHwnd, 0, wpixels, param, potparam, 
 			PaletteShift, &PlotType, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, LightHeight, PertColourMethod, PalOffset, IterDiv);
 	}
@@ -279,7 +281,7 @@ int	DoPerturbation(PMYVARIABLES)
 	    DataArrayZero.IsPositive = (param[4] == 1.0);
 	    }
 
-	status = frameCalculator[0].calculateOneFrame(rqlim, PertStatus, degree, method, biomorph, subtype, DataArrayZero.RSRA, DataArrayZero.IsPositive, UserData, xdots, &TZfilter[0], &TrueCol, &PertProgress[0], 
+	status = frameCalculator[0].calculateOneFrame(rqlim, PertStatus, degree, InsideMethod, OutsideMethod, biomorph, subtype, DataArrayZero.RSRA, DataArrayZero.IsPositive, UserData, xdots, &TZfilter[0], &TrueCol, &PertProgress[0],
 				&ThreadComplete[0], false, ThreadPertDelay, PertErrorMessage, ghMutex);
 	if (status < 0)
 	    {
@@ -465,7 +467,7 @@ void	LoadPerturbationParams(void)
 
 int	TogglePerturbation(WORD *type, int *subtype)
     {
-    if (*type == MANDELFP)
+    if (*type == MANDELFP || *type == MANDEL)
 	{
 	*type = PERTURBATION;
 	*subtype = 0;
@@ -1182,7 +1184,7 @@ DLGPROC FAR PASCAL PertDlg(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		}
 	    tempMethod = PertColourMethod;
 	    tempParam = IDC_COLOUR0 + tempMethod;
-	    CheckRadioButton(hDlg, IDC_COLOUR0, IDC_COLOUR7, tempParam);
+	    CheckRadioButton(hDlg, IDC_COLOUR0, IDC_COLOUR6, tempParam);
 	    return ((DLGPROC)TRUE);
 
 	case WM_COMMAND:

@@ -72,7 +72,7 @@ typedef char * USEGTYPE;
 #define DEFAULTASPECTDRIFT ((float)0.02) /* drift of < 2% is forced to 0% */
 
 
-#define ITEMNAMELEN 18   /* max length of names in .frm/.l/.ifs/.fc */
+#define ITEMNAMELEN 56   /* max length of names in .frm/.l/.ifs/.fc */
 
 #define NUMGENES 21
 
@@ -136,26 +136,6 @@ typedef struct alternatemathstuff ALTERNATE;
 #define dot_product(v1,v2)  ((v1)[0]*(v2)[0]+(v1)[1]*(v2)[1]+(v1)[2]*(v2)[2])  /* TW 7-09-89 */
 #endif
 
-#define    CMAX    4   /* maximum column (4 x 4 matrix) */
-#define    RMAX    4   /* maximum row    (4 x 4 matrix) */
-#define    DIM     3   /* number of dimensions */
-
-typedef double MATRIX [RMAX] [CMAX];  /* matrix of doubles */
-typedef int   IMATRIX [RMAX] [CMAX];  /* matrix of ints    */
-typedef long  LMATRIX [RMAX] [CMAX];  /* matrix of longs   */
-
-/* A MATRIX is used to describe a transformation from one coordinate
-system to another.  Multiple transformations may be concatenated by
-multiplying their transformation matrices. */
-
-typedef double VECTOR [DIM];  /* vector of doubles */
-typedef int   IVECTOR [DIM];  /* vector of ints    */
-typedef long  LVECTOR [DIM];  /* vector of longs   */
-
-/* A VECTOR is an array of three coordinates [x,y,z] representing magnitude
-and direction. A fourth dimension is assumed to always have the value 1, but
-is not in the data structure */
-
 #ifdef PI
 #undef PI
 #endif
@@ -190,8 +170,8 @@ struct baseunit { /* smallest part of a fractint 'gene' */
    char level;    /* mutation level at which this should become active */
 };
 
-typedef struct baseunit    GENEBASE;
-#define sign(x) (((x) < 0) ? -1 : ((x) != 0)  ? 1 : 0)
+//typedef struct baseunit    GENEBASE;
+//#define sign(x) (((x) < 0) ? -1 : ((x) != 0)  ? 1 : 0)
 
 /* 
  * The following typedefs allow declaring based data

@@ -55,21 +55,25 @@ extern	WORD	special;		// special colour, phase etc
 extern	RGBTRIPLE OrbitColour;		// Indexed colour for the orbit displays in Julia sets
 extern	int	biomorph;		// biomorph colour
 extern	int	decomp;			// number of decomposition colours
-extern	int	blockindex;		/* for solid guessing blocksize */
+extern	int	blockindex;		// for solid guessing blocksize
 extern	BYTE	pairflag;		// stereo pair
-extern	int	AutoStereo_value;	/* AutoStereo depth value */
+extern	int	AutoStereo_value;	// AutoStereo depth value
 extern	double	param[];
 extern	double	potparam[];
 extern	BOOL	RGBFilter;		// If true, we use the plotting routine for RGB filters (no plotting of iteration)
 extern	BOOL	UseCurrentPalette;	// do we use the ManpWIN palette? If false, generate internal filter palette
-extern	double	x_rot;			/* angle display plane to x axis */
-extern	double	y_rot;			/* angle display plane to y axis */
-extern	double	z_rot;			/* angle display plane to z axis */
-extern	double	sclx, scly, sclz;	/* scale */
+extern	double	x_rot;			// angle display plane to x axis
+extern	double	y_rot;			// angle display plane to y axis
+extern	double	z_rot;			// angle display plane to z axis
+extern	double	sclx, scly, sclz;	// scale
 extern	int	HenonPoints;
-extern	int	method;			// inside and outside filters
-extern	int	orientation;		// 0, 90, 180 or 270 degrees
-	BOOL	ExpandStarTrailColours = TRUE;	// use the first 16 colours if false, else expand across the whole iteration range
+extern	int	InsideMethod;		// the number of the inside filter
+extern	int	OutsideMethod;		// the number of the outside filter
+extern	int	RotationAngle;		// in degrees
+extern	Complex	RotationCentre;		// centre of rotation
+extern	int	BailoutTestType;	// type of bailout test
+
+BOOL	ExpandStarTrailColours = TRUE;	// use the first 16 colours if false, else expand across the whole iteration range
 extern	double	dStrands;		// for Tierazon filters
 	long    fillcolor = -1;		// tesseral fillcolor: -1=normal 0 means don't fill
 extern	BOOL	invert;			// invert fractal
@@ -99,13 +103,14 @@ extern	BigDouble   BigHor, BigVert, BigWidth;
 
 #define	MAXFUNCTIONS	60
 
-extern	WORD	type;			/* fractal type */
+extern	WORD	type;			// fractal type
 
 extern	void	init_log(HWND);
 extern	int	analyse_corner(char *);
 extern	int	FindInitCond(char *Str);
 extern	int	FindFormula(char *Str);
 extern	void	ConvertBignum2String(char *s, mpfr_t num);
+extern	CMatrix	Mat;			// transformation and rotation matrix
 
 //extern	void	SaveUndo(void);
 //extern	int	atox(char);
@@ -399,17 +404,18 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 //     short		nCtrlID, filterSum, i, divisor; 
      char		s[100];
      BOOL		bTrans ;
-     static	int	temp_logval, temp_inside, temp_biomorph, 
-							temp_decomp, temp_3Dthreshold;
+     static	int	temp_logval, temp_inside, temp_biomorph, temp_decomp, temp_3Dthreshold, OrigRotationAngle;
      static	long	temp_threshold;
      static	short	temp_blockindex;
      static     char	temp;
-     static     short	tempMethod;
+     static     short	tempInsideMethod;
+     static     short	tempOutsideMethod;
      static     UINT	tempParam;
      static     WORD	temp_special;
      static     long	temp_OrbitColour;
-     static     WORD	temp_orientation;
+     static     WORD	temp_RotationAngle;
      static     long	temp_fillcolor;
+     static     int	TempBailoutTest;
 
      switch (message)
 	  {
@@ -418,7 +424,7 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 		SetDlgItemInt(hDlg, IDM_THRESHOLD, threshold, TRUE);
 		sprintf(s, "%02X%02X%02X", OrbitColour.rgbtRed, OrbitColour.rgbtGreen, OrbitColour.rgbtBlue);
 		SetDlgItemText(hDlg, IDC_ORBITCOL, s);
-//		SetDlgItemInt(hDlg, IDC_ORBITCOL, OrbitColour, TRUE);
+		SetDlgItemInt(hDlg, IDM_ROTDEG, RotationAngle, TRUE);
 		SetDlgItemInt(hDlg, IDM_THRESH_OFF, Offset3D, TRUE);
 		SetDlgItemInt(hDlg, IDM_BLKINDEX, blockindex, TRUE);
 		SetDlgItemInt(hDlg, IDM_LOGVAL, logval, TRUE);
@@ -452,20 +458,42 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 		sprintf(s, "%5.2f", bumpMappingStrength);
 		SetDlgItemText(hDlg, IDM_MAPSTRENGTH, s);
 		
-	        tempMethod = method;
+		TempBailoutTest = BailoutTestType;
+		switch (TempBailoutTest)
+		    {
+		    case BAIL_MOD:
+			tempParam = IDC_BAIL_MOD;
+			break;
+		    case BAIL_REAL:
+			tempParam = IDC_BAIL_REAL;
+			break;
+		    case BAIL_IMAG:
+			tempParam = IDC_BAIL_IMAG;
+			break;
+		    case BAIL_OR:
+			tempParam = IDC_BAIL_OR;
+			break;
+		    case BAIL_AND:
+			tempParam = IDC_BAIL_AND;
+			break;
+		    case MANH:
+			tempParam = IDC_MANH;
+			break;
+		    case MANR:
+			tempParam = IDC_MANR;
+			break;
+		    }
+
+		CheckRadioButton(hDlg, IDC_BAIL_MOD, IDC_MANR, tempParam);
+
+		tempInsideMethod = InsideMethod;
 		// can't access tierazon filter/colour methods, so set the radio button to TIERAZONFILTERS or TIERAZONCOLOURS
-		if (method > TIERAZONFILTERS)
-		    tempMethod = (method > TIERAZONCOLOURS) ? TIERAZONCOLOURS : TIERAZONFILTERS;
-	        switch (tempMethod)
+		if (InsideMethod > TIERAZONFILTERS)
+		    tempInsideMethod = (InsideMethod > TIERAZONCOLOURS) ? TIERAZONCOLOURS : TIERAZONFILTERS;
+	        switch (tempInsideMethod)
 		    {
 		    case NONE:
-			tempParam = IDC_NONE;
-			break;
-		    case REAL:
-			tempParam = IDC_REAL1;
-			break;
-		    case IMAG:
-			tempParam = IDC_IMAG1;
+			tempParam = IDC_NO_INSIDE;
 			break;
 		    case BOF60:
 			tempParam = IDC_BOF60;
@@ -473,24 +501,12 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 		    case BOF61:
 			tempParam = IDC_BOF61;
 			break;
-		    case PERT1:
-			tempParam = IDC_PERT1;
-			break;
-		    case PERT2:
-			tempParam = IDC_PERT2;
-			break;
 		    case ZMAG:
 			tempParam = IDC_ZMAG;
 			break;
-		    case MULT:
-			tempParam = IDC_MULT;
-			break;
-		    case SUM:
-			tempParam = IDC_SUM;
-			break;
-		    case ATAN:
-			tempParam = IDC_ATAN;
-			break;
+//		    case ATAN:
+//			tempParam = IDC_ATAN;
+//			break;
 		    case POTENTIAL:
 			tempParam = IDC_POTENTIAL;
 			break;
@@ -507,7 +523,38 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 			tempParam = IDC_TIERAZONCOLOURS;
 			break;
 		    }
-		CheckRadioButton(hDlg, IDC_NONE, IDC_TIERAZONCOLOURS, tempParam);
+		CheckRadioButton(hDlg, IDC_NO_INSIDE, IDC_TIERAZONCOLOURS, tempParam);
+
+		tempOutsideMethod = OutsideMethod;
+		switch (tempOutsideMethod)
+		    {
+		    case NONE:
+			tempParam = IDC_NO_OUTSIDE;
+			break;
+		    case REAL:
+			tempParam = IDC_REAL1;
+			break;
+		    case IMAG:
+			tempParam = IDC_IMAG1;
+			break;
+		    case PERT1:
+			tempParam = IDC_PERT1;
+			break;
+		    case PERT2:
+			tempParam = IDC_PERT2;
+			break;
+		    case MULT:
+			tempParam = IDC_MULT;
+			break;
+		    case SUM:
+			tempParam = IDC_SUM;
+			break;
+		    case ATAN:
+			tempParam = IDC_ATAN;
+			break;
+		    }
+
+		CheckRadioButton(hDlg, IDC_NO_OUTSIDE, IDC_PERT2, tempParam);
 		CheckRadioButton(hDlg, IDC_CARTESIAN, IDC_CONICAL, IDC_CARTESIAN + CoordSystem);
 
 		temp = calcmode;
@@ -546,8 +593,8 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 		    }
 		CheckRadioButton(hDlg, IDC_GUESS, IDC_FWDDIFF, tempParam);
 
-		temp_orientation = orientation;
-	        switch (orientation)
+		temp_RotationAngle = RotationAngle % 360;
+	        switch (RotationAngle)
 		    {
 		    case NORMAL:
 			tempParam = IDC_NORMAL;
@@ -561,8 +608,11 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 		    case 270:
 			tempParam = IDC_270DEGREES;
 			break;
+		    default:
+			tempParam = IDM_ROTDEG;
+			temp_RotationAngle = GetDlgItemInt(hDlg, IDM_ROTDEG, &bTrans, TRUE);
 		    }
-		CheckRadioButton(hDlg, IDC_NORMAL, IDC_270DEGREES, tempParam);
+		CheckRadioButton(hDlg, IDC_NORMAL, IDC_OTHER_DEGREES, tempParam);
 
 		hCtrl = GetDlgItem (hDlg, IDC_STRETCHPALETTE);
 		SendMessage(hCtrl, BM_SETCHECK, TrueCol.Stretch, 0L);
@@ -732,17 +782,45 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 			CheckRadioButton(hDlg, IDC_GUESS, IDC_FWDDIFF, (int) LOWORD(wParam));
 		        return (DLGPROC) TRUE ;
 
-		    case IDC_NONE:
-		    case IDC_REAL1:
-		    case IDC_IMAG1:
+		    case IDC_BAIL_MOD:
+		    case IDC_BAIL_REAL:
+		    case IDC_BAIL_IMAG:
+		    case IDC_BAIL_OR:
+		    case IDC_BAIL_AND:
+		    case IDC_MANH:
+		    case IDC_MANR:
+			switch ((int)LOWORD(wParam))
+			    {
+			    case IDC_BAIL_MOD:
+				TempBailoutTest = BAIL_MOD;
+				break;
+			    case IDC_BAIL_REAL:
+				TempBailoutTest = BAIL_REAL;
+				break;
+			    case IDC_BAIL_IMAG:
+				TempBailoutTest = BAIL_IMAG;
+				break;
+			    case IDC_BAIL_OR:
+				TempBailoutTest = BAIL_OR;
+				break;
+			    case IDC_BAIL_AND:
+				TempBailoutTest = BAIL_AND;
+				break;
+			    case IDC_MANH:
+				TempBailoutTest = MANH;
+				break;
+			    case IDC_MANR:
+				TempBailoutTest = MANR;
+				break;
+			    }
+
+			CheckRadioButton(hDlg, IDC_BAIL_MOD, IDC_MANR, (int)LOWORD(wParam));
+			return (DLGPROC)TRUE;
+
+		    case IDC_NO_INSIDE:
 		    case IDC_BOF60:
 		    case IDC_BOF61:
 		    case IDC_ZMAG:
-		    case IDC_MULT:
-		    case IDC_SUM:
-		    case IDC_ATAN:
-		    case IDC_PERT1:
-		    case IDC_PERT2:
 		    case IDC_EPSCR:
 		    case IDC_POTENTIAL:
 		    case IDC_STARTRAILS:
@@ -750,78 +828,104 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 		    case IDC_TIERAZONCOLOURS:
 		        switch ((int) LOWORD(wParam))
 			    {
-			    case IDC_NONE:
-				tempMethod = NONE;
-				break;
-			    case IDC_REAL1:
-				tempMethod = REAL;
-				break;
-			    case IDC_IMAG1:
-				tempMethod = IMAG;
+			    case IDC_NO_INSIDE:
+				tempInsideMethod = NONE;
 				break;
 			    case IDC_BOF60:
-				tempMethod = BOF60;
+				tempInsideMethod = BOF60;
 				break;
 			    case IDC_BOF61:
-				tempMethod = BOF61;
-				break;
-			    case IDC_PERT1:
-				tempMethod = PERT1;
-				break;
-			    case IDC_PERT2:
-				tempMethod = PERT2;
+				tempInsideMethod = BOF61;
 				break;
 			    case IDC_ZMAG:
-				tempMethod = ZMAG;
-				break;
-			    case IDC_MULT:
-				tempMethod = MULT;
-				break;
-			    case IDC_SUM:
-				tempMethod = SUM;
-				break;
-			    case IDC_ATAN:
-				tempMethod = ATAN;
+				tempInsideMethod = ZMAG;
 				break;
 			    case IDC_EPSCR:
-				tempMethod = EPSCROSS;
+				tempInsideMethod = EPSCROSS;
 				break;
 			    case IDC_POTENTIAL:
-				tempMethod = POTENTIAL;
+				tempInsideMethod = POTENTIAL;
 				break;
 			    case IDC_STARTRAILS:
-				tempMethod = STARTRAIL;
+				tempInsideMethod = STARTRAIL;
 				break;
 			    case IDC_TIERAZONFILTERS:
-				tempMethod = TIERAZONFILTERS;
+				tempInsideMethod = TIERAZONFILTERS;
 				break;
 			    case IDC_TIERAZONCOLOURS:
-				tempMethod = TIERAZONCOLOURS;
+				tempInsideMethod = TIERAZONCOLOURS;
 				break;
 			    }
-			CheckRadioButton(hDlg, IDC_NONE, IDC_TIERAZONCOLOURS, (int) LOWORD(wParam));
+			CheckRadioButton(hDlg, IDC_NO_INSIDE, IDC_TIERAZONCOLOURS, (int) LOWORD(wParam));
 		        return (DLGPROC) TRUE ;
+
+		    case IDC_NO_OUTSIDE:
+		    case IDC_REAL1:
+		    case IDC_IMAG1:
+		    case IDC_MULT:
+		    case IDC_ATAN:
+		    case IDC_SUM:
+		    case IDC_PERT1:
+		    case IDC_PERT2:
+			switch ((int)LOWORD(wParam))
+			    {
+			    case IDC_NO_OUTSIDE:
+				tempOutsideMethod = NONE;
+				break;
+			    case IDC_REAL1:
+				tempOutsideMethod = REAL;
+				break;
+			    case IDC_IMAG1:
+				tempOutsideMethod = IMAG;
+				break;
+			    case IDC_PERT1:
+				tempOutsideMethod = PERT1;
+				break;
+			    case IDC_PERT2:
+				tempOutsideMethod = PERT2;
+				break;
+			    case IDC_MULT:
+				tempOutsideMethod = MULT;
+				break;
+			    case IDC_SUM:
+				tempOutsideMethod = SUM;
+				break;
+			    case IDC_ATAN:
+				tempOutsideMethod = ATAN;
+				break;
+			    }
+			CheckRadioButton(hDlg, IDC_NO_OUTSIDE, IDC_PERT2, (int)LOWORD(wParam));
+			return (DLGPROC)TRUE;
+
 		    case IDC_NORMAL:
 		    case IDC_90DEGREES:
 		    case IDC_180DEGREES:
 		    case IDC_270DEGREES:
-		        switch ((int) LOWORD(wParam))
+		    case IDC_OTHER_DEGREES:
+			switch ((int) LOWORD(wParam))
 			    {
 			    case IDC_NORMAL:
-				temp_orientation = NORMAL;
+				temp_RotationAngle = NORMAL;
 				break;
 			    case IDC_90DEGREES:
-				temp_orientation = 90;
+				temp_RotationAngle = 90;
 				break;
 			    case IDC_180DEGREES:
-				temp_orientation = 180;
+				temp_RotationAngle = 180;
 				break;
 			    case IDC_270DEGREES:
-				temp_orientation = 270;
+				temp_RotationAngle = 270;
 				break;
+			    default:
+				temp_RotationAngle = GetDlgItemInt(hDlg, IDM_ROTDEG, &bTrans, TRUE);
 			    }
-			CheckRadioButton(hDlg, IDC_NORMAL, IDC_270DEGREES, (int) LOWORD(wParam));
-		        return (DLGPROC) TRUE ;
+			SetDlgItemInt(hDlg, IDM_ROTDEG, temp_RotationAngle, TRUE);
+			CheckRadioButton(hDlg, IDC_NORMAL, IDC_OTHER_DEGREES, (int) LOWORD(wParam));
+			return (DLGPROC)TRUE;
+		    case IDM_ROTDEG:
+			temp_RotationAngle = GetDlgItemInt(hDlg, IDM_ROTDEG, &bTrans, TRUE);
+			CheckRadioButton(hDlg, IDC_NORMAL, IDC_OTHER_DEGREES, IDC_OTHER_DEGREES);
+			return (DLGPROC) TRUE ;
 
 		    case IDOK:
 			if (logval == 0 && temp_logval != 0)
@@ -849,17 +953,19 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 //			    special = 255;
 			else
 			    special = temp_special;
-			method = tempMethod;
+			BailoutTestType = TempBailoutTest;
+			InsideMethod = tempInsideMethod;
+			OutsideMethod = tempOutsideMethod;
 			OrbitColour.rgbtBlue = temp_OrbitColour & 0xff;
 			OrbitColour.rgbtGreen = (temp_OrbitColour >> 8) & 0xff;
 			OrbitColour.rgbtRed = (temp_OrbitColour >> 16) & 0xff;
-			if (method == POTENTIAL)
+			if (InsideMethod == POTENTIAL)
 			    {
 			    potparam[0] = GetDlgItemInt(hDlg, IDM_MAXCOL, &bTrans, TRUE);
 			    potparam[1] = GetDlgItemInt(hDlg, IDM_SLOPE, &bTrans, TRUE);
 			    potparam[2] = GetDlgItemInt(hDlg, IDM_BAILOUT, &bTrans, TRUE);
 			    }
-			if (method >= TIERAZONFILTERS)
+			if (InsideMethod >= TIERAZONFILTERS)
 			    {
 			    GetDlgItemText(hDlg, IDM_STALKS, s, 30);
 			    calcmode = '2';
@@ -880,7 +986,20 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 			GetDlgItemText(hDlg, IDC_BKGROUNDCOLOUR, s, 10);
 			sscanf(s, "%X", &BackgroundColour);
 			cycleflag = FALSE;
-			orientation = temp_orientation;
+			RotationAngle = temp_RotationAngle % 360;
+			if (temp_RotationAngle < 0)
+			    RotationAngle = -(-temp_RotationAngle % 360);
+			else
+			    RotationAngle = temp_RotationAngle % 360;
+			if (RotationAngle != NORMAL && RotationAngle != 90 && RotationAngle != 180 && RotationAngle != 270)
+			    {
+			    z_rot = (double)RotationAngle;
+			    RotationCentre.x = hor + (mandel_width * ScreenRatio) / 2;
+			    RotationCentre.y = vert + mandel_width / 2;
+			    if (OrigRotationAngle != RotationAngle)
+				Mat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
+			    }
+			OrigRotationAngle = RotationAngle;
 			distest = GetDlgItemInt(hDlg, IDC_DISTEST, &bTrans, TRUE);
 			distestwidth = GetDlgItemInt(hDlg, IDC_DISTESTWIDTH, &bTrans, TRUE);
 
@@ -1371,6 +1490,25 @@ DLGPROC FAR PASCAL FractTypeDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 		    case LATOO:
 			tempParam = IDC_LATOO;
 			break;
+		    case CHIP:
+			tempParam = IDC_CHIP;
+			break;
+		    case QUADRUPTWO:
+			tempParam = IDC_QUADRUPTWO;
+			break;
+		    case THREEPLY:
+			tempParam = IDC_THREEPLY;
+			break;
+		    case ICON:
+			tempParam = IDC_ICONS;
+			break;
+		    case DYNAMICFP:
+			tempParam = IDC_DYNAMIC;
+			break;
+		    case FPPOPCORN:
+			tempParam = IDC_FRACTINTPOPCORN;
+			break;
+
 		    }
 		CheckRadioButton(hDlg, IDC_MANDEL, IDC_TEST, tempParam);
 		SetFocus(GetDlgItem(hDlg, tempParam));
@@ -1821,7 +1959,24 @@ DLGPROC FAR PASCAL FractTypeDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 		    case IDC_LATOO:
 			temp = LATOO;
 			break;
-
+		    case IDC_CHIP:
+			temp = CHIP;
+			break;
+		    case IDC_QUADRUPTWO:
+			temp = QUADRUPTWO;
+			break;
+		    case IDC_THREEPLY:
+			temp = THREEPLY;
+			break;
+		    case IDC_ICONS:
+			temp = ICON;
+			break;
+		    case IDC_DYNAMIC:
+			temp = DYNAMICFP;
+			break;
+		    case IDC_FRACTINTPOPCORN:
+			temp = FPPOPCORN;
+			break;
 			CheckRadioButton(hDlg, IDC_MANDEL, IDC_TEST, (int) LOWORD(wParam));
 		        return (DLGPROC) TRUE ;
 
@@ -2454,33 +2609,46 @@ DLGPROC FAR PASCAL LyapDlg(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 #define	MAXFORMULASTRINGLENGTH		3600	
 
 char	FormulaString[MAXFORMULASTRINGLENGTH] = "\0";		// used to hold the full formula
+extern	char	*str_find_ci(char *, char *);
 
-void	AnalyseFormulaString(char *Startup, char *Formula, char *Bailout, char *FormulaString)
+void	AnalyseFormulaString(char *Startup, char *OrigStartup, char *Formula, char *Bailout, char *FormulaString)
 
     {
-    char    *p, *q, *r;
+    char    *p, *s, *t, *u;
     size_t  length = strlen(FormulaString);
 
-    p = FormulaString + length - 1;	// find end of formula string
-    q = Startup;
-    r = Formula;
+    char    *TempStr = new char [length + 1];
+    
+    strcpy(TempStr, FormulaString);			// protect original string
+    p = TempStr;
 
-    while (*p != ',' && *p)
-	p--;				// assume bailout starts at the last ','
-    strcpy(Bailout, p + 1);
-    *p = '\0';
-    p = FormulaString;
-    while (*p != ':' && *p)		// copy startup
+    u = str_find_ci(TempStr, ";");			// is it a comment?
+    if (u)
+	*u = '\0';					// remove comment
+    s = str_find_ci(TempStr, ":");			// possible initial condition
+    if (s)						// initial condition is given in the string and it's not part of a comment
 	{
-	*q = *p; p++; q++;
+	*(s - 1) = '\0';				// replace the ':' with a NULL
+	strcpy(Startup, p);
+	p = s;
 	}
-    *q = '\0';
-    p++;				// we don't want the ':'
-    while (*p)				// copy formula
+    else 
+	strcpy(Startup, OrigStartup);
+
+    if ((t = str_find_ci(p, "|")) != 0)			// bailout is given in the string
+	{ 
+	*(t - 2) = '\0';				// t - 2 so we keep the '|'
+	strcpy(Formula, p);
+	p = t - 1;
+	strcpy(Bailout, p);
+	}
+    else
 	{
-	*r = *p; p++; r++;
+	strcpy(Formula, p);
+	strcpy(Bailout, "|z| < 4.0");
 	}
-    *r = '\0';
+    
+    if (TempStr) { delete[] TempStr; TempStr = NULL; }
     }
 
 void	CreateFormulaString(char *Startup, char *Formula, char *Bailout, char *FormulaString)
@@ -2515,40 +2683,32 @@ DLGPROC FAR PASCAL ScrnFormDlg(HWND hDlg, UINT message, UINT wParam, LONG lParam
 
     {
     int			i;
-    static	int	index = -1;//, numrecords = 0;
-    static	int	index1 = -1;//, numFormulae = 0;
+    static	int	index = -1;
+    static	int	index1 = -1;
     static	char	Formula[1200] = "z = z*z + c + p1";
     static	char	Bailout[120] = "|z| < 4.0";
     static	char	Startup[1200] = "z=c=pixel";
+    static	int	OldIndex1;		// used to check if formula has been edited. If it doesn't change, then it is either a repeat or a change ion the curremy formula
 
     switch (message) 
 	{
         case WM_INITDIALOG:
-//	    if (!numrecords)	    // we'd better count how many records we have
-//		{
-//		while (InitCond[numrecords])
-//		    numrecords++;
-//		}
-//	    for (i = 0; i < numrecords; i++)
 	    for (i = 0; InitCond[i]; i++)
 		SendDlgItemMessage(hDlg, IDC_INITIAL, LB_ADDSTRING, (WPARAM)NULL, (LPARAM) (LPSTR) InitCond[i]);
 	    if (index == -1 || *Startup != '\0')		// index not loaded, but have a default
 		index = FindInitCond(Startup);
-            SendDlgItemMessage(hDlg, IDC_INITIAL, (UINT)LB_SETCURSEL, (WPARAM)((index == -1) ? 0 : index), 0L);
+            SendDlgItemMessage(hDlg, IDC_INITIAL, (UINT)LB_SETCURSEL, (WPARAM)((index == -1) ? 1 : index), 0L);
 
 	    for (i = 0; DirectFormula[i]; i++)
 		SendDlgItemMessage(hDlg, IDC_FORMULA, LB_ADDSTRING, (WPARAM)NULL, (LPARAM) (LPSTR) DirectFormula[i]);
-	    if (index1 == -1 || *Startup != '\0')		// index not loaded, but have a default
-		index1 = FindFormula(Formula);
+	    if (index1 == -1 || *Formula != '\0')		// index not loaded, but have a default
+		if (OldIndex1 != index1)			// it won't be found if the formula has been edited
+		    index1 = FindFormula(Formula);
             SendDlgItemMessage(hDlg, IDC_FORMULA, (UINT)LB_SETCURSEL, (WPARAM)((index1 == -1) ? 0 : index1), 0L);
-	    if (*FormulaString != '\0')
-		AnalyseFormulaString(Startup, Formula, Bailout, FormulaString);
-	    //	    sprintf(Bailout, "%lf", rqlim);
-	    //	    SetDlgItemText(hDlg, IDC_BAILOUT, ".004 <= |z|");
 	    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
 	    SetDlgItemText(hDlg, IDC_FORMULAVALUE, Formula);
 	    SetDlgItemText(hDlg, IDC_INITIALVALUE, Startup);
-
+	    OldIndex1 = index1;
             return ((DLGPROC) TRUE);
 
         case WM_COMMAND:
@@ -2556,19 +2716,9 @@ DLGPROC FAR PASCAL ScrnFormDlg(HWND hDlg, UINT message, UINT wParam, LONG lParam
 //	    switch (wParam)
 		{
                 case IDOK:
-//                    index = SendDlgItemMessage(hDlg, IDC_INITIAL, LB_GETCURSEL, 0, 0L);
-//		    if (index == LB_ERR) 
-//			{
-//			MessageBox(hDlg, "No Choice selected", "Select From a List", MB_OK | MB_ICONEXCLAMATION);
-//			break;
-//			}
-//		    strcpy(Startup, InitCond[index]);
 		    GetDlgItemText(hDlg, IDC_FORMULAVALUE, Formula, 1200);
 		    GetDlgItemText(hDlg, IDC_BAILOUT, Bailout, 100);
 		    GetDlgItemText(hDlg, IDC_INITIALVALUE, Startup, 1200);
-//		    rqlim = atof(Bailout);
-//		    sprintf(FormulaString, "%s:%s,|z| <= %f", Startup, Formula, rqlim);
-//		    sprintf(FormulaString, "%s:%s,%s", Startup, Formula, Bailout);
 		    CreateFormulaString(Startup, Formula, Bailout, FormulaString);
 		    EndDialog(hDlg, TRUE);
                     return ((DLGPROC) TRUE);
@@ -2578,53 +2728,31 @@ DLGPROC FAR PASCAL ScrnFormDlg(HWND hDlg, UINT message, UINT wParam, LONG lParam
                     return (FALSE);
 
                 case IDC_FORMULA:
-                    switch (HIWORD(wParam) & 0x0003) 
-//                    switch (LOWORD(lParam)) 
+		    index1 = (int)SendDlgItemMessage(hDlg, IDC_FORMULA, LB_GETCURSEL, 0, 0L);
+		    if (index1 == LB_ERR) 
 			{
-//                        case LBN_SELCHANGE:
-//                            index1 = SendDlgItemMessage(hDlg, IDC_FNLIST1, LB_GETCURSEL, 0, 0L);
-//                            if (index1 == LB_ERR)
-//                                break;
-//                            break;
-                         
-                       case LBN_DBLCLK:
-			    index1 = (int)SendDlgItemMessage(hDlg, IDC_FORMULA, LB_GETCURSEL, 0, 0L);
-			    if (index1 == LB_ERR) 
-				{
-				MessageBox(hDlg, "No Choice selected","Select From a List", MB_OK | MB_ICONEXCLAMATION);
-				break;
-				}
-			    SetDlgItemText(hDlg, IDC_FORMULAVALUE, DirectFormula[index1]);
-			    strcpy(Formula, DirectFormula[index1]);
-//			    EndDialog(hDlg, TRUE);
-			    return ((DLGPROC) TRUE);
-                  
+			MessageBox(hDlg, "No Choice selected","Select From a List", MB_OK | MB_ICONEXCLAMATION);
+			break;
 			}
+						    index = (int)SendDlgItemMessage(hDlg, IDC_INITIAL, LB_GETCURSEL, 0, 0L);
+		    if (index < 0) index = 1;
+		    if (*DirectFormula[index1] != '\0')
+			if (OldIndex1 != index1)			// don't overwrite an edited formula
+			    AnalyseFormulaString(Startup, InitCond[index], Formula, Bailout, DirectFormula[index1]);
+		    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
+		    SetDlgItemText(hDlg, IDC_FORMULAVALUE, Formula);
+		    SetDlgItemText(hDlg, IDC_INITIALVALUE, Startup);
 		    return ((DLGPROC) TRUE);
                 case IDC_INITIAL:
-                    switch (HIWORD(wParam) & 0x0003) 
-//                    switch (LOWORD(lParam)) 
+		    index = (int)SendDlgItemMessage(hDlg, IDC_INITIAL, LB_GETCURSEL, 0, 0L);
+		    if (index == LB_ERR) 
 			{
-//                        case LBN_SELCHANGE:
-//                            index1 = SendDlgItemMessage(hDlg, IDC_FNLIST1, LB_GETCURSEL, 0, 0L);
-//                            if (index1 == LB_ERR)
-//                                break;
-//                            break;
-                         
-                       case LBN_DBLCLK:
-			    index = (int)SendDlgItemMessage(hDlg, IDC_INITIAL, LB_GETCURSEL, 0, 0L);
-			    if (index == LB_ERR) 
-				{
-				MessageBox(hDlg, "No Choice selected","Select From a List", MB_OK | MB_ICONEXCLAMATION);
-				break;
-				}
-			    SetDlgItemText(hDlg, IDC_INITIALVALUE, InitCond[index]);
-			    strcpy(Startup, InitCond[index]);
-//			    EndDialog(hDlg, TRUE);
-			    return ((DLGPROC) TRUE);
-                  
+			MessageBox(hDlg, "No Choice selected","Select From a List", MB_OK | MB_ICONEXCLAMATION);
+			break;
 			}
-		    return ((DLGPROC) TRUE);
+		    SetDlgItemText(hDlg, IDC_INITIALVALUE, InitCond[index]);
+		    strcpy(Startup, InitCond[index]);
+//		    return ((DLGPROC) TRUE);
 	    return ((DLGPROC) TRUE);
 	    }
 	}
@@ -2648,7 +2776,7 @@ DLGPROC FAR PASCAL StereoPairDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
 	    SetDlgItemInt(hDlg, IDC_PAIRFLAG, pairflag, TRUE);
 	    SetDlgItemInt(hDlg, IDC_STEREODEPTH, AutoStereo_value, TRUE);
 	    return (DLGPROC)TRUE;
-		case WM_COMMAND:
+	case WM_COMMAND:
 	    switch ((int)LOWORD(wParam))
 		{
 		case IDOK:

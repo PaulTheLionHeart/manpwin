@@ -106,7 +106,7 @@ int	CPixel::ysym_split(int yaxis_col, int yaxis_between/*, int *symmetry*/)
 **************************************************************************/
 
 int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[], WORD degree, WORD type,
-    int subtype, BYTE calcmode, int orientation, CFract *Fractal, double hor, double vert, double mandel_width, BYTE BigNumFlag, BigDouble *Big_xxmin, 
+    int subtype, BYTE calcmode, int RotationAngle, CFract *Fractal, double hor, double vert, double mandel_width, BYTE BigNumFlag, BigDouble *Big_xxmin,
     BigDouble *Big_xxmax, BigDouble *Big_yymin, BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio, double *xxmin, 
     double *xxmax, double *yymin, double *yymax, WORD special, BYTE juliaflag)
 
@@ -241,9 +241,9 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 		    fract_sym = YAXIS;
 		break;
 	    case FORMULA:
-//		fract_sym = NOSYM;					// for now anyway
-		*yymax = vert + mandel_width;
-		fract_sym = *symmetry;
+		fract_sym = NOSYM;					// for now anyway
+//		*yymax = vert + mandel_width;
+//		fract_sym = *symmetry;
 		break;
 //	    case SCREENFORMULA:
 //		fract_sym = symmetry;
@@ -325,7 +325,7 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
     if (calcmode == 'F')
 	 fract_sym = NOSYM;
 	//    fract_sym = NOSYM;					// debug
-    if (orientation == 90 || orientation == 270)			// if rotated image by 90 or 270 degrees - then reverse symmetry
+    if (RotationAngle == 90 || RotationAngle == 270)			// if rotated image by 90 or 270 degrees - then reverse symmetry
 	{
 	switch (fract_sym)
 	    {
@@ -337,9 +337,11 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 		break;
 	    }
 	}
+    else if (RotationAngle != 0)					// if rotated image by intermediate angle
+	fract_sym = NOSYM;
 
 //    if (type != FORMULA)
-	setsymmetry(fract_sym, /*thread, */1, _3dflag, decomp, pairflag, method, invert, CoordSystem, param, degree, type, subtype, calcmode, orientation, Fractal, hor, 
+	setsymmetry(fract_sym, /*thread, */1, _3dflag, decomp, pairflag, method, invert, CoordSystem, param, degree, type, subtype, calcmode, RotationAngle, Fractal, hor,
 	    vert, mandel_width, xxmax, xxmin, yymin, yymax, special, juliaflag, PlotType, BigNumFlag, Big_xxmin, Big_xxmax, Big_yymin, Big_yymax, BigHor, BigVert, BigWidth, 
 	    ScreenRatio /*ixstop, xxstop, iystop, yystop*/);
 
@@ -351,7 +353,7 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
     **************************************************************************/
 
     void	CPixel::setsymmetry(int sym, int uselist, BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[],
-	WORD degree, WORD type, int subtype, BYTE calcmode, int orientation, CFract *Fractal, double hor, double vert, double mandel_width, double *xxmax, double *xxmin,
+	WORD degree, WORD type, int subtype, BYTE calcmode, int RotationAngle, CFract *Fractal, double hor, double vert, double mandel_width, double *xxmax, double *xxmin,
 	double *yymin, double *yymax, WORD special, BYTE juliaflag, int *PlotType, BYTE BigNumFlag, BigDouble *Big_xxmin, BigDouble *Big_xxmax, BigDouble *Big_yymin,
 	BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio)
 

@@ -117,7 +117,8 @@ extern	double	LightHeight;
 extern	int	PalOffset;			// begin palette here
 extern	double	IterDiv;			// divide ieration by this amount
 extern	int	PertColourMethod;		// some ideas from Kalles
-
+extern	int	RotationAngle;			// in degrees
+extern	Complex	RotationCentre;			// centre of rotation
 extern	char	LyapSequence[];			// hold the AB sequence for Lyapunov fractals
 
 static	int	HorOffset, VertOffset;
@@ -274,8 +275,8 @@ extern	DLGPROC FAR PASCAL	SelectColourDlg (HWND, UINT, WPARAM, LPARAM);
 extern	DLGPROC FAR PASCAL	SelectFilterDlg(HWND, UINT, WPARAM, LPARAM);
 extern	DLGPROC FAR PASCAL	SelectFDOptionDlg(HWND, UINT, WPARAM, LPARAM);
 extern	DLGPROC FAR PASCAL	ScrnFormDlg(HWND, UINT, UINT, LONG);
-extern	DLGPROC FAR PASCAL	MalthusAnimDlg(HWND, UINT, UINT, LONG);
-extern	DLGPROC FAR PASCAL	IkedaAnimDlg(HWND, UINT, UINT, LONG);
+//extern	DLGPROC FAR PASCAL	MalthusAnimDlg(HWND, UINT, UINT, LONG);
+//extern	DLGPROC FAR PASCAL	IkedaAnimDlg(HWND, UINT, UINT, LONG);
 extern	DLGPROC FAR PASCAL	ParamAnimDlg(HWND, UINT, UINT, LONG);
 extern	DLGPROC FAR PASCAL	OscillatorAnimDlg(HWND, UINT, UINT, LONG);
 extern	DLGPROC FAR PASCAL	OscMorphAnimDlg(HWND, UINT, UINT, LONG);
@@ -311,9 +312,9 @@ extern	char	lsys_type[];
 extern	BYTE	_3dflag;			// replay saved file. 3 = 3D
 extern	BOOL	ZoomEdge;			// Zooming process
 extern	BOOL	UseFractintPalette;		// standard EGA palette
-//extern	BYTE	TrueColourFlag;			// Use 3D palette generation
 extern	CTrueCol    TrueCol;			// palette info
-extern	int	method;				// inside and outside filters
+extern	int	InsideMethod;			// inside filters
+extern	int	OutsideMethod;			// outside filters
 extern	int	FilterType;			// data for Tierazon filters
 extern	int	ColourMethod;			// Tierazon colour methods
 extern	int	nFDOption;			// Fractal Dimension option for Tierazon filters
@@ -363,9 +364,9 @@ extern	HPALETTE 	hpal;
 extern	HANDLE  	hLogPal;       		// Temporary Handle
 extern	BYTE	default_palette[];		// default VGA colour palette
 
-extern	double	x_rot;				/* angle display plane to x axis */
-extern	double	y_rot;				/* angle display plane to y axis */
-extern	double	z_rot;				/* angle display plane to z axis */
+extern	double	x_rot;				// angle display plane to x axis
+extern	double	y_rot;				// angle display plane to y axis
+extern	double	z_rot;				// angle display plane to z axis
 
 extern	int	xAxis, yAxis, zAxis;		// numerical values for axes for chaotic oscillators
 
@@ -620,7 +621,6 @@ MessageBox (hwnd, TempString, szAppName, MB_ICONEXCLAMATION | MB_OK);
 		    case 4:	   // Animation Dialogs menu
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_SETUPANIMATION, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_JULIA_ANIM, MF_ENABLED);
-			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_MALTHUS_RATE_ANIMATION, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_STOPANIM, MF_ENABLED);
 			 break;
 		    case 5:	   // Colour Options menu
@@ -1022,8 +1022,6 @@ WNDPROC MenuCommand (HWND hwnd, UINT message, UINT wParam, LONG lParam)
 	case IDM_JULIA_ANIM:
 	case IDM_INVERSION_ANIM:
 	case IDM_FOURIERANIM:
-	case IDM_MALTHUS_RATE_ANIMATION:
-	case IDM_IKEDAANIMATION:
 	case IDM_PARAM_ANIM:
 	case IDM_OSCILLATOR_ANIMATION:
 	case IDM_MORPHOSC:
@@ -1044,29 +1042,6 @@ WNDPROC MenuCommand (HWND hwnd, UINT message, UINT wParam, LONG lParam)
 		{
 		case IDM_SETUPANIMATION:
 		    status = (int)DialogBox (hInst, "AnimationDlg", hwnd, (DLGPROC)AnimationDlg);
-		    break;
-		case IDM_MALTHUS_RATE_ANIMATION:
-		    if (type != MALTHUS)
-			{
-			if (MessageBox (hwnd, "Fractal type is not Malthus Population Growth! Do you wish to change to Malthus first?", "ManpWIN", MB_ICONEXCLAMATION | MB_YESNO) == IDYES)
-			    {
-			    status = 0;
-			    break;
-			    }
-			}
-		    status = (int)DialogBox (hInst, "MalthusAnimDlg", hwnd, (DLGPROC)MalthusAnimDlg);
-		    break;
-		case IDM_IKEDAANIMATION:
-		    if (type != FRACTALMAPS)
-			{
-			wsprintf(TempStr, "Fractal type %d (%s) is not Ikeda Attractor! Do you wish to change to Ikeda2D (One of the Fractal Maps) first?", type, fractalspecific[type].name);
-			if (MessageBox (hwnd, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_YESNO) == IDYES)
-			    {
-			    status = 0;
-			    break;
-			    }
-			}
-		    status = (int)DialogBox (hInst, "IkedaAnimDlg", hwnd, (DLGPROC)IkedaAnimDlg);
 		    break;
 		case IDM_PARAM_ANIM:
 		    if (type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
@@ -1117,7 +1092,7 @@ WNDPROC MenuCommand (HWND hwnd, UINT message, UINT wParam, LONG lParam)
 			}
 		    break;
 		case IDM_JULIA_ANIM:
-		    if (type == PERTURBATION || type == OSCILLATORS || type == FRACTALMAPS || type == CURVES || type == KNOTS || type == SPROTTMAPS || type == SURFACES || type == BUDDHABROT || type == CURLICUES || type == MANDELCLOUD)
+		    if (type == PERTURBATION || type == OSCILLATORS || type == FRACTALMAPS || type == CURVES || type == KNOTS || type == SPROTTMAPS || type == SURFACES || type == BUDDHABROT || type == CURLICUES || type == MANDELCLOUD || type == DYNAMICFP)
 			{
 			wsprintf(TempStr, "Fractal type %d (%s) cannot be configured for Julia animation!\nChange the fractal type first", type, fractalspecific[type].name);
 			MessageBox(hwnd, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
@@ -1500,7 +1475,7 @@ WNDPROC MenuCommand (HWND hwnd, UINT message, UINT wParam, LONG lParam)
 		}
 	    case IDM_FRACOPTIONS:
 		{
-		extern  int	method;			// filter method
+//		extern  int	InsideMethod;			// filter method
 
 #ifdef TESTFWDDIFF
 		if (DialogBox(hInst, "FractalTestDlg", hwnd, (DLGPROC)FractalTestDlg) == FALSE)
@@ -1511,10 +1486,10 @@ WNDPROC MenuCommand (HWND hwnd, UINT message, UINT wParam, LONG lParam)
 		    return 0;
 		else
 		    {
-		    if (method == TIERAZONFILTERS)
+		    if (InsideMethod == TIERAZONFILTERS)
 			if (DialogBox (hInst, "SelectTierazonDlg", hwnd, (DLGPROC)SelectFilterDlg) == FALSE)
 			    return 0;
-		    if (method == TIERAZONCOLOURS)
+		    if (InsideMethod == TIERAZONCOLOURS)
 			if (DialogBox (hInst, "SelectTierazonDlg", hwnd, (DLGPROC)SelectColourDlg) == FALSE)
 			    return 0;
 		    TrueCol.FillPalette(REPEAT, TrueCol.PalettePtr, threshold);
@@ -2536,9 +2511,9 @@ DLGPROC FAR PASCAL StatusInfoDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
     char	PassStr[100];
     char	FinishedStr[100];
     char	PrecisionStr[100];
-    char	TempStr[100];
+    char	TempStr[200];
     char	FilterString[80];
-    char	FractalType[120];
+    char	FractalType[1200];
     char	SubData[500];
     char	*PositionStr = NULL;
     char	*StatusString = NULL;
@@ -2609,9 +2584,9 @@ DLGPROC FAR PASCAL StatusInfoDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
 	wsprintf(FractalType, "Fractal: (Slope Der)-%s, Subtype = %d", GetFractalName(), subtype);
     else if (type == SLOPEFORWARDDIFF)
 	wsprintf(FractalType, "Fractal: (Slope Fwd)-%s, Subtype = %d", GetFractalName(), subtype);
-    else if (type == SCREENFORMULA)
-	sprintf(FractalType, "ScrnForm = <%s>", FormulaString);
-    else if (type == FORMULA || type == LSYSTEM || type == FRACTPAR || type == IFS)
+    else if (type == SCREENFORMULA || type == FORMULA || type == FFORMULA)
+	sprintf(FractalType, "Formula = <%s>\r\n", FormulaString);
+    else if (type == LSYSTEM || type == FRACTPAR || type == IFS)
 	sprintf(FractalType, "Fractal: %s, Sub=%s", GetFractalName(), lsys_type);
     else if (type == TIERAZON || type == CROSSROADS || type == ZIGZAG || type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
 	sprintf(FractalType, "Fractal: %s, Sub=%d", GetFractalName(), subtype);
@@ -2629,6 +2604,17 @@ DLGPROC FAR PASCAL StatusInfoDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
     else if (Fractal.NumFunct == 2 && type != OSCILLATORS)			// we use NumFunct to display dimensions
 	sprintf(SubData, "\r\nFn1 = %s,Fn2 = %s", Fractal.Fn1, Fractal.Fn2);
     strcat(StatusString, SubData);
+    if (RotationAngle != 0)
+	{
+	sprintf(TempStr, "\r\nRotation Angle: %d\r\nRotation Centre: %lf, %lf\r\nMagnification: %le", RotationAngle, RotationCentre.x, RotationCentre.y, (BigNumFlag) ? 1.0 / (double)precision : 2.0 / mandel_width);
+	strcat(StatusString, TempStr);
+	}
+
+    if (juliaflag)
+	{
+	sprintf(TempStr, "\r\nJulia: %lf, %lf", j.x, j.y);
+	strcat(StatusString, TempStr);
+	}
 
     if (type == PERTURBATION || type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF)
 	{
@@ -2699,14 +2685,16 @@ DLGPROC FAR PASCAL StatusInfoDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
 	strcat(StatusString, "\r\nMAP file=");
 	strcat(StatusString, MAPFile);
 	}
-    if (method > NONE)
+    if (InsideMethod > NONE || OutsideMethod > NONE)
 	{
-	if (method > TIERAZONCOLOURS)
+	if (InsideMethod > TIERAZONCOLOURS)
 	    sprintf(FilterString, "\r\nTZColour = %d, ", ColourMethod);
-	else if (method > TIERAZONFILTERS)
+	else if (InsideMethod > TIERAZONFILTERS)
 	    sprintf(FilterString, "\r\nTZFilter = %d, Fractal Dimension Options = %d, ", FilterType, nFDOption);
+	else if (InsideMethod > NONE)
+	    sprintf(FilterString, "Filter=%d, ", InsideMethod);
 	else
-	    sprintf(FilterString, "\r\nFilter = %d, ", method);
+	    sprintf(FilterString, "Filter=%d, ", OutsideMethod);
 	strcat(StatusString, FilterString);
 	}
 

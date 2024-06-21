@@ -27,30 +27,39 @@
 #define	INSIDE	TRUE
 #define	OUTSIDE	FALSE
 
-extern	double	hor;			/* horizontal address */
-extern	double	vert;			/* vertical address */
-extern	double	mandel_width;		/* width of display */
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+extern	HWND	GlobalHwnd;				// This is the main windows handle
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+extern	double	hor;			// horizontal address
+extern	double	vert;			// vertical address
+extern	double	mandel_width;		// width of display
 extern	double	ScreenRatio;		// ratio of width / height for the screen
-//extern	int	inside_colour;		/* normal 'lake' colour */
-extern	long	threshold;		/* maximum iterations */
+//extern	int	inside_colour;		// normal 'lake' colour
+extern	long	threshold;		// maximum iterations
 //extern	short	InsideRed;		// values for r, g, b channels for inside colour
 //extern	short	InsideGreen;			
 //extern	short	InsideBlue;			
-extern	WORD	type;			/* M=mand, N=Newton etc */
+extern	WORD	type;			// M=mand, N=Newton etc
 extern	CTrueCol    TrueCol;		// palette info
 //extern	BYTE	*PalettePtr;		// points to true colour palette
 //extern	CTrueCol    TrueCol;		// palette info
 extern	char	MAPFile[];		// colour map file
 
 extern	double	f_radius,f_xcenter,f_ycenter;    // inversion radius, center 
-extern	BYTE	juliaflag;		/* Julia implementation of fractal */
-extern	int	decomp;			/* number of decomposition colours */
-//extern	BYTE	degree;			/* special colour, phase etc */
-extern	int	subtype;		/* B=basin, S=stripe, N=normal */
+extern	BYTE	juliaflag;		// Julia implementation of fractal
+extern	short int ismand;		// parser version of the inverse of juliaflag
+
+extern	int	decomp;			// number of decomposition colours
+extern	WORD	degree;			// special colour, phase etc
+extern	int	subtype;		// B=basin, S=stripe, N=normal
 extern	double	HenonA, HenonXStart, HenonYStart, HenonStep;
 extern	char	lsys_type[];
 extern	double	rqlim;			// bailout level
-extern	int	orientation;		// 0, 90, 180 or 270 degrees
+extern	int	BailoutTestType;	// type of bailout test
+Complex	RotationCentre;		// centre of rotation
+extern	int	RotationAngle;
+extern	double	z_rot;			// angle display plane to z axis 
 
 extern	struct	FractintFilterStuff	FractintFilter[];	// default values for each 
 
@@ -70,17 +79,19 @@ extern	int	lsys_num;
 //int	level = 2;
 //DWORD	colour = 15;
 
-extern	WORD	degree;			// power, degree
 extern	BOOL	invert;			// invert fractal
 
 static	char	loaded = 0;
 static	int	endloop;		// ensure a clean exit
-static	double	param1, param2, param3, param4;
+static	double	param1, param2, param3, param4, param5, param6;
 extern	double	param[];		// note that param[0] = param1
 extern	double	potparam[];
-extern	int	method;			// inside and outside filters
+extern	int	InsideMethod;		// inside filters
+extern	int	OutsideMethod;		// outside filters
 extern	int	biomorph;		// biomorph colour
 //extern	void	FinalisePalette(int);
+extern	char	FormulaString[];	// used to hold the full formula
+extern	char	LyapSequence[];		// hold the AB sequence for Lyapunov fractals
 
 int	par(HWND, char *);
 int	ParLoad(HWND, char *);
@@ -89,7 +100,7 @@ int	ParLoad(HWND, char *);
 extern	char	*str_find_ci(char *, char *);
 extern	void	InitFract(int);
 extern	int	getprecbf_mag(void);
-//extern	short	FilePalette(HWND, char *, char *);
+extern	short	FilePalette(HWND, char *, char *);
 //extern	void	SetPalettePointer(BYTE *);
 //extern	void	cvtcorners(double, double, LDBL, double, double, double);
 extern	int	ifsload(HWND, char *);
@@ -98,14 +109,19 @@ extern	int	fpFormulaSetup(char *);
 extern	int	FindFunct(char *);
 //extern	void	FillPalette(int, BYTE *);	// if threshold larger than palette, fill or stretch
 extern	void	ConvertString2Bignum(mpfr_t, char *);
+extern	int	ProcessFormulaString(char *);
+extern	void	cvtcentermag(double *, double *, LDBL *, double *, double *, double *);
 //extern	char	*GetFractalName(void);
+extern	CMatrix	Mat;			// transformation and roatation matrix
 
 //static	int	ReadParFile(HWND, char *);
+extern	char	FRMPath[];		// path for formula files
+extern	char	IFSPath[];		// path for formula files
 
-struct FractintFilterStuff				// database of Fractint Outside filters
+struct FractintFilterStuff		// database of Fractint Outside filters
     {
-    char    *name;				// name of the fractal 
-    char    method;				// only allow '1', '2', blinds or spiral 
+    char    *name;			// name of the fractal 
+    char    method;			// only allow '1', '2', blinds or spiral 
     };
 
 //extern	CPixel	Pixel;		// routines for escape fractals
@@ -128,6 +144,37 @@ char	*trailing(char *instr)
     }
 
 /**************************************************************************
+	Check if file and formula exists - 
+	This saves warning messages if it doesn't 
+	because there may still be a formula in the par file
+**************************************************************************/
+
+int	CheckFileAndFormulaExist(char *filename, char *lsys_type)
+    {
+    FILE	*fp;
+    char	InLine[200];
+    char	*word;
+    int		linenum = 0;
+
+    if ((fp = fopen(filename, "rt")) == NULL)
+	return -1;
+    else
+	{
+	do
+	    {
+	    if (fgets(InLine, 160, fp) == 0)
+		return -1;
+
+	    if ((word = strchr(InLine, ';')))	// strip comment
+		*word = 0;
+	    ++linenum;
+	    } while (str_find_ci(InLine, lsys_type) == 0);
+	    fclose(fp);
+	}
+    return 0;
+    }
+
+/**************************************************************************
 	Analyse the formula file and type
 **************************************************************************/
 
@@ -135,10 +182,10 @@ int	AnalyseFormula(char *FormulaData)
     {
     char    *tok, *p, *q;
     char    filename[MAX_PATH];
-//    char    IFSType[50];
+    char    temp[MAX_PATH];
 
     p = FormulaData;
-    q = filename;
+    q = temp;
     while (*p != ' ')
 	{
 	*q = *p;
@@ -146,6 +193,7 @@ int	AnalyseFormula(char *FormulaData)
 	q++;
 	}
     *q = '\0';
+    sprintf(filename, "%s\\%s", FRMPath, temp);
     if (tok = str_find_ci(FormulaData, "formulaname="))
 	{
 	p = tok;
@@ -159,6 +207,9 @@ int	AnalyseFormula(char *FormulaData)
 	*q = '\0';
 	}
 
+    // check if file and formula exists - saves warning messages if it doesn't because there may still be a formula in the par file
+    if (CheckFileAndFormulaExist(filename, lsys_type) < 0)
+	return -1;
     if (fpFormulaSetup(filename) <= 0)
 	return -1;
     return 0;
@@ -172,10 +223,10 @@ int	AnalyseIFS(HWND hwnd, char *ifsdata)
     {
     char    *tok, *p, *q;
     char    filename[MAX_PATH];
-//    char    IFSType[50];
+    char    temp[MAX_PATH];
 
     p = ifsdata;
-    q = filename;
+    q = temp;
     while (*p != ' ')
 	{
 	*q = *p;
@@ -183,6 +234,7 @@ int	AnalyseIFS(HWND hwnd, char *ifsdata)
 	q++;
 	}
     *q = '\0';
+    sprintf(filename, "%s\\%s", IFSPath, temp);
     if (tok = str_find_ci(ifsdata, "ifs="))
 	{
 	p = tok;
@@ -296,7 +348,7 @@ MessageBox (hwnd, Trigdata, s, MB_ICONEXCLAMATION | MB_OK);
 	if ((FnPtr = FindFunct(fn2)) >= 0)
 	    {
 	    Fractal.Fn2 = TrigFn.FunctList[FnPtr];
-	    Fractal.Fn1Index = FnPtr;
+	    Fractal.Fn2Index = FnPtr;
 //	    dtrig1 = *FnctList[FnPtr].ptr;	// load function pointer 
 	    }
     if (numfn == 1 || numfn == 2)
@@ -309,35 +361,88 @@ MessageBox (hwnd, Trigdata, s, MB_ICONEXCLAMATION | MB_OK);
 	Find the fractal type
 **************************************************************************/
 
-int	FindType(HWND hwnd, char *FractType, char *FractName)
+int	FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double TempRqlim)
 
     {
-    char	*tok;
+    char	*tok, *tmpstr;
     int		k;
     CTrigFn	TrigFn;
+    char	TempLyapSequence[120];		// hold the AB sequence for Lyapunov fractals
+
+    if ((tmpstr = new char[strlen(FractType) + 1]) == NULL)
+	return -1;
+
+    strcpy(tmpstr, FractType);			// don't splatter main string
 
     juliaflag = FALSE;
     sscanf(FractType, "%s", FractName);
-    if (!_strnicmp(FractType, "lsystem", 3))
+    if (tok = str_find_ci(tmpstr, "ismand="))
+	{
+	juliaflag = (*tok == 'y') ? false : true;
+	ismand = !juliaflag;
+	}
+    if (!_strnicmp(FractType, "lsystem", 6))
 	{
 	type = LSYSTEM;
 	if (tok = str_find_ci(FractType, "lfile="))
 	    return (AnalyseLSystem(hwnd, tok));
+	delete[] tmpstr;
 	return 0;
+	}
+    if (!_strnicmp(FractType, "lyapunov", 8))
+	{
+	long	i = (long)param1;		// used to decode lyapunov sequence from param[0]
+	int	t, r;
+	int	lyaRxy[34];
+	int	lyaLength = 1;
+
+	type = LYAPUNOV;
+	param1 = param2;			// ManpWIN uses these parameters differently than FractInt
+	param2 = param3;
+	lyaRxy[0] = 1;
+	for (t = 31; t >= 0; t--)
+	    if (i & (1 << t)) break;
+	for (; t >= 0; t--)
+	    lyaRxy[lyaLength++] = (i & (1 << t)) != 0;
+	lyaRxy[lyaLength++] = 0;
+	for (r = 0; r < lyaLength; r++)
+	    TempLyapSequence[r] = lyaRxy[r] ? 'A' : 'B';
+	TempLyapSequence[r] = '\0';
+
+	//	return 0;
 	}
     if (!_strnicmp(FractType, "ifs", 3))
 	{
 	type = IFS;
+	delete[] tmpstr;
 	if (tok = str_find_ci(FractType, "ifsfile="))
 	    return (AnalyseIFS(hwnd, tok));
 	return 0;
 	}
     if (!_strnicmp(FractType, "formula", 7))
 	{
+	int	result;
+
 	type = FORMULA;
+	param[0] = param1;				// this stuff is still experimental
+	param[1] = param2;
+	param[2] = param3;
+	param[3] = param4;
+	param[4] = param5;
+	param[5] = param6;
 	if (tok = str_find_ci(FractType, "formulafile="))
-	    return (AnalyseFormula(tok));
-	return 0;
+	    {
+	    result = AnalyseFormula(tok);
+	    if (result == 0)
+		{
+		delete[] tmpstr;
+		return 0;
+		}
+	    else
+		*IsFrm = true;		// let's see if we can find a formula in the par file
+	    }
+	else	
+	    *IsFrm = true;
 	}
     for (k = 0; fractalspecific[k].name != NULL; k++)
 	{
@@ -345,34 +450,64 @@ int	FindType(HWND hwnd, char *FractType, char *FractName)
 	    break;
 	}
     if (fractalspecific[k].name == NULL)
+	{
+	delete[] tmpstr;
 	return -1;
+	}
     else
 	{
 	InitFract(k);
+	if (k == LYAPUNOV)
+	    strcpy(LyapSequence, TempLyapSequence);	// prevent it being splattered by the default in InitFract()
+	if (TempRqlim > 0.0)
+	    rqlim = TempRqlim;				// prevent it being splattered by the default in InitFract()
 	type = k;
 	param[0] = param1;				// this stuff is still experimental
 	param[1] = param2;
 	param[2] = param3;
 	param[3] = param4;
-//	*Fractal.rqlim = fractalspecific[type].rqlim;
-
-		// okay, let's do some special processing for Newton Fractals
-	if (k == COMPLEXNEWTON)
-	    param[4] = 0.0;				// subtype = 'N' or normal
-	else if (k == COMPLEXBASIN)
-	    param[4] = 1.0;				// subtype = 'B' or basin
-	else if (k == NEWTON)
-	    param[1] = 0.0;				// subtype = 'N' or normal
-	else if (k == NEWTBASIN)
+	param[4] = param5;
+	param[5] = param6;
+	switch (type)
 	    {
-	    param[1] = (param[1] == 0.0) ? 2.0 : 1.0;	// don't blame me, I didn't invent Fractint
-//	    type = k = NEWTON;
+	    // start with Julia fractals
+	    case LLAMBDAFNFN:
+	    case FPLAMBDAFNFN:
+	    case LJULFNFN:
+	    case FPJULFNFN:
+	    case BARNSLEYJ1FP:
+	    case BARNSLEYJ2FP:
+	    case BARNSLEYJ3FP:
+	    case FPPOPCORNJUL:
+	    case LPOPCORNJUL:
+	    case MANOWARJ:
+	    case MANOWARJFP:
+		juliaflag = TRUE;
+		j.x = param[0];
+		j.y = param[1];
+		break;
+	    case COMPLEXNEWTON:
+		param[4] = 0.0;				// subtype = 'N' or normal
+		break;
+	    case COMPLEXBASIN:
+		param[4] = 1.0;				// subtype = 'B' or basin
+		break;
+	    case NEWTON:
+		param[1] = 0.0;				// subtype = 'N' or normal
+		break;
+	    case NEWTBASIN:
+		param[1] = (param[1] == 0.0) ? 2.0 : 1.0;	// don't blame me, I didn't invent Fractint
+		break;
+
 	    }
 
-	if (tok = str_find_ci(FractType, "function="))
+	if (tok = str_find_ci(tmpstr, "function="))
 	    {
 	    if (AnalyseFunction(tok) < 0)
+		{
+		delete[] tmpstr;
 		return -1;
+		}
 	    }
 	else
 	    {
@@ -384,7 +519,6 @@ int	FindType(HWND hwnd, char *FractType, char *FractName)
 		    {
 		    Fractal.Fn1 = TrigFn.FunctList[FnPtr];
 		    Fractal.NumFunct = fractalspecific[type].numfn;
-//		    dtrig0 = *FnctList[FnPtr].ptr;	// load function pointer 
 		    }
 		}
 	    if (fractalspecific[type].numfn > 1)	// oh dear! a second function exists, better use default.
@@ -392,44 +526,49 @@ int	FindType(HWND hwnd, char *FractType, char *FractName)
 		if ((FnPtr = FindFunct(fractalspecific[type].fn2)) >= 0)
 		    {
 		    Fractal.Fn2 = TrigFn.FunctList[FnPtr];
-//		    dtrig1 = *FnctList[FnPtr].ptr;	// load function pointer 
 		    }
 		}
 	    }
+
 	if (fractalspecific[k].juliaflag == JULIAFP)
 	    {
 	    juliaflag = TRUE;
-	    j.x = param1;
-	    j.y = param2;
+	    j.x = param[0];
+	    j.y = param[1];
 	    }
 	else
 	    juliaflag = FALSE;
 	}
 
-//    if (fractalspecific[type].numfn > 0)
-//	{
-//	if (tok = str_find_ci(FractType, "function="))
-//	    {
-//	    if (AnalyseFunction(hwnd, tok) < 0)
-//		return -1;
-//	    }
-//	}
-
-/*
-    if (fractalspecific[type].numparams > 0)
-	{
-	param[0] = param1;
-	param[1] = param2;
-	param[2] = param3;
-	param[3] = param4;
-	}
-    if (juliaflag)
-	{
-	j.x = param1;
-	j.y = param2;
-	}
-*/
+    delete[] tmpstr;
     return 0;
+    }
+
+/**************************************************************************
+	Load Palette Map
+**************************************************************************/
+
+static int  ProcessBailoutTest(char *value)
+
+    {
+    int	test;
+    if (strncmp(value, "mod", 3) == 0)
+	test = BAIL_MOD;
+    else if (strncmp(value, "real", 4) == 0)
+	test = BAIL_REAL;
+    else if (strncmp(value, "imag", 4) == 0)
+	test = BAIL_IMAG;
+    else if (strncmp(value, "or", 2) == 0)
+	test = BAIL_AND;
+    else if (strncmp(value, "and", 3) == 0)
+	test = BAIL_AND;
+    else if (strncmp(value, "manh", 4) == 0)
+	test = MANH;
+    else if (strncmp(value, "manr", 4) == 0)
+	test = MANR;
+    else
+	test = BAIL_MOD;
+    return test;
     }
 
 /**************************************************************************
@@ -455,9 +594,11 @@ static int ParseColours(char *value)
 	    *q++ = *p;
 	    }
 	*q = '\0';
-//    FilePalette(hwnd, MapFile, "Fractint Par: Get Colour Map");
+	if (str_find_ci(MAPFile, "map") == 0)		// some fractint par files assume the extension 
+	    strcat(MAPFile, ".map");
+	FilePalette(GlobalHwnd, MAPFile, "Fractint Par: Get Colour Map");
 	TrueCol.FillPalette(REPEAT, TrueCol.PalettePtr, threshold);
-//    FinalisePalette(256);
+	TrueCol.FinalisePalette(256, threshold);
 
 #ifdef DEBUG
     for (i = 0; i < 8; i++)
@@ -605,7 +746,7 @@ int	ProcessParams(char *s)
 	    *s = ' ';
 	s++;
 	}
-    sscanf(t, "%lf %lf %lf %lf", &param1, &param2, &param3, &param4);
+    sscanf(t, "%lf %lf %lf %lf %lf %lf", &param1, &param2, &param3, &param4, &param5, &param6);
     return 0;
     }
 
@@ -623,12 +764,14 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
     char	*s4;
     char	*s5;
     char	*s6;
-    double	Magnification, a1, a2;
+    double	Magnification;
     double	Xmagfactor;
     double	Rotation;
     double	Skew;
-//    double	RotationAngle;
-    int		count;
+    double	floatval[6];					// pre-parsed floating parms
+    Complex	centre;
+
+    int		count, NumCorners;
     BigDouble   BigMag, temp, OneOverMag;
 
     t = s;
@@ -648,40 +791,64 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
     count = sscanf(t, "%s %s %s %s %s %s", s1, s2, s3, s4, s5, s6);
     if (CentreFlag)
 	{
-	sscanf(t, "%lf %lf %lf%lf %lf %lf", &hor, &vert, &Magnification, &Xmagfactor, &Rotation, &Skew);
-	hor -= (mandel_width / Magnification);
+	sscanf(t, "%lf %lf %lf %lf %lf %lf", &hor, &vert, &Magnification, &Xmagfactor, &Rotation, &Skew);
+	RotationCentre.x = hor;
+	RotationCentre.y = vert;
+	hor -= (ScreenRatio / Magnification);
 	vert -= (1.0 / Magnification);
 	mandel_width = 2.0 / Magnification;
 	}
     else
 	{
-	sscanf(t, "%lf %lf %lf %lf %lf %lf", &hor, &a1, &vert, &a2, &Rotation, &Skew);
-	mandel_width = vert - a2;
+	NumCorners = sscanf(t, "%lf %lf %lf %lf %lf %lf", &floatval[0], &floatval[1], &floatval[2], &floatval[3], &floatval[4], &floatval[5]);
+	if (NumCorners == 4)										// no rotation or skew
+	    {
+	    hor = floatval[0];
+	    vert = floatval[2];
+	    mandel_width = vert - floatval[3];
+	    Rotation = 0.0;
+	    Skew = 0.0;
+	    }
+	else if (NumCorners == 6)									// rotation and skew 
+	    {
+	    LDBL    mag;
+	    xxmin = floatval[0];
+	    xxmax = floatval[1];
+	    yymin = floatval[2];
+	    yymax = floatval[3];
+	    xx3rd = floatval[4];
+	    yy3rd = floatval[5];
+	    cvtcentermag(&centre.x, &centre.y, &mag, &Xmagfactor, &Rotation, &Skew);
+	    Magnification = mag;
+	    hor = centre.x - (ScreenRatio / Magnification);
+	    vert = centre.y - (1.0 / Magnification);
+	    mandel_width = 2.0 / Magnification;
+	    RotationCentre.x = hor + (ScreenRatio / Magnification);
+	    RotationCentre.y = vert + (1.0 / Magnification);
+	    }
+	else
+	    {
+	    if (s1) delete[] s1;
+	    if (s2) delete[] s2;
+	    if (s3) delete[] s3;
+	    if (s4) delete[] s4;
+	    if (s5) delete[] s5;
+	    if (s6) delete[] s6;
+	    return -1;										// other values are illegal as they don't specify the screen
+	    }
+
+//	count = sscanf(t, "%lf %lf %lf %lf %lf %lf", &hor, &a1, &vert, &a2, &Rotation, &Skew);
 	}
-/*
-    if (Rotation != 0.0)
+
+    RotationAngle = (int)Rotation;
+    if (Rotation == 0.0 || Rotation == 90.0 || Rotation == 180.0 || Rotation == 270.0)		// save calcs in rotating, just remap
+	RotationCentre = 0.0;
+    else
 	{
-	RotationAngle = Rotation * 360.0 / TWO_PI;
-	if (RotationAngle > -405.0 && RotationAngle <= -315.0)
-	    orientation = 0;
-	if (RotationAngle > -315.0 && RotationAngle <= -225.0)
-	    orientation = 90;
-	if (RotationAngle > -225.0 && RotationAngle <= -135.0)
-	    orientation = 180;
-	if (RotationAngle > -135.0 && RotationAngle <= -45.0)
-	    orientation = 270;
-	if (RotationAngle > -45.0 && RotationAngle <= 45.0)
-	    orientation = 0;
-	if (RotationAngle > 45.0 && RotationAngle <= 135.0)
-	    orientation = 90;
-	if (RotationAngle > 135.0 && RotationAngle <= 225.0)
-	    orientation = 180;
-	if (RotationAngle > 225.0 && RotationAngle <= 315.0)
-	    orientation = 270;
-	if (RotationAngle > 315.0 && RotationAngle <= 405.0)
-	    orientation = 0;
+	//	z_rot = Rotation;
+	//	RotationAngle = (int)Rotation;
+	Mat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, Rotation);
 	}
-*/
 
     if (mandel_width < 0.0)
 	mandel_width = - mandel_width;
@@ -704,7 +871,7 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 	if (s6) delete[] s6;
 	return -1;							// too many decimals for library
 	}
-    if (precision > DBL_DIG - 3)
+    if (precision > DBL_DIG - 3 && NumCorners != 6)			// bignum support not available yout
 	{
 	decimals = precision + PRECISION_FACTOR;
 //	if (!BigNumFlag)
@@ -717,7 +884,7 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 	if (CentreFlag)
 	    {
 	    ConvertString2Bignum(BigMag.x, s3);
-	    if (mpfr_sgn(BigMag.x) == 0)	// no naught division
+	    if (mpfr_sgn(BigMag.x) == 0)	// no naughty division
 		{
 		if (s1) delete[] s1;
 		if (s2) delete[] s2;
@@ -736,7 +903,7 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 	    {
 	    ConvertString2Bignum(temp.x, s4);			// mandel_width = vert - a2;
 	    BigWidth = BigVert - temp;
-	    if (mpfr_sgn(BigWidth.x) == 0)	// no naught division
+	    if (mpfr_sgn(BigWidth.x) == 0)	// no naughty division
 		{
 		if (s1) delete[] s1;
 		if (s2) delete[] s2;
@@ -755,15 +922,12 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 	    mandel_width = 1.0;
 	}
 
-    {
     if (s1) delete[] s1;
     if (s2) delete[] s2;
     if (s3) delete[] s3;
     if (s4) delete[] s4;
     if (s5) delete[] s5;
     if (s6) delete[] s6;
-    return -1;							// too many decimals for library
-    }
     return 0;
     }
 
@@ -778,7 +942,7 @@ int	ProcessInvert(char *s)
     int		count;
 
     t = s;
-    while(*s && *s != ' ')
+    while (*s && *s != ' ')
 	{
 	if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-' && *s != 'e')
 	    *s = ' ';
@@ -798,10 +962,10 @@ int	ProcessInvert(char *s)
 int	Processfilters(char *s, BOOL IsInside)
     {
     char	FilterName[24];
-    int		k;
+    int		k, method;
     BOOL	flag = FALSE;
 
-    sscanf(s, "%s", FilterName);    
+    sscanf(s, "%s", FilterName);
     for (k = 0; FractintFilter[k].name != NULL; k++)
 	{
 	if (str_find_ci(FilterName, FractintFilter[k].name))	// find the filter type
@@ -811,6 +975,10 @@ int	Processfilters(char *s, BOOL IsInside)
 	    }
 	}
     method = (flag) ? FractintFilter[k].method : NONE;
+    if (IsInside)
+	InsideMethod = method;
+    else
+	OutsideMethod = method;
     if (IsInside && !flag)
 	TrueCol.inside_colour = atoi(FilterName);
     return 0;
@@ -826,9 +994,9 @@ int	ProcessPotential(char *s)
     char	*t;
 
     t = s;
-    while(*s && *s != ' ')
+    while (*s && *s != ' ')
 	{
-    //  if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-')
+	//  if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-')
 	if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-' && *s != 'e')
 	    *s = ' ';
 	s++;
@@ -840,25 +1008,61 @@ int	ProcessPotential(char *s)
     }
 
 /**************************************************************************
-	Read the par file
+	    Read the par file
 **************************************************************************/
 
-#define BUFFERSIZE  2000
+#define BUFFERSIZE  5000
+
+char	*leading(char *instr) // strips leading spaces 
+    {
+    register char *s = instr;
+    while (*s && isspace(*s))
+	s++;
+    return s;
+    }
+
+char	*StripStuff(char *instr) // strips backslash and newlines 
+    {
+    register char *s = instr;
+    while (*s)
+	{
+	if (*s == '\\'/* || *s == '\n' || *s == '\r'*/)
+	    {
+	    *s = '\0';
+	    return instr;
+	    }
+	if (*s == '\n')
+	    {
+	    *s = ' ';
+	    return instr;
+	    }
+	s++;
+	}
+    return instr;
+    }
+
 static	int	ReadParFile(HWND hwnd, char *filename)
 
     {
     int		i;
-    char	*tok, *p, *q;
+    char	*tok, *q;
     int		err = 0;
     int		linenum = 0, check = 0;
-    char	InLine[200], temp[BUFFERSIZE], buffer[BUFFERSIZE], *word;
+    char	*temp = NULL, *buffer = NULL, *word;
+    char	InLine[200];
+    char	InLine1[200];
     FILE	*fp;
     char	s[200];
+    bool	IsFrm = false;		// do we have a formula?
+    char	tmp[164];
+    double	TempRqlim = -1.0;
 
     param[0] = param1 = 0.0;
     param[1] = param2 = 0.0;
     param[2] = param3 = 0.0;
     param[3] = param4 = 0.0;
+    param[4] = param5 = 0.0;
+    param[5] = param6 = 0.0;
     invert = FALSE;
     if ((fp = fopen(filename, "r")) == NULL)
 	{
@@ -869,6 +1073,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 
     do
 	{
+	char	*a, *b;
 	if (fgets(InLine, 160, fp) == 0)
 	    {
 	    wsprintf(s, "Can't Get FRACTINT Par Data: <%s>", filename);
@@ -876,61 +1081,41 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	    return -1;
 	    }
 
-#ifdef DEBUG
-wsprintf(s, "Line %d, <%s>", linenum, InLine);
-MessageBox (hwnd, s, "Finding Par", MB_ICONEXCLAMATION | MB_OK);
-#endif   
+	a = InLine;
+	b = tmp;
+	while (*a && *a != ' ' && *a != '\t')	// remove trailing white scharacters for final comparison
+	    {
+	    *b = *a;
+	    a++;b++;
+	    }
+	*b = '\0';
 
+	if ((word = strchr(InLine, ';')))	// strip comment
+	    *word = 0;
 	++linenum;
 	}
-	while (str_find_ci(InLine, lptr[lsys_ptr]) == 0);
+	while (_stricmp(tmp, lptr[lsys_ptr]) != 0);
 
-    *temp = '\0';
+    buffer = new char[BUFFERSIZE];
+    *buffer = '\0';
 
-    while(fgets(InLine, 160, fp))		// Max line length 160 chars
+    while(fgets(InLine1, 160, fp))		// Max line length 160 chars
 	{
-
-#ifdef DEBUG
-wsprintf(s, "Line %d, <%s>, <%s>", linenum, InLine, lptr[lsys_ptr]);
-MessageBox (hwnd, s, "Reading Par File", MB_ICONEXCLAMATION | MB_OK);
-#endif   
-
-
 	linenum++;
    
-	if ((word = strchr(InLine,';')))	// strip comment
+	if ((word = strchr(InLine1,';')))	// strip comment
 	    *word = 0;
-	strcat(temp, InLine + 2);
+	strcpy(InLine, StripStuff(InLine1));
+	strcat(buffer, leading(InLine));
 	if (str_find_ci(InLine, "}"))
 	     break;
-	if ((i = (int)strlen(buffer)) > BUFFERSIZE - 2)
+	if ((i = (int)strlen(buffer)) > BUFFERSIZE - 160)
 	    {
-	    wsprintf(s, "Par Data full line: <%d>", linenum);
+	    wsprintf(s, "Par Data full, line: <%d>", linenum);
 	    MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	    break;
 	    }
 	}    
-    
-    p = temp;
-    q = buffer;
-    while (*p)				// strip newlines and '\'
-	{
-	if (*p != '\\')
-	    {
-	    if (*p == '\n')
-		{
-		if (*(p - 1) != '\\')
-		    *q++ = ' ';
-		}
-	    else
-		*q++ = *p;
-	    }
-//	if (*p == '\n' && *(p - 1) == '\\')
-//	    {}				
-//	else if (*p == '\n')
-//	    *q++ = ' ';
-	p++;
-	}
 
     if (tok = str_find_ci(buffer, "params="))		// must be first
 	ProcessParams(tok);
@@ -942,12 +1127,14 @@ MessageBox (hwnd, s, "Reading Par File", MB_ICONEXCLAMATION | MB_OK);
 	}
     if (tok = str_find_ci(buffer, "inside="))
 	Processfilters(tok, INSIDE);
+    if (tok = str_find_ci(buffer, "bailout="))
+	TempRqlim = (double)atoi(tok);
     if (tok = str_find_ci(buffer, "decomp="))
 	decomp = atoi(tok);
     if (tok = str_find_ci(buffer, "potential="))
 	{
 	ProcessPotential(tok);
-	method = POTENTIAL;
+	InsideMethod = POTENTIAL;
 	}
     if (tok = str_find_ci(buffer, "corners="))
 	ProcessCorners(tok, FALSE);
@@ -955,15 +1142,19 @@ MessageBox (hwnd, s, "Reading Par File", MB_ICONEXCLAMATION | MB_OK);
 	ProcessCorners(tok, TRUE);
     if (tok = str_find_ci(buffer, "biomorph="))
 	biomorph = atoi(tok);
+    if (tok = str_find_ci(buffer, "function="))
+	AnalyseFunction(tok);
     if (tok = str_find_ci(buffer, "colors="))
 	ParseColours(tok);
     if (tok = str_find_ci(buffer, "invert="))
 	ProcessInvert(tok);
     if (tok = str_find_ci(buffer, "outside="))
 	Processfilters(tok, OUTSIDE);
+    if (tok = str_find_ci(buffer, "bailoutest="))
+	BailoutTestType = ProcessBailoutTest(tok);
     if (tok = str_find_ci(buffer, "type="))		// must be the only one which is after strlwr
 	{
-	if (FindType(hwnd, tok, temp) < 0)
+	if (FindType(hwnd, tok, buffer, &IsFrm, TempRqlim) < 0)
 	    {
 	    switch (type)
 		{
@@ -982,8 +1173,109 @@ MessageBox (hwnd, s, "Reading Par File", MB_ICONEXCLAMATION | MB_OK);
 		}
 	    MessageBox (hwnd, s, "Reading Fractint Par File", MB_ICONEXCLAMATION | MB_OK);
 	    fclose(fp);
+	    if (buffer) { delete[] buffer; buffer = NULL; }
 	    return -1;
 	    }
+	}
+    if (buffer) { delete[] buffer; buffer = NULL; }
+    if (IsFrm)
+	{
+	char *p;
+	do
+	    {
+	    if (fgets(InLine, 160, fp) == 0)
+		{
+		wsprintf(s, "Can't Find formula in the FRACTINT Par Data: <%s>", filename);
+		MessageBox(hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
+		return -1;
+		}
+
+#ifdef DEBUG
+	    wsprintf(s, "Line %d, <%s>", linenum, InLine);
+	    MessageBox(hwnd, s, "Finding Par", MB_ICONEXCLAMATION | MB_OK);
+#endif   
+
+	    ++linenum;
+	    } while (str_find_ci(InLine, "frm:") == 0);
+
+	temp = new char[BUFFERSIZE];
+	*temp = '\0';
+
+	// now let's interpret any formula if present
+	while (fgets(InLine, 160, fp))		// Max line length 160 chars
+	    {
+
+#ifdef DEBUG
+	    wsprintf(s, "Line %d, <%s>, <%s>", linenum, InLine, lptr[lsys_ptr]);
+	    MessageBox(hwnd, s, "Reading Par File", MB_ICONEXCLAMATION | MB_OK);
+#endif   
+
+
+	    linenum++;
+
+	    if ((word = strchr(InLine, ';')))	// strip comment
+		*word = 0;
+	    //	    strcat(temp, InLine + 2);
+	    strcat(temp, InLine);
+	    if (str_find_ci(InLine, "}"))
+		break;
+	    if ((i = (int)strlen(temp)) > BUFFERSIZE - 200)
+		{
+		wsprintf(s, "Par Frm Data full, line: <%d>", linenum);
+		MessageBox(hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
+		break;
+		}
+	    }
+	p = temp;
+	q = FormulaString;
+
+	bool	WasBackslash = false;
+	while (*p)
+	    {
+	    if (*p == '\n')				// replace returns with ',' as long as it isn't after a backslash or we already have a comma
+		{
+		if (!WasBackslash)
+		    {
+		    if (*(p - 1) != ',')
+			{
+			*q = ',';
+			q++;
+			}
+		    }
+		else
+		    WasBackslash = false;
+		p++;
+		}
+	    else if (*p == '}' || *p == ';')		// nemove '}' and comments
+		{
+		*q = '\0';
+		break;
+		}
+	    else if (*p == ':')				// nemove ',' after ':'
+		{
+		*q = *p;
+		p++; q++;
+		p++;
+		}
+	    else if (*p == '\\')			// remove '\'
+		{
+		WasBackslash = true;
+		p++;
+		}
+	    else if (*p == '\r')
+		p++;					// remove linefeeds
+	    else if (*p == ' ' || *p == '\t')
+		p++;					// remove spaces
+	    else
+		{
+		*q = *p;
+		p++; q++;
+		}
+	    }
+	*q = '\0';
+
+	ProcessFormulaString(FormulaString);
+	if (temp) { delete[] temp; temp = NULL; }
 	}
     if (type == FRACTPAR)				// if we haven't found a fractal, then we still have fractal type FRACTPAR
 	{
@@ -1060,7 +1352,7 @@ int	load_par(HWND hwnd, char *filename)
 	    for (j = 0; s[j]; ++j)
 		if (s[j] == '{' || s[j] == '\n' || s[j] == ' ')
 		    s[j] = '\0';
-	    s[20] = '\0';
+	    s[57] = '\0';
 	    strcpy(lptr[lsys_num], s + i);
 	    if (lsys_num < 64)
 		++lsys_num;

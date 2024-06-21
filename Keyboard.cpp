@@ -286,8 +286,6 @@ void	ProcessKeys(HWND hwnd, UINT wParam)
 	case 'I':  
 	    if (GetKeyState(VK_SHIFT) < 0)
 		SendMessage (hwnd, WM_COMMAND, IDM_INVERSION_ANIM, 0L);		// Inversion Animation
-	    else if (GetKeyState(VK_CONTROL) < 0)
-		SendMessage (hwnd, WM_COMMAND, IDM_IKEDAANIMATION, 0L);		// Ikeda Animation
 	    else
 		SendMessage (hwnd, WM_COMMAND, IDM_OPEN_SCI, 0L);		// open SCI file
 	    break;
@@ -315,8 +313,6 @@ void	ProcessKeys(HWND hwnd, UINT wParam)
 		SendMessage (hwnd, WM_COMMAND, IDM_MORPHOSC, 0L);		// Morph Oscillator
 	    else if (GetKeyState(VK_CONTROL) < 0)
 		SendMessage(hwnd, WM_COMMAND, IDM_SETUPTHREADS, 0L);		// Set up threadiong info
-	    else
-		SendMessage (hwnd, WM_COMMAND, IDM_MALTHUS_RATE_ANIMATION, 0L);	// Malthus animation  
 	    break;
     	
 	case 'N':						

@@ -32,10 +32,9 @@ struct	workliststuff	worklist[MAXCALCWORK];
 int	/*workpass, */totpasses, curpass;	// for 1/2 pass type tracing 
 int	PlotType;
 
-//	double	dem_delta, dem_width;	// distance estimator variables 
-	double	dem_toobig;
-	int	distest = 0, distestwidth = 71;
-	double	delxx, delxx2, delyy, delyy2;
+double	dem_toobig;
+int	distest = 0, distestwidth = 71;
+double	delxx, delxx2, delyy, delyy2;
 
 int	finished = FALSE;		// all passes complete 
 BYTE	orig_palette[768];		// loaded palette 
@@ -62,41 +61,37 @@ BYTE	save_flag;			// save screen after image
 BYTE	_3dflag;			// replay saved file. 3 = 3D 
 BOOL	ZoomEdge;			// Zooming process
 BOOL	UseFractintPalette = FALSE;	// standard EGA palette
-//BYTE	dumpflag;			/* dump to disk */
-BYTE	exitflag;			/* exit on completion */
-BYTE	juliaflag;			/* Julia implementation of fractal */
+BYTE	exitflag;			// exit on completion
+BYTE	juliaflag;			// Julia implementation of fractal
 BYTE	RealTimeJuliaFlag;		// Display Julia set in real time
-//BYTE	paramflag;			/* Parameters req for mandel, Newt */
-//char	floatflag;			/* floating point maths */
-BYTE	calcmode;			/* 'B' boundary, 'G' guess, etc */
-//BYTE	soundflag;			/* sound O.K.? */
-BYTE	phaseflag;			/* 3 phases for type SPECIALNEWT fractals */
-BYTE	cycleflag;			/* do colour cycling */
-BYTE	addflag;			/* add spirals */
-int	logflag;			/* log colour map required or in error */
-int	logval;				/* log colour map starting value */
-int	AutoStereo_value;		/* AutoStereo depth value */
-long	threshold;			/* maximum iterations */
+BYTE	calcmode;			// 'B' boundary, 'G' guess, etc
+BYTE	phaseflag;			// 3 phases for type SPECIALNEWT fractals
+BYTE	cycleflag;			// do colour cycling
+BYTE	addflag;			// add spirals
+int	logflag;			// log colour map required or in error
+int	logval;				// log colour map starting value
+int	AutoStereo_value;		// AutoStereo depth value
+long	threshold;			// maximum iterations
 int	Offset3D = 0;			// offset to threshold for 3D display
-int	start, end;			/* y pixel count range */
-BYTE	symmflag;			/* symmetry ? */
-int	reset_period;			/* periodicity checking */
-int	window_depth;			/* data window size */
-int	window_width;			/* modify for Julia set */
+int	start, end;			// y pixel count range
+BYTE	symmflag;			// symmetry ?
+int	reset_period;			// periodicity checking
+int	window_depth;			// data window size
+int	window_width;			// modify for Julia set
 
-double	x_rot;				/* angle display plane to x axis */
-double	y_rot;				/* angle display plane to y axis */
-double	z_rot;				/* angle display plane to z axis */
-double	sclx, scly, sclz;		/* scale */
+double	x_rot;				// angle display plane to x axis
+double	y_rot;				// angle display plane to y axis
+double	z_rot;				// angle display plane to z axis
+double	sclx, scly, sclz;		// scale 
 
-double	hor;				/* horizontal address */
-double	vert;				/* vertical address */
-double	mandel_width;			/* width of display */
-double	xgap;				/* gap between pixels */
-double	ygap;				/* gap between pixels */
+double	hor;				// horizontal address
+double	vert;				// vertical address
+double	mandel_width;			// width of display
+double	xgap;				// gap between pixels
+double	ygap;				// gap between pixels
 
-BYTE	ch;				/* used for compression */
-int	number;				/* used for compression */
+BYTE	ch;				// used for compression
+int	number;				// used for compression
 
 char	AntStatus[200];			// display the progress of ant()
 char	LyapSequence[120];		// hold the AB sequence for Lyapunov fractals
@@ -104,7 +99,13 @@ char	LyapSequence[120];		// hold the AB sequence for Lyapunov fractals
 double	potparam[3] = { 255.0, 820.0, 20.0 };		// potential parameters
 double	param[20];			// parameters
 double	f_radius, f_xcenter, f_ycenter;	// inversion radius, center
-double	magnitude, rqlim;
+double	magnitude;
+double	rqlim;				// bailout level
+int	BailoutTestType = BAIL_MOD;	// type of bailout test
+//int	method;				// inside and outside filters
+int	InsideMethod;			// the number of the inside filter
+int	OutsideMethod;			// the number of the outside filter
+
 int	colors = 256; 			// maximum colors available
 
 int	oldrow = -1;
@@ -117,11 +118,9 @@ extern	CSlope	Slope[];
 extern	CDib	Dib; 
 extern	WORD	delaycount;
 extern	RECT 	r;
-	int	method;			// inside and outside filters
 extern	int	FilterType;		// data for Tierazon filters
 extern	int	ColourMethod;		// Tierazon colour methods
 extern	int	nFDOption;		// Fractal Dimension option for Tierazon filters
-extern	double	rqlim;			// bailout level
 extern	double	xx3rd, yy3rd;		// selected screen corners 
 
 extern	BOOL	invert;			// invert fractal
@@ -141,7 +140,7 @@ extern	WORD	colours;
 
 	int	symmetry;		// symmetry flag 
 extern	POINT	ptSize;			// Stores DIB dimensions
-	int	orientation;		// 0, 90, 180 or 270 degrees
+extern	int	RotationAngle;		// in degrees
 extern	char	LSYSFile[];
 extern	char	PARFile[];
 extern	char	KFRFile[];
@@ -165,7 +164,7 @@ extern	char	*FractData(void);
 extern	char	*str_find_ci(char *, char *);
 
 extern	BOOL	bTrack;			// TRUE if user is selecting a region
-extern	HWND	GlobalHwnd;		// to allow passing of hwnd to find_file_item()
+extern	HWND	GlobalHwnd;		// to allow passing of hwnd
 
 //extern	BYTE	DisplayPaletteFlag;	// Display palette 
 extern	BOOL	RunAnimation;		// are we in the middle of an animation run?
@@ -237,11 +236,14 @@ void	DisplayStatusBarInfo(int, char *);
 
 extern	ProcessType	OscAnimProc;
 	CFract		Fractal;
-	CTZfilter	TZfilter;		// Tierazon filters
-	Complex	z, q, c, j;
+	CTZfilter	TZfilter;	// Tierazon filters
+	Complex		z, q, c, j;
 
-	CPlot	Plot;		// image plotting routines 
-	CPixel	Pix;		// routines for escape fractals
+	CPlot		Plot;		// image plotting routines 
+	CPixel		Pix;		// routines for escape fractals
+	CMatrix		Mat;		// matrix applications for rotation and translation
+	CBigMatrix	BigMat;		// matrix applications for rotation and translation
+
 				//CLine3d	Line3d;		// routines for projection and 3D transforms
 
 // stuff for Pixel initialisation
@@ -437,14 +439,16 @@ void	CreateFractalName(BOOL UseszAppName, char *Name)
     else
 	sprintf(PrecisionData, "");
 
-    if (method > NONE)
+    if (InsideMethod > NONE || OutsideMethod > NONE)
 	{
-	if (method > TIERAZONCOLOURS)
+	if (InsideMethod > TIERAZONCOLOURS)
 	    sprintf(FilterString, "TZColour=%d, ", ColourMethod);
-	else if (method > TIERAZONFILTERS)
+	else if (InsideMethod > TIERAZONFILTERS)
 	    sprintf(FilterString, "TZFilter=%d, ", FilterType);
+	else if (InsideMethod > NONE)
+	    sprintf(FilterString, "Filter=%d, ", InsideMethod);
 	else
-	    sprintf(FilterString, "Filter=%d, ", method);
+	    sprintf(FilterString, "Filter=%d, ", OutsideMethod);
 	}
     else
 	sprintf(FilterString, "");
@@ -561,6 +565,12 @@ int	SpecialFractals(HWND hwnd, CPixel *Pix)
 	case BIFADSINPI:
 	case BIFEQSINPI:
 	case BIFMAY:
+	case LBIFURCATION:
+	case LBIFSTEWART:
+	case LBIFLAMBDA:
+	case LBIFADSINPI:
+	case LBIFEQSINPI:
+	case LBIFMAY:
 	case QUADMAND:
 	case DIFFUSION:
 	case FOURIER:
@@ -600,13 +610,22 @@ int	SpecialFractals(HWND hwnd, CPixel *Pix)
 	case FFT:
 	case BUDDHABROT:
 	case POPCORN:
-//	case TEST:
+/*
+	case FPPOPCORN:
+	case LPOPCORN:
+	case FPPOPCORNJUL:
+	case LPOPCORNJUL:
+*/
 	case PERTURBATION:
 	case SLOPEDERIVATIVE:
 	case SLOPEFORWARDDIFF:
 	case ANT:
 	case TOWER:
 	case LATOO:
+	case CHIP:
+	case ICON:
+	case QUADRUPTWO:
+	case THREEPLY:
 	    if (fractalspecific[type].flags & OTHERFNINPIXEL)
 		{
 		OthFn.InitOtherFunctions(type, &z, &q, hwnd, wpixels, &TrueCol, &Dib, AntStatus, FrameEnd, FrameStart);
@@ -686,12 +705,12 @@ int	perform_worklist(HWND hwnd)
 	Pix.InitDistEst(&xxmin, &xxmax, &yymin, &yymax, &xx3rd, &yy3rd, &distestwidth, distest);
 
     // okay, we have to get the globals into the Pixel object somehow
-    Pix.InitPixel0(type, special, subtype, &degree, rqlim, ExpandStarTrailColours, SpecialFlag, precision, biomorph, method, orientation, xdots, ydots, nFDOption);
+    Pix.InitPixel0(type, special, subtype, &degree, rqlim, ExpandStarTrailColours, SpecialFlag, precision, biomorph, InsideMethod, OutsideMethod, RotationAngle, xdots, ydots, nFDOption);
     Pix.InitPixel1(&TZfilter, &TrueCol, &OscProcess, period_level, distest, invert, phaseflag, wpixels, juliaflag, closenuff, BigCloseEnough, calcmode);
     Pix.InitPixel2(CoordSystem, UseCurrentPalette, reset_period, colors, hor, vert, mandel_width, BigHor, BigVert, BigWidth, &yymax, &Big_yymax);
-    Pix.InitPixel3(dStrands, j, pairflag, &andcolor, _3dflag, xgap, ygap, Big_xgap, Big_ygap, &c, ScreenRatio, colours, &Fractal);
+    Pix.InitPixel3(dStrands, j, pairflag, &andcolor, _3dflag, xgap, ygap, Big_xgap, Big_ygap, &c, ScreenRatio, colours, &Fractal, BailoutTestType);
     Pix.InitPixel4(&cBig, &q, &z, &qBig, &zBig, threshold, BigNumFlag, &color, logval, &iteration, f_radius, f_xcenter, LyapSequence);
-    Pix.InitPixel5(f_ycenter, &symmetry, param, potparam, decomp, logtable, &AutoStereo_value, width, hwnd/*, worklist*/);
+    Pix.InitPixel5(f_ycenter, &symmetry, param, potparam, decomp, logtable, &AutoStereo_value, width, hwnd/*, worklist*/, &Mat, &BigMat);
     Pix.InitPixel6(&Dib, &PlotType, &oldrow, &oldcol, &time_to_zoom, &time_to_restart, &time_to_reinit, &time_to_quit, fillcolor, &andcolor, &blockindex, &totpasses, &curpass);
 
     NonStandardFractal = FALSE;

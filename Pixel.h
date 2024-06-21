@@ -5,6 +5,8 @@
 #include "BigDouble.h"
 #include "BigComplex.h"
 #include "OscProcess.h"
+#include "Matrix.h"
+#include "BigMatrix.h"
 #include "fractalp.h"
 #include "filter.h"
 #include "fract.h"
@@ -46,6 +48,11 @@ bits are numbered [..][y/16+1][x+1]&(1<<(y&15)) */
 typedef short(*TPREFIX)[2][maxyblk][maxxblk];
 #define tprefix   (*((TPREFIX)prefix))
 
+enum BAILOUTTEST
+    {
+    BAIL_MOD, BAIL_REAL, BAIL_IMAG, BAIL_OR, BAIL_AND, MANH, MANR
+    };
+
 #define calcadot(h,c,x,y) { if ((c = calc_frac(h, y, x, user_data)) == -1) return(-1); }
 
 #pragma once
@@ -71,16 +78,17 @@ class CPixel
 
 	int	StandardCalculationMode(HWND hwnd, CSlope Slope, int user_data(HWND hwnd));
 	int	FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[], WORD degree, WORD type,
-		int subtype, BYTE calcmode, int orientation, CFract *Fractal, double hor, double vert, double mandel_width, BYTE BigNumFlag, BigDouble *Big_xxmin,
+		int subtype, BYTE calcmode, int RotationAngle, CFract *Fractal, double hor, double vert, double mandel_width, BYTE BigNumFlag, BigDouble *Big_xxmin,
 		BigDouble *Big_xxmax, BigDouble *Big_yymin, BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio, double *xxmin,
 		double *xxmax, double *yymin, double *yymax, WORD special, BYTE juliaflag);
 
-	void	InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, int precisionIn, int biomorphIn, int methodIn, int orientationIn, int xdotsIn, int ydotsIn, int nFDOptionIn);
+	void	InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, int precisionIn, int biomorphIn, int InsideMethodIn, int OutsideMethodIn, 
+		int orientationIn, int xdotsIn, int ydotsIn, int nFDOptionIn);
 	void	InitPixel1(CTZfilter *TZfilterIn, CTrueCol *TrueColIn, COscProcess *OscProcessIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, double *wpixelsIn, BYTE juliaflagIn, double closenuffIn, BigDouble BigCloseEnoughIn, BYTE calcmodeIn);
 	void	InitPixel2(int CoordSystemIn, BOOL UseCurrentPaletteIn, int reset_periodIn, int colorsIn, double horIn, double vertIn, double mandel_widthIn, BigDouble BigHorIn, BigDouble BigVertIn, BigDouble BigWidthIn, double *yymax, BigDouble *Big_yymaxIn);
-	void	InitPixel3(double dStrandsIn, Complex jIn, BYTE pairflagIn, long *andcolor, BYTE _3dflagIn, double xgap, double ygap, BigDouble Big_xgap, BigDouble Big_ygap, Complex *cIn, double ScreenRatio, WORD colours, CFract *Fract);
+	void	InitPixel3(double dStrandsIn, Complex jIn, BYTE pairflagIn, long *andcolor, BYTE _3dflagIn, double xgap, double ygap, BigDouble Big_xgap, BigDouble Big_ygap, Complex *cIn, double ScreenRatio, WORD colours, CFract *Fract, int BailoutTestTypeIn);
 	void	InitPixel4(BigComplex *cBigIn, Complex *qIn, Complex *zIn, BigComplex *qBigIn, BigComplex *zBigIn, long thresholdIn, BYTE BigNumFlagIn, long *colorIn, int logvalIn, long *iterationIn, double f_radiusIn, double f_xcenterIn, char *LyapSequenceIn);
-	void	InitPixel5(double f_ycenterIn, int *symmetryIn, double paramIn[], double potparamIn[], int decompIn, BYTE *logtableIn, int *AutoStereo_valueIn, int widthIn, HWND hwndIn/*, struct workliststuff *worklistIn*/);
+	void	InitPixel5(double f_ycenterIn, int *symmetryIn, double paramIn[], double potparamIn[], int decompIn, BYTE *logtableIn, int *AutoStereo_valueIn, int widthIn, HWND hwndIn/*, struct workliststuff *worklistIn*/, CMatrix *MatIn, CBigMatrix *BigMatIn);
 	void	InitPixel6(CDib *DibIn, int *PlotTypeIn, int *oldrowIn, int *oldcolIn, int *time_to_zoom, int *time_to_restart, int *time_to_reinit, int *time_to_quit, long fillcolorIn, long *andcolorIn, int *blockindexIn, int *totpassesIn, int *curpassIn);
 	void	ManageBignumPrecision(int precision);				// allow internal bignum variables to track current precision requirements
 
@@ -122,8 +130,10 @@ class CPixel
 	BYTE	SpecialFlag;
 	double	dem_delta, dem_width;	// distance estimator variables
 	int	biomorph;
-	int	method;			// inside and outside filters
-	int	orientation;		// 0, 90, 180 or 270 degrees
+//	int	method;			// inside and outside filters
+	int	InsideMethod;		// the number of the inside filter
+	int	OutsideMethod;		// the number of the outside filter
+	int	RotationAngle;		// in degrees
 	int	period_level;		// 0 for no periodicity checking
 	int	distest;
 	BOOL	invert;			// invert fractal
@@ -202,7 +212,7 @@ class CPixel
 	int	xsym_split(int xaxis_row, int xaxis_between/*, int *symmetry*/);
 	int	ysym_split(int xaxis_row, int xaxis_between/*, int *symmetry*/);
 	void	setsymmetry(int sym, /*int thread, */int uselist, BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[],
-		WORD degree, WORD type, int subtype, BYTE calcmode, int orientation, CFract *Fractal, double hor, double vert, double mandel_width, double *xxmax,
+		WORD degree, WORD type, int subtype, BYTE calcmode, int RotationAngle, CFract *Fractal, double hor, double vert, double mandel_width, double *xxmax,
 		double *xxmin, double *yymin, double *yymax, WORD special, BYTE juliaflag, int *PlotType, BYTE BigNumFlag, BigDouble *Big_xxmin, BigDouble *Big_xxmax,
 		BigDouble *Big_yymin, BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio);
 //	DWORD	getcolor(WORD x, WORD y);
@@ -214,6 +224,8 @@ class CPixel
 	void	CalcBigFloatIteration(double error, double *wpixels, int row, int col, BigComplex z, BigComplex OldZ, BigComplex OlderZ);
 	int	DoBigFilter(int method, int hooper);
 	BigComplex	BigInvertz2(BigComplex  & Cmplx1);
+	bool	BailoutTest(Complex *z, Complex SqrZ);
+	bool	FractintBailoutTest(Complex *z);
 
 	// some fractal routines
 	int	InitFunctions(WORD type, Complex *z, Complex *q);
@@ -348,6 +360,8 @@ class CPixel
 	double	xval, yval, zval;	// rotate 
 
 	MATRIX	m;			// transformation matrice
+	CMatrix	*Mat;			// transformation and roatation matrix
+	CBigMatrix	*BigMat;	// transformation and roatation matrix
 
 	struct PointInfo
 	    {
@@ -365,6 +379,7 @@ class CPixel
 	Complex temp, temp1, temp2, temp3, temp4;
 	double	real_imag, absolute, distance;
 	HWND	hwnd;
+	int	BailoutTestType = BAIL_MOD;
 
 	// local variables for bignum functions
 	BigComplex	aBig, a2Big, aa3Big, bBig, l2Big, lm5Big, lp5Big, ozBig, /*sqrBig, */t2Big, t3Big, vBig;
@@ -418,7 +433,7 @@ class CPixel
 	Complex	croot, cdegree;
 	double	thresh;
 	int	root;
-	double qc, qci, qcj, qck;			// These are for quaternions and hypercomplex
+	double	qc, qci, qcj, qck;			// These are for quaternions and hypercomplex
 	int	PhoenixType = ZERO;
 	int	PhoenixDegree;
 
@@ -441,5 +456,7 @@ class CPixel
 	int	froth_shades;
 	long	oldcolor;
 
+	// Filter stuff used in DoFilter()
+	double	rqlim2; 
     };
 

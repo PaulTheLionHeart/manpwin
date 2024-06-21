@@ -32,7 +32,8 @@
 	Initialise Pixel
 **************************************************************************/
 
-void	CPixel::InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, int precisionIn, int biomorphIn, int methodIn, int orientationIn, int xdotsIn, int ydotsIn, int nFDOptionIn)
+void	CPixel::InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, int precisionIn, int biomorphIn, int InsideMethodIn, int OutsideMethodIn, 
+		int RotationAngleIn, int xdotsIn, int ydotsIn, int nFDOptionIn)
 
     {
     type = typeIn;
@@ -44,9 +45,10 @@ void	CPixel::InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degree
 //    dem_delta = dem_deltaIn;
 //    dem_width = dem_widthIn;
     biomorph = biomorphIn;
-    method = methodIn;
+    InsideMethod = InsideMethodIn;
+    OutsideMethod = OutsideMethodIn;
     nFDOption = nFDOptionIn;
-    orientation = orientationIn;
+    RotationAngle = RotationAngleIn;
     ExpandStarTrailColours = ExpandStarTrailColoursIn;
     xdots = xdotsIn;						// only the width of the strip
     ydots = ydotsIn;
@@ -86,7 +88,7 @@ void	CPixel::InitPixel2(int CoordSystemIn, BOOL UseCurrentPaletteIn, int reset_p
     Big_yymax = Big_yymaxIn;
     }
 
-void	CPixel::InitPixel3(double dStrandsIn, Complex jIn, BYTE pairflagIn, long *andcolorIn, BYTE _3dflagIn, double xgapIn, double ygapIn, BigDouble Big_xgapIn, BigDouble Big_ygapIn, Complex *cIn, double ScreenRatioIn, WORD coloursIn, CFract *Fract)
+void	CPixel::InitPixel3(double dStrandsIn, Complex jIn, BYTE pairflagIn, long *andcolorIn, BYTE _3dflagIn, double xgapIn, double ygapIn, BigDouble Big_xgapIn, BigDouble Big_ygapIn, Complex *cIn, double ScreenRatioIn, WORD coloursIn, CFract *Fract, int BailoutTestTypeIn)
     {
 //    FilterRGB = FilterRGBIn;
     dStrands = dStrandsIn;
@@ -103,6 +105,7 @@ void	CPixel::InitPixel3(double dStrandsIn, Complex jIn, BYTE pairflagIn, long *a
     colours = coloursIn;
     Fn1Index = Fract->Fn1Index;
     Fn2Index = Fract->Fn2Index;
+    BailoutTestType = BailoutTestTypeIn;
     }
 
 void	CPixel::InitPixel4(BigComplex *cBigIn, Complex *qIn, Complex *zIn, BigComplex *qBigIn, BigComplex *zBigIn, long thresholdIn, BYTE BigNumFlagIn, long *colorIn, int logvalIn, long *iterationIn, double f_radiusIn, double f_xcenterIn, char *LyapSequenceIn)
@@ -124,7 +127,7 @@ void	CPixel::InitPixel4(BigComplex *cBigIn, Complex *qIn, Complex *zIn, BigCompl
     LyapSequence = LyapSequenceIn;
     }
 
-void	CPixel::InitPixel5(double f_ycenterIn, int *symmetryIn, double paramIn[], double potparamIn[], int decompIn, BYTE *logtableIn, int *AutoStereo_valueIn, int widthIn, HWND hwndIn/*, struct workliststuff *worklistIn*/)
+void	CPixel::InitPixel5(double f_ycenterIn, int *symmetryIn, double paramIn[], double potparamIn[], int decompIn, BYTE *logtableIn, int *AutoStereo_valueIn, int widthIn, HWND hwndIn/*, struct workliststuff *worklistIn*/, CMatrix *MatIn, CBigMatrix *BigMatIn)
     {
     f_ycenter = f_ycenterIn;
     symmetry = symmetryIn;
@@ -137,7 +140,9 @@ void	CPixel::InitPixel5(double f_ycenterIn, int *symmetryIn, double paramIn[], d
     AutoStereo_value = AutoStereo_valueIn;
     width = widthIn;
     hwnd = hwndIn;
-//    for (int i = 0; i < MAXCALCWORK; i++)
+    Mat = MatIn;
+    BigMat = BigMatIn;
+    //    for (int i = 0; i < MAXCALCWORK; i++)
 //	worklist[i] = &worklistIn[i];
     }
 
@@ -251,8 +256,7 @@ int	CPixel::DoFilter(int method, int hooper)
 	*iteration = (BYTE) (*(logtable + (*iteration % MAXTHRESHOLD)));
     else if (biomorph >= 0)
 	{
-	double	rqlim2 = sqrt(rqlim);
-
+	rqlim2 = sqrt(rqlim);
 	if (fabs(z->x) < rqlim2 || fabs(z->y) < rqlim2)
 	    *iteration = biomorph;
 	}
@@ -436,7 +440,7 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
     long	min_index;			// iteration of min_orbit
     double	tantable[16];			// used for Star Trails
 
-    if(method == STARTRAIL)
+    if (InsideMethod == STARTRAIL)
        {
        int	i;
        for(i = 0; i < 16; i++)
@@ -446,7 +450,7 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
     magnitude = 0.0;
     min_orbit = 100000.0;
 
-    if (period_level == 0 || method == ZMAG || method == STARTRAIL)
+    if (period_level == 0 || InsideMethod == ZMAG || InsideMethod == STARTRAIL)
 	oldcolour = 32767; 			// don't check periodicity at all
     else //if (reset_period)
 	oldcolour = 240;			// don't check periodicity 1st n iterations
@@ -460,9 +464,9 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
     FloatIteration = 0.0;
     real_iteration = 0;
     phaseflag = 0;			// assume all type 5, 9 fractals same colour 
-    if (method >= TIERAZONFILTERS)
+    if (InsideMethod >= TIERAZONFILTERS)
 	{
-	TZfilter->InitFilter(method, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
+	TZfilter->InitFilter(InsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
 	TZfilter->LoadFilterQ(*q);
 	}
 
@@ -473,30 +477,12 @@ SetWindowText (hwnd, ProcessType);
 
     if (juliaflag)
 	{
-	switch (orientation)
-	    {
-	    case 0:		// normal
-		*q = j;
-		break;
-	    case 90:		// 90 degrees
-		q->x = -j.y;
-		q->y = -j.x;
-		break;
-	    case 180:		// 180 degrees
-		*q = -j;
-		break;
-	    case 270:		// 270 degrees
-		q->x = j.y;
-		q->y = j.x;
-		break;
-	    }
+	*q = j;
 	*z = (invert) ? invertz2(*c) : *c;
-//	z = (invert) ? CInvert(c) : c;
 	}
     else
 	{
 	*q = (invert) ? invertz2(*c) : *c;
-//	q = (invert) ? CInvert(c) : c;
 	*z = 0;
 	}
 
@@ -516,13 +502,13 @@ SetWindowText (hwnd, ProcessType);
 	dem_color = -1;
 	}
 
-    if (method == BOF60 || method == BOF61)
+    if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	{
 	magnitude = 0.0;
 	min_orbit = 100000.0;
 	}
 
-    if (method == POTENTIAL)
+    if (InsideMethod == POTENTIAL)
 	rqlim = (potparam[2] > 0) ? potparam[2] : 4.0;
 
     FloatIteration = 0.0;
@@ -584,12 +570,12 @@ SetWindowText (hwnd, ProcessType);
 	TempPt = *z;
 	OscProcess->ChangeCoordSystem(&z->x, &z->y, &TempZ, TempPt.x, TempPt.y, (double)*iteration, CoordSystem);
 							// result = 0 so continue iteration
-	if (method == STARTRAIL)
+	if (InsideMethod == STARTRAIL)
 	    {
 	    if(0 < *iteration && *iteration < 16)
 		tantable[*iteration - 1] = z->y/(z->x + 0.000001);
 	    }
-	else if (method == EPSCROSS)
+	else if (InsideMethod == EPSCROSS)
 	    {
 	    hooper = 0;
 	    if (fabs(z->x) < close)
@@ -603,7 +589,7 @@ SetWindowText (hwnd, ProcessType);
 		break;
 		}
 	    }
-	else if (method == BOF60 || method == BOF61)
+	else if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	    {
 	    magnitude = z->CSumSqr();
 	    if (magnitude < min_orbit)
@@ -612,7 +598,7 @@ SetWindowText (hwnd, ProcessType);
 		min_index = *iteration + 1L;
 		}
 	    }
-	else if (method >= TIERAZONFILTERS)
+	else if (InsideMethod >= TIERAZONFILTERS)
 	    TZfilter->DoTierazonFilter(*z, iteration);
 
 	if (*iteration > oldcolour)			// check periodicity
@@ -643,13 +629,13 @@ SetWindowText (hwnd, ProcessType);
 //    if (juliaflag && ShowOrbits)
 //	plot_orbits(special, NUM_ORBITS);
 
-    if (method >= TIERAZONFILTERS)
+    if (InsideMethod >= TIERAZONFILTERS)
 	{
 	TZfilter->EndTierazonFilter(*z, iteration, TrueCol);
 	return *iteration;
 	}
 
-    else if (method == STARTRAIL)
+    else if (InsideMethod == STARTRAIL)
 	{
 	int i;
 	double diff;
@@ -713,14 +699,17 @@ SetWindowText (hwnd, ProcessType);
 	}
 
     if (*iteration < threshold)
-	DoFilter(method, hooper);
+	{
+	DoFilter(InsideMethod, hooper);
+	DoFilter(OutsideMethod, hooper);
+	}
     else
 	{
-	if (method == BOF60)
+	if (InsideMethod == BOF60)
 	    *iteration = (int)(sqrt(min_orbit) * 75.0);
-	else if (method == BOF61)
+	else if (InsideMethod == BOF61)
 	    *iteration = min_index;
-	else if (method == ZMAG)
+	else if (InsideMethod == ZMAG)
 	    *iteration = (int)((z->CSumSqr()) * (threshold >> 1) + 1);
 	else
 	    *iteration = threshold;
@@ -792,48 +781,55 @@ SetWindowText (hwnd, ProcessType);
 	    if (row % pairflag || col % pairflag)
 		if (row != (int)ydots - 1)				// must trigger for last line
 		    return(threshold);
-	if (row != *oldrow)
+	if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
 	    {
-	    if (pairflag && row)					// draw row for right hand image
-		draw_right_image((short)(*oldrow));			// PHD to fix
-	    switch (orientation)
+	    if (row != *oldrow)
 		{
-		case NORMAL:						// normal
-		    c->y = *yymax - row * ygap;
-		    break;
-		case 90:						// 90 degrees
-		    c->x = -(*yymax - row * xgap);
-		    break;
-		case 180:						// 180 degrees
-		    c->y = -(*yymax - row * ygap);
-		    break;
-		case 270:						// 270 degrees
-		    c->x = *yymax - row * xgap;
-		    break;
+		if (pairflag && row)					// draw row for right hand image
+		    draw_right_image((short)(*oldrow));			// PHD to fix
+		switch (RotationAngle)
+		    {
+		    case NORMAL:						// normal
+			c->y = *yymax - row * ygap;
+			break;
+		    case 90:						// 90 degrees
+			c->x = *yymax - row * xgap;
+			break;
+		    case 180:						// 180 degrees
+			c->y = -(*yymax - row * ygap);
+			break;
+		    case 270:						// 270 degrees
+			c->x = -(*yymax - row * xgap);
+			break;
+		    }
+		*oldrow = row;
 		}
-	    *oldrow = row;
+	    if (col != *oldcol)
+		{
+		switch (RotationAngle)
+		    {
+		    case NORMAL:						// normal
+			c->x = col * xgap + hor;
+			break;
+		    case 90:						// 90 degrees
+			c->y = col * ygap + hor;
+			break;
+		    case 180:						// 180 degrees
+			c->x = -(col * xgap + hor);
+			break;
+		    case 270:						// 270 degrees
+			c->y = -(col * ygap + hor);
+			break;
+		    }
+
+		*oldcol = col;
+		}
 	    }
-	if (col != *oldcol)
+	else
 	    {
-	    switch (orientation)
-		{
-		case NORMAL:						// normal
-		    c->x = col * xgap + hor;
-		    break;
-		case 90:						// 90 degrees
-		    c->y = -(col * ygap + hor);
-		    break;
-		case 180:						// 180 degrees
-		    c->x = -(col * xgap + hor);
-		    break;
-		case 270:						// 270 degrees
-		    c->y = col * ygap + hor;
-		    break;
-		}
-
-	    *oldcol = col;
+	    double  zero = 0.0;
+	    Mat->DoTransformation(&c->x, &c->y, &zero, col * xgap + hor, *yymax - row * ygap, 0.0);
 	    }
-
 	if (user_data(hwnd) == -1)
 	    return(-1);
 	*color = (type == CIRCLESQ || type == FPCIRCLE) ? ((int)(floor(c->CSumSqr())) & 0x00ff) : dofract(hwnd, row, col);
@@ -961,7 +957,7 @@ int	CPixel::RunThread(HWND hwnd, int i, HANDLE ghMutex, int StripWidth, CSlope S
 	for (i = 0; i < num_worklist; ++i)
 	    worklist[i] = worklist[i + 1];
 
-	FindSymmetry(_3dflag, decomp, pairflag, method, invert, CoordSystem, param, *degree, type, subtype, calcmode, orientation, Fractal, hor, vert, mandel_width, BigNumFlag, Big_xxmin, Big_xxmax, Big_yymin, Big_yymax, BigHor, BigVert, BigWidth, ScreenRatio,
+	FindSymmetry(_3dflag, decomp, pairflag, InsideMethod, invert, CoordSystem, param, *degree, type, subtype, calcmode, RotationAngle, Fractal, hor, vert, mandel_width, BigNumFlag, Big_xxmin, Big_xxmax, Big_yymin, Big_yymax, BigHor, BigVert, BigWidth, ScreenRatio,
 	    xxmin, xxmax, yymin, yymax, special, juliaflag);
 	if (pairflag)
 	    init_stereo_pairs(pairflag, AutoStereo_value);			// init stereo pair parameters

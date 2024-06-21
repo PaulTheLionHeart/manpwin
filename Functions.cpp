@@ -440,7 +440,7 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	    real_imag = z->x * z->y;
 	    z->x = q->x + sqr.x - sqr.y;
 	    z->y = q->y + real_imag + real_imag;
-	    return ((sqr.x + sqr.y) >= rqlim);
+	    return BailoutTest(z, sqr);
 /*
 	    {
 	    Complex z2 = {z->x * z->x, z->y * z->y};
@@ -462,7 +462,8 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	case MANDEL4:
 	    *z = z->CPolynomial(*degree);
 	    *z = *z + *q;
-	    return (z->CSumSqr() >= rqlim);
+	    return FractintBailoutTest(z);
+//	    return (z->CSumSqr() >= rqlim);
 
 	case BURNINGSHIP:				// Burning Ship
 	    sqr.x = z->x * z->x;
@@ -470,14 +471,14 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	    real_imag = fabs(z->x * z->y);
 	    z->x = sqr.x - sqr.y + q->x;
 	    z->y = real_imag + real_imag - q->y;
-	    return ((sqr.x + sqr.y) >= rqlim);
+	    return BailoutTest(z, sqr);
 
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	    z->x = fabs(z->x);
 	    z->y = -fabs(z->y);
 	    *z = z->CPolynomial(*degree);
 	    *z = *z + *q;
-	    return (z->CSumSqr() >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case CUBIC:					// Art Matrix Cubic
 	    if (subtype == 'K')				// CKIN
@@ -591,7 +592,7 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 		*z = *q + z->CSin();
 	    z->x += param[0];
 	    z->y += param[1];
-	    return (z->CSumSqr() >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case EXPFRACTAL:				// Exponential
 	    {
@@ -638,21 +639,21 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	    double b1 = z->y;
 	    z->x = a1 / cos(b1) + q->x;
 	    z->y = b1 / sin(a1) + q->y;
-	    return (z->CSumSqr() >= rqlim);
+	    return FractintBailoutTest(z);
 	    }
 
 	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
 	    *z = a * *z * *z + ((param[5] == 1.0) ? 1.0 : -1.0) * z->CPolynomial(*degree);
 	    *z = *z + *q;
-	    return (z->CSumSqr() >= rqlim);
+	    return FractintBailoutTest(z);
 
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
 	    {
 	    double m = param[1];
 	    a = z->CPolynomial(*degree - 1);
 	    *z = (a * *z) / (m + a) + *q;
-	    return (z->CSumSqr() >= rqlim);
-	    }
+	    return FractintBailoutTest(z);
+	}
 
 	case POLYNOMIAL:				// Polynomial
 	    {
@@ -672,7 +673,7 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 		    }
 		*z = FinalZ + *q;
 		}
-	    return (z->CSumSqr() >= rqlim);
+	    return FractintBailoutTest(z);
 	    }
 
 	case RATIONALMAP:				// Art Matrix Rational Map 
@@ -783,5 +784,48 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 
 	}
     return 0;
+    }
+
+/**************************************************************************
+    Bailout Test
+**************************************************************************/
+
+bool	CPixel::BailoutTest(Complex *z, Complex SqrZ)
+    {
+//    Complex TempSqr;
+    double  magnitude;
+    double  manhmag;
+    double  manrmag;
+
+    switch (BailoutTestType)
+	{
+	case BAIL_MOD:
+	    magnitude = SqrZ.x + SqrZ.y;
+	    return (magnitude >= rqlim);
+
+	case BAIL_REAL:
+	    return (SqrZ.x >= rqlim);
+	
+	case BAIL_IMAG:
+	    return (SqrZ.y >= rqlim);
+
+	case BAIL_OR:
+	    return (SqrZ.x >= rqlim || SqrZ.y >= rqlim);
+	
+	case BAIL_AND:
+	    return (SqrZ.x >= rqlim && SqrZ.y >= rqlim);
+
+	case MANH:
+	    manhmag = fabs(z->x) + fabs(z->y);
+	    return ((manhmag * manhmag) >= rqlim);
+
+	case MANR:
+	    manrmag = z->x + z->y;	    // don't need abs() since we square it next
+	    return ((manrmag * manrmag) >= rqlim);
+
+	default:
+	    magnitude = SqrZ.x + SqrZ.y;
+	    return (magnitude >= rqlim);
+	}
     }
 

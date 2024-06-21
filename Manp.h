@@ -20,16 +20,6 @@
 
 #define	dot_product(v1,v2)  ((v1)[0]*(v2)[0]+(v1)[1]*(v2)[1]+(v1)[2]*(v2)[2])
 
-typedef double	MATRIX[4][4];		/* matrix of floats */
-typedef double	VECTOR[3];		/* vector of floats */
-typedef double	MATRIXPTR[][4];		/* fussy array warnings from HI_TECH */
-typedef double	VECTORPTR[];		/* ditto */
-
-typedef long	INTMATRIX[4][4];	/* matrix of longs */
-typedef long	INTVECTOR[3];		/* vector of longs */
-typedef long	INTMATRIXPTR[][4];	/* fussy array warnings from HI_TECH */
-typedef long	INTVECTORPTR[];		/* ditto */
-
 #define BLACK	0
 #define BLUE	1
 #define GREEN	2

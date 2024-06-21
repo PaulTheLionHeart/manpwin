@@ -163,8 +163,6 @@ static	char    szTitleName[MAXDATALINE] = "ManpWIN";
 static	FILE	*fp;				// script file   
 static	FILE	*fl;				// a list of files names for creating a large MPEG file
 static	int	StartIter, EndIter, CurrentFrame, frames, ParamNumber;
-static	BOOL	MathusRateAnimation = FALSE;
-static	BOOL	IkedaAnimation = FALSE;
 static	BOOL	ParamAnimation = FALSE;
 static	BOOL	OscillatorAnimation = FALSE;
 static	BOOL	JuliaSetAnimation = FALSE;
@@ -251,18 +249,16 @@ int	GenerateFractalFrame(HWND hwnd, char *FileName, int TotalFrames, int ThisFra
 	return -1;
 	}
 
-    if (type != MALTHUS || !MathusRateAnimation)	// already have all the information we need
-	if (type != FRACTALMAPS || !IkedaAnimation)	// ditto
-	    if (!ParamAnimation)
-		{
-		if (fgets(buf, MAXDATALINE, fp) == NULL) 
-		    return ENDOFSCRIPT;
-		if (GetParamData(hwnd, FileName, buf, SaveFileOrig, FALSE) < 0)
-		    return -1;
-		FramesCubed = (double)TotalFrames * (double)TotalFrames * (double)TotalFrames;		// use cubic fn
-		iCubed = (double)ThisFrame * (double)ThisFrame * (double)ThisFrame; 
-		threshold = StartIter + (int)(((double)(EndIter - StartIter + 1) * iCubed) / FramesCubed);
-		}
+    if (!ParamAnimation)
+	{
+	if (fgets(buf, MAXDATALINE, fp) == NULL) 
+	    return ENDOFSCRIPT;
+	if (GetParamData(hwnd, FileName, buf, SaveFileOrig, FALSE) < 0)
+	    return -1;
+	FramesCubed = (double)TotalFrames * (double)TotalFrames * (double)TotalFrames;		// use cubic fn
+	iCubed = (double)ThisFrame * (double)ThisFrame * (double)ThisFrame; 
+	threshold = StartIter + (int)(((double)(EndIter - StartIter + 1) * iCubed) / FramesCubed);
+	}
     hCursor = LoadCursor(NULL, IDC_WAIT);	// Load hour-glass cursor.
     SetCursor(hCursor);
 
@@ -395,8 +391,6 @@ int	InitScript(HWND hwnd, char *FileName, int *TotalFrames)
     char	*p;
 
     setup_defaults();
-    MathusRateAnimation = FALSE;
-    IkedaAnimation = FALSE;
     OscillatorAnimation = FALSE;
     ParamAnimation = FALSE;
     JuliaSetAnimation = FALSE;
@@ -437,17 +431,7 @@ int	InitScript(HWND hwnd, char *FileName, int *TotalFrames)
 	fclose(fp);
 	return -1;
 	}
-    if (strncmp(buf, "Malthus Animation:", 18) == 0)
-	{
-	sscanf(buf + 19, "%lf %lf %d", &StartRate, &EndRate, &frames);  
-	MathusRateAnimation = TRUE;
-	}
-    else if (strncmp(buf, "Ikeda Animation:", 16) == 0)
-	{
-	sscanf(buf + 17, "%lf %lf %d", &StartRate, &EndRate, &frames);  
-	IkedaAnimation = TRUE;
-	}
-    else if (strncmp(buf, "Parameter Animation:", 20) == 0)
+    if (strncmp(buf, "Parameter Animation:", 20) == 0)
 	{
 	sscanf(buf + 20, "%lf %lf %d %d %d", &StartRate, &EndRate, &frames, &ParamNumber, &Return2Start);  
 	ParamAnimation = TRUE;
@@ -502,8 +486,6 @@ int	InitScript(HWND hwnd, char *FileName, int *TotalFrames)
 	    }
 	sscanf(p, "%d %d %d %d", &EndIter, &frames, (int *)&TrueCol.ScriptPaletteFlag, &PaletteShift);
 	TrueCol.FinalThreshold = EndIter;
-	MathusRateAnimation = FALSE;
-	IkedaAnimation = FALSE;
 	OscillatorAnimation = FALSE;
 	ParamAnimation = FALSE;
 	}
@@ -787,18 +769,8 @@ void	EndScript(int ThisFrame)
 void	UpdateAnimParamValues(void)
     {
     static  int	count = 0;
-    if (!MathusRateAnimation && !IkedaAnimation && !ParamAnimation)	// if we got here by mistake, let's get outa here
+    if (!ParamAnimation)	// if we got here by mistake, let's get outa here
 	return;
-    if (MathusRateAnimation)
-	{
-	ParamNumber = 0;
-	param[0] += divisor;
-	}
-    if (IkedaAnimation)
-	{
-	ParamNumber = 1;
-	param[1] += divisor;
-	}
     if (ParamAnimation)
 	param[ParamNumber] += divisor;
     if (type == PERTURBATION && ParamNumber > 9)
@@ -828,19 +800,9 @@ void	UpdateAnimParamValues(void)
 
 void	InitAnimParamValues(void)
     {
-    if (!MathusRateAnimation && !IkedaAnimation && !ParamAnimation)	// if we got here by mistake, let's get outa here
+    if (!ParamAnimation)	// if we got here by mistake, let's get outa here
 	return;
-    if (type == MALTHUS && MathusRateAnimation)
-	{
-	divisor = (EndRate - StartRate) / frames;
-	param[0] = StartRate;
-	}
-    else if (type == FRACTALMAPS && IkedaAnimation)
-	{
-	divisor = (EndRate - StartRate) / frames;
-	param[1] = StartRate;
-	}
-    else if (ParamAnimation)
+    if (ParamAnimation)
 	{
 	divisor = (EndRate - StartRate) / frames;
 	if (type == PERTURBATION && ParamNumber > 9)
@@ -932,7 +894,7 @@ int	RunScript(HWND hwnd, char *FileName)
 	}
 
     CurrentFrame = 0;
-    if (MathusRateAnimation || IkedaAnimation || ParamAnimation)
+    if (ParamAnimation)
 	InitAnimParamValues();
     else					    // no need to read any further in script file. We calculate the change in rate only.
 	{
@@ -977,7 +939,7 @@ int	RunScript(HWND hwnd, char *FileName)
 
     while(TRUE)
 	{
-	if (MathusRateAnimation || IkedaAnimation || ParamAnimation)
+	if (ParamAnimation)
 	    UpdateAnimParamValues();
 	if (CurrentFrame < StartFrame/* && !StartImmediately*/)
 	    {
@@ -1072,7 +1034,7 @@ int	RunScript(HWND hwnd, char *FileName)
 		}
 	    }
 	if (WriteMemFrames)				// write frame to memory
-	    LoadAnimationFrame(buf, MoreInfo, CurrentFrame, param[ParamNumber], (MathusRateAnimation || IkedaAnimation || ParamAnimation), (OscAnimProc == MORPHING));
+	    LoadAnimationFrame(buf, MoreInfo, CurrentFrame, param[ParamNumber], ParamAnimation, (OscAnimProc == MORPHING));
 	CurrentFrame++;
 	if (CurrentFrame >= frames || time_to_break || CurrentFrame >= MAXANIM)
 	    {

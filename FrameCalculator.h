@@ -34,7 +34,7 @@ class calculateFrame
 	int	initialiseCalculateFrame(CDib *DibIn, CSlope *Slope, int WidthIn, int HeightIn, int threshold, BigDouble xZoomPointin, BigDouble yZoomPointin, BigDouble BigWidthIn, int decimals, CTZfilter *TZfilter, HWND hwndIn, int ThreadIn, double *wpixelsIn, 
 		double paramIn[], double potparamIn[], int PaletteShiftIn, int *PlotTypeIn, int SlopeTypeIn, double lightDirectionDegrees, double bumpMappingDepth, double bumpMappingStrength, int PaletteStartIn, double LightHeightIn, int PertColourMethodIn,
 		int PalOffset, double IterDiv);
-	int	calculateOneFrame(double bailout, char* StatusBarInfo, int powerin, int FilterTypeIn, int biomorph, int subtype, Complex RSRA, bool RSRsign,
+	int	calculateOneFrame(double bailout, char* StatusBarInfo, int powerin, int InsideMethodIn, int OutsideMethodIn, int biomorph, int subtype, Complex RSRA, bool RSRsign,
 									int user_data(HWND hwnd), int xdotsIn, CTZfilter *TZfilter, CTrueCol *TrueCol, int *pPertProgress, bool *ThreadComplete, bool Multi, int delay, char *PertErrorMessage, HANDLE ghMutex);
 	int	SlopeType;
 	int	PaletteShift = 0;
@@ -120,7 +120,9 @@ class calculateFrame
 	int	xdots;
 	int	width, height;
 	int	MaxIteration;
-	int	power, subtype, method, biomorph; 
+	int	power, subtype, biomorph; 
+	int	InsideMethod;			// the number of the inside filter
+	int	OutsideMethod;			// the number of the outside filter
 	long	GlitchPointCount;
 	long	RemainingPointCount;
 	mpfr_t	xZoomPt, yZoomPt;

@@ -329,8 +329,8 @@ void Arctanhz(Complex z, Complex *rz)
     else{
       temp0.x = 1 + z.x; temp0.y = z.y;             /* temp0 = 1 + z */
       temp1.x = 1 - z.x; temp1.y = -z.y;            /* temp1 = 1 - z */
-      FPUcplxdiv( &temp0, &temp1, &temp2);
-      FPUcplxlog( &temp2, &temp2);
+      FPUcplxdiv(&temp0, &temp1, &temp2);
+      FPUcplxlog(&temp2, &temp2);
       rz->x = .5*temp2.x; rz->y = .5*temp2.y;       /* rz = .5*temp2 */
       return;
     }
@@ -358,8 +358,8 @@ void Arctanz(Complex z, Complex *rz)
     temp1.x = 1 - temp0.x; temp1.y = -temp0.y;      /* temp1 = 1 - temp0 */
     temp2.x = 1 + temp0.x; temp2.y = temp0.y;       /* temp2 = 1 + temp0 */
 
-    FPUcplxdiv( &temp1, &temp2, &temp3);
-    FPUcplxlog( &temp3, &temp3);
+    FPUcplxdiv(&temp1, &temp2, &temp3);
+    FPUcplxlog(&temp3, &temp3);
     rz->x = -temp3.y*.5; rz->y = .5*temp3.x;           /* .5*i*temp0 */
   }
 }   /* end. Arctanz */

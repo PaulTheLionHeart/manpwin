@@ -24,9 +24,9 @@ void	CPixel::init3d(int xdots, int ydots, double x_rot, double y_rot, double z_r
     {
     CMatrix Mat;
 
-    Mat.identity(m);				/* start with identity */
+    Mat.identity(m);				// start with identity
 
-/* translate so origin is in centre, so that we rotate through the centre */
+// translate so origin is in centre, so that we rotate through the centre
 
     Mat.trans((double) xdots / (-2.0), (double) ydots / (-2.0), 0.0, m);
 

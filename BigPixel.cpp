@@ -287,41 +287,18 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
     real_iteration = 0;	
     phaseflag = 0;				// assume all type 5, 9 fractals same colour
 
-    if (method >= TIERAZONFILTERS)
+    if (InsideMethod >= TIERAZONFILTERS)
 	{
 	bigTemp = *qBig;
 	tempComplex = bigTemp.CBig2Double();
-	TZfilter->InitFilter(method, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
+	TZfilter->InitFilter(InsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
 	TZfilter->LoadFilterQ(tempComplex);
 	}
 
     if (juliaflag)
 	{
-	switch (orientation)
-	    {
-	    case 0:				// normal
-		qBig->x = j.x;
-		qBig->y = j.y;
-    //	    q = j;
-		break;
-	    case 90:				// 90 degrees
-		qBig->x = -j.y;
-		qBig->y = -j.x;
-    //	    q.x = -j.y;
-    //	    q.y = -j.x;
-		break;
-	    case 180:				// 180 degrees
-		qBig->x = -j.x;
-		qBig->y = -j.y;
-    //	    q = -j;
-		break;
-	    case 270:				// 270 degrees
-		qBig->x = j.y;
-		qBig->y = j.x;
-    //	    q.x = j.y;
-    //	    q.y = j.x;
-		break;
-	    }
+	qBig->x = j.x;
+	qBig->y = j.y;
 	*zBig = (invert) ? BigInvertz2(*cBig) : *cBig;
 	}
     else
@@ -336,13 +313,13 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	return(BLUE);
 //    ShowBignum(zBig->x, "x after init");
 //    ShowBignum(zBig->y, "y after init");
-    if (method == BOF60 || method == BOF61)
+    if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	{
 	magnitude = 0.0;
 	min_orbit = 100000.0;
 	}
 
-    if (method == POTENTIAL)
+    if (InsideMethod == POTENTIAL)
 	BigBailout = potparam[2];
 
     FloatIteration = 0.0;
@@ -354,15 +331,9 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	    BigOldZ = *zBig;
 	    }
 	if (FloatIteration >= threshold)
-	//    if (iteration >= threshold)
 	    break;
 	(*iteration)++;
 	FloatIteration++;
-
-//	ThreadStatus[ThreadNum].curpass = curpass;
-//	ThreadStatus[ThreadNum].totpasses = totpasses;
-//	ShowBignum(zBig->x, "x before runfract");
-//	ShowBignum(zBig->y, "y before runfract");
 
 	result = run_big_fractal();
 	if (result < 0)
@@ -380,7 +351,7 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	    }
 	else 
 	*/
-	if (method == EPSCROSS)
+	if (InsideMethod == EPSCROSS)
 	    {
 	    hooper = 0;
 	    if (zBig->x.BigAbs() < close)
@@ -394,7 +365,7 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 		break;
 		}
 	    }
-	else if (method == BOF60 || method == BOF61)
+	else if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	    {
 	    magnitude = zBig->CSumSqr();
 	    if (magnitude < min_orbit)
@@ -404,7 +375,7 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 		}
 	    }
 
-	else if (method >= TIERAZONFILTERS)
+	else if (InsideMethod >= TIERAZONFILTERS)
 	    {
 	    bigTemp = *zBig;
 	    tempComplex = bigTemp.CBig2Double();
@@ -447,9 +418,9 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
     if (*iteration >= threshold)
 	{
 	BigDouble	t = min_orbit.BigSqrt() * 75.0;
-	if (method == BOF60)
+	if (InsideMethod == BOF60)
 	    *iteration = (int)(t.BigDoubleToDouble());
-	else if (method == BOF61)
+	else if (InsideMethod == BOF61)
 	    *iteration = min_index;
 	}
 
@@ -465,7 +436,8 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 //		BioFlag = TRUE;
 		}
 	    }
-	DoBigFilter(method, hooper);
+	DoBigFilter(InsideMethod, hooper);
+	DoBigFilter(OutsideMethod, hooper);
 
       // eliminate negative colors & wrap arounds
       
@@ -480,7 +452,7 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	}
     else
 	{
-	if (method == ZMAG)
+	if (InsideMethod == ZMAG)
 	    {
 	    temp = zBig->CSumSqr();
 	    *iteration = (long)(temp * double(threshold >> 1) + 1.0);
@@ -489,7 +461,7 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	    *iteration = threshold;
 	}
 
-    if (method >= TIERAZONFILTERS)
+    if (InsideMethod >= TIERAZONFILTERS)
 	{
 	BigComplex	bigTemp;
 	Complex		tempComplex;
@@ -543,45 +515,53 @@ long	CPixel::BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 	if (row % pairflag || col % pairflag)
 	    if (row != (int)ydots - 1)			// must trigger for last line
 		return(threshold);
-    if (row != *oldrow)
+    if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
 	{
-	if (pairflag && row)		// draw row for right hand image
-	    draw_right_image((short)(*oldrow));
-	switch (orientation)
+	if (row != *oldrow)
 	    {
-	    case NORMAL:					// normal
-		cBig->y = *Big_yymax - Big_ygap * (double)row;
-		break;
-	    case 90:						// 90 degrees
-		cBig->x = -(*Big_yymax - Big_xgap * (double)row);
-		break;
-	    case 180:						// 180 degrees
-		cBig->y = -(*Big_yymax - Big_ygap * (double)row);
-		break;
-	    case 270:						// 270 degrees
-		cBig->x = *Big_yymax - Big_xgap * (double)row;
-		break;
+	    if (pairflag && row)		// draw row for right hand image
+		draw_right_image((short)(*oldrow));
+	    switch (RotationAngle)
+		{
+		case NORMAL:					// normal
+		    cBig->y = *Big_yymax - Big_ygap * (double)row;
+		    break;
+		case 90:						// 90 degrees
+		    cBig->x = *Big_yymax - Big_xgap * (double)row;
+		    break;
+		case 180:						// 180 degrees
+		    cBig->y = -(*Big_yymax - Big_ygap * (double)row);
+		    break;
+		case 270:						// 270 degrees
+		    cBig->x = -(*Big_yymax - Big_xgap * (double)row);
+		    break;
+		}
+	    *oldrow = row;
 	    }
-	*oldrow = row;
+	if (col != *oldcol)
+	    {
+	    switch (RotationAngle)
+		{
+		case NORMAL:					// normal
+		    cBig->x = Big_xgap * (double)col + BigHor;
+		    break;
+		case 90:						// 90 degrees
+		    cBig->y = Big_ygap * (double)col + BigHor;
+		    break;
+		case 180:						// 180 degrees
+		    cBig->x = -(Big_xgap * (double)col + BigHor);
+		    break;
+		case 270:						// 270 degrees
+		    cBig->y = -(Big_ygap * (double)col + BigHor);
+		    break;
+		}
+	    *oldcol = col;
+	    }
 	}
-    if (col != *oldcol)
+    else
 	{
-	switch (orientation)
-	    {
-	    case NORMAL:					// normal
-		cBig->x = Big_xgap * (double)col + BigHor;
-		break;
-	    case 90:						// 90 degrees
-		cBig->y = -(Big_ygap * (double)col + BigHor);
-		break;
-	    case 180:						// 180 degrees
-		cBig->x = -(Big_xgap * (double)col + BigHor);
-		break;
-	    case 270:						// 270 degrees
-		cBig->y = Big_ygap * (double)col + BigHor;
-		break;
-	    }
-	*oldcol = col;
+	BigDouble  zero = 0.0;
+	BigMat->DoTransformation(&cBig->x, &cBig->y, &zero, Big_xgap * (double)col + BigHor, *Big_yymax - Big_xgap * (double)row, 0.0);
 	}
 
     if (user_data(hwnd) == -1)

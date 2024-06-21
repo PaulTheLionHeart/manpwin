@@ -66,7 +66,7 @@ char mapmask[13] = {"*.map"};
 
 //extern	BYTE	 huge		*pixels;			// the device-independent bitmap  pixels
 extern	double 	*wpixels;			// floating point iterations for each pixels
-extern	HWND	GlobalHwnd;			// to allow passing of hwnd to find_file_item()
+extern	HWND	GlobalHwnd;			// to allow passing of hwnd 
 
 //#include "default.c"			/* default palette data */
 extern	CDib	Dib;				// Device Independent Bitmap

@@ -25,7 +25,7 @@ extern	double	hor;				/* horizontal address */
 extern	double	vert;				/* vertical address */
 extern	double	ScreenRatio;			// ratio of width / height for the screen
 extern	long	threshold;			/* maximum iterations */
-extern	HWND	GlobalHwnd;			// to allow passing of hwnd to find_file_item()
+extern	HWND	GlobalHwnd;			// to allow passing of hwnd 
 extern	double	param[];
 extern	int	CoordSystem;
 extern	int	xdots, ydots;
