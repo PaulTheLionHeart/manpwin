@@ -325,6 +325,7 @@
     <ClCompile Include="BigDouble.cpp" />
     <ClCompile Include="BigFunctions.cpp" />
     <ClCompile Include="BigMandelDerivatives.cpp" />
+    <ClCompile Include="BigMatrix.cpp" />
     <ClCompile Include="BigNumStuff.cpp" />
     <ClCompile Include="BigPixel.cpp" />
     <ClCompile Include="BigTrig.cpp" />
@@ -374,7 +375,6 @@
     <ClCompile Include="Guess.cpp" />
     <ClCompile Include="Henon.cpp" />
     <ClCompile Include="htmlhelp.cpp" />
-    <ClCompile Include="Ikeda.cpp" />
     <ClCompile Include="KallesPAR.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Kleinian.cpp" />
@@ -452,6 +452,7 @@
     <ClInclude Include="Big.h" />
     <ClInclude Include="BigComplex.h" />
     <ClInclude Include="BigDouble.h" />
+    <ClInclude Include="BigMatrix.h" />
     <ClInclude Include="BigTrig.h" />
     <ClInclude Include="CodeVersion.h" />
     <ClInclude Include="colour.h" />
