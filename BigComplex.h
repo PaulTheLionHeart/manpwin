@@ -41,19 +41,19 @@ class BigComplex
 	~BigComplex(void);
 
 
-	inline	BigComplex * operator =(const BigComplex &);	// Assignment Operator
-	inline	BigComplex * operator =(const BigDouble &);	// Assignment to a big double Operator
-	BigComplex * operator =(const Complex &);	// Assignment to a complex Operator
-	BigComplex * operator =(const double &);	// Assignment to a double Operator
-	BigComplex * operator =(const ExpComplex &);	// Assignment to a ExpComplex Operator
-	BigComplex * operator+=(const BigComplex &);
-	BigComplex * operator+=(BigDouble&);
-	BigComplex * operator-=(const BigComplex &);
-	BigComplex * operator-=(BigDouble &);
-	BigComplex * operator*=(const BigComplex &);
-	BigComplex * operator*=(BigDouble &);
-	BigComplex * operator++(void);			// prefix ++ operator
-//	BigComplex * operator++(int);			// postfix ++ operator
+	BigComplex & operator =(const BigComplex &);	// Assignment Operator
+	BigComplex & operator =(const BigDouble &);	// Assignment to a big double Operator
+	BigComplex & operator =(const Complex &);	// Assignment to a complex Operator
+	BigComplex & operator =(const double &);	// Assignment to a double Operator
+	BigComplex & operator =(const ExpComplex &);	// Assignment to a ExpComplex Operator
+	BigComplex & operator+=(const BigComplex &);
+	BigComplex & operator+=(BigDouble&);
+	BigComplex & operator-=(const BigComplex &);
+	BigComplex & operator-=(BigDouble &);
+	BigComplex & operator*=(const BigComplex &);
+	BigComplex & operator*=(BigDouble &);
+	BigComplex & operator++(void);			// prefix ++ operator
+//	BigComplex & operator++(int);			// postfix ++ operator
 
 	bool	   operator==(BigComplex &);
 	BigComplex operator^(BigDouble &);

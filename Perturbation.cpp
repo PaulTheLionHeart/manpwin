@@ -23,7 +23,7 @@
 
 #define		MAXTHREADS	40
 
-extern	void	ConvertBignum2String(char *s, mpfr_t num);
+//extern	void	ConvertBignum2String(char *s, mpfr_t num);
 extern	int	user_data(HWND);
 extern	void	DisplayStatusBarInfo(int, char *);
 extern	char	*GetFractalName(void);

@@ -52,6 +52,7 @@ extern	short int ismand;		// parser version of the inverse of juliaflag
 
 extern	int	decomp;			// number of decomposition colours
 extern	WORD	degree;			// special colour, phase etc
+extern	WORD	special;		// special colour, phase etc
 extern	int	subtype;		// B=basin, S=stripe, N=normal
 extern	double	HenonA, HenonXStart, HenonYStart, HenonStep;
 extern	char	lsys_type[];
@@ -386,6 +387,60 @@ int	FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double Te
 	type = LSYSTEM;
 	if (tok = str_find_ci(FractType, "lfile="))
 	    return (AnalyseLSystem(hwnd, tok));
+	delete[] tmpstr;
+	return 0;
+	}
+    if (!_strnicmp(FractType, "ManDerivatives", 14))
+	{
+	type = MANDELDERIVATIVES;
+	subtype = (int)param1;
+	degree = (WORD)param2;
+	delete[] tmpstr;
+	return 0;
+	}
+    if (!_strnicmp(FractType, "Perturbation", 12))
+	{
+	type = PERTURBATION;
+	subtype = (int)param1;
+	degree = (WORD)param2;
+	delete[] tmpstr;
+	return 0;
+	}
+    if (!_strnicmp(FractType, "ArtMatrix", 9))
+	{
+	subtype = (int)param2;
+	special = (int)param3;
+	param[0] = subtype;
+	switch ((int)param1)
+	    {
+	    case 0:
+		type = CUBIC;
+		param[1] = special;
+		break;
+	    case 1:
+		type = SPECIALNEWT;
+		param[0] = special;
+		break;
+	    case 2:
+		type = MATEIN;
+		break;
+	    case 3:
+		type = RATIONALMAP;
+		param[1] = special;
+		break;
+	    default:
+		type = CUBIC;
+		param[1] = special;
+		break;
+	    }
+	delete[] tmpstr;
+	return 0;
+	}
+    if (!_strnicmp(FractType, "Tierazon", 8))
+	{
+	type = TIERAZON;
+	subtype = (int)param1;
+	degree = (WORD)param2;
 	delete[] tmpstr;
 	return 0;
 	}

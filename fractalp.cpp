@@ -4585,10 +4585,17 @@ struct OscillatorSpecificStuff FractalMapSpecific[]=
 	},
 	{
 	"Asymmetry Evolvement and Controllability of a Symmetric Hyperchaotic Map",
-	"a", "s", "mu", "Colour Factor", ES, ES, ES, ES, ES, ES, 2.1, 0.5, 500.0, 500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	"a", "s", "Colour Factor", ES, ES, ES, ES, ES, ES, ES, 2.1, 0.5, 500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	"x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 1.0, -2.0, 1.0, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	-5.5, -3.0, 6.0, 1, 2, 3, 3, 3, 3, NULL, 1, YAXIS, 500000.0,
 	NullSetup, DoAsymmetryEvolvementControllabilityMap, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
+	"Attractor Merging and Amplitude Control of Hyperchaos in a Self-Reproducing Memristive Map",
+	"a", "b", "d", "Colour Factor", ES, ES, ES, ES, ES, ES, 2.0, 0.0, 1.5, 500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	"x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.1, 1.0, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	-5.5, -3.0, 6.0, 1, 2, 3, 3, 3, 3, NULL, 1, YAXIS, 700000.0,
+	NullSetup, DoAttractorMergingAmplitudeControlHyperchaosMap, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Basin Chaotic Fractal Map", "a", "Colour Factor", ES, ES, ES, ES, ES, ES, ES, ES, 0.4, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,

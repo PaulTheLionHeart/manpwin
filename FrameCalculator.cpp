@@ -58,18 +58,9 @@ int calculateFrame::initialiseCalculateFrame(CDib *DibIn, CSlope *Slope, int Wid
     PalOffset = PalOffsetIn;
     IterDiv = IterDivIn;
 
-    int bitcount = decimals * SAFETYMARGIN;
-    if (bitcount < 30)
-	bitcount = 30;
-    if (bitcount > SIZEOF_BF_VARS - 10)
-	bitcount = SIZEOF_BF_VARS - 10;
-    precision = decimals - PRECISION_FACTOR;
+    xZoomPt = xZoomPointin;
+    yZoomPt = yZoomPointin;
 
-    mpfr_set_default_prec(bitcount);
-    mpfr_init(xZoomPt);
-    mpfr_init(yZoomPt);
-    mpfr_set(xZoomPt, xZoomPointin.x, MPFR_RNDN);
-    mpfr_set(yZoomPt, yZoomPointin.x, MPFR_RNDN);
     return 0;
     }
 
@@ -230,7 +221,7 @@ int calculateFrame::calculateOneFrame(double bailout, char* StatusBarInfo, int p
 	for (long x = 0; x < width; x++) 
 	    {
 	    Point pt(x, height - 1 - y);
-	    pointsRemaining[y * width + x] = pt;
+	    *(pointsRemaining + y * width + x) = pt;
 	    RemainingPointCount++;
 	    }
 	}
@@ -254,8 +245,8 @@ int calculateFrame::calculateOneFrame(double bailout, char* StatusBarInfo, int p
 	//Check whether this is the first time running the loop. 
 	if (referencePoints == 1) 
 	    {
-	    mpfr_init_set(C.x.x, xZoomPt, MPFR_RNDN);
-	    mpfr_init_set(C.y.x, yZoomPt, MPFR_RNDN);
+	    C.x = xZoomPt;
+	    C.y = yZoomPt;
 	    ReferenceCoordinate = C;
 
 	    BigCalculatedDelta = 0.0;
@@ -284,19 +275,20 @@ int calculateFrame::calculateOneFrame(double bailout, char* StatusBarInfo, int p
 	    // We need to store this offset because the formula we use to convert pixels into a complex point does so relative to the center of the image.
 	    // We need to offset that calculation when our reference point isn't in the center. The actual offsetting is done in calculate point.
 
+	    Point   pt = *(pointsRemaining + referencePointIndex);
 	    if (ArithType == FLOATEXP || ArithType == DOUBLESHIFT)
 		{ 
 		//Get the complex point at the chosen reference point
-		BigDelta.x = ((BigMagnifiedRadius * (2 * pointsRemaining[referencePointIndex].getX() - width)) / window_radius);
-		BigDelta.y = ((-BigMagnifiedRadius * (2 * pointsRemaining[referencePointIndex].getY() - height)) / window_radius);
+		BigDelta.x = ((BigMagnifiedRadius * (2 * pt.getX() - width)) / window_radius);
+		BigDelta.y = ((-BigMagnifiedRadius * (2 * pt.getY() - height)) / window_radius);
 		BigCalculatedDelta = BigDelta;
 		ReferenceCoordinate = C + BigDelta;
 		}
 	    else
 		{
 		//Get the complex point at the chosen reference point
-		delta.x = ((magnifiedRadius * (2 * pointsRemaining[referencePointIndex].getX() - width)) / window_radius);
-		delta.y = ((-magnifiedRadius * (2 * pointsRemaining[referencePointIndex].getY() - height)) / window_radius);
+		delta.x = ((magnifiedRadius * (2 * pt.getX() - width)) / window_radius);
+		delta.y = ((-magnifiedRadius * (2 * pt.getY() - height)) / window_radius);
 
 		calculatedDelta = delta;
 
@@ -316,8 +308,9 @@ int calculateFrame::calculateOneFrame(double bailout, char* StatusBarInfo, int p
 	GlitchPointCount = 0;
 	for (i = 0; i < RemainingPointCount; i++)
 	    {
-	    x = pointsRemaining[i].getX();
-	    y = pointsRemaining[i].getY();
+	    Point   pt = *(pointsRemaining + i);
+	    x = pt.getX();
+	    y = pt.getY();
 
 	    if (ArithType != DOUBLE)
 		{
@@ -402,8 +395,6 @@ int calculateFrame::calculateOneFrame(double bailout, char* StatusBarInfo, int p
 
 void	calculateFrame::CloseTheDamnPointers(void)
     {
-    if (xZoomPt->_mpfr_d) mpfr_clear(xZoomPt);
-    if (yZoomPt->_mpfr_d) mpfr_clear(yZoomPt);
     if (pointsRemaining) { delete[] pointsRemaining; pointsRemaining = NULL; }
     if (glitchPoints) { delete[] glitchPoints; glitchPoints = NULL; }
     if (XSubN) { delete[] XSubN; XSubN = NULL; }
@@ -684,6 +675,8 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
 			index = MaxIteration;
 		    else if (w.y)
 			index = (long)((double)iteration * (w.x / w.y));
+		    else
+			index = iteration;
 		    break;
 		case SUM:						// "sum"
 		    if (iteration == MaxIteration)
@@ -965,6 +958,8 @@ int	calculateFrame::BigCalculatePoint(int x, int y, ExpComplex ExpDeltaSub0, dou
 			temp = ExpW.x / ExpW.y;
 			index = (long)((double)iteration * temp.todouble());
 			}
+		    else
+			index = iteration;
 		    break;
 		case SUM:						// "sum"
 		    if (iteration == MaxIteration)
@@ -1031,12 +1026,10 @@ int calculateFrame::ReferenceZoomPoint(BigComplex& centre, int maxIteration, int
     // Raising this number makes more calculations, but less variation between each calculation (less chance of mis-identifying a glitched point).
     BigComplex	ZTimes2, Z, SinX, CosX, ScaledZ;
     double	glitchTolerancy = 1e-6;
-    mpfr_t	TempReal, TempImag;
+    BigDouble	TempReal, TempImag;
     BigDouble	zisqr, zrsqr, realimag;
 
     ReferenceNumber++;
-    mpfr_init(TempReal);
-    mpfr_init(TempImag);
 //    if (subtype == 58)			// sin()
 //	Z = centre + param[6];
 //	Z = centre + HALF_PI;
@@ -1115,11 +1108,7 @@ int calculateFrame::ReferenceZoomPoint(BigComplex& centre, int maxIteration, int
 #endif
 //	if (user_data(hwnd) < 0)
 	if (user_data(NULL) < 0)
-	    {
-	    mpfr_clear(TempReal);
-	    mpfr_clear(TempImag);
 	    return -1;
-	    }
 	//Everything else in this loop is just for updating the progress counter. 
 	int lastChecked = -1;
 	double progress = (double)i / maxIteration;
@@ -1142,9 +1131,9 @@ int calculateFrame::ReferenceZoomPoint(BigComplex& centre, int maxIteration, int
 	    }
 	else
 	    {
-	    mpfr_mul_d(TempReal, Z.x.x, glitchTolerancy, MPFR_RNDN);
-	    mpfr_mul_d(TempImag, Z.y.x, glitchTolerancy, MPFR_RNDN);
-	    Complex tolerancy{ mpfr_get_d(TempReal, MPFR_RNDN), mpfr_get_d(TempImag, MPFR_RNDN) };
+	    TempReal = Z.x * glitchTolerancy;
+	    TempImag = Z.y * glitchTolerancy;
+	    Complex tolerancy{ TempReal.BigDoubleToDouble(), TempImag.BigDoubleToDouble() };
 	    *(PerturbationToleranceCheck + i) = (tolerancy.CSumSqr());
 	    }
 
@@ -1165,8 +1154,6 @@ int calculateFrame::ReferenceZoomPoint(BigComplex& centre, int maxIteration, int
 	    }
 */
 	}
-    mpfr_clear(TempReal);
-    mpfr_clear(TempImag);
     return 0;
     }
     

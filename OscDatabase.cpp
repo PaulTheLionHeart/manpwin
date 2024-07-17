@@ -3104,6 +3104,13 @@ struct OscillatorSpecificStuff OscillatorSpecific[]=
 	    NullSetup, DoDynamicsNewHyperchaoticSystem, "SelectOscParams", (DLGPROC)SelectOscParams, 0.001, 0.1, 1.0
 	},
 	{
+	"Dynamics of a New Three-Dimensional Chaotic Systems with Multiple Attractors", "a", "b", "c", "d", ES, ES, ES, ES, ES, ES,
+	    0.7303, 0.48867, 0.5785, 0.2373, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, -0.2, 0.1, 0.18, 0.2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -6.4, -3.42, 7.4, 1, 3, 2, 4, 3, 3, NULL, 1, YAXIS, 100000.0,
+	    NullSetup, DoDynamicsNew3DChaoticSystem, "SelectOscParams", (DLGPROC)SelectOscParams, 0.02, 1.0, 1.0
+	},
+	{
 	"Dynamics of Coupled Nonlinear Oscillators of Different Attractors", "mi", "alpha", "k", ES, ES, ES, ES, ES, ES, ES, 
 	    0.8, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", "w", ES, ES, ES, ES, ES, ES, 0.8, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,

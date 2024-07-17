@@ -16021,6 +16021,45 @@ int	DoDynamicsNewHyperchaoticSystem(void)
     }
 
 /**************************************************************************
+	Dynamics of a New Three-Dimensional Chaotic Systems with Multiple Attractors
+	Sujay Goldar* and Sk. Sarif Hassan - 2024
+	https://mail.google.com/mail/u/0/#inbox/FMfcgzQVxbjQMZMnFdpZxtxtTzTPpnGZ?projector=1&messagePartId=0.1
+	Corresponding authors:sksarifhassan@pinglacollege.ac.in,,,sujaygoldar@pinglacollege.ac.in,
+***************************************************************************/
+
+int	DoDynamicsNew3DChaoticSystem(void)
+
+    {
+    double	i, c1[3], cn[3], a, b, c, d;
+
+    c1[0] = param[10];	// x
+    c1[1] = param[11];	// y
+    c1[2] = param[12];	// z
+
+    a = param[0];
+    b = param[1];
+    c = param[2];
+    d = param[3];
+
+    totpasses = 10;
+
+    InitOscillator(c1, 3);						// pass in number of dimensions
+    for (i = 0; i < iterations; i++)
+	{
+	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	    return -1;
+	curpass = (int)(i * totpasses / iterations);
+	cn[0] = -a * c1[0] + b * c1[1] * c1[2];
+	cn[1] = -a * sqr(c1[1]) + c * c1[0] * c1[2];
+	cn[2] = d * c1[2] - c * c1[0] * c1[1];
+	if (DisplayOscillator(c1, cn, dt, ((DWORD)(i / 10.0) % threshold), i, 3, 0) < 0)
+	    break;
+	}
+    PlotExtras();
+    return 0;
+    }
+
+/**************************************************************************
 	Dynamics and Feedback Control for a New Hyperchaotic System
 	Kejun Zhuang, Hailong Zhu  2012-08-24
 ***************************************************************************/

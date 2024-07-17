@@ -503,7 +503,7 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 		    if (q->CSumSqr() < 0.111111)
 			{
 			*iteration = special;
-			*SpecialFlag = TRUE;			// for decomp and biomorph
+			*SpecialFlag = TRUE;		// for decomp and biomorph
 			return (TRUE);
 			}
 		    v = *z + a2;
@@ -515,7 +515,7 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 		if (v.CSumSqr() <= 0.000001)
 		    {
 		    *iteration = special;
-		    *SpecialFlag = TRUE;			/* for decomp and biomorph */
+		    *SpecialFlag = TRUE;		// for decomp and biomorph 
 		    return (TRUE);
 		    }
 		return (FALSE);

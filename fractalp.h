@@ -1674,6 +1674,7 @@ extern	int	DoAConservativeMemristiveChaoticSystem(PMYVARIABLES);
 extern	int	DoBouali3(PMYVARIABLES);
 extern	int	DoDynamicalAnalysisQuadraticMegastableChaoticOscillator(PMYVARIABLES);
 extern	int	DoChenCircuitLikeModel(PMYVARIABLES);
+extern	int	DoDynamicsNew3DChaoticSystem(PMYVARIABLES);
 
 
 
@@ -1894,6 +1895,7 @@ extern	int	DoExplorePotentialDeepLearningMap(PMYVARIABLES);
 extern	int	DoDynamicFractalMap(PMYVARIABLES);
 extern	int	DoComplexDynamics2DSineBoundedMemristiveMap(PMYVARIABLES);
 extern	int	DoFurtherStudyontheRulkovNeuronMap(PMYVARIABLES);
+extern	int	DoAttractorMergingAmplitudeControlHyperchaosMap(PMYVARIABLES);
 
 
 // Sprott Maps

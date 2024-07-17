@@ -16,36 +16,36 @@ BigComplex::~BigComplex(void)
 //    mpfr_clear(y.x);
     }
 
-BigComplex * BigComplex::operator=(const double & value)	// Assignment to double Operator
+BigComplex & BigComplex::operator=(const double & value)	// Assignment to double Operator
     {
     mpfr_set_d(this->x.x, value, MPFR_RNDN);
     mpfr_set_d(this->y.x, 0.0, MPFR_RNDN);
-    return this;
+    return *this;
     }
 
-BigComplex * BigComplex::operator=(const Complex & value)	// Assignment to Complex Operator
+BigComplex & BigComplex::operator=(const Complex & value)	// Assignment to Complex Operator
     {
     mpfr_set_d(this->x.x, value.x, MPFR_RNDN);
     mpfr_set_d(this->y.x, value.y, MPFR_RNDN);
-    return this;
+    return *this;
     }
 
-BigComplex * BigComplex::operator=(const BigDouble & value)	// Assignment to big double Operator
+BigComplex & BigComplex::operator=(const BigDouble & value)	// Assignment to big double Operator
     {
     mpfr_set(this->x.x, value.x, MPFR_RNDN);
     mpfr_set_d(this->y.x, 0.0, MPFR_RNDN);
-    return this;
+    return *this;
     }
 
-BigComplex * BigComplex::operator=(const BigComplex & Cmplx1)	// Assignment Operator
+BigComplex & BigComplex::operator=(const BigComplex & Cmplx1)	// Assignment Operator
     {
     mpfr_set(this->x.x, Cmplx1.x.x, MPFR_RNDN);
     mpfr_set(this->y.x, Cmplx1.y.x, MPFR_RNDN);
-    return this;
+    return *this;
     }
 
 // new stuff
-BigComplex * BigComplex::operator =(const ExpComplex & Cmplx1)	// complex add by ExpComplex Operator
+BigComplex & BigComplex::operator =(const ExpComplex & Cmplx1)	// complex add by ExpComplex Operator
     {
     BigComplex	temp;
     double	value;
@@ -73,43 +73,43 @@ BigComplex * BigComplex::operator =(const ExpComplex & Cmplx1)	// complex add by
     mpfr_set(this->x.x, temp.x.x, MPFR_RNDN);
     mpfr_set(this->y.x, temp.y.x, MPFR_RNDN);
 
-    return this;
+    return *this;
     }
 
 
-BigComplex * BigComplex::operator+=(const BigComplex & Cmplx1)
+BigComplex & BigComplex::operator+=(const BigComplex & Cmplx1)
     {
     mpfr_add(this->x.x, x.x, Cmplx1.x.x, MPFR_RNDN);
     mpfr_add(this->y.x, y.x, Cmplx1.y.x, MPFR_RNDN);
 //    x+=Cmplx1.x;
 //    y+=Cmplx1.y;
-    return this;
+    return *this;
     }
 
-BigComplex * BigComplex::operator+=(BigDouble & rvalue)
+BigComplex & BigComplex::operator+=(BigDouble & rvalue)
     {
     mpfr_add(this->x.x, x.x, rvalue.x, MPFR_RNDN);
 //    x+=rvalue;
-    return this;
+    return *this;
     }
 
-BigComplex * BigComplex::operator-=(const BigComplex & Cmplx1)
+BigComplex & BigComplex::operator-=(const BigComplex & Cmplx1)
     {
     mpfr_sub(this->x.x, x.x, Cmplx1.x.x, MPFR_RNDN);
     mpfr_sub(this->y.x, y.x, Cmplx1.y.x, MPFR_RNDN);
 //    x-=Cmplx1.x;
 //    y-=Cmplx1.y;
-    return this;
+    return *this;
     }
 
-BigComplex * BigComplex::operator-=(BigDouble & rvalue)
+BigComplex & BigComplex::operator-=(BigDouble & rvalue)
     {
     mpfr_sub(this->x.x, x.x, rvalue.x, MPFR_RNDN);
 //    x-=rvalue;
-    return this;
+    return *this;
     }
 
-BigComplex * BigComplex::operator*=(const BigComplex & Cmplx1)
+BigComplex & BigComplex::operator*=(const BigComplex & Cmplx1)
     {
     BigDouble	t1, t2, t3;
 
@@ -130,26 +130,26 @@ BigComplex * BigComplex::operator*=(const BigComplex & Cmplx1)
 //    t = Cmplx1.x*x-Cmplx1.y*y; 
 //    y = Cmplx1.x*y+Cmplx1.y*x;
 //    x = t;
-    return this;
+    return *this;
     }
 
-BigComplex * BigComplex::operator*=(BigDouble & rvalue)
+BigComplex & BigComplex::operator*=(BigDouble & rvalue)
     {
     mpfr_mul(this->x.x, rvalue.x, x.x, MPFR_RNDN);	// *a * *c
     mpfr_mul(this->y.x, rvalue.x, y.x, MPFR_RNDN);	// *b * *d
 //    x*=rvalue;
 //    y*=rvalue;
-    return this;
+    return *this;
     }
 
-BigComplex * BigComplex::operator++(void)	// prefix ++ operator
+BigComplex & BigComplex::operator++(void)	// prefix ++ operator
     {
     BigDouble	t;
 
     mpfr_set_ui(t.x, 1, MPFR_RNDN);
     mpfr_add(this->x.x, x.x, t.x, MPFR_RNDN);
 //    x+=1;
-    return this;
+    return *this;
     }
 
 /*
