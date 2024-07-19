@@ -650,9 +650,9 @@ int	CPixel::BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *
 	    t = (qBig->CCube() - 1) / (qBig->CSqr() * 3);
 	    aBig = t;
 	    bBig = t.CCube() * 2 - t * 2;
-	    caa3Big = a.CSqr() * 3;
+	    caa3Big = aBig.CSqr() * 3;
 	    if (!juliaflag)
-		*zBig = -a;
+		*zBig = -aBig;
 	    z2Big.x = 42;
 	    z2Big.y = 42;
 	    zBig->x += param[0];

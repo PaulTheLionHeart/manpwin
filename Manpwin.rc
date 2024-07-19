@@ -117,7 +117,7 @@ FONT 8, "MS Sans Serif"
     CTEXT           "Copyright © Paul de Leeuw Computers\nhttps://www.deleeuw.com.au", IDC_STATIC, 8, 53, 144, 15, SS_CENTER
     PUSHBUTTON      "OK", IDOK, 36, 89, 88, 14, WS_GROUP | NOT WS_TABSTOP
     CTEXT           "ABN 72 360 822 562", IDC_STATIC, 37, 75, 86, 8, SS_CENTER
-    CTEXT           "17/07/2024", IDC_STATIC, 55, 41, 40, 8, SS_CENTER
+    CTEXT           "19/07/2024", IDC_STATIC, 55, 41, 40, 8, SS_CENTER
 }
 
 
