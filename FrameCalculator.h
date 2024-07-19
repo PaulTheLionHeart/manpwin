@@ -125,7 +125,7 @@ class calculateFrame
 	int	OutsideMethod;			// the number of the outside filter
 	long	GlitchPointCount;
 	long	RemainingPointCount;
-	BigDouble	xZoomPt, yZoomPt;
+	mpfr_t	xZoomPt, yZoomPt;
 
 	BigDouble	BigWidth, BigZoomRadius;
 	BigComplex	BigCalculatedDelta;

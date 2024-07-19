@@ -58,9 +58,18 @@ int calculateFrame::initialiseCalculateFrame(CDib *DibIn, CSlope *Slope, int Wid
     PalOffset = PalOffsetIn;
     IterDiv = IterDivIn;
 
-    xZoomPt = xZoomPointin;
-    yZoomPt = yZoomPointin;
+    int bitcount = decimals * SAFETYMARGIN;
+    if (bitcount < 30)
+	bitcount = 30;
+    if (bitcount > SIZEOF_BF_VARS - 10)
+	bitcount = SIZEOF_BF_VARS - 10;
+    precision = decimals - PRECISION_FACTOR;
 
+    mpfr_set_default_prec(bitcount);
+    mpfr_init(xZoomPt);
+    mpfr_init(yZoomPt);
+    mpfr_set(xZoomPt, xZoomPointin.x, MPFR_RNDN);
+    mpfr_set(yZoomPt, yZoomPointin.x, MPFR_RNDN);
     return 0;
     }
 
@@ -245,8 +254,8 @@ int calculateFrame::calculateOneFrame(double bailout, char* StatusBarInfo, int p
 	//Check whether this is the first time running the loop. 
 	if (referencePoints == 1) 
 	    {
-	    C.x = xZoomPt;
-	    C.y = yZoomPt;
+	    mpfr_init_set(C.x.x, xZoomPt, MPFR_RNDN);
+	    mpfr_init_set(C.y.x, yZoomPt, MPFR_RNDN);
 	    ReferenceCoordinate = C;
 
 	    BigCalculatedDelta = 0.0;
@@ -395,6 +404,8 @@ int calculateFrame::calculateOneFrame(double bailout, char* StatusBarInfo, int p
 
 void	calculateFrame::CloseTheDamnPointers(void)
     {
+    if (xZoomPt->_mpfr_d) mpfr_clear(xZoomPt);
+    if (yZoomPt->_mpfr_d) mpfr_clear(yZoomPt);
     if (pointsRemaining) { delete[] pointsRemaining; pointsRemaining = NULL; }
     if (glitchPoints) { delete[] glitchPoints; glitchPoints = NULL; }
     if (XSubN) { delete[] XSubN; XSubN = NULL; }
@@ -1106,7 +1117,6 @@ int calculateFrame::ReferenceZoomPoint(BigComplex& centre, int maxIteration, int
 	    *(cosZp + i) = xCos;
 	    }
 #endif
-//	if (user_data(hwnd) < 0)
 	if (user_data(NULL) < 0)
 	    return -1;
 	//Everything else in this loop is just for updating the progress counter. 
