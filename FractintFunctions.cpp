@@ -288,6 +288,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    break;
 
 	case FPMANDELZPOWER:
+	case LMANDELZPOWER:
 	case LJULIAZPOWER:
 	case FPMANZTOZPLUSZPWR:
 	case FPJULZTOZPLUSZPWR:
@@ -824,6 +825,8 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    return 1;					// just to shut up compiler warnings
 
 
+	case LJULIAZPOWER:
+	case LMANDELZPOWER:
 	case FPMANDELZPOWER:
 	    *z = *z ^ temp2;
 	    z->x += q->x + param[0];

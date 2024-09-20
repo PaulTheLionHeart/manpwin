@@ -683,16 +683,16 @@ struct fractalspecificstuff fractalspecific[]=
    t_manzpower+1, realz0, imagz0, exponent,imexponent,ES,ES,ES, ES, ES, ES, 0,0,2,0,0,0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, LJULIAZPOWER, NOFRACTAL, FPMANDELZPOWER,	XAXIS_NOIMAG,
 //   longZpowerFractal,long_mandel_per_pixel,MandellongSetup,StandardFractal,STDBAILOUT,
-   -2.7, -2.0, 4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+   - 3.5,  -2.0,  4.0, 0, 2, NOFRACTAL, 4, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
    t_julzpower+1, realparm, imagparm, exponent,imexponent,ES,ES,ES, ES, ES, ES, 0.3,0.6,2,0,0,0,0,0,0,0,
 //   -2.0,  2.0, -1.5,  1.5, 1, NOFRACTAL, LMANDELZPOWER, FPJULIAZPOWER,	 ORIGIN,
 //   longZpowerFractal,long_julia_per_pixel,JulialongSetup,StandardFractal,STDBAILOUT,
-   -2.7,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
+      -3.5,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 4, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+      NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
@@ -3403,12 +3403,12 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"53.) Newton/Mandel, 6th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 7.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 6.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"54.) More Newton Msets, 15th order Newton Mset flower",
 	    NULL, NULL,
-	    NULL, NULL, 15.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 15.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"55.) More Newton Msets, 4th order Newton's apple",
@@ -3418,7 +3418,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"56.) More Newton Msets, 25th order Newton Mset flower",
 	    NULL, NULL,
-	    NULL, NULL, 25.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 25.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"57.) More Newton Msets, 38th order Newton Mset flower",
@@ -3433,12 +3433,12 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"59.) More Newton Msets, 5th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 6.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 6.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"60.) More Newton Msets, 18th order Newton Mset flower",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"61.) Polynomials, z=z*z+c; real=imag; imag=real",
@@ -4988,6 +4988,24 @@ struct OscillatorSpecificStuff FractalMapSpecific[]=
 	    NullSetup, DoDelayedLogistic, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
+	"Design and Implementation of 4D Memristive Map with Rich Initial-Relied and Parameter-Relied Dynamics I", "a", "b", "c1", "c2", "k1", "k2", "k3", "Colour Factor", ES, ES, 10.0, 1.0, 0.0, 0.0, 6.0, 0.1, 0.1, 1200.0, 0.0, 0.0,
+	    "x", "y", "z", "w", ES, ES, ES, ES, ES, ES, 0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -27.0, -16.0, 32.0, 1, 2, 3, 8, 4, 4, NULL, 1, YAXIS, 25000,
+	    NullSetup, DoDesignHardwareImplementation4DMemristiveHyperchaoticMap, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 0.2, 1.0
+	},
+	{
+	"Design and Implementation of 4D Memristive Map with Rich Initial-Relied and Parameter-Relied Dynamics II", "a", "b", "c1", "c2", "k1", "k2", "k3", "Colour Factor", ES, ES, 2.7, 1.0, 0.0, 0.0, 1.0, 0.1, 0.1, 1200.0, 0.0, 0.0,
+	    "x", "y", "z", "w", ES, ES, ES, ES, ES, ES, 0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -6.13, -3.5, 7.0, 1, 2, 3, 8, 4, 4, NULL, 1, YAXIS, 25000,
+	    NullSetup, DoDesignHardwareImplementation4DMemristiveHyperchaoticMap, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
+	"Design and Implementation of 4D Memristive Map with Rich Initial-Relied and Parameter-Relied Dynamics III", "a", "b", "c1", "c2", "k1", "k2", "k3", "Colour Factor", ES, ES, 2.0, 1.0, 0.1, 0.1, 1.0, 0.1, 0.1, 1200.0, 0.0, 0.0,
+	    "x", "y", "z", "w", ES, ES, ES, ES, ES, ES, 0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -0.75, 0.136, 1.8, 1, 2, 3, 8, 4, 4, NULL, 1, YAXIS, 25000,
+	    NullSetup, DoDesignHardwareImplementation4DMemristiveHyperchaoticMap, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
 	"Design New Chaotic Maps Based on Dimension Expansion I", "a", "w", "c", "Colour Factor", ES, ES, ES, ES, ES, ES, 1.0, PI, 3.0, 1200.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", "u", "v", ES, ES, ES, ES, ES, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -2.25, -1.25, 2.5, 1, 2, 3, 4, 5, 5, NULL, 1, YAXIS, 100000.0,
@@ -5800,6 +5818,12 @@ struct OscillatorSpecificStuff FractalMapSpecific[]=
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, -0.72, -0.64, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -3.0, -2.0, 3.0, 1, 2, 3, 5, 3, 3, NULL, 1, YAXIS, 1000000.0,
 	    NullSetup, DoTinkerbell, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
+	},
+	{
+	"Torus and Hyperchaos in 3D Lotka-Volterra Map", "a", "b", "r", "Colour Factor", ES, ES, ES, ES, ES, ES, -0.227, -0.05, 1.3875, 500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 1.5, 1.5, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -0.89, 0.4, 2.345, 1, 2, 3, 4, 3, 3, NULL, 1, YAXIS, 1000000.0,
+	    NullSetup, DoTorusHyperchaos3DLotkaVolterraMap, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Transformations of Spike and Burst Oscillations in the Stochastic Rulkov Model", "s", "a", "b", "c", "start", "Colour Factor", ES, ES, ES, ES, 0.005, 3.0, 1.0, 1.0, 500.0, 5000000.0, 0.0, 0.0, 0.0, 0.0,

@@ -26,8 +26,8 @@ MANPWIN MENU
         MENUITEM "&Save Parameters\tS", IDM_SAVEPAR
         MENUITEM "Save Im&age...\tA", IDM_SAVEIMAGE
         MENUITEM "Save Both Parameters and Image\t<Ctrl><Shft>S", IDM_SAVE_PAR_AND_IMAGE
-	MENUITEM "Save Kalles Fraktaler File\t<Ctrl>K", IDM_SAVE_KALLES
-	MENUITEM SEPARATOR
+        MENUITEM "Save Kalles Fraktaler File\t<Ctrl>K", IDM_SAVE_KALLES
+        MENUITEM SEPARATOR
         MENUITEM "E&xit\tESC or Enter", IDM_EXIT
     }
     POPUP "&Edit"
@@ -112,12 +112,12 @@ STYLE DS_MODALFRAME | DS_SETFONT | WS_POPUP
 FONT 8, "MS Sans Serif"
 {
     EDITTEXT        IDC_PROGRAMNAME, 41, 13, 79, 12, WS_DISABLED | NOT WS_BORDER | ES_CENTER | ES_AUTOHSCROLL
-    CTEXT           "4.01h Test 4", IDC_STATIC, 36, 28, 88, 9, SS_CENTER
+    CTEXT           "4.01h Test 6", IDC_STATIC, 36, 28, 88, 9, SS_CENTER
     ICON            "MANPWIN", IDC_STATIC, 8, 8, 21, 20, SS_ICON
     CTEXT           "Copyright © Paul de Leeuw Computers\nhttps://www.deleeuw.com.au", IDC_STATIC, 8, 53, 144, 15, SS_CENTER
     PUSHBUTTON      "OK", IDOK, 36, 89, 88, 14, WS_GROUP | NOT WS_TABSTOP
     CTEXT           "ABN 72 360 822 562", IDC_STATIC, 37, 75, 86, 8, SS_CENTER
-    CTEXT           "19/07/2024", IDC_STATIC, 55, 41, 40, 8, SS_CENTER
+    CTEXT           "18/09/2024", IDC_STATIC, 55, 41, 40, 8, SS_CENTER
 }
 
 
@@ -622,16 +622,16 @@ CAPTION "Fourier Analysis"
 FONT 8, "MS Sans Serif"
 {
     AUTORADIOBUTTON "Square", IDC_SQUAREWAVE, 17, 22, 44, 10
-    AUTORADIOBUTTON "Triangle", IDC_TRIANGLE, 17, 91, 46, 10
-    AUTORADIOBUTTON "Sawtooth", IDC_SAWTOOTH, 17, 114, 42, 10
-    AUTORADIOBUTTON "Full wave rectified sine wave", IDC_FULLWAVE, 17, 137, 45, 26, BS_MULTILINE
+    AUTORADIOBUTTON "Triangle", IDC_TRIANGLE, 17, 88, 46, 10
+    AUTORADIOBUTTON "Sawtooth", IDC_SAWTOOTH, 17, 110, 42, 10
+    AUTORADIOBUTTON "Full wave rectified sine wave", IDC_FULLWAVE, 17, 127, 45, 26, BS_MULTILINE
     EDITTEXT        IDC_FIBTIME, 102, 18, 28, 14, ES_AUTOHSCROLL
     EDITTEXT        IDC_HARMONICS, 102, 37, 28, 14, ES_AUTOHSCROLL
     LTEXT           "Delay between calculations (mS)", IDC_STATIC, 138, 17, 62, 18, SS_LEFT
     LTEXT           "Number of Harmonics", IDC_STATIC, 140, 40, 71, 10, SS_LEFT
     LTEXT           "Number of steps", IDC_STATIC, 140, 58, 67, 11, SS_LEFT
     EDITTEXT        IDM_STEPS, 102, 55, 28, 14
-    AUTORADIOBUTTON "Impulse Train", IDC_IMPULSETRAIN, 17, 176, 62, 10
+    AUTORADIOBUTTON "Impulse Train", IDC_IMPULSETRAIN, 17, 161, 62, 10
     GROUPBOX        "Sine Magnitudes", IDC_STATIC, 229, 6, 399, 111
     GROUPBOX        "", IDC_STATIC, 94, 6, 126, 72
     GROUPBOX        "Cosine Magnitudes", IDC_STATIC, 229, 132, 399, 113
@@ -712,13 +712,14 @@ FONT 8, "MS Sans Serif"
     CTEXT           "0", IDC_LABEL30, 592, 145, 20, 11, SS_CENTER
     GROUPBOX        "Preset Waveforms", IDC_STATIC, 8, 6, 79, 239
     GROUPBOX        "", IDC_STATIC, 94, 81, 126, 112
-    AUTORADIOBUTTON "User", IDC_USER, 17, 199, 62, 10
+    AUTORADIOBUTTON "User", IDC_USER, 17, 184, 62, 10
     GROUPBOX        "", IDC_STATIC, 94, 201, 126, 44
-    AUTORADIOBUTTON "Sine wave", IDC_SINWAVE, 17, 45, 52, 10
-    AUTORADIOBUTTON "Cosine wave", IDC_COSWAVE, 17, 68, 58, 10
-    AUTOCHECKBOX    "Moving Wave?", IDC_MOVINGWAVE, 17, 222, 61, 10
+    AUTORADIOBUTTON "Sine wave", IDC_SINWAVE, 17, 44, 52, 10
+    AUTORADIOBUTTON "Cosine wave", IDC_COSWAVE, 17, 66, 58, 10
+    AUTOCHECKBOX    "Moving Wave?", IDC_MOVINGWAVE, 17, 207, 61, 10
     PUSHBUTTON      "&OK", IDOK, 103, 217, 46, 14, WS_GROUP | NOT WS_TABSTOP
     PUSHBUTTON      "&CANCEL", IDCANCEL, 162, 217, 46, 14, WS_GROUP | NOT WS_TABSTOP
+    AUTOCHECKBOX    "Plot Circles?", IDC_PLOT_CIRCLES, 17, 223, 55, 8
 }
 
 
@@ -1051,7 +1052,7 @@ FONT 8, "MS Sans Serif", 0, 0, 1
     GROUPBOX        "Function Fractals", IDC_RED21, 361, 4, 106, 142, BS_CENTER
     GROUPBOX        "Bifurcation", IDC_RED4, 361, 150, 106, 88, BS_CENTER
     GROUPBOX        "Special", IDC_RED5, 479, 5, 130, 41, BS_CENTER
-    GROUPBOX        "Marcus Contribution", IDC_RED6, 479, 95, 130, 267, BS_CENTER
+    GROUPBOX        "Marcus Contribution", IDC_RED6, 479, 95, 130, 252, BS_CENTER
 }
 
 

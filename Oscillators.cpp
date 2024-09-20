@@ -5733,6 +5733,50 @@ int	DoAnalyticalNumerical(void)
     }
 
 /**************************************************************************
+	Analytic Proof of the Emergence of New Type of Lorenz-Like Attractors with Z4-Symmetry
+	Attractors from the Triple Instability in Systems with Attractors from the Triple Instability in Systems With Z4-Symmetry
+	Efrosiniia Karatetskaia, Alexey Kazakov, Klim Safonov and Dmitry Turaev https://arxiv.org/pdf/2408.06066.....  August 2024
+	Corresponding authors: eyukaratetskaya@gmail.com, kazakovdz@yandex.ru, safonov.klim@yandex.ru, d.turaev@imperial.ac.uk
+***************************************************************************/
+
+int	DoAnalyticProofEmergenceNewTypeLorenzAttractors(void)
+
+    {
+    double	i, c1[3], cn[3], a, b, mm, m1, m2, m3, m4, m5, m6;
+
+    c1[0] = param[10];	// x
+    c1[1] = param[11];	// y
+    c1[2] = param[12];	// z
+
+    a = param[0];
+    b = param[1];
+    mm = param[2];
+    totpasses = 10;
+
+    InitOscillator(c1, 3);						// pass in number of dimensions
+    for (i = 0; i < iterations; i++)
+	{
+	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	    return -1;
+	curpass = (int)(i * totpasses / iterations);
+	m1 = sqr(c1[0]) * c1[1] + c1[0] * sqr(c1[1]);
+	m2 = sqr(c1[0]) * c1[1] - c1[0] * sqr(c1[1]);
+	m3 = c1[0] + c1[1];
+	m4 = c1[0] - c1[1];
+	m5 = sqr(c1[0]) - sqr(c1[1]);
+	m6 = sqr(c1[0]) + sqr(c1[1]);
+
+	cn[0] = -a * c1[0] - b * c1[1] - 0.5 * c1[2] * m4 + 0.5 * m1 + 3.0 / 8.0 * sqr(c1[2]) * c1[0] - 1.0 / 8.0 * sqr(c1[2]) * c1[1];
+	cn[1] = b * c1[0] - a * c1[1] + 0.5 * c1[2] * m3 + 0.5 * m1 + 1.0 / 8.0 * sqr(c1[2]) * c1[0] + 3.0 / 8.0 * sqr(c1[2]) * c1[1];
+	cn[2] = mm * c1[2] + m5 - 0.25 * pow(c1[2], 3) - 0.5 * c1[2] * m6;
+	if (DisplayOscillator(c1, cn, dt, ((DWORD)(i / 25.0) % threshold), i, 3, 0) < 0)
+	    break;
+	}
+    PlotExtras();
+    return 0;
+    }
+
+/**************************************************************************
 	Anisochronous Self-Excited Systems
 	Experiment on Bifurcation and Chaos in Coupled Anisochronous Self-Excited Systems: 
 	Case of Two Coupled van der Pol-Duffing Oscillators
@@ -14460,6 +14504,42 @@ int	DoDixonSystem(void)
     }
 
 /**************************************************************************
+	DNA Dynamic Coding Image Encryption Algorithm with a Meminductor Chaotic System
+	Jianhui Wang, Wenqi Huang, Zian Wang, Junwei Wang and Kairui Chen 16 August 2024
+	https://iopscience.iop.org/article/10.1088/1402-4896/ad6bce/pdf.....DOI 10.1088/1402-4896/ad6bce
+	Corresponding author:  kray@gzhu.edu.cn
+***************************************************************************/
+
+int	DoDNADynamicCodingImageEncryptionAlgorithm(void)
+
+    {
+    double	i, c1[3], cn[3], real, imag;
+
+    c1[0] = param[10];	// x
+    c1[1] = param[11];	// y
+    c1[2] = 1.0;	// z
+
+    real = param[0];
+    imag = param[1];
+    totpasses = 10;
+
+    InitOscillator(c1, 3);						// pass in number of dimensions
+    for (i = 0; i < iterations; i++)
+	{
+	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	    return -1;
+	curpass = (int)(i * totpasses / iterations);
+	cn[0] = -0.8 * c1[1];
+	cn[1] = 0.1 * (-3 * (0.2 * c1[2] - 0.8 * cube(c1[2])) - 3 * c1[1] + c1[0]);
+	cn[2] = 2 * (0.2 * c1[2] - 0.8 * cube(c1[2])) + 3 * c1[1];
+	if (DisplayOscillator(c1, cn, dt, ((DWORD)(i / 10.0) % threshold), i, 3, 0) < 0)
+	    break;
+	}
+    PlotExtras();
+    return 0;
+    }
+
+/**************************************************************************
 	Do We need More Chaos Examples?
 	Julien C. Sprott
 	Chaos Theory and applications November 2020
@@ -15185,7 +15265,7 @@ int	DoDynamicAnalysesFPGAImplementationEngineeringApplications(void)
 	https://www.hindawi.com/journals/complexity/2019/6083853/
 ***************************************************************************/
 
-int	DoDynamicBehaviorsAnalysisChaoticCircui(void)
+int	DoDynamicBehaviorsAnalysisChaoticCircuit(void)
 
     {
     double	i, c1[3], cn[3], a, b, c;
@@ -15209,6 +15289,59 @@ int	DoDynamicBehaviorsAnalysisChaoticCircui(void)
 	cn[1] = b * (c1[0] + c1[1]);
 	cn[2] = a * log(fabs(c * cosh(c1[0]))) - a * log(fabs((c1[2] + c)));
 	if (DisplayOscillator(c1, cn, dt, ((DWORD)(i / 10.0) % threshold), i, 3, 0) < 0)
+	    break;
+	}
+    PlotExtras();
+    return 0;
+    }
+
+/**************************************************************************
+	Dynamic Behaviors of Far and Near Memristive Electromagnetic Induction in Spoon Neural Network
+	Qiang Lai and Yudi Xu August 20 2024
+	https://pubs.aip.org/aip/cha/article/34/8/083127/3309062....https://doi.org/10.1063/5.0216108
+	Corresponding author: laiqiang87@126.com
+***************************************************************************/
+
+int	DoDynamicBehaviorsFarNearMemristiveElectromagneticInduction(void)
+
+    {
+    double	i, c1[5], cn[5], a, b, c, d, k, p, q, t1, t2, t3, t4, v1, w1;
+
+    c1[0] = param[10];	// x
+    c1[1] = param[11];	// y
+    c1[2] = param[12];	// z
+    c1[3] = param[13];	// w
+    c1[4] = param[14];	// v
+
+    a = param[0];
+    b = param[1];
+    c = param[2];
+    d = param[3];
+    k = param[4];
+    p = param[5];
+    q = param[6];
+    totpasses = 10;
+
+    InitOscillator(c1, 5);						// pass in number of dimensions
+    for (i = 0; i < iterations; i++)
+	{
+	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	    return -1;
+	curpass = (int)(i * totpasses / iterations);
+	t1 = tanh(c1[0]);
+	t2 = tanh(c1[1]);
+	t3 = tanh(c1[2]);
+	t4 = tanh(c1[3]);
+
+	v1 = c1[0] - c1[2];
+	w1 = p - q * t1;
+
+	cn[0] = -c1[0] - 2.5 * t1 + t2 + k * w1 * v1;
+	cn[1] = -c1[1] + 3.4 * t1 + 1.5 * t3 + a * t4;
+	cn[2] = -c1[2] - 3 * t2 + 2 * t3 + 0.1 * t4 - k * w1 * v1;
+	cn[3] = -c1[3] + b * t3;
+	cn[4] = -c1[4] + v1;
+	if (DisplayOscillator(c1, cn, dt, ((DWORD)(i / 10.0) % threshold), i, 5, 0) < 0)
 	    break;
 	}
     PlotExtras();
@@ -29989,6 +30122,46 @@ int	DoNewNonlinearActiveElement(void)
     }
 
 /**************************************************************************
+	Nonlinear Analysis of a 4D Fractional Hyper-Chaotic System Based on Riemann–Liouville–Caputo Fractal–Fractional Derivative
+	Yuhang Pan 18 October 2021
+	https://link.springer.com/article/10.1007/s11071-021-06951...https://doi.org/10.1007/s11071-021-06951-w
+	Contacting author: yuhangpande@163.com
+***************************************************************************/
+
+int	DoNonlinearAnalysis4DFractionalHyperChaoticSystem(void)
+
+    {
+    double	i, c1[4], cn[4], a, b, c, d;
+
+    c1[0] = param[10];	// x
+    c1[1] = param[11];	// y
+    c1[2] = param[12];	// z
+    c1[3] = param[13];	// w
+
+    a = param[0];
+    b = param[1];
+    c = param[2];
+    d = param[3];
+    totpasses = 10;
+
+    InitOscillator(c1, 4);						// pass in number of dimensions
+    for (i = 0; i < iterations; i++)
+	{
+	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	    return -1;
+	curpass = (int)(i * totpasses / iterations);
+	cn[0] = a * (c1[1] - c1[0]) + c1[1] * c1[2] * c1[3];
+	cn[1] = b * (c1[1] + c1[0]) - c1[0] * c1[2] * c1[3];
+	cn[2] = -c * c1[2] + c1[0] * c1[1] * c1[2];
+	cn[3] = -d * c1[3] + c1[0] * c1[1] * c1[2];
+	if (DisplayOscillator(c1, cn, dt, ((DWORD)(i / 20.0) % threshold), i, 4, 0) < 0)
+	    break;
+	}
+    PlotExtras();
+    return 0;
+    }
+
+/**************************************************************************
 	Non-linear Arabesques I Images
 	LINEAR AND NONLINEAR ARABESQUES:
 	A STUDY OF CLOSED CHAINS OF NEGATIVE 2-ELEMENT CIRCUITS
@@ -30700,6 +30873,50 @@ int	DoNovelFourWing(void)
 	cn[1] = -c1[0] * c1[2] + c1[1] * c1[2];
 	cn[2] = -c1[2] - m * c1[0] * c1[1] + b;
 	if (DisplayOscillator(c1, cn, dt, ((DWORD)i % threshold), i, 3, 0) < 0)
+	    break;
+	}
+    PlotExtras();
+    return 0;
+    }
+
+/**************************************************************************
+	Novel Grayscale Image Encryption Based on 4D Fractional-Order Hyperchaotic System, 2D Henon Map and Knight Tour Algorithm
+	Saeed Ullah, Xinge Liu, Adil Waheed, Shuailei Zhang and Shan Li 8 August 2024
+	https://iopscience.iop.org/article/10.1088/1402-4896/ad6d0e/pdf.....DOI 10.1088/1402-4896/ad6d0e
+	Corresponding author: liuxgjiayou@126.com
+***************************************************************************/
+
+int	DoNovelGrayscaleImageEncryption(void)
+
+    {
+    double	i, c1[4], cn[4], a, b, c, d, e, f, g;
+
+    c1[0] = param[10];	// x
+    c1[1] = param[11];	// y
+    c1[2] = param[12];	// z
+    c1[3] = param[13];	// w
+
+    a = param[0];
+    b = param[1];
+    c = param[2];
+    d = param[3];
+    e = param[4];
+    f = param[5];
+    g = param[6];
+
+    totpasses = 10;
+
+    InitOscillator(c1, 4);						// pass in number of dimensions
+    for (i = 0; i < iterations; i++)
+	{
+	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	    return -1;
+	curpass = (int)(i * totpasses / iterations);
+	cn[0] = a * c1[0] + c1[1] * c1[2];
+	cn[1] = b - c * c1[0] * c1[2] - cube(c1[1]);
+	cn[2] = d * c1[0] * c1[1] + e * c1[2] + f * c1[3];
+	cn[3] = c1[0] - g * c1[2];
+	if (DisplayOscillator(c1, cn, dt, ((DWORD)i % threshold), i, 4, 0) < 0)
 	    break;
 	}
     PlotExtras();

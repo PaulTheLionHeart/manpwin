@@ -1065,6 +1065,24 @@ struct OscillatorSpecificStuff OscillatorSpecific[]=
 	    NullSetup, DoAnalyticalNumerical, "SelectOscParams", (DLGPROC)SelectOscParams, 0.01, 1.0, 1.0
 	},
 	{
+	"Analytic Proof of the Emergence of New Type of Lorenz-Like Attractors with Z4-Symmetry I", "a", "b", "mm", ES, ES, ES, ES, ES, ES, ES, 0.07, 0.0015, 0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -0.63, -0.36, 0.72, 1, 3, 2, 3, 3, 3, NULL, 1, YAXIS, 10000,
+	    NullSetup, DoAnalyticProofEmergenceNewTypeLorenzAttractors, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0875, 1.0, 1.0
+	},
+	{
+	"Analytic Proof of the Emergence of New Type of Lorenz-Like Attractors with Z4-Symmetry II", "a", "b", "mm", ES, ES, ES, ES, ES, ES, ES, 0.0475, 0.1775, 0.02, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -0.355, -0.06, 0.4, 1, 3, 2, 3, 3, 3, NULL, 1, YAXIS, 10000,
+	    NullSetup, DoAnalyticProofEmergenceNewTypeLorenzAttractors, "SelectOscParams", (DLGPROC)SelectOscParams, 0.05, 1.0, 1.0
+	},
+	{
+	"Analytic Proof of the Emergence of New Type of Lorenz-Like Attractors with Z4-Symmetry III", "a", "b", "mm", ES, ES, ES, ES, ES, ES, ES, 0.0813, 0.07, 0.03, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.1, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -0.655, -0.375, 0.74, 1, 3, 2, 3, 3, 3, NULL, 1, YAXIS, 10000,
+	    NullSetup, DoAnalyticProofEmergenceNewTypeLorenzAttractors, "SelectOscParams", (DLGPROC)SelectOscParams, 0.05, 1.0, 1.0
+	},
+	{
 	"Anisochronous Self-Excited Systems", "e", "beta", "mi", "delta", ES, ES, ES, ES, ES, ES, 1.25, 1.0, 1.5, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x1", "x2", "x3", "x4", ES, ES, ES, ES, ES, ES, -0.1, -0.3, 0.4, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -3.5, -2.0, 4.0, 2, 4, 3, 4, 4, 4, NULL, 1, YAXIS, 500000,
@@ -2764,6 +2782,12 @@ struct OscillatorSpecificStuff OscillatorSpecific[]=
 	    NullSetup, DoDixonSystem, "SelectOscParams", (DLGPROC)SelectOscParams, 0.005, 0.6, 0.6
 	},
 	{
+	"DNA Dynamic Coding Image Encryption Algorithm with a Meminductor Chaotic System", ES, ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, -0.1, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -0.412, -0.22, 0.44, 1, 2, 3, 0, 3, 3, NULL, 1 + AVERAGE, YAXIS, 50000.0,
+	    NullSetup, DoDNADynamicCodingImageEncryptionAlgorithm, "SelectOscParams", (DLGPROC)SelectOscParams, 0.05, 2.0, 0.1
+	},
+	{
 	"Do We need More Chaos Examples? Julian Sprott", ES, ES, ES, ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.2, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -3.32, -1.9, 4.0, 1, 2, 3, 0, 3, 3, NULL, 1, YAXIS, 300000.0,
@@ -2857,7 +2881,14 @@ struct OscillatorSpecificStuff OscillatorSpecific[]=
 	    0.9, 0.5, 0.005, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.2, -0.95, 5.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -15.6, -8.83, 17.5, 1, 6, 2, 3, 3, 3, NULL, 1, YAXIS, 100000.0,
-	    NullSetup, DoDynamicBehaviorsAnalysisChaoticCircui, "SelectOscParams", (DLGPROC)SelectOscParams, 0.01, 1.0, 1.0
+	    NullSetup, DoDynamicBehaviorsAnalysisChaoticCircuit, "SelectOscParams", (DLGPROC)SelectOscParams, 0.01, 1.0, 1.0
+	},
+	{
+	"Dynamic Behaviors of Far and Near Memristive Electromagnetic Induction in Spoon Neural Network", "a", "b", "c", "d", "k", "p", "q", ES, ES, ES,
+	    0.58, -12.5, 1.0, 0.1, 0.4, 1.0, 15.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", "w", "v", ES, ES, ES, ES, ES, 1.0, 0.0001, 0.0001, 0.0001, 0.00011, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -0.225, -0.135, 0.27, 1, 2, 3, 7, 5, 5, NULL, 1 + AVERAGE, YAXIS, 15000.0,
+	    NullSetup, DoDynamicBehaviorsFarNearMemristiveElectromagneticInduction, "SelectOscParams", (DLGPROC)SelectOscParams, 0.072, 0.2, 0.2
 	},
 	{
 	"Dynamic Evolution Analysis of Stock Price Fluctuation and Its Control", "a0", "a1", "a2", "a3", "q", "w", ES, ES, ES, ES, 
@@ -5855,6 +5886,12 @@ struct OscillatorSpecificStuff OscillatorSpecific[]=
 	    NullSetup, DoNewNonlinearActiveElement, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0015, 1.0, 1.0
 	},
 	{
+	"Nonlinear Analysis of a 4D Fractional System Based on Riemann-Liouville-Caputo Fractal Derivative", "a", "b", "c", "d", ES, ES, ES, ES, ES, ES, 25.0, 2.0, 15.0, 35.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", "w", ES, ES, ES, ES, ES, ES, 2.0, 0.2, 1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -30.0, -16.0, 32.0, 1, 2, 3, 4, 4, 4, NULL, 1, YAXIS, 200000.0,
+	    NullSetup, DoNonlinearAnalysis4DFractionalHyperChaoticSystem, "SelectOscParams", (DLGPROC)SelectOscParams, 0.0001, 1.0, 1.0
+	},
+	{
 	"Nonlinear Arabesques I", 
 	    ES, ES, ES, ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, -0.8, -0.1, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -6025,14 +6062,21 @@ struct OscillatorSpecificStuff OscillatorSpecific[]=
 	},
 	{
 	"Novel Four-Wing Strange Attractor Born in Bistability", 
-	    "a", "b", "M", ES, ES,  ES, ES, ES, ES, ES, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "a", "b", "M", ES, ES, ES, ES, ES, ES, ES, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 1.0, -1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -150.0, -140.0, 180.0, 5, 6, 4, 3, 3, 3, NULL, 1, YAXIS, 50000.0,
 	    NullSetup, DoNovelFourWing, "SelectOscParams", (DLGPROC)SelectOscParams, 0.005, 1.0, 1.0
 	},
 	{
+	"Novel Grayscale Image Encryption Based on 4D Chaotic System, 2D Henon Map and Knight Tour Algorithm",
+	    "a", "b", "c", "d", "e", "f", "g", ES, ES, ES, -10.0, 9.0, -1.0, -3.0, 10.0, 0.9, 2.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", "w", ES, ES, ES, ES, ES, ES, 0.01, 0.02, 0.03, 0.04, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -53.0, -30.0, 60.0, 1, 2, 3, 7, 4, 4, NULL, 1, YAXIS, 100000.0,
+	    NullSetup, DoNovelGrayscaleImageEncryption, "SelectOscParams", (DLGPROC)SelectOscParams, 0.002, 1.0, 0.3
+	},
+	{
 	"Novel Hyperjerk 4D System", 
-	    "a", "b", "c", ES, ES,  ES, ES, ES, ES, ES, 1.0, 4.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "a", "b", "c", ES, ES, ES, ES, ES, ES, ES, 1.0, 4.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", "w", ES, ES, ES, ES, ES, ES, 0.5, 0.4, 0.3, 0.9, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -10.0, -6.0, 12.0, 2, 3, 4, 3, 4, 4, NULL, 1, YAXIS, 500000.0,
 	    NullSetup, DoNovelHyperjerk, "SelectOscParams", (DLGPROC)SelectOscParams, 0.001, 1.0, 1.0
