@@ -623,7 +623,8 @@
 #define IDC_STAR                                5002
 #define IDC_FILLPOLYGON                         5003
 #define IDC_USER                                8888
-#define IDC_MOVINGWAVE                          10001
+#define IDC_MOVINGWAVE                          10000
+#define IDC_PLOT_CIRCLES                        10001
 #define IDC_FFT_REAL                            10002
 #define IDC_FFT_IMAG                            10003
 #define IDC_FFT_REALIMAG                        10004

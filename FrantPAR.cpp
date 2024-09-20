@@ -110,6 +110,8 @@ extern	int	fpFormulaSetup(char *);
 extern	int	FindFunct(char *);
 //extern	void	FillPalette(int, BYTE *);	// if threshold larger than palette, fill or stretch
 extern	void	ConvertString2Bignum(mpfr_t, char *);
+extern	void	ConvertBignum2String(char *s, mpfr_t num);
+extern	int	ChangeBigPrecision(int decimals);
 extern	int	ProcessFormulaString(char *);
 extern	void	cvtcentermag(double *, double *, LDBL *, double *, double *, double *);
 //extern	char	*GetFractalName(void);
@@ -537,6 +539,7 @@ int	FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double Te
 	    case LPOPCORNJUL:
 	    case MANOWARJ:
 	    case MANOWARJFP:
+	    case LJULIAZPOWER:
 		juliaflag = TRUE;
 		j.x = param[0];
 		j.y = param[1];
@@ -837,13 +840,6 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 	s++;
 	}
 
-    s1 = new char[SIZEOF_BF_VARS];
-    s2 = new char[SIZEOF_BF_VARS];
-    s3 = new char[SIZEOF_BF_VARS];
-    s4 = new char[SIZEOF_BF_VARS];
-    s5 = new char[SIZEOF_BF_VARS];
-    s6 = new char[SIZEOF_BF_VARS];
-    count = sscanf(t, "%s %s %s %s %s %s", s1, s2, s3, s4, s5, s6);
     if (CentreFlag)
 	{
 	sscanf(t, "%lf %lf %lf %lf %lf %lf", &hor, &vert, &Magnification, &Xmagfactor, &Rotation, &Skew);
@@ -881,16 +877,6 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 	    RotationCentre.x = hor + (ScreenRatio / Magnification);
 	    RotationCentre.y = vert + (1.0 / Magnification);
 	    }
-	else
-	    {
-	    if (s1) delete[] s1;
-	    if (s2) delete[] s2;
-	    if (s3) delete[] s3;
-	    if (s4) delete[] s4;
-	    if (s5) delete[] s5;
-	    if (s6) delete[] s6;
-	    return -1;										// other values are illegal as they don't specify the screen
-	    }
 
 //	count = sscanf(t, "%lf %lf %lf %lf %lf %lf", &hor, &a1, &vert, &a2, &Rotation, &Skew);
 	}
@@ -908,6 +894,14 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
     if (mandel_width < 0.0)
 	mandel_width = - mandel_width;
 
+    s1 = new char[SIZEOF_BF_VARS];
+    s2 = new char[SIZEOF_BF_VARS];
+    s3 = new char[SIZEOF_BF_VARS];
+    s4 = new char[SIZEOF_BF_VARS];
+    s5 = new char[SIZEOF_BF_VARS];
+    s6 = new char[SIZEOF_BF_VARS];
+    count = sscanf(t, "%s %s %s %s %s %s", s1, s2, s3, s4, s5, s6);
+/*
     if (mandel_width < DBL_MIN)			// we can do a BigNum calculation here to allow deeper zooming
 	{
 //	if (init_big_dec((int)strlen(s3) + PRECISION_FACTOR) < 0)	// need enough temp precision to load BigWidth
@@ -915,6 +909,7 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 	ConvertString2Bignum(BigWidth.x, s3);
 	BigNumFlag = TRUE;
 	}
+*/
     precision = getprecbf_mag();
     if (precision < 0)			// exceeded allowable precision
 	{
@@ -932,6 +927,17 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 //	if (!BigNumFlag)
 //	    if (init_big_dec(decimals) < 0)
 //		return -1;
+//	mpfr_set_default_prec(decimals);
+	if (ChangeBigPrecision(decimals) < 0)				// increase precision of Big numbers	
+	    {
+	    if (s1) delete[] s1;
+	    if (s2) delete[] s2;
+	    if (s3) delete[] s3;
+	    if (s4) delete[] s4;
+	    if (s5) delete[] s5;
+	    if (s6) delete[] s6;
+	    return -1;							// too many decimals for library
+	    }
 	BigNumFlag = TRUE;
 	BigBailout = rqlim;
 	ConvertString2Bignum(BigHor.x, s1);
@@ -950,9 +956,18 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 		return -1;
 		}
 	    OneOverMag = BigMag.BigInvert();
+	    // for debugging
+	    ConvertBignum2String(s4, BigHor.x);
+	    ConvertBignum2String(s5, BigVert.x);
+	    ConvertBignum2String(s6, BigMag.x);
+
 	    BigHor = BigHor - OneOverMag * ScreenRatio;
 	    BigVert = BigVert - OneOverMag;
 	    BigWidth = OneOverMag + OneOverMag;
+	    // for debugging
+	    ConvertBignum2String(s4, BigHor.x);
+	    ConvertBignum2String(s5, BigVert.x);
+	    ConvertBignum2String(s6, BigWidth.x);
 	    }
 	else
 	    {
@@ -1133,6 +1148,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	    {
 	    wsprintf(s, "Can't Get FRACTINT Par Data: <%s>", filename);
 	    MessageBox (hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
+	    fclose(fp);
 	    return -1;
 	    }
 
@@ -1229,7 +1245,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	    MessageBox (hwnd, s, "Reading Fractint Par File", MB_ICONEXCLAMATION | MB_OK);
 	    fclose(fp);
 	    if (buffer) { delete[] buffer; buffer = NULL; }
-	    return -1;
+		return -1;
 	    }
 	}
     if (buffer) { delete[] buffer; buffer = NULL; }
@@ -1242,6 +1258,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 		{
 		wsprintf(s, "Can't Find formula in the FRACTINT Par Data: <%s>", filename);
 		MessageBox(hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
+		fclose(fp);
 		return -1;
 		}
 
@@ -1278,6 +1295,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 		{
 		wsprintf(s, "Par Frm Data full, line: <%d>", linenum);
 		MessageBox(hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
+		fclose(fp);
 		break;
 		}
 	    }

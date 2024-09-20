@@ -1492,7 +1492,7 @@ extern	int	DoAnalysisChaoticSystemWithLineEquilibrium(PMYVARIABLES);
 extern	int	DoFractionalSymbolicNetworkEntropyAnalysis(PMYVARIABLES);
 extern	int	DoPeriodDoublingRoute2Chaos(PMYVARIABLES);
 extern	int	DoSecureCommunicationUsingNewHyperchaoticSystem(PMYVARIABLES);
-extern	int	DoDynamicBehaviorsAnalysisChaoticCircui(PMYVARIABLES);
+extern	int	DoDynamicBehaviorsAnalysisChaoticCircuit(PMYVARIABLES);
 extern	int	DoEntropyAnalysisImageEncryptionApplication(PMYVARIABLES);
 extern	int	DoDynamicsAnalysisImplementationMultiscroll(PMYVARIABLES);
 extern	int	DoANew3DChaoticSystem4QuadraticNonlinearTerms(PMYVARIABLES);
@@ -1675,6 +1675,11 @@ extern	int	DoBouali3(PMYVARIABLES);
 extern	int	DoDynamicalAnalysisQuadraticMegastableChaoticOscillator(PMYVARIABLES);
 extern	int	DoChenCircuitLikeModel(PMYVARIABLES);
 extern	int	DoDynamicsNew3DChaoticSystem(PMYVARIABLES);
+extern	int	DoAnalyticProofEmergenceNewTypeLorenzAttractors(PMYVARIABLES);
+extern	int	DoNonlinearAnalysis4DFractionalHyperChaoticSystem(PMYVARIABLES);
+extern	int	DoDNADynamicCodingImageEncryptionAlgorithm(PMYVARIABLES);
+extern	int	DoDynamicBehaviorsFarNearMemristiveElectromagneticInduction(PMYVARIABLES);
+extern	int	DoNovelGrayscaleImageEncryption(PMYVARIABLES);
 
 
 
@@ -1896,6 +1901,8 @@ extern	int	DoDynamicFractalMap(PMYVARIABLES);
 extern	int	DoComplexDynamics2DSineBoundedMemristiveMap(PMYVARIABLES);
 extern	int	DoFurtherStudyontheRulkovNeuronMap(PMYVARIABLES);
 extern	int	DoAttractorMergingAmplitudeControlHyperchaosMap(PMYVARIABLES);
+extern	int	DoDesignHardwareImplementation4DMemristiveHyperchaoticMap(PMYVARIABLES);
+extern	int	DoTorusHyperchaos3DLotkaVolterraMap(PMYVARIABLES);
 
 
 // Sprott Maps

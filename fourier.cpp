@@ -89,7 +89,8 @@ int	WaveformArray[MAXSTEPS];
 
 WORD	WavePtr = 0;			// point to the currently updated location
 static	short	level[LEVELS];
-BOOL		MovingWave = TRUE;
+static	BOOL	MovingWave = TRUE;
+static	BOOL	PlotCircles = FALSE;
 static	BOOL	first = TRUE;
 
 extern	int	FibDelay(HWND, WORD);
@@ -163,7 +164,7 @@ int	Harmonics(BOOL clear, int TotalFrames, CPlot Plot)
     WORD	i, x1, y1, x2, y2, centrex, centrey;
     double	xold, yold;
     double	xnew, ynew;
-    int	test;
+    int		test, radius;
 
     xnew = ynew = xold = yold = 0.0;
     centrey = ydots / 2;
@@ -200,6 +201,11 @@ int	Harmonics(BOOL clear, int TotalFrames, CPlot Plot)
 	if (y2 < 0)
 	    y2 = 0;
 	Plot.genline(x1, (WORD)(ydots - y1), x2, (WORD)(ydots - y2), clear ? 0 : FourierArray[i].c);
+	if (PlotCircles)
+	    {
+	    radius = (int)sqrt(((double)sqr(x2 - x1) + (double)sqr(y2 - y1)));
+	    Plot.DisplayCircle(x1, (WORD)(ydots - y1), radius, clear ? 0 : FourierArray[i].c);
+	    }
 	xold = xnew;
 	yold = ynew;
 	}
@@ -523,6 +529,8 @@ DLGPROC FAR PASCAL FourierTypeDlg (HWND hDlg, UINT message, UINT wParam, LONG lP
 //		SendMessage(hCtrl, BM_SETCHECK, 1, 0L);
 		SendMessage(hCtrl, BM_SETCHECK, MovingWave, 0L);
 //		SetFocus(GetDlgItem(hDlg, tempParam));
+		hCtrl = GetDlgItem(hDlg, IDC_PLOT_CIRCLES);
+		SendMessage(hCtrl, BM_SETCHECK, PlotCircles, 0L);
 		if (FourierPreview.InitPreview(hDlg) < 0)
 		    {
 		    wsprintf(s, "Error: No memory for preview");
@@ -680,6 +688,9 @@ DLGPROC FAR PASCAL FourierTypeDlg (HWND hDlg, UINT message, UINT wParam, LONG lP
 			    steps = MAXSTEPS;
 			hCtrl = GetDlgItem (hDlg, IDC_MOVINGWAVE) ;
 			MovingWave = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			hCtrl = GetDlgItem(hDlg, IDC_PLOT_CIRCLES);
+			PlotCircles = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+
 			for (nIndex = 0; nIndex < LEVELS; nIndex++)
 			    {
 			    if (nIndex  < LEVELS / 2)					// sine sliders

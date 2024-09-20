@@ -507,38 +507,38 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	case KNOTS:
 	case CURVES:
 	    break;
-//	case BIFURCATION:				/* Bifurcation Fractal */
+//	case BIFURCATION:				// Bifurcation Fractal
 //	    subtype = 'B';
-//	    special = 50;				/* cycles before display */
+//	    special = 50;				// cycles before display
 //	    break;
-	case CUBIC:					/* CUBIC fractals */
-	    subtype = 'B';				/* CBIN */
+	case CUBIC:					// CUBIC fractals
+	    subtype = 'B';				// CBIN */
 	    special = WHITE;
 	    break;
-	case POWER:					/* POWER fractals */
+	case POWER:					// POWER fractals
 	case BURNINGSHIPPOWER:				// Burning Ship of other powers besides quadratic
-	    special = 3;				/* power = 3 */
+	    special = 3;				// power = 3
 	    break;
-	case NEWTONPOLYGON:				/* Newton Polygon fractals */
-	    degree = 5;					/* Degree = 5 */
+	case NEWTONPOLYGON:				// Newton Polygon fractals
+	    degree = 5;					// Degree = 5
 	    break;
-	case NEWTONVARIATION:				/* Newton Variation fractals */
-	    degree = 3;					/* Degree = 3 */
+	case NEWTONVARIATION:				// Newton Variation fractals
+	    degree = 3;					// Degree = 3
 	    break;
-	case FOURIER:					/* Fourier Analysis fractals */
+	case FOURIER:					// Fourier Analysis fractals
 	    break;
-	case SPECIALNEWT:				/* type SPECIALNEWT fractal */
-	    special = 16;				/* special in type 5 fractal is multiple colour flag */
+	case SPECIALNEWT:				// type SPECIALNEWT fractal
+	    special = 16;				// special in type 5 fractal is multiple colour flag
 	    break;
-	case RATIONALMAP:				/* Rational Map type fractal */
-	    subtype = 'A';				/* RAT34 */
+	case RATIONALMAP:				// Rational Map type fractal
+	    subtype = 'A';				// RAT34
 	    special = WHITE;
 	    break;
-	case SINFRACTAL:				/* sin() type fractal */
-	case EXPFRACTAL:				/* Exponential type fractal */
-	case MATEIN:					/* MATEIN type fractal */
-	    subtype = 'R';				/* REAL */
-	    special = WHITE;				/* special colour */
+	case SINFRACTAL:				// sin() type fractal
+	case EXPFRACTAL:				// Exponential type fractal
+	case MATEIN:					// MATEIN type fractal
+	    subtype = 'R';				// REAL
+	    special = WHITE;				// special colour
 	    break;
 //	default:
 //	    return -1;					// dunno this fractal
@@ -659,7 +659,7 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
     	    Axes2Text(AxesText, xAxis + 1, yAxis + 1, zAxis + 1);
 	    break;
         
-	case FOURIER:					/* Fourier Analysis fractals */
+	case FOURIER:					// Fourier Analysis fractals
 	    steps = 400;
 	    NumHarmonics = 60;
 	    if (*(str + 3) != '\0')
@@ -683,10 +683,10 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	    if (*(str + 13) != '\0')
 		ReadSliders(str + 13);
 	    break;
-	case BIFURCATION:				/* Bifurcation Fractal */
-	case CUBIC:					/* CUBIC fractals */
-	case RATIONALMAP:				/* Rational Map type fractal */
-	case EXPFRACTAL:				/* Exponential type fractal */
+	case BIFURCATION:				// Bifurcation Fractal
+	case CUBIC:					// CUBIC fractals
+	case RATIONALMAP:				// Rational Map type fractal
+	case EXPFRACTAL:				// Exponential type fractal
 	    strncpy(t, str + 3, 3);
 	    t[3] = '\0';
 	    subtype = atoi(t);
