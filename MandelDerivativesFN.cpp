@@ -622,7 +622,7 @@ int	CPixel::RunManDerFunctions(int subtype, Complex *z, Complex *q, BYTE *Specia
 	    tempz.x = z->x * zabs.x - z->y * zabs.y;
 	    sqrtz = (*degree % 2 == 1) ? z->CSqrt() : 1.0;		// use square root power if degree is odd
 	    *z = tempz.CPolynomial(*degree / 2) * sqrtz + *q;
-	    return BailoutTest(z, sqr);
+	    return FractintBailoutTest(z);
 	    }
 
 	case 56:					// SimonBrot2
@@ -639,7 +639,7 @@ int	CPixel::RunManDerFunctions(int subtype, Complex *z, Complex *q, BYTE *Specia
 	    tempz = zabs;
 	    sqrtz = (*degree % 2 == 1) ? z->CSqrt() : 1.0;		// use square root power if degree is odd
 	    *z = z->CPolynomial(*degree / 2) * sqrtz * tempz + *q;
-	    return BailoutTest(z, sqr);
+	    return FractintBailoutTest(z);
 	    }
 
 	case 57:					// Kung Fu Panda
@@ -655,7 +655,7 @@ int	CPixel::RunManDerFunctions(int subtype, Complex *z, Complex *q, BYTE *Specia
 	    t2.x = fabs(t1.x);
 	    t2.y = fabs(t1.y);
 	    *z = t2 * t2 - *q;
-	    return BailoutTest(z, sqr);
+	    return FractintBailoutTest(z);
 	    }
 
 	case 58:					// HPDZ Buffalo
@@ -674,7 +674,7 @@ int	CPixel::RunManDerFunctions(int subtype, Complex *z, Complex *q, BYTE *Specia
 	    *z = w * w - w;
 	    z->x += q->x;
 	    z->y -= q->y;
-	    return BailoutTest(z, sqr);
+	    return FractintBailoutTest(z);
 	    }
 
 	case 59:					// SzegediButterfly 1
@@ -693,7 +693,7 @@ int	CPixel::RunManDerFunctions(int subtype, Complex *z, Complex *q, BYTE *Specia
 	    z->y = sqr.x - sqrt(fabs(z->y));
 	    *z += *q;
 
-	    return BailoutTest(z, sqr);
+	    return FractintBailoutTest(z);
 	    }
 
 	case 60:					// SzegediButterfly 2
@@ -708,10 +708,8 @@ int	CPixel::RunManDerFunctions(int subtype, Complex *z, Complex *q, BYTE *Specia
 	    z->x = temp;
 	    *z += *q;
 
-	    return BailoutTest(z, sqr);
+	    return FractintBailoutTest(z);
 	    }
-
-
 	}
     return 0;
     }

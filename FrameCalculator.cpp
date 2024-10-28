@@ -36,7 +36,7 @@ int calculateFrame::initialiseCalculateFrame(CDib *DibIn, CSlope *Slope, int Wid
     BigWidth = BigWidthIn;
     ZoomRadius = mpfr_get_d(BigWidth.x, MPFR_RNDN);
     BigZoomRadius = BigWidth;
-    InsideMethod = TZfilter->method;
+    OutsideMethod = TZfilter->method;
     hwnd = hwndIn;
     thread = ThreadIn;
     ReferenceNumber = 0;
@@ -491,7 +491,7 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
 	}
 #endif
 
-    if (InsideMethod >= TIERAZONFILTERS)
+    if (OutsideMethod >= TIERAZONFILTERS)
 	TZfilter->LoadFilterQ(DeltaSub0);		// initialise the constants used by Tierazon filters
 
     Plot.InitPlot(MaxIteration, TrueCol, wpixels, xdots, height, xdots, height, Dib->BitsPerPixel, Dib, USEPALETTE);
@@ -526,7 +526,7 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
 		CalculateDerivativeSlope(&dc, temp1);
 	    }
 
-	if (InsideMethod >= TIERAZONFILTERS)
+	if (OutsideMethod >= TIERAZONFILTERS)
 	    {
 	    Complex z = *(XSubN + iteration) + DeltaSubN;
 	    TZfilter->DoTierazonFilter(z, (long *)&iteration);
@@ -583,7 +583,7 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
 	//use bailout radius of 256 for smooth coloring.
 	} while (ZCoordinateMagnitudeSquared < bailout && iteration < MaxIteration);
 
-    if (SlopeType == DERIVSLOPE)
+    if (SlopeType == DERIVSLOPE && (iteration < MaxIteration || InsideMethod == 0))	// complicated if statement - we want to keep outside slope if using inside filters
 	{
 	if (ArithType == DOUBLESHIFT)
 	    {
@@ -695,6 +695,10 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
 		    else
 			index = iteration + (long)(w.x + w.y);
 		    break;
+		case POTENTIAL:
+		    magnitude = sqr(w.x) + sqr(w.y);
+		    index = Pot.potential(magnitude, iteration, MaxIteration, TrueCol, 256, potparam);
+		    break;
 		case ATAN:						// "atan"
 		    if (iteration == MaxIteration)
 			index = MaxIteration;
@@ -702,12 +706,18 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
 			index = (long)fabs(atan2(w.y, w.x)*180.0 / PI);
 		    break;
 		default:						// make sure we set all the inside pixels unless there is an inside filter (later on in the next switch)
-		    if (iteration == MaxIteration)
-			index = MaxIteration;
+		    if (OutsideMethod >= TIERAZONFILTERS)		// suite of Tierazon filters and colouring schemes
+			{
+			TZfilter->EndTierazonFilter(w, (long *)&iteration, TrueCol);
+			index = iteration;
+			}
 		    else
 			{
 //			if (abs(PaletteShift) <= 1)
-			index = iteration;
+			if (iteration == MaxIteration)
+			    index = MaxIteration;
+			else
+			    index = iteration;
 //			else
 //			    index = (BYTE)(((long)(FloatIteration * abs(PaletteShift))) % 256);
 //			index = iteration % 256;
@@ -735,21 +745,12 @@ int	calculateFrame::calculatePoint(int x, int y, Complex DeltaSub0, double bailo
 //		    else
 //			index = iteration;
 		    break;
-		case POTENTIAL:
-		    magnitude = sqr(w.x) + sqr(w.y);
-		    index = Pot.potential(magnitude, iteration, MaxIteration, TrueCol, 256, potparam);
-		    break;
 		default:
-		    if (InsideMethod >= TIERAZONFILTERS)		// suite of Tierazon filters and colouring schemes
-			{
-			TZfilter->EndTierazonFilter(w, (long *)&iteration, TrueCol);
-			index = iteration;
-			}
 		    break;
 		}
 	    }
 
-	if (SlopeType != DERIVSLOPE)
+	if (SlopeType != DERIVSLOPE || (iteration == MaxIteration && InsideMethod > 0))
 	    {
 	    if (*PlotType == FILTERPLOT)
 		Plot.FilterPoint(x + width * thread, height - 1 - y, index, &(TZfilter->FilterRGB));
@@ -797,7 +798,7 @@ int	calculateFrame::BigCalculatePoint(int x, int y, ExpComplex ExpDeltaSub0, dou
     FloatIteration = 0.0;
     bool glitched = false;
 
-    if (InsideMethod >= TIERAZONFILTERS)
+    if (OutsideMethod >= TIERAZONFILTERS)
 	{
 	Complex	tempComplex;
 
@@ -825,7 +826,7 @@ int	calculateFrame::BigCalculatePoint(int x, int y, ExpComplex ExpDeltaSub0, dou
 	ExpTemp = ExpDeltaSubN + *(ExpXSubN + iteration);
 	ExpZCoordinateMagnitudeSquared = ExpTemp.CSumSqr();
 
-	if (InsideMethod >= TIERAZONFILTERS)
+	if (OutsideMethod >= TIERAZONFILTERS)
 	    {
 	    Complex	tempComplex;
 	    ExpTemp = ExpDeltaSubN + *(ExpXSubN + iteration);
@@ -997,7 +998,7 @@ int	calculateFrame::BigCalculatePoint(int x, int y, ExpComplex ExpDeltaSub0, dou
 		    index = Pot.potential(magnitude, iteration, MaxIteration, TrueCol, 256, potparam);
 		    break;
 		default:
-		    if (InsideMethod >= TIERAZONFILTERS)			// suite of Tierazon filters and colouring schemes
+		    if (OutsideMethod >= TIERAZONFILTERS)			// suite of Tierazon filters and colouring schemes
 			{
 			Complex	tempComplex;
 

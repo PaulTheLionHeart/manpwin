@@ -32,7 +32,7 @@ int	ColourMethod = 1;			// Tierazon colour methods
 BOOL	UseCurrentPalette = TRUE;		// do we use the ManpWIN palette? If false, generate internal filter palette
 
 	int	nFDOption = 4;			// Fractal Dimension option for Tierazon filters
-extern	int	InsideMethod;			// inside filter methods
+extern	int	OutsideMethod;			// outside filter methods
 //extern	double 	*wpixels;			// an array of doubles holding slope modified iteration counts
 extern	BYTE	calcmode;
 extern	BYTE	oldcalcmode;			// store values during 3D transformations, filters etc
@@ -109,7 +109,7 @@ int	SetupTierazonColours(void)
                         }
                     ColourPtr = index;
 		    ColourMethod = ColourPtr = index;
-		    InsideMethod = ColourPtr + TIERAZONCOLOURS;
+		    OutsideMethod = ColourPtr + TIERAZONCOLOURS;
 		    oldcalcmode = calcmode;
 		    							// these plotting modes get the iteration count lost in RGB filters
 		    if (calcmode == 'G' || calcmode == 'T' || calcmode == 'B' && TierazonColour[ColourMethod].calctype != ' ')
@@ -144,7 +144,7 @@ int	SetupTierazonColours(void)
 				break;
 				}
 			    ColourMethod = ColourPtr = index;
-			    InsideMethod = ColourPtr + TIERAZONCOLOURS;
+			    OutsideMethod = ColourPtr + TIERAZONCOLOURS;
 			    oldcalcmode = calcmode;
 		    							// these plotting modes get the iteration count lost in RGB filters
 			    if (calcmode == 'G' || calcmode == 'T' || calcmode == 'B' && TierazonColour[ColourMethod].calctype != ' ')
@@ -201,7 +201,7 @@ int	SetupTierazonColours(void)
 			//		    PreviousLsys_ptr = index;
 			//		    strcpy(lsys_type, lptr[lsys_ptr]);
 			FilterType = FilterPtr = index;
-			InsideMethod = FilterPtr + TIERAZONFILTERS;
+			OutsideMethod = FilterPtr + TIERAZONFILTERS;
 			oldcalcmode = calcmode;
 			// these plotting modes get the iteration count lost in RGB filters
 			if (calcmode == 'G' || calcmode == 'T' || calcmode == 'B' && TierazonFilter[FilterType].calctype != ' ')
@@ -236,7 +236,7 @@ int	SetupTierazonColours(void)
 				    break;
 				    }
 				FilterType = FilterPtr = index;
-				InsideMethod = FilterPtr + TIERAZONFILTERS;
+				OutsideMethod = FilterPtr + TIERAZONFILTERS;
 				oldcalcmode = calcmode;
 				// these plotting modes get the iteration count lost in RGB filters
 				if (calcmode == 'G' || calcmode == 'T' || calcmode == 'B' && TierazonFilter[FilterType].calctype != ' ')

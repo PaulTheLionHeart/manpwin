@@ -1283,14 +1283,14 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 		    break;
 		case 'D':							// method
 		    AnalyseMethod(token + 2);
-		    if (InsideMethod > TIERAZONFILTERS && InsideMethod < TIERAZONCOLOURS)	// tierazon filters
+		    if (OutsideMethod > TIERAZONFILTERS && OutsideMethod < TIERAZONCOLOURS)	// tierazon filters
 			{
-			FilterType = InsideMethod - TIERAZONFILTERS;
+			FilterType = OutsideMethod - TIERAZONFILTERS;
 			RGBFilter = (TierazonFilter[FilterType].rgb) ? TRUE : FALSE;
 			}
-		    else if (InsideMethod > TIERAZONCOLOURS)				// tierazon colours)
+		    else if (OutsideMethod > TIERAZONCOLOURS)				// tierazon colours)
 			{
-			ColourMethod = InsideMethod - TIERAZONCOLOURS;
+			ColourMethod = OutsideMethod - TIERAZONCOLOURS;
 			RGBFilter = (TierazonColour[ColourMethod].rgb) ? TRUE : FALSE;
 			}
 
@@ -1631,12 +1631,12 @@ void	BasicFractData(char *info, BOOL CreateAnim)
 	{
 	sprintf(s, " -DI%03d", InsideMethod);	// display method
 	strcat(info, s);
-	if (InsideMethod > TIERAZONFILTERS)
+	if (OutsideMethod > TIERAZONFILTERS)
 	    {
 	    sprintf(s, ",%f,%d,%d", dStrands, nFDOption, UseCurrentPalette);	// Parameters for the Tierazon filters
 	    strcat(info, s);
 	    }
-	else if (InsideMethod == POTENTIAL)
+	else if (OutsideMethod == POTENTIAL)
 	    {
 	    sprintf(s, ",%f,%f,%f", potparam[0], potparam[1], potparam[2]);	// Parameters for potential
 	    strcat(info, s);

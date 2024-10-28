@@ -1205,7 +1205,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
     if (tok = str_find_ci(buffer, "potential="))
 	{
 	ProcessPotential(tok);
-	InsideMethod = POTENTIAL;
+	OutsideMethod = POTENTIAL;
 	}
     if (tok = str_find_ci(buffer, "corners="))
 	ProcessCorners(tok, FALSE);

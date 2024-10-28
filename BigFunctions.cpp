@@ -224,8 +224,7 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	    mpfr_add(zBig->x.x, qBig->x.x, t.x, MPFR_RNDN);
 	    mpfr_add(t.x, realimagBig.x, qBig->y.x, MPFR_RNDN);
 	    mpfr_add(zBig->y.x, realimagBig.x, t.x, MPFR_RNDN);
-	    mpfr_add(t.x, sqrBig.x.x, sqrBig.y.x, MPFR_RNDN);
-	    return (mpfr_cmp(t.x, BigBailout.x) > 0);
+	    return BigBailoutTest(zBig, sqrBig);
 	    }
 
 	case BURNINGSHIP:				// Burning Ship
@@ -239,19 +238,18 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	    realimagBig = t.BigAbs();
 	    zBig->x = qBig->x + sqrBig.x - sqrBig.y;
 	    zBig->y = realimagBig + realimagBig - qBig->y;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 	    }
 
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	    zBig->x = zBig->x.BigAbs();
 	    zBig->y = -zBig->y.BigAbs();
 	    *zBig = *qBig + zBig->CPolynomial(*degree);
-	    return (zBig->x.BigSqr() + zBig->y.BigSqr() > BigBailout);
+	    return BigFractintBailoutTest(zBig);
 
 	case POWER:			// Power
 	    *zBig = *qBig + zBig->CPolynomial(*degree);
-	    return (zBig->CSumSqr() > rqlim);
-//	    return (zBig->x.BigSqr() + zBig->y.BigSqr() > BigBailout);
+	    return BigFractintBailoutTest(zBig);
 
 	case CUBIC:					// Art Matrix Cubic
 	    {
@@ -398,7 +396,7 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
 	    *zBig = aBig * *zBig * *zBig + zBig->CPolynomial(*degree) * ((param[5] == 1.0) ? 1.0 : -1.0);
 	    *zBig = *zBig + *qBig;
-	    return (zBig->CSumSqr() > rqlim);
+	    return BigFractintBailoutTest(zBig);
 
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
 	    {
@@ -408,7 +406,7 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	    m = param[1];
 	    z1 = zBig->CPolynomial(*degree - 1);
 	    *zBig = (z1 * *zBig) / (z1 + m) + *qBig;
-	    return (zBig->CSumSqr() > rqlim);
+	    return BigFractintBailoutTest(zBig);
 	}
 
 	case POLYNOMIAL:				// Polynomial
@@ -427,8 +425,10 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 		    }
 		}
 	    *zBig = FinalZ + *qBig;
-	    return (zBig->CSumSqr() >= rqlim);
-	    }
+	    sqrBig.x = zBig->x.BigSqr();
+	    sqrBig.y = zBig->y.BigSqr();
+	    return BigFractintBailoutTest(zBig);
+	}
 
 	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
 	    return (BigRunManDerFunctions(subtype, zBig, qBig, SpecialFlag, iteration));
@@ -439,3 +439,96 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	}
     return 0;
     }
+
+/**************************************************************************
+    Bailout Test
+**************************************************************************/
+
+bool	CPixel::BigBailoutTest(BigComplex *z, BigComplex SqrZ)
+    {
+    double  magnitude;
+    BigDouble  manhmag;
+    BigDouble  manrmag;
+
+    switch (BailoutTestType)
+	{
+	case BAIL_MOD:
+	    magnitude = z->CSumSqr();
+	    return (magnitude >= rqlim);
+
+	case BAIL_REAL:
+	    return (SqrZ.x > BigBailout);
+	
+	case BAIL_IMAG:
+	    return (SqrZ.y > BigBailout);
+
+	case BAIL_OR:
+	    return (SqrZ.x > BigBailout || SqrZ.y > BigBailout);
+	
+	case BAIL_AND:
+	    return (SqrZ.x > BigBailout && SqrZ.y > BigBailout);
+
+	case MANH:
+	    manhmag = z->x.BigAbs() + z->y.BigAbs();
+	    return (manhmag.BigSqr() > BigBailout);
+
+	case MANR:
+	    manrmag = z->x + z->y;	    // don't need abs() since we square it next
+	    return (manrmag.BigSqr() > BigBailout);
+
+	default:
+	    magnitude = z->CSumSqr();
+	    return (magnitude >= rqlim);
+	}
+    }
+
+/**************************************************************************
+    Bailout Test
+**************************************************************************/
+
+bool	CPixel::BigFractintBailoutTest(BigComplex *z)
+    {
+    BigComplex TempSqr;
+    double  magnitude;
+    BigDouble  manhmag;
+    BigDouble  manrmag;
+
+    switch (BailoutTestType)
+	{
+	case BAIL_MOD:
+	    magnitude = z->CSumSqr();
+	    return (magnitude >= rqlim);
+
+	case BAIL_REAL:
+	    TempSqr.x = z->x.BigSqr();
+	    return (TempSqr.x > BigBailout);
+	
+	case BAIL_IMAG:
+	    TempSqr.y = z->y.BigSqr();
+	    return (TempSqr.y > BigBailout);
+
+	case BAIL_OR:
+	    TempSqr.x = z->x.BigSqr();
+	    TempSqr.y = z->y.BigSqr();
+	    return (TempSqr.x > BigBailout || TempSqr.y > BigBailout);
+	
+	case BAIL_AND:
+	    TempSqr.x = z->x.BigSqr();
+	    TempSqr.y = z->y.BigSqr();
+	    return (TempSqr.x > BigBailout && TempSqr.y > BigBailout);
+
+	case MANH:
+	    manhmag = z->x.BigAbs() + z->y.BigAbs();
+	    return (manhmag.BigSqr() > BigBailout);
+
+	case MANR:
+	    manrmag = z->x + z->y;	    // don't need abs() since we square it next
+	    return (manrmag.BigSqr() > BigBailout);
+
+	default:
+	    magnitude = z->CSumSqr();
+	    return (magnitude >= rqlim);
+	}
+    }
+
+

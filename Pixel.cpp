@@ -440,7 +440,7 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
     long	min_index;			// iteration of min_orbit
     double	tantable[16];			// used for Star Trails
 
-    if (InsideMethod == STARTRAIL)
+    if (OutsideMethod == STARTRAIL)
        {
        int	i;
        for(i = 0; i < 16; i++)
@@ -450,7 +450,7 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
     magnitude = 0.0;
     min_orbit = 100000.0;
 
-    if (period_level == 0 || InsideMethod == ZMAG || InsideMethod == STARTRAIL)
+    if (period_level == 0 || InsideMethod == ZMAG || OutsideMethod == STARTRAIL)
 	oldcolour = 32767; 			// don't check periodicity at all
     else //if (reset_period)
 	oldcolour = 240;			// don't check periodicity 1st n iterations
@@ -464,9 +464,9 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
     FloatIteration = 0.0;
     real_iteration = 0;
     phaseflag = 0;			// assume all type 5, 9 fractals same colour 
-    if (InsideMethod >= TIERAZONFILTERS)
+    if (OutsideMethod >= TIERAZONFILTERS)
 	{
-	TZfilter->InitFilter(InsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
+	TZfilter->InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
 	TZfilter->LoadFilterQ(*q);
 	}
 
@@ -508,7 +508,7 @@ SetWindowText (hwnd, ProcessType);
 	min_orbit = 100000.0;
 	}
 
-    if (InsideMethod == POTENTIAL)
+    if (OutsideMethod == POTENTIAL)
 	rqlim = (potparam[2] > 0) ? potparam[2] : 4.0;
 
     FloatIteration = 0.0;
@@ -570,12 +570,12 @@ SetWindowText (hwnd, ProcessType);
 	TempPt = *z;
 	OscProcess->ChangeCoordSystem(&z->x, &z->y, &TempZ, TempPt.x, TempPt.y, (double)*iteration, CoordSystem);
 							// result = 0 so continue iteration
-	if (InsideMethod == STARTRAIL)
+	if (OutsideMethod == STARTRAIL)
 	    {
 	    if(0 < *iteration && *iteration < 16)
 		tantable[*iteration - 1] = z->y/(z->x + 0.000001);
 	    }
-	else if (InsideMethod == EPSCROSS)
+	else if (OutsideMethod == EPSCROSS)
 	    {
 	    hooper = 0;
 	    if (fabs(z->x) < close)
@@ -598,7 +598,7 @@ SetWindowText (hwnd, ProcessType);
 		min_index = *iteration + 1L;
 		}
 	    }
-	else if (InsideMethod >= TIERAZONFILTERS)
+	else if (OutsideMethod >= TIERAZONFILTERS)
 	    TZfilter->DoTierazonFilter(*z, iteration);
 
 	if (*iteration > oldcolour)			// check periodicity
@@ -629,13 +629,13 @@ SetWindowText (hwnd, ProcessType);
 //    if (juliaflag && ShowOrbits)
 //	plot_orbits(special, NUM_ORBITS);
 
-    if (InsideMethod >= TIERAZONFILTERS)
+    if (OutsideMethod >= TIERAZONFILTERS)
 	{
 	TZfilter->EndTierazonFilter(*z, iteration, TrueCol);
 	return *iteration;
 	}
 
-    else if (InsideMethod == STARTRAIL)
+    else if (OutsideMethod == STARTRAIL)
 	{
 	int i;
 	double diff;
@@ -700,7 +700,7 @@ SetWindowText (hwnd, ProcessType);
 
     if (*iteration < threshold)
 	{
-	DoFilter(InsideMethod, hooper);
+//	DoFilter(InsideMethod, hooper);
 	DoFilter(OutsideMethod, hooper);
 	}
     else
@@ -957,7 +957,7 @@ int	CPixel::RunThread(HWND hwnd, int i, HANDLE ghMutex, int StripWidth, CSlope S
 	for (i = 0; i < num_worklist; ++i)
 	    worklist[i] = worklist[i + 1];
 
-	FindSymmetry(_3dflag, decomp, pairflag, InsideMethod, invert, CoordSystem, param, *degree, type, subtype, calcmode, RotationAngle, Fractal, hor, vert, mandel_width, BigNumFlag, Big_xxmin, Big_xxmax, Big_yymin, Big_yymax, BigHor, BigVert, BigWidth, ScreenRatio,
+	FindSymmetry(_3dflag, decomp, pairflag, OutsideMethod, invert, CoordSystem, param, *degree, type, subtype, calcmode, RotationAngle, Fractal, hor, vert, mandel_width, BigNumFlag, Big_xxmin, Big_xxmax, Big_yymin, Big_yymax, BigHor, BigVert, BigWidth, ScreenRatio,
 	    xxmin, xxmax, yymin, yymax, special, juliaflag);
 	if (pairflag)
 	    init_stereo_pairs(pairflag, AutoStereo_value);			// init stereo pair parameters

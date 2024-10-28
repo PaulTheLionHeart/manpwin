@@ -352,15 +352,15 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 	    InitTierazonFunctions(87, z, q);
 	    break;
 
-	case QUARTET1:				// a specific Tierazon fractal
+	case QUARTET1:					// a specific Tierazon fractal
+	    InitTierazonFunctions(83, z, q);
+	    break;
+
+	case QUARTET2:					// a specific Tierazon fractal
 	    InitTierazonFunctions(85, z, q);
 	    break;
 
-	case QUARTET2:				// a specific Tierazon fractal
-	    InitTierazonFunctions(85, z, q);
-	    break;
-
-	case QUARTET3:				// a specific Tierazon fractal
+	case QUARTET3:					// a specific Tierazon fractal
 	    InitTierazonFunctions(96, z, q);
 	    break;
 
@@ -371,23 +371,23 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 	    z->y = 0.0 + param[2];
 	    break;
 
-	case QUAD:				// a specific Tierazon fractal
+	case QUAD:					// a specific Tierazon fractal
 	    InitTierazonFunctions(90, z, q);
 	    break;
 
-	case RAMONSIN:				// a specific Tierazon fractal
+	case RAMONSIN:					// a specific Tierazon fractal
 	    InitTierazonFunctions(116, z, q);
 	    break;
 
-	case RAMONCOS:				// a specific Tierazon fractal
+	case RAMONCOS:					// a specific Tierazon fractal
 	    InitTierazonFunctions(117, z, q);
 	    break;
 
-	case FORMULA05:				// a specific Tierazon fractal
+	case FORMULA05:					// a specific Tierazon fractal
 	    InitTierazonFunctions(5, z, q);
 	    break;
 
-	case TEDDY:				// a specific Tierazon fractal
+	case TEDDY:					// a specific Tierazon fractal
 	    InitTierazonFunctions(104, z, q);
 	    break;
 
@@ -410,11 +410,11 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 #define TEDDY			189
 
 */
-	case TETRATION:				// a specific Tierazon fractal
+	case TETRATION:					// a specific Tierazon fractal
 	    InitTetration(z, q);
 	    break;
 
-	case KLEINIAN:				// a specific Tierazon fractal
+	case KLEINIAN:					// a specific Tierazon fractal
 	    InitKleinian(z, q);
 	    break;
 	}
@@ -737,13 +737,13 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	case NEWTONVARIATION:				// a specific Tierazon fractal
 	    return (RunTierazonFunctions(87, z, q, SpecialFlag, iteration));
 
-	case QUARTET1:				// a specific Tierazon fractal
+	case QUARTET1:					// a specific Tierazon fractal
+	    return (RunTierazonFunctions(83, z, q, SpecialFlag, iteration));
+
+	case QUARTET2:					// a specific Tierazon fractal
 	    return (RunTierazonFunctions(85, z, q, SpecialFlag, iteration));
 
-	case QUARTET2:				// a specific Tierazon fractal
-	    return (RunTierazonFunctions(85, z, q, SpecialFlag, iteration));
-
-	case QUARTET3:				// a specific Tierazon fractal
+	case QUARTET3:					// a specific Tierazon fractal
 	    return (RunTierazonFunctions(96, z, q, SpecialFlag, iteration));
 
 	case NOVA:
@@ -752,33 +752,33 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	    Complex	z1, zd, fn, f1n;
 
 	    z1 = *z;
-	    f1n = z->CPolynomial(*degree - 1);			// z^(deg - 1) - first derivative power
-	    fn = f1n * *z;						// z^(deg)
+	    f1n = z->CPolynomial(*degree - 1);		// z^(deg - 1) - first derivative power
+	    fn = f1n * *z;				// z^(deg)
 	    *z = *z - (fn - 1) / (*degree*f1n) + *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 	    }
-	case QUAD:				// a specific Tierazon fractal
+	case QUAD:					// a specific Tierazon fractal
 	    return (RunTierazonFunctions(90, z, q, SpecialFlag, iteration));
 
-	case RAMONSIN:				// a specific Tierazon fractal
+	case RAMONSIN:					// a specific Tierazon fractal
 	    return (RunTierazonFunctions(116, z, q, SpecialFlag, iteration));
 
-	case RAMONCOS:				// a specific Tierazon fractal
+	case RAMONCOS:					// a specific Tierazon fractal
 	    return (RunTierazonFunctions(117, z, q, SpecialFlag, iteration));
 
-	case FORMULA05:				// a specific Tierazon fractal
+	case FORMULA05:					// a specific Tierazon fractal
 	    return (RunTierazonFunctions(5, z, q, SpecialFlag, iteration));
 
-	case TEDDY:				// a specific Tierazon fractal
+	case TEDDY:					// a specific Tierazon fractal
 	    return (RunTierazonFunctions(104, z, q, SpecialFlag, iteration));
 
-	case TETRATION:				// Tetration fractal
+	case TETRATION:					// Tetration fractal
 	    return(DoTetration(iteration));
 	    break;
 
-	case KLEINIAN:				// Kleinian fractal
+	case KLEINIAN:					// Kleinian fractal
 	    return (CalculateKleinian(z));
 	    break;
 
@@ -792,7 +792,6 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 
 bool	CPixel::BailoutTest(Complex *z, Complex SqrZ)
     {
-//    Complex TempSqr;
     double  magnitude;
     double  manhmag;
     double  manrmag;

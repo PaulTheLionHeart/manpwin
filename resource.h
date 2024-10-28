@@ -179,6 +179,10 @@
 #define IDC_PLASMA_GRAIN                        265
 #define IDM_LSYSTEM                             300
 #define IDM_STEREOPAIRSETUP                     310
+#define IDC_NO_INSIDE                           400
+#define IDC_ZMAG                                401
+#define IDC_BOF60                               402
+#define IDC_BOF61                               403
 #define IDC_HUE1                                500
 #define IDC_HUE2                                501
 #define IDC_HUE3                                502
@@ -197,12 +201,8 @@
 #define IDC_ATAN                                545
 #define IDC_PERT1                               546
 #define IDC_PERT2                               547
-#define IDC_NO_INSIDE                           550
-#define IDC_ZMAG                                551
 #define IDC_EPSCR                               552
 #define IDC_STARTRAILS                          553
-#define IDC_BOF60                               554
-#define IDC_BOF61                               555
 #define IDC_POTENTIAL                           556
 #define IDC_TIERAZONFILTERS                     557
 #define IDC_TIERAZONCOLOURS                     558
