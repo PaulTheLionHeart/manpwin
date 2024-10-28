@@ -49,19 +49,19 @@
 
 // defines for inside/outside
 #define NONE		0
-#define ITER		1
-#define REAL		2
-#define IMAG		3
-#define MULT		4
-#define SUM		5
-#define ATAN		6
-#define PERT1		7
-#define PERT2		8
+#define ZMAG		1
+#define BOF60		2
+#define BOF61		3
 #define BIOMORPH	9
-#define ZMAG		59
-#define BOF60		60
-#define BOF61		61
-#define POTENTIAL	65
+#define ITER		10
+#define REAL		11
+#define IMAG		12
+#define MULT		13
+#define SUM		14
+#define ATAN		15
+#define PERT1		16
+#define PERT2		17
+#define POTENTIAL	18
 #define EPSCROSS	90
 #define STARTRAIL	91
 #define PERIOD		92

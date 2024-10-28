@@ -133,7 +133,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    realimagBig = tBig.BigAbs() * zBig->y;
 	    zBig->x = qBig->x + sqrBig.x - sqrBig.y;
 	    zBig->y = -(realimagBig + realimagBig - qBig->y);
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 1:						// Burning Ship
 	    return (BigRunFunctions(BURNINGSHIP, zBig, qBig, SpecialFlag, iteration));
@@ -162,7 +162,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    realimagBig = zBig->x * zBig->y.BigAbs();
 	    zBig->x = qBig->x + sqrBig.x - sqrBig.y;
 	    zBig->y = realimagBig + realimagBig + qBig->y;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 4:						// Buffalo (works according to Kalles Fraktaller)
 	    sqrBig.x = zBig->x.BigSqr();
@@ -186,7 +186,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 		zBig->y = zBig->y.BigAbs() - qBig->y;
 		zBig->x = zBig->x.BigAbs() + qBig->x;
 		}
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 5:						// Perpendicular Buffalo - (according to Kalles Fraktaller)
 	    tBig = zBig->x.BigAbs();
@@ -195,7 +195,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = zBig->y * tBig * -2.0 + qBig->y;
 	    tBig = sqrBig.x - sqrBig.y;
 	    zBig->x = qBig->x + tBig.BigAbs();
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 6:						// Mandelbar (Tricorn)
 	    sqrBig.x = zBig->x.BigSqr();
@@ -212,7 +212,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 		zBig->y = (param[3] == 1.0 ? zBig->y : -zBig->y) + qBig->y;
 		zBig->x = (param[3] == 1.0 ? -zBig->x : zBig->x) + qBig->x;
 		}
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 7:						// Celtic
 	    sqrBig.x = zBig->x.BigSqr();
@@ -230,7 +230,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 		zBig->y += qBig->y;
 		zBig->x = -qBig->x - zBig->x.BigAbs();
 		}
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 8:						// Mandelbar Celtic
 	    sqrBig.x = zBig->x.BigSqr();
@@ -238,7 +238,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = zBig->x * zBig->y * -2.0 + qBig->y;
 	    tBig = sqrBig.x - sqrBig.y;
 	    zBig->x = qBig->x + tBig.BigAbs();
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 9:						// Perpendicular Celtic
 	    tBig = zBig->x.BigAbs();
@@ -247,7 +247,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = zBig->y * tBig * -2.0 + qBig->y;
 	    tBig = sqrBig.x - sqrBig.y;
 	    zBig->x = qBig->x + tBig.BigAbs();
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 10:					// Cubic Flying Squirrel (Buffalo Imaginary)
 	    sqrBig.x = zBig->x.BigSqr();
@@ -255,14 +255,14 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = (sqrBig.x * 3.0 - sqrBig.y) * zBig->y;
 	    zBig->y = tBig.BigAbs() - qBig->y;
 	    zBig->x = qBig->x + (sqrBig.x - sqrBig.y * 3.0) * zBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 11:					// Heart Mandelbrot
 	    sqrBig.x = zBig->x.BigSqr();
 	    sqrBig.y = zBig->y.BigSqr();
 	    zBig->y = zBig->x.BigAbs() * zBig->y * 2.0 - qBig->y;
 	    zBig->x = sqrBig.x - sqrBig.y + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 12:					// Celtic Heart
 	    sqrBig.x = zBig->x.BigSqr();
@@ -270,21 +270,21 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = zBig->x.BigAbs() * zBig->y * 2.0 - qBig->y;
 	    tBig = sqrBig.x - sqrBig.y;
 	    zBig->x = qBig->x + tBig.BigAbs();
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 13:					// Partial Cubic Burning Ship Real
 	    sqrBig.x = zBig->x.BigSqr();
 	    sqrBig.y = zBig->y.BigSqr();
 	    zBig->y = (sqrBig.x * 3.0 - sqrBig.y) * zBig->y + qBig->y;
 	    zBig->x = qBig->x + (sqrBig.x - sqrBig.y * 3.0) * zBig->x.BigAbs();
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 14:					// Partial Cubic Burning Ship Imaginary
 	    sqrBig.x = zBig->x.BigSqr();
 	    sqrBig.y = zBig->y.BigSqr();
 	    zBig->y = (sqrBig.x * 3.0 - sqrBig.y) * zBig->y.BigAbs() + qBig->y;
 	    zBig->x = qBig->x + (sqrBig.x - sqrBig.y * 3.0) * zBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 15:					// Partial Cubic Buffalo Real (Celtic)
 	    sqrBig.x = zBig->x.BigSqr();
@@ -292,7 +292,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = (sqrBig.x * 3.0 - sqrBig.y) * zBig->y + qBig->y;
 	    tBig = (sqrBig.x - sqrBig.y * 3.0) * zBig->x;
 	    zBig->x = qBig->x + tBig.BigAbs();
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 16:					// Cubic Quasi Burning Ship (Buffalo Burning Ship Hybrid)
 	    sqrBig.x = zBig->x.BigSqr();
@@ -300,7 +300,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = (sqrBig.x * 3.0 - sqrBig.y) * zBig->y;
 	    zBig->y = -tBig.BigAbs() + qBig->y;
 	    zBig->x = qBig->x + (sqrBig.x - sqrBig.y * 3.0) * zBig->x.BigAbs();
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 17:					// Cubic Quasi Perpendicular
 	    sqrBig.x = zBig->x.BigSqr();
@@ -308,7 +308,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = sqrBig.x * 3.0 - sqrBig.y;
 	    zBig->y = -tBig.BigAbs() * zBig->y + qBig->y;
 	    zBig->x = qBig->x + (sqrBig.x - sqrBig.y * 3.0) * zBig->x.BigAbs();
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 18:					// Cubic Quasi Heart
 	    sqrBig.x = zBig->x.BigSqr();
@@ -316,7 +316,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = sqrBig.x * 3.0 - sqrBig.y;
 	    zBig->y = tBig.BigAbs() * zBig->y + qBig->y;
 	    zBig->x = qBig->x + (sqrBig.x - sqrBig.y * 3.0) * zBig->x.BigAbs();
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
     /****************************************************************
 	4th Order Fractals:
@@ -332,7 +332,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    realimagBig = zBig->x * zBig->y;
 	    zBig->y = realimagBig * 4.0 * (sqrBig.x - sqrBig.y) + qBig->y;
 	    zBig->x = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0 + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 20:					// Mandelbar 4th Order
 	    sqrBig.x = zBig->x.BigSqr();
@@ -340,7 +340,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    realimagBig = zBig->x * zBig->y;
 	    zBig->y = -realimagBig * 4.0 * (sqrBig.x - sqrBig.y) + qBig->y;
 	    zBig->x = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0 + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
     /****************************************************************
 	***Straight ABS Variations (16)
@@ -352,28 +352,28 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    realimagBig = zBig->x * zBig->y;
 	    zBig->y = realimagBig.BigAbs() * 4.0 * (sqrBig.x - sqrBig.y) + qBig->y;
 	    zBig->x = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0 + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 22:					// Burning Ship 4th Partial Imag
 	    sqrBig.x = zBig->x.BigSqr();
 	    sqrBig.y = zBig->y.BigSqr();
 	    zBig->y = zBig->x * zBig->y.BigAbs() * 4.0 * (sqrBig.x - sqrBig.y) + qBig->y;
 	    zBig->x = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0 + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 23:					// Burning Ship 4th Partial Real
 	    sqrBig.x = zBig->x.BigSqr();
 	    sqrBig.y = zBig->y.BigSqr();
 	    zBig->y = zBig->x.BigAbs() * zBig->y * 4.0 * (sqrBig.x - sqrBig.y) + qBig->y;
 	    zBig->x = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0 + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 24:					// Burning Ship 4th Partial Real Mbar
 	    sqrBig.x = zBig->x.BigSqr();
 	    sqrBig.y = zBig->y.BigSqr();
 	    zBig->y = -zBig->x.BigAbs() * zBig->y * 4.0 * (sqrBig.x - sqrBig.y) + qBig->y;
 	    zBig->x = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0 + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 25:					// Celtic Burning Ship 4th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -382,7 +382,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0;
 	    zBig->y = realimagBig.BigAbs() * 4.0 * (sqrBig.x - sqrBig.y) + qBig->y;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 26:					// Celtic Burning Ship 4th Partial Imag
 	    sqrBig.x = zBig->x.BigSqr();
@@ -390,7 +390,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0;
 	    zBig->y = zBig->x * zBig->y.BigAbs() * 4.0 * (sqrBig.x - sqrBig.y) + qBig->y;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 27:					// Celtic Burning Ship 4th Partial Real
 	    sqrBig.x = zBig->x.BigSqr();
@@ -398,7 +398,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0;
 	    zBig->y = zBig->x.BigAbs() * zBig->y * 4.0 * (sqrBig.x - sqrBig.y) + qBig->y;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 28:					// Celtic Burning Ship 4th Partial Real Mbar
 	    sqrBig.x = zBig->x.BigSqr();
@@ -406,7 +406,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0;
 	    zBig->y = -zBig->x.BigAbs() * zBig->y * 4.0 * (sqrBig.x - sqrBig.y) + qBig->y;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 29:					// Buffalo 4th Order
 	    sqrBig.x = zBig->x.BigSqr();
@@ -415,7 +415,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = tBig.BigAbs() * 4.0 + qBig->y;
 	    tBig = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 30:					// Buffalo 4th Partial Imag
 	    sqrBig.x = zBig->x.BigSqr();
@@ -423,7 +423,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = zBig->x * zBig->y * (sqrBig.x - sqrBig.y);
 	    zBig->y = tBig.BigAbs() * 4.0 + qBig->y;
 	    zBig->x = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0 + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 31:					// Celtic (Buffalo 4th Partial Real)
 	    sqrBig.x = zBig->x.BigSqr();
@@ -431,7 +431,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = zBig->x * zBig->y * (sqrBig.x - sqrBig.y) * 4.0 + qBig->y;
 	    tBig = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 32:					// Celtic 4th Mbar
 	    sqrBig.x = zBig->x.BigSqr();
@@ -439,7 +439,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = -zBig->x * zBig->y * (sqrBig.x - sqrBig.y) * 4.0 + qBig->y;
 	    tBig = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
     /**************************************************************************
 	Quasi ABS Variations (10)
@@ -451,7 +451,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = (sqrBig.x - sqrBig.y);
 	    zBig->y = -zBig->x * zBig->y * tBig.BigAbs() * 4.0 + qBig->y;
 	    zBig->x = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0 + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 34:					// False Quasi Heart 4th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -459,7 +459,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = (sqrBig.x - sqrBig.y);
 	    zBig->y = zBig->x * zBig->y * tBig.BigAbs() * 4.0 + qBig->y;
 	    zBig->x = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0 + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 35:					// Celtic False Quasi Perpendicular 4th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -468,7 +468,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = -zBig->x * zBig->y * tBig.BigAbs() * 4.0 + qBig->y;
 	    tBig = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 36:					// Celtic False Quasi Heart 4th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -477,7 +477,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = zBig->x * zBig->y * tBig.BigAbs() * 4.0 + qBig->y;
 	    tBig = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 37:					// Imag Quasi Perpendicular / Heart 4th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -485,7 +485,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = (sqrBig.x - sqrBig.y);
 	    zBig->y = zBig->x * zBig->y.BigAbs() * tBig.BigAbs() * 4.0 + qBig->y;
 	    zBig->x = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0 + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 38:					// Real Quasi Perpendicular 4th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -493,7 +493,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = (sqrBig.x - sqrBig.y);
 	    zBig->y = -zBig->x.BigAbs() * zBig->y * tBig.BigAbs() * 4.0 + qBig->y;
 	    zBig->x = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0 + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 39:					// Real Quasi Heart 4th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -501,7 +501,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = (sqrBig.x - sqrBig.y);
 	    zBig->y = zBig->x.BigAbs() * zBig->y * tBig.BigAbs() * 4.0 + qBig->y;
 	    zBig->x = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0 + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 40:					// Celtic Imag Quasi Perpendicular / Heart 4th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -510,7 +510,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = zBig->x * zBig->y.BigAbs() * tBig.BigAbs() * 4.0 + qBig->y;
 	    tBig = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 41:					// Celtic Real Quasi Perpendicular 4th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -519,7 +519,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = -zBig->x.BigAbs() * zBig->y * tBig.BigAbs() * 4.0 + qBig->y;
 	    tBig = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 42:					// Celtic Real Quasi Heart 4th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -528,7 +528,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = zBig->x.BigAbs() * zBig->y * tBig.BigAbs() * 4.0 + qBig->y;
 	    tBig = sqrBig.x * sqrBig.x + sqrBig.y * sqrBig.y - sqrBig.x * sqrBig.y * 6.0;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
     /****************************************************************
 	5th Order Fractals:
@@ -542,7 +542,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    RealImagSqrBig = sqrBig.x * sqrBig.y;
 	    zBig->y = (sqrsqrBig.x * 5.0 - RealImagSqrBig * 10.0 + sqrsqrBig.y) * zBig->y + qBig->y;
 	    zBig->x = (sqrsqrBig.x - RealImagSqrBig * 10.0 + sqrsqrBig.y * 5.0) * zBig->x + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 44:					// Mandelbar 5th (Vertical)
 	    sqrBig.x = zBig->x.BigSqr();
@@ -552,7 +552,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    RealImagSqrBig = sqrBig.x * sqrBig.y;
 	    zBig->y = -(sqrsqrBig.x * 5.0 - RealImagSqrBig * 10.0 + sqrsqrBig.y) * zBig->y + qBig->y;
 	    zBig->x = (sqrsqrBig.x - RealImagSqrBig * 10.0 + sqrsqrBig.y * 5.0) * zBig->x + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 45:					// Mandelbar 5th (horizontal)
 	    sqrBig.x = zBig->x.BigSqr();
@@ -562,7 +562,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    RealImagSqrBig = sqrBig.x * sqrBig.y;
 	    zBig->y = (sqrsqrBig.x * 5.0 - RealImagSqrBig * 10.0 + sqrsqrBig.y) * zBig->y + qBig->y;
 	    zBig->x = -(sqrsqrBig.x - RealImagSqrBig * 10.0 + sqrsqrBig.y * 5.0) * zBig->x + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 46:					// Burning Ship 5th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -572,7 +572,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    RealImagSqrBig = sqrBig.x * sqrBig.y;
 	    zBig->y = (sqrsqrBig.x * 5.0 - RealImagSqrBig * 10.0 + sqrsqrBig.y) * zBig->y.BigAbs() + qBig->y;
 	    zBig->x = (sqrsqrBig.x - RealImagSqrBig * 10.0 + sqrsqrBig.y * 5.0) * zBig->x.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 47:					// Buffalo 5th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -584,7 +584,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = tBig.BigAbs() + qBig->y;
 	    tBig = (sqrsqrBig.x - RealImagSqrBig * 10.0 + sqrsqrBig.y * 5.0) * zBig->x;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 48:					// Burning Ship 5th Partial
 	    sqrBig.x = zBig->x.BigSqr();
@@ -594,7 +594,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    RealImagSqrBig = sqrBig.x * sqrBig.y;
 	    zBig->y = (sqrsqrBig.x * 5.0 - RealImagSqrBig * 10.0 + sqrsqrBig.y) * zBig->y + qBig->y;
 	    zBig->x = (sqrsqrBig.x - RealImagSqrBig * 10.0 + sqrsqrBig.y * 5.0) * zBig->x.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 49:					// Burning Ship 5th Partial Mbar
 	    sqrBig.x = zBig->x.BigSqr();
@@ -604,7 +604,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    RealImagSqrBig = sqrBig.x * sqrBig.y;
 	    zBig->y = -(sqrsqrBig.x * 5.0 - RealImagSqrBig * 10.0 + sqrsqrBig.y) * zBig->y + qBig->y;
 	    zBig->x = (sqrsqrBig.x - RealImagSqrBig * 10.0 + sqrsqrBig.y * 5.0) * zBig->x.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 50:					// Celtic 5th (Buffalo 5th Partial)
 	    sqrBig.x = zBig->x.BigSqr();
@@ -615,7 +615,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = (sqrsqrBig.x * 5.0 - RealImagSqrBig * 10.0 + sqrsqrBig.y) * zBig->y + qBig->y;
 	    tBig = (sqrsqrBig.x - RealImagSqrBig * 10.0 + sqrsqrBig.y * 5.0) * zBig->x;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 51:					// Celtic 5th Mbar
 	    sqrBig.x = zBig->x.BigSqr();
@@ -626,7 +626,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    zBig->y = -(sqrsqrBig.x * 5.0 - RealImagSqrBig * 10.0 + sqrsqrBig.y) * zBig->y + qBig->y;
 	    tBig = (sqrsqrBig.x - RealImagSqrBig * 10.0 + sqrsqrBig.y * 5.0) * zBig->x;
 	    zBig->x = tBig.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 52:					// Quazi Burning Ship 5th (BS/Buffalo Hybrid)
 	    sqrBig.x = zBig->x.BigSqr();
@@ -637,7 +637,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = (sqrsqrBig.x * 5.0 - RealImagSqrBig * 10.0 + sqrsqrBig.y) * zBig->y;
 	    zBig->y = -tBig.BigAbs() + qBig->y;
 	    zBig->x = (sqrsqrBig.x - RealImagSqrBig * 10.0 + sqrsqrBig.y * 5.0) * zBig->x.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 53:					// Quazi Perpendicular 5th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -648,7 +648,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = (sqrsqrBig.x * 5.0 - RealImagSqrBig * 10.0 + sqrsqrBig.y);
 	    zBig->y = -tBig.BigAbs() * zBig->y + qBig->y;
 	    zBig->x = (sqrsqrBig.x - RealImagSqrBig * 10.0 + sqrsqrBig.y * 5.0) * zBig->x.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 54:					// Quazi Heart 5th
 	    sqrBig.x = zBig->x.BigSqr();
@@ -659,7 +659,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    tBig = (sqrsqrBig.x * 5.0 - RealImagSqrBig * 10.0 + sqrsqrBig.y);
 	    zBig->y = tBig.BigAbs() * zBig->y + qBig->y;
 	    zBig->x = (sqrsqrBig.x - RealImagSqrBig * 10.0 + sqrsqrBig.y * 5.0) * zBig->x.BigAbs() + qBig->x;
-	    return (sqrBig.x + sqrBig.y > BigBailout);
+	    return BigBailoutTest(zBig, sqrBig);
 
 	case 55:					// SimonBrot
 /**************************************************************************
@@ -683,7 +683,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    else
 		sqrtzBig = 1.0;
 	    *zBig = tempzBig.CPolynomial(*degree / 2) * sqrtzBig + *qBig;
-	    return (zBig->x.BigSqr() + zBig->y.BigSqr() > BigBailout);
+	    return BigFractintBailoutTest(zBig);
 	    }
 
 	case 56:					// SimonBrot2
@@ -703,7 +703,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    else
 		sqrtzBig = 1.0;
 	    *zBig = zBig->CPolynomial(*degree / 2) * sqrtzBig * tempzBig + *qBig;
-	    return (zBig->x.BigSqr() + zBig->y.BigSqr() > BigBailout);
+	    return BigFractintBailoutTest(zBig);
 	    }
 
 	case 57:					// Kung Fu Panda
@@ -720,7 +720,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 	    t2.y = t1.y.BigAbs();
 	    *zBig = t2 * t2 - *qBig;
 
-	    return (zBig->x.BigSqr() + zBig->y.BigSqr() > BigBailout);
+	    return BigFractintBailoutTest(zBig);
 	    }
 
 	case 58:					// HPDZ Buffalo
@@ -743,8 +743,8 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 //	    ShowBignum(zBig->x, " CPixel Inside Buffalo Z.x");
 //	    ShowBignum(zBig->y, "CPixel Inside Buffalo Z.y");
 //	    ShowBignum(BigBailout, "CPixel bailout");
-	    return (zBig->x.BigSqr() + zBig->y.BigSqr() > BigBailout);
-	}
+	    return BigFractintBailoutTest(zBig);
+	    }
 
 #ifdef SZEGEDBUTTERFLY
 	case 59:					// SzegediButterfly 1

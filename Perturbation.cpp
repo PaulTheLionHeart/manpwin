@@ -196,20 +196,20 @@ int	InitPerturbation(void)
 
     if (NumberThreads > MAXTHREADS)
 	NumberThreads = MAXTHREADS;
-    if (InsideMethod > 0 || OutsideMethod > 0 || biomorph >= 0)					// can't have it both ways
+    if (/*InsideMethod > 0 || */OutsideMethod > 0 || biomorph >= 0)					// can't have it both ways
 	SlopeType = NOSLOPE;
     if (NumberThreads <= 0)									// no multi-threading
 	BigCentrex = BigHor + (BigWidth * ((double)Dib.DibWidth / (double)(2 * Dib.DibHeight)));
     BigCentrey = -(BigVert + (BigWidth / 2.0));							// negative because of screen layout
-    if (InsideMethod >= TIERAZONFILTERS)
+    if (OutsideMethod >= TIERAZONFILTERS)
 	for (i = 0; i < NumberThreads; i++)
-	    TZfilter[i].InitFilter(InsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
+	    TZfilter[i].InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
 //    if (BigNumFlag)
 //	mandel_width = mpfr_get_d(BigWidth.x, MPFR_RNDN);
     if (NumberThreads <= 0)									// no multi-threading
 	{
-	if (InsideMethod >= TIERAZONFILTERS)
-	    TZfilter[0].InitFilter(InsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
+	if (OutsideMethod >= TIERAZONFILTERS)
+	    TZfilter[0].InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
 	frameCalculator[0].initialiseCalculateFrame(&Dib, &Slope, (int)Dib.DibWidth, (int)Dib.DibHeight, threshold, BigCentrex, BigCentrey, BigWidth / 2, decimals, &TZfilter[0], GlobalHwnd, 0, wpixels, param, potparam, 
 			PaletteShift, &PlotType, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, LightHeight, PertColourMethod, PalOffset, IterDiv);
 	}

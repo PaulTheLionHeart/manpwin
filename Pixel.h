@@ -225,8 +225,9 @@ class CPixel
 	int	DoBigFilter(int method, int hooper);
 	BigComplex	BigInvertz2(BigComplex  & Cmplx1);
 	bool	BailoutTest(Complex *z, Complex SqrZ);
+	bool	BigBailoutTest(BigComplex *z, BigComplex SqrZ);
 	bool	FractintBailoutTest(Complex *z);
-
+	bool	BigFractintBailoutTest(BigComplex *z);
 	// some fractal routines
 	int	InitFunctions(WORD type, Complex *z, Complex *q);
 	int	RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration);

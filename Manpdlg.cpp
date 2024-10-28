@@ -487,13 +487,13 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 		CheckRadioButton(hDlg, IDC_BAIL_MOD, IDC_MANR, tempParam);
 
 		tempInsideMethod = InsideMethod;
-		// can't access tierazon filter/colour methods, so set the radio button to TIERAZONFILTERS or TIERAZONCOLOURS
-		if (InsideMethod > TIERAZONFILTERS)
-		    tempInsideMethod = (InsideMethod > TIERAZONCOLOURS) ? TIERAZONCOLOURS : TIERAZONFILTERS;
 	        switch (tempInsideMethod)
 		    {
 		    case NONE:
 			tempParam = IDC_NO_INSIDE;
+			break;
+		    case ZMAG:
+			tempParam = IDC_ZMAG;
 			break;
 		    case BOF60:
 			tempParam = IDC_BOF60;
@@ -501,31 +501,16 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 		    case BOF61:
 			tempParam = IDC_BOF61;
 			break;
-		    case ZMAG:
-			tempParam = IDC_ZMAG;
-			break;
 //		    case ATAN:
 //			tempParam = IDC_ATAN;
 //			break;
-		    case POTENTIAL:
-			tempParam = IDC_POTENTIAL;
-			break;
-		    case EPSCROSS:
-			tempParam = IDC_EPSCR;
-			break;
-		    case STARTRAIL:
-			tempParam = IDC_STARTRAILS;
-			break;
-		    case TIERAZONFILTERS:
-			tempParam = IDC_TIERAZONFILTERS;
-			break;
-		    case TIERAZONCOLOURS:
-			tempParam = IDC_TIERAZONCOLOURS;
-			break;
 		    }
-		CheckRadioButton(hDlg, IDC_NO_INSIDE, IDC_TIERAZONCOLOURS, tempParam);
+		CheckRadioButton(hDlg, IDC_NO_INSIDE, IDC_BOF61, tempParam);
 
 		tempOutsideMethod = OutsideMethod;
+		// can't access tierazon filter/colour methods, so set the radio button to TIERAZONFILTERS or TIERAZONCOLOURS
+		if (OutsideMethod > TIERAZONFILTERS)
+		    tempOutsideMethod = (OutsideMethod > TIERAZONCOLOURS) ? TIERAZONCOLOURS : TIERAZONFILTERS;
 		switch (tempOutsideMethod)
 		    {
 		    case NONE:
@@ -552,9 +537,24 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 		    case ATAN:
 			tempParam = IDC_ATAN;
 			break;
+		    case POTENTIAL:
+			tempParam = IDC_POTENTIAL;
+			break;
+		    case EPSCROSS:
+			tempParam = IDC_EPSCR;
+			break;
+		    case STARTRAIL:
+			tempParam = IDC_STARTRAILS;
+			break;
+		    case TIERAZONFILTERS:
+			tempParam = IDC_TIERAZONFILTERS;
+			break;
+		    case TIERAZONCOLOURS:
+			tempParam = IDC_TIERAZONCOLOURS;
+			break;
 		    }
 
-		CheckRadioButton(hDlg, IDC_NO_OUTSIDE, IDC_PERT2, tempParam);
+		CheckRadioButton(hDlg, IDC_NO_OUTSIDE, IDC_TIERAZONCOLOURS, tempParam);
 		CheckRadioButton(hDlg, IDC_CARTESIAN, IDC_CONICAL, IDC_CARTESIAN + CoordSystem);
 
 		temp = calcmode;
@@ -821,15 +821,13 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 		    case IDC_BOF60:
 		    case IDC_BOF61:
 		    case IDC_ZMAG:
-		    case IDC_EPSCR:
-		    case IDC_POTENTIAL:
-		    case IDC_STARTRAILS:
-		    case IDC_TIERAZONFILTERS:
-		    case IDC_TIERAZONCOLOURS:
 		        switch ((int) LOWORD(wParam))
 			    {
 			    case IDC_NO_INSIDE:
 				tempInsideMethod = NONE;
+				break;
+			    case IDC_ZMAG:
+				tempInsideMethod = ZMAG;
 				break;
 			    case IDC_BOF60:
 				tempInsideMethod = BOF60;
@@ -837,26 +835,8 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 			    case IDC_BOF61:
 				tempInsideMethod = BOF61;
 				break;
-			    case IDC_ZMAG:
-				tempInsideMethod = ZMAG;
-				break;
-			    case IDC_EPSCR:
-				tempInsideMethod = EPSCROSS;
-				break;
-			    case IDC_POTENTIAL:
-				tempInsideMethod = POTENTIAL;
-				break;
-			    case IDC_STARTRAILS:
-				tempInsideMethod = STARTRAIL;
-				break;
-			    case IDC_TIERAZONFILTERS:
-				tempInsideMethod = TIERAZONFILTERS;
-				break;
-			    case IDC_TIERAZONCOLOURS:
-				tempInsideMethod = TIERAZONCOLOURS;
-				break;
 			    }
-			CheckRadioButton(hDlg, IDC_NO_INSIDE, IDC_TIERAZONCOLOURS, (int) LOWORD(wParam));
+			CheckRadioButton(hDlg, IDC_NO_INSIDE, IDC_BOF61, (int) LOWORD(wParam));
 		        return (DLGPROC) TRUE ;
 
 		    case IDC_NO_OUTSIDE:
@@ -867,6 +847,11 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 		    case IDC_SUM:
 		    case IDC_PERT1:
 		    case IDC_PERT2:
+		    case IDC_EPSCR:
+		    case IDC_POTENTIAL:
+		    case IDC_STARTRAILS:
+		    case IDC_TIERAZONFILTERS:
+		    case IDC_TIERAZONCOLOURS:
 			switch ((int)LOWORD(wParam))
 			    {
 			    case IDC_NO_OUTSIDE:
@@ -893,8 +878,23 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 			    case IDC_ATAN:
 				tempOutsideMethod = ATAN;
 				break;
+			    case IDC_EPSCR:
+				tempOutsideMethod = EPSCROSS;
+				break;
+			    case IDC_POTENTIAL:
+				tempOutsideMethod = POTENTIAL;
+				break;
+			    case IDC_STARTRAILS:
+				tempOutsideMethod = STARTRAIL;
+				break;
+			    case IDC_TIERAZONFILTERS:
+				tempOutsideMethod = TIERAZONFILTERS;
+				break;
+			    case IDC_TIERAZONCOLOURS:
+				tempOutsideMethod = TIERAZONCOLOURS;
+				break;
 			    }
-			CheckRadioButton(hDlg, IDC_NO_OUTSIDE, IDC_PERT2, (int)LOWORD(wParam));
+			CheckRadioButton(hDlg, IDC_NO_OUTSIDE, IDC_TIERAZONCOLOURS, (int)LOWORD(wParam));
 			return (DLGPROC)TRUE;
 
 		    case IDC_NORMAL:

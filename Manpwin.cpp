@@ -1486,10 +1486,10 @@ WNDPROC MenuCommand (HWND hwnd, UINT message, UINT wParam, LONG lParam)
 		    return 0;
 		else
 		    {
-		    if (InsideMethod == TIERAZONFILTERS)
+		    if (OutsideMethod == TIERAZONFILTERS)
 			if (DialogBox (hInst, "SelectTierazonDlg", hwnd, (DLGPROC)SelectFilterDlg) == FALSE)
 			    return 0;
-		    if (InsideMethod == TIERAZONCOLOURS)
+		    if (OutsideMethod == TIERAZONCOLOURS)
 			if (DialogBox (hInst, "SelectTierazonDlg", hwnd, (DLGPROC)SelectColourDlg) == FALSE)
 			    return 0;
 		    TrueCol.FillPalette(REPEAT, TrueCol.PalettePtr, threshold);
@@ -2511,6 +2511,7 @@ DLGPROC FAR PASCAL StatusInfoDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
     char	PassStr[100];
     char	FinishedStr[100];
     char	PrecisionStr[100];
+    char	ParamStr[250];
     char	TempStr[200];
     char	FilterString[80];
     char	FractalType[1200];
@@ -2597,8 +2598,17 @@ DLGPROC FAR PASCAL StatusInfoDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
     else
 	wsprintf(FractalType, "Fractal: %s, Subtype = %d", GetFractalName(), subtype);
 
-    sprintf(StatusString, "%s\r\nPixel [%d][%d], %s%s\r\n%s\r\nThreshold: %ld\r\nArith=%s\r\nParams: \r\n0: %f\r\n1: %f\r\n2: %f\r\n3: %f\r\n4: %f\r\n5: %f\r\n6: %f\r\n7: %f\r\n8: %f\r\n9: %f\r\nBailout: %f\r\nImage Size: [%d][%d]",
-	FractalType, col, row, PassStr, FinishedStr, PositionStr, threshold, PrecisionStr, param[0], param[1], param[2], param[3], param[4], param[5], param[6], param[7], param[8], param[9], rqlim, xdots, ydots);
+    sprintf(ParamStr, "Params: ");
+    for (int i = 0; i < NUMPARAM; i++)
+	{
+	if ((fabs(param[i]) < 0.00001 || fabs(param[i]) > 100000.0) && param[i] != 0.0)
+	    sprintf(TempStr, "\r\n%d: %-12.9e", i, param[i]);
+	else
+	    sprintf(TempStr, "\r\n%d: %-12.9f", i, param[i]);
+	strcat(ParamStr, TempStr);
+	}
+    sprintf(StatusString, "%s\r\nPixel [%d][%d], %s%s\r\n%s\r\nThreshold: %ld\r\nArith=%s\r\n%s\r\nBailout: %f\r\nImage Size: [%d][%d]",
+	FractalType, col, row, PassStr, FinishedStr, PositionStr, threshold, PrecisionStr, ParamStr, rqlim, xdots, ydots);
     if (Fractal.NumFunct == 1)
 	sprintf(SubData, "\r\nFn = %s", Fractal.Fn1);
     else if (Fractal.NumFunct == 2 && type != OSCILLATORS)			// we use NumFunct to display dimensions
@@ -2687,9 +2697,9 @@ DLGPROC FAR PASCAL StatusInfoDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
 	}
     if (InsideMethod > NONE || OutsideMethod > NONE)
 	{
-	if (InsideMethod > TIERAZONCOLOURS)
+	if (OutsideMethod > TIERAZONCOLOURS)
 	    sprintf(FilterString, "\r\nTZColour = %d, ", ColourMethod);
-	else if (InsideMethod > TIERAZONFILTERS)
+	else if (OutsideMethod > TIERAZONFILTERS)
 	    sprintf(FilterString, "\r\nTZFilter = %d, Fractal Dimension Options = %d, ", FilterType, nFDOption);
 	else if (InsideMethod > NONE)
 	    sprintf(FilterString, "Filter=%d, ", InsideMethod);

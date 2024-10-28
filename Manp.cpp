@@ -441,9 +441,9 @@ void	CreateFractalName(BOOL UseszAppName, char *Name)
 
     if (InsideMethod > NONE || OutsideMethod > NONE)
 	{
-	if (InsideMethod > TIERAZONCOLOURS)
+	if (OutsideMethod > TIERAZONCOLOURS)
 	    sprintf(FilterString, "TZColour=%d, ", ColourMethod);
-	else if (InsideMethod > TIERAZONFILTERS)
+	else if (OutsideMethod > TIERAZONFILTERS)
 	    sprintf(FilterString, "TZFilter=%d, ", FilterType);
 	else if (InsideMethod > NONE)
 	    sprintf(FilterString, "Filter=%d, ", InsideMethod);

@@ -447,10 +447,11 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 
 	case 83:					// Quartets, t=0; z1=z; z=z*z*z-t*t*t+c; z=z1
 	    z2 = 0;
+	    *degree = (int)param[0];
 	    if (!juliaflag)
 		*z = *q;
-	    z->x += param[0];
-	    z->y += param[1];
+	    z->x += param[1];
+	    z->y += param[2];
 	    break;
 
 	case 84:					// Quartets, t=0; z1=z; z=z*z*z*z-t*t*t*t+c; t=z1
@@ -1391,7 +1392,10 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 83:					// Quartets, t=0; z1=z; z=z*z*z-t*t*t+c; z=z1
 	    z1 = *z;
-	    *z = z->CCube() - z2.CCube() + *q;
+	    a = z->CPolynomial(*degree) + *q;
+	    b = z2.CPolynomial(*degree);	// global z2 used for t
+	    *z = a - b;
+//	    *z = z->CCube() - z2.CCube() + *q;
 	    z2 = z1;
 	    //    z=z*z*z-t*t*t+c;
 	    //    t=z1;
