@@ -240,7 +240,6 @@ int	GenerateFractalFrame(HWND hwnd, char *FileName, int TotalFrames, int ThisFra
     char	s[MAXLINE];
     char	buf[MAXDATALINE]; 
 
-    BigNumFlag = FALSE;					// we are starting at the shallow end of the pool
     user_data(hwnd);
     if (time_to_quit)
 	{
@@ -251,7 +250,8 @@ int	GenerateFractalFrame(HWND hwnd, char *FileName, int TotalFrames, int ThisFra
 
     if (!ParamAnimation)
 	{
-	if (fgets(buf, MAXDATALINE, fp) == NULL) 
+	BigNumFlag = FALSE;					// we are starting at the shallow end of the pool
+	if (fgets(buf, MAXDATALINE, fp) == NULL)
 	    return ENDOFSCRIPT;
 	if (GetParamData(hwnd, FileName, buf, SaveFileOrig, FALSE) < 0)
 	    return -1;
@@ -772,13 +772,18 @@ void	UpdateAnimParamValues(void)
     if (!ParamAnimation)	// if we got here by mistake, let's get outa here
 	return;
     if (ParamAnimation)
-	param[ParamNumber] += divisor;
-    if (type == PERTURBATION && ParamNumber > 9)
+	{
+	if (ParamNumber == 10)
+	    rqlim += divisor;
+	else
+	    param[ParamNumber] += divisor;
+	}
+    if (type == PERTURBATION && ParamNumber > 10)
 	{
 	switch (ParamNumber)
 	    {
-	    case 10:	// can't animate Slope Type
-		break;
+//	    case 10:	// can't animate Slope Type
+//		break;	// now used for rqlim (bailout)
 	    case 11:
 		lightDirectionDegrees += divisor;
 		break;
@@ -810,7 +815,8 @@ void	InitAnimParamValues(void)
 	    switch (ParamNumber)
 		{
 		case 10:	// can't animate Slope Type
-		    break;
+		    rqlim = StartRate;
+		    break;	// now used for rqlim (bailout)
 		case 11:	
 		    lightDirectionDegrees = StartRate;
 		    break;
@@ -1034,7 +1040,12 @@ int	RunScript(HWND hwnd, char *FileName)
 		}
 	    }
 	if (WriteMemFrames)				// write frame to memory
-	    LoadAnimationFrame(buf, MoreInfo, CurrentFrame, param[ParamNumber], ParamAnimation, (OscAnimProc == MORPHING));
+	    {
+	    if (ParamNumber == 10)
+		LoadAnimationFrame(buf, MoreInfo, CurrentFrame, rqlim, ParamAnimation, (OscAnimProc == MORPHING));
+	    else
+		LoadAnimationFrame(buf, MoreInfo, CurrentFrame, param[ParamNumber], ParamAnimation, (OscAnimProc == MORPHING));
+	    }
 	CurrentFrame++;
 	if (CurrentFrame >= frames || time_to_break || CurrentFrame >= MAXANIM)
 	    {

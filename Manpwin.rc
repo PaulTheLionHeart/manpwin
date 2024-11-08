@@ -117,7 +117,7 @@ FONT 8, "MS Sans Serif"
     CTEXT           "Copyright © Paul de Leeuw Computers\nhttps://www.deleeuw.com.au", IDC_STATIC, 8, 53, 144, 15, SS_CENTER
     PUSHBUTTON      "OK", IDOK, 36, 89, 88, 14, WS_GROUP | NOT WS_TABSTOP
     CTEXT           "ABN 72 360 822 562", IDC_STATIC, 37, 75, 86, 8, SS_CENTER
-    CTEXT           "28/10/2024", IDC_STATIC, 55, 41, 40, 8, SS_CENTER
+    CTEXT           "08/11/2024", IDC_STATIC, 55, 41, 40, 8, SS_CENTER
 }
 
 
@@ -1614,37 +1614,40 @@ FONT 8, "Ms Shell Dlg"
     LTEXT           "Final value of Param", IDC_STATIC, 133, 20, 65, 8, SS_LEFT
     LTEXT           "Parameter number to animate", IDC_STATIC, 208, 20, 93, 8, SS_LEFT
     GROUPBOX        "Current Parameter Values", IDC_STATIC, 20, 57, 300, 168
-    EDITTEXT        ID_FRACPARAM1, 238, 71, 60, 12
-    EDITTEXT        ID_FRACPARAM2, 238, 86, 60, 12
-    EDITTEXT        ID_FRACPARAM3, 238, 101, 60, 12
-    EDITTEXT        ID_FRACPARAM4, 238, 116, 60, 12
-    EDITTEXT        ID_FRACPARAM5, 238, 131, 60, 12
-    EDITTEXT        ID_FRACPARAM6, 238, 146, 60, 12
-    EDITTEXT        ID_FRACPARAM7, 238, 161, 60, 12
-    EDITTEXT        ID_FRACPARAM8, 238, 176, 60, 12
-    EDITTEXT        ID_FRACPARAM9, 238, 191, 60, 12
-    EDITTEXT        ID_FRACPARAM10, 238, 206, 60, 12
-    LTEXT           "", ID_FRACPARTX1, 45, 75, 178, 8, NOT WS_GROUP | SS_LEFT
-    LTEXT           "", ID_FRACPARTX2, 45, 89, 178, 8, NOT WS_GROUP | SS_LEFT
-    LTEXT           "", ID_FRACPARTX3, 45, 103, 178, 8, NOT WS_GROUP | SS_LEFT
-    LTEXT           "", ID_FRACPARTX4, 45, 117, 178, 8, NOT WS_GROUP | SS_LEFT
-    LTEXT           "", ID_FRACPARTX5, 45, 131, 178, 8, NOT WS_GROUP | SS_LEFT
-    LTEXT           "", ID_FRACPARTX6, 45, 145, 178, 8, NOT WS_GROUP | SS_LEFT
-    LTEXT           "", ID_FRACPARTX7, 45, 160, 178, 8, NOT WS_GROUP | SS_LEFT
-    LTEXT           "", ID_FRACPARTX8, 45, 176, 178, 8, NOT WS_GROUP | SS_LEFT
-    LTEXT           "", ID_FRACPARTX9, 45, 190, 178, 8, NOT WS_GROUP | SS_LEFT
-    LTEXT           "", ID_FRACPARTX10, 45, 205, 178, 8, NOT WS_GROUP | SS_LEFT
-    LTEXT           "0", IDC_STATIC, 31, 73, 8, 8, SS_LEFT
-    LTEXT           "1", IDC_STATIC, 31, 89, 8, 8, SS_LEFT
-    LTEXT           "2", IDC_STATIC, 31, 103, 8, 8, SS_LEFT
-    LTEXT           "3", IDC_STATIC, 31, 117, 8, 8, SS_LEFT
-    LTEXT           "5", IDC_STATIC, 31, 146, 8, 8, SS_LEFT
-    LTEXT           "4", IDC_STATIC, 31, 131, 8, 8, SS_LEFT
-    LTEXT           "6", IDC_STATIC, 31, 162, 8, 8, SS_LEFT
-    LTEXT           "7", IDC_STATIC, 31, 176, 8, 8, SS_LEFT
-    LTEXT           "9", IDC_STATIC, 31, 205, 8, 8, SS_LEFT
-    LTEXT           "8", IDC_STATIC, 31, 190, 8, 8, SS_LEFT
+    EDITTEXT        ID_FRACPARAM1, 238, 70, 60, 12
+    EDITTEXT        ID_FRACPARAM2, 238, 84, 60, 12
+    EDITTEXT        ID_FRACPARAM3, 238, 98, 60, 12
+    EDITTEXT        ID_FRACPARAM4, 238, 112, 60, 12
+    EDITTEXT        ID_FRACPARAM5, 238, 126, 60, 12
+    EDITTEXT        ID_FRACPARAM6, 238, 140, 60, 12
+    EDITTEXT        ID_FRACPARAM7, 238, 154, 60, 12
+    EDITTEXT        ID_FRACPARAM8, 238, 168, 60, 12
+    EDITTEXT        ID_FRACPARAM9, 238, 182, 60, 12
+    EDITTEXT        ID_FRACPARAM10, 238, 196, 60, 12
+    LTEXT           "", ID_FRACPARTX1, 48, 74, 178, 8, NOT WS_GROUP | SS_LEFT
+    LTEXT           "", ID_FRACPARTX2, 45, 87, 178, 8, NOT WS_GROUP | SS_LEFT
+    LTEXT           "", ID_FRACPARTX3, 48, 100, 178, 8, NOT WS_GROUP | SS_LEFT
+    LTEXT           "", ID_FRACPARTX4, 48, 113, 178, 8, NOT WS_GROUP | SS_LEFT
+    LTEXT           "", ID_FRACPARTX5, 45, 126, 178, 8, NOT WS_GROUP | SS_LEFT
+    LTEXT           "", ID_FRACPARTX6, 48, 139, 178, 8, NOT WS_GROUP | SS_LEFT
+    LTEXT           "", ID_FRACPARTX7, 45, 153, 178, 8, NOT WS_GROUP | SS_LEFT
+    LTEXT           "", ID_FRACPARTX8, 48, 168, 178, 8, NOT WS_GROUP | SS_LEFT
+    LTEXT           "", ID_FRACPARTX9, 45, 181, 178, 8, NOT WS_GROUP | SS_LEFT
+    LTEXT           "", ID_FRACPARTX10, 48, 195, 178, 8, NOT WS_GROUP | SS_LEFT
+    LTEXT           "0", IDC_STATIC, 31, 72, 8, 8, SS_LEFT
+    LTEXT           "1", IDC_STATIC, 31, 87, 8, 8, SS_LEFT
+    LTEXT           "2", IDC_STATIC, 31, 100, 8, 8, SS_LEFT
+    LTEXT           "3", IDC_STATIC, 31, 113, 8, 8, SS_LEFT
+    LTEXT           "5", IDC_STATIC, 31, 140, 8, 8, SS_LEFT
+    LTEXT           "4", IDC_STATIC, 31, 126, 8, 8, SS_LEFT
+    LTEXT           "6", IDC_STATIC, 31, 155, 8, 8, SS_LEFT
+    LTEXT           "7", IDC_STATIC, 31, 168, 8, 8, SS_LEFT
+    LTEXT           "9", IDC_STATIC, 31, 195, 8, 8, SS_LEFT
+    LTEXT           "8", IDC_STATIC, 31, 181, 8, 8, SS_LEFT
     AUTOCHECKBOX    "Return?", IDC_RETURN, 190, 363, 42, 8, BS_MULTILINE
+    LTEXT           "10", IDC_STATIC, 31, 210, 9, 8, SS_LEFT
+    EDITTEXT        ID_FRACPARAM11, 238, 211, 60, 12
+    LTEXT           "Bailout Value", IDC_STATIC, 48, 209, 42, 8, SS_LEFT
 }
 
 

@@ -219,8 +219,9 @@ int	InitPerturbation(void)
 	for (i = 0; i < NumberThreads; i++)
 	    {
 	    BigCentrex = (BigHor + BigWidth * ScreenRatio * (double)i / (double)NumberThreads) + (BigWidth * ((double)Dib.DibWidth / (double)(2 * NumberThreads * Dib.DibHeight)));	// find centre of each slice
-	    frameCalculator[i].initialiseCalculateFrame(&Dib, &Slope, (int)Dib.DibWidth / NumberThreads, (int)Dib.DibHeight, threshold, BigCentrex, BigCentrey, BigWidth * ScreenRatio / (2 * NumberThreads), decimals, &TZfilter[i], GlobalHwnd, i, wpixels, param, potparam,
-			PaletteShift, &PlotType, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, LightHeight, PertColourMethod, PalOffset, IterDiv);
+	    frameCalculator[i].initialiseCalculateFrame(&Dib, &Slope, (int)Dib.DibWidth / NumberThreads, (int)Dib.DibHeight, threshold, BigCentrex, BigCentrey, BigWidth * ScreenRatio / (2 * NumberThreads), 
+			decimals, &TZfilter[i], GlobalHwnd, i, wpixels, param, potparam, PaletteShift, &PlotType, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, 
+			LightHeight, PertColourMethod, PalOffset, IterDiv);
 	    }
 	}
 

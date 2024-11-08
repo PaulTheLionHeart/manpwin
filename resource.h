@@ -577,6 +577,7 @@
 #define ID_FRACPARAM8                           3208
 #define ID_FRACPARAM9                           3209
 #define ID_FRACPARAM10                          3210
+#define ID_FRACPARAM11                          3211
 #define ID_FRACPARTX1                           3221
 #define ID_FRACPARTX2                           3222
 #define ID_FRACPARTX3                           3223

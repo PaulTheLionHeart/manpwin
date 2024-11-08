@@ -11,7 +11,7 @@
 #include	"resource.h"
 #include	"fractype.h"
 #include	"fractalp.h"
-//#include	"menu.h"
+#include	"BigDouble.h"
 #include	"anim.h"
 #include	"polygon.h"
 #include	"colour.h"
@@ -32,6 +32,7 @@ extern	char	*GenerateAnimFileName (char *, char *);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
 extern	char	*AnimData(void);
 extern	void	ConvertRGB2ASCII(BYTE, BYTE, BYTE, char *);
+extern	void	ConvertBignum2String(char *s, mpfr_t num);
 
 extern	long	threshold;
 extern	double	mandel_width;			/* width of display */
@@ -75,6 +76,13 @@ extern	CTrueCol    TrueCol;			// palette info
 extern	CFract	Fractal;			// current fractal stuff
 extern	COscProcess	OscProcess;
 
+// Big num declarations **********************************************************
+extern	int	decimals, precision;
+extern	BYTE	BigNumFlag;		// True if bignum used
+extern	BigDouble   BigHor, BigVert, BigWidth;
+extern	int getprecbf_mag(void);
+// Big num declarations **********************************************************
+
 /**************************************************************************
 	Parameter script generator
 **************************************************************************/
@@ -96,7 +104,25 @@ int	GenParameterScript(HWND hwnd, char *filename)
 	}
 
     fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimData());	// add quotes to filename to trap spaces in path
-    fprintf(out, " -c%24.24f,%24.24f,%24.24f\n", hor, vert, mandel_width);
+    if (BigNumFlag)
+	{
+	char	*s1, *s2, *s3;
+	s1 = new char[SIZEOF_BF_VARS];
+	s2 = new char[SIZEOF_BF_VARS];
+	s3 = new char[SIZEOF_BF_VARS];
+	ConvertBignum2String(s1, BigHor.x);
+	ConvertBignum2String(s2, BigVert.x);
+	ConvertBignum2String(s3, BigWidth.x);
+	*(s1 + decimals + 5) = '\0';					// no need to print too many decimals
+	*(s2 + decimals + 5) = '\0';
+	*(s3 + decimals + 5) = '\0';
+	fprintf(out, " -c%s,%s,%s\n", s1, s2, s3);
+	if (s1) { delete[] s1; s1 = NULL; }
+	if (s2) { delete[] s2; s2 = NULL; }
+	if (s3) { delete[] s3; s3 = NULL; }
+	}
+    else
+        fprintf(out, " -c%24.24f,%24.24f,%24.24g\n", hor, vert, mandel_width);
     fprintf(out, "Parameter Animation: %10.10f %10.10f %d %d %d\n", StartRate, EndRate, frames, ParamNumber, Return2Start);
     fprintf(out, "Palette=\n");
     for (i = 0, k = 0; i < threshold; i++, k++)
@@ -124,7 +150,7 @@ DLGPROC FAR PASCAL ParamAnimDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
      HWND		hCtrl;
      BOOL		TempCheck;
      BOOL		bTrans ;
-     char		s[10][100];
+     char		s[11][100];
      static	char	TempFile[MAX_PATH];
      static	char	TempStr[MAX_PATH];
      static	struct	OscillatorSpecificStuff	*DatabasePtr; 
@@ -212,6 +238,8 @@ DLGPROC FAR PASCAL ParamAnimDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 			    }
 			for (i = NumParams; i < NUMPARAM; i++)
 			    SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
+			sprintf(s[10], "%f", rqlim);
+			SetDlgItemText(hDlg, ID_FRACPARAM11, s[10]);
 		    }
 
 		SetUpFilename(ScriptFileName, "sci", "Param");
@@ -300,6 +328,8 @@ DLGPROC FAR PASCAL ParamAnimDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 			    GetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[i], 100);
 			    param[i] = atof(s[i]);
 			    }
+			GetDlgItemText(hDlg, ID_FRACPARAM11, s[10], 100);
+			rqlim = atof(s[10]);
 			if (type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
 			    {
 			    for (i = 0; i < NumVariables && i < 10; i++)	// pick up any changes to the initial variable values
@@ -310,6 +340,8 @@ DLGPROC FAR PASCAL ParamAnimDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 			    }
 
 			ParamNumber = GetDlgItemInt(hDlg, IDC_PARAM_NUM, &bTrans, TRUE);
+			if ((ParamNumber < 0 || ParamNumber > 10) && type != PERTURBATION)
+			    ParamNumber = 0;
 			if (type == PERTURBATION)
 			    {
 			    SlopeType = GetDlgItemInt(hDlg, ID_FRACVAR01, &bTrans, TRUE);
