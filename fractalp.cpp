@@ -4175,8 +4175,9 @@ char	*DirectFormula[] =
 //    text=1,elseif((x>0.225&&x<0.275||y>0.175)&&x>0.1&&x<0.4),text=1,elseif(x>0.45&&x<0.5),text=1,elseif(x<0.6||x>0.8||((y>-x1+1.215)&&(y<-x1+1.305))&&x>0.55&&x<0.85),text=1,elseif(x>1.025&&x<1.075||y>0.175&&x>0.9&&x<1.2),\
 //    text=1,endif,endif,z=1+(0.0,-0.65)/(pixel+(0.0,.75)):if(text==0),z2=z*z,z4=z2*z2,n=z4*z2-1,z=z-n/(6*z4*z),if(|n|>=0.0001),continue=1,else,continue=0,endif,endif,continue",
     "z=atanh(pixel):z=z*z*z + c, |z| < 12",
-    "z = c = pixel:  z = z ^ 1000 * (c ^ (-1002)) + c,  | z| <= 10000 ; FracFern by Jim Muth",
+    "z = c = pixel:  z = z ^ 1000 * (c ^ (-1002)) + c,  |z| <= 10000 ; FracFern by Jim Muth",
     "z = 1 / (z*z + c);",
+    "z = c = pixel, a = (real)p1:  z = z*z + c, |z| < a; Mandelbrot where (real)p1 is the bailout",
     NULL
     };
 
