@@ -829,16 +829,14 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	case LMANDELZPOWER:
 	case FPMANDELZPOWER:
 	    *z = *z ^ temp2;
-	    z->x += q->x + param[0];
-	    z->y += q->y + param[1];
+	    *z += *q;
 	    return FractintBailoutTest(z);
 
 	case FPMANZTOZPLUSZPWR:
 	case FPJULZTOZPLUSZPWR:
 	    temp = z->CPolynomial((int)param[2]);
 	    *z = *z ^ *z;
-	    z->x = temp.x + z->x + q->x + param[0];
-	    z->y = temp.y + z->y + q->y + param[1];
+	    *z = temp + *z + *q;
 	    return FractintBailoutTest(z);
 
 	case MARKSMANDELFP:				// Mark Peterson's variation of "lambda" function

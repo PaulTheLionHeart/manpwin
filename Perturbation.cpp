@@ -19,7 +19,7 @@
 #include "Fractype.h"
 #include "big.h"
 #include "Slope.h"
-//#include "pixel.h"
+#include "pixel.h"
 
 #define		MAXTHREADS	40
 
@@ -59,6 +59,11 @@ extern	int	precision;
 extern	int	xdots, ydots;
 extern	BYTE	juliaflag;			// Julia implementation of fractal 
 extern	int	PlotType;
+extern	BYTE	_3dflag;			// generate image in 3D
+extern	double	x_rot;				// angle display plane to x axis
+extern	double	y_rot;				// angle display plane to y axis
+extern	double	z_rot;				// angle display plane to z axis
+extern	double	sclx, scly, sclz;		// scale 
 
 // stuff for DwdDiff algorithm
 extern	double	bump_transfer_factor;
@@ -78,7 +83,7 @@ extern	HWND	GlobalHwnd;			// This is the main windows handle
 extern	CTrueCol    TrueCol;			// palette info
 extern	CDib	Dib;
 extern	CFract	Fractal;			// current fractal stuff
-//extern	CPixel	Pix;				// routines for escape fractals
+extern	CPixel	Pix;				// routines for escape fractals
 
 static	CTZfilter	TZfilter[MAXTHREADS];	// Tierazon filters
 
@@ -384,6 +389,38 @@ int	DoPerturbation(PMYVARIABLES)
 //	    param[0] = param[5];
 	Slope.InitRender(threshold, &TrueCol, &Dib, wpixels, PaletteShift, bump_transfer_factor, PaletteStart, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength);
 	Slope.RenderSlope(xdots, ydots, PertColourMethod, PalOffset, IterDiv);
+	}
+    else if (_3dflag)
+	{
+	long	colour;
+	int	x, y;
+	DWORD	index, count = 0;
+	Pix.init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
+	Dib.ClearDib(0L);
+	index = xdots * ydots;
+	double	*ptr = wpixels;
+	double	diff = (double)threshold;
+	while (count++ < index)			// find the level to keep the image on screen
+	    {
+	    if (*ptr < diff && *ptr > 0L)
+		{
+		diff = *ptr++;
+		}
+	    }
+
+	for (y = 0; y < ydots; y++)
+	    {
+	    for (x = 0; x < xdots; x++)
+		{
+		index = ((DWORD)y * (DWORD)Dib.DibWidth) + (DWORD)x;
+		if (wpixels)
+		    colour = (long)(*(wpixels + index));
+		else
+		    return 0;			// oops, we don't actually have data to transform
+		if (colour > 0L)
+		    Pix.projection(x, y, colour - (long)diff / 4);
+		}
+	    }
 	}
     if (ghMutex != NULL)
 	{
