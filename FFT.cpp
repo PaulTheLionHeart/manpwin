@@ -427,7 +427,7 @@ DLGPROC FAR PASCAL FastFourierDlg (HWND hDlg, UINT message, UINT wParam, LONG lP
 		if ((nCtrlID = ((WORD)(GetWindowLong (hCtrl, GWL_ID)))) == 0)
 		    {
 		    wsprintf(s, "Error: Scrollbar fail: <%ld>", GetLastError());
-		    MessageBox (hDlg, s, "Paul's Graphics Viewer", MB_ICONEXCLAMATION | MB_OK);
+		    MessageBox (hDlg, s, "Paul's Fractals", MB_ICONEXCLAMATION | MB_OK);
 		    }
 
 	       nIndex  = nCtrlID - IDC_SCROLLBAR1;
