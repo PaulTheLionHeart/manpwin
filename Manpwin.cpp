@@ -2574,8 +2574,15 @@ DLGPROC FAR PASCAL StatusInfoDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
 	    //	    break;
 	}
     sprintf(FinishedStr, "%s", (finished) ? ", Image Complete" : " ");
-    if (BigNumFlag)
-	sprintf(PrecisionStr, "Arbitrary Prec: %d", precision);
+    if (BigNumFlag)	    // now we have double double and quad double...
+	{
+	if (precision <= 30 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+	    sprintf(PrecisionStr, "DD Prec: %d", precision);
+	else if (precision <= 60 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+	    sprintf(PrecisionStr, "QD Prec: %d", precision);
+	else
+	    sprintf(PrecisionStr, "Arb Prec: %d", precision);
+	}
     else
 	sprintf(PrecisionStr, "Floating Point: %d", precision);
 
@@ -2592,7 +2599,14 @@ DLGPROC FAR PASCAL StatusInfoDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
     else if (type == TIERAZON || type == CROSSROADS || type == ZIGZAG || type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
 	sprintf(FractalType, "Fractal: %s, Sub=%d", GetFractalName(), subtype);
     else if (type == CUBIC)
-	sprintf(FractalType, "Fractal: %s, Sub=C%cIN", GetFractalName(), subtype);
+	{
+	char	ch;
+	if (subtype == 0)   ch = 'B';
+	if (subtype == 1)   ch = 'C';
+	if (subtype == 2)   ch = 'F';
+	if (subtype == 3)   ch = 'K';
+	sprintf(FractalType, "Fractal: %s, Sub=C%cIN", GetFractalName(), ch);
+	}
     else if (type == MALTHUS || type == TRIANGLES || type == GEOMETRY || type == CIRCLES || type == PASCALTRIANGLE)
 	sprintf(FractalType, "Fractal: %s, Sub=%c", GetFractalName(), subtype);
     else

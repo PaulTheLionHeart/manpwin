@@ -14,6 +14,7 @@
 #include "Fractype.h"
 #include "ManpWin.h"
 #include "Pixel.h"
+#include "Manp.h"
 
 // Error codes for Cellular
 #define BAD_T         1
@@ -36,6 +37,8 @@
 #endif
 #define MAXIMUM_POINTS	    10000
 
+#define max(a,b)    (((a) > (b)) ? (a) : (b))
+#define min(a,b)    (((a) < (b)) ? (a) : (b))
 
 //////////////////////////////////////////////////////////////////////
 // Class definition

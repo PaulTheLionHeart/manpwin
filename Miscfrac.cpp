@@ -22,7 +22,7 @@ extern	BOOL	bTrack;				// TRUE if user is selecting a region
 
 extern	CPixel	Pix;
 
-static	Complex	sqr;
+static	Complex	Sqr;
 static	double	real_imag;		// z_real * z_imag 
 
 int	row, col;
@@ -64,7 +64,7 @@ int	init_mandel_df(void)
 	z.x = q.x + param[0];
 	z.y = q.y + param[1];
 	}
-    sqr = 0;
+    Sqr = 0;
     real_imag = 0.0;
     return 0;
     }
@@ -76,12 +76,12 @@ int	init_mandel_df(void)
 int	do_mandel_df(void)
 
     {
-    sqr.x = z.x * z.x;
-    sqr.y = z.y * z.y;
+    Sqr.x = z.x * z.x;
+    Sqr.y = z.y * z.y;
     real_imag = z.x * z.y;
-    z.x = q.x + sqr.x - sqr.y;
+    z.x = q.x + Sqr.x - Sqr.y;
     z.y = q.y + real_imag + real_imag;
-    return ((sqr.x + sqr.y) >= rqlim);
+    return ((Sqr.x + Sqr.y) >= rqlim);
     }
 
 /************ standalone engine for "bifurcation" types ***************/

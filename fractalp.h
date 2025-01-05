@@ -138,6 +138,7 @@ extern	struct	PerturbationSpecificStuff	PerturbationSpecific[];	// default value
 #define	TRIGINPIXEL	1024			// functions are specified in FractintTrig.cpp and used in CPixel (these use globals to allow trig functions)
 #define	AXISIMAGEDISP	2048			// display axes in oscillators
 #define	OTHERFNINPIXEL	4096			// non-rastor functions still in pixel
+#define	USEDOUBLEDOUBLE	8192			// allows for both double double and quad douple floating point types
 
 #define	ESCAPING	0			// bailout schemes for slope using fwd diff
 #define	ESCAPING1	1
@@ -1680,6 +1681,8 @@ extern	int	DoNonlinearAnalysis4DFractionalHyperChaoticSystem(PMYVARIABLES);
 extern	int	DoDNADynamicCodingImageEncryptionAlgorithm(PMYVARIABLES);
 extern	int	DoDynamicBehaviorsFarNearMemristiveElectromagneticInduction(PMYVARIABLES);
 extern	int	DoNovelGrayscaleImageEncryption(PMYVARIABLES);
+extern	int	DoDynamicsStabilizationChaoticMonetarySystem(PMYVARIABLES);
+extern	int	DoRosslerChaoticOscillatorControlledPhaseImpact(PMYVARIABLES);
 
 
 

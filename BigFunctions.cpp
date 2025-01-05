@@ -22,7 +22,7 @@
 
 int	CPixel::BigInitFunctions(WORD type, BigComplex *zBig, BigComplex *qBig)
     {
-    switch (type)
+     switch (type)
 	{
 	case MANDELFP:					// Mandelbrot
 	case MANDEL:					// to handle fractint par files
@@ -137,6 +137,9 @@ int	CPixel::BigInitFunctions(WORD type, BigComplex *zBig, BigComplex *qBig)
 	    break;
 	    }
 
+	case EXPFRACTAL:				// there's no initialisation for exp()
+	    break;
+
 	case SINFRACTAL:				// Sine
 	    if (!juliaflag)
 		{
@@ -195,6 +198,54 @@ int	CPixel::BigInitFunctions(WORD type, BigComplex *zBig, BigComplex *qBig)
 
 	case TIERAZON:					// a group of Mandelbrot Derivatives
 	    BigInitTierazonFunctions(subtype, zBig, qBig);
+	    break;
+	case NEWTONAPPLE:				// a specific Tierazon fractal
+	    BigInitTierazonFunctions(55, zBig, qBig);
+	    break;
+	case NEWTONFLOWER:				// a specific Tierazon fractal
+	    BigInitTierazonFunctions(35, zBig, qBig);
+	    break;
+	case NEWTONMSET:				// a specific Tierazon fractal
+	    BigInitTierazonFunctions(52, zBig, qBig);
+	    break;
+	case NEWTONPOLYGON:				// a specific Tierazon fractal
+	    BigInitTierazonFunctions(31, zBig, qBig);
+	    break;
+	case NEWTONCROSS:				// a specific Tierazon fractal
+	    BigInitTierazonFunctions(59, zBig, qBig);
+	    break;
+	case NEWTONJULIANOVA:				// a specific Tierazon fractal
+	    BigInitTierazonFunctions(2, zBig, qBig);
+	    break;
+	case NEWTONVARIATION:				// a specific Tierazon fractal
+	    BigInitTierazonFunctions(87, zBig, qBig);
+	    break;
+	case QUARTET1:					// a specific Tierazon fractal
+	    BigInitTierazonFunctions(83, zBig, qBig);
+	    break;
+	case QUARTET2:					// a specific Tierazon fractal
+	    BigInitTierazonFunctions(85, zBig, qBig);
+	    break;
+	case QUARTET3:					// a specific Tierazon fractal
+	    BigInitTierazonFunctions(96, zBig, qBig);
+	    break;
+	case NOVA:
+	    BigInitTierazonFunctions(2, zBig, qBig);
+	    break;
+	case QUAD:					// a specific Tierazon fractal
+	    BigInitTierazonFunctions(90, zBig, qBig);
+	    break;
+	case RAMONSIN:					// a specific Tierazon fractal
+	    BigInitTierazonFunctions(116, zBig, qBig);
+	    break;
+	case RAMONCOS:					// a specific Tierazon fractal
+	    BigInitTierazonFunctions(117, zBig, qBig);
+	    break;
+	case FORMULA05:					// a specific Tierazon fractal
+	    BigInitTierazonFunctions(5, zBig, qBig);
+	    break;
+	case TEDDY:					// a specific Tierazon fractal
+	    BigInitTierazonFunctions(104, zBig, qBig);
 	    break;
 	}
     return 0;
@@ -294,6 +345,10 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	    {
 	    BigComplex	z2Big;
 
+	    if ((int)param[0] < 0)
+		special = 2;
+	    else
+		special = (int)param[0];
 	    z2Big = zBig->CSqr();
 	    temp1Big = z2Big * zBig->CDouble() + aBig;
 	    temp2Big = z2Big * 3.0 + bBig;
@@ -433,8 +488,55 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
 	    return (BigRunManDerFunctions(subtype, zBig, qBig, SpecialFlag, iteration));
 
+	case NEWTONAPPLE:				// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(55, zBig, qBig, SpecialFlag, iteration));
 
-	case TIERAZON:					// a group of Mandelbrot Derivatives
+	case NEWTONFLOWER:				// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(35, zBig, qBig, SpecialFlag, iteration));
+
+	case NEWTONMSET:				// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(52, zBig, qBig, SpecialFlag, iteration));
+
+	case NEWTONPOLYGON:				// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(31, zBig, qBig, SpecialFlag, iteration));
+
+	case NEWTONCROSS:				// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(59, zBig, qBig, SpecialFlag, iteration));
+
+	case NEWTONJULIANOVA:				// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(2, zBig, qBig, SpecialFlag, iteration));
+
+	case NEWTONVARIATION:				// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(87, zBig, qBig, SpecialFlag, iteration));
+
+	case QUARTET1:					// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(83, zBig, qBig, SpecialFlag, iteration));
+
+	case QUARTET2:					// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(85, zBig, qBig, SpecialFlag, iteration));
+
+	case QUARTET3:					// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(96, zBig, qBig, SpecialFlag, iteration));
+
+	case NOVA:
+	    return (BigRunTierazonFunctions(2, zBig, qBig, SpecialFlag, iteration));
+
+	case QUAD:					// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(90, zBig, qBig, SpecialFlag, iteration));
+
+	case RAMONSIN:					// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(116, zBig, qBig, SpecialFlag, iteration));
+
+	case RAMONCOS:					// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(117, zBig, qBig, SpecialFlag, iteration));
+
+	case FORMULA05:					// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(5, zBig, qBig, SpecialFlag, iteration));
+
+	case TEDDY:					// a specific Tierazon fractal
+	    return (BigRunTierazonFunctions(104, zBig, qBig, SpecialFlag, iteration));
+
+	case TIERAZON:					// a group of Tierazon Fractals
 	    return (BigRunTierazonFunctions(subtype, zBig, qBig, SpecialFlag, iteration));
 	}
     return 0;

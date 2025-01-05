@@ -1,9 +1,12 @@
 #include <Windows.h>
+//#include "DDComplex.h"
 #include "colour.h"
 #include "Dib.h"
 #include "complex.h"
 #include "BigDouble.h"
 #include "BigComplex.h"
+#include "DDcomplex.h"
+#include "QDcomplex.h"
 #include "OscProcess.h"
 #include "Matrix.h"
 #include "BigMatrix.h"
@@ -15,10 +18,14 @@
 #include "slope.h"
 #include "plot.h"
 #include ".\parser\TrigFn.h"
+//#include "qdlib/dd_real.h"
 
 #ifndef sqr
 #define sqr(x) ((x)*(x))
 #endif
+
+#define max(a,b)    (((a) > (b)) ? (a) : (b))
+#define min(a,b)    (((a) < (b)) ? (a) : (b))
 
 #define MAXROOTS		64		// Newton fractals
 #define distance(z1,z2)		(sqr((z1).x-(z2).x)+sqr((z1).y-(z2).y))
@@ -63,12 +70,20 @@ class CPixel
 	long	dofract(HWND hwnd, int row, int col);
 	long	DoBigFract(HWND hwnd, int row, int col);
 	long	BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd));
+	long	DoDDFract(HWND hwnd, int row, int col);
+	long	DoQDFract(HWND hwnd, int row, int col);
+	int     ConvertBignumVariables2DD();
+	int     ConvertBignumVariables2QD();
 	int	run_fractal(Complex *z, Complex *q);
 	int	run_big_fractal();
+	int	run_DD_fractal(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration);
+	int	run_QD_fractal(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialFlag, long *iteration);
 	int	init_fractal(Complex *z, Complex *q);
 	int	init_big_fractal();
-	int	float_decomposition(double z_real, double z_imag);
-//	int	potential(double mag, int iterations);
+	int	FloatDecomposition(double z_real, double z_imag);
+	int	DDDecomposition(dd_real z_real, dd_real z_imag);
+	int	QDDecomposition(qd_real z_real, qd_real z_imag);
+	//	int	potential(double mag, int iterations);
 	long	calc_frac(HWND hwnd, int row, int col, int user_data(HWND hwnd));
 	Complex	invertz2(Complex  & Cmplx1);
 	void	init_stereo_pairs(int pairflag, int *AutoStereo_value);
@@ -95,6 +110,9 @@ class CPixel
 	int	BifurcLambda(double Rate, double *Population);			// it's here becasue it is used in miscfrac.cpp Lyapunov fractal
 	int	bifurcation(int user_data(HWND hwnd));						// ditto for bifurcation()
 	void	plot_orbits(RGBTRIPLE colour, int count);
+	
+	
+	// QD stuff
 
 	void	plot(WORD x, WORD y, DWORD color);
 	void	PlotPixel(WORD, WORD, DWORD);
@@ -201,6 +219,26 @@ class CPixel
 	BigComplex	BigOldZ, BigOlderZ;
 
 	/**************** Big Number Globals *********************/
+
+	/**************** Double double Globals *********************/
+
+	DDComplex	zDD, cDD, qDD, DDOldZ, DDOlderZ, z4DD;
+	DDComplex	c1DD, c2DD, z2DD, cbDD, caa3DD, tDD;	// Tierazon
+	DDComplex	aDD, bDD, a2DD, aa3DD, vDD;		// Cubic
+	DDComplex	lm5DD, lp5DD, l2DD;			// Art Matric Newton
+	dd_real		DDCloseEnough;
+
+	/**************** Double double Globals *********************/
+
+	/**************** Double double Globals *********************/
+
+	QDComplex	zQD, cQD, qQD, QDOldZ, QDOlderZ, z4QD;
+	QDComplex	c1QD, c2QD, z2QD, cbQD, caa3QD, tQD;	// Tierazon
+	QDComplex	aQD, bQD, a2QD, aa3QD, vQD;		// Cubic
+	QDComplex	lm5QD, lp5QD, l2QD;			// Art Matric Newton
+	qd_real		QDCloseEnough;
+
+	/**************** Double double Globals *********************/
 	// symmetry stuff
 	int	ixstart, ixstop, iystart, iystop;	// start, stop here 
 	int	xxstart, xxstop;			// these are same as worklist, 
@@ -223,6 +261,8 @@ class CPixel
 	void	CalcFloatIteration(double error, double *wpixels, int row, int col, Complex z, Complex OldZ, Complex OlderZ);
 	void	CalcBigFloatIteration(double error, double *wpixels, int row, int col, BigComplex z, BigComplex OldZ, BigComplex OlderZ);
 	int	DoBigFilter(int method, int hooper);
+	int	DoDDFilter(int method, int hooper, DDComplex *z);
+	int	DoQDFilter(int method, int hooper, QDComplex *z);
 	BigComplex	BigInvertz2(BigComplex  & Cmplx1);
 	bool	BailoutTest(Complex *z, Complex SqrZ);
 	bool	BigBailoutTest(BigComplex *z, BigComplex SqrZ);
@@ -267,7 +307,31 @@ class CPixel
 	int	ScottZXTrigPlusZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn);
 	int	SkinnerZXTrigSubZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn);
 
-	// non-raster functions
+	// double double functions
+	int	BigDouble2DD(dd_real *out, BigDouble *in);
+	void	CalcDDFloatIteration(double error, double *wpixels, int row, int col, DDComplex z, DDComplex OldZ, DDComplex OlderZ, 
+		double FloatIteration, WORD type, int subtype, WORD *degree, BYTE SpecialFlag, WORD special, int width);
+	int	DDRunTierazonFunctions(int subtype, DDComplex *z, DDComplex *q, DDComplex *z2, BYTE *SpecialFlag, long *iteration);
+	bool	DDBailoutTest(DDComplex *z, DDComplex SqrZ, double rqlim, int BailoutTestType);
+	bool	DDFractintBailoutTest(DDComplex *z, double rqlim, int BailoutTestType);
+	int	DDRunManDerFunctions(int subtype, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration);
+	int	DDInitTierazonFunctions(int subtype, DDComplex *z, DDComplex *q);
+	int	DDInitFunctions(WORD type, DDComplex *z, DDComplex *q);
+	int	DDInitManDerFunctions(int subtype, DDComplex *z, DDComplex *q);
+
+	// quad double functions
+	int	BigDouble2QD(qd_real *out, BigDouble *in);
+	void	CalcQDFloatIteration(double error, double *wpixels, int row, int col, QDComplex z, QDComplex OldZ, QDComplex OlderZ,
+		double FloatIteration, WORD type, int subtype, WORD *degree, BYTE SpecialFlag, WORD special, int width);
+	int	QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDComplex *z2, BYTE *SpecialFlag, long *iteration);
+	bool	QDBailoutTest(QDComplex *z, QDComplex SqrZ, double rqlim, int BailoutTestType);
+	bool	QDFractintBailoutTest(QDComplex *z, double rqlim, int BailoutTestType);
+	int	QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q);
+	int	QDInitManDerFunctions(int subtype, QDComplex *z, QDComplex *q);
+	int	QDInitTierazonFunctions(int subtype, QDComplex *z, QDComplex *q);
+	int	QDInitFunctions(WORD type, QDComplex *z, QDComplex *q);
+
+	    // non-raster functions
 //	int	DoCurlicues(void);
 
 	// pixel plotting routines
@@ -456,6 +520,21 @@ class CPixel
 	int	froth_altcolor;
 	int	froth_shades;
 	long	oldcolor;
+
+	// decomposition stuff
+	double	cos45 = 0.70710678118654750;	// cos 45	degrees
+	double	sin45 = 0.70710678118654750;	// sin 45	degrees
+	double	cos22_5 = 0.92387953251128670;	// cos 22.5	degrees
+	double	sin22_5 = 0.38268343236508980;	// sin 22.5	degrees
+	double	cos11_25 = 0.98078528040323040; // cos 11.25	degrees
+	double	sin11_25 = 0.19509032201612820; // sin 11.25	degrees
+	double	cos5_625 = 0.99518472667219690; // cos 5.625	degrees
+	double	sin5_625 = 0.09801714032956060; // sin 5.625	degrees
+	double	tan22_5 = 0.41421356237309500;	// tan 22.5	degrees
+	double	tan11_25 = 0.19891236737965800; // tan 11.25	degrees
+	double	tan5_625 = 0.09849140335716425; // tan 5.625	degrees
+	double	tan2_8125 = 0.04912684976946725; // tan 2.8125	degrees
+	double	tan1_4063 = 0.02454862210892544; // tan 1.4063	degrees
 
 	// Filter stuff used in DoFilter()
 	double	rqlim2; 

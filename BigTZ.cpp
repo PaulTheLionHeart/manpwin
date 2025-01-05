@@ -48,10 +48,14 @@ int	CPixel::BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *
 	case 11:					// z=z*z*z*z+c
 	case 12:					// z=z*z*z*z*z+c
 	case 13:					// z=z*z*z*z*z*z+c
-	    *degree = (int)param[0];
-	    if (*degree < 2)
-		*degree = 2;
-	    BigInitFunctions(POWER, zBig, qBig);
+	    *degree = (int)param[2];
+	    if (*degree < 1)
+		*degree = 1;
+	    if (!juliaflag)
+		{
+		zBig->x = qBig->x + param[0];
+		zBig->y = qBig->y + param[1];
+		}
 	    break;
 
 	case 2:						// Nova, init: z=1; iterate: z=z-((z*z*z-1)/(3*z*z))+c
@@ -275,13 +279,13 @@ int	CPixel::BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *
 	case 57:					// More Newton Msets, 38th order Newton Mset flower
 	case 58:					// More Newton Msets, 50th order Newton Mset flower
 	case 106:					// More Fractals, 5th order N/Mset
-	    *degree = (int)param[0];
+	    *degree = (int)param[2];
 	    if (*degree < 2)
 		*degree = 2;
 	    if (!juliaflag)
 		{
-		zBig->x = -qBig->x * (double)(*degree - 2) / (double)*degree + param[1];
-		zBig->y = -qBig->y * (double)(*degree - 2) / (double)*degree + param[2];
+		zBig->x = -qBig->x * (double)(*degree - 2) / (double)*degree + param[0];
+		zBig->y = -qBig->y * (double)(*degree - 2) / (double)*degree + param[1];
 		}
 	    break;
 
@@ -311,26 +315,26 @@ int	CPixel::BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *
 
 	case 55:					// More Newton Msets, 4th order Newton's apple
 //	case 59:					// More Newton Msets, 5th order Newton Mset
-	    *degree = (int)param[0];
+	    *degree = (int)param[2];
 	    if (*degree < 2)
 		*degree = 2;
 	    if (!juliaflag)
 		*zBig = *qBig * ((double)*degree);
 	    *zBig = zBig->CInvert();
-	    zBig->x = zBig->x + param[1];
-	    zBig->y = zBig->y + param[2];
+	    zBig->x = zBig->x + param[0];
+	    zBig->y = zBig->y + param[1];
 	    break;
 
 
 	case 59:					// More Newton Msets, 5th order Newton Mset
-	    *degree = (int)param[0];
+	    *degree = (int)param[2];
 	    if (*degree < 2)
 		*degree = 2;
 	    if (!juliaflag)
 		*zBig = *qBig * 2.0;
 	    *zBig = zBig->CInvert();
-	    zBig->x =  - zBig->x + param[1];
-	    zBig->y =  - zBig->y + param[2];
+	    zBig->x =  - zBig->x + param[0];
+	    zBig->y =  - zBig->y + param[1];
 	    break;
 
 	case 60:					// More Newton Msets, 18th order Newton Mset flower
@@ -340,7 +344,7 @@ int	CPixel::BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *
 	    break;
 
 	case 67:					// Newton Variations II, z=z-(((z^3)-z)/((3*z*z-1)))+c
-	    *degree = (int)param[0];
+	    *degree = (int)param[2];
 	    if (*degree < 2)
 		*degree = 2;
 	    if (!juliaflag)
@@ -456,6 +460,7 @@ int	CPixel::BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *
 	    break;
 
 	case 83:					// Quartets, t=0; z1=z; z=z*z*z-t*t*t+c; z=z1
+	    *degree = (int)param[2];
 	    z2Big = 0;
 	    if (!juliaflag)
 		*zBig = *qBig;
@@ -464,23 +469,23 @@ int	CPixel::BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *
 	    break;
 
 	case 84:					// Quartets, t=0; z1=z; z=z*z*z*z-t*t*t*t+c; t=z1
-	    *degree = (int)param[0];
+	    *degree = (int)param[2];
 	    if (*degree < 2)
 		*degree = 2;
-	    z2Big.x = param[1];	    // t = 0;
-	    z2Big.y = param[2];
+	    z2Big.x = param[0];	    // t = 0;
+	    z2Big.y = param[1];
 	    if (!juliaflag)
 		*zBig = 0;
 	    break;
 
 	case 85:					// Quartets, z2=z; z=(z^4)+c; c=z2
-	    *degree = (int)param[0];
+	    *degree = (int)param[2];
 	    if (*degree < 2)
 		*degree = 2;
 	    if (!juliaflag)
 		{
-		zBig->x = qBig->x + param[1];
-		zBig->y = qBig->y + param[2];
+		zBig->x = qBig->x + param[0];
+		zBig->y = qBig->y + param[1];
 		}
 	    break;
 
@@ -540,14 +545,14 @@ int	CPixel::BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *
 	    }
 
 	case 96:					// Quartets, z1=z; z=z*z*z*z+z2/2+c;; z2=z1
-	    *degree = (int)param[0];
+	    *degree = (int)param[2];
 	    if (*degree < 2)
 		*degree = 2;
 	    z2Big = *qBig;
 	    if (!juliaflag)
 		{
-		zBig->x = param[1];
-		zBig->y = param[2];
+		zBig->x = param[0];
+		zBig->y = param[1];
 		}
 	    break;
 
@@ -734,23 +739,23 @@ int	CPixel::BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *
 	    break;
 
 	case 165:					// Flarium 67-69, Newton Variations: z = ((z-(((z^n)-1)/(n*(z^(n-1)))))^2)*c
-	    *degree = (int)param[0];
+	    *degree = (int)param[2];
 	    if (*degree < 2)
 		*degree = 2;
 	    if (!juliaflag)
 		*zBig = 1;
-	    zBig->x += param[1];
-	    zBig->y += param[2];
+	    zBig->x += param[0];
+	    zBig->y += param[1];
 	    break;
 
 	case 172:					// Flarium 112-116, Polynomials: z=z^n*c+z*c; Dragon curve variations
-	    *degree = (int)param[0];
+	    *degree = (int)param[2];
 	    if (*degree < 2)
 		*degree = 2;
 	    if (!juliaflag)
 		*zBig = *qBig;
-	    zBig->x += param[1];
-	    zBig->y += param[2];
+	    zBig->x += param[0];
+	    zBig->y += param[1];
 	    break;
 
 	case 173:					// Flarium 117, Newton Variations: z = z-(z*z*z-z*c-1)/(3*z*z+c-1)
@@ -761,13 +766,13 @@ int	CPixel::BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *
 	    break;
 
 	case 177:					// Flarium 145, Polynomial: z=z^2+c [Jaenisch method]
-	    *degree = (int)param[0];
+	    *degree = (int)param[2];
 	    if (*degree < 2)
 		*degree = 2;
 	    if (!juliaflag)
 		*zBig = *qBig;
-	    z4Big.x = param[1];
-	    z4Big.y = param[2];
+	    z4Big.x = param[0];
+	    z4Big.y = param[1];
 	    z2Big = *zBig;
 	    break;
 	}

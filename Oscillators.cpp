@@ -16233,6 +16233,44 @@ int	DoDynamicsAndFeedback(void)
     }
 
 /**************************************************************************
+	Dynamics and Stabilization of Chaotic Monetary System Using Radial Basis Function Neural Network Control
+	Muhamad Deni Johansyah, Aceng Sambas, Fareh Hannachi, Seyed Mohamad Hamidzadeh, Volodymyr Rusyn, Monika Hidayanti, Bob Foster and Endang Rusyaman
+	https://www.mdpi.com/2227-7390/12/24/3977......https://doi.org/10.3390/math12243977
+	18 December 2024
+	Contacting author: muhamad.deni@unpad.ac.id
+***************************************************************************/
+
+int	DoDynamicsStabilizationChaoticMonetarySystem(void)
+
+    {
+    double	i, c1[3], cn[3], a, b, c;
+
+    c1[0] = param[10];	// x
+    c1[1] = param[11];	// y
+    c1[2] = param[12];	// z
+
+    a = param[0];
+    b = param[1];
+    c = param[2];
+    totpasses = 10;
+
+    InitOscillator(c1, 3);						// pass in number of dimensions
+    for (i = 0; i < iterations; i++)
+	{
+	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	    return -1;
+	curpass = (int)(i * totpasses / iterations);
+	cn[0] = -a * c1[0] + c1[2] + c1[0] * c1[1] + b * c1[1] *  c1[2];
+	cn[1] = 1.0 - c * c1[1] - c1[0] * c1[0];
+	cn[2] = -c1[0] - c1[2] - b * c1[0] * c1[1];
+	if (DisplayOscillator(c1, cn, dt, ((DWORD)(i / 10.0) % threshold), i, 3, 0) < 0)
+	    break;
+	}
+    PlotExtras();
+    return 0;
+    }
+
+/**************************************************************************
 	Dynamics and Synchronisation of New Hyperchaotic Complex Lorenz System in 7 Dimensions
 	Emad E. Mahmoud 17 November 2011
 ***************************************************************************/
@@ -34406,6 +34444,50 @@ int	DoRossler(void)
 	cn[1] = c1[0] + a * c1[1];
 	cn[2] = b + c1[2] * (c1[0] - c);
 	if (DisplayOscillator(c1, cn, dt, ((DWORD)(i / 3.0) % threshold), i, 3, 0) < 0)
+	    break;
+	}
+    PlotExtras();
+    return 0;
+    }
+
+/**************************************************************************
+	Rossler Chaotic Oscillator with Controlled Phase Impact
+	Kuznetsov A.P, Sedova Y.V., Stankevich N.V.
+	https://dspace.spbu.ru/bitstream/11701/48040/1/24105-jdecp-stankevich.pdf - in russian.....ISSN 1817-2172
+	2024
+	apkuz@rambler.ru, sedovayv@yandex.ru, stankevichnv@mail.ru
+***************************************************************************/
+
+int	DoRosslerChaoticOscillatorControlledPhaseImpact(void)
+
+    {
+    double	i, c1[4], cn[4], a, b, r, k, azao, p;
+
+    c1[0] = param[10];	// x
+    c1[1] = param[11];	// y
+    c1[2] = param[12];	// z
+    c1[3] = param[13];	// w
+
+    a = param[0];
+    b = param[1];
+    r = param[2];
+    k = param[3];
+    azao = param[4];
+    p = param[5];
+    totpasses = 10;
+
+    InitOscillator(c1, 4);						// pass in number of dimensions
+    for (i = 0; i < iterations; i++)
+	{
+	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	    return -1;
+	curpass = (int)(i * totpasses / iterations);
+
+	cn[0] = -c1[1] - c1[2];
+	cn[1] = c1[0] + a * c1[1] + azao * sin(c1[3]);
+	cn[2] = b + (c1[0] - r) * c1[2];
+	cn[3] = p - k * (c1[1] + c1[2]);
+	if (DisplayOscillator(c1, cn, dt, ((DWORD)(i / 3.0) % threshold), i, 4, 0) < 0)
 	    break;
 	}
     PlotExtras();

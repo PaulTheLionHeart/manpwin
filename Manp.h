@@ -16,6 +16,9 @@
 #define	ESC_CHAR	0x1b
 #define	MAXOSC		10000		// maxiumum number of oscillators/curves/surfaces/knots/fractal maps
 
+#define max(a,b)	(((a) > (b)) ? (a) : (b))
+#define min(a,b)	(((a) < (b)) ? (a) : (b))
+
 #define	MAXPOLYDEG	8		// only because we are limnited by param[] for polynomial()
 
 #define	dot_product(v1,v2)  ((v1)[0]*(v2)[0]+(v1)[1]*(v2)[1]+(v1)[2]*(v2)[2])

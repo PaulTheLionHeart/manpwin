@@ -965,7 +965,7 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 			    potparam[1] = GetDlgItemInt(hDlg, IDM_SLOPE, &bTrans, TRUE);
 			    potparam[2] = GetDlgItemInt(hDlg, IDM_BAILOUT, &bTrans, TRUE);
 			    }
-			if (InsideMethod >= TIERAZONFILTERS)
+			if (OutsideMethod >= TIERAZONFILTERS)
 			    {
 			    GetDlgItemText(hDlg, IDM_STALKS, s, 30);
 			    calcmode = '2';
