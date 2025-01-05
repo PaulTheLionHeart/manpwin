@@ -253,13 +253,13 @@ struct fractalspecificstuff fractalspecific[]=
    {
 //#define MANDEL                   0
    t_mandel+1, realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, MANDELFP, 2, 2, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS_NOPARM, 4.0,
+   -3.5, -2.0, 4.0, 0, MANDELFP, 2, 2, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS_NOPARM, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
    t_julia+1, realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, JULIAFP, 2, 2, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS_NOPARM, 4.0,
+   -3.5, -2.0, 4.0, 0, JULIAFP, 2, 2, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS_NOPARM, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -279,7 +279,7 @@ struct fractalspecificstuff fractalspecific[]=
 
    {
    t_mandel+1, realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, MANDELFP, 2, 2, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS_NOPARM, 4.0,
+   -3.5, -2.0, 4.0, 0, MANDELFP, 2, 2, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS_NOPARM, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
 //   init_mandel_df, do_mandel_df, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
 
@@ -1774,16 +1774,16 @@ struct fractalspecificstuff fractalspecific[]=
    "Cubic",
        "Subtype: 0=CBIN, 1=CCIN, 2=CFIN, 3=CKIN", "Special Colour", realz0, imagz0, ES, ES,ES, ES, ES, ES,
       0.0, 2.0, 0.0, 0.0, 0, 0,0,0,0,0,
-   -5.3333, -3.0, 6.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+   -5.3333, -3.0, 6.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
 //#define NEWTONPOLYGON			174
    {
    "Newton Polygon",
-      {newtpoly, realz0, imagz0, ES,ES,ES, ES, ES, ES, ES},
-      {5.0, 0.0,0.0,0.0, 0,0,0,0,0,0},
-   -3.5, -2.0, 4.0, CONVERGING, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+      {realz0, imagz0, newtpoly, ES,ES,ES, ES, ES, ES, ES},
+      {0.0, 0.0, 5.0, 0.0, 0,0,0,0,0,0},
+   -3.5, -2.0, 4.0, CONVERGING, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
 //   init_NewtonPolygon, do_NewtonPolygon, "NewtonGeneral", NewtonGeneral, STDBAILOUT
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
@@ -1820,7 +1820,7 @@ struct fractalspecificstuff fractalspecific[]=
    "Special Newton",
       "Phase colour separation", realz0, imagz0, ES, ES, ES,ES, ES, ES, ES,
       75.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5555556, -2.0, 4.0, CONVERGING1, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+   -3.5555556, -2.0, 4.0, CONVERGING1, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -1847,7 +1847,7 @@ struct fractalspecificstuff fractalspecific[]=
    "Power",
       newtdegree, realz0, imagz0, ES,ES,ES,ES, ES, ES, ES,
       4.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, -1, 3, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, -1, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    //init_power_df, do_power_df, "PowerTypeDlg", PowerTypeDlg, STDBAILOUT
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
@@ -1866,7 +1866,7 @@ struct fractalspecificstuff fractalspecific[]=
    "Sine Function",
       realz0, imagz0, "0=multiply, else=plus", "Start value for z", ES, ES,ES, ES, ES, ES,
       0.0, 0.0, 0.0, HALF_PI, 0,0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 80.0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 80.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -1875,29 +1875,29 @@ struct fractalspecificstuff fractalspecific[]=
    "Exponential Function",
        "Subtype: 0 = real, 1 = imaginary, 2 = magnitude", realz0, imagz0, "degree (1 - 4)", "0=multiply, else=plus", ES,ES, ES, ES, ES,
       0.0, 0.0, 0.0, 1.0, 0.0, 0.0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 10.0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 10.0,
    NullSetup, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
    {
    "Newton Apple",
-      newtdegree, realz0, imagz0, ES,ES,ES,ES, ES, ES, ES,
-      4.0, 0.0, 0.0, 0.0, 0.0, 0.0,0,0,0,0,
+      realz0, imagz0, newtdegree, ES,ES,ES,ES, ES, ES, ES,
+      0.0, 0.0, 4.0, 0.0, 0.0, 0.0,0,0,0,0,
 //   "Newton Apple","(testpt Param #1)","(testpt param #2)","(testpt param #3)","(testpt param #4)", 0.0, 0.0, 0.0, 0.0,
 //   -2.0,  2.0, -1.5,  1.5, 0, NOFRACTAL, NOFRACTAL, NOFRACTAL,	 NOSYM,
 //   NULL,	  NULL, 	    StandaloneSetup, test,    STDBAILOUT,
-   -1.5,  -0.75,  1.5, CONVERGING, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+   -1.5,  -0.75,  1.5, CONVERGING, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
 //   init_NewtonApple, do_NewtonApple, NULL, NULL, STDBAILOUT
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 //#define NEWTONFLOWER         186
    {
    "Newton Flower",
-      newtdegree, realz0, imagz0, ES,ES,ES,ES, ES, ES, ES,
-      5.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
+      realz0, imagz0, newtdegree, ES,ES,ES,ES, ES, ES, ES,
+      0.0, 0.0, 5.0, 0.0,0,0,0,0,0,0,
 //   "5th Order Newton","(testpt Param #1)","(testpt param #2)","(testpt param #3)","(testpt param #4)", 0.0, 0.0, 0.0, 0.0,
 //   -2.0,  2.0, -1.5,  1.5, 0, NOFRACTAL, NOFRACTAL, NOFRACTAL,	 NOSYM,
 //   NULL,	  NULL, 	    StandaloneSetup, test,    STDBAILOUT,
-   -3.5, -2.0, 4.0, CONVERGING, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, NOSYM, 4.0,
+   -3.5, -2.0, 4.0, CONVERGING, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, NOSYM, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
 //   init_NewtonFlower, do_NewtonFlower, "NewtonGeneral", NewtonGeneral, STDBAILOUT
    },
@@ -1925,16 +1925,16 @@ struct fractalspecificstuff fractalspecific[]=
    "Teddy (try using the filters)",
       ES, ES, ES, ES, ES, ES,ES, ES, ES, ES,
       0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, NULL, NULL, STDBAILOUT
    },
 
 //#define NEWTONMSET             190
    {
    "Newton M Set",
-      newtdegree, realz0, imagz0, ES,ES,ES,ES, ES, ES, ES,
-      4.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5, -2.0, 4.0, CONVERGING, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+      realz0, imagz0, newtdegree, ES,ES,ES,ES, ES, ES, ES,
+      0.0, 0.0, 4.0, 0.0,0,0,0,0,0,0,
+   -3.5, -2.0, 4.0, CONVERGING, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -1943,50 +1943,50 @@ struct fractalspecificstuff fractalspecific[]=
    "Newton Julia Nova",
       realz0, imagz0, ES, ES, ES, ES,ES, ES, ES, ES,
       0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 //#define TALIS                  192
    {
    "Talis Power",
       "Degree", "m", realz0, imagz0, ES, ES,ES, ES, ES, ES, 3.0, 1.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 400.0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 400.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 //#define NEWTONCROSS            193
 
    {
    "Newton Cross",
-      newtdegree, realz0, imagz0, ES,ES,ES,ES, ES, ES, ES,
-      6.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+      realz0, imagz0, newtdegree, ES,ES,ES,ES, ES, ES, ES,
+      0.0, 0.0, 6.0, 0.0,0,0,0,0,0,0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
 //#define QUARTET1               194
    {
    "Quartet 1",
-      newtdegree, realz0, imagz0, ES,ES,ES,ES, ES, ES, ES,
-      4.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+      realz0, imagz0, newtdegree, ES,ES,ES,ES, ES, ES, ES,
+      0.0, 0.0, 3.0, 0.0,0,0,0,0,0,0,
+   -3.5,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
 //#define QUARTET2               195
    {
    "Quartet 2",
-      newtdegree, realz0, imagz0, ES,ES,ES,ES, ES, ES, ES,
-      4.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+      realz0, imagz0, newtdegree, ES,ES,ES,ES, ES, ES, ES,
+      0.0, 0.0, 4.0, 0.0,0,0,0,0,0,0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
 //#define QUARTET3               196
    {
    "Quartet 3",
-      newtdegree, realz0, imagz0, ES,ES,ES,ES, ES, ES, ES,
-      4.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+      realz0, imagz0, newtdegree, ES,ES,ES,ES, ES, ES, ES,
+      0.0, 0.0, 4.0, 0.0,0,0,0,0,0,0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -1995,7 +1995,7 @@ struct fractalspecificstuff fractalspecific[]=
    "z=(c/sin(z))^2",
       realz0, imagz0, ES, ES, ES, ES,ES, ES, ES, ES,
       0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL, XYAXIS, 4.0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XYAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -2004,7 +2004,7 @@ struct fractalspecificstuff fractalspecific[]=
    "z=(c/cos(z))^2",
       realz0, imagz0, ES, ES, ES, ES,ES, ES, ES, ES,
       0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL, XYAXIS, 4.0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XYAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -2013,7 +2013,7 @@ struct fractalspecificstuff fractalspecific[]=
    "Formula 05",
       realz0, imagz0, ES, ES, ES, ES,ES, ES, ES, ES,
       0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -1.0,  -0.25,  0.5, CONVERGING, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+   -1.0,  -0.25,  0.5, CONVERGING, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -2032,7 +2032,7 @@ struct fractalspecificstuff fractalspecific[]=
    "Quad",
       realz0, imagz0, ES, ES, ES, ES,ES, ES, ES, ES,
       0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -10.0,  -6.0,  12.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL, XYAXIS, 8.0,
+   -10.0,  -6.0,  12.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XYAXIS, 8.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -2058,9 +2058,9 @@ struct fractalspecificstuff fractalspecific[]=
 
    {
    "Tierazon Fractal",
-      realz0, imagz0, ES, ES, ES, ES,ES, ES, ES, ES,
+      realz0, imagz0, "degree if applicable", ES, ES, ES,ES, ES, ES, ES,
       0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -2.7, -2.0, 4.0, CONVERGING, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+   -2.7, -2.0, 4.0, CONVERGING, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -2084,19 +2084,19 @@ struct fractalspecificstuff fractalspecific[]=
 
    {
 //#define NEWTONVARIATION	       207	
-   "Newton Variation", newtdegree, realz0, imagz0, ES,ES,ES, ES, ES, ES, ES, 3.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
+   "Newton Variation", realz0, imagz0, newtdegree, ES,ES,ES, ES, ES, ES, ES, 0.0, 0.0, 3.0, 0.0,0,0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
-   -3.5, -2.0, 4.0, CONVERGING, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, NOSYM, 4.0,
+   -3.5, -2.0, 4.0, CONVERGING, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, NOSYM, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
 //#define NOVA	       208	
-   "Newton Nova", newtdegree, realz0, imagz0, ES,ES,ES, ES, ES, ES, ES, 3.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
+   "Newton Nova", realz0, imagz0, ES, ES,ES,ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
-   -3.5, -2.0, 4.0, CONVERGING, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, NOSYM, 4.0,
+   -3.5, -2.0, 4.0, CONVERGING, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, NOSYM, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -2226,7 +2226,7 @@ struct fractalspecificstuff fractalspecific[]=
    {
 //#define BURNINGSHIP	       223
    "Burning Ship", realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,
-   -3.5, -2.0,  4.0, 0, MANDEL, 2, 2, 0, NULL, NULL, FUNCTIONINPIXEL, NOSYM, 4.0,
+   -3.5, -2.0,  4.0, 0, MANDEL, 2, 2, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, NOSYM, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
    {
@@ -2246,7 +2246,7 @@ struct fractalspecificstuff fractalspecific[]=
    "Burning Ship of Higher Degree",
        "degree",realz0, imagz0,ES, ES,ES,ES, ES, ES, ES,
       {3.0, 0.0, 0.0, 0.0, 0,0,0,0,0,0,},
-   -3.5, -2.0,  4.0, 0, NOFRACTAL, -1, 3, 0, NULL, NULL, FUNCTIONINPIXEL, NOSYM, 4.0,
+   -3.5, -2.0,  4.0, 0, NOFRACTAL, -1, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, NOSYM, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
    {
@@ -2261,7 +2261,7 @@ struct fractalspecificstuff fractalspecific[]=
    "Mandelbrot Derivatives",
       realz0, imagz0, ES, ES, ES, ES,ES, ES, ES, ES,
       0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
-   -2.7,  -2.0,  4.0, ESCAPING1, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+   -2.7,  -2.0,  4.0, ESCAPING1, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
    {
@@ -2338,7 +2338,7 @@ struct fractalspecificstuff fractalspecific[]=
     {
 //#define SLOPEDERIVATIVE	240
 	"Slope Using Derivatives", "Mandelbrot = 0, else Power degree", "Use Palette? = 0","Light Source Angle (degrees)","Light Source Height",ES, ES, ES, ES, ES,ES,0.0,0.0,45.0,1.5,0.0,0.0,0,0,0,0,
-	-3.5, -2.0, 4.0, 0, MANDEL, NOFRACTAL, 4, 0, NULL, NULL, 0, NOSYM, 1000.0,
+	-3.5, -2.0, 4.0, 0, MANDEL, NOFRACTAL, 4, 0, NULL, NULL, USEDOUBLEDOUBLE, NOSYM, 1000.0,
 	InitSlopeFractal, DoSlopeFractal, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
     },
     {
@@ -2353,7 +2353,7 @@ struct fractalspecificstuff fractalspecific[]=
     //#define POLYNOMIAL	242
 	 "Polynomial",realz0, imagz0, "8th Power Coefficient", "7th Power Coefficient", "6th Power Coefficient", "5th Power Coefficient", "Quartic Coefficient", "Cubic Coefficient", "Square Coefficient", "Z Coefficient",
 	    0.0, 0.0, 1.0, 3.0, 2.0, 1.0,0,0,0,1.0,
-	    -4.0,  -2.0,  4.0, 0, MANDELFP, NOFRACTAL, 10, 0, NULL, NULL, FUNCTIONINPIXEL, NOSYM, 1280.0,
+	    -4.0,  -2.0,  4.0, 0, MANDELFP, NOFRACTAL, 10, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, NOSYM, 1280.0,
 	NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
     },
     {
@@ -3188,22 +3188,22 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"10.) z=z*z*z+c",
 	    NULL, NULL,
-	    NULL, NULL, 3.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, 3, ESCAPING
+	    NULL, NULL, 0.0, 0.0, 3.0, 0.0, 4.0, XYAXIS, 3, ESCAPING
 	},
 	{
 	"11.) z=z*z*z*z+c",
 	    NULL, NULL,
-	    NULL, NULL, 4.0, 0.0, 0.0, 0.0, 4.0, XAXIS, 4, ESCAPING
+	    NULL, NULL, 0.0, 0.0, 4.0, 0.0, 4.0, XAXIS, 4, ESCAPING
 	},
 	{
 	"12.) z=z*z*z*z*z+c",
 	    NULL, NULL,
-	    NULL, NULL, 5.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, 5, ESCAPING
+	    NULL, NULL, 0.0, 0.0, 5.0, 0.0, 4.0, XYAXIS, 5, ESCAPING
 	},
 	{
 	"13.) z=z*z*z*z*z*z+c",
 	    NULL, NULL,
-	    NULL, NULL, 6.0, 0.0, 0.0, 0.0, 4.0, XAXIS, 6, ESCAPING
+	    NULL, NULL, 0.0, 0.0, 6.0, 0.0, 4.0, XAXIS, 6, ESCAPING
 	},
 	{
 	"14.) z1=z*z+c; z=z*z+c*z2; z2=z",
@@ -3268,52 +3268,52 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"26.) Newton/Mandel, 5th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 5.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 5.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"27.) Newton/Mandel, 7th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 7.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 7.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"28.) Newton/Mandel, 9th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 9.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 9.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"29.) Newton/Mandel, 13th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 13.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 13.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"30.) Newton/Mandel, 8th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 8.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 8.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"31.) Newton/Mandel, Newton Diamond",
 	    NULL, NULL,
-	    NULL, NULL, 5.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 5.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"32.) Newton/Mandel, Newton Pentagon",
 	    NULL, NULL,
-	    NULL, NULL, 6.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 6.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"33.) Newton/Mandel, Newton Hexagon",
 	    NULL, NULL,
-	    NULL, NULL, 7.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 7.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"34.) Newton/Mandel, Newton Octagon",
 	    NULL, NULL,
-	    NULL, NULL, 9.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 9.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"35.) Newton/Mandel, 9th order Newton Flower",
 	    NULL, NULL,
-	    NULL, NULL, 13.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 13.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"36.) Newton Variations, z=z-(z*z*z*z*c-z+c)/(4*z*z*z*c)",
@@ -3398,42 +3398,42 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"52.) Newton/Mandel, 8th order Newton flower",
 	    NULL, NULL,
-	    NULL, NULL, 8.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 8.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"53.) Newton/Mandel, 6th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 6.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 6.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"54.) More Newton Msets, 15th order Newton Mset flower",
 	    NULL, NULL,
-	    NULL, NULL, 15.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 15.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"55.) More Newton Msets, 4th order Newton's apple",
 	    NULL, NULL,
-	    NULL, NULL, 4.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 4.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"56.) More Newton Msets, 25th order Newton Mset flower",
 	    NULL, NULL,
-	    NULL, NULL, 25.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 25.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"57.) More Newton Msets, 38th order Newton Mset flower",
 	    NULL, NULL,
-	    NULL, NULL, 38.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 38.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"58.) More Newton Msets, 50th order Newton Mset flower",
 	    NULL, NULL,
-	    NULL, NULL, 50.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 50.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"59.) More Newton Msets, 5th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 6.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 6.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"60.) More Newton Msets, 18th order Newton Mset flower",
@@ -3553,17 +3553,17 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"83.) Quartets, t=0; z1=z; z=z*z*z-t*t*t+c; z=z1",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, 3, ESCAPING
+	    NULL, NULL, 0.0, 0.0, 3.0, 0.0, 4.0, XYAXIS, 4, ESCAPING
 	},
 	{
 	"84.) Quartets, t=0; z1=z; z=z*z*z*z-t*t*t*t+c; t=z1", 
 	    NULL, NULL,
-	    NULL, NULL, 4.0, 0.0, 0.0, 0.0, 4.0, XAXIS, 4, ESCAPING
+	    NULL, NULL, 0.0, 0.0, 4.0, 0.0, 4.0, XAXIS, 4, ESCAPING
 	},
 	{
 	"85.) Quartets, z2=z; z=(z^4)+c; c=z2",
 	    NULL, NULL,
-	    NULL, NULL, 4.0, 0.0, 0.0, 0.0, 4.0, XAXIS, 4, ESCAPING
+	    NULL, NULL, 0.0, 0.0, 4.0, 0.0, 4.0, XAXIS, 4, ESCAPING
 	},
 	{
 	"86.) Newton Variations, z=z-((z^4)-z)/(4*(z^3)-1); z=z*z*c",
@@ -3618,7 +3618,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"96.) Quartets, z1=z; z=z*z*z*z+z2/2+c;; z2=z1",
 	    NULL, NULL,
-	    NULL, NULL, 4.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, ESCAPING
+	    NULL, NULL, 0.0, 0.0, 4.0, 0.0, 4.0, XAXIS, -1, ESCAPING
 	},
 	{
 	"97.) Polynomials, z = z*z+c*(1+sqrt(z))",
@@ -3668,7 +3668,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"106.) More Fractals, 5th order N/Mset",
 	    NULL, NULL,
-	    NULL, NULL, 5.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 0.0, 0.0, 5.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"107.) More Fractals, z1 = z; z = sin(z) - c; c = 1/(z*50); [quartet]", 
@@ -3739,7 +3739,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"120.) Flarium 07, Polynomial: z = (z*z+c)^(cn+c)",
 	    NULL, NULL,
-	    NULL, NULL, 3.0, 0.0, 0.0, 0.0, 1000.0, NOSYM, -1, ESCAPING
+	    NULL, NULL, 0.0, 0.0, 3.0, 0.0, 1000.0, NOSYM, -1, ESCAPING
 	},
 	{
 	"121.) Flarium 08, Sharon Webb: z = z*z*z*z+1/c; [Sharon Star]",
@@ -3799,7 +3799,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"132.) Flarium 27, Polynomial: z=z*z*(cn+z)/(cn+z+c)+c",
 	    NULL, NULL,
-	    NULL, NULL, 3.0, 0.0, 0.0, 0.0, 1000.0, XAXIS, 2, ESCAPING
+	    NULL, NULL, 0.0, 0.0, 3.0, 0.0, 1000.0, XAXIS, 2, ESCAPING
 	},
 	{
 	"133.) Flarium 28, Derbyshire / Newton: z=z - (z*z*z-1)/(3*z*z)+c; [Nova-Mandelbrot-MultiFract]",
@@ -3964,7 +3964,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"165.) Flarium 67-69, Newton Variations: z = ((z-(((z^n)-1)/(n*(z^(n-1)))))^2)*c; ",
 	    NULL, NULL,
-	    NULL, NULL, 3.0, 0.0, 0.0, 0.0, 1000.0, XAXIS, 2, ESCAPING
+	    NULL, NULL, 0.0, 0.0, 3.0, 0.0, 1000.0, XAXIS, 2, ESCAPING
 	},
 	{
 	"166.) Flarium 80, Newton Variations: z=((z*z*z*z-1)/(1-(3*z*z*z)))*c",
@@ -3999,7 +3999,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"172.) Flarium 112-116, Polynomials: z=z^n*c+z*c; Dragon curve variations",
 	    NULL, NULL,
-	    NULL, NULL, 3.0, 0.0, 0.0, 0.0, 1000.0, XAXIS, -1, ESCAPING
+	    NULL, NULL, 0.0, 0.0, 3.0, 0.0, 1000.0, XAXIS, -1, ESCAPING
 	},
 	{
 	"173.) Flarium 117, Newton Variations: z = z-(z*z*z-z*c-1)/(3*z*z+c-1)",
@@ -4024,7 +4024,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"177.) Flarium 145, Polynomial: z=z^2+c [Jaenisch method]",
 	    NULL, NULL,
-	    NULL, NULL, 2.0, 0.0, 4.0, 0.0, 1000.0, NOSYM, 2, ESCAPING
+	    NULL, NULL, 4.0, 2.0, 0.0, 0.0, 1000.0, NOSYM, 2, ESCAPING
 	},
 	NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0
     };
@@ -4054,6 +4054,7 @@ struct BigFractalStuff BigFractalSpecific[]=
 	{ MAGNET2,	    NULL,			NullSetup },
 	{ TEDDY,	    NULL,			NullSetup },
 	{ NEWTONMSET,	    NULL,			NullSetup },
+	{ NEWTONVARIATION,  NULL,			NullSetup },
 	{ NEWTONJULIANOVA,  NULL,			NullSetup },
 	{ TALIS,	    NULL,			NullSetup },
 	{ NEWTONCROSS,	    NULL,			NullSetup },
@@ -4083,7 +4084,7 @@ struct BigFractalStuff BigFractalSpecific[]=
 //	{ REDSHIFTRIDER,    NULL,			NullSetup },
 	{ SLOPEDERIVATIVE,  InitSlopeFractal,		DoSlopeFractal },	// this function runs both float and bignum
 	{ SLOPEFORWARDDIFF, InitSlopeFractal,		DoSlopeFractal },	// same function used but splits depending on type
-//	{ POLYNOMIAL,	    NULL,			NullSetup },
+	{ POLYNOMIAL,	    NULL,			NullSetup },
 	{ 0, NULL, NULL }
     };
 

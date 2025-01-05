@@ -326,6 +326,8 @@ void	CPixel::tidy_worklist()
 int	CPixel::StandardCalculationMode(HWND hwnd, CSlope Slope, int user_data(HWND hwnd))
 
     {
+//    TestQDManp();
+//    return 0;
 //    *ThreadComplete = false;
     switch (calcmode)
 	{

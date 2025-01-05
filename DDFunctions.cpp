@@ -1,23 +1,16 @@
-/*
-    FUNCTIONS.CPP a module for the per pixel calculations of fractals. 
-    
-    Written in Microsoft Visual 'C++' by Paul de Leeuw.
 
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
-*/
 
-#include	<math.h>
-#include	"manp.h"
-#include	"fractype.h"
-#include	"Complex.h"
-#include	"pixel.h"
+// simple example of QD usage to illustrate linking process
+// Alex Kaiser, LBNL, 6/3/2010
+
+#include    "DDComplex.h"
+#include    "pixel.h"
 
 /**************************************************************************
 	Initialise functions for each pixel
 **************************************************************************/
 
-int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
+int	CPixel::DDInitFunctions(WORD type, DDComplex *z, DDComplex *q)
     {
     switch (type)
 	{
@@ -97,6 +90,8 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 	    break;
 
 	case CUBIC:					// Art Matrix Cubic
+	    {
+	    DDComplex	t2, t3, temp;
 	    switch ((int)param[0])
 		{
 		case 0:
@@ -125,43 +120,45 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 		{
 		t3 = *q * 3;				// T3 = 3*T
 		t2 = q->CSqr();				// T2 = T*T
-		a = (t2 + 1) / t3;			// A  = (T2 + 1)/T3
+		aDD = (t2 + 1) / t3;			// A  = (T2 + 1)/T3
 							// B  = 2*A*A*A + (T2 - 2)/T3    
-		temp = a.CCube() * 2;			// 2*A*A*A
-		b = (t2 - 2) / t3 + temp;		// B  = 2*A*A*A + (T2 - 2)/T3
+		temp = aDD.CCube() * 2;			// 2*A*A*A
+		bDD = (t2 - 2) / t3 + temp;		// B  = 2*A*A*A + (T2 - 2)/T3
 		}
 	    else if (subtype == 'C' || subtype == 'F')	// CCIN or CFIN
 		{
-		a = *q;					// A = T
+		aDD = *q;				// A = T
 							// find B = T + 2*T*T*T
 		temp = q->CCube();			// B = T*T*T
 		if (subtype == 'C')
-		    b = temp + temp + *q;		// B = B * 2 + T
+		    bDD = temp + temp + *q;		// B = B * 2 + T
 		else
 		    {
-		    b = (temp - *q) * 2;		// B = B * 2 - 2 * T
-		    a2 = a + a;
+		    bDD = (temp - *q) * 2;		// B = B * 2 - 2 * T
+		    a2DD = aDD + aDD;
 		    }
 		}
 	    else if (subtype == 'K')			// CKIN 
 		{
-		a = 0;
-		v = 0;
-		b = *q;					// B = T
+		aDD = 0;
+		vDD = 0;
+		bDD = *q;				// B = T
 		}
-	    aa3 = a.CSqr() * 3;				// AA3 = A*A*3
+	    aa3DD = aDD.CSqr() * 3;				// AA3 = A*A*3
 	    if (!juliaflag)
-		*z = -a;				// Z = -A
+		*z = -aDD;				// Z = -A
 	    break;
+	    }
 
 	case SPECIALNEWT:				// Art Matrix Newton
-	    l2 = q->CSqr();				// L2 = L*L
-	    a = -l2 + 0.25;				// A = ( .25,0) - L2
-	    b = -l2 - 0.75;				// B = (-.75,0) - L2 
-	    lm5 = *q - 0.5;				// LM5 = L - (.5,0)
-	    lp5 = *q + 0.5;				// LP5 = L + (.5,0)
+	    l2DD = q->CSqr();				// L2 = L*L
+	    aDD = -l2DD + 0.25;				// A = ( .25,0) - L2
+	    bDD = -l2DD - 0.75;				// B = (-.75,0) - L2 
+	    lm5DD = *q - 0.5;				// LM5 = L - (.5,0)
+	    lp5DD = *q + 0.5;				// LP5 = L + (.5,0)
 	    break;
 
+/*
 	case MATEIN:					// Art Matriuc Matein fractal
 	    if ((absolute = q->CSumSqr()) > 1.0)
 		return(-1);				// not inside set
@@ -177,6 +174,10 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 	    distance = 1.0;				// D = 1
 	    oz = z->CInvert();				// OZ = 1/Z
 	    break;
+*/
+
+	case EXPFRACTAL:				// there's no initialisation for exp()
+		break;
 
 	case SINFRACTAL:				// Sine
 	    if (!juliaflag)
@@ -221,6 +222,7 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 		}
 	    break;
 
+/*
 	case RATIONALMAP:				// Art Matrix Rational Map 
 	    switch ((int)param[0])
 		{
@@ -315,81 +317,78 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 		*z = temp1.CInvert();			// Z = 1/(A*Z*Z + B*Z + 1)
 		}
 	    break;
+*/
 
 	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
-	    InitManDerFunctions(subtype, z, q);
+	    DDInitManDerFunctions(subtype, z, q);
 	    break;
 
 	case TIERAZON:					// a group of Tierazon fractals
-	    InitTierazonFunctions(subtype, z, q);
+	    DDInitTierazonFunctions(subtype, z, q);
 	    break;
 
 	case NEWTONAPPLE:				// a specific Tierazon fractal
-	    InitTierazonFunctions(55, z, q);
+	    DDInitTierazonFunctions(55, z, q);
 	    break;
 
 	case NEWTONFLOWER:				// a specific Tierazon fractal
-	    InitTierazonFunctions(35, z, q);
+	    DDInitTierazonFunctions(35, z, q);
 	    break;
 
 	case NEWTONMSET:				// a specific Tierazon fractal
-	    InitTierazonFunctions(52, z, q);
+	    DDInitTierazonFunctions(52, z, q);
 	    break;
 
 	case NEWTONPOLYGON:				// a specific Tierazon fractal
-	    InitTierazonFunctions(31, z, q);
+	    DDInitTierazonFunctions(31, z, q);
 	    break;
 
 	case NEWTONCROSS:				// a specific Tierazon fractal
-	    InitTierazonFunctions(59, z, q);
+	    DDInitTierazonFunctions(59, z, q);
 	    break;
 
 	case NEWTONJULIANOVA:				// a specific Tierazon fractal
-	    InitTierazonFunctions(2, z, q);
+	    DDInitTierazonFunctions(2, z, q);
 	    break;
 
 	case NEWTONVARIATION:				// a specific Tierazon fractal
-	    InitTierazonFunctions(87, z, q);
+	    DDInitTierazonFunctions(87, z, q);
 	    break;
 
 	case QUARTET1:					// a specific Tierazon fractal
-	    InitTierazonFunctions(83, z, q);
+	    DDInitTierazonFunctions(83, z, q);
 	    break;
 
 	case QUARTET2:					// a specific Tierazon fractal
-	    InitTierazonFunctions(85, z, q);
+	    DDInitTierazonFunctions(85, z, q);
 	    break;
 
 	case QUARTET3:					// a specific Tierazon fractal
-	    InitTierazonFunctions(96, z, q);
+	    DDInitTierazonFunctions(96, z, q);
 	    break;
 
 	case NOVA:
-	    InitTierazonFunctions(2, z, q);
-//	    if (*degree < 2)
-//		*degree = 2;
-//	    z->x = 1.0 + param[1];
-//	    z->y = 0.0 + param[2];
+	    DDInitTierazonFunctions(2, z, q);
 	    break;
 
 	case QUAD:					// a specific Tierazon fractal
-	    InitTierazonFunctions(90, z, q);
+	    DDInitTierazonFunctions(90, z, q);
 	    break;
 
 	case RAMONSIN:					// a specific Tierazon fractal
-	    InitTierazonFunctions(116, z, q);
+	    DDInitTierazonFunctions(116, z, q);
 	    break;
 
 	case RAMONCOS:					// a specific Tierazon fractal
-	    InitTierazonFunctions(117, z, q);
+	    DDInitTierazonFunctions(117, z, q);
 	    break;
 
 	case FORMULA05:					// a specific Tierazon fractal
-	    InitTierazonFunctions(5, z, q);
+	    DDInitTierazonFunctions(5, z, q);
 	    break;
 
 	case TEDDY:					// a specific Tierazon fractal
-	    InitTierazonFunctions(104, z, q);
+	    DDInitTierazonFunctions(104, z, q);
 	    break;
 
 /*
@@ -411,6 +410,7 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 #define TEDDY			189
 
 */
+/*
 	case TETRATION:					// a specific Tierazon fractal
 	    InitTetration(z, q);
 	    break;
@@ -418,8 +418,8 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 	case KLEINIAN:					// a specific Tierazon fractal
 	    InitKleinian(z, q);
 	    break;
+*/
 	}
-
     return 0;
     }
 
@@ -427,71 +427,65 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 	Run functions for each iteration
 **************************************************************************/
 
-int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration)
+int	CPixel::run_DD_fractal(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration)
     {
+    DDComplex	temp1, temp2;
+
     switch (type)
 	{
 	case MANDELFP:					// Mandelbrot
 	case MANDEL:					// to handle fractint par files
 	case JULIA:					// to handle fractint par files
-	case JULIAFP:					// like he said
-
-	    sqr.x = z->x * z->x;
-	    sqr.y = z->y * z->y;
-	    real_imag = z->x * z->y;
-	    z->x = q->x + sqr.x - sqr.y;
-	    z->y = q->y + real_imag + real_imag;
-	    return BailoutTest(z, sqr);
-/*
 	    {
-	    Complex z2 = {z->x * z->x, z->y * z->y};
-	    Complex one = {1.0,0.0};
-	    *z = (*z * *z * *z) / (one + z2) + *q;
-	    return (z->CSumSqr() >= rqlim);
-	    }
+	    dd_real	realimagDD;
+	    DDComplex	sqrDD;
 
-	    {
-	    z->y += q->y * sin(z->x);
-	    z->x += q->x * z->y;
-	    return (z->CSumSqr() >= rqlim);
+	    sqrDD.x = z->x * z->x;
+	    sqrDD.y = z->y * z->y;
+	    realimagDD = z->x * z->y;
+	    z->x = q->x + sqrDD.x - sqrDD.y;
+	    z->y = q->y + realimagDD + realimagDD;
+	    return DDBailoutTest(z, sqrDD, rqlim, BailoutTestType);
 	    }
-*/
-	case POWER:					// Power
-	case JULIA4FP:
-	case JULIA4:
-	case MANDEL4FP:
-	case MANDEL4:
-	    *z = z->CPolynomial(*degree);
-	    *z = *z + *q;
-	    return FractintBailoutTest(z);
-//	    return (z->CSumSqr() >= rqlim);
-
 	case BURNINGSHIP:				// Burning Ship
-	    sqr.x = z->x * z->x;
-	    sqr.y = z->y * z->y;
-	    real_imag = fabs(z->x * z->y);
-	    z->x = sqr.x - sqr.y + q->x;
-	    z->y = real_imag + real_imag - q->y;
-	    return BailoutTest(z, sqr);
+	    {
+	    dd_real	t, realimagDD;
+	    DDComplex	sqrDD;
+
+	    sqrDD.x = z->x * z->x;
+	    sqrDD.y = z->y * z->y;
+	    realimagDD = fabs(z->x * z->y);
+	    z->x = sqrDD.x - sqrDD.y + q->x;
+	    z->y = realimagDD + realimagDD - q->y;
+	    return DDBailoutTest(z, sqrDD, rqlim, BailoutTestType);
+	    }
 
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	    z->x = fabs(z->x);
 	    z->y = -fabs(z->y);
 	    *z = z->CPolynomial(*degree);
 	    *z = *z + *q;
-	    return FractintBailoutTest(z);
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+
+	case POWER:			// Power
+	    *z = z->CPolynomial(*degree);
+	    *z = *z + *q;
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
 
 	case CUBIC:					// Art Matrix Cubic
+	    {
+	    DDComplex	temp;
+
 	    if (subtype == 'K')				// CKIN
 		{
-		*z = z->CCube() + b;			// Z = Z*Z*Z + B
+		*z = z->CCube() + bDD;			// Z = Z*Z*Z + B
 		z->x += param[2];
 		z->y += param[3];
 		}
 	    else
 		{
-		temp = z->CCube() + b;			// Z = Z*Z*Z + B
-		*z = temp - aa3 * *z;			// Z = Z*Z*Z - AA3*Z + B
+		temp = z->CCube() + bDD;		// Z = Z*Z*Z + B
+		*z = temp - aa3DD * *z;			// Z = Z*Z*Z - AA3*Z + B
 		z->x += param[2];
 		z->y += param[3];
 		}
@@ -507,13 +501,13 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 			*SpecialFlag = TRUE;		// for decomp and biomorph
 			return (TRUE);
 			}
-		    v = *z + a2;
+		    vDD = *z + a2DD;
 		    }
 		else if (subtype == 'K')
-		    v = *z - v;
+		    vDD = *z - vDD;
 		else
-		    v = *z - a;
-		if (v.CSumSqr() <= 0.000001)
+		    vDD = *z - aDD;
+		if (vDD.CSumSqr() <= 0.000001)
 		    {
 		    *iteration = special;
 		    *SpecialFlag = TRUE;		// for decomp and biomorph 
@@ -521,6 +515,7 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 		    }
 		return (FALSE);
 		}
+	    }
 
 	case SPECIALNEWT:				// Art Matrix Newton
 	    {
@@ -528,56 +523,33 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 		special = 2;
 	    else
 		special = (int)param[0];
-	    Complex z2 = z->CSqr();			// z2 = z*z
+	    DDComplex z2 = z->CSqr();			// z2 = z*z
 							// Z  =  (2*Z*Z2 + A)/(3*Z2 + B)
-	    Complex top = z2 * *z * 2 + a;
-	    Complex bottom = z2 * 3 + b;
+	    DDComplex top = z2 * *z * 2 + aDD;
+	    DDComplex bottom = z2 * 3 + bDD;
 	    *z = top / bottom;
 	    z->x += param[1];
 	    z->y += param[2];
-	    v = *z - 1;
-	    if (v.CSumSqr() <= 0.000001)
+	    vDD = *z - 1.0;
+	    if (vDD.CSumSqr() <= 0.000001)
 		{
 		phaseflag = 0;				// first phase
 		return(TRUE);
 		}
-	    v = *z - lm5;
-	    if (v.CSumSqr() <= 0.000001)
+	    vDD = *z - lm5DD;
+	    if (vDD.CSumSqr() <= 0.000001)
 		{
 		phaseflag = 1;				// second phase
 		return(TRUE);
 		}
-	    v = *z + lp5;
-	    if (v.CSumSqr() <= 0.000001)
+	    vDD = *z + lp5DD;
+	    if (vDD.CSumSqr() <= 0.000001)
 		{
 		phaseflag = 2;				// third phase
 		return(TRUE);
 		}
 	    return(FALSE);
 	    }
-
-	case MATEIN:					// Art Matriuc Matein fractal
-	    epsilon = 0.01;
-	    escape = 10.0E20;
-	    *z = *q * (*z + oz);			// Z = L*(Z + OZ)
-	    z->x += param[0];
-	    z->y += param[1];
-	    oz = z->CInvert();				// OZ = 1/Z
-	    temp = -oz / *z + 1;			// T = 1 - OZ/Z
-							// D = D*ABSL*(REAL(T)*REAL(T) + IMAG(T)*IMAG(T))
-	    distance = distance * absolute * temp.CSumSqr();
-
-	    if (distance <= epsilon)
-		{
-		phaseflag = 0;			// first phase
-		return(TRUE);
-		}
-	    if (distance > escape)
-		{
-		phaseflag = 1;			// second phase
-		return(TRUE);
-		}
-	    return(FALSE);
 
 /**************************************************************************
     Determine count before 'Z' becomes unstable
@@ -591,7 +563,7 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 		*z = *q + z->CSin();
 	    z->x += param[0];
 	    z->y += param[1];
-	    return FractintBailoutTest(z);
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
 
 	case EXPFRACTAL:				// Exponential
 	    {
@@ -632,142 +604,87 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	    return(FALSE);
 	    }
 
-	case THORN:					// Thorn Fractal
-	    {
-	    double a1 = z->x;
-	    double b1 = z->y;
-	    z->x = a1 / cos(b1) + q->x;
-	    z->y = b1 / sin(a1) + q->y;
-	    return FractintBailoutTest(z);
-	    }
-
-	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
-	    *z = a * *z * *z + ((param[5] == 1.0) ? 1.0 : -1.0) * z->CPolynomial(*degree);
-	    *z = *z + *q;
-	    return FractintBailoutTest(z);
-
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
 	    {
-	    double m = param[1];
-	    a = z->CPolynomial(*degree - 1);
-	    *z = (a * *z) / (m + a) + *q;
-	    return FractintBailoutTest(z);
+	    dd_real m = param[1];
+	    aDD = z->CPolynomial(*degree - 1);
+	    *z = (aDD * *z) / (aDD + m) + *q; 
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
 	    }
 
 	case POLYNOMIAL:				// Polynomial
 	    {
-	    Complex	InitialZ = *z;
-	    Complex	FinalZ = { 0.0, 0.0 };
+	    DDComplex	InitialZ = zDD;
+	    DDComplex	FinalZ = { 0.0, 0.0 };
 
 	    for (int m = 0; m < MAXPOLYDEG; m++)
 		{
-		Complex BigComplexTemp = InitialZ;
+		DDComplex ComplexTemp = InitialZ;
 		if (param[2 + m] != 0.0)
 		    {
 		    for (int k = 0; k < MAXPOLYDEG - m - 1; k++)
-			BigComplexTemp *= InitialZ;
-		    FinalZ += (BigComplexTemp * param[2 + m]);
+			ComplexTemp *= InitialZ;
+		    FinalZ += (ComplexTemp * param[2 + m]);
 		    }
 		}
 	    *z = FinalZ + *q;
-	    return FractintBailoutTest(z);
+	    return DDFractintBailoutTest(&zDD, rqlim, BailoutTestType);
 	    }
-
-	case RATIONALMAP:				// Art Matrix Rational Map 
-	    {
-	    Complex az = a * *z;			// AZ = A*Z
-	    temp = az * *z + 1;
-	    temp1 = b * *z + temp;
-	    *z = temp1.CInvert();			// Z = 1/(AZ*Z + B*Z + 1)
-	    z->x += param[2];
-	    z->y += param[3];
-	    if (z->CSumSqr() > escape)
-		{
-		if ((alpha.x * z->y + alpha.y * z->x) <= 0.0)
-		    *color = penp[*iteration % 4];
-		else
-		    *color = penn[*iteration % 4];
-		*iteration = *color;
-		return (TRUE);
-		}
-	    temp = az * 2 + b;
-	    Complex d = z->CSqr()*temp;			// D = (2*AZ + B)*Z*Z
-	    double dist = d.CSumSqr();
-	    der *= dist;				// DER  =   DER*(REAL(D)*REAL(D) + IMAG(D)*IMAG(D))
-	    if (der < epsilon)
-		{
-		*iteration = threshold;
-		return(TRUE);
-		}
-	    if (*iteration >= threshold)
-		{
-		*iteration = special;
-		return(TRUE);
-		}
-	    return(FALSE);				// continue iterations
-	    }
-
-	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
-	    return (RunManDerFunctions(subtype, z, q, SpecialFlag, iteration));
 
 	case TIERAZON:					// a group of Tierazon fractalsa
-	    return (RunTierazonFunctions(subtype, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(subtype, z, q, &z2DD, SpecialFlag, iteration));
 
 	case NEWTONAPPLE:				// a specific Tierazon fractal
-	    return (RunTierazonFunctions(55, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(55, z, q, &z2DD, SpecialFlag, iteration));
 
 	case NEWTONFLOWER:				// a specific Tierazon fractal
-	    return (RunTierazonFunctions(35, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(35, z, q, &z2DD, SpecialFlag, iteration));
 
 	case NEWTONMSET:				// a specific Tierazon fractal
-	    return (RunTierazonFunctions(52, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(52, z, q, &z2DD, SpecialFlag, iteration));
 
 	case NEWTONPOLYGON:				// a specific Tierazon fractal
-	    return (RunTierazonFunctions(31, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(31, z, q, &z2DD, SpecialFlag, iteration));
 
 	case NEWTONCROSS:				// a specific Tierazon fractal
-	    return (RunTierazonFunctions(59, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(59, z, q, &z2DD, SpecialFlag, iteration));
 
 	case NEWTONJULIANOVA:				// a specific Tierazon fractal
-	    return (RunTierazonFunctions(2, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(2, z, q, &z2DD, SpecialFlag, iteration));
 
 	case NEWTONVARIATION:				// a specific Tierazon fractal
-	    return (RunTierazonFunctions(87, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(87, z, q, &z2DD, SpecialFlag, iteration));
 
 	case QUARTET1:					// a specific Tierazon fractal
-	    return (RunTierazonFunctions(83, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(83, z, q, &z2DD, SpecialFlag, iteration));
 
 	case QUARTET2:					// a specific Tierazon fractal
-	    return (RunTierazonFunctions(85, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(85, z, q, &z2DD, SpecialFlag, iteration));
 
 	case QUARTET3:					// a specific Tierazon fractal
-	    return (RunTierazonFunctions(96, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(96, z, q, &z2DD, SpecialFlag, iteration));
 
 	case NOVA:
-	    return (RunTierazonFunctions(2, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(2, z, q, &z2DD, SpecialFlag, iteration));
 
 	case QUAD:					// a specific Tierazon fractal
-	    return (RunTierazonFunctions(90, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(90, z, q, &z2DD, SpecialFlag, iteration));
 
 	case RAMONSIN:					// a specific Tierazon fractal
-	    return (RunTierazonFunctions(116, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(116, z, q, &z2DD, SpecialFlag, iteration));
 
 	case RAMONCOS:					// a specific Tierazon fractal
-	    return (RunTierazonFunctions(117, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(117, z, q, &z2DD, SpecialFlag, iteration));
 
 	case FORMULA05:					// a specific Tierazon fractal
-	    return (RunTierazonFunctions(5, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(5, z, q, &z2DD, SpecialFlag, iteration));
 
 	case TEDDY:					// a specific Tierazon fractal
-	    return (RunTierazonFunctions(104, z, q, SpecialFlag, iteration));
+	    return (DDRunTierazonFunctions(104, z, q, &z2DD, SpecialFlag, iteration));
 
-	case TETRATION:					// Tetration fractal
-	    return(DoTetration(iteration));
-	    break;
+	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
+	    return (DDRunManDerFunctions(subtype, z, q, SpecialFlag, iteration));
 
-	case KLEINIAN:					// Kleinian fractal
-	    return (CalculateKleinian(z));
-	    break;
 
 	}
     return 0;
@@ -777,41 +694,96 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
     Bailout Test
 **************************************************************************/
 
-bool	CPixel::BailoutTest(Complex *z, Complex SqrZ)
+bool	CPixel::DDBailoutTest(DDComplex *z, DDComplex SqrZ, double rqlim, int BailoutTestType)
     {
     double  magnitude;
-    double  manhmag;
-    double  manrmag;
+    dd_real manhmag;
+    dd_real manrmag;
+    dd_real DDBailout = rqlim;
 
     switch (BailoutTestType)
 	{
 	case BAIL_MOD:
-	    magnitude = SqrZ.x + SqrZ.y;
+	    magnitude = z->CSumSqr();
 	    return (magnitude >= rqlim);
 
 	case BAIL_REAL:
-	    return (SqrZ.x >= rqlim);
+	    return (SqrZ.x > DDBailout);
 	
 	case BAIL_IMAG:
-	    return (SqrZ.y >= rqlim);
+	    return (SqrZ.y > DDBailout);
 
 	case BAIL_OR:
-	    return (SqrZ.x >= rqlim || SqrZ.y >= rqlim);
+	    return (SqrZ.x > DDBailout || SqrZ.y > DDBailout);
 	
 	case BAIL_AND:
-	    return (SqrZ.x >= rqlim && SqrZ.y >= rqlim);
+	    return (SqrZ.x > DDBailout && SqrZ.y > DDBailout);
 
 	case MANH:
-	    manhmag = fabs(z->x) + fabs(z->y);
-	    return ((manhmag * manhmag) >= rqlim);
+	    manhmag = abs(z->x) + abs(z->y);
+	    return (sqr(manhmag) > DDBailout);
 
 	case MANR:
 	    manrmag = z->x + z->y;	    // don't need abs() since we square it next
-	    return ((manrmag * manrmag) >= rqlim);
+	    return (sqr(manrmag) > DDBailout);
 
 	default:
-	    magnitude = SqrZ.x + SqrZ.y;
+	    magnitude = z->CSumSqr();
 	    return (magnitude >= rqlim);
 	}
     }
+
+/**************************************************************************
+    Bailout Test
+**************************************************************************/
+
+bool	CPixel::DDFractintBailoutTest(DDComplex *z, double rqlim, int BailoutTestType)
+    {
+    DDComplex TempSqr;
+    double  magnitude;
+    dd_real manhmag;
+    dd_real manrmag;
+    dd_real DDBailout = rqlim;
+
+    switch (BailoutTestType)
+	{
+	case BAIL_MOD:
+	    magnitude = z->CSumSqr();
+	    return (magnitude >= rqlim);
+
+	case BAIL_REAL:
+	    TempSqr.x = sqr(z->x);
+	    return (TempSqr.x > DDBailout);
+	
+	case BAIL_IMAG:
+	    TempSqr.y = sqr(z->y);
+	    return (TempSqr.y > DDBailout);
+
+	case BAIL_OR:
+	    TempSqr.x = sqr(z->x);
+	    TempSqr.y = sqr(z->y);
+	    return (TempSqr.x > DDBailout || TempSqr.y > DDBailout);
+	
+	case BAIL_AND:
+	    TempSqr.x = sqr(z->x);
+	    TempSqr.y = sqr(z->y);
+	    return (TempSqr.x > DDBailout && TempSqr.y > DDBailout);
+
+	case MANH:
+	    manhmag = abs(z->x) + abs(z->y);
+	    return (sqr(manhmag) > DDBailout);
+
+	case MANR:
+	    manrmag = z->x + z->y;	    // don't need abs() since we square it next
+	    return (sqr(manrmag) > DDBailout);
+
+	default:
+	    magnitude = z->CSumSqr();
+	    return (magnitude >= rqlim);
+	}
+    }
+
+
+
+
 

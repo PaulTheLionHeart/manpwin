@@ -21,31 +21,31 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8253B6B5-D533-470C-B39B-6E7E35B9CB70}</ProjectGuid>
     <RootNamespace>Manpwin</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
     <ProjectName>Manpwin64</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -183,7 +183,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:MSVCRTD.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:MSVCRTD.lib "D:\c\ManpWINMpfr\x64\Debug\qdlib.lib" </AdditionalOptions>
       <AdditionalDependencies>oldnames.lib;odbc32.lib;odbccp32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -291,7 +291,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalOptions>/NODEFAULTLIB:LIBCMT.lib /LTCG %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:MSVCRTD.lib "D:\c\ManpWINMpfr\x64\Debug\qdlib.lib" </AdditionalOptions>
       <AdditionalDependencies>oldnames.lib;odbc32.lib;odbccp32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -342,6 +342,11 @@
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="Cross.cpp" />
     <ClCompile Include="Curves.cpp" />
+    <ClCompile Include="DDComplex.cpp" />
+    <ClCompile Include="DDFunctions.cpp" />
+    <ClCompile Include="DDMandelDerivativesFN.cpp" />
+    <ClCompile Include="DDPixel.cpp" />
+    <ClCompile Include="DDTZFunctions.cpp" />
     <ClCompile Include="Decomp.cpp" />
     <ClCompile Include="Default.cpp" />
     <ClCompile Include="DerivSlope.cpp" />
@@ -415,6 +420,11 @@
     <ClCompile Include="Popcorn.cpp" />
     <ClCompile Include="Potential.cpp" />
     <ClCompile Include="preview.cpp" />
+    <ClCompile Include="QDComplex.cpp" />
+    <ClCompile Include="QDFunctions.cpp" />
+    <ClCompile Include="QDMandelDerivativesFN.cpp" />
+    <ClCompile Include="QDPixel.cpp" />
+    <ClCompile Include="QDTZFunctions.cpp" />
     <ClCompile Include="Rotate.cpp" />
     <ClCompile Include="RTJulia.cpp" />
     <ClCompile Include="Savefile.cpp" />
@@ -457,6 +467,7 @@
     <ClInclude Include="CodeVersion.h" />
     <ClInclude Include="colour.h" />
     <ClInclude Include="Complex.h" />
+    <ClInclude Include="DDComplex.h" />
     <ClInclude Include="Dib.h" />
     <ClInclude Include="EditPal.h" />
     <ClInclude Include="ExpComplex.h" />
@@ -477,6 +488,7 @@
     <ClInclude Include="Polygon.h" />
     <ClInclude Include="Potential.h" />
     <ClInclude Include="Preview.h" />
+    <ClInclude Include="QDComplex.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Slope.h" />
     <ClInclude Include="Tetration.h" />

@@ -427,7 +427,14 @@ void	CreateFractalName(BOOL UseszAppName, char *Name)
     else if (type == TIERAZON || type == CROSSROADS || type == ZIGZAG || type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
 	sprintf(SubData, "Sub=%d", subtype);
     else if (type == CUBIC)
-	sprintf(SubData, "Sub=C%cIN", subtype);
+	{
+	char	ch;
+	if (param[0] == 0.0)   ch = 'B';
+	if (param[0] == 1.0)   ch = 'C';
+	if (param[0] == 2.0)   ch = 'F';
+	if (param[0] == 3.0)   ch = 'K';
+	sprintf(SubData, "Sub=C%cIN", ch);
+	}
     else if (type == MALTHUS || type == TRIANGLES || type == GEOMETRY || type == CIRCLES || type == PASCALTRIANGLE)
 	sprintf(SubData, "Sub=%c", subtype);
     else if (type == SCREENFORMULA)
@@ -879,7 +886,15 @@ void	DisplayStatusBarInfo (int complete, char *text)
     else if (complete == INCOMPLETE)
 	{
 	sprintf(FinishedStr, ", Time %s", ShowTime (ElapsedTime));
-	sprintf(PrecisionStr, "Arb Prec: %d", precision);
+	if (BigNumFlag)	    // now we have double double and quad double...
+	    {
+	    if (precision <= 30 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+		sprintf(PrecisionStr, "DD Prec: %d", precision);
+	    else if (precision <= 60 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+		sprintf(PrecisionStr, "QD Prec: %d", precision);
+	    else
+		sprintf(PrecisionStr, "Arb Prec: %d", precision);
+	    }
 	if (OscAnimProc == MORPHING)
 	    sprintf(szStatus, "%s%s", PassStr, FinishedStr);
 	else if (type == PERTURBATION)

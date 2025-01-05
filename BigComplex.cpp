@@ -697,7 +697,7 @@ BigComplex	BigComplex::CTanh(void)
 BigComplex	BigComplex::CExp()
     {
     BigComplex	a;
-    BigDouble	t1, t2, t3, t4;
+    BigDouble	t1, t2, t3;
 
     mpfr_sin_cos(t1.x, t2.x, y.x, MPFR_RNDN);	// BigTemp1 = sin(z), BigTemp2 = cos(z)
     mpfr_exp(t3.x, x.x, MPFR_RNDN);		// a = exp(a);

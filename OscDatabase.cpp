@@ -3051,6 +3051,13 @@ struct OscillatorSpecificStuff OscillatorSpecific[]=
 	    NullSetup, DoDynamicsAndFeedback, "SelectOscParams", (DLGPROC)SelectOscParams, 0.001, 0.7, 1.0
 	},
 	{
+	"Dynamics & Stabilization of Chaotic Monetary System Using Radial Basis Function Neural Network Control",
+	    "a", "b", "c", ES, ES, ES, ES, ES, ES, ES, 0.5, -2.0, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, -0.1, 0.1, 0.1, 0.15, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -6.5, -3.0, 8.0, 1, 2, 3, 3, 3, 3, NULL, 1, YAXIS, 20000.0,
+	    NullSetup, DoDynamicsStabilizationChaoticMonetarySystem, "SelectOscParams", (DLGPROC)SelectOscParams, 0.005, 1.0, 1.0
+	},
+	{
 	"Dynamics and Synchronisation of New Hyperchaotic Complex Lorenz System in 7 Dimensions I", 
 	    "a", "b", "g", "k1", "k2", ES, ES, ES, ES, ES, 14.0, 3.0, 20.0, -5.0, -4.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", "u", "v", "w", "q", ES, ES, ES, 0.1, 0.1, 0.1, 0.0, -0.5, 0.1, 0.1, 0.0, 0.0, 0.0,
@@ -6734,6 +6741,12 @@ struct OscillatorSpecificStuff OscillatorSpecific[]=
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -20.0, -16.0, 30.0, 1, 2, 3, 3, 3, 3, NULL, 1, YAXIS, 500000.0,
 	    NullSetup, DoRossler, "SelectOscParams", (DLGPROC)SelectOscParams, 0.002, 1.0, 1.0
+	},
+	{
+	"Rössler Chaotic Oscillator with Controlled Phase Impact", "a", "b", "r", "k", "azao", "p", ES, ES, ES, ES, 0.15, 0.4, 8.5, 0.05, 5.4, PI, 0.0, 0.0, 0.0, 0.0,
+	    "x", "y", "z", "w", ES, ES, ES, ES, ES, ES, 0.1, 0.2, 0.3, 0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+	    -32.0, -18.0, 36.0, 1, 2, 3, 6, 4, 4, NULL, 1, YAXIS, 200000.0,
+	    NullSetup, DoRosslerChaoticOscillatorControlledPhaseImpact, "SelectOscParams", (DLGPROC)SelectOscParams, 0.001, 1.0, 1.0
 	},
 	{
 	"Rössler-Like System - II", "a", "b", "c", ES, ES, ES, ES, ES, ES, ES, 0.5, 1.0, -0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,

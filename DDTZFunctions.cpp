@@ -13,14 +13,16 @@
 
 #include	<math.h>
 #include	"Complex.h"
+#include	"DDComplex.h"
 #include	"fractype.h"
 #include	"pixel.h"
+
 
 /**************************************************************************
 	Initialise functions for each pixel
 **************************************************************************/
 
-int	CPixel::InitTierazonFunctions(int subtype, Complex *z, Complex *q)
+int	CPixel::DDInitTierazonFunctions(int subtype, DDComplex *z, DDComplex *q)
     {
     switch (subtype)
 	{
@@ -31,7 +33,7 @@ int	CPixel::InitTierazonFunctions(int subtype, Complex *z, Complex *q)
 	case 101:					// M-Set Method
 	case 117:					// Ramon, z = (c/cos(z))^2
 	case 118:					// N - Set Method
-	    InitFunctions(MANDELFP, z, q);
+	    DDInitFunctions(MANDELFP, z, q);
 	    break;
 
 	case 10:					// z=z*z*z+c
@@ -60,17 +62,17 @@ int	CPixel::InitTierazonFunctions(int subtype, Complex *z, Complex *q)
 	    break;
 
 	case 3:						// Ushiki's Phoenix, z=z*z-.5*z+c; z=z*z-.5*z2+c; z2=z; z=z1
-	    {
-	    c1.x = 0;
-	    c1.y = 1;
-	    if (!juliaflag)
-		*z = *q;
-	    // Rotate it so its pointing upward
-	    *z = *z * c1;
-	    *q = *q * c1;
-	    z2 = 0;
-	    break;
-	    }
+	{
+	c1DD.x = 0.0;
+	c1DD.y = 1.0;
+	if (!juliaflag)
+	    *z = *q;
+	// Rotate it so its pointing upward
+	*z = *z * c1DD;
+	*q = *q * c1DD;
+	z2DD.x = 0.0;
+	break;
+	}
 
 	case 6:						// z=z-((z*z*z)+(c-1)*z-c)/(3*(z*z)+c-1)
 	case 7:						// Newton variation, z = z-((z*z*z)+(c-1)*z-c)/(3*(z*z)+c-1)
@@ -102,25 +104,25 @@ int	CPixel::InitTierazonFunctions(int subtype, Complex *z, Complex *q)
 		z->x += param[0];
 		z->y += param[1];
 		}
-	    z2 = 1.0;
+	    z2DD = 1.0;
 	    break;
 
 	case 15:					// Phoenix II, z1=z; z=z*z + real(c) + imag(c)*z2; z2=z1
 	case 16:					// Phoenix III, z1=z; z=z*z*z +   real(c) + imag(c)*z2; z2=z1
 	case 17:					// Phoenix IV,  z1=z; z=z*z*z +.5*real(c) + imag(c)*z2; z2=z1
-	    c1.x = 0;
-	    c1.y = -1;
+	    c1DD.x = 0.0;
+	    c1.y = -1.0;
 	    if (!juliaflag)
 		*z = *q;
 	    // Rotate it so its pointing upward
 	    if (subtype != 17)
 		{
-		*z = *z * c1;
-		z2 = 0;
+		*z = *z * c1DD;
+		z2DD = 0;
 		}
 	    else
-		z2 = *z;
-	    *q = *q * c1;
+		z2DD = *z;
+	    *q = *q * c1DD;
 
 	    //c.x = 0.563;   // Paul Carlson's point
 	    //c.x = 0.56667; // Ushiki's / Pickover's point
@@ -131,93 +133,94 @@ int	CPixel::InitTierazonFunctions(int subtype, Complex *z, Complex *q)
 	Newton M-Set, Explanation by Paul Carlson
 ***************************************************************************/
 
-/*
-From - Sun Nov 09 16:15:28 1997
-Path: news.gte.net!newsfeed.gte.net!europa.clark.net!199.0.154.56!ais.net!ix.netcom.com!news
-From: pjcarlsn@ix.netcom.com (Paul and/or Joyce Carlson)
-Newsgroups: alt.binaries.pictures.fractals
-Subject: Fractal: Newton Msets Explained
-Date: Sun, 09 Nov 1997 21:54:12 GMT
-Organization: Netcom
-Lines: 72
-Expires: 30 days
-Message-ID: <6457u5$p8p@sjx-ixn2.ix.netcom.com>
-NNTP-Posting-Host: ftc-co2-12.ix.netcom.com
-X-NETCOM-Date: Sun Nov 09 12:54:29 PM PST 1997
-X-Newsreader: Forte Free Agent 1.0.82
-Xref: news.gte.net alt.binaries.pictures.fractals:9670
+    /*
+    From - Sun Nov 09 16:15:28 1997
+    Path: news.gte.net!newsfeed.gte.net!europa.clark.net!199.0.154.56!ais.net!ix.netcom.com!news
+    From: pjcarlsn@ix.netcom.com (Paul and/or Joyce Carlson)
+    Newsgroups: alt.binaries.pictures.fractals
+    Subject: Fractal: Newton Msets Explained
+    Date: Sun, 09 Nov 1997 21:54:12 GMT
+    Organization: Netcom
+    Lines: 72
+    Expires: 30 days
+    Message-ID: <6457u5$p8p@sjx-ixn2.ix.netcom.com>
+    NNTP-Posting-Host: ftc-co2-12.ix.netcom.com
+    X-NETCOM-Date: Sun Nov 09 12:54:29 PM PST 1997
+    X-Newsreader: Forte Free Agent 1.0.82
+    Xref: news.gte.net alt.binaries.pictures.fractals:9670
 
-Quite often in the past when I've posted a zoom into a
-Newton Mset I've received a message or two asking me exactly
-what a Newton Mset is, and how to go about programming
-or writing a formula for one.  Because I plan on posting
-several of them in the near future, I thought I'd save
-some time by posting an explanation in advance.
+    Quite often in the past when I've posted a zoom into a
+    Newton Mset I've received a message or two asking me exactly
+    what a Newton Mset is, and how to go about programming
+    or writing a formula for one.  Because I plan on posting
+    several of them in the near future, I thought I'd save
+    some time by posting an explanation in advance.
 
-The Newton method is a numerical method of solving for
-the roots of real or complex valued polynomial equations.
-An initial guess is made at a root and then the method is
-iterated, producing new values that (hopefully) converge
-to a root of the equation.
+    The Newton method is a numerical method of solving for
+    the roots of real or complex valued polynomial equations.
+    An initial guess is made at a root and then the method is
+    iterated, producing new values that (hopefully) converge
+    to a root of the equation.
 
-The traditional Newton fractal is similar to a Julia set
-in that the pixel values are used as the initial values
-(or guesses).  A typical equation that is used to produce
-a traditional Newton fractal is:
+    The traditional Newton fractal is similar to a Julia set
+    in that the pixel values are used as the initial values
+    (or guesses).  A typical equation that is used to produce
+    a traditional Newton fractal is:
 
-    Z^3 - 1 = 0
+	Z^3 - 1 = 0
 
-On the other hand, what I call the Newton Mset method
-solves for the roots of an equation in which the pixel
-value appears in the equation.  For example, in this
-equation the pixel value is denoted as C:
+    On the other hand, what I call the Newton Mset method
+    solves for the roots of an equation in which the pixel
+    value appears in the equation.  For example, in this
+    equation the pixel value is denoted as C:
 
-    Z^3 + C*Z^2 - Z + C = 0
+	Z^3 + C*Z^2 - Z + C = 0
 
-Because C has a different value for every pixel, the
-method actually solves a different equation for every
-pixel.  Now the question is what to use for the initial
-guess for each solution.  The answer is to use one of
-the "critical points."  These are the values of Z for
-which the second derivative vanishes and can be found
-by setting the second derivative of the equation to
-zero and solving for Z.  In the example equation
-above:
+    Because C has a different value for every pixel, the
+    method actually solves a different equation for every
+    pixel.  Now the question is what to use for the initial
+    guess for each solution.  The answer is to use one of
+    the "critical points."  These are the values of Z for
+    which the second derivative vanishes and can be found
+    by setting the second derivative of the equation to
+    zero and solving for Z.  In the example equation
+    above:
 
-    The function:          f(Z)   = Z^3 + C*Z^2 - Z + C
-    The first derivative:  f'(Z)  = 3*Z^2 + 2*C*Z - 1
-    The second derivative: f''(Z) = 6*Z + 2*C
-    Therefore,  setting 6*Z + 2*C = 0 we have Z = -C/3
+	The function:          f(Z)   = Z^3 + C*Z^2 - Z + C
+	The first derivative:  f'(Z)  = 3*Z^2 + 2*C*Z - 1
+	The second derivative: f''(Z) = 6*Z + 2*C
+	Therefore,  setting 6*Z + 2*C = 0 we have Z = -C/3
 
-The variable Z is initialized to -C/3 prior to the
-iteration loop.  From there, everything proceeds as
-usual using the general Newton Method formula:
+    The variable Z is initialized to -C/3 prior to the
+    iteration loop.  From there, everything proceeds as
+    usual using the general Newton Method formula:
 
-    Z[n+1] = Z[n] - f(Z[n]) / f'(Z[n])
+	Z[n+1] = Z[n] - f(Z[n]) / f'(Z[n])
 
-A root is assumed to be found when Z[n] and Z[n+1] are
-very close together.
+    A root is assumed to be found when Z[n] and Z[n+1] are
+    very close together.
 
-In the Newton Mset fractals that I will be posting the
-colors of the pixels have nothing to do with which
-root a pixel converged to, unlike the more traditional
-coloring method.
+    In the Newton Mset fractals that I will be posting the
+    colors of the pixels have nothing to do with which
+    root a pixel converged to, unlike the more traditional
+    coloring method.
 
-I hope this helps someone.
+    I hope this helps someone.
 
-Regards,
+    Regards,
 
-Paul Carlson
-------------------------------------------------------------------
-                email   pjcarlsn@ix.netcom.com
+    Paul Carlson
+	    ------------------------------------------------------------------
+	    email   pjcarlsn@ix.netcom.com
 
-WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
-                        http://fractal.mta.ca/fractals/carlson/
-                        http://www.cnam.fr/fractals/carlson.html
+    WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
+			    http://fractal.mta.ca/fractals/carlson/
+			    http://www.cnam.fr/fractals/carlson.html
 
-        anonymous FTP   ftp.cnam.fr   /pub/Fractals/carlson
-------------------------------------------------------------------
-*/
+	    anonymous FTP   ftp.cnam.fr   /pub/Fractals/carlson
+    ------------------------------------------------------------------
+    */
+
 	case 18:					// Newton/Mandel, z=-z/3; iterate: z=z-(z*z*z+z*z*c-z+c)/(3*z*z+2*c*z-1)
 	case 19:					// Newton/Mandel, z=-z/3; iterate: z=z-(z*z*z+z*z*c+z+c)/(3*z*z+2*c*z+1)
 	case 24:					// Newton/Mandel, z=-z/3;  iterate: z=z-((z^3)+z*z*c +c)/(3*z*z+2*z*c)
@@ -242,7 +245,7 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 	    break;
 
 	case 23:					// Newton/Mandel, z=-.5/z; iterate: z=z-((z^4)*c+(z^3)+z+c)/(4*(z^3)*c+3*z*z+1)
-  	    if (!juliaflag)
+	    if (!juliaflag)
 		*z = *q / -0.5;
 	    *z = z->CInvert();
 	    break;
@@ -417,23 +420,23 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 	    break;
 
 	case 79:					// Polynomials, CBAP  F(z) = Z^3 - 3*(A^2)*Z + B(MOD 2)
-	    {
-	    Complex ca, t2, t3;
+	{
+	DDComplex ca, t2, t3;
 
-	    t = *q;
-	    t3 = t * 3;
-	    t2 = t * t;
-	    ca = (t2 + 1) / t3;
-	    //cb=2*ca*ca*ca+(t2-cmplx(2,0))/t3;
-	    cb = ca.CCube() * 2 + (t2 - 2) / t3;
-	    caa3 = ca.CSqr() * 3;
-	    if (!juliaflag)
-		*z = -ca;
-	    }    
-	    break;
+	tDD = *q;
+	t3 = tDD * 3;
+	t2 = tDD * tDD;
+	ca = (t2 + 1) / t3;
+	//cb=2*ca*ca*ca+(t2-cmplx(2,0))/t3;
+	cbDD = ca.CCube() * 2 + (t2 - 2) / t3;
+	caa3DD = ca.CSqr() * 3;
+	if (!juliaflag)
+	    *z = -ca;
+	}
+	break;
 
 	case 80:					// Quartets, z=.5; z=z*z-z2*z2+c; z2=z
-	    z2 = 0.5;
+	    z2DD = 0.5;
 	    if (!juliaflag)
 		*z = *q;
 	    z->x += param[0];
@@ -444,13 +447,13 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 	case 82:					// Quartets, z2=z; z=z*z*z*z+5*z2*c; z2=z1
 	    if (!juliaflag)
 		*z = *q;
-	    z2 = *z;
+	    z2DD = *z;
 	    z->x += param[0];
 	    z->y += param[1];
 	    break;
 
 	case 83:					// Quartets, t=0; z1=z; z=z*z*z-t*t*t+c; z=z1
-	    z2 = 0;
+	    z2DD = 0.0;
 	    *degree = (int)param[2];
 	    if (!juliaflag)
 		*z = *q;
@@ -462,10 +465,10 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 	    *degree = (int)param[2];
 	    if (*degree < 2)
 		*degree = 2;
-	    z2.x = param[0];	    // t = 0;
-	    z2.y = param[1];
+	    z2DD.x = param[0];	    // t = 0;
+	    z2DD.y = param[1];
 	    if (!juliaflag)
-		*z = 0;
+		*z = 0.0;
 	    break;
 
 	case 85:					// Quartets, z2=z; z=(z^4)+c; c=z2
@@ -487,36 +490,36 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 	    break;
 
 	case 91:					// Polynomials, z=z*z*z-caa3*z+cb; [CCAP]
-	    {
-	    Complex ca, t2, t3;
+	{
+	DDComplex ca, t2, t3;
 
-	    t = *q;
-	    ca = t;
-	    cb = t.CCube() * 2 + t;
-	    caa3 = ca * ca * 3;
-	    if (!juliaflag)
-		*z = -ca;
-	    }
+	tDD = *q;
+	ca = tDD;
+	cbDD = tDD.CCube() * 2 + tDD;
+	caa3DD = ca * ca * 3;
+	if (!juliaflag)
+	    *z = -ca;
+	}
 	break;
 
 	case 92:					// Polynomials, z=z*z*z-caa3*z+cb; [CFAP]
-	    {
-	    Complex ca, t2, t3;
+	{
+	DDComplex ca, t2, t3;
 
-	    t = *q;
-	    ca = t;
-	    cb = (t.CCube() - t) * 2;
-	    caa3 = ca.CSqr() * 3;
-	    //    ca2 = ca+ca;
-	    if (!juliaflag)
-		*z = -ca;
-	    }
+	tDD = *q;
+	ca = tDD;
+	cbDD = (tDD.CCube() - tDD) * 2;
+	caa3DD = ca.CSqr() * 3;
+	//    ca2 = ca+ca;
+	if (!juliaflag)
+	    *z = -ca;
+	}
 	break;
 
 	case 93:					// Quartets, z1=z; z=z*z*z*z-z2+c; z2 = z1
 	    if (!juliaflag)
 		*z = *q;
-	    z2 = *z;
+	    z2DD = *z;
 	    z->x += param[1];
 	    z->y += param[2];
 	    break;
@@ -526,15 +529,15 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 		*z = *q;
 	    z->x += param[0];
 	    z->y += param[1];
-	    t = *q + 1;
-	    z2 = t.CSin();
+	    tDD = *q + 1;
+	    z2DD = tDD.CSin();
 	    break;
 
 	case 96:					// Quartets, z1=z; z=z*z*z*z+z2/2+c;; z2=z1
 	    *degree = (int)param[2];
 	    if (*degree < 2)
 		*degree = 2;
-	    z2 = *q;
+	    z2DD = *q;
 	    if (!juliaflag)
 		{
 		z->x = param[0];
@@ -547,8 +550,8 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 		*z = *q;
 	    z->x += param[0];
 	    z->y += param[1];
-	    z2 = z->CSin();	//z2 = c-c.csin();
-	    z2 = *z - z2;
+	    z2DD = z->CSin();	//z2 = c-c.csin();
+	    z2DD = *z - z2DD;
 	    break;
 
 	case 103:					// Ramon, z = ((z*z*z+3*c2*z+c1)/(3*z*z+3*c2*z+c1+1))^2; [magneto 2]
@@ -557,8 +560,8 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 		z->x = param[0];
 		z->y = param[1];
 		}
-	    c2 = *q - 1;
-	    c1 = c2 * (*q - 2);
+	    c2DD = *q - 1;
+	    c1DD = c2DD * (*q - 2);
 	    break;
 
 	case 104:					// Ramon, z = ((z*z+c)/(2*z))^2 (Teddy)
@@ -570,13 +573,13 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 	case 132:					// Flarium 27, Polynomial: z=z*z*(cn+z)/(cn+z+c)+c
 	    if (!juliaflag)
 		*z = *q;
-	    z2.x = param[0];
-	    z2.y = param[1];
+	    z2DD.x = param[0];
+	    z2DD.y = param[1];
 	    break;
 
 	case 123:					// Flarium 10, Sharon Webb: z = z*z*z*z+((c/2)^2)+c; [Sharon08]
-	    t = *q / 2;
-	    z2 = t.CSqr();
+	    tDD = *q / 2;
+	    z2DD = tDD.CSqr();
 	    if (!juliaflag)
 		*z = *q;
 	    z->x += param[0];
@@ -588,7 +591,7 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 		*z = *q;
 	    z->x += param[0];
 	    z->y += param[1];
-	    z2 = *z ^ (*z + 2);
+	    z2DD = *z ^ (*z + 2);
 	    break;
 
 	case 126:					// Flarium 13, Sharon Webb: z=(z*z*z*z-z2*z2*z2*z2+c)^2
@@ -608,15 +611,15 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 	case 129:					// Flarium 20, Phoenix: z = z*z*z*z+c.imag()+c.real()*z2; [4th Order Phoenix]
 	    z->x = q->x + param[0];
 	    z->y = q->y + param[1];
-	    t.x = 0;
-	    t.y = 1;
+	    tDD.x = 0.0;
+	    tDD.y = 1.0;
 	    z2 = 0;
 	    if (!juliaflag)
-		*q *= t;
+		*q *= tDD;
 	    else
 		{
-		*q *= t;
-		*z *= t;
+		*q *= tDD;
+		*z *= tDD;
 		}
 	    break;
 
@@ -629,14 +632,14 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 	    break;
 
 	case 136:					// Flarium 31, Polynomial: z = z*z*z-aa3*z+b
-	    t = (q->CCube() - 1) / (3 * q->CSqr());
-	    a = t;
-	    b = 2 * t.CCube() - 2 * t;
-	    caa3 = a.CSqr() * 3;
+	    tDD = (q->CCube() - 1) / (3 * q->CSqr());
+	    aDD = tDD;
+	    bDD = 2 * tDD.CCube() - 2 * tDD;
+	    caa3DD = aDD.CSqr() * 3;
 	    if (!juliaflag)
-		*z = -a;
-	    z2.x = 42;
-	    z2.y = 42;
+		*z = -aDD;
+	    z2DD.x = 42;
+	    z2DD.y = 42;
 	    z->x += param[0];
 	    z->y += param[1];
 	    return 0;
@@ -690,8 +693,8 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 		*z = *q;
 	    z->x += param[0];
 	    z->y += param[1];
-	    t = *q / 2;
-	    z2 = t.CSqr();
+	    tDD = *q / 2;
+	    z2DD = tDD.CSqr();
 	    break;
 
 	case 161:					// Flarium 61, Polynomial: z=z*z*z*z+(c+(c/pi))
@@ -707,7 +710,7 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 		*z = *q;
 	    z->x += param[0];
 	    z->y += param[1];
-	    z2 = *z;
+	    z2DD = *z;
 	    break;
 
 	case 165:					// Flarium 67-69, Newton Variations: z = ((z-(((z^n)-1)/(n*(z^(n-1)))))^2)*c
@@ -743,9 +746,9 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 		*degree = 2;
 	    if (!juliaflag)
 		*z = *q;
-	    z4.x = param[0];
-	    z4.y = param[1];
-	    z2 = *z;
+	    z4DD.x = param[0];
+	    z4DD.y = param[1];
+	    z2DD = *z;
 	    break;
 	}
     return 0;
@@ -755,72 +758,86 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 	Run functions for each iteration
 **************************************************************************/
 
-int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration)
+int	CPixel::DDRunTierazonFunctions(int subtype, DDComplex *z, DDComplex *q, DDComplex *z2, BYTE *SpecialFlag, long *iteration)
     {
+    DDComplex   a, b, t, z1, z3, zd, zt;
+    static	double	    d;
+
     switch (subtype)
 	{
 	case 0:						// Mandelbrot
 	case 1:						// Mandelbrot (Tierazon version)
 	case 101:					// M-Set Method
 	case 118:					// N - Set Method
-	    return (RunFunctions(MANDELFP, z, q, SpecialFlag, iteration));
+//	    return (RunFunctions(MANDELFP, z, q, SpecialFlag, iteration));
+	    {
+	    dd_real	realimag;
+	    DDComplex	sqr;
+
+	    realimag = z->x * z->y;
+	    sqr.x = z->x * z->x;
+	    sqr.y = z->y * z->y;
+	    z->x = sqr.x - sqr.y + q->x;
+	    z->y = realimag + realimag + q->y;
+	    return DDBailoutTest(z, sqr, rqlim, BailoutTestType);
+	    }
 
 	case 2:						// Nova, init: z=1; iterate: z=z-((z*z*z-1)/(3*z*z))+c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - ((*z*z2 - 1) / (z2 * 3)) + *q;
+	    *z2 = z->CSqr();
+	    *z = *z - ((*z**z2 - 1) / (*z2 * 3)) + *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 3:						// Ushiki's Phoenix, z=z*z-.5*z+c; z=z*z-.5*z2+c; z2=z; z=z1
 	    *z = z->CSqr() - *z * 0.5 + *q;
-	    z1 = z->CSqr() - z2 * 0.5 + *q;
-	    z2 = *z;
+	    z1 = z->CSqr() - *z2 * 0.5 + *q;
+	    *z2 = *z;
 	    *z = z1;
-	    return FractintBailoutTest(z);
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
 
 	case 4:						// Talis, z=((z*z)/(1+z))+c
 	    *z = z->CSqr() / (*z + 1) + *q;
-	    return FractintBailoutTest(z);
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
 
 	case 5:						// Newton variation, z=((z*z*z-z-1)/(3*z*z-1)-z)*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = ((*z*z2 - *z - 1) / (z2 * 3 - 1) - *z) * *q;  
-	    //  z=((z*z2-z-1)/(3*z2-1)-z)*c;  
+	    *z2 = z->CSqr();
+	    *z = ((*z**z2 - *z - 1) / (*z2 * 3 - 1) - *z) * *q;  
+	    //  z=((z**z2-z-1)/(3**z2-1)-z)*c;  
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 6:						// z=z-((z*z*z)+(c-1)*z-c)/(3*(z*z)+c-1)
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = z->CSqr();
 	    *z = *z - ((*z*z1) + (*q - 1) * *z - *q) / ((z1) * 3 + *q - 1);
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 7:						// Newton variation, z = z-((z*z*z)+(c-1)*z-c)/(3*(z*z)+c-1)
-	    z2 = *z;
+	    *z2 = *z;
 	    *z = (*z - ((z->CCube() + *q * *z - *z - *q) / (z->CSqr() * 3 + *q - 1))) + *q;
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE || d > MAXSIZE);
 
 	case 8:						// Nova variant, init: z=1; iterate: z=z-((z*z*z*z-z)/(4*z*z*z-1)+c
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = z->CCube();
 	    *z = *z - (*z*z1 - *z) / (z1 * 4 - 1) + *q;
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 9:						// Nova variant, init: z=1; iterate: z=z-((z*z*z*z-z)/(4*z*z*z-z)+c
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = z->CCube();
 	    *z = *z - (*z*z1 - *z) / (z1 * 4 - *z) + *q;
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
@@ -829,95 +846,95 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	case 12:					// z=z*z*z*z*z+c
 	case 13:					// z=z*z*z*z*z*z+c
 	    *z = z->CPolynomial(*degree) + *q;		// z^deg - function power
-	    return FractintBailoutTest(z);
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
 
 	case 14:					// z1=z*z+c; z=z*z+c*z2; z2=z
 	    z1 = z->CSqr() + *q;
-	    *z = z->CSqr() + *q * z2;
-	    z2 = z1;
-	    return FractintBailoutTest(z);
+	    *z = z->CSqr() + *q * *z2;
+	    *z2 = z1;
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
 
 	case 15:					// Phoenix II, z1=z; z=z*z + real(c) + imag(c)*z2; z2=z1
 	    z1 = *z;
-	    *z = z->CSqr() + q->x + z2 * q->y;
-	    z2 = z1;
-	    return FractintBailoutTest(z);
+	    *z = z->CSqr() + q->x + *z2 * q->y;
+	    *z2 = z1;
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
 
 	case 16:					// Phoenix III, z1=z; z=z*z*z +   real(c) + imag(c)*z2; z2=z1
 	    z1 = *z;
-	    *z = z->CCube() + q->x + z2 * q->y;
-	    //z = z*z + __real__ c + __imag__ c * z2;
-	    z2 = z1;
-	    return FractintBailoutTest(z);
+	    *z = z->CCube() + q->x + *z2 * q->y;
+	    //z = z*z + __real__ c + __imag__ c * *z2;
+	    *z2 = z1;
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
 
 	case 17:					// Phoenix IV,  z1=z; z=z*z*z +.5*real(c) + imag(c)*z2; z2=z1
 	    z1 = *z;
-	    *z = z->CCube() + .5 * q->x + z2 * q->y;
-	    z2 = z1;
-	    return FractintBailoutTest(z);
+	    *z = z->CCube() + .5 * q->x + *z2 * q->y;
+	    *z2 = z1;
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
 
 	case 18:					// Newton/Mandel, z=-z/3; iterate: z=z-(z*z*z+z*z*c-z+c)/(3*z*z+2*c*z-1)
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = z->CSqr();
 	    *z = *z - (*z*z1 + z1 * *q - *z + *q) / (z1 * 3 + *q * *z * 2 - 1);
 	    //z=z1*z1+c;
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 19:					// Newton/Mandel, z=-z/3; iterate: z=z-(z*z*z+z*z*c+z+c)/(3*z*z+2*c*z+1)
-	    z2 = *z;
+	    *z2 = *z;
 	    *z = *z - (z->CCube() + *q * z->CSqr() + *z + *q) / (z->CSqr() * 3 + *q * *z * 2 + 1);
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 20:					// Newton/Mandel, z= z/2; iterate: z=z-(z^4-(z^3)*c-z-c)/(4*(z^3)-3*(z^2)*c-1)
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = z->CSqr();
 	    //    z = z-c;
 	    *z = *z - (z1.CSqr() - z1 * *z * *q - *z - *q) / (*z*z1 * 4 - z1 * *q * 3 - 1);
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 21:					// Newton/Mandel, z=-1/(3*z); iterate: z=z-((z^3)*c+z^2+z+c)/(3*(z^2)*c+2*z+1)
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = z->CSqr();
 	    *z = *z - (*z*z1 * *q + z1 + *z + *q) / (z1 * *q * 3 + *z * 2 + 1);
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 22:					// Newton/Mandel, z=-.5; iterate: z=z-((z^4)c+(z^3)*c+z+c)/(4*(z^3)*c+3*z*z*c+1)
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = z->CSqr();
 	    *z = *z - (z1.CSqr() * *q + z1 * *z * *q + *z + *q) / (z1 * *z * *q * 4 + z1 * *q * 3 + 1);
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 23:					// Newton/Mandel, z=-.5/z; iterate: z=z-((z^4)*c+(z^3)+z+c)/(4*(z^3)*c+3*z*z+1)
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = *z * *z;
 	    *z = *z - (z1.CSqr() * *q + z1 * *z + *z + *q) / (z1 * *z * *q * 4 + z1 * 3 + 1);
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 24:					// Newton/Mandel, z=-z/3;  iterate: z=z-((z^3)+z*z*c +c)/(3*z*z+2*z*c)
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = z->CSqr();
 	    *z = *z - (z1 * *z + z1 * *q + *q) / (z1 * 3 + *z * *q * 2);
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 25:					// Newton/Mandel, z=-z/2;  iterate: z=z-((z^4)+(z^3)*c+c)/(4*(z^3)+3*z*z*c)
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = z->CSqr();
 	    *z = *z - (z1.CSqr() + z1 * *z * *q + *q) / (z1 * *z * 4 + *z * *z * *q * 3);
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
@@ -927,8 +944,8 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	case 29:					// Newton/Mandel, 13th order Newton Mset
 	case 30:					// Newton/Mandel, 8th order Newton Mset
 	case 53:					// Newton/Mandel, 6th order Newton Mset
-	{
-	    Complex	fn, f1n, f2n, a, b;
+	    {
+	    DDComplex	fn, f1n, f2n, a, b;
 
 	    z1 = *z;
 	    f2n = z->CPolynomial(*degree - 2);		// z^(deg - 2) - second derivative power
@@ -947,7 +964,7 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	case 33:					// Newton/Mandel, Newton Hexagon
 	case 34:					// Newton/Mandel, Newton Octagon
 	    {
-	    Complex	fn, f1n, f2n, a, b;
+	    DDComplex	fn, f1n, f2n, a, b;
 
 	    z1 = *z;
 	    f2n = z->CPolynomial(*degree - 2);		// z^(deg - 2) - second derivative power
@@ -969,7 +986,7 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	case 58:					// More Newton Msets, 50th order Newton Mset flower
 	case 106:					// More Fractals, 5th order N/Mset
 	    {
-	    Complex	 fn, f1n, f2n, a, b;
+	    DDComplex	 fn, f1n, f2n, a, b;
 
 	    z1 = *z;
 	    f2n = z->CPolynomial(*degree - 2);		// z^(deg - 2) - second derivative power
@@ -994,32 +1011,32 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 37:					// Newton Variations, z=z-(z*z*z-z+c)/(3*z*z)
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - (*z*z2 - *z + *q) / (z2 * 3);
+	    *z2 = z->CSqr();
+	    *z = *z - (*z**z2 - *z + *q) / (*z2 * 3);
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 38:					// Newton Variations, z=z-(z*z*z*c-z*c-1)/(3*z*z*c)
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - (*z*z2 * *q - *z * *q - 1) / (z2 * *q * 3);
+	    *z2 = z->CSqr();
+	    *z = *z - (*z**z2 * *q - *z * *q - 1) / (*z2 * *q * 3);
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 39:					// Newton Variations, z=z-(z*z*z*c-z*z*c-1)/(3*z*z*c)
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - (*z*z2 * *q - *z * *z * *q - 1) / (z2 * *q * 3);
+	    *z2 = z->CSqr();
+	    *z = *z - (*z**z2 * *q - *z * *z * *q - 1) / (*z2 * *q * 3);
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 40:					// Newton Variations, z=z-(z*z*z*c-1)/(3*z*z*c)
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - (*z*z2 * *q - 1) / (z2 * *q * 3);
+	    *z2 = z->CSqr();
+	    *z = *z - (*z**z2 * *q - 1) / (*z2 * *q * 3);
 	    *z = z->CSqr() * *q + *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
@@ -1027,40 +1044,40 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 41:					// Newton Variations, z=z-(z*z*z*c-z-1)/(3*z*z*c-z)
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - (*z*z2 * *q - *z - 1) / (z2 * *q * 3 - *z);
+	    *z2 = z->CSqr();
+	    *z = *z - (*z**z2 * *q - *z - 1) / (*z2 * *q * 3 - *z);
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 42:					// Newton Variations, z=z-(z*z*z*c-z*c-1)/(3*z*z*c-z)
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - (*z*z2 * *q - *z * *q - 1) / (z2 * *q * 3 - *z);
+	    *z2 = z->CSqr();
+	    *z = *z - (*z**z2 * *q - *z * *q - 1) / (*z2 * *q * 3 - *z);
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 43:					// Newton Variations, z=z-(z*z*z*c-z*z-1)/(3*z*z*c-3*z*z-3*z)
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - (*z*z2 * *q - z2 - 1) / (z2 * *q * 3 - z2 * 3 - *z * 3);
+	    *z2 = z->CSqr();
+	    *z = *z - (*z**z2 * *q - *z2 - 1) / (*z2 * *q * 3 - *z2 * 3 - *z * 3);
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 44:					// Newton Variations, z=z-(z*z*z*c-z*z*c-1)/(3*z*z*c-z*c-z)
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - (*z*z2 * *q - z2 * *q - 1) / (z2 * *q * 3 - *z * *q - *z);
+	    *z2 = z->CSqr();
+	    *z = *z - (*z**z2 * *q - *z2 * *q - 1) / (*z2 * *q * 3 - *z * *q - *z);
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 45:					// Newton Variations, z=((z-(z*z*z-z)/(3*z*z-1))^2)*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = (*z - (*z*z2 - *z) / (z2 * 3 - 1));
+	    *z2 = z->CSqr();
+	    *z = (*z - (*z**z2 - *z) / (*z2 * 3 - 1));
 	    *z = *z * *z * *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
@@ -1113,8 +1130,8 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 51:					// Trig functions, z = csin(z*z*z*z)*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    a = z2.CSqr();
+	    *z2 = z->CSqr();
+	    a = z2->CSqr();
 	    *z = *q * a.CSin();
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
@@ -1122,8 +1139,8 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 55:					// More Newton Msets, 4th order Newton's apple
 	    {
-	    double	s, t, u;
-	    Complex	fn, f1n, f2n, f3n, c, e, f;
+	    dd_real	s, t, u;
+	    DDComplex	fn, f1n, f2n, f3n, c, e, f;
 
 	    z1 = *z;
 	    f3n = z->CPolynomial(*degree - 4);		// z^(deg - 4) - third derivative power
@@ -1175,8 +1192,8 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 59:					// More Newton Msets, 5th order Newton Mset
 	    {
-	    double	s, t;
-	    Complex	fn, f1n, f2n, c;
+	    dd_real	s, t;
+	    DDComplex	fn, f1n, f2n, c;
 
 	    z1 = *z;
 	    f2n = z->CPolynomial(*degree - 3);		// z^(deg - 3) - second derivative power
@@ -1196,14 +1213,14 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 60:					// More Newton Msets, 18th order Newton Mset flower
 	    {
-	    Complex	z8, z16;
+	    DDComplex	z8, z16;
 
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    z4 = z2.CSqr();
-	    z8 = z4.CSqr();
+	    *z2 = z->CSqr();
+	    z4DD = z2->CSqr();
+	    z8 = z4DD.CSqr();
 	    z16 = z8.CSqr();
-	    *z = *z - (z16*z2 * *q * 19 + z16 * *z * 18 - *z) / (z16 * *z * *q * 342 + z16 * 306 - 1);
+	    *z = *z - (z16**z2 * *q * 19 + z16 * *z * 18 - *z) / (z16 * *z * *q * 342 + z16 * 306 - 1);
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
@@ -1211,7 +1228,7 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 61:					// Polynomials, z=z*z+c; real=imag; imag=real
 	    {
-	    double t;
+	    dd_real t;
 
 	    z1 = *z;
 	    *z = z->CSqr() + *q;
@@ -1225,32 +1242,32 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 62:					// Newton Variations II, z=(((z^3)-z-1)/((z^3)-1)-z)*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = ((*z*z2 - *z - 1) / (z2 * *z - 1) - *z) * *q;   // 3rd order M-Set
+	    *z2 = z->CSqr();
+	    *z = ((*z**z2 - *z - 1) / (*z2 * *z - 1) - *z) * *q;   // 3rd order M-Set
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 63:					// Newton Variations II, z=(((z^4)-z*z-1)/(4*z*z-1)-z)*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = ((z2.CSqr() - z2 - 1) / (z2 * 4 - 1) - *z) * *q;  // 
+	    *z2 = z->CSqr();
+	    *z = ((z2->CSqr() - *z2 - 1) / (*z2 * 4 - 1) - *z) * *q;  // 
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE || d > MAXSIZE);
 
 	case 64:					// Newton Variations II, z=(z-((z^3)-1)/(3*z*z-fabs(z)-1))*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = (*z - (*z*z2 - 1) / (z2 * 3 - z->CFabs() - 1)) * *q;
+	    *z2 = z->CSqr();
+	    *z = (*z - (*z**z2 - 1) / (*z2 * 3 - z->CFabs() - 1)) * *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 65:					// Newton Variations II, z=(z-((z^3)-1)/(3*z*z-z-1))*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = (*z - (*z*z2 - 1) / (z2 * 3 - *z - 1)) * *q;  // Almost makes a connection
+	    *z2 = z->CSqr();
+	    *z = (*z - (*z**z2 - 1) / (*z2 * 3 - *z - 1)) * *q;  // Almost makes a connection
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
@@ -1265,24 +1282,24 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 67:					// Newton Variations II, z=z-(((z^3)-z)/((3*z*z-1)))+c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - ((*z*z2 - *z) / ((z2 * 3 - 1))) + *q;
+	    *z2 = z->CSqr();
+	    *z = *z - ((*z**z2 - *z) / ((*z2 * 3 - 1))) + *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 68:					// Newton Variations II, z=(z-((z^3)-1)/(4*z*z-z-1))*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = (*z - (*z*z2 - 1) / (z2 * 4 - *z - 1)) * *q;
+	    *z2 = z->CSqr();
+	    *z = (*z - (*z**z2 - 1) / (*z2 * 4 - *z - 1)) * *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 69:					// Newton Variations II, z=(z-((z^3)-1)/(3*z*z-z))*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = (*z - (*z*z2 - 1) / (z2 * 3 - *z)) * *q;
+	    *z2 = z->CSqr();
+	    *z = (*z - (*z**z2 - 1) / (*z2 * 3 - *z)) * *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
@@ -1313,8 +1330,8 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 73:					// Newton Variations II, z=c*(z-((z^3)-z)/(3*z*z-1))
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = (*z - (*z*z2 - *z) / (z2 * 3 - 1));  // 105
+	    *z2 = z->CSqr();
+	    *z = (*z - (*z**z2 - *z) / (*z2 * 3 - 1));  // 105
 	    *z = *z * *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
@@ -1347,31 +1364,31 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 77:					// Newton Variations II, z=(((z^3)-1)/(2*z*z-1)-z)*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = ((z2 * *z - 1) / (z2 * 2 - 1) - *z) * *q;  // 109
+	    *z2 = z->CSqr();
+	    *z = ((*z2 * *z - 1) / (*z2 * 2 - 1) - *z) * *q;  // 109
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 78:					// Newton Variations II, z=(((z^3)-z-1)/(3*(z^3)-1)-z)*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = ((*z*z2 - *z - 1) / (*z*z2 * 3 - 1) - *z) * *q; // 2nd Order M-Set 110
+	    *z2 = z->CSqr();
+	    *z = ((*z**z2 - *z - 1) / (*z**z2 * 3 - 1) - *z) * *q; // 2nd Order M-Set 110
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 79:					// Polynomials, CBAP  F(z) = Z^3 - 3*(A^2)*Z + B(MOD 2)
 	    z1 = *z;
-	    *z = z->CCube() - caa3 * *z + cb;
+	    *z = z->CCube() - caa3DD * *z + cbDD;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE || d > MAXSIZE);
 
 	case 80:					// Quartets, z=.5; z=z*z-z2*z2+c; z2=z
 	    z1 = *z;
-	    *z = z->CSqr() - z2.CSqr() + *q;
-	    z2 = z1;
+	    *z = z->CSqr() - z2->CSqr() + *q;
+	    *z2 = z1;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE || d > MAXSIZE);
@@ -1379,8 +1396,8 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	case 81:					// Quartets, z2=2; z=z*z*z*z+z2+c; z2=z1
 	    z1 = *z;
 	    zt = z->CSqr();
-	    *z = zt.CSqr() + z2 + *q;
-	    z2 = z1;
+	    *z = zt.CSqr() + *z2 + *q;
+	    *z2 = z1;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE || d > MAXSIZE);
@@ -1388,8 +1405,8 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	case 82:					// Quartets, z2=z; z=z*z*z*z+5*z2*c; z2=z1
 	    z1 = *z;
 	    zt = z->CSqr();
-	    *z = zt.CSqr() + z2 * *q * 5;
-	    z2 = z1;
+	    *z = zt.CSqr() + *z2 * *q * 5;
+	    *z2 = z1;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE || d > MAXSIZE);
@@ -1397,10 +1414,10 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	case 83:					// Quartets, t=0; z1=z; z=z*z*z-t*t*t+c; z=z1
 	    z1 = *z;
 	    a = z->CPolynomial(*degree) + *q;
-	    b = z2.CPolynomial(*degree);	// global z2 used for t
+	    b = z2->CPolynomial(*degree);	// global z2 used for t
 	    *z = a - b;
-//	    *z = z->CCube() - z2.CCube() + *q;
-	    z2 = z1;
+//	    *z = z->CCube() - *z2.CCube() + *q;
+	    *z2 = z1;
 	    //    z=z*z*z-t*t*t+c;
 	    //    t=z1;
 	    zd = *z - z1;
@@ -1410,19 +1427,19 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	case 84:					// Quartets, t=0; z1=z; z=z*z*z*z-t*t*t*t+c; t=z1
 	    z1 = *z;
 	    a = z->CPolynomial(*degree) + *q;
-	    b = z2.CPolynomial(*degree);	// global z2 used for t
+	    b = z2->CPolynomial(*degree);	// global z2 used for t
 	    *z = a - b;
-	    z2 = z1;				// t = z1
+	    *z2 = z1;				// t = z1
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE || d > MAXSIZE);
 
 	case 85:					// Quartets, z2=z; z=(z^4)+c; c=z2
 	    z1 = *z;
-	    z2 = *z;
+	    *z2 = *z;
 	    //  z = z*z*z*z+q;
 	    *z = z->CPolynomial(*degree) + *q;
-	    *q = z2;
+	    *q = *z2;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE || d > MAXSIZE);
@@ -1438,8 +1455,8 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 87:					// Newton Variations, z=z-((z^3)-1)/(3*z*z); z=(z^3)*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - (*z*z2 - 1) / (z2 * 3);
+	    *z2 = z->CSqr();
+	    *z = *z - (*z**z2 - 1) / (*z2 * 3);
 	    *z = z->CCube() * *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
@@ -1456,9 +1473,9 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 89:					// Newton Variations, z=z-((z^5)-1)/(5*(z^4)); z=(z^5)*c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    z4 = z2.CSqr();
-	    *z = *z - (*z*z4 - 1) / (z4 * 5);
+	    *z2 = z->CSqr();
+	    z4DD = z2->CSqr();
+	    *z = *z - (*z*z4DD - 1) / (z4DD * 5);
 	    *z = z->CCube()*z->CSqr() * *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
@@ -1475,7 +1492,7 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 91:					// Polynomials, z=z*z*z-caa3*z+cb; [CCAP]
 	    z1 = *z;
-	    a = caa3 * *z - cb;
+	    a = caa3DD * *z - cbDD;
 	    *z = z->CCube() - a;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
@@ -1483,8 +1500,8 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 92:					// Polynomials, z=z*z*z-caa3*z+cb; [CFAP]
 	    z1 = *z;
-	    a = caa3 * *z;
-	    *z = z->CCube() - a + cb;
+	    a = caa3DD * *z;
+	    *z = z->CCube() - a + cbDD;
 	    //    z = z*z*z-caa3*z+cb;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
@@ -1493,8 +1510,8 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	case 93:					// Quartets, z1=z; z=z*z*z*z-z2+c; z2 = z1
 	    z1 = *z;
 	    zt = z->CSqr();
-	    *z = zt.CSqr() - z2 + *q;
-	    z2 = z1;
+	    *z = zt.CSqr() - *z2 + *q;
+	    *z2 = z1;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE || d > MAXSIZE);
@@ -1513,7 +1530,7 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	    z1 = *z;
 	    zt = z->CSqr();
 	    a = zt.CSqr();
-	    *z = a / z2 + *q;
+	    *z = a / *z2 + *q;
 	    //    z = z*z*z*z/t1+c;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
@@ -1521,25 +1538,25 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 96:					// Quartets, z1=z; z=z*z*z*z+z2/2+c;; z2=z1
 	    z1 = *z;
-	    //    z=z*z*z*z+z2/2+q;
-	    *z = z->CPolynomial(*degree) + z2 / 2.0 + *q;
-	    z2 = z1;
+	    //    z=z*z*z*z+*z2/2+q;
+	    *z = z->CPolynomial(*degree) + *z2 / 2.0 + *q;
+	    *z2 = z1;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE || d > MAXSIZE);
 
 	case 97:					// Polynomials, z = z*z+c*(1+sqrt(z))
 	    z1 = *z;
-	    z2 = z->CSumSqr();
-	    *z = *z * *z + *q * (z2 + 1);
+	    *z2 = z->CSumSqr();
+	    *z = *z * *z + *q * (*z2 + 1);
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE || d > MAXSIZE);
 
 	case 98:					// Quartets, z1=z; z=z*z*z*z/(1+z)+c;; c=z1
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = z2.CSqr() / (*z + 1) + *q;
+	    *z2 = z->CSqr();
+	    *z = z2->CSqr() / (*z + 1) + *q;
 	    *q = z1;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
@@ -1547,11 +1564,11 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 99:					// Quartets, z1=z; z2=c+z2/z-z; z=z*c+z2/c
 	    z1 = *z;
-	    z2 = z2 / *z + *q - *z;
-	    a = z2 / *q;
+	    *z2 = *z2 / *z + *q - *z;
+	    a = *z2 / *q;
 	    *z = *z * *q + a;
-	    //    z2=c+z2/z-z;
-	    //    z=z*c+z2/c;
+	    //    *z2=c+*z2/z-z;
+	    //    z=z*c+*z2/c;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
@@ -1582,15 +1599,15 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 103:					// Ramon, z = ((z*z*z+3*c2*z+c1)/(3*z*z+3*c2*z+c1+1))^2; [magneto 2]
 	    {
-	    Complex c2z3;
+	    DDComplex c2z3;
 
 	    z1 = *z;
 	    // z = ((z*z*z+(3*(c-1)*z)+((c-1)*(c-2)))/(3*z*z+(3*(c-2)*z)+((c-1)*(c-2))+1))*((z*z*z+(3*(c-1)*z)+((c-1)*(c-2)))/(3*z*z+(3*(c-2)*z)+((c-1)*(c-2))+1));
-	    z2 = z->CSqr();
-	    //    z = (z*z2+3*c2*z+c1)/(3*z2+3*c2*z+c1+1);	
-	    c2z3 = *z * c2*3.0;
-	    a = *z * z2 + c2z3 + c1;
-	    b = z2 * 3 + c2z3 + c1 + 1;
+	    *z2 = z->CSqr();
+	    //    z = (z**z2+3*c2*z+c1)/(3**z2+3*c2*z+c1+1);	
+	    c2z3 = *z * c2DD*3.0;
+	    a = *z * *z2 + c2z3 + c1DD;
+	    b = *z2 * 3 + c2z3 + c1DD + 1;
 	    *z = a / b;
 	    *z = *z * *z;
 
@@ -1610,8 +1627,8 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 105:					// More Fractals, 3rd order Newton/ Mset [figure 8]
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - ((*z*z2 + z2 * *q - *z) / (z2 * 3 + *z * *q * 2 - 1));
+	    *z2 = z->CSqr();
+	    *z = *z - ((*z**z2 + *z2 * *q - *z) / (*z2 * 3 + *z * *q * 2 - 1));
 	    zd = z1 - *z;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
@@ -1628,13 +1645,13 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 108:					// More Fractals, z=(z*c)/(1+z)+c; [Talis II]
 	    *z = (*z * *q) / (*z + 1) + *q;
-	    return FractintBailoutTest(z);
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
 
 	case 109:					// More Fractals, z=(c+z*z*c)/(1-z*z*c)
-	    z2 = z->CSqr() * *q;
-	    //    z2 = z*z*q;
-	    *z = (*q + z2) / (-z2 + 1);
-	    return FractintBailoutTest(z);
+	    *z2 = z->CSqr() * *q;
+	    //    *z2 = z*z*q;
+	    *z = (*q + *z2) / (-*z2 + 1);
+	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
 
 	case 110:					// More Fractals, z = (c+(z^6))/(1+(z^2))
 	    z1 = *z;
@@ -1646,8 +1663,8 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 
 	case 111:					// Ramon, z = (z^2)/(1+c*(z^2))
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = z2 / (*q*z2 + 1);
+	    *z2 = z->CSqr();
+	    *z = *z2 / (*q**z2 + 1);
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
@@ -1696,133 +1713,133 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	    return (zd.CSumSqr() < MINSIZE || z->CSumSqr() > rqlim);
 
 	case 119:					// Flarium 06, Newton Variations: z=z-(z*z*z-1)/3*z*z; z=z*c
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = z->CSqr();
 	    *z = *z - (*z*z1 - 1) / 3 * z1;
 	    *z = *z * *q;
-	    zd = *z - z2;
-	    return FractintBailoutTest(&zd);
+	    zd = *z - *z2;
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 120:					// Flarium 07, Polynomial: z = (z*z+c)^(cn+c)
 	    z1 = *z;
-	    *z = (*z * *z + *q) ^ (z2 + *q);
+	    *z = (*z * *z + *q) ^ (*z2 + *q);
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 121:					// Flarium 08, Sharon Webb: z = z*z*z*z+1/c; [Sharon Star]
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    z4 = z2.CSqr();
-	    *z = z4 + q->CInvert();
+	    *z2 = z->CSqr();
+	    z4DD = z2->CSqr();
+	    *z = z4DD + q->CInvert();
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 122:					// Flarium 09, Sharon Webb: z = (z*z/2+c)*(z*z/2+c); [Sharon's Space Probe]
 	    z1 = *z;
-	    z2 = z->CSqr() / 2 + *q;
-	    *z = z2.CSqr();
+	    *z2 = z->CSqr() / 2 + *q;
+	    *z = z2->CSqr();
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 123:					// Flarium 10, Sharon Webb: z = z*z*z*z+((c/2)^2)+c; [Sharon08]
 	    {
-	    Complex z2a;
+	    DDComplex z2a;
 
 	    z1 = *z;
 	    z2a = z->CSqr();
-	    z4 = z2a.CSqr();
-	    *z = z4 + z2 + *q;
+	    z4DD = z2a.CSqr();
+	    *z = z4DD + *z2 + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 	    }
 
 	case 124:					// Flarium 11, Sharon Webb: z = z*z*z*z+(z^(z+cn))+c
 	    {
-	    Complex z2a;
+	    DDComplex z2a;
 
 	    z1 = *z;
 	    z2a = z->CSqr();
-	    z4 = z2a.CSqr();
-	    *z = z4 + z2 + *q;
+	    z4DD = z2a.CSqr();
+	    *z = z4DD + *z2 + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 	    }
 
 	case 125:					// Flarium 12, Sharon Webb: z = (z+z*z/2)+c
 	    z1 = *z;
 	    *z = (*z + z->CSqr() / 2) + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 126:					// Flarium 13, Sharon Webb: z=(z*z*z*z-z2*z2*z2*z2+c)^2
 	    {
-	    Complex	z2a, quadz2;
+	    DDComplex	z2a, quadz2;
 
 	    z1 = *z;
 	    z2a = z->CSqr();
-	    z4 = z2a.CSqr();
-	    z2a = z2.CSqr();
+	    z4DD = z2a.CSqr();
+	    z2a = z2->CSqr();
 	    quadz2 = z2a.CSqr();
 	    //    z = (z*z*z*z-z2*z2*z2*z2+q)*(z*z*z*z-z2*z2*z2*z2+q);
-	    t = (z4 - quadz2 + *q);
+	    t = (z4DD - quadz2 + *q);
 	    *z = t.CSqr();
-	    z2 = z1;
+	    *z2 = z1;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 	    }
 
 	case 127:					// Flarium 15, Newton Variations: z = z - (z*z*z*z-1)/(4*z*z*z) + c; [4th Order Nova]
 	    z1 = *z;
-	    z2 = z->CCube();
-	    *z = *z - (z2 * *z - 1) / (4 * z2) + *q;
+	    *z2 = z->CCube();
+	    *z = *z - (*z2 * *z - 1) / (4 * *z2) + *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 128:					// Flarium 16, Newton Variations: z = z - (z*z*z*z*z-1)/(5*z*z*z*z) + c; [5th Order Nova]
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    z4 = z2.CSqr();
-	    *z = *z - (z4* * z - 1) / (5 * z4) + *q;
+	    *z2 = z->CSqr();
+	    z4DD = z2->CSqr();
+	    *z = *z - (z4DD * *z - 1) / (5 * z4DD) + *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 129:					// Flarium 20, Phoenix: z = z*z*z*z+c.imag()+c.real()*z2; [4th Order Phoenix]
 	    {
-	    Complex z2a;
+	    DDComplex z2a;
 	    
 	    z1 = *z;
 	    z2a = z->CSqr();
-	    z4 = z2a.CSqr();
-	    *z = z4 + q->y + q->x * z2;
-	    z2 = z1;
+	    z4DD = z2a.CSqr();
+	    *z = z4DD + q->y + *z2 * q->x;
+	    *z2 = z1;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 	    }
 
 	case 130:					// Flarium 21, Sharon Webb: z=(1/z*z-c)*(z*z*z*z+c); [Sharon03]
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    z4 = z2.CSqr();
-	    *z = (z->CInvert() * *z - *q)*(z4 + *q);
+	    *z2 = z->CSqr();
+	    z4DD = z2->CSqr();
+	    *z = (z->CInvert() * *z - *q)*(z4DD + *q);
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 131:					// Flarium 25, Newton Variations: z=z-(z*z*z*z-z)/(4*z*z*z-z); z=z*c
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = z->CCube();
 	    *z = *z - (*z*z1 - *z) / (4 * z1 - *z);
 	    *z = *z * *q;
-	    zd = *z - z2;
+	    zd = *z - *z2;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 132:					// Flarium 27, Polynomial: z=z*z*(cn+z)/(cn+z+c)+c
 	    z1 = *z;
-	    *z = z->CSqr()*(z2 + *z) / (z2 + *z + *q) + *q;
+	    *z = z->CSqr()*(*z2 + *z) / (*z2 + *z + *q) + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 133:					// Flarium 28, Derbyshire / Newton: z=z - (z*z*z-1)/(3*z*z)+c; [Nova-Mandelbrot-MultiFract]
 	    {
@@ -1848,7 +1865,7 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 		}
 	    *z = z->CSqr() + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 	    }
 
 	case 134:					// Flarium 29, Derbyshire / Newton: c = (z*z*z-1)/(3*z*z); z -= (z*z*z-1)/(3*z*z)*c
@@ -1866,216 +1883,216 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	    return (d < MINSIZE);
 
 	case 136:					// Flarium 31, Polynomial: z = z*z*z-aa3*z+b
-	    z2 = *z;
-	    *z = z->CCube() - caa3 * *z + b;
-	    zd = *z - z2;
-	    return FractintBailoutTest(&zd);
+	    *z2 = *z;
+	    *z = z->CCube() - caa3DD * *z + b;
+	    zd = *z - *z2;
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 137:					// Flarium 32, Derbyshire / Newton: 3rd Order Nova in a M-Set (Try single pass)
-	    z2 = *z;
+	    *z2 = *z;
 	    z1 = z->CSqr();
 	    *z = *z - (*z*z1 - 1) / (3 * z1) + *q;
-	    zd = *z - z2;
-	    return FractintBailoutTest(&zd);
+	    zd = *z - *z2;
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 138:					// Flarium 34, Sharon Webb: z1= z*(z*z).csin()/2; z=z1*z1 + c; [Sharon14]
-	    z2 = *z;
+	    *z2 = *z;
 	    t = z->CSqr();
 	    z1 = *z * t.CSin() / 2;
 	    *z = z1.CSqr() + *q;
-	    zd = *z - z2;
-	    return FractintBailoutTest(&zd);
+	    zd = *z - *z2;
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 139:					// Flarium 35, Polynomial: z=c*(z.csin())
-	    z2 = *z;
+	    *z2 = *z;
 	    *z = *q * z->CSin();
-	    zd = *z - z2;
-	    return FractintBailoutTest(&zd);
+	    zd = *z - *z2;
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 140:					// Flarium 36, Polynomial: z=(c*z).csin()
-	    z2 = *z;
+	    *z2 = *z;
 	    t = *z * *q;
 	    *z = t.CSin();
-	    zd = *z - z2;
-	    return FractintBailoutTest(&zd);
+	    zd = *z - *z2;
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 141:					// Flarium 37, Polynomial: z=(z*z*z-1)/(3*z*z); z = c*(z.csin() + z.ccos())
-	    z2 = *z;
+	    *z2 = *z;
 	    *z = *q * (z->CSin() + z->CCos());
-	    zd = *z - z2;
-	    return FractintBailoutTest(&zd);
+	    zd = *z - *z2;
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 142:					// Flarium 38, Polynomial: z = z*z+c; z.set_real(z.real()*z.real()); [Variation real]
-	    z2 = *z;
+	    *z2 = *z;
 	    *z = *z * *z + *q;
 	    z->x = z->x*z->x;
-	    zd = *z - z2;
-	    return FractintBailoutTest(&zd);
+	    zd = *z - *z2;
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 143:					// Flarium 40, Polynomial: z1 = z*z*z*z; z = c*z1/4*z1 + z
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    z4 = z2.CSqr();
-	    *z = *q * z4 / 4 * z4 + *z;
-	    zd = *z - z4;
-	    return FractintBailoutTest(&zd);
+	    *z2 = z->CSqr();
+	    z4DD = z2->CSqr();
+	    *z = *q * z4DD / 4 * z4DD + *z;
+	    zd = *z - z4DD;
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 144:					// Flarium 41, Polynomial: z = c*(z*z*z*z).csin()
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    z4 = z2.CSqr();
-	    *z = *q * z4.CSin();
+	    *z2 = z->CSqr();
+	    z4DD = z2->CSqr();
+	    *z = *q * z4DD.CSin();
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d > rqlim);
 
 	case 145:					// Flarium 43, Polynomial: z = z*z*z*z + (z*c).csin() + c
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    z4 = z2.CSqr();
+	    *z2 = z->CSqr();
+	    z4DD = z2->CSqr();
 	    t = *z * *q;
-	    *z = z4 + t.CSin() + *q;
+	    *z = z4DD + t.CSin() + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 146:					// Flarium 44, Polynomial: z=(z*z*z*z-z)/(4*z*z*z); z=c*z.csin()
 	    z1 = *z;
 	    *z = *q * z->CSin();
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 147:					// Flarium 45, Polynomial: z=(z*z*z*z-1)/(4*z*z*z); z=c*z.csin()
 	    z1 = *z;
 	    *z = *q * z->CSin();
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 148:					// Flarium 46, Sharon Webb: z1= z*(z*z).csin()/2; z=z1*z1 + c; [Sharon14 N-Method]
 	    z1 = *z;
 	    t = z->CSqr();
-	    z2 = t.CSin() * *z / 2;
-	    *z = z2.CSqr() + *q;
+	    *z2 = t.CSin() * *z / 2;
+	    *z = z2->CSqr() + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 149:					// Flarium 49, Polynomial: z=(z*z*z*z-z)/((4*z*z*z)-z); z=c*z.csin()
 	    z1 = *z;
 	    *z = *q * z->CSin();
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 150:					// Flarium 50, Sharon Webb: z = z*z*z*z+1/c; [Sharon's Star M-Set]
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    z4 = z2.CSqr();
-	    *z = z4 + q->CInvert();
+	    *z2 = z->CSqr();
+	    z4DD = z2->CSqr();
+	    *z = z4DD + q->CInvert();
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 151:					// Flarium 51, Sharon Webb: z = (z*z/2+c)*(z*z/2+c); [Space Probe M-Set]
 	    z1 = *z;
-	    z2 = z->CSqr() / 2 + *q;
-	    *z = z2.CSqr();
+	    *z2 = z->CSqr() / 2 + *q;
+	    *z = z2->CSqr();
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 152:					// Flarium 52, Sharon Webb: z = z*z*z*z+t+c; [Sharon08 M-Set]
 	    {
-	    Complex	z2a;
+	    DDComplex	z2a;
 
 	    z1 = *z;
 	    z2a = z->CSqr();
-	    z4 = z2a.CSqr();
-	    *z = z4 + z2 + *q;
+	    z4DD = z2a.CSqr();
+	    *z = z4DD + *z2 + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 	}
 
 	case 153:					// Flarium 53, Sharon Webb: z = (z+z*z/2)+c; [M-Set]
 	    z1 = *z;
 	    *z = (*z + z->CSqr() / 2) + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 154:					// Flarium 54, Polynomial: z = z*z*c+c; [M-Set]
 	    z1 = *z;
 	    *z = z->CSqr() * *q + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 155:					// Flarium 55, Polynomial: z = (z*z).csin()*z*z*c+c; [M-Set]
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = z2.CSin() * z->CSqr() * *q + *q;
+	    *z2 = z->CSqr();
+	    *z = z2->CSin() * z->CSqr() * *q + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 156:					// Flarium 56, Polynomial: z = (z*z+c)/(z*z-c); [M-Set]
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = (z2 + *q) / (z2 - *q);
+	    *z2 = z->CSqr();
+	    *z = (*z2 + *q) / (*z2 - *q);
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 157:					// Flarium 57, Derbyshire / Newton: z=z-(z*z1-z)/((5*z1)-z)+c; [5th Order Nova Variation]
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    z4 = z2.CSqr();
-	    *z = *z - (*z*z4 - *z) / ((5 * z4) - *z) + *q;
+	    *z2 = z->CSqr();
+	    z4DD = z2->CSqr();
+	    *z = *z - (*z*z4DD - *z) / ((5 * z4DD) - *z) + *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 158:					// Flarium 58, Derbyshire / Newton: z=z-(z*z1-z)/((3*z1)-z)+c; [3rd Order Nova Variation]
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - (*z*z2 - *z) / ((3 * z2) - *z) + *q;
+	    *z2 = z->CSqr();
+	    *z = *z - (*z**z2 - *z) / ((3 * *z2) - *z) + *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 159:					// Flarium 59, Derbyshire / Newton: z=z-(z*z1-z)/((3*z1)-1)+c; [3rd Order Nova Variation]
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    *z = *z - (*z*z2 - *z) / ((3 * z2) - 1) + *q;
+	    *z2 = z->CSqr();
+	    *z = *z - (*z**z2 - *z) / ((3 * *z2) - 1) + *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 160:					// Flarium 60, Derbyshire / Newton: z=z-(z*z1-z)/((5*z1)-1)+c; [5th Order Nova Variation]
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    z4 = z2.CSqr();
-	    *z = *z - (*z*z4 - *z) / ((5 * z4) - 1) + *q;
+	    *z2 = z->CSqr();
+	    z4DD = z2->CSqr();
+	    *z = *z - (*z*z4DD - *z) / ((5 * z4DD) - 1) + *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 161:					// Flarium 61, Polynomial: z=z*z*z*z+(c+(c/pi))
 	    z1 = *z;
-	    z2 = z->CSqr();
-	    z4 = z2.CSqr();
-	    *z = z4 + *q;
+	    *z2 = z->CSqr();
+	    z4DD = z2->CSqr();
+	    *z = z4DD + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 162:					// Flarium 62, Polynomial: z=z*z*(1+z)/(1+z+c)+c
 	    z1 = *z;
 	    *z = z->CSqr()*(1 + *z) / (1 + *z + *q) + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 163:					// Flarium 64, PHOENIX: z1=z; z=z*z*z*z+c.real()*z2/2+c.imag()*z2/2+c; z2=z1
 	    {
-	    Complex	z2a;
+	    DDComplex	z2a;
 
 	    z1 = *z;
 	    z2a = z->CSqr();
-	    z4 = z2a.CSqr();
-	    *z = z4 + q->x * q->y*z2 / 2 + *q;
-	    z2 = z1;
+	    z4DD = z2a.CSqr();
+	    *z = z4DD + *z2 * (q->x * q->y) / 2 + *q;
+	    *z2 = z1;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 	}
 
 	case 164:					// Flarium 66, Newton Variations: z = ((z-(((z^2)-1)/(2*z)))^2)*c
@@ -2083,11 +2100,11 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	    *z = *z - (z->CSqr() - 1) / (2 * *z);
 	    *z = z->CSqr() * *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 165:					// Flarium 67-69, Newton Variations: z = ((z-(((z^n)-1)/(n*(z^(n-1)))))^2)*c
 	    {
-	    Complex	fn, f1n;
+	    DDComplex	fn, f1n;
 
 	    z1 = *z;
 	    f1n = z->CPolynomial(*degree - 1);		// z^(deg - 1) - first derivative power
@@ -2095,27 +2112,27 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	    *z = *z - (fn - 1) / (*degree*f1n);
 	    *z = z->CSqr() * *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 	}
 
 	case 166:					// Flarium 80, Newton Variations: z=((z*z*z*z-1)/(1-(3*z*z*z)))*c
 	    z1 = *z;
-	    z2 = z->CCube();   // A correct one, finally
-	    *z = ((*z*z2 - 1) / (1 - (3 * z2))) * *q;
+	    *z2 = z->CCube();   // A correct one, finally
+	    *z = ((*z**z2 - 1) / (1 - (3 * *z2))) * *q;
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE);
 
 	case 167:					// Flarium 90, Sharon Webb: z = (z*(z*z).csin()/2).csin()+c; [Sharon15]
 	    {
-	    Complex	s;
+	    DDComplex	s;
 
 	    z1 = *z;
 	    t = z->CSqr();
 	    s = *z * t.CSin() / 2;
 	    *z = s.CSin() + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 	}
 
 	case 168:					// Flarium 91, Sharon Webb: z = (z*(z+z).ccos()/2); z = z*z+c; [Sharon16]
@@ -2124,7 +2141,7 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	    *z = (*z*t.CCos() / 2);
 	    *z = z->CSqr() + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 169:					// Flarium 92, Sharon Webb: z = (z*(z+z).csin()/2); z = z*z+c; [Sharon17]
 	    z1 = *z;
@@ -2132,7 +2149,7 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	    *z = (*z*t.CSin() / 2);
 	    *z = z->CSqr() + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 170:					// Flarium 93, Sharon Webb: z = (z*(z+z*z).csin()/2); z = z*z+c; [Sharon18]
 	    z1 = *z;
@@ -2140,26 +2157,26 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	    *z = (*z*t.CSin() / 2);
 	    *z = z->CSqr() + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 171:					// Flarium 111, Sharon Webb: z1= z*(z*z).csin()/2; z=z1*z1 + c; [Alden's Ray Method]
 	    z1 = *z;
 	    t = z->CSqr();
 	    //    z2 = z*CSinError(CSqr(z))/2;
-	    z2 = *z * t.CSin() / 2;
-	    *z = z2.CSqr() + *q;
+	    *z2 = *z * t.CSin() / 2;
+	    *z = z2->CSqr() + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 172:					// Flarium 112-116, Polynomials: z=z^n*c+z*c; Dragon curve variations
 	    {
-	    Complex	fn;
+	    DDComplex	fn;
 
 	    z1 = *z;
 	    fn = z->CPolynomial(*degree);
 	    *z = fn * *q + *z * *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 	}
 
 	case 173:					// Flarium 117, Newton Variations: z = z-(z*z*z-z*c-1)/(3*z*z+c-1)
@@ -2174,27 +2191,27 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	    t = z->CCube()*z->CSqr();
 	    *z = t.CSin() + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 175:					// Flarium 119, Sharon Webb: z = (z+(z*z)/.192).csin() + c; [Sharon's Butterfly]
 	    z1 = *z;
 	    t = *z + (*z * *z) / .192;
 	    *z = t.CSin() + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 176:					// Flarium 125, Sharon Webb: z = z+z*z*z/4 + c; [Sharon21]
 	    z1 = *z;
 	    *z = *z + z->CCube() / 4 + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 
 	case 177:					// Flarium 145, Polynomial: z=z^2+c [Jaenisch method]
 	    {
 	    int		i, rzflag, jrw;
 	    int		nFF = 1;
 	    long	NMAX = (threshold * 2) / 3;
-	    double	r, rz;
+	    dd_real	r, rz;
 	    long	LocalIteration;
 	    //    BOOL	b_MAX;
 
@@ -2202,7 +2219,7 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 	    if (*iteration >= threshold)
 		{
 		// Inside
-		*z = z2;
+		*z = *z2;
 		i = 0;
 		jrw = 0;
 		LocalIteration = NMAX - 2;
@@ -2211,19 +2228,19 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 		    //z=z*z + c;
 	//	    z=CCube(z) + q;
 	//	    z = CPolynomial(z, degree) + q;
-		    *z = *z ^ z4 + *q;
+		    *z = *z ^ z4DD + *q;
 
 		    if (z->x < 0)
 			z->x = -(log10(fabs(z->x)));
 		    else if (z->x > 0)
 			z->x = log10(fabs(z->x));
-		    else z->x = 0;
+		    else z->x = 0.0;
 
 		    if (z->y < 0)
 			z->y = -(log10(fabs(z->y)));
 		    else if (z->y > 0)
 			z->y = log10(fabs(z->y));
-		    else z->y = 0;
+		    else z->y = 0.0;
 
 		    r = z->CSumSqr();
 
@@ -2263,7 +2280,7 @@ int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *Spec
 		}
 	    *z = z->CPolynomial(*degree) + *q;
 	    zd = *z - z1;
-	    return FractintBailoutTest(&zd);
+	    return DDFractintBailoutTest(&zd, rqlim, BailoutTestType);
 	    }
 	}
     return 0;

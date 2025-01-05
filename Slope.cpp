@@ -16,10 +16,352 @@ double CSlope::cdot(Complex a, Complex b)
     }
 
 /***********************************************************************
+	Convert bignum to double double
+***********************************************************************/
+
+int	CSlope::BigDouble2DD(dd_real *out, BigDouble *in)
+    {
+    dd_real	x1, x2;
+    BigDouble	t1, t2;
+    double	y1, y2;
+    
+    y1 = in->BigDoubleToDouble();	// truncate to a double
+    t1 = y1;
+    t2 = *in - t1;			// subtract truncated bit to get the remainder
+    y2 = t2.BigDoubleToDouble();	// remainder as a float
+    x1 = y1;
+    x2 = y2;
+    *out = x1 + x2;
+    if (isnan(out->x[0]) || isnan(out->x[1]))
+	{
+	*out = 0.0;
+	return -1;
+	}
+    return 0;
+    }
+
+/***********************************************************************
+	Convert bignum variables to double double
+***********************************************************************/
+
+int	CSlope::ConvertBignumsDD(BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth,
+	dd_real *DDxgap, dd_real *DDygap, dd_real *DDhor, dd_real *DDvert, dd_real *DDWidth)
+    {
+    if (BigDouble2DD(DDxgap, &Big_xgap) < 0) return -1;
+    if (BigDouble2DD(DDygap, &Big_ygap) < 0) return -1;
+    if (BigDouble2DD(DDhor, &BigHor) < 0) return -1;
+    if (BigDouble2DD(DDvert, &BigVert) < 0) return -1;
+    if (BigDouble2DD(DDWidth, &BigWidth) < 0) return -1;
+    return 0;
+    }
+
+/***********************************************************************
+	Convert bignum to quad double
+***********************************************************************/
+
+int	CSlope::BigDouble2QD(qd_real *out, BigDouble *in)
+    {
+    qd_real	x1, x2, x3, x4;
+    BigDouble	t1, t2, t3, t4, t5, t6;
+    double	y1, y2, y3, y4;
+
+    y1 = in->BigDoubleToDouble();	// truncate to a double
+    t1 = y1;
+    t2 = *in - t1;			// subtract truncated bit to get the remainder
+    y2 = t2.BigDoubleToDouble();	// remainder as a float
+    t3 = y2;
+    t4 = t2 - t3;
+    y3 = t4.BigDoubleToDouble();
+    t5 = y3;
+    t6 = t4 - t5;
+    y4 = t6.BigDoubleToDouble();
+    x1 = y1;
+    x2 = y2;
+    x3 = y3;
+    x4 = y4;
+    *out = x1 + x2 + x3 + x4;
+    if (isnan(out->x[0]) || isnan(out->x[1]))
+	{
+	*out = 0.0;
+	return -1;
+	}
+    return 0;
+    }
+
+/***********************************************************************
+	Convert bignum variables to quad double
+***********************************************************************/
+
+int	CSlope::ConvertBignumsQD(BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth,
+    qd_real *QDxgap, qd_real *QDygap, qd_real *QDhor, qd_real *QDvert, qd_real *QDWidth)
+    {
+    if (BigDouble2QD(QDxgap, &Big_xgap) < 0) return -1;
+    if (BigDouble2QD(QDygap, &Big_ygap) < 0) return -1;
+    if (BigDouble2QD(QDhor, &BigHor) < 0) return -1;
+    if (BigDouble2QD(QDvert, &BigVert) < 0) return -1;
+    if (BigDouble2QD(QDWidth, &BigWidth) < 0) return -1;
+    return 0;
+    }
+
+/***********************************************************************
+	Reflection: fractal calculations quad double version
+***********************************************************************/
+
+double CSlope::GiveQDReflection(Complex j, BYTE juliaflag, QDComplex cQD, int *iterations, double rqlim, long threshold, Complex v)
+    {
+    int		i = 0; // iteration 
+    int		k;
+    qd_real	realimagQD;
+    QDComplex	sqrQD, vQD, qQD, temp, temp1;
+
+    QDComplex	dCQD = 0.0;		// derivative with respect to c 
+    qd_real	QDReflection = 0.0;
+    double	reflection = FP_ZERO;	// inside 
+    QDComplex	zQD = 0.0;
+    qd_real	h2 = param[1];		// height factor of the incoming light
+    QDComplex	u;
+    int		degree1, degree2;
+    QDComplex	unity = { 1.0, 0.0 };
+
+    vQD.x = v.x;
+    vQD.y = v.y;
+
+    *degree = (int)param[3];
+    if (juliaflag)
+	{
+	qQD.x = j.x;
+	qQD.y = j.y;
+	zQD.x = cQD.x;
+	zQD.y = cQD.y;
+	}
+    else
+	{
+	if (subtype == 3)				// Sine
+	    zQD = param[4];
+	qQD = cQD;
+	}
+    for (i = 0; i < threshold; i++)
+	{
+	switch (subtype)
+	    {
+	    case 0:					// Mandelbrot
+		dCQD = dCQD * (zQD + zQD) + 1.0;
+		sqrQD.x = zQD.x * zQD.x;
+		sqrQD.y = zQD.y * zQD.y;
+		realimagQD = zQD.x * zQD.y;
+		zQD.x = qQD.x + sqrQD.x - sqrQD.y;
+		zQD.y = qQD.y + realimagQD + realimagQD;
+		break;
+	    case 1:					// Cubic
+		dCQD = dCQD * zQD.CSqr() * 3.0 + 1.0;
+		zQD = zQD.CCube() + qQD;
+		break;
+	    case 2:					// Power
+		temp = 1.0;
+		for (k = 0; k < *degree - 1; k++)
+		    temp *= zQD;
+		dCQD = temp * dCQD * (double)*degree + 1.0;
+		zQD = temp * zQD + qQD;
+		break;
+	    case 3:					// Sin
+		dCQD = dCQD * zQD.CCos() + 1.0;
+		if (param[3] == 0)
+		    zQD = zQD.CSin() * qQD;
+		else
+		    zQD = zQD.CSin() + qQD;
+		break;
+	    case 4:					// Sin + 1/c
+		dCQD = dCQD * zQD.CCos() + 1.0;
+		zQD = zQD.CSin() + unity / qQD;
+		break;
+	    case 5:					// exp
+		dCQD = dCQD * zQD.CExp() + 1.0;
+		zQD = zQD.CExp() + qQD;
+		break;
+	    case 6:					// Power + 1/c
+		temp = 1.0;
+		for (k = 0; k < *degree - 1; k++)
+		    temp *= zQD;
+		dCQD = temp * dCQD * (double)*degree + 1.0;
+		zQD = temp * zQD + unity / qQD;
+		break;
+	    case 7:
+		degree1 = (int)param[4];
+		degree2 = (int)param[5];
+		dCQD = dCQD * zQD.CPolynomial(*degree - 1) * param[3] + zQD.CPolynomial(degree1 - 1) * param[4] + zQD.CPolynomial(degree2 - 1) * param[5] + 1.0;
+		zQD = zQD.CPolynomial(*degree) + zQD.CPolynomial(degree1) + zQD.CPolynomial(degree2) + qQD;
+		break;
+	    case 8:
+		dCQD = dCQD * zQD.CSqr() * 3.0 + 1.0;
+		zQD = zQD.CCube() + (qQD - 1.0) * zQD + qQD;
+		break;
+	    case 9:
+		dCQD = dCQD * zQD.CSqr() * 0.75 + 2.0;
+		zQD = zQD.CCube() / 4.0 + zQD + qQD;
+		break;
+	    case 10:					// Sin(z^n)
+		temp = zQD.CPolynomial(*degree);
+		dCQD = dCQD * temp.CCos() * zQD.CPolynomial(*degree - 1) * param[3] + 1.0;
+		zQD = temp.CSin() + qQD;
+		break;
+	    case 11:					// Sinh
+		dCQD = dCQD * zQD.CSinh() + 1.0;
+		zQD = zQD.CSinh() + qQD;
+		break;
+	    case 12:					// Sinh(z^n)
+		temp = zQD.CPolynomial(*degree);
+		dCQD = dCQD * temp.CSinh() * zQD.CPolynomial(*degree - 1) * param[3] + 1.0;
+		zQD = temp.CSinh() + qQD;
+		break;
+	    }
+
+	if (zQD.CSumSqr() > rqlim) 
+	    {
+	    u = zQD / dCQD;
+	    u = u / u.CFabs();
+	    QDReflection = u.x * vQD.x + u.y * vQD.y + h2;
+	    QDReflection = QDReflection / (h2 + 1.0); // rescale so that t does not get QDger than 1
+	    reflection = to_double(QDReflection);
+	    if (reflection < 0.0) reflection = 0.0;
+	    *iterations = i;
+	    break;
+	    }
+	}
+    return reflection;
+    }
+
+/***********************************************************************
+	Reflection: fractal calculations double double version
+***********************************************************************/
+
+double CSlope::GiveDDReflection(Complex j, BYTE juliaflag, DDComplex cDD, int *iterations, double rqlim, long threshold, Complex v)
+    {
+    int		i = 0; // iteration 
+    int		k;
+    dd_real	realimagDD;
+    DDComplex	sqrDD, vDD, qDD, temp, temp1;
+
+    DDComplex	dCDD = 0.0;		// derivative with respect to c 
+    dd_real	DDReflection = 0.0;
+    double	reflection = FP_ZERO;	// inside 
+    DDComplex	zDD = 0.0;
+    dd_real	h2 = param[1];		// height factor of the incoming light
+    DDComplex	u;
+    int		degree1, degree2;
+    DDComplex	unity = { 1.0, 0.0 };
+
+    vDD.x = v.x;
+    vDD.y = v.y;
+
+    *degree = (int)param[3];
+    if (juliaflag)
+	{
+	qDD.x = j.x;
+	qDD.y = j.y;
+	zDD.x = cDD.x;
+	zDD.y = cDD.y;
+	}
+    else
+	{
+	if (subtype == 3)				// Sine
+	    zDD = param[4];
+	qDD = cDD;
+	}
+    for (i = 0; i < threshold; i++)
+	{
+	switch (subtype)
+	    {
+	    case 0:					// Mandelbrot
+		dCDD = dCDD * (zDD + zDD) + 1.0;
+		sqrDD.x = zDD.x * zDD.x;
+		sqrDD.y = zDD.y * zDD.y;
+		realimagDD = zDD.x * zDD.y;
+		zDD.x = qDD.x + sqrDD.x - sqrDD.y;
+		zDD.y = qDD.y + realimagDD + realimagDD;
+		break;
+	    case 1:					// Cubic
+		dCDD = dCDD * zDD.CSqr() * 3.0 + 1.0;
+		zDD = zDD.CCube() + qDD;
+		break;
+	    case 2:					// Power
+		temp = 1.0;
+		for (k = 0; k < *degree - 1; k++)
+		    temp *= zDD;
+		dCDD = temp * dCDD * (double)*degree + 1.0;
+		zDD = temp * zDD + qDD;
+		break;
+	    case 3:					// Sin
+		dCDD = dCDD * zDD.CCos() + 1.0;
+		if (param[3] == 0)
+		    zDD = zDD.CSin() * qDD;
+		else
+		    zDD = zDD.CSin() + qDD;
+		break;
+	    case 4:					// Sin + 1/c
+		dCDD = dCDD * zDD.CCos() + 1.0;
+		zDD = zDD.CSin() + unity / qDD;
+		break;
+	    case 5:					// exp
+		dCDD = dCDD * zDD.CExp() + 1.0;
+		zDD = zDD.CExp() + qDD;
+		break;
+	    case 6:					// Power + 1/c
+		temp = 1.0;
+		for (k = 0; k < *degree - 1; k++)
+		    temp *= zDD;
+		dCDD = temp * dCDD * (double)*degree + 1.0;
+		zDD = temp * zDD + unity / qDD;
+		break;
+	    case 7:
+		degree1 = (int)param[4];
+		degree2 = (int)param[5];
+		dCDD = dCDD * zDD.CPolynomial(*degree - 1) * param[3] + zDD.CPolynomial(degree1 - 1) * param[4] + zDD.CPolynomial(degree2 - 1) * param[5] + 1.0;
+		zDD = zDD.CPolynomial(*degree) + zDD.CPolynomial(degree1) + zDD.CPolynomial(degree2) + qDD;
+		break;
+	    case 8:
+		dCDD = dCDD * zDD.CSqr() * 3.0 + 1.0;
+		zDD = zDD.CCube() + (qDD - 1.0) * zDD + qDD;
+		break;
+	    case 9:
+		dCDD = dCDD * zDD.CSqr() * 0.75 + 2.0;
+		zDD = zDD.CCube() / 4.0 + zDD + qDD;
+		break;
+	    case 10:					// Sin(z^n)
+		temp = zDD.CPolynomial(*degree);
+		dCDD = dCDD * temp.CCos() * zDD.CPolynomial(*degree - 1) * param[3] + 1.0;
+		zDD = temp.CSin() + qDD;
+		break;
+	    case 11:					// Sinh
+		dCDD = dCDD * zDD.CSinh() + 1.0;
+		zDD = zDD.CSinh() + qDD;
+		break;
+	    case 12:					// Sinh(z^n)
+		temp = zDD.CPolynomial(*degree);
+		dCDD = dCDD * temp.CSinh() * zDD.CPolynomial(*degree - 1) * param[3] + 1.0;
+		zDD = temp.CSinh() + qDD;
+		break;
+	    }
+
+	if (zDD.CSumSqr() > rqlim) 
+	    {
+	    u = zDD / dCDD;
+	    u = u / u.CFabs();
+	    DDReflection = u.x * vDD.x + u.y * vDD.y + h2;
+	    DDReflection = DDReflection / (h2 + 1.0); // rescale so that t does not get DDger than 1
+	    reflection = to_double(DDReflection);
+	    if (reflection < 0.0) reflection = 0.0;
+	    *iterations = i;
+	    break;
+	    }
+	}
+    return reflection;
+    }
+
+/***********************************************************************
 	Reflection: fractal calculations Bignum version
 ***********************************************************************/
 
-double CSlope::GiveBigReflection(Complex j, BYTE juliaflag, BigComplex cBig, int *iterations, double rqlim, long threshold, Complex v)
+double CSlope::GiveBigReflection(Complex j, BYTE juliaflag, BigComplex cBig, QDComplex cQD, DDComplex cDD, int *iterations, double rqlim, long threshold, Complex v)
     {
     int		i = 0; // iteration 
     int		k;
@@ -35,6 +377,10 @@ double CSlope::GiveBigReflection(Complex j, BYTE juliaflag, BigComplex cBig, int
     int		degree1, degree2;
     BigComplex	unity = { 1.0, 0.0 };
 
+    if (precision <= 30)			// use double double ... 4 times faster
+	return GiveDDReflection(j, juliaflag, cDD, iterations, rqlim, threshold, v);
+    else if (precision <= 60)
+	return GiveQDReflection(j, juliaflag, cQD, iterations, rqlim, threshold, v);
     vBig = v;
 
     *degree = (int)param[3];
@@ -397,7 +743,7 @@ double CSlope::GiveReflection(Complex j, BYTE juliaflag, Complex C, int *iterati
 	Caluclate the colour of the pixel
 **************************************************************************/
 
-RGBTRIPLE CSlope::compute_colour(CTrueCol *TrueCol, Complex j, BYTE juliaflag, Complex c, BigComplex cBig, double rqlim, long threshold, BYTE BigNumFlag, Complex v, bool *Time2Exit)
+RGBTRIPLE CSlope::compute_colour(CTrueCol *TrueCol, Complex j, BYTE juliaflag, Complex c, BigComplex cBig, QDComplex cQD, DDComplex cDD, double rqlim, long threshold, BYTE BigNumFlag, Complex v, bool *Time2Exit)
     {
 
     double	reflection;
@@ -408,7 +754,7 @@ RGBTRIPLE CSlope::compute_colour(CTrueCol *TrueCol, Complex j, BYTE juliaflag, C
     *Time2Exit = false;
     if (BigNumFlag)
 	{
-	reflection = GiveBigReflection(j, juliaflag, cBig, &iterations, rqlim, threshold, v);
+	reflection = GiveBigReflection(j, juliaflag, cBig, cQD, cDD, &iterations, rqlim, threshold, v);
 	if (reflection < 0)
 	    *Time2Exit = true;
 	}
@@ -469,11 +815,15 @@ void	    CSlope::Create2DVector(Complex *v, double LightAngle)
 
 int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
 					    BYTE BigNumFlag, BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
-					    int bits_per_pixelIn, BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, HANDLE ghMutex)
+					    int bits_per_pixelIn, BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, int precisionIn, HANDLE ghMutex)
 //    BYTE BigNumFlag, BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, int degree, bool UsePalette, double LightAngle, double LightHeight, CTrueCol *TrueCol, CDib *Dib)
     {
     Complex	c;
     BigComplex	cBig;
+    DDComplex	cDD;
+    QDComplex	cQD;
+    dd_real	DDhor, DDvert, DDxgap, DDygap, DDWidth;
+    qd_real	QDhor, QDvert, QDxgap, QDygap, QDWidth;
     RGBTRIPLE	colour;
     int		lastChecked = -1;
     Complex	v;// unit 2D vector in this direction
@@ -484,6 +834,7 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
     for (i = 0; i < NUMSLOPEDERIVPARAM; i++)
 	param[i] = paramIn[i];
 
+    precision = precisionIn;
     thread = threadIn;
     NumThreads = NumThreadsIn;
     subtype = subtypeIn;
@@ -500,12 +851,26 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 
     *ThreadComplete = false;
 
+    if (BigNumFlag)
+	{
+	if (precision <= 30)
+	    ConvertBignumsDD(Big_xgap, Big_ygap, BigHor, BigVert, BigWidth, &DDxgap, &DDygap, &DDhor, &DDvert, &DDWidth);
+	else if (precision <= 60)
+	    ConvertBignumsQD(Big_xgap, Big_ygap, BigHor, BigVert, BigWidth, &QDxgap, &QDygap, &QDhor, &QDvert, &QDWidth);
+	}
     Plot.InitPlot(threshold, TrueCol, wpixels, xdots, height, xdots, height, Dib->BitsPerPixel, Dib, USEPALETTE);
     for (iY = 0; iY < ydots; iY++)
 	{
 	double progress = (double)iY / ydots;
 	if (BigNumFlag)
-	    cBig.y = BigVert + BigWidth - Big_ygap * iY;
+	    {
+	    if (precision <= 30)			// use double double ... 4 times faster
+	    	cDD.y = DDvert + DDWidth - DDygap * iY;
+	    else if (precision <= 60)
+		cQD.y = QDvert + QDWidth - QDygap * iY;
+	    else
+		cBig.y = BigVert + BigWidth - Big_ygap * iY;
+	    }
 	else
 	    c.y = vert + mandel_width - iY * ygap;
 	if (int(progress * 100) != lastChecked)
@@ -518,11 +883,18 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 	    if (user_data(hwnd) < 0)
 		return -1;
 	    if (BigNumFlag)
-		cBig.x = BigHor + Big_xgap * iX;
+		{
+		if (precision <= 30)			// use double double ... 4 times faster
+		    cDD.x = DDhor + DDxgap * iX;
+		else if (precision <= 60)
+		    cQD.x = QDhor + QDxgap * iX;
+		else
+		    cBig.x = BigHor + Big_xgap * iX;
+		}
 	    else
 		c.x = hor + iX * xgap;
 
-	    colour = compute_colour(TrueCol, j, juliaflag, c, cBig, rqlim, threshold, BigNumFlag, v, &Time2Exit);
+	    colour = compute_colour(TrueCol, j, juliaflag, c, cBig, cQD, cDD, rqlim, threshold, BigNumFlag, v, &Time2Exit);
 	    if (Time2Exit)
 		return 0;
 //	    plot(iX, iY, iterations);

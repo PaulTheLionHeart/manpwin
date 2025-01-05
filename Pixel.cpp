@@ -53,6 +53,11 @@ void	CPixel::InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degree
     xdots = xdotsIn;						// only the width of the strip
     ydots = ydotsIn;
     precision = precisionIn;
+
+    // initialise a number of BigNumvariables that will be used in DD and QD fractals. This prevents NaN in conversion
+    aBig = 0.0; a2Big = 0.0; aa3Big = 0.0; bBig = 0.0; l2Big = 0.0; lm5Big = 0.0; lp5Big = 0.0; ozBig = 0.0; t2Big = 0.0; t3Big = 0.0; vBig = 0.0;
+    tempBig = 0.0; temp1Big = 0.0; temp2Big = 0.0; temp3Big = 0.0; sqrBig = 0.0; sqrsqrBig = 0.0; realimagBig = 0.0; RealImagSqrBig = 0.0; tBig = 0.0;
+    c1Big = 0.0; c2Big = 0.0; cbBig = 0.0; caa3Big = 0.0; z1Big = 0.0; z2Big = 0.0; z3Big = 0.0; z4Big = 0.0; zdBig = 0.0; ztBig;
     }
 
 void	CPixel::InitPixel1(CTZfilter *TZfilterIn, CTrueCol *TrueColIn, COscProcess *OscProcessIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, double *wpixelsIn, BYTE juliaflagIn, double closenuffIn, BigDouble BigCloseEnoughIn, BYTE calcmodeIn)
@@ -251,7 +256,7 @@ int	CPixel::DoFilter(int method, int hooper)
     CPotential	Pot;
 
     if (colours == 256 && decomp > 0)
-	*iteration = float_decomposition(z->x, z->y);
+	*iteration = FloatDecomposition(z->x, z->y);
     else if (logval)
 	*iteration = (BYTE) (*(logtable + (*iteration % MAXTHRESHOLD)));
     else if (biomorph >= 0)
@@ -405,6 +410,10 @@ void	CPixel::CalcFloatIteration(double error, double *wpixels, int row, int col,
 	    FloatIteration += special;
 	else if (phaseflag == 2)			// third phase
 	    FloatIteration += (special << 1);
+	if (*color > threshold)
+	    *color = threshold;
+	if (*color > threshold)
+	    *color = threshold;
 	}						// default first phase
     if ((long)FloatIteration >= threshold)
 	FloatIteration = (double)threshold;
@@ -975,3 +984,4 @@ int	CPixel::RunThread(HWND hwnd, int i, HANDLE ghMutex, int StripWidth, CSlope S
 	}
     return 0;
     }
+

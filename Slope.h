@@ -1,10 +1,10 @@
 #include <Windows.h>
-
-//#include "manp.h"
 #include "colour.h"
 #include "Dib.h"
 #include "complex.h"
 #include "BigComplex.h"
+#include "DDComplex.h"
+#include "QDComplex.h"
 #include "Fractalp.h"
 #include "filter.h"
 #include "plot.h"
@@ -26,7 +26,7 @@ class CSlope
     public:
 	int	RunSlopeDerivative(HWND GlobalHwnd, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtype, int NumThreads, int thread, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
 								BYTE BigNumFlag, BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
-								int bits_per_pixel, BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, HANDLE ghMutex);
+								int bits_per_pixel, BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, int precision, HANDLE ghMutex);
 	int	RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
 								BYTE BigNumFlag, BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, double *wpixels, BYTE juliaflag, 
 								int xdots, int ydots, int width, WORD *degreeIn);
@@ -43,8 +43,14 @@ class CSlope
     private:
 	double	cdot(Complex a, Complex b);
 	double	GiveReflection(Complex j, BYTE juliaflag, Complex Z, int *iterations, double rqlim, long threshold, Complex v);
-	double	GiveBigReflection(Complex j, BYTE juliaflag, BigComplex C, int *iterations, double rqlim, long threshold, Complex v);
-	RGBTRIPLE compute_colour(CTrueCol *TrueCol, Complex j, BYTE juliaflag, Complex c, BigComplex qBig, double rqlim, long threshold, BYTE BigNumFlag, Complex v, bool *Time2Exit);
+	double	GiveBigReflection(Complex j, BYTE juliaflag, BigComplex C, QDComplex cQD, DDComplex cDD, int *iterations, double rqlim, long threshold, Complex v);
+	double	GiveDDReflection(Complex j, BYTE juliaflag, DDComplex cDD, int *iterations, double rqlim, long threshold, Complex v);
+	double	GiveQDReflection(Complex j, BYTE juliaflag, QDComplex cQD, int *iterations, double rqlim, long threshold, Complex v);
+	int	BigDouble2DD(dd_real *out, BigDouble *in);
+	int	BigDouble2QD(qd_real *out, BigDouble *in);
+	int	ConvertBignumsDD(BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, dd_real *DDxgap, dd_real *DDygap, dd_real *DDhor, dd_real *DDvert, dd_real *DDWidth);
+	int	ConvertBignumsQD(BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, qd_real *QDxgap, qd_real *QDygap, qd_real *QDhor, qd_real *QDvert, qd_real *QDWidth);
+	RGBTRIPLE compute_colour(CTrueCol *TrueCol, Complex j, BYTE juliaflag, Complex c, BigComplex cBig, QDComplex cQD, DDComplex cDD, double rqlim, long threshold, BYTE BigNumFlag, Complex v, bool *Time2Exit);
 	void	Create2DVector(Complex *v, double LightAngle);
 	double	getGradientX(double *wpixels, int index, int width);
 	double	getGradientY(double *wpixels, int index, int width, int height);
@@ -55,6 +61,7 @@ class CSlope
 	int	NumThreads;
 	int	thread;
 	int	bits_per_pixel;
+	int	precision;
 	WORD	*degree;
 
 	// Fwd Diff Render Stuff
