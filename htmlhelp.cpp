@@ -5,7 +5,7 @@
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 #include <windows.h>
 #include <stdio.h>
-#include <htmlhelp.h>	// PHD 24/10/2007 tp allow *.CHM files
+#include <htmlhelp.h>	// PHD 24/10/2007 to allow *.CHM files
 #include <tchar.h>
 #include "manp.h"
 
