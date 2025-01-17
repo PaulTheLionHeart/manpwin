@@ -1,0 +1,8 @@
+C:/Github/manpwin/manpwin/build/CMakeFiles/manpwin.dir
+C:/Github/manpwin/manpwin/build/CMakeFiles/ALL_BUILD.dir
+C:/Github/manpwin/manpwin/build/CMakeFiles/ZERO_CHECK.dir
+C:/Github/manpwin/manpwin/build/MPEG/CMakeFiles/mpeg.dir
+C:/Github/manpwin/manpwin/build/parser/CMakeFiles/parser.dir
+C:/Github/manpwin/manpwin/build/pnglib/CMakeFiles/pnglib.dir
+C:/Github/manpwin/manpwin/build/qdlib/CMakeFiles/qdlib.dir
+C:/Github/manpwin/manpwin/build/ZLib/CMakeFiles/zlib.dir
