@@ -1,0 +1,535 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{26CE7F4A-C370-3C1F-AB65-30154E120E7D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>mpfr</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Github\manpwin\manpwin\build\mpfr\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mpfr.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mpfr</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Github\manpwin\manpwin\build\mpfr\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mpfr.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">mpfr</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Github\manpwin\manpwin\build\mpfr\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">mpfr.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">mpfr</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Github\manpwin\manpwin\build\mpfr\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">mpfr.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">mpfr</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Github\manpwin\manpwin\mpfr\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Github/manpwin/manpwin/mpfr/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Github/manpwin/manpwin -BC:/Github/manpwin/manpwin/build --check-stamp-file C:/Github/manpwin/manpwin/build/mpfr/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Github\manpwin\manpwin\build\mpfr\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Github/manpwin/manpwin/mpfr/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Github/manpwin/manpwin -BC:/Github/manpwin/manpwin/build --check-stamp-file C:/Github/manpwin/manpwin/build/mpfr/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Github\manpwin\manpwin\build\mpfr\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Github/manpwin/manpwin/mpfr/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Github/manpwin/manpwin -BC:/Github/manpwin/manpwin/build --check-stamp-file C:/Github/manpwin/manpwin/build/mpfr/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Github\manpwin\manpwin\build\mpfr\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Github/manpwin/manpwin/mpfr/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Github/manpwin/manpwin -BC:/Github/manpwin/manpwin/build --check-stamp-file C:/Github/manpwin/manpwin/build/mpfr/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Github\manpwin\manpwin\build\mpfr\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\abort_prec_max.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\acos.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\acosh.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\add.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\add1.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\add1sp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\add_d.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\add_ui.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\agm.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\ai.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\asin.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\asinh.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\atan.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\atan2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\atanh.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\bernoulli.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\beta.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\buildopt.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\cache.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\cbrt.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\check.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\clear.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\clears.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\cmp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\cmp2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\cmp_abs.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\cmp_d.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\cmp_ld.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\cmp_si.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\cmp_ui.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\comparisons.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\constant.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\const_catalan.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\const_euler.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\const_log2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\const_pi.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\copysign.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\cos.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\cosh.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\cot.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\coth.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\csc.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\csch.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\digamma.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\dim.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\div.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\div_2exp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\div_2si.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\div_2ui.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\div_d.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\div_ui.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\dot.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\dump.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\d_div.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\d_sub.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\eint.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\eq.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\erandom.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\erf.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\erfc.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\exceptions.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\exp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\exp10.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\exp2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\exp3.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\expm1.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\exp_2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\extract.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\factorial.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\fits_intmax.c" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\fits_s.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\fits_sint.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\fits_slong.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\fits_sshort.c" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\fits_u.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\fits_uint.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\fits_uintmax.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\fits_ulong.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\fits_ushort.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\fma.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\fmma.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\fms.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\fpif.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\frac.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\free_cache.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\frexp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\gamma.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\gammaonethird.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\gamma_inc.c" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\gen_inverse.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_d.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_d128.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_d64.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_exp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_f.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_float128.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_flt.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_ld.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_q.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_si.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_sj.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_str.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_ui.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_uj.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_z.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\get_z_exp.c" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\gmp.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\gmp_op.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\grandom.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\hypot.c" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\ieee_floats.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\init.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\init2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\inits.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\inits2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\inp_str.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\int_ceil_log2.c" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\invert_limb.h" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\invsqrt_limb.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\isinf.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\isinteger.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\isnan.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\isnum.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\isqrt.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\isregular.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\iszero.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\jn.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\jyn_asympt.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\li2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\lngamma.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\log.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\log10.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\log1p.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\log2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\logging.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\log_ui.c" />
+    <None Include="C:\Github\manpwin\manpwin\mpfr\Makefile.am">
+    </None>
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\minmax.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\min_prec.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\modf.c" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\mparam_h.in" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\mparam.h" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\mpf2mpfr.h" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\mpfr-cvers.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\mpfr-gmp.c" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\mpfr-gmp.h" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\mpfr-impl.h" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\mpfr-intmax.h" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\mpfr-longlong.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\mpfr-mini-gmp.c" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\mpfr-mini-gmp.h" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\mpfr-sassert.h" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\mpfr-thread.h" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\mpfr.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\mpn_exp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\mp_clz_tab.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\mul.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\mulders.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\mul_2exp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\mul_2si.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\mul_2ui.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\mul_d.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\mul_ui.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\nbits_ulong.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\neg.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\next.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\nrandom.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\odd_p.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\out_str.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\pool.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\pow.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\powerof2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\pow_si.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\pow_ui.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\pow_z.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\printf.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\print_raw.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\print_rnd_mode.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\random_deviate.c" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr\random_deviate.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\rec_sqrt.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\reldiff.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\rem1.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\rint.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\rndna.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\root.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\round_near_x.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\round_p.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\round_prec.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\round_raw_generic.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\scale2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sec.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sech.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\setmax.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\setmin.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\setsign.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_d.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_d128.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_d64.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_dfl_prec.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_exp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_f.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_float128.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_flt.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_inf.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_ld.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_nan.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_prc_raw.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_prec.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_q.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_rnd.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_si.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_si_2exp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_sj.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_str.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_str_raw.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_ui.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_ui_2exp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_uj.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_z.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_zero.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\set_z_exp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sgn.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\signbit.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sin.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sinh.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sinh_cosh.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sin_cos.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\si_op.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sqr.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sqrt.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sqrt_ui.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\stack_interface.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\strtofr.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sub.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sub1.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sub1sp.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\subnormal.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sub_d.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sub_ui.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\sum.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\swap.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\tan.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\tanh.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\total_order.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\ubf.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\uceil_exp2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\uceil_log2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\ufloor_log2.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\ui_div.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\ui_pow.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\ui_pow_ui.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\ui_sub.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\urandom.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\urandomb.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\vasprintf.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\version.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\volatile.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\yn.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\zeta.c" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\mpfr\zeta_ui.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Github\manpwin\manpwin\build\ZERO_CHECK.vcxproj">
+      <Project>{BCC156E0-531B-3F5B-8273-5275F94EB6D9}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

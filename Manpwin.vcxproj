@@ -45,7 +45,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -320,13 +320,13 @@
     <ClCompile Include="ant.cpp" />
     <ClCompile Include="Apollonius.cpp" />
     <ClCompile Include="Approximation.cpp" />
+    <ClCompile Include="Arithmetic.cpp" />
     <ClCompile Include="Bif.cpp" />
     <ClCompile Include="BigComplex.cpp" />
     <ClCompile Include="BigDouble.cpp" />
     <ClCompile Include="BigFunctions.cpp" />
     <ClCompile Include="BigMandelDerivatives.cpp" />
     <ClCompile Include="BigMatrix.cpp" />
-    <ClCompile Include="BigNumStuff.cpp" />
     <ClCompile Include="BigPixel.cpp" />
     <ClCompile Include="BigTrig.cpp" />
     <ClCompile Include="BigTZ.cpp" />
@@ -343,8 +343,10 @@
     <ClCompile Include="Cross.cpp" />
     <ClCompile Include="Curves.cpp" />
     <ClCompile Include="DDComplex.cpp" />
+    <ClCompile Include="DDFractintTrig.cpp" />
     <ClCompile Include="DDFunctions.cpp" />
     <ClCompile Include="DDMandelDerivativesFN.cpp" />
+    <ClCompile Include="DDMatrix.cpp" />
     <ClCompile Include="DDPixel.cpp" />
     <ClCompile Include="DDTZFunctions.cpp" />
     <ClCompile Include="Decomp.cpp" />
@@ -368,12 +370,14 @@
     <ClCompile Include="fractalp.cpp" />
     <ClCompile Include="FractintFilters.cpp" />
     <ClCompile Include="FractintFunctions.cpp" />
+    <ClCompile Include="DDFractintFunctions.cpp" />
     <ClCompile Include="FractintTrig.cpp" />
     <ClCompile Include="FracZoom.cpp" />
     <ClCompile Include="FrameCalculator.cpp" />
     <ClCompile Include="FrantPAR.cpp" />
     <ClCompile Include="Functions.cpp" />
     <ClCompile Include="FwdDiff.cpp" />
+    <ClCompile Include="FwdDiffFn.cpp" />
     <ClCompile Include="Genline.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="GIFwrite.cpp" />
@@ -421,8 +425,11 @@
     <ClCompile Include="Potential.cpp" />
     <ClCompile Include="preview.cpp" />
     <ClCompile Include="QDComplex.cpp" />
+    <ClCompile Include="QDFractintFunctions.cpp" />
+    <ClCompile Include="QDFractintTrig.cpp" />
     <ClCompile Include="QDFunctions.cpp" />
     <ClCompile Include="QDMandelDerivativesFN.cpp" />
+    <ClCompile Include="QDMatrix.cpp" />
     <ClCompile Include="QDPixel.cpp" />
     <ClCompile Include="QDTZFunctions.cpp" />
     <ClCompile Include="Rotate.cpp" />
@@ -458,6 +465,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="anim.h" />
+    <ClInclude Include="Arithmetic.h" />
     <ClInclude Include="Bif.h" />
     <ClInclude Include="Big.h" />
     <ClInclude Include="BigComplex.h" />
@@ -468,6 +476,7 @@
     <ClInclude Include="colour.h" />
     <ClInclude Include="Complex.h" />
     <ClInclude Include="DDComplex.h" />
+    <ClInclude Include="DDMatrix.h" />
     <ClInclude Include="Dib.h" />
     <ClInclude Include="EditPal.h" />
     <ClInclude Include="ExpComplex.h" />
@@ -489,6 +498,7 @@
     <ClInclude Include="Potential.h" />
     <ClInclude Include="Preview.h" />
     <ClInclude Include="QDComplex.h" />
+    <ClInclude Include="QDMatrix.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Slope.h" />
     <ClInclude Include="Tetration.h" />

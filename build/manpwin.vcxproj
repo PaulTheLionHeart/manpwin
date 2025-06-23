@@ -1,0 +1,519 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{A3117E09-FD05-39FB-ABC9-61DA0F604309}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>manpwin</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Github\manpwin\manpwin\build\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">manpwin.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">manpwin</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Github\manpwin\manpwin\build\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">manpwin.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">manpwin</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Github\manpwin\manpwin\build\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">manpwin.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">manpwin</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Github\manpwin\manpwin\build\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">manpwin.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">manpwin</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>MPEG\Debug\mpeg.lib;parser\Debug\parser.lib;pnglib\Debug\pnglib.lib;qdlib\Debug\qdlib.lib;ZLib\Debug\zlib.lib;htmlhelp.lib;C:\Github\manpwin\mpfr\build.vc15\lib\x64\Debug\mpfr.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Github/manpwin/manpwin/build/Debug/manpwin.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Github/manpwin/manpwin/build/Debug/manpwin.pdb</ProgramDataBaseFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>MPEG\Release\mpeg.lib;parser\Release\parser.lib;pnglib\Release\pnglib.lib;qdlib\Release\qdlib.lib;ZLib\Release\zlib.lib;htmlhelp.lib;C:\Github\manpwin\mpfr\build.vc15\lib\x64\Release\mpfr.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Github/manpwin/manpwin/build/Release/manpwin.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Github/manpwin/manpwin/build/Release/manpwin.pdb</ProgramDataBaseFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>MPEG\MinSizeRel\mpeg.lib;parser\MinSizeRel\parser.lib;pnglib\MinSizeRel\pnglib.lib;qdlib\MinSizeRel\qdlib.lib;ZLib\MinSizeRel\zlib.lib;htmlhelp.lib;mpfr-NOTFOUND;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Github/manpwin/manpwin/build/MinSizeRel/manpwin.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Github/manpwin/manpwin/build/MinSizeRel/manpwin.pdb</ProgramDataBaseFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>MPEG\RelWithDebInfo\mpeg.lib;parser\RelWithDebInfo\parser.lib;pnglib\RelWithDebInfo\pnglib.lib;qdlib\RelWithDebInfo\qdlib.lib;ZLib\RelWithDebInfo\zlib.lib;htmlhelp.lib;mpfr-NOTFOUND;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Github/manpwin/manpwin/build/RelWithDebInfo/manpwin.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Github/manpwin/manpwin/build/RelWithDebInfo/manpwin.pdb</ProgramDataBaseFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Github\manpwin\manpwin\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Github/manpwin/manpwin/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Github/manpwin/manpwin -BC:/Github/manpwin/manpwin/build --check-stamp-file C:/Github/manpwin/manpwin/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeCCompiler.cmake;C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeCXXCompiler.cmake;C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeRCCompiler.cmake;C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeSystem.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Github\manpwin\manpwin\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Github/manpwin/manpwin/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Github/manpwin/manpwin -BC:/Github/manpwin/manpwin/build --check-stamp-file C:/Github/manpwin/manpwin/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeCCompiler.cmake;C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeCXXCompiler.cmake;C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeRCCompiler.cmake;C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeSystem.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Github\manpwin\manpwin\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Github/manpwin/manpwin/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Github/manpwin/manpwin -BC:/Github/manpwin/manpwin/build --check-stamp-file C:/Github/manpwin/manpwin/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeCCompiler.cmake;C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeCXXCompiler.cmake;C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeRCCompiler.cmake;C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeSystem.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Github\manpwin\manpwin\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Github/manpwin/manpwin/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Github/manpwin/manpwin -BC:/Github/manpwin/manpwin/build --check-stamp-file C:/Github/manpwin/manpwin/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeCCompiler.cmake;C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeCXXCompiler.cmake;C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeRCCompiler.cmake;C:\Github\manpwin\manpwin\build\CMakeFiles\3.29.0-rc4\CMakeSystem.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.29\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Github\manpwin\manpwin\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Github\manpwin\manpwin\AniInvert.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\AniJulia.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\anim.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\anim.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\ant.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Apollonius.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Approximation.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Bif.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Bif.h" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Big.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\BigComplex.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\BigComplex.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\BigDouble.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\BigDouble.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\BigFN.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\BigFunctions.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\BigMandelDerivatives.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\BigManDerivatives.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\BigMatrix.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\BigMatrix.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\BigNumStuff.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\BigPixel.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\BigTrig.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\BigTrig.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\BigTZ.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Bt.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\BuddhaBrot.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\CalcMode.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Circle.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Clipbord.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\CodeVersion.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Colour.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\colour.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Colour1.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\ColourMethod.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Complex.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Complex.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Config.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Cross.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Curves.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\DDComplex.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\DDComplex.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\DDFunctions.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\DDMandelDerivativesFN.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\DDPixel.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\DDTZFunctions.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Decomp.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Default.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\DerivSlope.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Dib.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Dib.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Dither.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Dl3quant.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Dostereo.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\EditPal.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\EditPal.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\EditPalDlg.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\ExpComplex.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\ExpComplex.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\FDimension.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\FFT.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\fibonaci.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\filter.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Filter.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\FilterData.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\floatexp.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\fourier.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Fract.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\fract.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\FractalMaps.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\fractalp.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\fractalp.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Fractals.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\FractintFilters.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\FractintFunctions.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\FractintTrig.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Fractype.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\FracZoom.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\FrameCalculator.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\FrameCalculator.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\FrantPAR.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Functions.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\FwdDiff.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Genline.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Geometry.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\GIFwrite.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Guess.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Henon.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\htmlhelp.cpp" />
+    <None Include="C:\Github\manpwin\manpwin\icon1.ico">
+    </None>
+    <ClCompile Include="C:\Github\manpwin\manpwin\Ikeda.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\KallesPAR.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Keyboard.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Kleinian.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\KnotOsc.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Knots.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Line3d.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Lorenz.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Lsys.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Malthus.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\MandelDerivatives.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\MandelDerivativesFN.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Maninit.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Manp.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Manpdlg.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Manpfile.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Manpmain.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Manpwin.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Manpwin.h" />
+    <None Include="C:\Github\manpwin\manpwin\MANPWIN.ICO">
+    </None>
+    <ResourceCompile Include="C:\Github\manpwin\manpwin\Manpwin.rc" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Matrix.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Matrix.h" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\menu.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Miscfrac.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Mountain.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\MPEGWrite.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\mpfr.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Newton.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\OscAnim.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\OscDatabase.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Oscillators.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\OscMorph.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\OscProcess.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\OscProcess.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\OtherFunctions.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\OtherFunctions.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\ParamAnim.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Pascal.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\PertFN.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\PertFNFloatExp.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Perturbation.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Pixel.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Pixel.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Plot.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Plot.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\png.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Polygon.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Polygon.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Popcorn.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Potential.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Potential.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\preview.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Preview.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\QDComplex.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\QDComplex.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\QDFunctions.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\QDMandelDerivativesFN.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\QDPixel.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\QDTZFunctions.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\resource.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Rotate.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\RTJulia.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Savefile.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\SaveVars.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Script.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\SierpinskiFlowers.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Slope.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Slope.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\SlopeMT.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\SprottLinz.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\SprottMaps.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\SprottOsc.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Stereo.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Surfaces.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Sym.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\SymPlot.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Tess.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Tetration.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Tetration.h" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\tierazon.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\TierazonFunctions.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Triangles.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\trig.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\TZFilterDLG.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\undo.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Update.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\User.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Zigzag.cpp" />
+    <ClCompile Include="C:\Github\manpwin\manpwin\Zoom.cpp" />
+    <ClInclude Include="C:\Github\manpwin\manpwin\Zoom.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Github\manpwin\manpwin\build\ZERO_CHECK.vcxproj">
+      <Project>{BCC156E0-531B-3F5B-8273-5275F94EB6D9}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Github\manpwin\manpwin\build\MPEG\mpeg.vcxproj">
+      <Project>{847CBDC2-F769-3061-AED0-DFD3EC77A835}</Project>
+      <Name>mpeg</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Github\manpwin\manpwin\build\parser\parser.vcxproj">
+      <Project>{1E5394DE-38D5-3B33-85C4-F0F099F06755}</Project>
+      <Name>parser</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Github\manpwin\manpwin\build\pnglib\pnglib.vcxproj">
+      <Project>{09B495FD-A6F5-36D5-8B3F-B39FB445968D}</Project>
+      <Name>pnglib</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Github\manpwin\manpwin\build\qdlib\qdlib.vcxproj">
+      <Project>{6C237EB3-B93F-3BA9-BC0A-010FE4C81199}</Project>
+      <Name>qdlib</Name>
+    </ProjectReference>
+    <ProjectReference Include="C:\Github\manpwin\manpwin\build\ZLib\zlib.vcxproj">
+      <Project>{9FCDACCC-2EA8-3EC8-BA62-CA246B938E92}</Project>
+      <Name>zlib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
