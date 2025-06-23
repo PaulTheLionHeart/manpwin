@@ -28,6 +28,7 @@
 
 /**************** Big Number Globals *********************/
 
+extern	int	decimals, precision;
 extern	int	dec;
 extern	BYTE	BigNumFlag;		// True if bignum used
 extern	BigDouble   BigHor, BigVert, BigWidth;
@@ -213,8 +214,10 @@ extern	CDib		Dib;
 extern	CPlot		Plot;				// image plotting routines 
 extern	CFract		Fractal;
 extern	COscProcess	OscProcess;
-extern	CMatrix		Mat;				// transformation and roatation matrix
-extern	CBigMatrix	BigMat;				// transformation and roatation matrix
+extern	CMatrix		Mat;				// transformation and rotation matrix
+extern	CDDMatrix	DDMat;				// transformation and rotation matrix
+extern	CQDMatrix	QDMat;				// transformation and rotation matrix
+extern	CBigMatrix	BigMat;				// transformation and rotation matrix
 extern	Complex		j;
 
 static	bool OldPertFormat;				// used to get param values for old format perturbation par files
@@ -1199,7 +1202,7 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
     {						// Establish string and get the first token:
     char	*token;
     char	seps[]   = " \t\n";
-    char	i;
+    char	TokChar;
     char	s[200];
     char	SaveString[2048];		// get filenames from quotes.
     char	TempBuffer[SIZEOF_BF_VARS * 3];	// Save entire string to get anything within quotes.
@@ -1215,9 +1218,9 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 	{
 	if (*token == '-') 
 	    {
-	    i = *(token + 1);
-	    *(token + 1) = i = toupper(i);
-	    switch (i) 
+	    TokChar = *(token + 1);
+	    *(token + 1) = TokChar = toupper(TokChar);
+	    switch (TokChar)
 		{
 		case '~':				// some ideas from Kalles
 		    if (*(token + 2))
@@ -1476,7 +1479,9 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 		    break;
 		}
 	    }
-	else if((i != 'F') && (i != 'S') && (i != 'A'))		// must be a space in a filename or a required string
+/*  This causes more problems than it fixes
+
+	else if((TokChar != 'F') && (TokChar != 'S') && (TokChar != 'A'))		// must be a space in a filename or a required string
 	    {
 	    if (token > q)					// we are past a formula string
 		{
@@ -1485,7 +1490,7 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 #else
 		wsprintf(s, "Faulty Token <%s> (not '-') in file: %s for read", token, filename);
 #endif
-		MessageBox (hwnd, s, "View", MB_ICONEXCLAMATION | MB_OK);
+		MessageBox (hwnd, s, "Paul's Fractals", MB_ICONEXCLAMATION | MB_OK);
 		MessageBeep (0);         
 		}
 #ifdef DEBUG
@@ -1496,6 +1501,7 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 		}
 #endif
 	    }
+*/
 	token = strtok(NULL, seps);
 	}
 
@@ -1506,7 +1512,14 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 	{
 	z_rot = (double)(RotationAngle % 360);
 	if (BigNumFlag)
-	    BigMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
+	    {
+	    if (precision <= 30)
+		DDMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
+	    else if (precision <= 60)
+		QDMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
+	    else
+		BigMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
+	    }
 	else
 	    Mat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
 	}

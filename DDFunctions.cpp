@@ -6,6 +6,9 @@
 #include    "DDComplex.h"
 #include    "pixel.h"
 
+extern	    int DDFormPerPixel(DDComplex *zIn, DDComplex *qIn);	// norty declarations because this is in the formula parser
+extern	    int DDFormula(DDComplex *zIn, DDComplex *qIn);
+
 /**************************************************************************
 	Initialise functions for each pixel
 **************************************************************************/
@@ -42,8 +45,8 @@ int	CPixel::DDInitFunctions(WORD type, DDComplex *z, DDComplex *q)
 		z->x = q->x + param[0];
 		z->y = q->y + param[1];
 		}
-	    sqr = 0;
-	    real_imag = 0.0;
+	    sqrDD = 0.0;
+	    realimagDD = 0.0;
 	    break;
 /**************************************************************************
     The Burning Ship fractal for Higher Powers
@@ -391,6 +394,10 @@ int	CPixel::DDInitFunctions(WORD type, DDComplex *z, DDComplex *q)
 	    DDInitTierazonFunctions(104, z, q);
 	    break;
 
+	case SCREENFORMULA:
+	case FORMULA:
+	    DDFormPerPixel(z, q);
+	    break;
 /*
 #define NEWTONFLOWER		186
 #define NEWTONMSET		190
@@ -427,7 +434,7 @@ int	CPixel::DDInitFunctions(WORD type, DDComplex *z, DDComplex *q)
 	Run functions for each iteration
 **************************************************************************/
 
-int	CPixel::run_DD_fractal(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration)
+int	CPixel::DDRunFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration)
     {
     DDComplex	temp1, temp2;
 
@@ -437,9 +444,6 @@ int	CPixel::run_DD_fractal(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
 	case MANDEL:					// to handle fractint par files
 	case JULIA:					// to handle fractint par files
 	    {
-	    dd_real	realimagDD;
-	    DDComplex	sqrDD;
-
 	    sqrDD.x = z->x * z->x;
 	    sqrDD.y = z->y * z->y;
 	    realimagDD = z->x * z->y;
@@ -449,9 +453,6 @@ int	CPixel::run_DD_fractal(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
 	    }
 	case BURNINGSHIP:				// Burning Ship
 	    {
-	    dd_real	t, realimagDD;
-	    DDComplex	sqrDD;
-
 	    sqrDD.x = z->x * z->x;
 	    sqrDD.y = z->y * z->y;
 	    realimagDD = fabs(z->x * z->y);
@@ -685,7 +686,9 @@ int	CPixel::run_DD_fractal(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
 	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
 	    return (DDRunManDerFunctions(subtype, z, q, SpecialFlag, iteration));
 
-
+	case FORMULA:
+	case SCREENFORMULA:
+	    return (DDFormula(z, q));
 	}
     return 0;
     }
@@ -696,16 +699,16 @@ int	CPixel::run_DD_fractal(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
 
 bool	CPixel::DDBailoutTest(DDComplex *z, DDComplex SqrZ, double rqlim, int BailoutTestType)
     {
-    double  magnitude;
-    dd_real manhmag;
-    dd_real manrmag;
-    dd_real DDBailout = rqlim;
+    dd_real	magnitude;
+    dd_real	manhmag;
+    dd_real	manrmag;
+    dd_real	DDBailout = rqlim;
 
     switch (BailoutTestType)
 	{
 	case BAIL_MOD:
 	    magnitude = z->CSumSqr();
-	    return (magnitude >= rqlim);
+	    return (magnitude > rqlim);
 
 	case BAIL_REAL:
 	    return (SqrZ.x > DDBailout);
@@ -729,7 +732,7 @@ bool	CPixel::DDBailoutTest(DDComplex *z, DDComplex SqrZ, double rqlim, int Bailo
 
 	default:
 	    magnitude = z->CSumSqr();
-	    return (magnitude >= rqlim);
+	    return (magnitude > rqlim);
 	}
     }
 
@@ -739,17 +742,17 @@ bool	CPixel::DDBailoutTest(DDComplex *z, DDComplex SqrZ, double rqlim, int Bailo
 
 bool	CPixel::DDFractintBailoutTest(DDComplex *z, double rqlim, int BailoutTestType)
     {
-    DDComplex TempSqr;
-    double  magnitude;
-    dd_real manhmag;
-    dd_real manrmag;
-    dd_real DDBailout = rqlim;
+    DDComplex	TempSqr;
+    dd_real	magnitude;
+    dd_real	manhmag;
+    dd_real	manrmag;
+    dd_real	DDBailout = rqlim;
 
     switch (BailoutTestType)
 	{
 	case BAIL_MOD:
 	    magnitude = z->CSumSqr();
-	    return (magnitude >= rqlim);
+	    return (magnitude > rqlim);
 
 	case BAIL_REAL:
 	    TempSqr.x = sqr(z->x);
@@ -779,7 +782,7 @@ bool	CPixel::DDFractintBailoutTest(DDComplex *z, double rqlim, int BailoutTestTy
 
 	default:
 	    magnitude = z->CSumSqr();
-	    return (magnitude >= rqlim);
+	    return (magnitude > rqlim);
 	}
     }
 

@@ -21,21 +21,45 @@
 #include	"BigComplex.h"
 #include	"pixel.h"
 #include	"Potential.h"
+#include	"DDMatrix.h"
 
 /**************************************************************************
-	Convert Bignum variables to double doubles
+	Initialise fractal
 **************************************************************************/
 
-int    CPixel::ConvertBignumVariables2DD()
+int	CPixel::DDInitFractal(DDComplex *z, DDComplex *q)
+
     {
-    if (BigDouble2DD(&zDD.x, &zBig->x) < 0) return -1;
-    if (BigDouble2DD(&zDD.y, &zBig->y) < 0) return -1;
-    if (BigDouble2DD(&cDD.x, &cBig->x) < 0) return -1;
-    if (BigDouble2DD(&cDD.y, &cBig->y) < 0) return -1;
-    if (BigDouble2DD(&qDD.x, &qBig->x) < 0) return -1;
-    if (BigDouble2DD(&qDD.y, &qBig->y) < 0) return -1;
-    if (BigDouble2DD(&DDCloseEnough, &BigCloseEnough) < 0) return -1;
+    if (fractalspecific[type].flags & FUNCTIONINPIXEL)
+	return(DDInitFunctions(type, z, q));
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL)
+	return(DDInitFractintFunctions(type, z, q));
+    else if (fractalspecific[type].flags & TRIGINPIXEL)
+	return(DDInitFractintTrigFunctions(type, z, q));
+//    else if (fractalspecific[type].flags & OTHERFNINPIXEL)
+//	return(InitOtherFunctions(type, z, q));
+//    else if (fractalspecific[type].per_pixel() < 0)
+//	return -1;
     return 0;
+    }
+
+/**************************************************************************
+	Run fractal
+**************************************************************************/
+
+int	CPixel::DDRunFractal(DDComplex *z, DDComplex *q)
+
+    {
+    if (fractalspecific[type].flags & FUNCTIONINPIXEL)
+	return(DDRunFunctions(type, z, q, &SpecialFlag, iteration));
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL)
+	return(DDRunFractintFunctions(type, z, q, &SpecialFlag, iteration));
+    else if (fractalspecific[type].flags & TRIGINPIXEL)
+	return(DDRunFractintTrigFunctions(type, z, q, &SpecialFlag, iteration));
+//    else if (fractalspecific[type].flags & OTHERFNINPIXEL)
+//	return(RunOtherFunctions(type, z, q, &SpecialFlag, iteration));
+    else
+	return fractalspecific[type].calctype();
     }
 
 /**************************************************************************
@@ -247,7 +271,6 @@ long	CPixel::DoDDFract(HWND hwnd, int row, int col)
 
     {
     long	real_iteration;			// actual count for orbit deletion
-    BigComplex	bigTemp;
     DDComplex	DDTemp;
     Complex	tempComplex;
     dd_real	magnitude;
@@ -296,20 +319,17 @@ long	CPixel::DoDDFract(HWND hwnd, int row, int col)
 
     if (juliaflag)
 	{
-	qBig->x = j.x;
-	qBig->y = j.y;
-	*zBig = (invert) ? BigInvertz2(*cBig) : *cBig;
+	qDD.x = j.x;
+	qDD.y = j.y;
+	zDD = (invert) ? DDInvertz2(cDD) : cDD;
 	}
     else
 	{
-	*qBig = (invert) ? BigInvertz2(*cBig) : *cBig;
-	*zBig = 0.0;
+	qDD = (invert) ? DDInvertz2(cDD) : cDD;
+	zDD = 0.0;
 	}
 
-    if (ConvertBignumVariables2DD() < 0)
-	return (-1L);
-    
-    DDInitFunctions(type, &zDD, &qDD);
+    DDInitFractal(&zDD, &qDD);
     if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	{
 	magnitude = 0.0;
@@ -332,7 +352,7 @@ long	CPixel::DoDDFract(HWND hwnd, int row, int col)
 	(*iteration)++;
 	FloatIteration++;
 
-	result = run_DD_fractal(type, &zDD, &qDD, &SpecialFlag, iteration);
+	result = DDRunFractal(&zDD, &qDD);
 	if (result < 0)
 	    return(BLUE);				// division by zero (Was Blue)
 	else if (result == 1)				// escape time
@@ -396,8 +416,8 @@ long	CPixel::DoDDFract(HWND hwnd, int row, int col)
 		dd_real   xAbs = DDSaved.x - zDD.x;
 		dd_real   yAbs = DDSaved.y - zDD.y;
 
-		if (abs(xAbs) < DDCloseEnough)
-		    if (abs(yAbs) < DDCloseEnough)
+		if (abs(xAbs) < *DDCloseEnough)
+		    if (abs(yAbs) < *DDCloseEnough)
 			*iteration = threshold;
 		}
 	    }
@@ -465,24 +485,22 @@ long	CPixel::DoDDFract(HWND hwnd, int row, int col)
     return(*iteration);
     }
 
-#ifdef DOUBLEDOUBLE
-
 /**************************************************************************
      Invert fractal
 **************************************************************************/
 
-BigComplex	CPixel::BigInvertz2(BigComplex  & Cmplx1)
+DDComplex	CPixel::DDInvertz2(DDComplex  & Cmplx1)
 
     {
-    BigComplex	temp;
-    BigDouble	tempsqrx, BigRadius = f_radius;
+    DDComplex	temp;
+    dd_real	tempsqrx, BigRadius = f_radius;
 
     temp.x = Cmplx1.x;
     temp.y = Cmplx1.y;
     temp.x -= f_xcenter; temp.y -= f_ycenter;	// Normalize values to center of circle
 
-    tempsqrx = temp.x.BigSqr() + temp.y.BigSqr();	// Get old radius
-    if (tempsqrx.BigAbs() > (BigDouble)FLT_MIN)
+    tempsqrx = sqr(temp.x) + sqr(temp.y);	// Get old radius
+    if (abs(tempsqrx) > (dd_real)FLT_MIN)
 	tempsqrx = BigRadius / tempsqrx;
     else
 	tempsqrx = FLT_MAX;			// a big number, but not TOO big
@@ -493,8 +511,11 @@ BigComplex	CPixel::BigInvertz2(BigComplex  & Cmplx1)
     return  temp;
     }
 
-#endif // DOUBLEDOUBLE
+/************************************************************************
+	Convert BigDouble to DoubleDouble
+************************************************************************/
 
+//extern	void	ShowBignum(BigDouble x, char *Location);
 int	CPixel::BigDouble2DD(dd_real *out, BigDouble *in)
     {
     dd_real	x1, x2;
@@ -510,9 +531,109 @@ int	CPixel::BigDouble2DD(dd_real *out, BigDouble *in)
     *out = x1 + x2;
     if (isnan(out->x[0]) || isnan(out->x[1]))
 	{
+//	ShowBignum(*in, "in");
+//	ShowBignum(t1, "t1");
+//	ShowBignum(t2, "t2");
 	*out = 0.0;
 	return -1;
 	}
     return 0;
+    }
+
+/************************************************************************
+	Calculate DD Fractal
+************************************************************************/
+
+long	CPixel::DDCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
+
+    {
+
+ //   FloatCornerstoBig(var);
+    if (pairflag)		// half size screens: only do every second row / col
+	if (row % pairflag || col % pairflag)
+	    if (row != (int)ydots - 1)			// must trigger for last line
+		return(threshold);
+
+    if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
+	{
+	if (row != *oldrow)
+	    {
+	    if (pairflag && row)		// draw row for right hand image
+		draw_right_image((short)(*oldrow));
+	    switch (RotationAngle)
+		{
+		case NORMAL:						// normal
+		    cDD.y = *DDyymax - *DDygap * (double)row;
+		    break;
+		case 90:						// 90 degrees
+		    cDD.x = *DDyymax - *DDxgap * (double)row;
+		    break;
+		case 180:						// 180 degrees
+		    cDD.y = -(*DDyymax - *DDygap * (double)row);
+		    break;
+		case 270:						// 270 degrees
+		    cDD.x = -(*DDyymax - *DDxgap * (double)row);
+		    break;
+		}
+	    *oldrow = row;
+	    }
+	if (col != *oldcol)
+	    {
+	    switch (RotationAngle)
+		{
+		case NORMAL:						// normal
+		    cDD.x = *DDxgap * (double)col + *DDHor;
+		    break;
+		case 90:						// 90 degrees
+		    cDD.y = *DDygap * (double)col + *DDHor;
+		    break;
+		case 180:						// 180 degrees
+		    cDD.x = -(*DDxgap * (double)col + *DDHor);
+		    break;
+		case 270:						// 270 degrees
+		    cDD.y = -(*DDygap * (double)col + *DDHor);
+		    break;
+		}
+	    *oldcol = col;
+	    }
+	}
+    else
+	{
+	dd_real  zero = 0.0;
+	double  z_rot = (double)RotationAngle;
+	DDMat->InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
+	DDMat->DoTransformation(&cDD.x, &cDD.y, &zero, *DDxgap * (double)col + *DDHor, *DDyymax - *DDxgap * (double)row, 0.0);
+	}
+
+    if (user_data(hwnd) == -1)
+	return(-1);
+    *color = DoDDFract(hwnd, row, col);	// double double
+    if (*color < 0)
+	return -1;
+    reset_period = 0;
+
+    if (*color >= threshold)
+	*color = threshold;
+/*
+    else if (logval && logflag == TRUE)
+	color = (BYTE) (*(logtable + color));
+*/
+
+    if (calcmode == 'B')
+	{
+	if (*color >= colours)	/* don't use color 0 unless from inside */
+	    if (colours < 16)
+		*color &= *andcolor;
+	    else
+		*color = ((*color - 1) % *andcolor) + 1;  /* skip color zero */
+	}
+
+     if (_3dflag)
+	    projection(col, row, *color);
+	else if (pairflag)
+	    do_stereo_pairs(col, row, *color);
+    else
+	plot((WORD)col, (WORD)row, *color);
+    return(*color);
     }
 

@@ -158,7 +158,6 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    croot.y = param[3];
 	    cdegree.x = param[0];
 	    cdegree.y = param[1];
-	    thresh = 0.3 * PI / cdegree.x;		// less than half distance between roots
 	    *z = *q;
 	    subtype = ((int)param[4] == 0.0) ? 'N' : 'B';
 	    break;
@@ -552,7 +551,6 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    d = zd.CSumSqr();
 	    if (d < MINSIZE)
 		{
-
 		if (subtype == 'S' || subtype == 'B')
 		    {
 		    tmpcolor = -1;
@@ -610,7 +608,6 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    temp3.x = sqr.x - sqr.y + temp.x + temp1.x + param[0];
 	    temp3.y = 2.0 * z->x * z->y + temp.y + temp1.y + param[1];
 	    temp1 = *z;
-	    d = z->CSumSqr();
 	    *z = temp3;
 	    return BailoutTest(z, sqr);
 
@@ -789,15 +786,14 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	case MANDELLAMBDA:
 	case LAMBDAFP:
 	case LAMBDA:
-	    sqr.x = z->x * z->x;
-	    sqr.y = z->y * z->y;
-
 	    sqr.x = z->x - sqr.x + sqr.y;
 	    sqr.y = -(z->y * z->x);
 	    sqr.y += sqr.y + z->y;
 
 	    z->x = temp.x * sqr.x - temp.y * sqr.y;
 	    z->y = temp.x * sqr.y + temp.y * sqr.x;
+	    sqr.x = z->x * z->x;
+	    sqr.y = z->y * z->y;
 	    return BailoutTest(z, sqr);
 
 	case PHOENIXFP:

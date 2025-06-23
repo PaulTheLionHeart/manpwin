@@ -105,7 +105,7 @@ void	RTJuliaOrbits(RGBTRIPLE colour, int count)
     z = 0;
     for (i = 0; i < count; i++)
 	{
-	Pix.run_fractal(&z, &q);
+	Pix.RunFractal(&z, &q);
 	row = Jheight - (int)((Pix.z->y + 2.0) / Jygap);
 	col = (int)(z.x / Jxgap + (double)Jwidth / 2.0);
 	if (col > rect.left && col < rect.right && row > rect.top && row < rect.bottom)
@@ -186,13 +186,13 @@ int	DrawJulia(HWND hwnd, POINTS ptCurrent)
 	    Pix.c->y += Jygap;
 	    *Pix.z = (invert) ? Pix.invertz2(*Pix.c) : *Pix.c;
 	    iteration = 0;
-	    Pix.init_fractal(Pix.z, Pix.q);
+	    Pix.InitFractal(Pix.z, Pix.q);
 	    for EVER
 		{
 		if (iteration >= threshold)
 		    break;
 		iteration += SpeedFactor;
-		result = Pix.run_fractal(Pix.z, Pix.q);
+		result = Pix.RunFractal(Pix.z, Pix.q);
 		if (result)				// escape time
 		    break;
 		}

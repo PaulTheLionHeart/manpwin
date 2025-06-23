@@ -17,6 +17,7 @@
     (203) 276-9721
 */
 
+
 /*      Chuck Ebbert (CompuServe [76306,1226] ) changed code marked 'CAE fp'    */
 /*   for fast 387 floating-point math.  See PARSERA.ASM and PARSERFP.C */
 /*   (13 Dec 1992.)  */
@@ -29,16 +30,19 @@
 
   /* see Fractint.c for a description of the "include"  hierarchy */
 //#include "port.h"
+#include "parser.h"
 #include "prototyp.h"
-#include "..\complex.h"
+#include "..\Complex.h"
 #include "..\fract.h"
+#include "..\BigDouble.h"
+#include "..\Arithmetic.h"
 
 
 #ifdef WATCH_MP
 double x1, y1, x2, y2;
 #endif
 
-enum MATH_TYPE MathType = D_MATH;
+extern	MATH_TYPE MathType;
 /* moved _LCMPLX and union ARg to mpmath.h -6-20-90 TIW */
 
 #define MAXLSYS		800		// Max LSystem in file (Make sure to change this value in lsys.cpp)
@@ -58,6 +62,9 @@ enum MATH_TYPE MathType = D_MATH;
 HWND	GlobalHwnd;			// to allow passing of hwnd 
 extern	char	lsys_type[];
 
+extern	int	precision;
+extern	BYTE	BigNumFlag;
+
 extern	double	hor;			// horizontal address
 extern	double	vert;			// vertical address 
 extern	double	mandel_width;		// width of display
@@ -69,12 +76,15 @@ extern	char	lptr[][100];
 extern	int	lsys_num;
 extern	char	lsys_Label[];		// for display in type selection
 
-//extern	Complex	New/*, old*/;
-extern	Complex	c, j, z, q;
+extern	Complex	c, j, z;
+/*extern*/ DDComplex   zDD, cDD;
+/*extern*/ QDComplex   zQD, cQD;
 
 extern	char	*str_find_ci(char *, char *);
+extern	DDComplex	DDComplexPower(DDComplex x, DDComplex y);
+//extern	CSlope	Slope[];
 
-/* global data  */
+// global data 
 struct fls far *pfls = (struct fls far *)0;
 	char	FormName[FILE_MAX_PATH];
 unsigned Max_Ops  = MAX_OPS;
@@ -191,8 +201,22 @@ struct token_st {
    Complex token_const;
 };
 
+int 	 GetMathType()
+    {
+    int	  Arith;
+    if (BigNumFlag)
+	{
+	if (precision <= 30)
+	    Arith = DOUBLEDOUBLE;
+	else
+	    Arith = QUADDOUBLE;
+	}
+    else
+	Arith = DOUBLEFLOAT;
+    return Arith;
+    }
 
-int pstopmsg(int x,char *msg)
+int pstopmsg(int x, char *msg)
 {
 char      s[360];
 
@@ -201,7 +225,6 @@ MessageBox (GlobalHwnd, s, "Formula Error", MB_ICONEXCLAMATION | MB_OK);
 
 return(x); /* just to quiet warnings */
 }
-
 
 /* CAE fp added MAX_STORES and LOADS */
 /* MAX_STORES must be even to make Unix alignment work */
@@ -230,8 +253,8 @@ struct Arg *Arg1, *Arg2;
 
 /* CAE fp  made some of the following non-static for PARSERA.ASM */
 /* Some of these variables should be renamed for safety */
-struct Arg s[20], far * far *Store, far * far *Load;     /* static CAE fp */
-static	int StoPtr, LodPtr, OpPtr;      /* static CAE fp */
+struct Arg s[20], **Store, **Load;     /* static CAE fp */
+	int StoPtr, LodPtr, OpPtr;      /* static CAE fp */
 static	int var_count;
 static	int complx_count;
 static	int real_count;
@@ -250,20 +273,12 @@ double	fgLimit;           /* TIW 05-04-91 */
 static	double fg;
 static	int ShiftBack;     /* TIW 06-18-90 */
 static	int SetRandom;     /* MCP 11-21-91 */
-static	int Randomized;
+	int Randomized;
 static	unsigned long RandNum;
 short	uses_p1, uses_p2, uses_p3, uses_p4, uses_p5, uses_jump;
 short	uses_ismand;
 unsigned int chars_in_formula;
 int     debugflag;
-
-#define ChkFloatDenom(denom)\
-    if (fabs(denom) <= DBL_MIN) {\
-        if (save_release > 1920) overflow = 1;\
-        return;\
-    }
-
-static	struct Arg LastSqr;
 
 #if (_MSC_VER >= 700)
 #pragma code_seg ("parser1_text")     /* place following in an overlay */
@@ -369,564 +384,6 @@ static char far *ParseErrs(int which)
 #pragma code_seg ()       /* back to normal segment */
 #endif
 
-/* use the following when only float functions are implemented to
-   get MP math and Integer math */
-
-/* Random number code, MCP 11-21-91 */
-
-unsigned long NewRandNum(void)
-{
-   return(RandNum = ((RandNum << 15) + rand15()) ^ RandNum);
-}
-
-void dRandom(void)
-{
-   long x, y;
-
-   /* Use the same algorithm as for fixed math so that they will generate
-          the same fractals when the srand() function is used. */
-
-    bitshift = 20;			// got to make up some silly value PHD 2009-10-17
-   x = NewRandNum() >> (32 - bitshift);
-   y = NewRandNum() >> (32 - bitshift);
-   Arg2->d.x = ((double)x / (1L << bitshift));
-   Arg2->d.y = ((double)y / (1L << bitshift));
-}
-
-void RandomSeed(void)
-{
-   time_t ltime;
-
-   /* Use the current time to randomize the random number sequence. */
-   time(&ltime);
-   srand((unsigned int)ltime);
-
-   NewRandNum();
-   NewRandNum();
-   NewRandNum();
-   Randomized = 1;
-}
-
-void dStkSRand(void)
-{
-   long x, y;
-
-   x = rand15();
-   y = rand15();
-   Arg1->d.x = (double)x / 12000.0;
-   Arg1->d.y = (double)y / 12000.0;
-}
-
-void (*StkSRand)(void) = dStkSRand;
-
-void dStkLodDup()
-{
-   Arg1+=2;
-   Arg2+=2;
-   *Arg2 = *Arg1 = *Load[LodPtr];
-   LodPtr+=2;
-}
-
-void dStkLodSqr()
-{
-   Arg1++;
-   Arg2++;
-   Arg1->d.y = Load[LodPtr]->d.x * Load[LodPtr]->d.y * 2.0;
-   Arg1->d.x = (Load[LodPtr]->d.x * Load[LodPtr]->d.x) - (Load[LodPtr]->d.y * Load[LodPtr]->d.y);
-   LodPtr++;
-}
-
-void dStkLodSqr2()
-{
-   Arg1++;
-   Arg2++;
-   LastSqr.d.x = Load[LodPtr]->d.x * Load[LodPtr]->d.x;
-   LastSqr.d.y = Load[LodPtr]->d.y * Load[LodPtr]->d.y;
-   Arg1->d.y = Load[LodPtr]->d.x * Load[LodPtr]->d.y * 2.0;
-   Arg1->d.x = LastSqr.d.x - LastSqr.d.y;
-   LastSqr.d.x += LastSqr.d.y;
-   LastSqr.d.y = 0;
-   LodPtr++;
-}
-
-void dStkStoDup(){}
-void dStkStoSqr(){}
-void dStkStoSqr0(){}
-
-void dStkLodDbl()
-{
-   Arg1++;
-   Arg2++;
-   Arg1->d.x = Load[LodPtr]->d.x * 2.0;
-   Arg1->d.y = Load[LodPtr]->d.y * 2.0;
-   LodPtr++;
-}
-
-void dStkStoDbl(){}
-void dStkReal2(){}
-
-void dStkSqr0()
-{
-   LastSqr.d.y = Arg1->d.y * Arg1->d.y; /* use LastSqr as temp storage */
-   Arg1->d.y = Arg1->d.x * Arg1->d.y * 2.0;
-   Arg1->d.x = Arg1->d.x * Arg1->d.x - LastSqr.d.y;
-}
-
-void dStkSqr3()
-{
-   Arg1->d.x = Arg1->d.x * Arg1->d.x;
-}
-
-void dStkAbs(void) {
-   Arg1->d.x = fabs(Arg1->d.x);
-   Arg1->d.y = fabs(Arg1->d.y);
-}
-
-void (*StkAbs)(void) = dStkAbs;
-
-void dStkSqr(void) {
-   LastSqr.d.x = Arg1->d.x * Arg1->d.x;
-   LastSqr.d.y = Arg1->d.y * Arg1->d.y;
-   Arg1->d.y = Arg1->d.x * Arg1->d.y * 2.0;
-   Arg1->d.x = LastSqr.d.x - LastSqr.d.y;
-   LastSqr.d.x += LastSqr.d.y;
-   LastSqr.d.y = 0;
-}
-
-void (*StkSqr)(void) = dStkSqr;
-
-void dStkAdd(void) {
-   Arg2->d.x += Arg1->d.x;
-   Arg2->d.y += Arg1->d.y;
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkAdd)(void) = dStkAdd;
-
-void dStkSub(void) {
-   Arg2->d.x -= Arg1->d.x;
-   Arg2->d.y -= Arg1->d.y;
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkSub)(void) = dStkSub;
-
-void dStkConj(void) {
-   Arg1->d.y = -Arg1->d.y;
-}
-
-void (*StkConj)(void) = dStkConj;
-
-void dStkFloor(void) {
-   Arg1->d.x = floor(Arg1->d.x);
-   Arg1->d.y = floor(Arg1->d.y);
-}
-
-void (*StkFloor)(void) = dStkFloor;
-
-void dStkCeil(void) {
-   Arg1->d.x = ceil(Arg1->d.x);
-   Arg1->d.y = ceil(Arg1->d.y);
-}
-
-void (*StkCeil)(void) = dStkCeil;
-
-void dStkTrunc(void) {
-   Arg1->d.x = (int)(Arg1->d.x);
-   Arg1->d.y = (int)(Arg1->d.y);
-}
-
-void (*StkTrunc)(void) = dStkTrunc;
-
-void dStkRound(void) {
-   Arg1->d.x = floor(Arg1->d.x+.5);
-   Arg1->d.y = floor(Arg1->d.y+.5);
-}
-
-void (*StkRound)(void) = dStkRound;
-
-void dStkZero(void) {
-   Arg1->d.y = Arg1->d.x = 0.0;
-}
-
-void (*StkZero)(void) = dStkZero;
-
-void dStkOne(void) {
-   Arg1->d.x = 1.0;
-   Arg1->d.y = 0.0;
-}
-
-void (*StkOne)(void) = dStkOne;
-
-
-void dStkReal(void) {
-   Arg1->d.y = 0.0;
-}
-
-void (*StkReal)(void) = dStkReal;
-
-void dStkImag(void) {
-   Arg1->d.x = Arg1->d.y;
-   Arg1->d.y = 0.0;
-}
-
-void (*StkImag)(void) = dStkImag;
-
-void dStkNeg(void) {
-   Arg1->d.x = -Arg1->d.x;
-   Arg1->d.y = -Arg1->d.y;
-}
-
-void (*StkNeg)(void) = dStkNeg;
-
-void dStkMul(void) {
-   FPUcplxmul(&Arg2->d, &Arg1->d, &Arg2->d);
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkMul)(void) = dStkMul;
-
-void dStkDiv(void) {
-   FPUcplxdiv(&Arg2->d, &Arg1->d, &Arg2->d);
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkDiv)(void) = dStkDiv;
-
-void dStkMod(void) {
-   Arg1->d.x = (Arg1->d.x * Arg1->d.x) + (Arg1->d.y * Arg1->d.y);
-   Arg1->d.y = 0.0;
-}
-
-void (*StkMod)(void) = dStkMod;
-
-void StkSto(void) {
-   *Store[StoPtr++] = *Arg1;
-}
-
-void (*PtrStkSto)(void) = StkSto;
-
-void StkLod(void) {
-   Arg1++;
-   Arg2++;
-   *Arg1 = *Load[LodPtr++];
-}
-
-void (*PtrStkLod)(void) = StkLod;
-
-void StkClr(void) {
-   s[0] = *Arg1;
-   Arg1 = &s[0];
-   Arg2 = Arg1;
-   Arg2--;
-}
-
-void (*PtrStkClr)(void) = StkClr;
-
-/* MCP 4-9-91, Added Flip() */
-
-void dStkFlip(void) {
-   double t;
-
-   t = Arg1->d.x;
-   Arg1->d.x = Arg1->d.y;
-   Arg1->d.y = t;
-}
-
-void (*StkFlip)(void) = dStkFlip;
-
-void dStkSin(void) {
-   double sinx, cosx, sinhy, coshy;
-
-   FPUsincos(&Arg1->d.x, &sinx, &cosx);
-   FPUsinhcosh(&Arg1->d.y, &sinhy, &coshy);
-   Arg1->d.x = sinx*coshy;
-   Arg1->d.y = cosx*sinhy;
-}
-
-void (*StkSin)(void) = dStkSin;
-
-/* The following functions are supported by both the parser and for fn
-   variable replacement. TIW 04-22-91 */
-
-void dStkTan(void) {
-   double sinx, cosx, sinhy, coshy, denom;
-   Arg1->d.x *= 2;
-   Arg1->d.y *= 2;
-   FPUsincos(&Arg1->d.x, &sinx, &cosx);
-   FPUsinhcosh(&Arg1->d.y, &sinhy, &coshy);
-   denom = cosx + coshy;
-   ChkFloatDenom(denom);
-   Arg1->d.x = sinx/denom;
-   Arg1->d.y = sinhy/denom;
-}
-
-void (*StkTan)(void) = dStkTan;
-
-void dStkTanh(void) {
-   double siny, cosy, sinhx, coshx, denom;
-   Arg1->d.x *= 2;
-   Arg1->d.y *= 2;
-   FPUsincos(&Arg1->d.y, &siny, &cosy);
-   FPUsinhcosh(&Arg1->d.x, &sinhx, &coshx);
-   denom = coshx + cosy;
-   ChkFloatDenom(denom);
-   Arg1->d.x = sinhx/denom;
-   Arg1->d.y = siny/denom;
-}
-
-void (*StkTanh)(void) = dStkTanh;
-
-void dStkCoTan(void) {
-   double sinx, cosx, sinhy, coshy, denom;
-   Arg1->d.x *= 2;
-   Arg1->d.y *= 2;
-   FPUsincos(&Arg1->d.x, &sinx, &cosx);
-   FPUsinhcosh(&Arg1->d.y, &sinhy, &coshy);
-   denom = coshy - cosx;
-   ChkFloatDenom(denom);
-   Arg1->d.x = sinx/denom;
-   Arg1->d.y = -sinhy/denom;
-}
-
-void (*StkCoTan)(void) = dStkCoTan;
-
-void dStkCoTanh(void) {
-   double siny, cosy, sinhx, coshx, denom;
-   Arg1->d.x *= 2;
-   Arg1->d.y *= 2;
-   FPUsincos(&Arg1->d.y, &siny, &cosy);
-   FPUsinhcosh(&Arg1->d.x, &sinhx, &coshx);
-   denom = coshx - cosy;
-   ChkFloatDenom(denom);
-   Arg1->d.x = sinhx/denom;
-   Arg1->d.y = -siny/denom;
-}
-
-void (*StkCoTanh)(void) = dStkCoTanh;
-
-/* The following functions are not directly used by the parser - support
-   for the parser was not provided because the existing parser language
-   represents these quite easily. They are used for fn variable support
-   in miscres.c but are placed here because they follow the pattern of
-   the other parser functions. TIW 04-22-91 */
-
-void dStkRecip(void) {
-   double mod;
-   mod =Arg1->d.x * Arg1->d.x + Arg1->d.y * Arg1->d.y;
-   ChkFloatDenom(mod);
-   Arg1->d.x =  Arg1->d.x/mod;
-   Arg1->d.y = -Arg1->d.y/mod;
-}
-
-void (*StkRecip)(void) = dStkRecip;
-
-void StkIdent(void) { /* do nothing - the function Z */
-}
-
-void (*dStkIdent)(void) = StkIdent;
-
-/* End TIW 04-22-91 */
-
-void dStkSinh(void) {
-   double siny, cosy, sinhx, coshx;
-
-   FPUsincos(&Arg1->d.y, &siny, &cosy);
-   FPUsinhcosh(&Arg1->d.x, &sinhx, &coshx);
-   Arg1->d.x = sinhx*cosy;
-   Arg1->d.y = coshx*siny;
-}
-
-void (*StkSinh)(void) = dStkSinh;
-
-void dStkCos(void) {
-   double sinx, cosx, sinhy, coshy;
-
-   FPUsincos(&Arg1->d.x, &sinx, &cosx);
-   FPUsinhcosh(&Arg1->d.y, &sinhy, &coshy);
-   Arg1->d.x = cosx*coshy;
-   Arg1->d.y = -sinx*sinhy; /* TIW 04-25-91 sign */
-}
-
-void (*StkCos)(void) = dStkCos;
-
-/* Bogus version of cos, to replicate bug which was in regular cos till v16: */
-
-void dStkCosXX(void) {
-   dStkCos();
-   Arg1->d.y = -Arg1->d.y;
-}
-
-void (*StkCosXX)(void) = dStkCosXX;
-
-void dStkCosh(void) {
-   double siny, cosy, sinhx, coshx;
-
-   FPUsincos(&Arg1->d.y, &siny, &cosy);
-   FPUsinhcosh(&Arg1->d.x, &sinhx, &coshx);
-   Arg1->d.x = coshx*cosy;
-   Arg1->d.y = sinhx*siny;
-}
-
-void (*StkCosh)(void) = dStkCosh;
-
-/* TIW added arc functions here 11-25-94 */
-
-void dStkASin(void) {
-   Arcsinz(Arg1->d, &(Arg1->d));
-}
-
-void (*StkASin)(void) = dStkASin;
-
-void dStkASinh(void) {
-   Arcsinhz(Arg1->d, &(Arg1->d));
-}
-
-void (*StkASinh)(void) = dStkASinh;
-
-void dStkACos(void) {
-   Arccosz(Arg1->d, &(Arg1->d));
-}
-
-void (*StkACos)(void) = dStkACos;
-
-void dStkACosh(void) {
-   Arccoshz(Arg1->d, &(Arg1->d));
-}
-
-void (*StkACosh)(void) = dStkACosh;
-
-void dStkATan(void) {
-   Arctanz(Arg1->d, &(Arg1->d));
-}
-
-void (*StkATan)(void) = dStkATan;
-
-void dStkATanh(void) {
-   Arctanhz(Arg1->d, &(Arg1->d));
-}
-
-void (*StkATanh)(void) = dStkATanh;
-
-void dStkSqrt(void) {
-   Arg1->d = ComplexSqrtFloat(Arg1->d.x, Arg1->d.y);
-}
-
-void (*StkSqrt)(void) = dStkSqrt;
-
-void dStkCAbs(void) {
-   Arg1->d.x = sqrt(sqr(Arg1->d.x)+sqr(Arg1->d.y));
-   Arg1->d.y = 0.0;
-}
-
-void (*StkCAbs)(void) = dStkCAbs;
-
-/* TIW end arc functions 11-25-94 */
-
-void dStkLT(void) {
-   Arg2->d.x = (double)(Arg2->d.x < Arg1->d.x);
-   Arg2->d.y = 0.0;
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkLT)(void) = dStkLT;
-
-void dStkGT(void) {
-   Arg2->d.x = (double)(Arg2->d.x > Arg1->d.x);
-   Arg2->d.y = 0.0;
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkGT)(void) = dStkGT;
-
-void dStkLTE(void) {
-   Arg2->d.x = (double)(Arg2->d.x <= Arg1->d.x);
-   Arg2->d.y = 0.0;
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkLTE)(void) = dStkLTE;
-
-void dStkGTE(void) {
-   Arg2->d.x = (double)(Arg2->d.x >= Arg1->d.x);
-   Arg2->d.y = 0.0;
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkGTE)(void) = dStkGTE;
-
-void dStkEQ(void) {
-   Arg2->d.x = (double)(Arg2->d.x == Arg1->d.x);
-   Arg2->d.y = 0.0;
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkEQ)(void) = dStkEQ;
-
-void dStkNE(void) {
-   Arg2->d.x = (double)(Arg2->d.x != Arg1->d.x);
-   Arg2->d.y = 0.0;
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkNE)(void) = dStkNE;
-
-void dStkOR(void) {
-   Arg2->d.x = (double)(Arg2->d.x || Arg1->d.x);
-   Arg2->d.y = 0.0;
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkOR)(void) = dStkOR;
-
-void dStkAND(void) {
-   Arg2->d.x = (double)(Arg2->d.x && Arg1->d.x);
-   Arg2->d.y = 0.0;
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkAND)(void) = dStkAND;
-void dStkLog(void) {
-   FPUcplxlog(&Arg1->d, &Arg1->d);
-}
-
-void (*StkLog)(void) = dStkLog;
-
-void FPUcplxexp(Complex *x, Complex *z) {
-   double e2x, siny, cosy;
-
-      e2x = exp(x->x);
-      FPUsincos(&x->y, &siny, &cosy);
-      z->x = e2x * cosy;
-      z->y = e2x * siny;
-}
-
-   void dStkExp(void) {
-      FPUcplxexp(&Arg1->d, &Arg1->d);
-   }
-
-void (*StkExp)(void) = dStkExp;
-
-void dStkPwr(void) {
-   Arg2->d = ComplexPower(Arg2->d, Arg1->d);
-   Arg1--;
-   Arg2--;
-}
-
-void (*StkPwr)(void) = dStkPwr;
-
 void EndInit(void) {
    LastInitOp = OpPtr;
    InitJumpIndex = jump_index;
@@ -950,6 +407,22 @@ void dStkJumpOnFalse (void)
       jump_index++;
 }
 
+void ddStkJumpOnFalse(void)
+    {
+    if (Arg1->dd.x == 0)
+	StkJump();
+    else
+	jump_index++;
+    }
+
+void qdStkJumpOnFalse(void)
+    {
+    if (Arg1->qd.x == 0)
+	StkJump();
+    else
+	jump_index++;
+    }
+
 void (*StkJumpOnFalse)(void) = dStkJumpOnFalse;
 
 void dStkJumpOnTrue (void)
@@ -960,6 +433,22 @@ void dStkJumpOnTrue (void)
       jump_index++;
 }
 
+void ddStkJumpOnTrue(void)
+    {
+    if (Arg1->dd.x != 0.0)
+	StkJump();
+    else
+	jump_index++;
+    }
+
+void qdStkJumpOnTrue(void)
+    {
+    if (Arg1->qd.x != 0.0)
+	StkJump();
+    else
+	jump_index++;
+    }
+
 void (*StkJumpOnTrue)(void) = dStkJumpOnTrue;
 
 void StkJumpLabel (void)
@@ -968,7 +457,7 @@ void StkJumpLabel (void)
 }
 
 #if (_MSC_VER >= 700)
-#pragma code_seg ("parser1_text")     /* place following in an overlay */
+#pragma code_seg ("parser1_text")     // place following in an overlay
 #endif
 
 unsigned SkipWhiteSpace(char *Str) {
@@ -988,7 +477,7 @@ unsigned SkipWhiteSpace(char *Str) {
    return(n - 1);
 }
 
-/* detect if constant is part of a (a,b) construct */
+// detect if constant is part of a (a,b) construct
 static int isconst_pair(char *Str) {
    int n,j;
    int answer = 0;
@@ -1035,6 +524,8 @@ struct ConstArg far *isconst(char *Str, int Len) {
    v[vsp].s = Str;
    v[vsp].len = Len;
    v[vsp].a.d.x = v[vsp].a.d.y = 0.0;
+   v[vsp].a.dd.x = v[vsp].a.dd.y = 0.0;
+   v[vsp].a.qd.x = v[vsp].a.qd.y = 0.0;
 
    if(isdigit(Str[0])
        || (Str[0] == '-' && (isdigit(Str[1]) || Str[1] == '.'))
@@ -1062,9 +553,15 @@ struct ConstArg far *isconst(char *Str, int Len) {
          z.y = 0.0;
       z.x = atof(Str);
       switch(MathType) {
-      case D_MATH:
+      case DOUBLEFLOAT:
          v[vsp].a.d = z;
          break;
+      case DOUBLEDOUBLE:
+	  v[vsp].a.dd = z;
+	  break;
+      case QUADDOUBLE:
+	  v[vsp].a.qd = z;
+	  break;
       }
       v[vsp].s = Str;
    }
@@ -1274,500 +771,766 @@ struct SYMETRY {
 
 extern	char	FormulaString[];	// used to hold the full formula
 
-static int ParseStr(char *Str, int pass) {
-   struct ConstArg far *c;
-   int ModFlag = 999, Len, Equals = 0, Mod[20], mdstk = 0;
-   int jumptype;
-   double const_pi, const_e;
-   double Xctr, Yctr, Xmagfactor, Rotation, Skew;
-   LDBL Magnification;
+static int ParseStr(char *Str, int pass) 
+    {
+    struct ConstArg *c;
+    int ModFlag = 999, Len, Equals = 0, Mod[20], mdstk = 0;
+    int jumptype;
+    double const_pi, const_e;
+    double Xctr, Yctr, Xmagfactor, Rotation, Skew;
+    LDBL Magnification;
 
-   strcpy(FormulaString, Str);		// needed to save formula to par file
-   SetRandom = Randomized = 0;
-   uses_jump = 0;
-   jump_index = 0;
-   if(pass == 0)
-      o = (struct PEND_OP far *)
-    ((char far *)typespecific_workarea + total_formula_mem-sizeof(struct PEND_OP) * Max_Ops);
-   else if(used_extra == 1)
-      o = (struct PEND_OP far *)
-    ((char far *)typespecific_workarea + total_formula_mem-sizeof(struct PEND_OP) * Max_Ops);
-   else
-      o = (struct PEND_OP far *)malloc(sizeof(struct PEND_OP) * (long)Max_Ops * 16L);
-   if( !o || !typespecific_workarea) {
-      stopmsg(0,ParseErrs(PE_INSUFFICIENT_MEM_FOR_TYPE_FORMULA));
-      return(1);
-   }
-   switch(MathType) {
-   case D_MATH:
-      StkAdd = dStkAdd;
-      StkSub = dStkSub;
-      StkNeg = dStkNeg;
-      StkMul = dStkMul;
-      StkSin = dStkSin;
-      StkSinh = dStkSinh;
-      StkLT = dStkLT;
-      StkLTE = dStkLTE;
-      StkMod = dStkMod;
-      StkSqr = dStkSqr;
-      StkCos = dStkCos;
-      StkCosh = dStkCosh;
-      StkLog = dStkLog;
-      StkExp = dStkExp;
-      StkPwr = dStkPwr;
-      StkDiv = dStkDiv;
-      StkAbs = dStkAbs;
-      StkReal = dStkReal;
-      StkImag = dStkImag;
-      StkConj = dStkConj;
-//      StkTrig0 = dtrig0;   /* TIW 03-30-91 */
-//      StkTrig1 = dtrig1;   /* TIW 03-30-91 */
-//      StkTrig2 = dtrig2;   /* TIW 03-30-91 */
-//      StkTrig3 = dtrig3;   /* TIW 03-30-91 */
-      StkFlip = dStkFlip;
-      StkTan = dStkTan;    /* TIW 04-22-91 */
-      StkTanh = dStkTanh;  /* TIW 04-22-91 */
-      StkCoTan = dStkCoTan;    /* TIW 04-24-91 */
-      StkCoTanh = dStkCoTanh;  /* TIW 04-24-91 */
-      StkCosXX = dStkCosXX;    /* PB  04-28-91 */
-      StkGT  = dStkGT;         /* MCP 11-3-91 */
-      StkGTE = dStkGTE;        /* MCP 11-3-91 */
-      StkEQ  = dStkEQ;         /* MCP 11-3-91 */
-      StkNE  = dStkNE;         /* MCP 11-3-91 */
-      StkAND = dStkAND;        /* MCP 11-3-91 */
-      StkOR  = dStkOR ;        /* MCP 11-3-91 */
-      StkSRand = dStkSRand;    /* MCP 11-21-91 */
-      StkASin = dStkASin;      /* TIW 11-25-94 */
-      StkASinh = dStkASinh;    /* TIW 11-25-94 */
-      StkACos = dStkACos;      /* TIW 11-25-94 */
-      StkACosh = dStkACosh;    /* TIW 11-25-94 */
-      StkATan = dStkATan;      /* TIW 11-25-94 */
-      StkATanh = dStkATanh;    /* TIW 11-25-94 */
-      StkCAbs = dStkCAbs;      /* TIW 11-25-94 */
-      StkSqrt = dStkSqrt;      /* TIW 11-25-94 */
-      StkZero = dStkZero;      /* JCO 12-31-94 */
-      StkFloor = dStkFloor;    /* TIW 06-30-96 */
-      StkCeil = dStkCeil;      /* TIW 06-30-96 */
-      StkTrunc = dStkTrunc;    /* TIW 06-30-96 */
-      StkRound = dStkRound;    /* TIW 06-30-96 */
-      StkJumpOnTrue  = dStkJumpOnTrue;     /* GGM 02-10-97 */
-      StkJumpOnFalse = dStkJumpOnFalse;    /* GGM 02-10-97 */
-      StkOne = dStkOne;        /* GGM 10-08-97 */
-      break;
-   }
-   maxfn = 0;   /* TIW 03-30-91 */
-   for(vsp = 0; vsp < sizeof(Constants) / sizeof(char*); vsp++) {
-      v[vsp].s = Constants[vsp];
-      v[vsp].len = (int)strlen(Constants[vsp]);
-   }
-   cvtcentermag(&Xctr, &Yctr, &Magnification, &Xmagfactor, &Rotation, &Skew);
-   const_pi = atan(1.0) * 4;
-   const_e  = exp(1.0);
-   v[7].a.d.x = v[7].a.d.y = 0.0;
-   v[11].a.d.x = (double)xdots;
-   v[11].a.d.y = (double)ydots;
-   v[12].a.d.x = (double)threshold;
-   v[12].a.d.y = 0;
-   v[13].a.d.x = (double)ismand;
-   v[13].a.d.y = 0;
-   v[14].a.d.x = hor + (mandel_width * 1.777777777778) / 2.0;
-   v[14].a.d.y = vert + mandel_width / 2.0;
-   v[15].a.d.x = (double)1.0 / mandel_width;
-   v[15].a.d.y = vert / (hor * 1.777777777778);
-   v[16].a.d.x = 0.0;
-   v[16].a.d.y = 0.0;
+    strcpy(FormulaString, Str);		// needed to save formula to par file
+    SetRandom = Randomized = 0;
+    uses_jump = 0;
+    jump_index = 0;
+    if(pass == 0)
+	o = (struct PEND_OP far *) ((char far *)typespecific_workarea + total_formula_mem-sizeof(struct PEND_OP) * Max_Ops);
+    else if(used_extra == 1)
+	o = (struct PEND_OP far *) ((char far *)typespecific_workarea + total_formula_mem-sizeof(struct PEND_OP) * Max_Ops);
+    else
+	o = (struct PEND_OP far *)malloc(sizeof(struct PEND_OP) * (long)Max_Ops * 16L);
+    if( !o || !typespecific_workarea) 
+	{
+	stopmsg(0,ParseErrs(PE_INSUFFICIENT_MEM_FOR_TYPE_FORMULA));
+	return(1);
+    }
+    switch(MathType)
+	{
+	case DOUBLEFLOAT:
+	    StkAdd = dStkAdd;
+	    StkSub = dStkSub;
+	    StkNeg = dStkNeg;
+	    StkMul = dStkMul;
+	    StkSin = dStkSin;
+	    StkSinh = dStkSinh;
+	    StkLT = dStkLT;
+	    StkLTE = dStkLTE;
+	    StkMod = dStkMod;
+	    StkSqr = dStkSqr;
+	    StkCos = dStkCos;
+	    StkCosh = dStkCosh;
+	    StkLog = dStkLog;
+	    StkExp = dStkExp;
+	    StkPwr = dStkPwr;
+	    StkDiv = dStkDiv;
+	    StkAbs = dStkAbs;
+	    StkReal = dStkReal;
+	    StkImag = dStkImag;
+	    StkConj = dStkConj;
+	    //	    StkTrig0 = dtrig0;   /* TIW 03-30-91 */
+	    //	    StkTrig1 = dtrig1;   /* TIW 03-30-91 */
+	    //	    StkTrig2 = dtrig2;   /* TIW 03-30-91 */
+	    //	    StkTrig3 = dtrig3;   /* TIW 03-30-91 */
+	    StkFlip = dStkFlip;
+	    StkTan = dStkTan;    /* TIW 04-22-91 */
+	    StkTanh = dStkTanh;  /* TIW 04-22-91 */
+	    StkCoTan = dStkCoTan;    /* TIW 04-24-91 */
+	    StkCoTanh = dStkCoTanh;  /* TIW 04-24-91 */
+	    StkCosXX = dStkCosXX;    /* PB  04-28-91 */
+	    StkGT = dStkGT;         /* MCP 11-3-91 */
+	    StkGTE = dStkGTE;        /* MCP 11-3-91 */
+	    StkEQ = dStkEQ;         /* MCP 11-3-91 */
+	    StkNE = dStkNE;         /* MCP 11-3-91 */
+	    StkAND = dStkAND;        /* MCP 11-3-91 */
+	    StkOR = dStkOR;        /* MCP 11-3-91 */
+	    StkSRand = dStkSRand;    /* MCP 11-21-91 */
+	    StkASin = dStkASin;      /* TIW 11-25-94 */
+	    StkASinh = dStkASinh;    /* TIW 11-25-94 */
+	    StkACos = dStkACos;      /* TIW 11-25-94 */
+	    StkACosh = dStkACosh;    /* TIW 11-25-94 */
+	    StkATan = dStkATan;      /* TIW 11-25-94 */
+	    StkATanh = dStkATanh;    /* TIW 11-25-94 */
+	    StkCAbs = dStkCAbs;      /* TIW 11-25-94 */
+	    StkSqrt = dStkSqrt;      /* TIW 11-25-94 */
+	    StkZero = dStkZero;      /* JCO 12-31-94 */
+	    StkFloor = dStkFloor;    /* TIW 06-30-96 */
+	    StkCeil = dStkCeil;      /* TIW 06-30-96 */
+	    StkTrunc = dStkTrunc;    /* TIW 06-30-96 */
+	    StkRound = dStkRound;    /* TIW 06-30-96 */
+	    StkJumpOnTrue = dStkJumpOnTrue;     /* GGM 02-10-97 */
+	    StkJumpOnFalse = dStkJumpOnFalse;    /* GGM 02-10-97 */
+	    StkOne = dStkOne;        /* GGM 10-08-97 */
+	    break;
+	case DOUBLEDOUBLE:
+	    StkAdd = ddStkAdd;
+	    StkSub = ddStkSub;
+	    StkNeg = ddStkNeg;
+	    StkMul = ddStkMul;
+	    StkSin = ddStkSin;
+	    StkSinh = ddStkSinh;
+	    StkLT = ddStkLT;
+	    StkLTE = ddStkLTE;
+	    StkMod = ddStkMod;
+	    StkSqr = ddStkSqr;
+	    StkCos = ddStkCos;
+	    StkCosh = ddStkCosh;
+	    StkLog = ddStkLog;
+	    StkExp = ddStkExp;
+	    StkPwr = ddStkPwr;
+	    StkDiv = ddStkDiv;
+	    StkAbs = ddStkAbs;
+	    StkReal = ddStkReal;
+	    StkImag = ddStkImag;
+	    StkConj = ddStkConj;
+	    StkFlip = ddStkFlip;
+	    StkTan = ddStkTan;    /* TIW 04-22-91 */
+	    StkTanh = ddStkTanh;  /* TIW 04-22-91 */
+	    StkCoTan = ddStkCoTan;    /* TIW 04-24-91 */
+	    StkCoTanh = ddStkCoTanh;  /* TIW 04-24-91 */
+	    StkCosXX = ddStkCosXX;    /* PB  04-28-91 */
+	    StkGT = ddStkGT;         /* MCP 11-3-91 */
+	    StkGTE = ddStkGTE;        /* MCP 11-3-91 */
+	    StkEQ = ddStkEQ;         /* MCP 11-3-91 */
+	    StkNE = ddStkNE;         /* MCP 11-3-91 */
+	    StkAND = ddStkAND;        /* MCP 11-3-91 */
+	    StkOR = ddStkOR;        /* MCP 11-3-91 */
+	    StkSRand = ddStkSRand;    /* MCP 11-21-91 */
+	    StkASin = ddStkASin;      /* TIW 11-25-94 */
+	    StkASinh = ddStkASinh;    /* TIW 11-25-94 */
+	    StkACos = ddStkACos;      /* TIW 11-25-94 */
+	    StkACosh = ddStkACosh;    /* TIW 11-25-94 */
+	    StkATan = ddStkATan;      /* TIW 11-25-94 */
+	    StkATanh = ddStkATanh;    /* TIW 11-25-94 */
+	    StkCAbs = ddStkCAbs;      /* TIW 11-25-94 */
+	    StkSqrt = ddStkSqrt;      /* TIW 11-25-94 */
+	    StkZero = ddStkZero;      /* JCO 12-31-94 */
+	    StkFloor = ddStkFloor;    /* TIW 06-30-96 */
+	    StkCeil = ddStkCeil;      /* TIW 06-30-96 */
+	    StkTrunc = ddStkTrunc;    /* TIW 06-30-96 */
+	    StkRound = ddStkRound;    /* TIW 06-30-96 */
+	    StkJumpOnTrue = ddStkJumpOnTrue;     /* GGM 02-10-97 */
+	    StkJumpOnFalse = ddStkJumpOnFalse;    /* GGM 02-10-97 */
+	    StkOne = ddStkOne;        /* GGM 10-08-97 */
+	    break;
+	case QUADDOUBLE:
+	    StkAdd = qdStkAdd;
+	    StkSub = qdStkSub;
+	    StkNeg = qdStkNeg;
+	    StkMul = qdStkMul;
+	    StkSin = qdStkSin;
+	    StkSinh = qdStkSinh;
+	    StkLT = qdStkLT;
+	    StkLTE = qdStkLTE;
+	    StkMod = qdStkMod;
+	    StkSqr = qdStkSqr;
+	    StkCos = qdStkCos;
+	    StkCosh = qdStkCosh;
+	    StkLog = qdStkLog;
+	    StkExp = qdStkExp;
+	    StkPwr = qdStkPwr;
+	    StkDiv = qdStkDiv;
+	    StkAbs = qdStkAbs;
+	    StkReal = qdStkReal;
+	    StkImag = qdStkImag;
+	    StkConj = qdStkConj;
+	    StkFlip = qdStkFlip;
+	    StkTan = qdStkTan;    /* TIW 04-22-91 */
+	    StkTanh = qdStkTanh;  /* TIW 04-22-91 */
+	    StkCoTan = qdStkCoTan;    /* TIW 04-24-91 */
+	    StkCoTanh = qdStkCoTanh;  /* TIW 04-24-91 */
+	    StkCosXX = qdStkCosXX;    /* PB  04-28-91 */
+	    StkGT = qdStkGT;         /* MCP 11-3-91 */
+	    StkGTE = qdStkGTE;        /* MCP 11-3-91 */
+	    StkEQ = qdStkEQ;         /* MCP 11-3-91 */
+	    StkNE = qdStkNE;         /* MCP 11-3-91 */
+	    StkAND = qdStkAND;        /* MCP 11-3-91 */
+	    StkOR = qdStkOR;        /* MCP 11-3-91 */
+	    StkSRand = qdStkSRand;    /* MCP 11-21-91 */
+	    StkASin = qdStkASin;      /* TIW 11-25-94 */
+	    StkASinh = qdStkASinh;    /* TIW 11-25-94 */
+	    StkACos = qdStkACos;      /* TIW 11-25-94 */
+	    StkACosh = qdStkACosh;    /* TIW 11-25-94 */
+	    StkATan = qdStkATan;      /* TIW 11-25-94 */
+	    StkATanh = qdStkATanh;    /* TIW 11-25-94 */
+	    StkCAbs = qdStkCAbs;      /* TIW 11-25-94 */
+	    StkSqrt = qdStkSqrt;      /* TIW 11-25-94 */
+	    StkZero = qdStkZero;      /* JCO 12-31-94 */
+	    StkFloor = qdStkFloor;    /* TIW 06-30-96 */
+	    StkCeil = qdStkCeil;      /* TIW 06-30-96 */
+	    StkTrunc = qdStkTrunc;    /* TIW 06-30-96 */
+	    StkRound = qdStkRound;    /* TIW 06-30-96 */
+	    StkJumpOnTrue = qdStkJumpOnTrue;     /* GGM 02-10-97 */
+	    StkJumpOnFalse = qdStkJumpOnFalse;    /* GGM 02-10-97 */
+	    StkOne = qdStkOne;        /* GGM 10-08-97 */
+	    break;
+	}
+    maxfn = 0;   /* TIW 03-30-91 */
+    for(vsp = 0; vsp < sizeof(Constants) / sizeof(char*); vsp++) 
+	{
+	v[vsp].s = Constants[vsp];
+	v[vsp].len = (int)strlen(Constants[vsp]);
+	}
+    cvtcentermag(&Xctr, &Yctr, &Magnification, &Xmagfactor, &Rotation, &Skew);
+    const_pi = atan(1.0) * 4;
+    const_e  = exp(1.0);
 
-   switch(MathType) {
-   case D_MATH:
-      v[1].a.d.x = param[0];
-      v[1].a.d.y = param[1];
-      v[2].a.d.x = param[2];
-      v[2].a.d.y = param[3];
-      v[5].a.d.x = const_pi;
-      v[5].a.d.y = 0.0;
-      v[6].a.d.x = const_e;
-      v[6].a.d.y = 0.0;
-      v[8].a.d.x = param[4];
-      v[8].a.d.y = param[5];
-      v[17].a.d.x = param[6];
-      v[17].a.d.y = param[7];
-      v[18].a.d.x = param[8];
-      v[18].a.d.y = param[9];
-      break;
-   }
+    v[7].a.d.x = v[7].a.d.y = 0.0;
+    v[11].a.d.x = (double)xdots;
+    v[11].a.d.y = (double)ydots;
+    v[12].a.d.x = (double)threshold;
+    v[12].a.d.y = 0;
+    v[13].a.d.x = (double)ismand;
+    v[13].a.d.y = 0;
+    // do we need to copy these int DD and QD?
+    v[14].a.d.x = hor + (mandel_width * 1.777777777778) / 2.0;
+    v[14].a.d.y = vert + mandel_width / 2.0;
+    v[15].a.d.x = (double)1.0 / mandel_width;
+    v[15].a.d.y = vert / (hor * 1.777777777778);
+    v[16].a.d.x = 0.0;
+    v[16].a.d.y = 0.0;
 
-   LastInitOp = paren = OpPtr = LodPtr = StoPtr = posp = 0;
-   ExpectingArg = 1;
-   for(n = 0; Str[n]; n++) {
-      if(!Str[n])
-         break;
-      InitN = n;
-      switch(Str[n]) {
-         case ' ':
-         case '\t':
-         case '\r':
-         case '\n':
-            break;
-         case '(':
-            paren++;
-            break;
-         case ')':
-            paren--;
-            break;
-         case '|':
-            if(Str[n+1] == '|') {
-               ExpectingArg = 1;
-               n++;
-               o[posp].f = StkOR;
-               o[posp++].p = 7 - (paren + Equals)*15;
-            }
-            else if(ModFlag == paren-1) {
-               paren--;
-               ModFlag = Mod[--mdstk];
-            }
-            else {
-               Mod[mdstk++] = ModFlag;
-               o[posp].f = StkMod;
-               o[posp++].p = 2 - (paren + Equals)*15;
-               ModFlag = paren++;
-            }
-            break;
-         case ',':
-         case ';':
-            if(!ExpectingArg) {
-               ExpectingArg = 1;
-               o[posp].f = (void(far*)(void))0;
-               o[posp++].p = 15;
-               o[posp].f = StkClr;
-               o[posp++].p = -30000;
-               Equals = paren = 0;
-            }
-            break;
-         case ':':
-            ExpectingArg = 1;
-            o[posp].f = (void(far*)(void))0;
-            o[posp++].p = 15;
-            o[posp].f = EndInit;
-            o[posp++].p = -30000;
-            Equals = paren = 0;
-            LastInitOp = 10000;
-            break;
-         case '+':
-            ExpectingArg = 1;
-            o[posp].f = StkAdd;
-            o[posp++].p = 4 - (paren + Equals)*15;
-            break;
-         case '-':
-            if(ExpectingArg) {
-               o[posp].f = StkNeg;
-               o[posp++].p = 2 - (paren + Equals)*15;
-            }
-            else {
-               o[posp].f = StkSub;
-               o[posp++].p = 4 - (paren + Equals)*15;
-               ExpectingArg = 1;
-            }
-            break;
-         case '&':
-            ExpectingArg = 1;
-            n++;
-            o[posp].f = StkAND;
-            o[posp++].p = 7 - (paren + Equals)*15;
-            break;
-         case '!':
-            ExpectingArg = 1;
-            n++;
-            o[posp].f = StkNE;
-            o[posp++].p = 6 - (paren + Equals)*15;
-            break;
-         case '<':
-            ExpectingArg = 1;
-            if(Str[n+1] == '=') {
-               n++;
-               o[posp].f = StkLTE;
-            }
-            else
-               o[posp].f = StkLT;
-            o[posp++].p = 6 - (paren + Equals)*15;
-            break;
-         case '>':
-            ExpectingArg = 1;
-            if(Str[n+1] == '=') {
-               n++;
-               o[posp].f = StkGTE;
-            }
-            else
-               o[posp].f = StkGT;
-            o[posp++].p = 6 - (paren + Equals)*15;
-            break;
-         case '*':
-            ExpectingArg = 1;
-            o[posp].f = StkMul;
-            o[posp++].p = 3 - (paren + Equals)*15;
-            break;
-         case '/':
-            ExpectingArg = 1;
-            o[posp].f = StkDiv;
-            o[posp++].p = 3 - (paren + Equals)*15;
-            break;
-         case '^':
-            ExpectingArg = 1;
-            o[posp].f = StkPwr;
-            o[posp++].p = 2 - (paren + Equals)*15;
-            break;
-         case '=':
-            ExpectingArg = 1;
-            if(Str[n+1] == '=') {
-               n++;
-               o[posp].f = StkEQ;
-               o[posp++].p = 6 - (paren + Equals)*15;
-            }
-            else {
-               o[posp-1].f = StkSto;
-               o[posp-1].p = 5 - (paren + Equals)*15;
-               Store[StoPtr++] = Load[--LodPtr];
-               Equals++;
-            }
-            break;
-         default:
-            while(isalnum(Str[n+1]) || Str[n+1] == '.' || Str[n+1] == '_')
-               n++;
-            Len = (n+1)-InitN;
-            ExpectingArg = 0;
-            if((jumptype = isjump(&Str[InitN], Len)) != 0) {
-               uses_jump = 1;
-               switch (jumptype) {
-                  case 1:                      /* if */
-                     ExpectingArg = 1;
-                     jump_control[jump_index++].type = 1;
-                     o[posp].f = StkJumpOnFalse;
-                     o[posp++].p = 1;
-                     break;
-                  case 2:                     /* elseif */
-                     ExpectingArg = 1;
-                     jump_control[jump_index++].type = 2;
-                     jump_control[jump_index++].type = 2;
-                     o[posp].f = StkJump;
-                     o[posp++].p = 1;
-                     o[posp].f = (void(far*)(void))0;
-                     o[posp++].p = 15;
-                     o[posp].f = StkClr;
-                     o[posp++].p = -30000;
-                     o[posp].f = StkJumpOnFalse;
-                     o[posp++].p = 1;
-                     break;
-                  case 3:                     /* else */
-                     jump_control[jump_index++].type = 3;
-                     o[posp].f = StkJump;
-                     o[posp++].p = 1;
-                     break;
-                  case 4: /* endif */
-                     jump_control[jump_index++].type = 4;
-                     o[posp].f = StkJumpLabel;
-                     o[posp++].p = 1;
-                     break;
-                  default:
-                     break;
-               }
-            }
-            else {
-               o[posp].f = isfunct(&Str[InitN], Len);
-               if(o[posp].f != NotAFnct) {
-                  o[posp++].p = 1 - (paren + Equals)*15;
-                  ExpectingArg = 1;
-               }
-               else {
-                  c = isconst(&Str[InitN], Len);
-                  Load[LodPtr++] = &(c->a);
-                  o[posp].f = StkLod;
-                  o[posp++].p = 1 - (paren + Equals)*15;
-                  n = InitN + c->len - 1;
-               }
-            }
-            break;
-      }
-   }
-   o[posp].f = (void(far*)(void))0;
-   o[posp++].p = 16;
-   NextOp = 0;
-   LastOp = posp;
-   while(NextOp < posp) {
-      if(o[NextOp].f)
-         RecSortPrec();
-      else {
-         NextOp++;
-         LastOp--;
-      }
-   }
-   if(pass > 0 && used_extra == 0)
-      free(o);
-   return(0);
-}
+    switch(MathType) 
+	{
+	case DOUBLEFLOAT:
+	    v[1].a.d.x = param[0];
+	    v[1].a.d.y = param[1];
+	    v[2].a.d.x = param[2];
+	    v[2].a.d.y = param[3];
+	    v[5].a.d.x = const_pi;
+	    v[5].a.d.y = 0.0;
+	    v[6].a.d.x = const_e;
+	    v[6].a.d.y = 0.0;
+	    v[8].a.d.x = param[4];
+	    v[8].a.d.y = param[5];
+	    v[17].a.d.x = param[6];
+	    v[17].a.d.y = param[7];
+	    v[18].a.d.x = param[8];
+	    v[18].a.d.y = param[9];
+	    break;
+	case DOUBLEDOUBLE:
+	    v[1].a.dd.x = param[0];
+	    v[1].a.dd.y = param[1];
+	    v[2].a.dd.x = param[2];
+	    v[2].a.dd.y = param[3];
+	    v[5].a.dd.x = const_pi;
+	    v[5].a.dd.y = 0.0;
+	    v[6].a.dd.x = const_e;
+	    v[6].a.dd.y = 0.0;
+	    v[8].a.dd.x = param[4];
+	    v[8].a.dd.y = param[5];
+	    v[17].a.dd.x = param[6];
+	    v[17].a.dd.y = param[7];
+	    v[18].a.dd.x = param[8];
+	    v[18].a.dd.y = param[9];
+	    break;
+	case QUADDOUBLE:
+	    v[1].a.qd.x = param[0];
+	    v[1].a.qd.y = param[1];
+	    v[2].a.qd.x = param[2];
+	    v[2].a.qd.y = param[3];
+	    v[5].a.qd.x = const_pi;
+	    v[5].a.qd.y = 0.0;
+	    v[6].a.qd.x = const_e;
+	    v[6].a.qd.y = 0.0;
+	    v[8].a.qd.x = param[4];
+	    v[8].a.qd.y = param[5];
+	    v[17].a.qd.x = param[6];
+	    v[17].a.qd.y = param[7];
+	    v[18].a.qd.x = param[8];
+	    v[18].a.qd.y = param[9];
+	    break;
+	}
+
+    LastInitOp = paren = OpPtr = LodPtr = StoPtr = posp = 0;
+    ExpectingArg = 1;
+    for(n = 0; Str[n]; n++) 
+	{
+	if(!Str[n])
+	    break;
+	InitN = n;
+	switch(Str[n]) 
+	    {
+	    case ' ':
+	    case '\t':
+	    case '\r':
+	    case '\n':
+		break;
+	    case '(':
+		paren++;
+		break;
+	    case ')':
+		paren--;
+		break;
+	    case '|':
+		if(Str[n+1] == '|') 
+		    {
+		    ExpectingArg = 1;
+		    n++;
+		    o[posp].f = StkOR;
+		    o[posp++].p = 7 - (paren + Equals)*15;
+		    }
+		else if(ModFlag == paren-1) 
+		    {
+		    paren--;
+		    ModFlag = Mod[--mdstk];
+		    }
+		else 
+		    {
+		    Mod[mdstk++] = ModFlag;
+		    o[posp].f = StkMod;
+		    o[posp++].p = 2 - (paren + Equals)*15;
+		    ModFlag = paren++;
+		    }
+		break;
+	    case ',':
+	    case ';':
+		if(!ExpectingArg) 
+		    {
+		    ExpectingArg = 1;
+		    o[posp].f = (void(far*)(void))0;
+		    o[posp++].p = 15;
+		    o[posp].f = StkClr;
+		    o[posp++].p = -30000;
+		    Equals = paren = 0;
+		    }
+		break;
+	    case ':':
+		ExpectingArg = 1;
+		o[posp].f = (void(far*)(void))0;
+		o[posp++].p = 15;
+		o[posp].f = EndInit;
+		o[posp++].p = -30000;
+		Equals = paren = 0;
+		LastInitOp = 10000;
+		break;
+	    case '+':
+		ExpectingArg = 1;
+		o[posp].f = StkAdd;
+		o[posp++].p = 4 - (paren + Equals)*15;
+		break;
+	    case '-':
+		if(ExpectingArg) 
+		    {
+		    o[posp].f = StkNeg;
+		    o[posp++].p = 2 - (paren + Equals)*15;
+		    }
+		else 
+		    {
+		    o[posp].f = StkSub;
+		    o[posp++].p = 4 - (paren + Equals)*15;
+		    ExpectingArg = 1;
+		    }
+		break;
+	    case '&':
+		ExpectingArg = 1;
+                n++;
+		o[posp].f = StkAND;
+		o[posp++].p = 7 - (paren + Equals)*15;
+		break;
+	    case '!':
+		ExpectingArg = 1;
+		n++;
+		o[posp].f = StkNE;
+		o[posp++].p = 6 - (paren + Equals)*15;
+		break;
+	    case '<':
+		ExpectingArg = 1;
+		if(Str[n+1] == '=') 
+		    {
+		    n++;
+		    o[posp].f = StkLTE;
+		    }
+		else
+		    o[posp].f = StkLT;
+		o[posp++].p = 6 - (paren + Equals)*15;
+		break;
+	    case '>':
+		ExpectingArg = 1;
+		if(Str[n+1] == '=') 
+		    {
+		    n++;
+		    o[posp].f = StkGTE;
+		    }
+		else
+		    o[posp].f = StkGT;
+		o[posp++].p = 6 - (paren + Equals)*15;
+		break;
+	    case '*':
+		ExpectingArg = 1;
+		o[posp].f = StkMul;
+		o[posp++].p = 3 - (paren + Equals)*15;
+		break;
+	    case '/':
+		ExpectingArg = 1;
+		o[posp].f = StkDiv;
+		o[posp++].p = 3 - (paren + Equals)*15;
+		break;
+	    case '^':
+		ExpectingArg = 1;
+		o[posp].f = StkPwr;
+		o[posp++].p = 2 - (paren + Equals)*15;
+		break;
+	    case '=':
+		ExpectingArg = 1;
+		if(Str[n+1] == '=') 
+		    {
+		    n++;
+		    o[posp].f = StkEQ;
+		    o[posp++].p = 6 - (paren + Equals)*15;
+		    }
+		else	
+		    {
+		    o[posp-1].f = StkSto;
+		    o[posp-1].p = 5 - (paren + Equals)*15;
+		    Store[StoPtr++] = Load[--LodPtr];
+		    Equals++;
+		    }
+		break;
+	    default:
+		while(isalnum(Str[n+1]) || Str[n+1] == '.' || Str[n+1] == '_')
+		    n++;
+		Len = (n+1)-InitN;
+		ExpectingArg = 0;
+		if((jumptype = isjump(&Str[InitN], Len)) != 0) 
+		    {
+		    uses_jump = 1;
+		    switch (jumptype) 
+			{
+			case 1:                      /* if */
+			    ExpectingArg = 1;
+			    jump_control[jump_index++].type = 1;
+			    o[posp].f = StkJumpOnFalse;
+			    o[posp++].p = 1;
+			    break;
+			case 2:                     /* elseif */
+			    ExpectingArg = 1;
+			    jump_control[jump_index++].type = 2;
+			    jump_control[jump_index++].type = 2;
+			    o[posp].f = StkJump;
+			    o[posp++].p = 1;
+			    o[posp].f = (void(far*)(void))0;
+			    o[posp++].p = 15;
+			    o[posp].f = StkClr;
+			    o[posp++].p = -30000;
+			    o[posp].f = StkJumpOnFalse;
+			    o[posp++].p = 1;
+			    break;
+			case 3:                     /* else */
+			    jump_control[jump_index++].type = 3;
+			    o[posp].f = StkJump;
+			    o[posp++].p = 1;
+			    break;
+			case 4: /* endif */
+			    jump_control[jump_index++].type = 4;
+			    o[posp].f = StkJumpLabel;
+			    o[posp++].p = 1;
+			    break;
+			default:
+			    break;
+			}
+		    }
+		else 
+		    {
+		    o[posp].f = isfunct(&Str[InitN], Len);
+		    if(o[posp].f != NotAFnct) 
+			{
+			o[posp++].p = 1 - (paren + Equals)*15;
+			ExpectingArg = 1;
+			}
+		    else 
+			{
+			c = isconst(&Str[InitN], Len);
+			Load[LodPtr++] = &(c->a);
+			o[posp].f = StkLod;
+			o[posp++].p = 1 - (paren + Equals)*15;
+			n = InitN + c->len - 1;
+			}
+		    }
+		break;
+	    }
+	}
+    o[posp].f = (void(far*)(void))0;
+    o[posp++].p = 16;
+    NextOp = 0;
+    LastOp = posp;
+    while(NextOp < posp) 
+	{
+	if(o[NextOp].f)
+	    RecSortPrec();
+	else  
+	    {
+	    NextOp++;
+	    LastOp--;
+	    }
+	}
+    if(pass > 0 && used_extra == 0)
+	free(o);
+    return(0);
+    }
 
 #if (_MSC_VER >= 700)
 #pragma code_seg ()       /* back to normal segment */
 #endif
 
-int	Formula1(Complex *zIn, Complex *qIn)		// used for direct formula parser so it can be used with real time Julia
+int	FormulaFloat(Complex *zIn)		// used for direct formula parser so it can be used with real time Julia
     {
     int	    ret;
 
     z = *zIn;
-    q = *qIn;
     ret = Formula();
     *zIn = z;
-    *qIn = q;
     return ret;
     }
 
-int Formula(void) {
-   if(FormName[0] == 0 || overflow) return(1);
+int	DDFormula(DDComplex *zIn, DDComplex *cIn)	// used for direct formula parser so it can be used with real time Julia
+    {
+    int	    ret;
 
-   LodPtr = InitLodPtr;
-   StoPtr = InitStoPtr;
-   OpPtr = InitOpPtr;
-   jump_index=InitJumpIndex;
-   /* Set the random number, MCP 11-21-91 */
-   if(SetRandom || Randomized)
-   {
-      switch(MathType)
-      {
-      case D_MATH:
-         dRandom();
-         break;
-      }
-   }
+    zDD = *zIn;
+//    cDD = *cIn;
+    ret = Formula();
+    *zIn = zDD;
+//    *cIn = cDD;
+    return ret;
+    }
 
-   Arg1 = &s[0];
-   Arg2 = Arg1-1;
-   while(OpPtr < (int)LastOp) {
-      f[OpPtr]();
-      OpPtr++;
+int	QDFormula(QDComplex *zIn, QDComplex *cIn)	// used for direct formula parser so it can be used with real time Julia
+    {
+    int	    ret;
+
+    zQD = *zIn;
+    ret = Formula();
+    *zIn = zQD;
+    return ret;
+    }
+
+int Formula(void) 
+    {
+    double  temp;
+    if(FormName[0] == 0 || overflow) return(1);
+
+    LodPtr = InitLodPtr;
+    StoPtr = InitStoPtr;
+    OpPtr = InitOpPtr;
+    jump_index=InitJumpIndex;
+    // Set the random number, MCP 11-21-91
+    if(SetRandom || Randomized)
+	{
+	switch(MathType)
+	    {
+	    case DOUBLEFLOAT:
+		dRandom();
+		break;
+	    case DOUBLEDOUBLE:
+		ddRandom();
+		break;
+	    case QUADDOUBLE:
+		qdRandom();
+		break;
+	    }
+	}
+
+    Arg1 = &s[0];
+    Arg2 = Arg1-1;
+    while(OpPtr < (int)LastOp) 
+	{
+	f[OpPtr]();
+	OpPtr++;
 #ifdef WATCH_MP
       x1 = *MP2d(Arg1->m.x);
       y1 = *MP2d(Arg1->m.y);
       x2 = *MP2d(Arg2->m.x);
       y2 = *MP2d(Arg2->m.y);
 #endif
-   }
+    }
 
-   switch(MathType) {
-   case D_MATH:
-      z = v[3].a.d;
-      return(Arg1->d.x == 0.0);
-   }
-   return(1);
-}
+    switch(MathType) 
+	{
+	case DOUBLEFLOAT:
+	    z = v[3].a.d;
+	    return(Arg1->d.x == 0.0);
+	case DOUBLEDOUBLE:
+	    zDD = v[3].a.dd;
+	    temp = to_double(Arg1->dd.x);
+	    return(temp == 0.0);
+	case QUADDOUBLE:
+	    zQD = v[3].a.qd;
+	    temp = to_double(Arg1->qd.x);
+	    return(temp == 0.0);
+	}
+    return(1);
+    }
 
 extern	int	period_level;		// 0 for no periodicity checking
 
-int	form_per_pixel1(Complex *zIn, Complex *qIn)		// used for direct formula parser so it can be used with real time Julia
+int	FormPerPixelFloat(Complex *zIn)		// used for direct formula parser so it can be used with real time Julia
     {
+    MathType = DOUBLEFLOAT;		// plain old double
     z = *zIn;
-    q = *qIn;
-    form_per_pixel();
+    FormPerPixel();
     *zIn = z;
-    *qIn = q;
     return 0;
     }
 
-int form_per_pixel(void) {
-   if (FormName[0] == 0) return(1);
-   overflow = LodPtr = StoPtr = OpPtr = jump_index = 0;
-   Arg1 = &s[0];
-   Arg2 = Arg1;
-   Arg2--;
+int DDFormPerPixel(DDComplex *zIn, DDComplex *qIn)
+    {
+    MathType = DOUBLEDOUBLE;		// double-double
+    zDD = *zIn;
+    cDD = *qIn;
+    FormPerPixel();
+    *zIn = zDD;
+    return 0;
+    }
 
-   period_level = FALSE;
+int QDFormPerPixel(QDComplex *zIn, QDComplex *qIn)
+    {
+    MathType = QUADDOUBLE;		// quad-double
+    zQD = *zIn;
+    cQD = *qIn;
+    FormPerPixel();
+    *zIn = zQD;
+    return 0;
+    }
 
-   v[10].a.d.x = (double)col;
-   v[10].a.d.y = (double)row;
+int FormPerPixel(void)
+    {
+    if (FormName[0] == 0) return(1);
+    overflow = LodPtr = StoPtr = OpPtr = jump_index = 0;
+    Arg1 = &s[0];
+    Arg2 = Arg1;
+    Arg2--;
 
-    v[1].a.d.x = param[0];
-    v[1].a.d.y = param[1];
-    v[2].a.d.x = param[2];
-    v[2].a.d.y = param[3];
-    v[3].a.d.x = param[4];
-    v[3].a.d.y = param[5];
+    period_level = FALSE;
+
 	// end added PHD 2017-11-03
 
-   switch(MathType) {
-   case D_MATH:
-      if((row+col)&1)
-         v[9].a.d.x = 1.0;
-      else
-         v[9].a.d.x = 0.0;
-      v[9].a.d.y = 0.0;
-      break;
-   }
+    switch(MathType) 
+	{
+	case DOUBLEFLOAT:
+	    v[10].a.d.x = (double)col;
+	    v[10].a.d.y = (double)row;
 
-   /* TW started additions for inversion support here 4/17/94 */
-   {
+	    v[1].a.d.x = param[0];
+	    v[1].a.d.y = param[1];
+	    v[2].a.d.x = param[2];
+	    v[2].a.d.y = param[3];
+	    v[3].a.d.x = param[4];
+	    v[3].a.d.y = param[5];
+	    if((row+col)&1)
+		v[9].a.d.x = 1.0;
+	    else
+		v[9].a.d.x = 0.0;
+	    v[9].a.d.y = 0.0;
+	    break;
+	case DOUBLEDOUBLE:
+	    v[10].a.dd.x = (double)col;
+	    v[10].a.dd.y = (double)row;
+
+	    v[1].a.dd.x = param[0];
+	    v[1].a.dd.y = param[1];
+	    v[2].a.dd.x = param[2];
+	    v[2].a.dd.y = param[3];
+	    v[3].a.dd.x = param[4];
+	    v[3].a.dd.y = param[5];
+	    if ((row + col) & 1)
+		v[9].a.dd.x = 1.0;
+	    else
+		v[9].a.dd.x = 0.0;
+	    v[9].a.dd.y = 0.0;
+	    break;
+	case QUADDOUBLE:
+	    v[10].a.qd.x = (double)col;
+	    v[10].a.qd.y = (double)row;
+
+	    v[1].a.qd.x = param[0];
+	    v[1].a.qd.y = param[1];
+	    v[2].a.qd.x = param[2];
+	    v[2].a.qd.y = param[3];
+	    v[3].a.qd.x = param[4];
+	    v[3].a.qd.y = param[5];
+	    if ((row + col) & 1)
+		v[9].a.qd.x = 1.0;
+	    else
+		v[9].a.qd.x = 0.0;
+	    v[9].a.qd.y = 0.0;
+	    break;
+	}
+
+   // TW started additions for inversion support here 4/17/94
+	{
          // TW end of inversion support changes here 4/17/94
-         switch(MathType)
-         {
-         case D_MATH:
-            v[0].a.d.x = c.x;
-	    v[0].a.d.y = c.y;
-            break;
-         }
-   }
+	switch(MathType)
+	    {
+	    case DOUBLEFLOAT:
+		v[0].a.d.x = c.x;
+		v[0].a.d.y = c.y;
+		break;
+	    case DOUBLEDOUBLE:
+		v[0].a.dd.x = cDD.x;
+		v[0].a.dd.y = cDD.y;
+		break;
+	    case QUADDOUBLE:
+		v[0].a.qd.x = cQD.x;
+		v[0].a.qd.y = cQD.y;
+		break;
+	    }
+	}
 
+    if(LastInitOp)
+	LastInitOp = LastOp;
+    while(OpPtr < LastInitOp) 
+	{
+	f[OpPtr]();
+	OpPtr++;
+	}
+    InitLodPtr = LodPtr;
+    InitStoPtr = StoPtr;
+    InitOpPtr = OpPtr;
+    // Set old variable for orbits TIW 12-18-93
+    switch(MathType) 
+	{
+	case DOUBLEFLOAT:
+	    z = v[3].a.d;
+	    break;
+	case DOUBLEDOUBLE:
+	    zDD = v[3].a.dd;
+	    break;
+	case QUADDOUBLE:
+	    zQD = v[3].a.qd;
+	    break;
+	}
 
-   if(LastInitOp)
-      LastInitOp = LastOp;
-   while(OpPtr < LastInitOp) {
-      f[OpPtr]();
-      OpPtr++;
-   }
-   InitLodPtr = LodPtr;
-   InitStoPtr = StoPtr;
-   InitOpPtr = OpPtr;
-   /* Set old variable for orbits TIW 12-18-93 */
-   switch(MathType) {
-   case D_MATH:
-      z = v[3].a.d;
-      break;
-   }
-
-   if(overflow)
-      return(0);
-   else
-      return(1);
-}
+    if(overflow)
+	return(0);
+    else
+	return(1);
+    }
 
 int fill_if_group(int endif_index, JUMP_PTRS_ST* jump_data)
-{
-   int i   = endif_index;
-   int ljp = endif_index; /* ljp means "last jump processed" */
-   while(i > 0) {
-      i--;
-      switch (jump_control[i].type) {
-         case 1:    /*if(); this concludes processing of this group*/
-            jump_control[i].ptrs = jump_data[ljp];
-            jump_control[i].DestJumpIndex = ljp + 1;
-            return i;
-         case 2:    /*elseif* ( 2 jumps, the else and the if*/
+    {
+    int i   = endif_index;
+    int ljp = endif_index; /* ljp means "last jump processed" */
+    while(i > 0) 
+	{
+	i--;
+	switch (jump_control[i].type) 
+	    {
+	    case 1:    /*if(); this concludes processing of this group*/
+		jump_control[i].ptrs = jump_data[ljp];
+		jump_control[i].DestJumpIndex = ljp + 1;
+		return i;
+	    case 2:    /*elseif* ( 2 jumps, the else and the if*/
                /* first, the "if" part */
-            jump_control[i].ptrs = jump_data[ljp];
-            jump_control[i].DestJumpIndex = ljp + 1;
+		jump_control[i].ptrs = jump_data[ljp];
+		jump_control[i].DestJumpIndex = ljp + 1;
 
                /* then, the else part */
-            i--; /*fall through to "else" is intentional*/
-         case 3:
-            jump_control[i].ptrs = jump_data[endif_index];
-            jump_control[i].DestJumpIndex = endif_index + 1;
-            ljp = i;
-            break;
-         case 4:    /*endif*/
-               i = fill_if_group(i, jump_data);
-            break;
-         default:
-            break;
-      }
-   }
-   return -1; /* should never get here */
-}
+		i--; /*fall through to "else" is intentional*/
+	    case 3:
+		jump_control[i].ptrs = jump_data[endif_index];
+		jump_control[i].DestJumpIndex = endif_index + 1;
+		ljp = i;
+		break;
+	    case 4:    /*endif*/
+		i = fill_if_group(i, jump_data);
+		break;
+	    default:
+		break;
+	    }
+	}
+    return -1; /* should never get here */
+    }
 
 int fill_jump_struct(void)
 { /* Completes all entries in jump structure. Returns 1 on error) */
@@ -2658,48 +2421,42 @@ int RunForm(char *Name, int from_prompts1c) {  /*  returns 1 if an error occurre
 }
 
 
-int fpFormulaSetup(char *FormFile) {
+int fpFormulaSetup(char *FormFile)
+    {
+    int RunFormRes;              // CAE fp
+    strcpy(FormName, FormFile);	// yeah yeah, it's hard to interface two independent systems
+    MathType = DOUBLEFLOAT;
+    RunFormRes = !RunForm(FormName, 0); // RunForm() returns 1 for failure
+    return RunFormRes;
+    }
 
-   int RunFormRes;              /* CAE fp */
-
-   strcpy(FormName, FormFile);	// yeah yeah, it's hard to interface two independent systems
-   MathType = D_MATH;
-   RunFormRes = !RunForm(FormName, 0); /* RunForm() returns 1 for failure */
-   return RunFormRes;
-//#endif
-}
-
-int intFormulaSetup(void) {
-#ifdef XFRACT
-      printf("intFormulaSetup called!!!\n");
-      exit(-1);
-#else
-      MathType = L_MATH;
-      fg = (double)(1L << bitshift);
-      fgLimit = (double)0x7fffffffL / fg;
-      ShiftBack = 32 - bitshift;
-#endif
-      return(!RunForm(FormName, 0));
-   }
-
+/*
+int DDFormulaSetup(char *FormFile)
+    {
+    int RunFormRes;              // CAE fp
+    strcpy(FormName, FormFile);	// yeah yeah, it's hard to interface two independent systems
+    MathType = DD_MATH;
+    RunFormRes = !RunForm(FormName, 0); // RunForm() returns 1 for failure
+    return RunFormRes;
+    }
+*/
 
 /* TIW added 06-20-90 so functions can be called from fractals.c */
 void init_misc()
-{
-   static struct ConstArg far vv[5];
-   static struct Arg argfirst,argsecond;
-   if(!v)
-      v = vv;
-   Arg1 = &argfirst; Arg2 = &argsecond; /* needed by all the ?Stk* functions */
-   fg = (double)(1L << bitshift);
-   fgLimit = (double)0x7fffffffL / fg;
-   ShiftBack = 32 - bitshift;
-   Delta16 = bitshift - 16;
-//   bitshiftless1 = bitshift-1;
-   uses_p1 = uses_p2 = uses_p3 = uses_jump = uses_ismand = 0;
-   uses_p4 = uses_p5 = 0;
-}
-
+    {
+    static struct ConstArg far vv[5];
+    static struct Arg argfirst, argsecond;
+    if (!v)
+	v = vv;
+    Arg1 = &argfirst; Arg2 = &argsecond; /* needed by all the ?Stk* functions */
+    fg = (double)(1L << bitshift);
+    fgLimit = (double)0x7fffffffL / fg;
+    ShiftBack = 32 - bitshift;
+    Delta16 = bitshift - 16;
+    //   bitshiftless1 = bitshift-1;
+    uses_p1 = uses_p2 = uses_p3 = uses_jump = uses_ismand = 0;
+    uses_p4 = uses_p5 = 0;
+    }
 
 /* PB 910417 here to end changed.
         Allocate sub-arrays from one main farmemalloc, using global variable
@@ -3879,6 +3636,32 @@ void	insertFunctionNames(char *FormStr, CFract Fractal)		// insert function name
     }
 
 /**************************************************************************
+	Initialise Formula String
+**************************************************************************/
+
+int	InitParserArithmetic(void)
+    {
+    MathType = (MATH_TYPE)GetMathType();
+    if (FormStr)				//  No errors while making string
+	{
+	parser_allocate();		//  ParseStr() will test if this alloc worked 
+	if (ParseStr(FormStr, 1))
+	    return -1;			//  parse failed, don't change fn pointers 
+	else
+	    {
+	    if (uses_jump == 1 && fill_jump_struct() == 1)
+		{
+		stopmsg(PE_ERROR_IN_PARSING_JUMP_STATEMENTS, ParseErrs(PE_ERROR_IN_PARSING_JUMP_STATEMENTS));
+		return -1;
+		}
+	    return 0;
+	    }
+	}
+    else
+	return -1;			// error in making string
+    }
+
+/**************************************************************************
 	Process Formula String
 **************************************************************************/
 
@@ -3897,35 +3680,18 @@ int	ProcessFormulaString(char *FormulaString)
 //    sprintf(FormStr, "a=real(p1), b=imag(p1), d=real(p2), f=imag(p2),,g=1/f, h=1/d, j=1/(f-b), z=(-a*b*g*h)^j,,k=real(p3)+1, l=imag(p3)+100, c=fn1(pixel):z=k*((a*(z^b))+(d*(z^f)))+c,,|z| < l  ");
 //    sprintf(FormStr, "a=11, b=-1.2, d=4.3, f=-6,g=1/f, h=1/d, j=1/(f-b), z=(-a*b*g*h)^j,k=0+1, l=1e+100+100, c=fn1(pixel):z=k*((a*(z^b))+(d*(z^f)))+c,|z| < l  ");
 //    sprintf(FormStr, "Z=C=Pixel:Z=log(Z),,Z=exp(1.414213562373*(Z+flip(real(p1))))+C,,|Z|<36");
+//    sprintf(FormStr, "a = real(p1), b = imag(p1), d = real(p2), f = imag(p2), g = 1 / f, h = 1 / d, j = 1 / (f - b), z = (((-a * b*g*h) ^ j) + (p4)), k = real(p3) + 1, l = imag(p3) + 100, c = fn1(pixel) : z = k * ((a*(z^b)) + (d*(z^f))) + c, | z | < l");
+//    sprintf(FormStr, "z=g=pixel, a=real(p1), b=imag(p1), c=real(p2),d = imag(p2), e = real(p3), f = imag(p3) :	h = z ^ a + (g - b)*z - g, j = c * z^d + g,z = z - e * h / j, f <= |h| ");
+//    sprintf(FormStr, "z=c=pixel: z = z * z + c,|z| < 4.0");
     if (str_find_ci(FormStr, "fn1") || str_find_ci(FormStr, "fn2"))
 	insertFunctionNames(FormStr, Fractal);		// insert function names in place of literal "fn1", "fn2"
-    if(FormStr)				//  No errors while making string
-	{
-	parser_allocate();		//  ParseStr() will test if this alloc worked 
-	if (ParseStr(FormStr,1))
-	    return -1;			//  parse failed, don't change fn pointers 
-	else
-	    {
-	    if(uses_jump == 1 && fill_jump_struct() == 1) 
-		{
-		stopmsg(PE_ERROR_IN_PARSING_JUMP_STATEMENTS, ParseErrs(PE_ERROR_IN_PARSING_JUMP_STATEMENTS));
-		return -1;
-		}
-
-// all parses succeeded so set the pointers back to good functions
-//         curfractalspecific->per_pixel = form_per_pixel;
-//         curfractalspecific->orbitcalc = Formula;
-	    return 0;
-	    }
-	}
-    else
-	return -1;			// error in making string
+    return InitParserArithmetic();
     }
 
-/*
+/*************************************************************
   Read a formula file, picking off the formula names.
   Formulas use the format "  name = { ... }  name = { ... } "
-*/
+*************************************************************/
 
 int get_formula_names(HWND hwnd, char *filename)	// get the fractal formula names
 

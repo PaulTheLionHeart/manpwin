@@ -102,7 +102,6 @@ double	f_radius, f_xcenter, f_ycenter;	// inversion radius, center
 double	magnitude;
 double	rqlim;				// bailout level
 int	BailoutTestType = BAIL_MOD;	// type of bailout test
-//int	method;				// inside and outside filters
 int	InsideMethod;			// the number of the inside filter
 int	OutsideMethod;			// the number of the outside filter
 
@@ -188,19 +187,24 @@ extern	struct __timeb64 	FrameStart;
 extern	DWORD	StatusColour;		// colour of status bar
 extern	double	ScreenRatio;		// ratio of width / height for the screen
 extern	DOUBLE	yymax;			// max value of vert
+extern	Complex	RotationCentre;		// centre of rotation
 extern	HWND	CallingWindowHandle;	// Is ManpWIN called by an external window via WM_COPYDATA message?
 extern	int	DataFromPNGFile;	// loaded PNG file?
 extern	int	NumberThreads;		// number of threads for multi-threading
 extern	double 	*wpixels;		// an array of doubles holding slope modified iteration counts
 
-// Big num declarations **********************************************************
-extern	BYTE	BigNumFlag;		// True if bignum used
-extern	int	decimals, precision;
+// number declarations **********************************************************
+extern	BYTE		BigNumFlag;		// True if bignum used
+extern	MATH_TYPE	MathType;
+
+extern	int		decimals, precision;
 extern	BigDouble	BigHor, BigVert, BigWidth, Big_xgap, Big_ygap;
 extern	BigComplex	zBig, cBig, qBig;
 extern	BigDouble	Big_xxmax, Big_xxmin, Big_yymax, Big_yymin;
 extern	BigDouble	BigCloseEnough, BigBailout;
-// Big num declarations **********************************************************
+extern	dd_real		DDBailout, DDCloseEnough, DDxgap, DDygap, DDHor, DDVert, DDWidth, DDyymax;
+extern	qd_real		QDBailout, QDCloseEnough, QDxgap, QDygap, QDHor, QDVert, QDWidth, QDyymax;
+// number declarations **********************************************************
 
 int	time_to_zoom = 0;		// time to zoom in or out?
 int	time_to_restart = 0;		// time to restart?
@@ -218,7 +222,7 @@ extern	int	find_count_fp(DOUBLE, DOUBLE), DoHenon(void), user_data(HWND),
 extern	int	NullSetup(void);				// sometimes we just don't want to do anything 
 extern	int	rotate(int);
 
-extern	void	init_log(HWND), init_sym(void), set_palette(void), 
+extern	void	init_log(HWND), set_palette(void), 
 		setsymmetry(int, int), DisplayPalette(HWND, BOOL);
 
 extern	int	write_png_file(HWND, char *, char *, char *); 
@@ -227,6 +231,7 @@ extern	void	initFibonacci(void);
 extern	void	UpdateInit(void);
 extern	int	UpdateClose(void);
 extern	void	ConvertBignum2String(char *s, mpfr_t num);
+extern	int	InitParserArithmetic(void);
 
 	void	DisplayFractal(HWND);
 
@@ -242,9 +247,9 @@ extern	ProcessType	OscAnimProc;
 	CPlot		Plot;		// image plotting routines 
 	CPixel		Pix;		// routines for escape fractals
 	CMatrix		Mat;		// matrix applications for rotation and translation
-	CBigMatrix	BigMat;		// matrix applications for rotation and translation
-
-				//CLine3d	Line3d;		// routines for projection and 3D transforms
+	CDDMatrix	DDMat;
+	CQDMatrix	QDMat;
+	CBigMatrix	BigMat;
 
 // stuff for Pixel initialisation
 	BYTE		SpecialFlag;			// tell graphing routine of special conditions
@@ -308,7 +313,6 @@ void	pfract_main(HWND hwnd, char *szSaveFileName)
 		    init_log(hwnd);				// log colour distribution
 		if (_3dflag)
 		    Pix.init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
-		init_sym();					// symmetry? set up params
 		if (!addflag && !DataFromPNGFile/* || type != FIBONACCI*/)
 		    ClearScreen();
 		hCursor = LoadCursor(NULL, IDC_ARROW);		// Load normal cursor.
@@ -365,7 +369,8 @@ void	pfract_main(HWND hwnd, char *szSaveFileName)
 		    wsprintf(s, "Error: Could not write file: <%s>", szSaveFileName);
 		    MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		    MessageBeep (0);
-		    return;
+		    AutoSaveFlag = false;
+		    continue;
 		    }
 		}
 	    if (CallingWindowHandle)				// image started by WM_COPYDATA message... return message 
@@ -403,20 +408,53 @@ void	pfract_main(HWND hwnd, char *szSaveFileName)
     }
 
 /**************************************************************************
+	Get Arith Type
+**************************************************************************/
+
+int 	 GetArithType()
+    {
+    if (BigNumFlag)
+	{
+	if (precision <= 30)
+	    MathType = DOUBLEDOUBLE;
+	else if (precision <= 60)
+	    MathType = QUADDOUBLE;
+	else
+	    MathType = ARBITRARYPREC;
+	}
+    else
+	MathType = DOUBLEFLOAT;
+    return MathType;
+    }
+
+/**************************************************************************
 	Create Fractal Name
 **************************************************************************/
 
 void	CreateFractalName(BOOL UseszAppName, char *Name)
 
     {
-//    static  char	Name[6400];
     char		*szAppName = "Paul's Fractals";
-//    char		ColourData[100];
     char		SubData[1200];
     char		PrecisionData[20];
     char		FilterString[20];
-
-//    strcpy (ColourData, "");
+    char		ArithString[20];
+    int			Arith = GetArithType();
+    switch (Arith)
+	{
+	case DOUBLEFLOAT:
+	    strcpy(ArithString, "Arith=Float");
+	    break;
+	case DOUBLEDOUBLE:
+	    strcpy(ArithString, "Arith=DD");
+	    break;
+	case QUADDOUBLE:
+	    strcpy(ArithString, "Arith=QD");
+	    break;
+	default:
+	    strcpy(ArithString, "Arith=Bignum");
+	    break;
+	}
 
     if (Fractal.NumFunct == 1)
 	sprintf(SubData, "Fn=%s", Fractal.Fn1);
@@ -466,19 +504,19 @@ void	CreateFractalName(BOOL UseszAppName, char *Name)
 	    (UseszAppName) ? (LPSTR)szAppName : "", threshold, calcmode, logval, GetFractalName(), SubData, MaxDimensions, CoordSysInfo.CoordSys[CoordSystem], AxesText);
 	}
     else if (type == PERTURBATION)
-	wsprintf(Name, "%s: Thresh=%d, %sFract=(Pert)-%s, %s, NumThreads=%d, BigNum=%c, Deg=%d, %s",
-	(UseszAppName) ? (LPSTR)szAppName : "", threshold, FilterString, GetFractalName(), SubData, NumberThreads, ((BigNumFlag) ? 'T' : 'F'), degree, PrecisionData);
+	wsprintf(Name, "%s: Thresh=%d, %sFract=(Pert)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
+	(UseszAppName) ? (LPSTR)szAppName : "", threshold, FilterString, GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
     else if (type == SLOPEDERIVATIVE)
-	wsprintf(Name, "%s: Thresh=%d, Fract=(Slope Der)-%s, %s, NumThreads=%d, BigNum=%c, Deg=%d, %s",
-	(UseszAppName) ? (LPSTR)szAppName : "", threshold, GetFractalName(), SubData, NumberThreads, ((BigNumFlag) ? 'T' : 'F'), degree, PrecisionData);
+	wsprintf(Name, "%s: Thresh=%d, Fract=(Slope Der)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
+	(UseszAppName) ? (LPSTR)szAppName : "", threshold, GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
     else if (type == SLOPEFORWARDDIFF)
-	wsprintf(Name, "%s: Thresh=%d, Fract=(Slope Fwd)-%s, %s, NumThreads=%d, BigNum=%c, Deg=%d, %s",
-	(UseszAppName) ? (LPSTR)szAppName : "", threshold, GetFractalName(), SubData, NumberThreads, ((BigNumFlag) ? 'T' : 'F'), degree, PrecisionData);
+	wsprintf(Name, "%s: Thresh=%d, Fract=(Slope Fwd)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
+	(UseszAppName) ? (LPSTR)szAppName : "", threshold, GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
     else
 	{
-	wsprintf(Name, "%s: Thresh=%d, Plot=%c, %sLog=%d, Fract=%s, %s, Jul=%c, BigNum=%c, Deg=%d, Spec=%d, 3D=%c, %s", 
+	wsprintf(Name, "%s: Thresh=%d, Plot=%c, %sLog=%d, Fract=%s, %s, Jul=%c, %s, Deg=%d, Spec=%d, 3D=%c, %s", 
 	    (UseszAppName) ? (LPSTR)szAppName : "", threshold, calcmode, FilterString, logval, GetFractalName(), SubData,
-	    ((juliaflag) ? 'T' : 'F'), ((BigNumFlag) ? 'T' : 'F'), degree, special, ((_3dflag) ? 'T' : 'F'), PrecisionData);
+	    ((juliaflag) ? 'T' : 'F'), ArithString, degree, special, ((_3dflag) ? 'T' : 'F'), PrecisionData);
 	}
     }
 
@@ -501,71 +539,13 @@ void	DisplayFractal(HWND hwnd)
 
 #include"BigTrig.h"
 
-//extern	BigDouble sinhcosh_bf(BigDouble *s, BigDouble *c, BigDouble n);
-//extern	BigDouble sincos_bf(BigDouble *s, BigDouble *c, BigDouble n);
-
-
 int	SpecialFractals(HWND hwnd, CPixel *Pix)
 
     {
     COtherFunctions	OthFn;
-
-
-    // some tests of an alternative method of doing trig for multi-threading
-/*
-    CBigTrig	BigTrig;		// alternative thread-friendly trig functions
-
-    BigDouble	angle = PI / 4.2;
-    BigDouble	num = 1.87691236410345037471097406173046071374607161;
-
-    num = num / 1.08729379479874579;
-    BigDouble	sin1, cos1, sinh1, cosh1, exp1, ln1;
-    BigDouble	sin2, cos2, sinh2, cosh2, exp2, ln2;
-
-    double	_sin1, _cos1, _sinh1, _cosh1, _exp1, _ln1;
-    double	_sin2, _cos2, _sinh2, _cosh2, _exp2, _ln2;
-
-    BigTrig.sincos_bf(&sin1, &cos1, angle);
-    BigTrig.sinhcosh_bf(&sinh1, &cosh1, num);
-
-
-    mpfr_sin_cos(sin2.x, cos2.x, angle.x, MPFR_RNDN);
-    mpfr_sinh_cosh(sinh2.x, cosh2.x, num.x, MPFR_RNDN);
-
-    _sin1 = (double)mpfr_get_d(sin1.x, MPFR_RNDN);
-    _cos1 = (double)mpfr_get_d(cos1.x, MPFR_RNDN);
-    _sinh1 = (double)mpfr_get_d(sinh1.x, MPFR_RNDN);
-    _cosh1 = (double)mpfr_get_d(cosh1.x, MPFR_RNDN);
-    _sin2 = (double)mpfr_get_d(sin2.x, MPFR_RNDN);
-    _cos2 = (double)mpfr_get_d(cos2.x, MPFR_RNDN);
-    _sinh2 = (double)mpfr_get_d(sinh2.x, MPFR_RNDN);
-    _cosh2 = (double)mpfr_get_d(cosh2.x, MPFR_RNDN);
-
-    double s, c, sh, ch, exp, ln;
-
-    s = (double)mpfr_get_d((sin1 - sin2).x, MPFR_RNDN);
-    c = (double)mpfr_get_d((cos1 - cos2).x, MPFR_RNDN);
-    sh = (double)mpfr_get_d((sinh1 - sinh2).x, MPFR_RNDN);
-    ch = (double)mpfr_get_d((cosh1 - cosh2).x, MPFR_RNDN);
-
-    BigTrig.exp_bf(&exp1, num);
-    mpfr_exp(exp2.x, num.x, MPFR_RNDN);
-    BigTrig.ln_bf(&ln1, num);
-    mpfr_log(ln2.x, num.x, MPFR_RNDN);
-
-    _exp1 = (double)mpfr_get_d(exp1.x, MPFR_RNDN);
-    _exp2 = (double)mpfr_get_d(exp2.x, MPFR_RNDN);
-    _ln1 = (double)mpfr_get_d(ln1.x, MPFR_RNDN);
-    _ln2 = (double)mpfr_get_d(ln2.x, MPFR_RNDN);
-
-    exp = (double)mpfr_get_d((exp1 - exp2).x, MPFR_RNDN);
-    ln = (double)mpfr_get_d((ln1 - ln2).x, MPFR_RNDN);
-*/
-
     switch (type)
 	{
 	case DYNAMICFP:
-//	case TEST:
 	case BIFURCATION:
 	case BIFSTEWART:
 	case BIFLAMBDA:
@@ -617,12 +597,6 @@ int	SpecialFractals(HWND hwnd, CPixel *Pix)
 	case FFT:
 	case BUDDHABROT:
 	case POPCORN:
-/*
-	case FPPOPCORN:
-	case LPOPCORN:
-	case FPPOPCORNJUL:
-	case LPOPCORNJUL:
-*/
 	case PERTURBATION:
 	case SLOPEDERIVATIVE:
 	case SLOPEFORWARDDIFF:
@@ -640,16 +614,23 @@ int	SpecialFractals(HWND hwnd, CPixel *Pix)
 		}
 	    else
 		{
+		double	temp_x, temp_y;
+
+		temp_x = ScreenRatio / (double)(xdots - 1);
+		temp_y = 1.0 / (double)(ydots - 1);
+		if (BigNumFlag)
+		    {
+		    Big_xgap = BigWidth * temp_x;
+		    Big_ygap = BigWidth * temp_y;
+		    }
+		else
+		    {
+		    xgap = mandel_width * temp_x;
+		    ygap = mandel_width * temp_y;
+		    }
 		fractalspecific[type].per_pixel();
 		fractalspecific[type].calctype();
 		}
-/*
-	    Pix->init_fractal(&z, &q);
-	    if (fractalspecific[type].flags & OTHERFNINPIXEL)
-		Pix->RunOtherFunctions(type, &z, &q, &SpecialFlag, &iteration);
-	    else
-		fractalspecific[type].calctype();
-*/
 	    return 1;
 
 	case OSCILLATORS:
@@ -712,13 +693,15 @@ int	perform_worklist(HWND hwnd)
 	Pix.InitDistEst(&xxmin, &xxmax, &yymin, &yymax, &xx3rd, &yy3rd, &distestwidth, distest);
 
     // okay, we have to get the globals into the Pixel object somehow
-    Pix.InitPixel0(type, special, subtype, &degree, rqlim, ExpandStarTrailColours, SpecialFlag, precision, biomorph, InsideMethod, OutsideMethod, RotationAngle, xdots, ydots, nFDOption);
-    Pix.InitPixel1(&TZfilter, &TrueCol, &OscProcess, period_level, distest, invert, phaseflag, wpixels, juliaflag, closenuff, BigCloseEnough, calcmode);
+    Pix.InitPixel0(type, special, subtype, &degree, rqlim, ExpandStarTrailColours, SpecialFlag, precision, biomorph, InsideMethod, OutsideMethod, RotationAngle, xdots, ydots, nFDOption, &Plot);
+    Pix.InitPixel1(&TZfilter, &TrueCol, &OscProcess, period_level, distest, invert, phaseflag, wpixels, juliaflag, &closenuff, &BigCloseEnough, calcmode);
     Pix.InitPixel2(CoordSystem, UseCurrentPalette, reset_period, colors, hor, vert, mandel_width, BigHor, BigVert, BigWidth, &yymax, &Big_yymax);
-    Pix.InitPixel3(dStrands, j, pairflag, &andcolor, _3dflag, xgap, ygap, Big_xgap, Big_ygap, &c, ScreenRatio, colours, &Fractal, BailoutTestType);
+    Pix.InitPixel3(dStrands, j, pairflag, &andcolor, _3dflag, &xgap, &ygap, &Big_xgap, &Big_ygap, &c, ScreenRatio, colours, &Fractal, BailoutTestType);
     Pix.InitPixel4(&cBig, &q, &z, &qBig, &zBig, threshold, BigNumFlag, &color, logval, &iteration, f_radius, f_xcenter, LyapSequence);
-    Pix.InitPixel5(f_ycenter, &symmetry, param, potparam, decomp, logtable, &AutoStereo_value, width, hwnd/*, worklist*/, &Mat, &BigMat);
+    Pix.InitPixel5(f_ycenter, &symmetry, param, potparam, decomp, logtable, &AutoStereo_value, width, hwnd, &Mat, &DDMat, &QDMat, &BigMat);
     Pix.InitPixel6(&Dib, &PlotType, &oldrow, &oldcol, &time_to_zoom, &time_to_restart, &time_to_reinit, &time_to_quit, fillcolor, &andcolor, &blockindex, &totpasses, &curpass);
+    Pix.InitPixel7(&DDxgap, &DDygap, &DDHor, &DDVert, &DDWidth, &DDCloseEnough, &QDxgap, &QDygap, &QDHor, &QDVert, &QDWidth, &QDCloseEnough);
+    Pix.InitPixel8(&DDyymax, &QDyymax, &MathType, RotationCentre);
 
     NonStandardFractal = FALSE;
     SpecialFunctionsFlag = SpecialFractals(hwnd, &Pix);				// non-"standard" fractals - no multi-threading
@@ -730,6 +713,9 @@ int	perform_worklist(HWND hwnd)
 	return 1;								// finished processing non-standard plotted fractal
 	}
 
+    if (type == SCREENFORMULA || type == FORMULA)
+	if (InitParserArithmetic() < 0)						// we have to load different routines for each type of arithmetic, so let's test for it and init function pointers
+	    return -1;
     if (calcmode == 'F')
 	Slope[0].InitRender(threshold, &TrueCol, &Dib, wpixels, PaletteShift, bump_transfer_factor, PaletteStart, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength);
     size_t SizofPix = sizeof(Pix);			// just for interest
@@ -898,24 +884,29 @@ void	DisplayStatusBarInfo (int complete, char *text)
 	if (OscAnimProc == MORPHING)
 	    sprintf(szStatus, "%s%s", PassStr, FinishedStr);
 	else if (type == PERTURBATION)
-	    sprintf(szStatus, "%s%s, Arith=%s, %s", PertStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Pert"), PositionStr);
+	    sprintf(szStatus, "%s%s, Arith=%s, %s", PertStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
 	else if (type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF)
-	    sprintf(szStatus, "%s%s, Arith=%s, %s", SlopeStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Pert"), PositionStr);
+	    sprintf(szStatus, "%s%s, Arith=%s, %s", SlopeStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
 	else if (type == ANT || type == TOWER)
 	    sprintf(szStatus, "Progress = %s", AntStatus);
 	else if (type == LYAPUNOV)
-	    sprintf(szStatus, "%s%s, %s, Arith=%s, Lyapunov Sequence='%s'", PassStr, FinishedStr, PositionStr, ((BigNumFlag) ? PrecisionStr : "Float"), LyapSequence);
+	    sprintf(szStatus, "%s%s, Arith=%s, %s, Lyapunov Sequence='%s'", PassStr, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr, LyapSequence);
 	else
-	    sprintf(szStatus, "%s%s, %s, Arith=%s", PassStr, FinishedStr, PositionStr, ((BigNumFlag) ? PrecisionStr : "Float"));
+	    sprintf(szStatus, "%s%s, Arith=%s, %s", PassStr, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
 	if (str_find_ci(szStatus, "Ref[") != 0)
 	    StatusColour = 0x00FFFF80;
 	else
 	    StatusColour = 0x0000FFFF;
 	}
+    else if (complete == CALCULATINGREF)
+	{
+	sprintf(FinishedStr, ", Time %s", ShowTime(ElapsedTime));
+	sprintf(PrecisionStr, "Arb Prec: %d", precision);
+	sprintf(szStatus, "%s%s, Arith=%s, %s", PertStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
+	StatusColour = 0x00FFFF80;
+	}
     else							// initialising
 	{
-//	sprintf(FinishedStr, ", Image time %s", ShowTime (ElapsedTime));
-//	sprintf(PrecisionStr, "Arb Prec: %d", precision);
 	sprintf(szStatus, "Initialising fractal variables");
 	StatusColour = 0x006060FF;
 	}

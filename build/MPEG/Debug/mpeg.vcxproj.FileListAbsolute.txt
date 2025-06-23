@@ -1,0 +1,1 @@
+C:\Github\manpwin\manpwin\build\MPEG\Debug\mpeg.lib

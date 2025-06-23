@@ -5,16 +5,11 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-//#include <Windows.h>
-//#include <time.h>
 #include "..\complex.h"
-//#include "Fractype.h"
 #include "prototyp.h"
 
 #undef DEBUG		// not sure how this got defined
 #define rand15() rand()
-#define Sqrtz(z,rz) (*(rz) = ComplexSqrtFloat((z).x, (z).y))
-
 
 //////////////////////////////////////////////////////////////////////
 // Class definition
@@ -23,6 +18,7 @@
 class CTrigFn
     {
     public:
+	// float routines
 	void dStkSin(Complex *z);
 	void dStkSinh(Complex *z);
 	void dStkCos(Complex *z);
@@ -59,11 +55,112 @@ class CTrigFn
 	void dStkTrunc(Complex *z);
 	void dStkRound(Complex *z);
 
-	int  FindFunct(char *Str, int NumFns);
+	// double double routines
+	void ddStkSin(DDComplex *z);
+	void ddStkSinh(DDComplex *z);
+	void ddStkCos(DDComplex *z);
+	void ddStkCosh(DDComplex *z);
+	void ddStkSqr(DDComplex *z);
+	void ddStkLog(DDComplex *z);
+	void ddStkExp(DDComplex *z);
+	void ddStkAbs(DDComplex *z);
+	void ddStkConj(DDComplex *z);
+	void ddStkReal(DDComplex *z);
+	void ddStkImag(DDComplex *z);
+	void ddStkIdent(DDComplex *z);
+	void ddStkRecip(DDComplex *z);
+	void ddStkFlip(DDComplex *z);
+	void ddStkTan(DDComplex *z);
+	void ddStkTanh(DDComplex *z);
+
+	void ddStkCoTan(DDComplex *z);
+	void ddStkCoTanh(DDComplex *z);
+	void ddStkCosXX(DDComplex *z);
+	void ddStkSRand(DDComplex *z);
+	void ddStkASin(DDComplex *z);
+	void ddStkASinh(DDComplex *z);
+	void ddStkACos(DDComplex *z);
+	void ddStkACosh(DDComplex *z);
+
+	void ddStkATan(DDComplex *z);
+	void ddStkATanh(DDComplex *z);
+	void ddStkSqrt(DDComplex *z);
+	void ddStkCAbs(DDComplex *z);
+
+	void ddStkFloor(DDComplex *z);
+	void ddStkCeil(DDComplex *z);
+	void ddStkTrunc(DDComplex *z);
+	void ddStkRound(DDComplex *z);
+
+	// quad double routines
+	void qdStkSin(QDComplex *z);
+	void qdStkSinh(QDComplex *z);
+	void qdStkCos(QDComplex *z);
+	void qdStkCosh(QDComplex *z);
+	void qdStkSqr(QDComplex *z);
+	void qdStkLog(QDComplex *z);
+	void qdStkExp(QDComplex *z);
+	void qdStkAbs(QDComplex *z);
+	void qdStkConj(QDComplex *z);
+	void qdStkReal(QDComplex *z);
+	void qdStkImag(QDComplex *z);
+	void qdStkIdent(QDComplex *z);
+	void qdStkRecip(QDComplex *z);
+	void qdStkFlip(QDComplex *z);
+	void qdStkTan(QDComplex *z);
+	void qdStkTanh(QDComplex *z);
+
+	void qdStkCoTan(QDComplex *z);
+	void qdStkCoTanh(QDComplex *z);
+	void qdStkCosXX(QDComplex *z);
+	void qdStkSRand(QDComplex *z);
+	void qdStkASin(QDComplex *z);
+	void qdStkASinh(QDComplex *z);
+	void qdStkACos(QDComplex *z);
+	void qdStkACosh(QDComplex *z);
+
+	void qdStkATan(QDComplex *z);
+	void qdStkATanh(QDComplex *z);
+	void qdStkSqrt(QDComplex *z);
+	void qdStkCAbs(QDComplex *z);
+
+	void qdStkFloor(QDComplex *z);
+	void qdStkCeil(QDComplex *z);
+	void qdStkTrunc(QDComplex *z);
+	void qdStkRound(QDComplex *z);
 
 	void CMPLXtrig(Complex *zIn, Complex *zOut, int index);
+	void DDCMPLXtrig(DDComplex *zIn, DDComplex *zOut, int index);
+	void QDCMPLXtrig(QDComplex *zIn, QDComplex *zOut, int index);
 	void HComplexTrig(_HCMPLX *h, _HCMPLX *out, int index);	    // extends the unary function f to *h1 
+	void DDHComplexTrig(_DDHCMPLX *h, _DDHCMPLX *out, int index);
+	void QDHComplexTrig(_QDHCMPLX *h, _QDHCMPLX *out, int index); 
 
+	// float routines
+	void Arcsinz(Complex z, Complex *rz);
+	void Arccosz(Complex z, Complex *rz);
+	void Arcsinhz(Complex z, Complex *rz);
+	void Arccoshz(Complex z, Complex *rz);
+	void Arctanhz(Complex z, Complex *rz);
+	void Arctanz(Complex z, Complex *rz);
+	Complex ComplexSqrtFloat(double x, double y);
+	int  FindFunct(char *Str, int NumFns);
+
+	// double double routines
+	void DDArcsinz(DDComplex z, DDComplex *rz);
+	void DDArccosz(DDComplex z, DDComplex *rz);
+	void DDArcsinhz(DDComplex z, DDComplex *rz);
+	void DDArccoshz(DDComplex z, DDComplex *rz);
+	void DDArctanhz(DDComplex z, DDComplex *rz);
+	void DDArctanz(DDComplex z, DDComplex *rz);
+
+	// quad double routines
+	void QDArcsinz(QDComplex z, QDComplex *rz);
+	void QDArccosz(QDComplex z, QDComplex *rz);
+	void QDArcsinhz(QDComplex z, QDComplex *rz);
+	void QDArccoshz(QDComplex z, QDComplex *rz);
+	void QDArctanhz(QDComplex z, QDComplex *rz);
+	void QDArctanz(QDComplex z, QDComplex *rz);
 
 	char *FunctList[37] = {"sin", "sinh", "cos", "cosh", "sqr", "log", "exp", "abs", "conj", "real",
 					"imag", "ident", "recip", "fn1", "fn2", "fn3", "fn4", "flip", "tan", "tanh", 
@@ -75,96 +172,7 @@ class CTrigFn
 	void FPUsinhcosh(double *Angle, double *Sinh, double *Cosh);
 	void FPUcplxlog(Complex *x, Complex *z);
 	void FPUcplxexp(Complex *x, Complex *z);
-	void Arcsinz(Complex z, Complex *rz);
-	void Arccosz(Complex z, Complex *rz);
-	void Arcsinhz(Complex z, Complex *rz);
-	void Arccoshz(Complex z, Complex *rz);
-	void Arctanhz(Complex z, Complex *rz);
-	void Arctanz(Complex z, Complex *rz);
-	Complex ComplexSqrtFloat(double x, double y);
     };
-
-
-/*
-
-struct FNCT_LIST FnctList[] = {
-	{ s_sin,   &StkSin },
-	{ s_sinh,  &StkSinh },
-	{ s_cos,   &StkCos },
-	{ s_cosh,  &StkCosh },
-	{ s_sqr,   &StkSqr },
-	{ s_log,   &StkLog },
-	{ s_exp,   &StkExp },
-	{ s_abs,   &StkAbs },
-	{ s_conj,  &StkConj },
-	{ s_real,  &StkReal },
-	{ s_imag,  &StkImag },
-	{ s_ident, &dStkIdent },
-	{ s_recip, &StkRecip },
-	{ s_fn1,   &StkTrig0 },   // TIW 03-30-91
-	{ s_fn2,   &StkTrig1 },   // TIW 03-30-91
-	{ s_fn3,   &StkTrig2 },   // TIW 03-30-91
-	{ s_fn4,   &StkTrig3 },   // TIW 03-30-91
-	{ s_flip,  &StkFlip },    // MCP 4-9-91
-	{ s_tan,   &StkTan },     // TIW 04-22-91
-	{ s_tanh,  &StkTanh },    // TIW 04-22-91
-	{ s_cotan, &StkCoTan },   // TIW 04-24-91
-	{ s_cotanh,&StkCoTanh },  // TIW 04-24-91
-	{ s_cosxx, &StkCosXX },   // PB  04-28-91
-	{ s_srand, &StkSRand },   // MCP 11-21-91
-	{ s_asin,  &StkASin },    // TIW 11-26-94
-	{ s_asinh, &StkASinh },   // TIW 11-26-94
-	{ s_acos,  &StkACos },    // TIW 11-26-94
-	{ s_acosh, &StkACosh },   // TIW 11-26-94
-	{ s_atan,  &StkATan },    // TIW 11-26-94
-	{ s_atanh, &StkATanh },   // TIW 11-26-94
-	{ s_sqrt,  &StkSqrt },    // TIW 11-26-94
-	{ s_cabs,  &StkCAbs },    // TIW 11-26-94
-	{ s_floor, &StkFloor },   // TIW 06-30-96
-	{ s_ceil,  &StkCeil },    // TIW 06-30-96
-	{ s_trunc, &StkTrunc },   // TIW 06-30-96
-	{ s_round, &StkRound },   // TIW 06-30-96
-	{ "", NULL },		    // PHD 2009-10-15
-    };
-*/
-/*
-char s_sin [] =             "sin";
-char s_cos [] =             "cos";
-char s_cosh [] =            "cosh";
-char s_sqr [] =             "sqr";
-char s_log [] =             "log";
-char s_exp [] =             "exp";
-char s_abs [] =             "abs";
-char s_conj [] =            "conj";
-char s_fn1 [] =             "fn1";
-char s_fn2 [] =             "fn2";
-char s_fn3 [] =             "fn3";
-char s_fn4 [] =             "fn4";
-char s_flip [] =            "flip";
-char s_floor [] =           "floor";
-char s_ceil [] =            "ceil";
-char s_trunc [] =           "trunc";
-char s_round [] =           "round";
-char s_tan [] =             "tan";
-char s_tanh [] =            "tanh";
-char s_cotan [] =           "cotan";
-char s_cotanh [] =          "cotanh";
-char s_cosxx [] =           "cosxx";
-char s_srand [] =           "srand";
-char s_recip [] =           "recip";
-char s_ident [] =           "ident";
-char s_zero [] =            "zero";
-char s_one  [] =            "one";
-char s_asin [] =            "asin";
-char s_asinh [] =           "asinh";
-char s_acos [] =            "acos";
-char s_acosh [] =           "acosh";
-char s_atanh [] =           "atanh";
-char s_cabs [] =            "cabs";
-char s_sqrt [] =            "sqrt";
-char s_ismand [] =          "ismand";
-
-*/
 
 
 

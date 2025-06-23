@@ -16,8 +16,8 @@
 #include	".\parser\TrigFn.h"
 
 // lotsa norty externs that will be resolved when we c++ise parser
-extern	int	form_per_pixel1(Complex *z, Complex *q);
-extern	int	Formula1(Complex *z, Complex *q);
+extern	int	FormPerPixelFloat(Complex *z);
+extern	int	FormulaFloat(Complex *z);
 // end norty externs that will be resolved when we c++ise parser
 
 
@@ -161,8 +161,9 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	    sqr.y = sqr(z->y);
 	    temp1 = *z;
 	    break;
+	case FORMULA:
 	case SCREENFORMULA:
-	    form_per_pixel1(z, q);
+	    FormPerPixelFloat(z);
 	    break;
 
 
@@ -395,8 +396,9 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 	    *z = z->CSqr();
 	    return FractintBailoutTest(z);
 
+	case FORMULA:
 	case SCREENFORMULA:
-	    return(Formula1(z, q));
+	    return(FormulaFloat(z));
 
 
 

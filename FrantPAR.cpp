@@ -1373,7 +1373,7 @@ int	FractintPar(HWND hwnd, char *filename)
     }
 
 /**************************************************************************
-	Load L-System Name
+	Load par file Name
 **************************************************************************/
 
 int	ParLoad(HWND hwnd, char *filename)

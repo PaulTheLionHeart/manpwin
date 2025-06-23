@@ -87,7 +87,7 @@ extern	int getprecbf_mag(void);
 	Parameter script generator
 **************************************************************************/
 
-int	GenParameterScript(HWND hwnd, char *filename) 
+int	GenParameterScript(HWND hwnd, char *filename, int NumVariables) 
 
     {
     int		i, k;
@@ -365,7 +365,7 @@ DLGPROC FAR PASCAL ParamAnimDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 			    frames = 20;
 			if (frames > MAXANIM)
 			    frames = MAXANIM;
-			GenParameterScript(hDlg, ScriptFileName);
+			GenParameterScript(hDlg, ScriptFileName, NumVariables);
 			EndDialog (hDlg, TRUE);
 			return(DLGPROC)TRUE;
 

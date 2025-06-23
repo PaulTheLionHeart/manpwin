@@ -7,73 +7,58 @@
     (console drivers & serial I/O) is in separate machine libraries.
 */
 
+#include <conio.h>
+#include <stdio.h>
 #include "Fract.h"
 #include "manp.h"
 #include "fractype.h"
 #include "fractalp.h"
 #include "complex.h"
-#include <conio.h>
-#include <stdio.h>
 #include "big.h"
 #include "BigDouble.h"
+#include "DDComplex.h"
+#include "QDComplex.h"
 #include ".\parser\cmplx.h"
 #include "colour.h"
+#include "Arithmetic.h"
 
-BYTE	orbit_flag;			/* display orbits? */
-//int	inside_colour;			/* normal 'lake' colour */
-double	closenuff;			/* periodicity bailout */
-long	closenuff_int;			/* periodicity bailout */
-int	period_level;			/* 0 for no periodicity checking */
+BYTE	orbit_flag;			// display orbits?
+double	closenuff;			// periodicity bailout
+long	closenuff_int;			// periodicity bailout
+int	period_level;			// 0 for no periodicity checking
 static	int	first_init = TRUE;	// first time once only init done
 
-//extern	short	InsideRed;		// values for r, g, b channels for inside colour
-//extern	short	InsideGreen;			
-//extern	short	InsideBlue;			
+extern	BYTE	orig_palette[];		// loaded palette
 
-//extern	char	palette_file[];
-extern	BYTE	orig_palette[];		/* loaded palette */
+extern  BYTE	*logtable;		// log value table for col comp
 
-//extern far BYTE	*logtable;		/* log value table for col comp */
-extern  BYTE	*logtable;		/* log value table for col comp */
-
-extern	WORD	type;			/* M=mand, J=Julia */
-//extern	BYTE	dumpflag;		/* dump to disk */
-extern	char	floatflag;		/* floating point maths */
-extern	BYTE	juliaflag;		/* Julia implementation of fractal */
-extern	BYTE	screenflag;		/* replay saved screen */
-extern	int	logflag;		/* log colour map required */
-extern	int	logval;			/* log colour map start */
-extern	long	threshold;		/* maximum iterations */
-extern	int	window_depth;		/* data window size */
-extern	int	window_width;		/* modify for Julia set */
-extern	BYTE	pairflag;		/* stereo pair */
-extern	BYTE	save_flag;		/* save screen after image */
-//extern	BYTE	_3dflag;		/* replay saved file. 3 = 3D */
-//extern	BYTE	TrueColourFlag;		// Use 3D palette generation
+extern	WORD	type;			// M=mand, J=Julia
+extern	char	floatflag;		// floating point maths
+extern	BYTE	juliaflag;		// Julia implementation of fractal
+extern	BYTE	screenflag;		// replay saved screen
+extern	int	logflag;		// log colour map required
+extern	int	logval;			// log colour map start
+extern	long	threshold;		// maximum iterations
+extern	int	window_depth;		// data window size
+extern	int	window_width;		// modify for Julia set
+extern	BYTE	pairflag;		// stereo pair
+extern	BYTE	save_flag;		// save screen after image
 extern	WORD	colours;
 
-extern	double	x_rot;			/* angle display plane to x axis */
-extern	double	y_rot;			/* angle display plane to y axis */
-extern	double	z_rot;			/* angle display plane to z axis */
-extern	double	sclx, scly, sclz;	/* scale */
+extern	double	x_rot;			// angle display plane to x axis
+extern	double	y_rot;			// angle display plane to y axis
+extern	double	z_rot;			// angle display plane to z axis
+extern	double	sclx, scly, sclz;	// scale
 
 extern	int	RotationAngle;		// rotate image in degrees
 extern	Complex	RotationCentre;		// centre of rotation
 
-//extern	WORD	RedStartInt, GreenStartInt, BlueStartInt, RedIncInt, GreenIncInt, BlueIncInt;
-
-extern	double	hor;			/* horizontal address */
-extern	double	vert;			/* vertical address */
-extern	double	mandel_width;		/* width of display */
+extern	double	hor;			// horizontal address
+extern	double	vert;			// vertical address
+extern	double	mandel_width;		// width of display
 extern	double	ScreenRatio;		// ratio of width / height for the screen
-extern	double	xgap;			/* gap between pixels */
-extern	double	ygap;			/* gap between pixels */
-
-//extern	long	hor_int;		/* horizontal address */
-//extern	long	vert_int;		/* vertical address */
-//extern	long	width_int;		/* width of display */
-//extern	long	xgap_int;		/* gap between pixels */
-//extern	long	ygap_int;		/* gap between pixels */
+extern	double	xgap;			// gap between pixels
+extern	double	ygap;			// gap between pixels
 
 extern	int	xdots, ydots, bits_per_pixel;
 
@@ -90,13 +75,16 @@ extern	int	distest, distestwidth;	// distance estimation
 extern	double	param[];
 extern	double	rqlim;
 
-// Big num declarations **********************************************************
+// number declarations **********************************************************
 extern	BYTE	BigNumFlag;		// True if bignum used
+extern	MATH_TYPE MathType;
 extern	int	decimals, precision;
 extern	BigDouble	BigBailout, BigCloseEnough, Big_xgap, Big_ygap, BigHor, BigVert, BigWidth;
+extern	dd_real	DDBailout, DDCloseEnough, DDxgap, DDygap, DDHor, DDVert, DDWidth;
+extern	qd_real	QDBailout, QDCloseEnough, QDxgap, QDygap, QDHor, QDVert, QDWidth;
 
 extern	int getprecbf_mag(void);
-// Big num declarations **********************************************************
+// number declarations **********************************************************
 
 extern	struct	svga	*video_type;	/* card specific */
 
@@ -128,32 +116,6 @@ extern	struct	Arg *Arg1, *Arg2;
 extern	CTrueCol    TrueCol;		// palette info
 extern	CFract	Fractal;
 extern	Complex	j;
-
-
-/**************************************************************************
-	Setup symmetry etc
-**************************************************************************/
-
-void	init_sym(void)
-
-    {
-    double	temp_x, temp_y;
-
-    temp_x = ScreenRatio / (double) (xdots - 1);
-    temp_y = 1.0 / (double) (ydots - 1);
-    if (BigNumFlag)
-	{
-	Big_xgap = BigWidth * temp_x;
-	Big_ygap = BigWidth * temp_y;
-	BigCloseEnough = Big_ygap / 16.0;
-	}
-    else
-	{
-	xgap = mandel_width * temp_x;
-	ygap = mandel_width * temp_y;
-	closenuff = ygap / 16.0;
-	}
-    }
 
 /**************************************************************************
 	Setup log table
@@ -220,8 +182,6 @@ void	init(HWND hwnd)
     save_flag = FALSE;
     InitTrueColourPalette(FALSE);
 
-//    init_big_2(hwnd);				// set up bignum memory
-
     /////////					// initialise Fractal object
     Fractal.LoadFnArray();
     for (i = 0; i < NUMPARAM; i++)
@@ -266,9 +226,6 @@ int	analyse_corner(char *s)
 
     if (mandel_width < DBL_MIN)						// we can do a BigNum calculation here to allow deeper zooming
 	{
-//	if (init_big_dec((int)strlen(s3) + PRECISION_FACTOR) < 0)	// need enough temp precision to load BigWidth
-//	    return -1;
-//	init_big_dec(SIZEOF_BF_VARS - PRECISION_FACTOR * 2);		// need enough temp precision to load BigWidth
 	ConvertString2Bignum(BigWidth.x, s3);
 	BigNumFlag = TRUE;
 	}
@@ -345,7 +302,6 @@ char	*strtok1(register char * s1, register const char * s2)	// required to use d
     return s1;
     }
 
-//char	*AnalysePalette(char *s/*, HWND hwnd*/)
 void	AnalysePalette(char *s/*, HWND hwnd*/)
 
     {
@@ -353,9 +309,6 @@ void	AnalysePalette(char *s/*, HWND hwnd*/)
     char	seps[]   = " \t\n";
     char	*token;
 
-//char	q[120];
-
-//strcpy(store, s);
     t = s;
     while(*s)
 	{

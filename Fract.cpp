@@ -38,8 +38,8 @@ int	CFract::InitData(void)	// initialise function array
     NumParam = 0;	// Number of parameters required for fractal
     NumFunct = 0;	// Number of functions required for fractal
 //    rqlim = 4;		// bailout limit
-    Fn1 = "";
-    Fn2 = "";		// function name pointers
+    Fn1 = "sin";
+    Fn2 = "sqr";	// function name pointers
     return 1;
     }
 

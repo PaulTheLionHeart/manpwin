@@ -548,15 +548,15 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 
 bool	CPixel::BigBailoutTest(BigComplex *z, BigComplex SqrZ)
     {
-    double  magnitude;
-    BigDouble  manhmag;
-    BigDouble  manrmag;
+    BigDouble	magnitude;
+    BigDouble	manhmag;
+    BigDouble	manrmag;
 
     switch (BailoutTestType)
 	{
 	case BAIL_MOD:
 	    magnitude = z->CSumSqr();
-	    return (magnitude >= rqlim);
+	    return (magnitude > BigBailout);
 
 	case BAIL_REAL:
 	    return (SqrZ.x > BigBailout);
@@ -580,7 +580,7 @@ bool	CPixel::BigBailoutTest(BigComplex *z, BigComplex SqrZ)
 
 	default:
 	    magnitude = z->CSumSqr();
-	    return (magnitude >= rqlim);
+	    return (magnitude > BigBailout);
 	}
     }
 
@@ -591,7 +591,7 @@ bool	CPixel::BigBailoutTest(BigComplex *z, BigComplex SqrZ)
 bool	CPixel::BigFractintBailoutTest(BigComplex *z)
     {
     BigComplex TempSqr;
-    double  magnitude;
+    BigDouble  magnitude;
     BigDouble  manhmag;
     BigDouble  manrmag;
 
@@ -599,7 +599,7 @@ bool	CPixel::BigFractintBailoutTest(BigComplex *z)
 	{
 	case BAIL_MOD:
 	    magnitude = z->CSumSqr();
-	    return (magnitude >= rqlim);
+	    return (magnitude > BigBailout);
 
 	case BAIL_REAL:
 	    TempSqr.x = z->x.BigSqr();
@@ -629,7 +629,7 @@ bool	CPixel::BigFractintBailoutTest(BigComplex *z)
 
 	default:
 	    magnitude = z->CSumSqr();
-	    return (magnitude >= rqlim);
+	    return (magnitude > BigBailout);
 	}
     }
 
