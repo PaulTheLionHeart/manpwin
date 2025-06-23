@@ -23,19 +23,42 @@
 #include	"Potential.h"
 
 /**************************************************************************
-	Convert Bignum variables to quad doubles
+	Initialise fractal
 **************************************************************************/
 
-int    CPixel::ConvertBignumVariables2QD()
+int	CPixel::QDInitFractal(QDComplex *z, QDComplex *q)
+
     {
-    if (BigDouble2QD(&zQD.x, &zBig->x) < 0) return -1;
-    if (BigDouble2QD(&zQD.y, &zBig->y) < 0) return -1;
-    if (BigDouble2QD(&cQD.x, &cBig->x) < 0) return -1;
-    if (BigDouble2QD(&cQD.y, &cBig->y) < 0) return -1;
-    if (BigDouble2QD(&qQD.x, &qBig->x) < 0) return -1;
-    if (BigDouble2QD(&qQD.y, &qBig->y) < 0) return -1;
-    if (BigDouble2QD(&QDCloseEnough, &BigCloseEnough) < 0) return -1;
+    if (fractalspecific[type].flags & FUNCTIONINPIXEL)
+	return(QDInitFunctions(type, z, q));
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL)
+	return(QDInitFractintFunctions(type, z, q));
+    else if (fractalspecific[type].flags & TRIGINPIXEL)
+	return(QDInitFractintTrigFunctions(type, z, q));
+//    else if (fractalspecific[type].flags & OTHERFNINPIXEL)
+//	return(InitOtherFunctions(type, z, q));
+    else if (fractalspecific[type].per_pixel() < 0)
+	return -1;
     return 0;
+    }
+
+/**************************************************************************
+	Run fractal
+**************************************************************************/
+
+int	CPixel::QDRunFractal(QDComplex *z, QDComplex *q)
+
+    {
+    if (fractalspecific[type].flags & FUNCTIONINPIXEL)
+	return(QDRunFunctions(type, z, q, &SpecialFlag, iteration));
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL)
+	return(QDRunFractintFunctions(type, z, q, &SpecialFlag, iteration));
+    else if (fractalspecific[type].flags & TRIGINPIXEL)
+	return(QDRunFractintTrigFunctions(type, z, q, &SpecialFlag, iteration));
+//    else if (fractalspecific[type].flags & OTHERFNINPIXEL)
+//	return(RunOtherFunctions(type, z, q, &SpecialFlag, iteration));
+    else
+	return fractalspecific[type].calctype();
     }
 
 /**************************************************************************
@@ -247,7 +270,6 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 
     {
     long	real_iteration;			// actual count for orbit deletion
-    BigComplex	bigTemp;
     QDComplex	QDTemp;
     Complex	tempComplex;
     qd_real	magnitude;
@@ -296,20 +318,17 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 
     if (juliaflag)
 	{
-	qBig->x = j.x;
-	qBig->y = j.y;
-	*zBig = (invert) ? BigInvertz2(*cBig) : *cBig;
+	qQD.x = j.x;
+	qQD.y = j.y;
+	zQD = (invert) ? QDInvertz2(cQD) : cQD;
 	}
     else
 	{
-	*qBig = (invert) ? BigInvertz2(*cBig) : *cBig;
-	*zBig = 0.0;
+	qQD = (invert) ? QDInvertz2(cQD) : cQD;
+	zQD = 0.0;
 	}
 
-    if (ConvertBignumVariables2QD() < 0)
-	return (-1L);
-
-    QDInitFunctions(type, &zQD, &qQD);
+    QDInitFractal(&zQD, &qQD);
     if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	{
 	magnitude = 0.0;
@@ -332,7 +351,7 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 	(*iteration)++;
 	FloatIteration++;
 
-	result = run_QD_fractal(type, &zQD, &qQD, &SpecialFlag, iteration);
+	result = QDRunFractal(&zQD, &qQD);
 	if (result < 0)
 	    return(BLUE);				// division by zero (Was Blue)
 	else if (result == 1)				// escape time
@@ -396,8 +415,8 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 		qd_real   xAbs = QDSaved.x - zQD.x;
 		qd_real   yAbs = QDSaved.y - zQD.y;
 
-		if (abs(xAbs) < QDCloseEnough)
-		    if (abs(yAbs) < QDCloseEnough)
+		if (abs(xAbs) < *QDCloseEnough)
+		    if (abs(yAbs) < *QDCloseEnough)
 			*iteration = threshold;
 		}
 	    }
@@ -465,24 +484,22 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
     return(*iteration);
     }
 
-#ifdef DOUBLEDOUBLE
-
 /**************************************************************************
      Invert fractal
 **************************************************************************/
 
-BigComplex	CPixel::BigInvertz2(BigComplex  & Cmplx1)
+QDComplex	CPixel::QDInvertz2(QDComplex  & Cmplx1)
 
     {
-    BigComplex	temp;
-    BigDouble	tempsqrx, BigRadius = f_radius;
+    QDComplex	temp;
+    qd_real	tempsqrx, BigRadius = f_radius;
 
     temp.x = Cmplx1.x;
     temp.y = Cmplx1.y;
     temp.x -= f_xcenter; temp.y -= f_ycenter;	// Normalize values to center of circle
 
-    tempsqrx = temp.x.BigSqr() + temp.y.BigSqr();	// Get old radius
-    if (tempsqrx.BigAbs() > (BigDouble)FLT_MIN)
+    tempsqrx = sqr(temp.x) + sqr(temp.y);	// Get old radius
+    if (abs(tempsqrx) > (dd_real)FLT_MIN)
 	tempsqrx = BigRadius / tempsqrx;
     else
 	tempsqrx = FLT_MAX;			// a big number, but not TOO big
@@ -493,8 +510,11 @@ BigComplex	CPixel::BigInvertz2(BigComplex  & Cmplx1)
     return  temp;
     }
 
-#endif // DOUBLEDOUBLE
+/************************************************************************
+	Convert BigDouble to Quad Double
+************************************************************************/
 
+//extern	void	ShowBignum(BigDouble x, char *Location);
 int	CPixel ::BigDouble2QD(qd_real *out, BigDouble *in)
     {
     qd_real	x1, x2, x3, x4;
@@ -522,5 +542,101 @@ int	CPixel ::BigDouble2QD(qd_real *out, BigDouble *in)
 	return -1;
 	}
     return 0;
+    }
+
+/************************************************************************
+	Calculate QD Fractal
+************************************************************************/
+
+long	CPixel::QDCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
+
+    {
+
+ //   FloatCornerstoBig(var);
+    if (pairflag)		// half size screens: only do every second row / col
+	if (row % pairflag || col % pairflag)
+	    if (row != (int)ydots - 1)			// must trigger for last line
+		return(threshold);
+    if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
+	{
+	if (row != *oldrow)
+	    {
+	    if (pairflag && row)		// draw row for right hand image
+		draw_right_image((short)(*oldrow));
+	    switch (RotationAngle)
+		{
+		case NORMAL:						// normal
+		    cQD.y = *QDyymax - *QDygap * (double)row;
+		    break;
+		case 90:						// 90 degrees
+		    cQD.x = *QDyymax - *QDxgap * (double)row;
+		    break;
+		case 180:						// 180 degrees
+		    cQD.y = -(*QDyymax - *QDygap * (double)row);
+		    break;
+		case 270:						// 270 degrees
+		    cQD.x = -(*QDyymax - *QDxgap * (double)row);
+		    break;
+		}
+	    *oldrow = row;
+	    }
+	if (col != *oldcol)
+	    {
+	    switch (RotationAngle)
+		{
+		case NORMAL:						// normal
+		    cQD.x = *QDxgap * (double)col + *QDHor;
+		    break;
+		case 90:						// 90 degrees
+		    cQD.y = *QDygap * (double)col + *QDHor;
+		    break;
+		case 180:						// 180 degrees
+		    cQD.x = -(*QDxgap * (double)col + *QDHor);
+		    break;
+		case 270:						// 270 degrees
+		    cQD.y = -(*QDygap * (double)col + *QDHor);
+		    break;
+		}
+	    *oldcol = col;
+	    }
+	}
+    else
+	{
+	qd_real  zero = 0.0;
+	double  z_rot = (double)RotationAngle;
+	QDMat->InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
+	QDMat->DoTransformation(&cQD.x, &cQD.y, &zero, *QDxgap * (double)col + *QDHor, *QDyymax - *QDxgap * (double)row, 0.0);
+	}
+
+    if (user_data(hwnd) == -1)
+	return(-1);
+    *color = DoQDFract(hwnd, row, col);	// quad double
+    if (*color < 0)
+	return -1;
+    reset_period = 0;
+
+    if (*color >= threshold)
+	*color = threshold;
+/*
+    else if (logval && logflag == TRUE)
+	color = (BYTE) (*(logtable + color));
+*/
+
+    if (calcmode == 'B')
+	{
+	if (*color >= colours)	/* don't use color 0 unless from inside */
+	    if (colours < 16)
+		*color &= *andcolor;
+	    else
+		*color = ((*color - 1) % *andcolor) + 1;  /* skip color zero */
+	}
+
+     if (_3dflag)
+	    projection(col, row, *color);
+	else if (pairflag)
+	    do_stereo_pairs(col, row, *color);
+    else
+	plot((WORD)col, (WORD)row, *color);
+    return(*color);
     }
 

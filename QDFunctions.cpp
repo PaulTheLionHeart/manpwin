@@ -6,6 +6,9 @@
 #include  "QDComplex.h"
 #include  "pixel.h"
 
+extern	    int QDFormPerPixel(QDComplex *zIn, QDComplex *qIn);	// norty declarations because this is in the formula parser
+extern	    int QDFormula(QDComplex *zIn, QDComplex *qIn);
+
 /**************************************************************************
 	Initialise functions for each pixel
 **************************************************************************/
@@ -42,8 +45,8 @@ int	CPixel::QDInitFunctions(WORD type, QDComplex *z, QDComplex *q)
 		z->x = q->x + param[0];
 		z->y = q->y + param[1];
 		}
-	    sqr = 0;
-	    real_imag = 0.0;
+	    sqrQD = 0;
+	    realimagQD = 0.0;
 	    break;
 /**************************************************************************
     The Burning Ship fractal for Higher Powers
@@ -391,6 +394,11 @@ int	CPixel::QDInitFunctions(WORD type, QDComplex *z, QDComplex *q)
 	    QDInitTierazonFunctions(104, z, q);
 	    break;
 
+	case FORMULA:
+	case SCREENFORMULA:
+	    QDFormPerPixel(z, q);
+	    break;
+
 /*
 #define NEWTONFLOWER		186
 #define NEWTONMSET		190
@@ -426,7 +434,7 @@ int	CPixel::QDInitFunctions(WORD type, QDComplex *z, QDComplex *q)
 	Run functions for each iteration
 **************************************************************************/
 
-int	CPixel::run_QD_fractal(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialFlag, long *iteration)
+int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialFlag, long *iteration)
     {
     QDComplex	temp1, temp2;
 
@@ -684,7 +692,9 @@ int	CPixel::run_QD_fractal(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
 	    return (QDRunManDerFunctions(subtype, z, q));
 
-
+	case FORMULA:
+	case SCREENFORMULA:
+	    return (QDFormula(z, q));
 	}
     return 0;
     }
@@ -695,16 +705,16 @@ int	CPixel::run_QD_fractal(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 
 bool	CPixel::QDBailoutTest(QDComplex *z, QDComplex SqrZ, double rqlim, int BailoutTestType)
     {
-    double  magnitude;
-    qd_real  manhmag;
-    qd_real  manrmag;
-    qd_real QDBailout = rqlim;
+    qd_real	magnitude;
+    qd_real	manhmag;
+    qd_real	manrmag;
+    qd_real	QDBailout = rqlim;
 
     switch (BailoutTestType)
 	{
 	case BAIL_MOD:
 	    magnitude = z->CSumSqr();
-	    return (magnitude >= rqlim);
+	    return (magnitude > rqlim);
 
 	case BAIL_REAL:
 	    return (SqrZ.x > QDBailout);
@@ -728,7 +738,7 @@ bool	CPixel::QDBailoutTest(QDComplex *z, QDComplex SqrZ, double rqlim, int Bailo
 
 	default:
 	    magnitude = z->CSumSqr();
-	    return (magnitude >= rqlim);
+	    return (magnitude > rqlim);
 	}
     }
 
@@ -738,17 +748,17 @@ bool	CPixel::QDBailoutTest(QDComplex *z, QDComplex SqrZ, double rqlim, int Bailo
 
 bool	CPixel::QDFractintBailoutTest(QDComplex *z, double rqlim, int BailoutTestType)
     {
-    QDComplex TempSqr;
-    double  magnitude;
-    qd_real  manhmag;
-    qd_real  manrmag;
-    qd_real QDBailout = rqlim;
+    QDComplex	TempSqr;
+    qd_real	magnitude;
+    qd_real	manhmag;
+    qd_real	manrmag;
+    qd_real	QDBailout = rqlim;
 
     switch (BailoutTestType)
 	{
 	case BAIL_MOD:
 	    magnitude = z->CSumSqr();
-	    return (magnitude >= rqlim);
+	    return (magnitude > rqlim);
 
 	case BAIL_REAL:
 	    TempSqr.x = sqr(z->x);
@@ -778,7 +788,7 @@ bool	CPixel::QDFractintBailoutTest(QDComplex *z, double rqlim, int BailoutTestTy
 
 	default:
 	    magnitude = z->CSumSqr();
-	    return (magnitude >= rqlim);
+	    return (magnitude > rqlim);
 	}
     }
 

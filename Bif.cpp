@@ -109,14 +109,14 @@ int	CPixel::bifurcation(int user_data(HWND hwnd))
 
     *PlotType = NOSYM;
     result = FALSE;
-    cpuz = 1.0 / ygap;
+    cpuz = 1.0 / *ygap;
 //    calcmode = '1';				// mainly for display
 
     cycles = (int)param[0];
     beta = (long)param[2];
     for (col = 0; col < (int)xdots; ++col)
 	{
-	c.x = col * xgap + hor;
+	c.x = col * *xgap + hor;
 	Population = param[1];
 	Rate = c.x;
 	for (j = 0; j < cycles + threshold; ++j)

@@ -25,7 +25,7 @@
 	Initialise fractal
 **************************************************************************/
 
-int    CPixel::init_big_fractal(void)
+int    CPixel::BigInitFractal(void)
     {
     BOOL    IsBig = FALSE;
     int	    i;
@@ -50,7 +50,7 @@ int    CPixel::init_big_fractal(void)
 	Run fractal
 **************************************************************************/
 
-int    CPixel::run_big_fractal(void)
+int    CPixel::BigRunFractal(void)
     {
     if (fractalspecific[type].flags & FUNCTIONINPIXEL)
 	return(BigRunFunctions(type, zBig, qBig, &SpecialFlag, iteration));
@@ -319,7 +319,7 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 
 //    ShowBignum(zBig->x, "x before init");
 //    ShowBignum(zBig->y, "y before init");
-    if (init_big_fractal() < 0)
+    if (BigInitFractal() < 0)
 	return(BLUE);
 //    ShowBignum(zBig->x, "x after init");
 //    ShowBignum(zBig->y, "y after init");
@@ -345,7 +345,7 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	(*iteration)++;
 	FloatIteration++;
 
-	result = run_big_fractal();
+	result = BigRunFractal();
 	if (result < 0)
 	    return(BLUE);				// division by zero (Was Blue)
 	else if (result == 1)				// escape time
@@ -408,8 +408,8 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 		BigDouble   xAbs = BigSaved.x - zBig->x;
 		BigDouble   yAbs = BigSaved.y - zBig->y;
 
-		if (xAbs.BigAbs() < BigCloseEnough)
-		    if (yAbs.BigAbs() < BigCloseEnough)
+		if (xAbs.BigAbs() < *BigCloseEnough)
+		    if (yAbs.BigAbs() < *BigCloseEnough)
 			*iteration = threshold;
 		}
 	    }
@@ -505,7 +505,7 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	return  temp;
 	}
 
-    /************************************************************************
+/************************************************************************
 	Calculate Big Fractal
 ************************************************************************/
 
@@ -525,17 +525,17 @@ long	CPixel::BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 		draw_right_image((short)(*oldrow));
 	    switch (RotationAngle)
 		{
-		case NORMAL:					// normal
-		    cBig->y = *Big_yymax - Big_ygap * (double)row;
+		case NORMAL:						// normal
+		    cBig->y = *Big_yymax - *Big_ygap * (double)row;
 		    break;
 		case 90:						// 90 degrees
-		    cBig->x = *Big_yymax - Big_xgap * (double)row;
+		    cBig->x = *Big_yymax - *Big_xgap * (double)row;
 		    break;
 		case 180:						// 180 degrees
-		    cBig->y = -(*Big_yymax - Big_ygap * (double)row);
+		    cBig->y = -(*Big_yymax - *Big_ygap * (double)row);
 		    break;
 		case 270:						// 270 degrees
-		    cBig->x = -(*Big_yymax - Big_xgap * (double)row);
+		    cBig->x = -(*Big_yymax - *Big_xgap * (double)row);
 		    break;
 		}
 	    *oldrow = row;
@@ -544,17 +544,17 @@ long	CPixel::BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 	    {
 	    switch (RotationAngle)
 		{
-		case NORMAL:					// normal
-		    cBig->x = Big_xgap * (double)col + BigHor;
+		case NORMAL:						// normal
+		    cBig->x = *Big_xgap * (double)col + BigHor;
 		    break;
 		case 90:						// 90 degrees
-		    cBig->y = Big_ygap * (double)col + BigHor;
+		    cBig->y = *Big_ygap * (double)col + BigHor;
 		    break;
 		case 180:						// 180 degrees
-		    cBig->x = -(Big_xgap * (double)col + BigHor);
+		    cBig->x = -(*Big_xgap * (double)col + BigHor);
 		    break;
 		case 270:						// 270 degrees
-		    cBig->y = -(Big_ygap * (double)col + BigHor);
+		    cBig->y = -(*Big_ygap * (double)col + BigHor);
 		    break;
 		}
 	    *oldcol = col;
@@ -563,7 +563,7 @@ long	CPixel::BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
     else
 	{
 	BigDouble  zero = 0.0;
-	BigMat->DoTransformation(&cBig->x, &cBig->y, &zero, Big_xgap * (double)col + BigHor, *Big_yymax - Big_xgap * (double)row, 0.0);
+	BigMat->DoTransformation(&cBig->x, &cBig->y, &zero, *Big_xgap * (double)col + BigHor, *Big_yymax - *Big_xgap * (double)row, 0.0);
 	}
 
     if (user_data(hwnd) == -1)

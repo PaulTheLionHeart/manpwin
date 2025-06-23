@@ -40,6 +40,7 @@ class DDComplex
 
 	DDComplex operator =(const DDComplex &);// Assignment Operator
 	DDComplex operator =(const double &);	// Assignment to a double Operator
+	DDComplex operator =(const Complex &);	// Assignment to a complex Operator
 	DDComplex operator+=(const DDComplex &);
 	DDComplex operator+=(double&);
 	DDComplex operator-=(const DDComplex &);
@@ -87,8 +88,10 @@ class DDComplex
 	DDComplex	CTan();			// tangent
 	DDComplex	CCosh();		// hyperbolic cosine
 	DDComplex	CTanh();		// hyperbolic tangent
-	void	CPower(DDComplex  & result, DDComplex  & base, int exp);
-	double	CSumSqr();		// real squared + imaginary squared
+	void		CPower(DDComplex  & result, DDComplex  & base, int exp);
+//	void		DDComplexPower(DDComplex  & result, DDComplex x, DDComplex y);
+	DDComplex	DDComplexPower(DDComplex x, DDComplex y);
+	double		CSumSqr();		// real squared + imaginary squared
 
 	dd_real	x, y;
     };

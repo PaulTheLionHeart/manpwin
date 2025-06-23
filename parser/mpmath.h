@@ -8,16 +8,23 @@
 #ifndef _CMPLX_DEFINED
 #include "cmplx.h"
 #endif
+
+#include "..\qdlib\dd_real.h"
+#include "..\qdlib\qd_real.h"
 #include "..\Complex.h"
+#include "..\DDComplex.h"
+#include "..\QDComplex.h"
 
  /*** Formula Declarations ***/
-enum MATH_TYPE { D_MATH, M_MATH, L_MATH };
+//enum MATH_TYPE { DOUBLEFLOAT, DOUBLEDOUBLE, QUADDOUBLE};
 
  /* the following are declared 4 dimensional as an experiment */
  /* changeing declarations to Complex and _LCMPLX restores the code */
  /* to 2D */
 struct Arg {
-    Complex    d;
+    Complex	d;
+    DDComplex	dd;
+    QDComplex	qd;
     };
 
 struct ConstArg {

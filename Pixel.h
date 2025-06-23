@@ -1,5 +1,4 @@
 #include <Windows.h>
-//#include "DDComplex.h"
 #include "colour.h"
 #include "Dib.h"
 #include "complex.h"
@@ -9,6 +8,8 @@
 #include "QDcomplex.h"
 #include "OscProcess.h"
 #include "Matrix.h"
+#include "DDMatrix.h"
+#include "QDMatrix.h"
 #include "BigMatrix.h"
 #include "fractalp.h"
 #include "filter.h"
@@ -18,7 +19,6 @@
 #include "slope.h"
 #include "plot.h"
 #include ".\parser\TrigFn.h"
-//#include "qdlib/dd_real.h"
 
 #ifndef sqr
 #define sqr(x) ((x)*(x))
@@ -70,16 +70,22 @@ class CPixel
 	long	dofract(HWND hwnd, int row, int col);
 	long	DoBigFract(HWND hwnd, int row, int col);
 	long	BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd));
+	long	DDCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd));
+	long	QDCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd));
 	long	DoDDFract(HWND hwnd, int row, int col);
 	long	DoQDFract(HWND hwnd, int row, int col);
 	int     ConvertBignumVariables2DD();
 	int     ConvertBignumVariables2QD();
-	int	run_fractal(Complex *z, Complex *q);
-	int	run_big_fractal();
-	int	run_DD_fractal(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration);
-	int	run_QD_fractal(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialFlag, long *iteration);
-	int	init_fractal(Complex *z, Complex *q);
-	int	init_big_fractal();
+	int	RunFractal(Complex *z, Complex *q);
+	int	DDRunFractal(DDComplex *z, DDComplex *q);
+	int	QDRunFractal(QDComplex *z, QDComplex *q);
+	int	BigRunFractal();
+	int	DDRunFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration);
+	int	QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialFlag, long *iteration);
+	int	InitFractal(Complex *z, Complex *q);
+	int	DDInitFractal(DDComplex *z, DDComplex *q);
+	int	QDInitFractal(QDComplex *z, QDComplex *q);
+	int	BigInitFractal();
 	int	FloatDecomposition(double z_real, double z_imag);
 	int	DDDecomposition(dd_real z_real, dd_real z_imag);
 	int	QDDecomposition(qd_real z_real, qd_real z_imag);
@@ -98,36 +104,28 @@ class CPixel
 		double *xxmax, double *yymin, double *yymax, WORD special, BYTE juliaflag);
 
 	void	InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, int precisionIn, int biomorphIn, int InsideMethodIn, int OutsideMethodIn, 
-		int orientationIn, int xdotsIn, int ydotsIn, int nFDOptionIn);
-	void	InitPixel1(CTZfilter *TZfilterIn, CTrueCol *TrueColIn, COscProcess *OscProcessIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, double *wpixelsIn, BYTE juliaflagIn, double closenuffIn, BigDouble BigCloseEnoughIn, BYTE calcmodeIn);
+		int orientationIn, int xdotsIn, int ydotsIn, int nFDOptionIn, CPlot *PlotIn);
+	void	InitPixel1(CTZfilter *TZfilterIn, CTrueCol *TrueColIn, COscProcess *OscProcessIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, double *wpixelsIn, BYTE juliaflagIn, double *closenuffIn, BigDouble *BigCloseEnoughIn, BYTE calcmodeIn);
 	void	InitPixel2(int CoordSystemIn, BOOL UseCurrentPaletteIn, int reset_periodIn, int colorsIn, double horIn, double vertIn, double mandel_widthIn, BigDouble BigHorIn, BigDouble BigVertIn, BigDouble BigWidthIn, double *yymax, BigDouble *Big_yymaxIn);
-	void	InitPixel3(double dStrandsIn, Complex jIn, BYTE pairflagIn, long *andcolor, BYTE _3dflagIn, double xgap, double ygap, BigDouble Big_xgap, BigDouble Big_ygap, Complex *cIn, double ScreenRatio, WORD colours, CFract *Fract, int BailoutTestTypeIn);
+	void	InitPixel3(double dStrandsIn, Complex jIn, BYTE pairflagIn, long *andcolor, BYTE _3dflagIn, double *xgap, double *ygap, BigDouble *Big_xgap, BigDouble *Big_ygap, Complex *cIn, double ScreenRatio, WORD colours, CFract *Fract, int BailoutTestTypeIn);
 	void	InitPixel4(BigComplex *cBigIn, Complex *qIn, Complex *zIn, BigComplex *qBigIn, BigComplex *zBigIn, long thresholdIn, BYTE BigNumFlagIn, long *colorIn, int logvalIn, long *iterationIn, double f_radiusIn, double f_xcenterIn, char *LyapSequenceIn);
-	void	InitPixel5(double f_ycenterIn, int *symmetryIn, double paramIn[], double potparamIn[], int decompIn, BYTE *logtableIn, int *AutoStereo_valueIn, int widthIn, HWND hwndIn/*, struct workliststuff *worklistIn*/, CMatrix *MatIn, CBigMatrix *BigMatIn);
+	void	InitPixel5(double f_ycenterIn, int *symmetryIn, double paramIn[], double potparamIn[], int decompIn, BYTE *logtableIn, int *AutoStereo_valueIn, int widthIn, HWND hwndIn, CMatrix *MatIn, CDDMatrix *DDMatIn, CQDMatrix *QDMatIn, CBigMatrix *BigMatIn);
 	void	InitPixel6(CDib *DibIn, int *PlotTypeIn, int *oldrowIn, int *oldcolIn, int *time_to_zoom, int *time_to_restart, int *time_to_reinit, int *time_to_quit, long fillcolorIn, long *andcolorIn, int *blockindexIn, int *totpassesIn, int *curpassIn);
+	void	InitPixel7(dd_real *DDxgapIn, dd_real *DDygapIn, dd_real *DDHorIn, dd_real *DDVertIn, dd_real *DDWidthIn, dd_real *DDCloseEnoughIn, qd_real *QDxgapIn, qd_real *QDygapIn, qd_real *QDHorIn, qd_real *QDVertIn, qd_real *QDWidthIn, qd_real *QDCloseEnoughIn);
+	void	InitPixel8(dd_real *DDyymax, qd_real *QDyymax, MATH_TYPE *MathTypeIn, Complex RotationCentre);
+
 	void	ManageBignumPrecision(int precision);				// allow internal bignum variables to track current precision requirements
 
 	int	BifurcLambda(double Rate, double *Population);			// it's here becasue it is used in miscfrac.cpp Lyapunov fractal
 	int	bifurcation(int user_data(HWND hwnd));						// ditto for bifurcation()
 	void	plot_orbits(RGBTRIPLE colour, int count);
-	
-	
-	// QD stuff
 
 	void	plot(WORD x, WORD y, DWORD color);
 	void	PlotPixel(WORD, WORD, DWORD);
 
-//	void	DisplayLyapSequence(int *Rxy, int SeqLength);
-
 	// line3d stuff
 	void	projection(int x, int y, long col);
-//	void	xrot(double, MATRIXPTR);
-//	void	yrot(double, MATRIXPTR);
-//	void	zrot(double, MATRIXPTR);
-//	void	trans(double, double, double, MATRIXPTR);
 	void	init3d(int xdots, int ydots, double x_rot, double y_rot, double z_rot, double sclx, double scly, double sclz, long threshold, double hor, double vert);
-//	void	identity(MATRIXPTR);
-//	int	vmult(VECTORPTR, MATRIXPTR, VECTORPTR);
 
 	WORD	special;		// special colour for CBIN fractals, phase etc
 	int	logval;			// log colour map starting value 
@@ -156,7 +154,7 @@ class CPixel
 	int	distest;
 	BOOL	invert;			// invert fractal
 	BYTE	phaseflag;		// 3 phases for type SPECIALNEWT fractals
-	double	closenuff;		// periodicity bailout
+	double	*closenuff;		// periodicity bailout
 	BYTE	juliaflag;		// Julia implementation of fractal
 	BYTE	calcmode;		// trace type B, G, 1, 2
 	int	CoordSystem;
@@ -183,8 +181,8 @@ class CPixel
 	double	hor;			// horizontal address
 	double	vert;			// vertical address
 	double	mandel_width;		// width of display
-	double	xgap;			// gap between pixels
-	double	ygap;			// gap between pixels
+	double	*xgap;			// gap between pixels
+	double	*ygap;			// gap between pixels
 	int	NonStandardFractal;	// does fractal use standard plotting mode?
 	double	*yymax;			// max value of vert
 
@@ -198,7 +196,7 @@ class CPixel
 	CTZfilter   *TZfilter;		// Tierazon filters
 	COscProcess *OscProcess;
 //	RGBTRIPLE   *FilterRGB;		// for Tierazon filters
-	CPlot	    Plot;
+	CPlot	    *Plot;
 
 //	CLine3d	    *Line3d;		// routines for projection and 3D transforms
 	int	dem_color;
@@ -207,14 +205,14 @@ class CPixel
 //	int	*time_to_quit;		// enable clean exit
 
 	/**************** Big Number Globals *********************/
-
+	MATH_TYPE   *MathType;
 	int	BigFractPtr = 0;	// point to the Bignum fractal specific stuff
 	int	decimals = 10, precision;
 	BYTE	BigNumFlag;		// True if bignum used
 	double	ScreenRatio;		// ratio of width / height for the screen
+	Complex	RotationCentre;		// centre of rotation
 
-	BigDouble	BigCloseEnough, BigBailout, *Big_yymax, Big_xgap, Big_ygap, BigHor, BigVert, BigWidth;
-//	BigDouble	Big_oldhor, Big_oldvert, Big_oldwidth;
+	BigDouble	*BigCloseEnough, BigBailout, *Big_yymax, *Big_xgap, *Big_ygap, BigHor, BigVert, BigWidth;
 	BigComplex	*zBig, *cBig, *qBig;
 	BigComplex	BigOldZ, BigOlderZ;
 
@@ -226,7 +224,9 @@ class CPixel
 	DDComplex	c1DD, c2DD, z2DD, cbDD, caa3DD, tDD;	// Tierazon
 	DDComplex	aDD, bDD, a2DD, aa3DD, vDD;		// Cubic
 	DDComplex	lm5DD, lp5DD, l2DD;			// Art Matric Newton
-	dd_real		DDCloseEnough;
+	DDComplex	sqrDD;
+	dd_real		*DDxgap, *DDygap, *DDHor, *DDVert, *DDWidth;
+	dd_real		*DDyymax, *DDCloseEnough, DDBailout, realimagDD;
 
 	/**************** Double double Globals *********************/
 
@@ -236,9 +236,12 @@ class CPixel
 	QDComplex	c1QD, c2QD, z2QD, cbQD, caa3QD, tQD;	// Tierazon
 	QDComplex	aQD, bQD, a2QD, aa3QD, vQD;		// Cubic
 	QDComplex	lm5QD, lp5QD, l2QD;			// Art Matric Newton
-	qd_real		QDCloseEnough;
+	QDComplex	sqrQD;
+	qd_real		*QDxgap, *QDygap, *QDHor, *QDVert, *QDWidth;
+	qd_real		*QDyymax, *QDCloseEnough, QDBailout, realimagQD;
 
 	/**************** Double double Globals *********************/
+
 	// symmetry stuff
 	int	ixstart, ixstop, iystart, iystop;	// start, stop here 
 	int	xxstart, xxstop;			// these are same as worklist, 
@@ -253,8 +256,7 @@ class CPixel
 		WORD degree, WORD type, int subtype, BYTE calcmode, int RotationAngle, CFract *Fractal, double hor, double vert, double mandel_width, double *xxmax,
 		double *xxmin, double *yymin, double *yymax, WORD special, BYTE juliaflag, int *PlotType, BYTE BigNumFlag, BigDouble *Big_xxmin, BigDouble *Big_xxmax,
 		BigDouble *Big_yymin, BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio);
-//	DWORD	getcolor(WORD x, WORD y);
-	//	int	*symmetry;				// symmetry flag
+	int	InitArithmetic();
 
     private:
 	int	DoFilter(int method, int hooper);
@@ -263,6 +265,8 @@ class CPixel
 	int	DoBigFilter(int method, int hooper);
 	int	DoDDFilter(int method, int hooper, DDComplex *z);
 	int	DoQDFilter(int method, int hooper, QDComplex *z);
+	DDComplex	DDInvertz2(DDComplex  & Cmplx1);
+	QDComplex	QDInvertz2(QDComplex  & Cmplx1);
 	BigComplex	BigInvertz2(BigComplex  & Cmplx1);
 	bool	BailoutTest(Complex *z, Complex SqrZ);
 	bool	BigBailoutTest(BigComplex *z, BigComplex SqrZ);
@@ -274,9 +278,17 @@ class CPixel
 	int	BigInitFunctions(WORD type, BigComplex *zBig, BigComplex *qBig);
 	int	BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE *SpecialFlag, long *iteration);
 	int	InitFractintFunctions(WORD type, Complex *z, Complex *q);
+	int	DDInitFractintFunctions(WORD type, DDComplex *z, DDComplex *q);
+	int	QDInitFractintFunctions(WORD type, QDComplex *z, QDComplex *q);
 	int	RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration);
+	int	DDRunFractintFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration);
+	int	QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialFlag, long *iteration);
 	int	InitFractintTrigFunctions(WORD type, Complex *z, Complex *q);
+	int	DDInitFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q);
+	int	QDInitFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q);
 	int	RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration);
+	int	DDRunFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration);
+	int	QDRunFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialFlag, long *iteration);
 	int	InitManDerFunctions(int subtype, Complex *z, Complex *q);
 	int	RunManDerFunctions(int subtype, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration);
 	int	BigInitManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBig);
@@ -306,6 +318,12 @@ class CPixel
 	int	ZXTrigPlusZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn);
 	int	ScottZXTrigPlusZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn);
 	int	SkinnerZXTrigSubZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn);
+	int	DDZXTrigPlusZfpFractal(DDComplex *z, DDComplex *q, CTrigFn *TrigFn);		// z = (p1*z*trig(z))+p2*z
+	int	DDScottZXTrigPlusZfpFractal(DDComplex *z, DDComplex *q, CTrigFn *TrigFn);	// z = (z*trig(z))+z
+	int	DDSkinnerZXTrigSubZfpFractal(DDComplex *z, DDComplex *q, CTrigFn *TrigFn);
+	int	QDZXTrigPlusZfpFractal(QDComplex *z, QDComplex *q, CTrigFn *TrigFn);
+	int	QDScottZXTrigPlusZfpFractal(QDComplex *z, QDComplex *q, CTrigFn *TrigFn);
+	int	QDSkinnerZXTrigSubZfpFractal(QDComplex *z, QDComplex *q, CTrigFn *TrigFn);
 
 	// double double functions
 	int	BigDouble2DD(dd_real *out, BigDouble *in);
@@ -330,9 +348,6 @@ class CPixel
 	int	QDInitManDerFunctions(int subtype, QDComplex *z, QDComplex *q);
 	int	QDInitTierazonFunctions(int subtype, QDComplex *z, QDComplex *q);
 	int	QDInitFunctions(WORD type, QDComplex *z, QDComplex *q);
-
-	    // non-raster functions
-//	int	DoCurlicues(void);
 
 	// pixel plotting routines
 	void	symplot2(WORD, WORD, DWORD);
@@ -425,8 +440,10 @@ class CPixel
 	double	xval, yval, zval;	// rotate 
 
 	MATRIX	m;			// transformation matrice
-	CMatrix	*Mat;			// transformation and roatation matrix
-	CBigMatrix	*BigMat;	// transformation and roatation matrix
+	CMatrix	*Mat;			// transformation and rotation matrix
+	CBigMatrix	*BigMat;
+	CDDMatrix	*DDMat;
+	CQDMatrix	*QDMat;
 
 	struct PointInfo
 	    {
@@ -442,6 +459,8 @@ class CPixel
 
 	Complex	a, a2, aa3, b, l2, lm5, lp5, oz, sqr, t2, t3, v;	// local variables for functions
 	Complex temp, temp1, temp2, temp3, temp4;
+	DDComplex tempDD, temp1DD, temp2DD, temp3DD, temp4DD;
+	QDComplex tempQD, temp1QD, temp2QD, temp3QD, temp4QD;
 	double	real_imag, absolute, distance;
 	HWND	hwnd;
 	int	BailoutTestType = BAIL_MOD;
@@ -492,13 +511,21 @@ class CPixel
 	double	u, v1, K, M;				// Kleinian stuff
 
 							// stuff for Fractint functions
-	Complex	Coefficient/*, *floatparm*/;
+	Complex	Coefficient;
+	DDComplex	CoefficientDD;
+	QDComplex	CoefficientQD;
 	double	foldxinitx, foldyinity, foldxinity, foldyinitx;
 	Complex	roots[MAXROOTS];			// roots
+	DDComplex	rootsDD[MAXROOTS];
+	QDComplex	rootsQD[MAXROOTS];
 	Complex	croot, cdegree;
+	DDComplex	crootDD, cdegreeDD;
+	QDComplex	crootQD, cdegreeQD;
 	double	thresh;
 	int	root;
 	double	qc, qci, qcj, qck;			// These are for quaternions and hypercomplex
+	dd_real	qcDD, qciDD, qcjDD, qckDD;
+	qd_real	qcQD, qciQD, qcjQD, qckQD;
 	int	PhoenixType = ZERO;
 	int	PhoenixDegree;
 

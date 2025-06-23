@@ -417,7 +417,7 @@ extern	int	InitPerturbation(PMYVARIABLES);
 extern	int	DoPerturbation(PMYVARIABLES);
 
 extern	int	RunForm(char *, int);
-extern	int	form_per_pixel(PMYVARIABLES); 
+extern	int	FormPerPixel(PMYVARIABLES);
 extern	int	DoHenon(PMYVARIABLES);
 extern	int	DoMalthus(PMYVARIABLES);
 extern	int	DoTriangle(PMYVARIABLES);
@@ -431,9 +431,9 @@ extern	int	DoApollonius(PMYVARIABLES);
 extern	int	DoApolloniusIFS(PMYVARIABLES);
 extern	int	DoSierpinskiFlower(PMYVARIABLES);
 extern	int	DoZigzag(PMYVARIABLES);
-extern	int	DoGargoyles(PMYVARIABLES);
-extern	int	DoCurlicues(PMYVARIABLES);
-extern	int	DoChuaFlight(PMYVARIABLES);
+//extern	int	DoGargoyles(PMYVARIABLES);
+//extern	int	DoCurlicues(PMYVARIABLES);
+//extern	int	DoChuaFlight(PMYVARIABLES);
 extern	int	DoBurningShip(PMYVARIABLES);
 extern	int	DoBurningShipPower(PMYVARIABLES);
 //extern	int	DoThorn(PMYVARIABLES);
@@ -1906,6 +1906,7 @@ extern	int	DoFurtherStudyontheRulkovNeuronMap(PMYVARIABLES);
 extern	int	DoAttractorMergingAmplitudeControlHyperchaosMap(PMYVARIABLES);
 extern	int	DoDesignHardwareImplementation4DMemristiveHyperchaoticMap(PMYVARIABLES);
 extern	int	DoTorusHyperchaos3DLotkaVolterraMap(PMYVARIABLES);
+extern	int	DoAnalysisFIPS140(PMYVARIABLES);
 
 
 // Sprott Maps

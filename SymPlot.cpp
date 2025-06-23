@@ -42,7 +42,7 @@ void	CPixel::plot(WORD x, WORD y, DWORD color)
 	    symplot4basin(x, y, color);
 	    break;
 	case FILTERPLOT:
-	    Plot.FilterPoint(x, y, color, &(TZfilter->FilterRGB));
+	    Plot->FilterPoint(x, y, color, &(TZfilter->FilterRGB));
 	    break;
 	default:
 	    PlotPixel(x, y, color);
@@ -197,7 +197,7 @@ void	CPixel::PlotPixel(WORD x, WORD y, DWORD colour)
     {
     if (*time_to_quit)
 	return;
-    Plot.PlotPoint(x, y, colour);
+    Plot->PlotPoint(x, y, colour);
     }
 
 

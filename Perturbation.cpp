@@ -21,7 +21,7 @@
 #include "Slope.h"
 #include "pixel.h"
 
-#define		MAXTHREADS	40
+#define		MAXTHREADS	64
 
 //extern	void	ConvertBignum2String(char *s, mpfr_t num);
 extern	int	user_data(HWND);

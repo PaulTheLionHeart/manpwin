@@ -17,29 +17,11 @@ void FPUcplxmul(Complex *x, Complex *y, Complex *z)
     z->x = tx;
 }
 
-/* orig code
-void FPUcplxdiv(Complex *x, Complex *y, Complex *z)
-{
-    double mod,tx,yxmod,yymod;
-    mod = y->x * y->x + y->y * y->y;
-    if (mod==0) {
-	DivideOverflow++;
-    }
-    yxmod = y->x/mod;
-    yymod = - y->y/mod;
-    tx = x->x * yxmod - x->y * yymod;
-    z->y = x->x * yymod + x->y * yxmod;
-    z->x = tx;
-}
-*/
-
 void FPUcplxdiv(Complex *x, Complex *y, Complex *z)
     {
     const double mod = y->x * y->x + y->y * y->y;
     if (mod == 0.0 || fabs(mod) <= DBL_MIN)
 	{
-//	z->x = ID_INFINITY;
-//	z->y = ID_INFINITY;
 	DivideOverflow++;
 	return;
 	}
@@ -67,13 +49,24 @@ void FPUsinhcosh(double *Angle, double *Sinh, double *Cosh)
 }
 
 void FPUcplxlog(Complex *x, Complex *z)
-{
-    double mod,zx,zy;
-    mod = sqrt(x->x*x->x + x->y*x->y);
-    zx = log(mod);
-    zy = atan2(x->y,x->x);
+    {
+    if (x->x == 0.0 && x->y == 0.0)
+	{
+	z->x = 0.0;
+	z->y = 0.0;
+	return;
+	}
+    if (x->y == 0.0)		// x is real
+	{
+	z->x = log(x->x);
+	z->y = 0.0;
+	return;
+	}
+    double mod = x->x * x->x + x->y * x->y;
+    double real = isnan(mod) || islessequal(mod, 0) || isinf(mod) ? 0.5	: 0.5 * log(mod);
+    double imag = isnan(x->x) || isnan(x->y) || isinf(x->x) || isinf(x->y) ? 1.0 : atan2(x->y, x->x);
+    z->x = real;
+    z->y = imag;
+    }
 
-    z->x = zx;
-    z->y = zy;
-}
 

@@ -40,6 +40,7 @@ class QDComplex
 
 	QDComplex operator =(const QDComplex &);// Assignment Operator
 	QDComplex operator =(const double &);	// Assignment to a double Operator
+	QDComplex operator =(const Complex &);	// Assignment to a complex Operator
 	QDComplex operator+=(const QDComplex &);
 	QDComplex operator+=(double&);
 	QDComplex operator-=(const QDComplex &);
@@ -88,6 +89,7 @@ class QDComplex
 	QDComplex	CTanh();		// hyperbolic tangent
 	qd_real		CFabs();		// abs
 	void		CPower(QDComplex  & result, QDComplex  & base, int exp);
+	QDComplex	QDComplexPower(QDComplex x, QDComplex y);
 	double		CSumSqr();		// real squared + imaginary squared
 
 	qd_real	x, y;

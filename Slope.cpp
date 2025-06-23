@@ -361,7 +361,7 @@ double CSlope::GiveDDReflection(Complex j, BYTE juliaflag, DDComplex cDD, int *i
 	Reflection: fractal calculations Bignum version
 ***********************************************************************/
 
-double CSlope::GiveBigReflection(Complex j, BYTE juliaflag, BigComplex cBig, QDComplex cQD, DDComplex cDD, int *iterations, double rqlim, long threshold, Complex v)
+double CSlope::GiveBigReflection(Complex j, BYTE juliaflag, BigComplex cBig, int *iterations, double rqlim, long threshold, Complex v)
     {
     int		i = 0; // iteration 
     int		k;
@@ -377,10 +377,6 @@ double CSlope::GiveBigReflection(Complex j, BYTE juliaflag, BigComplex cBig, QDC
     int		degree1, degree2;
     BigComplex	unity = { 1.0, 0.0 };
 
-    if (precision <= 30)			// use double double ... 4 times faster
-	return GiveDDReflection(j, juliaflag, cDD, iterations, rqlim, threshold, v);
-    else if (precision <= 60)
-	return GiveQDReflection(j, juliaflag, cQD, iterations, rqlim, threshold, v);
     vBig = v;
 
     *degree = (int)param[3];
@@ -743,7 +739,7 @@ double CSlope::GiveReflection(Complex j, BYTE juliaflag, Complex C, int *iterati
 	Caluclate the colour of the pixel
 **************************************************************************/
 
-RGBTRIPLE CSlope::compute_colour(CTrueCol *TrueCol, Complex j, BYTE juliaflag, Complex c, BigComplex cBig, QDComplex cQD, DDComplex cDD, double rqlim, long threshold, BYTE BigNumFlag, Complex v, bool *Time2Exit)
+RGBTRIPLE CSlope::compute_colour(CTrueCol *TrueCol, Complex j, BYTE juliaflag, Complex c, BigComplex cBig, QDComplex cQD, DDComplex cDD, double rqlim, long threshold, BYTE ArithType, Complex v, bool *Time2Exit)
     {
 
     double	reflection;
@@ -752,14 +748,24 @@ RGBTRIPLE CSlope::compute_colour(CTrueCol *TrueCol, Complex j, BYTE juliaflag, C
     int		PaletteStart = (int)(fabs(param[2]));
 
     *Time2Exit = false;
-    if (BigNumFlag)
+    switch (ArithType)
 	{
-	reflection = GiveBigReflection(j, juliaflag, cBig, cQD, cDD, &iterations, rqlim, threshold, v);
-	if (reflection < 0)
-	    *Time2Exit = true;
+	case DOUBLEDOUBLE:
+	    reflection = GiveDDReflection(j, juliaflag, cDD, &iterations, rqlim, threshold, v);
+	    break;
+	case QUADDOUBLE:
+	    reflection = GiveQDReflection(j, juliaflag, cQD, &iterations, rqlim, threshold, v);
+	    break;
+	case ARBITRARYPREC:
+	    reflection = GiveBigReflection(j, juliaflag, cBig, &iterations, rqlim, threshold, v);
+	    break;
+	case DOUBLEFLOAT:
+	    reflection = GiveReflection(j, juliaflag, c, &iterations, rqlim, threshold, v);
+	    break;
 	}
-    else
-	reflection = GiveReflection(j, juliaflag, c, &iterations, rqlim, threshold, v);
+
+    if (reflection < 0)
+	*Time2Exit = true;
 
     if (reflection == FP_ZERO) 
 	{
@@ -854,25 +860,39 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
     if (BigNumFlag)
 	{
 	if (precision <= 30)
+	    {
 	    ConvertBignumsDD(Big_xgap, Big_ygap, BigHor, BigVert, BigWidth, &DDxgap, &DDygap, &DDhor, &DDvert, &DDWidth);
+	    ArithType = DOUBLEDOUBLE;
+	    }
 	else if (precision <= 60)
+	    {
 	    ConvertBignumsQD(Big_xgap, Big_ygap, BigHor, BigVert, BigWidth, &QDxgap, &QDygap, &QDhor, &QDvert, &QDWidth);
+	    ArithType = QUADDOUBLE;
+	    }
+	else
+	    ArithType = ARBITRARYPREC;
 	}
+    else
+	ArithType = DOUBLEFLOAT;
     Plot.InitPlot(threshold, TrueCol, wpixels, xdots, height, xdots, height, Dib->BitsPerPixel, Dib, USEPALETTE);
     for (iY = 0; iY < ydots; iY++)
 	{
 	double progress = (double)iY / ydots;
-	if (BigNumFlag)
+	switch (ArithType)
 	    {
-	    if (precision <= 30)			// use double double ... 4 times faster
-	    	cDD.y = DDvert + DDWidth - DDygap * iY;
-	    else if (precision <= 60)
+	    case DOUBLEDOUBLE:
+		cDD.y = DDvert + DDWidth - DDygap * iY;
+		break;
+	    case QUADDOUBLE:
 		cQD.y = QDvert + QDWidth - QDygap * iY;
-	    else
+		break;
+	    case ARBITRARYPREC:
 		cBig.y = BigVert + BigWidth - Big_ygap * iY;
+		break;
+	    case DOUBLEFLOAT:
+		c.y = vert + mandel_width - iY * ygap;
+		break;
 	    }
-	else
-	    c.y = vert + mandel_width - iY * ygap;
 	if (int(progress * 100) != lastChecked)
 	    {
 	    lastChecked = int(progress * 100);
@@ -882,19 +902,23 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 	    {
 	    if (user_data(hwnd) < 0)
 		return -1;
-	    if (BigNumFlag)
+	    switch (ArithType)
 		{
-		if (precision <= 30)			// use double double ... 4 times faster
+		case DOUBLEDOUBLE:
 		    cDD.x = DDhor + DDxgap * iX;
-		else if (precision <= 60)
+		    break;
+		case QUADDOUBLE:
 		    cQD.x = QDhor + QDxgap * iX;
-		else
+		    break;
+		case ARBITRARYPREC:
 		    cBig.x = BigHor + Big_xgap * iX;
+		    break;
+		case DOUBLEFLOAT:
+		    c.x = hor + iX * xgap;
+		    break;
 		}
-	    else
-		c.x = hor + iX * xgap;
 
-	    colour = compute_colour(TrueCol, j, juliaflag, c, cBig, cQD, cDD, rqlim, threshold, BigNumFlag, v, &Time2Exit);
+	    colour = compute_colour(TrueCol, j, juliaflag, c, cBig, cQD, cDD, rqlim, threshold, ArithType, v, &Time2Exit);
 	    if (Time2Exit)
 		return 0;
 //	    plot(iX, iY, iterations);

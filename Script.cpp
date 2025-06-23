@@ -31,9 +31,7 @@ extern	int	mainview(HWND, BOOL);
 extern	char	*trailing(char *);
 extern	int	GetParamData(HWND, LPSTR, LPSTR, LPSTR, BOOL);
 extern	void	setup_defaults(void);
-extern	void	init_log(HWND), init_sym(void), /*init3d(void), */NewtonSetup(void), 
-		/*init_stereo_pairs(void), */DisplayPalette(HWND, BOOL);
-//extern	int	ComplexNewtonSetup(void);
+extern	void	init_log(HWND), NewtonSetup(void), DisplayPalette(HWND, BOOL);
 extern	int	write_png_file(HWND, char *, char *, char *); 
 extern	int	read_png_file(HWND hwnd, char *infile);
 extern	void	ClearScreen(void);
@@ -42,7 +40,6 @@ extern	int	perform_worklist(HWND);
 extern	void	InitTrueColourPalette(BYTE);
 extern	int	user_data(HWND);
 extern	char	*ShowTime (double);
-//extern	short	FilePalette(HWND, char *, char *);
 	int	RunFourierScript(HWND, char *, char *);
 extern	void	InitFourier(char);
 extern	int	FourierStep(HWND, char *, int, int, CPlot);
@@ -52,26 +49,22 @@ extern	int	AnimateClose(void);
 extern	char	*FractData(void);
 extern	int	ProcessFormulaString(char *);
 extern	char	*str_find_ci(char *, char *);
-//extern	void	LoadOscillatorParams(void);
-//extern	void	LoadKnotParams(void);
-//extern	void	LoadFractalMapParams(void);
-//extern	void	LoadCurveParams(void);
+
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
 extern	DLGPROC	PNGFileOpenDlg(HWND, LPSTR, LPSTR);
 extern	void	DoCaption(HWND, char *);
 
 extern	BYTE	BigNumFlag;		// True if bignum used
-extern	double	hor;			/* horizontal address */
-extern	double	vert;			/* vertical address */
-extern	double	mandel_width;		/* width of display */
-extern	BYTE	_3dflag;		/* replay saved file. 3 = 3D */
-extern	int	logval;			/* log colour map starting value */
-extern	WORD	type;			/* M=mand, N=Newton etc */
-extern	BYTE	pairflag;		/* stereo pair */
+extern	double	hor;			// horizontal address
+extern	double	vert;			// vertical address
+extern	double	mandel_width;		// width of display
+extern	BYTE	_3dflag;		// replay saved file. 3 = 3D
+extern	int	logval;			// log colour map starting value
+extern	WORD	type;			// M=mand, N=Newton etc
+extern	BYTE	pairflag;		// stereo pair
 extern	BOOL	AutoSaveFlag;
-extern	int	number;				/* used for compression */
-//extern	short	num_worklist;		/* resume worklist for standard engine */
-//extern	int	workpass;		/* for 1/2 pass type tracing */
+extern	int	number;			// used for compression
+
 extern	long	threshold;
 extern	int	time_to_restart;	// time to restart?
 extern	int	time_to_reinit;		// time to reinitialize?
@@ -79,9 +72,8 @@ extern	int	time_to_quit;		// time to quit?
 extern	int	time_to_load;		// time to load file?
 extern	int	time_to_load;		// time to load file?
 extern	int	time_to_break;		// time to break out of animation?
-extern	int	finished;		/* all passes complete */
+extern	int	finished;		// all passes complete
 extern	BOOL	StartImmediately;	// immediate start of animation generation
-//extern	BYTE	palette_flag;		// set palette
 extern	char	MAPFile[];		// colour map file
 extern	char	MPGPath[];		// path for MPEG files
 extern	char	MPGFile[];		// MPEG file
@@ -91,7 +83,6 @@ extern	char	PNGFile[];		// PNG file
 extern	int	subtype;
 extern	WORD	steps;			// for Fourier Analysis
 extern	BYTE	cycleflag;		// do colour cycling
-//extern	BYTE	*PalettePtr;		// points to true colour palette
 extern	CTrueCol    TrueCol;		// palette info
 extern	BOOL	WritePNGFrames;		// write frames to PNG files
 extern	BOOL	WriteMemFrames;		// write frames to memory
@@ -106,7 +97,6 @@ extern	int	MaxDimensions;
 extern	double	iterations;
 extern	int	AutoStereo_value;	// AutoStereo depth value
 extern	int	PaletteShift;		// fractional palette addressing
-//extern	BOOL	DisplayAxisImages;	// display all axes in a single image
 extern	BOOL	DisplayAxisLabels;		// show labels for axis pairs
 
 extern	double	lightDirectionDegrees;
@@ -115,7 +105,6 @@ extern	double	bumpMappingStrength;
 extern	int	PaletteStart;
 
 extern	int	invert;
-//extern	int	symmetry;
 extern	double	f_radius,f_xcenter,f_ycenter;    // inversion radius, center 
 
 extern	PAINTSTRUCT 	ps;
@@ -137,18 +126,15 @@ extern	CPlot		Plot;		// image plotting routines
 extern	CPixel		Pix;		// routines for escape fractals
 extern	HWND		GlobalHwnd;	// This is the main windows handle
 extern	char		szStatus[];	// status bar text
-extern	CDib	Dib;
-extern	Complex	j;
+extern	CDib		Dib;
+extern	Complex		j;
 
 PAINTSTRUCT 	StatusBar;
 RECT 		StatusBarRect;
 BOOL		RunAnimation = FALSE;		// are we in the middle of an animation run?
 BOOL		SuspendAnimation = FALSE;	// pause animation run?
-//BYTE		ScriptPaletteFlag = FALSE;	// Display palette in animation frames
 	int	StartFrame = 0;			// allow us to resume animation run
 	DWORD	StatusColour = 0x0000FFFF;	// colour of status bar
-//	time_t	FrameEnd = 0;
-//	time_t	FrameStart = 0;
 struct __timeb64 	FrameEnd;
 struct __timeb64 	FrameStart;
 
@@ -157,7 +143,6 @@ static	double	TotalTime = 0.0;
 static	double	FinalTime = 0.0;
 static	double	RemainingTime = 0.0;
 static	double	StartRate, EndRate;		// population growth rates for Malthus fractal
-//static	BYTE	*LocalPalettePtr;		// points local palette to store script palette
 static	char    szTitleName[MAXDATALINE] = "ManpWIN";
 
 static	FILE	*fp;				// script file   
@@ -180,6 +165,7 @@ extern	int	UpdateClose(void);
 extern	void	DisplayStatusBarInfo(int, char *);
 
 extern	COscProcess	OscProcess;
+extern	MATH_TYPE MathType;
 
 /*------------------------------------------
    Generate  MPG filename
@@ -266,21 +252,13 @@ int	GenerateFractalFrame(HWND hwnd, char *FileName, int TotalFrames, int ThisFra
 	init_log(hwnd);				// log colour distribution
     if (_3dflag)
 	Pix.init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
-					// init 3D parameters 
-//    if (type == NEWTON || type == NEWTBASIN)
-//	NewtonSetup();
-//    if (type == COMPLEXNEWTON || type == COMPLEXBASIN)
-//	ComplexNewtonSetup();
     if (pairflag)
 	Pix.init_stereo_pairs(pairflag, &AutoStereo_value);			// init stereo pair parameters
-    init_sym();					// symmetry? set up params
+    Pix.InitArithmetic();
     ClearScreen();
     hCursor = LoadCursor(NULL, IDC_ARROW);	// Load normal cursor.
     SetCursor(hCursor);			        // Reload arrow cursor.
     DisplayFractal(hwnd);
-//    num_worklist = 0;
-//    number = 0;				// char count for screen
-//    workpass = 0;
     finished = FALSE;
     if (perform_worklist(hwnd) < 0)
 	{
@@ -414,8 +392,6 @@ int	InitScript(HWND hwnd, char *FileName, int *TotalFrames)
 	}
     else 
 	{
-//	if (strcmp("Default Colour Map", MAPFile) == 0)
-//	    palette_flag = FALSE;
 	strcpy(buf1, buf);
 	if (GetParamData(hwnd, FileName, buf, SaveFileOrig, FALSE) < 0)
 	    return -1;
@@ -469,7 +445,6 @@ int	InitScript(HWND hwnd, char *FileName, int *TotalFrames)
 		OscAnimProc = MORPHING;
 		break;
 	    }
-//	OscAnimProc = (RotateAnim) ? RUNANIM : EVOLUTION;
 	}
     else
 	{
@@ -536,31 +511,12 @@ int	InitScript(HWND hwnd, char *FileName, int *TotalFrames)
     time_to_break = FALSE;
     if (type == FOURIER)
 	{
-//	RunFourierScript(hwnd, FileName, buf1);
-//	fclose(fp);
 	ClearScreen();
 	InitFourier(subtype);
 	}
     if (OscAnimProc == MORPHING)
 	{
 	ClearScreen();
-/*
-	switch (type)
-	    {
-	    case OSCILLATORS:
-		LoadOscillatorParams();
-		break;
-	    case KNOTS:
-		LoadKnotParams();
-		break;
-	    case FRACTALMAPS:
-		LoadFractalMapParams();
-		break;
-	    case CURVES:
-		LoadCurveParams();
-		break;
-	    }
-*/
 	if (OscProcess.InitMorphing(MaxDimensions, (long)iterations, &UpdateFrames, type, OscAnimProc, frames, &Dib/*, OscProcess.DisplayAxisImages*/) < 0)
 	    MessageBox (hwnd, "Oscillator Morphing failed because of Memory Unavailable", "ManpWin", MB_ICONEXCLAMATION | MB_OK);
 	StatusColour = 0x0000FFFF;				// colour of status bar
@@ -580,17 +536,6 @@ void	OutputAxesStatus(HWND hwnd, HDC	hdc, int HorOffset, int VertOffset, int Num
     LOGFONT lf;
     SelectObject(hdc, CreateFontIndirect(&lf));
 
-//    HBRUSH  hbr;         // handle to brush
-//    SetBkColor(ps.hdc, 0L);
-//    SetTextColor(ps.hdc, 0x00ffffff);
-//    BeginPaint(hwnd, &ps);
-//    hbr = CreateSolidBrush(0xffffff);
-/*				    // 3D
-    AxisRect.left = HorOffset + (xdots * 2) / 25;
-    AxisRect.top = VertOffset + ydots / 4 - GetSystemMetrics(SM_CYMENU);// make status same size as menu
-    AxisRect.right = HorOffset + (xdots * 3) / 25;
-    AxisRect.bottom = VertOffset + ydots / 4;
-*/
     AxisRect.left = HorOffset + (xdots * 2) / (NumColumns * 5);
     AxisRect.top = VertOffset + ydots / 10;
     AxisRect.right = AxisRect.left + xdots / (2 * NumColumns);
@@ -607,12 +552,7 @@ void	OutputAxesStatus(HWND hwnd, HDC	hdc, int HorOffset, int VertOffset, int Num
     lf.lfStrikeOut = 0;
     lf.lfOrientation = 0;
     lf.lfWeight = FW_BOLD;
-
-//    FillRect(ps.hdc, &AxisRect, hbr);
-//    TextOut(ps.hdc, 8, AxisRect.top + 2, szStatus, (int)strlen(szStatus));
     Dib.Text2Dib(hdc, &AxisRect, 0x00ffffff, 0L, &lf, TRANSPARENT, text);
-//    DrawText(hdc, text, (int)strlen(text), &AxisRect, DT_CENTER);
-//    DeleteObject(hbr);
     }
 
 void	ShowAxisLabels(HWND hwnd)
@@ -625,19 +565,9 @@ void	ShowAxisLabels(HWND hwnd)
 
     int NumColumns = NumAxes - 1;
     int NumRows = NumAxes / 2;
-//    HDC	hdc = GetDC(hwnd);
 
     if (OscProcess.DisplayAxisImages)
 	{
-	/*
-		for (int i = 0; i < 15; i++)
-		    {
-		    int HorOffset = (i % 5) * xdots / 5 + 5;
-		    int VertOffset = (i / 5) * ydots / 3 + 5;
-		    OutputAxesStatus(GlobalHwnd, HorOffset, VertOffset, ANIM[i].FrameInfo);
-		    //	TextOut(ps.hdc, HorOffset, VertOffset, ANIM[i].FrameInfo, (int)strlen(ANIM[i].FrameInfo));
-		    }
-	*/
 	BeginPaint(hwnd, &ps);
 	for (int i = 0; i < NumRows * NumColumns; i++)
 	    {
@@ -667,14 +597,10 @@ void	ShowAxisLabels(HWND hwnd)
 		}
 	    sprintf(text, "%s-%s", a, b);
 	    OutputAxesStatus(GlobalHwnd, ps.hdc, HorOffset, VertOffset, NumRows, NumColumns, text);
-//	    OutputAxesStatus(GlobalHwnd, HorOffset, VertOffset, ANIM[i].FrameInfo);
-//	    TextOut(ps.hdc, HorOffset, VertOffset, ANIM[i].FrameInfo, (int)strlen(ANIM[i].FrameInfo));
 	    }
 	EndPaint(hwnd, &ps);
 	InvalidateRect(GlobalHwnd, &r, FALSE);
-	//	DisplayAxisImages = FALSE;
 	}
-//    ReleaseDC(hwnd, hdc);
     }
 
 
@@ -684,26 +610,20 @@ void	ShowAxisLabels(HWND hwnd)
 
 void	EndScript(int ThisFrame)
     {
-//    if (LocalPalettePtr)
-//	delete [] LocalPalettePtr;
     StatusColour = 0x0000FF00;					// colour of status bar
     sprintf(szStatus, "Animation Run Completed %d frames in %s", ThisFrame, ShowTime ((long)TotalTime));
     AutoSaveFlag = FALSE;					// all done
     time_to_restart = FALSE;
-//    time_to_restart = TRUE;
     time_to_break = FALSE;
     OscAnimProc = STANDARD;
     if (!OscProcess.DisplayAxisImages)
 	return;
 
     Dib.ClearDib(0, 0, 0);	// set background colour
-//    SetWindowText(GlobalHwnd, "Calculating Axis Images");
-//    DisplayStatusBarInfo(INCOMPLETE, "Calculating Axis Images");		// display status bar
 
     DWORD   local_width = WIDTHBYTES((DWORD)width * (DWORD)bits_per_pixel);
     DWORD   ptr;
     BYTE    colour;
-//    int	    HorOffset, VertOffset;
 
     for (int i = 0; i < frames; i++)
 	{
@@ -719,19 +639,7 @@ void	EndScript(int ThisFrame)
 		    }
 		}
 	}
-//    ShowAxisLabels(GlobalHwnd);
-//    DisplayStatusBarInfo(COMPLETE, PARFile);			// display status bar
-/*
-    BeginPaint(GlobalHwnd, &ps);
-    for (int i = 0; i < 15; i++)
-	{
-	HorOffset = (i % 5) * xdots / 5 + 5;
-	VertOffset = (i / 5) * ydots / 3 + 5;
-	OutputAxesStatus(GlobalHwnd, HorOffset, VertOffset, ANIM[i].FrameInfo);
-//	TextOut(ps.hdc, HorOffset, VertOffset, ANIM[i].FrameInfo, (int)strlen(ANIM[i].FrameInfo));
-	}
-    EndPaint(GlobalHwnd, &ps);
-*/
+
     time_to_break = TRUE;
     RunAnimation = FALSE;
     AnimateClose();
@@ -740,25 +648,6 @@ void	EndScript(int ThisFrame)
     if (DisplayAxisLabels)
 	ShowAxisLabels(GlobalHwnd);
     DoCaption(GlobalHwnd, (type == OSCILLATORS) ? OscillatorSpecific[subtype].name : FractalMapSpecific[subtype].name);
-    //    SetWindowText(GlobalHwnd, "Completed Calculating Axis Images");
-
-//    DisplayStatusBarInfo(COMPLETE, "Completed Calculating Axis Images");		// display status bar
-//    DisplayStatusBarInfo(COMPLETE, "Splat");		// display status bar
-//    InvalidateRect(GlobalHwnd, &r, FALSE);
-
-/*
-    BeginPaint(GlobalHwnd, &ps);
-    for (int i = 0; i < 15; i++)
-	{
-	HorOffset = (i % 5) * xdots / 5 + 5;
-	VertOffset = (i / 5) * ydots / 3 + 5;
-	OutputAxesStatus(GlobalHwnd, HorOffset, VertOffset, ANIM[i].FrameInfo);
-	//	TextOut(ps.hdc, HorOffset, VertOffset, ANIM[i].FrameInfo, (int)strlen(ANIM[i].FrameInfo));
-	}
-    EndPaint(GlobalHwnd, &ps);
-
-//    Sleep(500);
-*/
     }
 
 /*-----------------------------------------------------------------------------------
@@ -912,37 +801,8 @@ int	RunScript(HWND hwnd, char *FileName)
 	    return -1;
 	    }
 	}
+
     UpdateInit();
-//    if (flag == 1)							// flag returned from InitScript()
-//	{
-//	if (ImplementMorph(OscillatorSpecific[subtype].MaxDimensions, (int)OscillatorSpecific[subtype].iterations) < 0)
-//	    {
-//	    MessageBox (hwnd, "Oscillator Morphing failed because of Memory Unavailable", "ManpWin", MB_ICONEXCLAMATION | MB_OK);
-//	    CloseMorphing();
-//	    return -1;
-//	    }
-//	CloseMorphing();
-//	return 1;							// MORPHING gets reset in ImplementMorph(), so make sure RunScript() knows we are morphing
-//	}
-
-// What is this needed for? It crashes PaletteShift
-/*
-    if (StartFrame > 0)							// we are resuming after a break
-	{
-	if (abs(PaletteShift) > 1)
-	    {
-	    if (PNGFileOpenDlg(hwnd, PNGFile, szTitleName) == 0)
-		{
-		if (read_png_file(hwnd, PNGFile) < 0)			// load last reliable frame to set up palette etc
-		    {
-		    wsprintf(s, "Error in getting start up data for frame: %d", StartFrame);
-		    MessageBox(hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
-		    }
-		}
-	    }
-	}
-*/
-
     while(TRUE)
 	{
 	if (ParamAnimation)
@@ -956,12 +816,6 @@ int	RunScript(HWND hwnd, char *FileName)
 		fclose(fp);
 		return -1;
 		}
-//	    if (WriteMemFrames)				// write frame to memory
-//		{
-//		sprintf(ReadFileName, "%s%05d.png", SaveFileOrig, CurrentFrame);	// try to use existing files
-//		if (read_png_file(hwnd, ReadFileName) > 0)
-//		    LoadAnimationFrame(buf, MoreInfo, CurrentFrame, param[ParamNumber], (MathusRateAnimation || IkedaAnimation || ParamAnimation), FALSE);
-//		}
 	    CurrentFrame++;
 	    continue;					// skip until we catch up
 	    }
@@ -981,8 +835,6 @@ int	RunScript(HWND hwnd, char *FileName)
 	    ptr++;
 	*ptr = '\0';
 
-//	if (LocalPalettePtr)
-//	    memcpy(PalettePtr, LocalPalettePtr, EndIter * 3);
 	if (type == SCREENFORMULA && JuliaSetAnimation)			// update julia values
 	    {
 	    param[0] = j.x;
@@ -1073,17 +925,6 @@ int	RunScript(HWND hwnd, char *FileName)
     StatusColour = 0x0000FFFF;				// colour of status bar
     time_to_break = FALSE;
     DisplayStatusBarInfo(INFORMATION, "Full list of images for each axis pair");		// display status bar
-/*
-    for (int i = 0; i < 15; i++)
-	{
-	int	    HorOffset, VertOffset;
-	HorOffset = (i % 5) * xdots / 5 + 5;
-	VertOffset = (i / 5) * ydots / 3 + 5;
-	OutputAxesStatus(GlobalHwnd, HorOffset, VertOffset, "SPLAT");
-	//	TextOut(ps.hdc, HorOffset, VertOffset, ANIM[i].FrameInfo, (int)strlen(ANIM[i].FrameInfo));
-	}
-    InvalidateRect(GlobalHwnd, &r, FALSE);
-*/
     return 0;
     }
 
@@ -1105,9 +946,7 @@ void	StatusBarAnimInfo (int frame, int TotalFrames)
     FrameStart.millitm = FrameEnd.millitm;
     TotalTime += FrameTime;
     AverageTime = (frame - StartFrame > 0) ? TotalTime / (double)(frame - StartFrame) : FrameTime;
-    // FinalTime = (frame > 0) ? (TotalTime *  TotalFrames) / (long)frame : 0L;
-    //    RemainingTime = (TotalFrames - frame) * AverageTime;
-    if (FrameTime > MaxFrameTime)
+        if (FrameTime > MaxFrameTime)
 	MaxFrameTime = FrameTime;
     RemainingTime = (TotalFrames - frame) * MaxFrameTime;				// assume it will always be longer than the maximum frame time. This gets rid of early fast frame bias.
 
@@ -1119,11 +958,9 @@ void	StatusBarAnimInfo (int frame, int TotalFrames)
 #endif
     sprintf(FrameTimeString, "Time for Frame[%d]of[%d]=%s", frame, TotalFrames, ShowTime (FrameTime));
     sprintf(AverageTimeString, "Ave Frame Time=%s", ShowTime (AverageTime));
-//sprintf(FinalTimeString, "Total Expected Time (Poor Guess if BigNum)=%s", ShowTime (FinalTime));
     sprintf(RemainingTimeString, "Remaining Time (Est)=%s", ShowTime (RemainingTime));
     sprintf(szStatus, "%s, %s, %s, %s", TotalTimeString, FrameTimeString, AverageTimeString, RemainingTimeString);
     StatusColour = 0x0000FFFF;				// colour of status bar
-//LastSmoothTime = SmoothTime;
     }
 
 /*-----------------------------------------
@@ -1134,13 +971,6 @@ void	OutputStatusBar (HWND hwnd)
     {
     HBRUSH  hbr;         // handle to brush
 
-/*
-    if (DisplayAxisImages)
-	{
-	strcpy(szStatus, "Axis Display");
-	StatusColour = 0x0000ff00;
-	}
-*/
     hbr = CreateSolidBrush(StatusColour);
     GetClientRect (hwnd, &r);
     StatusBarRect.left = r.left;
@@ -1149,33 +979,7 @@ void	OutputStatusBar (HWND hwnd)
     StatusBarRect.bottom = r.bottom;
     FillRect(ps.hdc, &StatusBarRect, hbr);
     TextOut(ps.hdc, 8, StatusBarRect.top + 2, szStatus, (int)strlen(szStatus));    
-//    DrawText(ps.hdc, szStatus, strlen(szStatus), &StatusBarRect, DT_LEFT);  
     DeleteObject(hbr);
-//    if (DisplayAxisImages)
-//	ShowAxisLabels(hwnd);
-#ifdef SPLAT
-    if (DisplayAxisImages)
-	{
-/*
-	for (int i = 0; i < 15; i++)
-	    {
-	    int HorOffset = (i % 5) * xdots / 5 + 5;
-	    int VertOffset = (i / 5) * ydots / 3 + 5;
-	    OutputAxesStatus(GlobalHwnd, HorOffset, VertOffset, ANIM[i].FrameInfo);
-	    //	TextOut(ps.hdc, HorOffset, VertOffset, ANIM[i].FrameInfo, (int)strlen(ANIM[i].FrameInfo));
-	    }
-*/
-	for (int i = 0; i < 28; i++)
-	    {
-	    int HorOffset = (i % 7) * xdots / 7 + 5;
-	    int VertOffset = (i / 7) * ydots / 4 + 5;
-	    OutputAxesStatus(GlobalHwnd, HorOffset, VertOffset, ANIM[i].FrameInfo);
-	    //	TextOut(ps.hdc, HorOffset, VertOffset, ANIM[i].FrameInfo, (int)strlen(ANIM[i].FrameInfo));
-	    }
-	InvalidateRect(GlobalHwnd, &r, FALSE);
-//	DisplayAxisImages = FALSE;
-	}
-#endif
     }
 
 /**************************************************************************
@@ -1208,10 +1012,8 @@ DLGPROC FAR PASCAL AnimStartDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 		SendMessage(hCtrl, BM_SETCHECK, WriteMemFrames, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGFILELIST);
 		SendMessage(hCtrl, BM_SETCHECK, WritePNGList, 0L);
-//		SetUpFilename(PNGName, "animpng", "Manp");
 		SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGName);
 	        return (DLGPROC)TRUE ;
-//	        return FALSE ;
 
 	  case WM_COMMAND:
 	        switch ((int) LOWORD(wParam))
@@ -1244,8 +1046,6 @@ DLGPROC FAR PASCAL AnimStartDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WriteMPEGFrames = FALSE;
 			    }
-//			sprintf(PNGFile, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
-//			SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGFile);
 			return (DLGPROC)TRUE;
 		    case IDOK:
 			StartFrame = GetDlgItemInt(hDlg, IDC_ANIMSTART, &bTrans, TRUE);

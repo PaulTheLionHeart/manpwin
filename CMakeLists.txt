@@ -17,6 +17,8 @@ anim.h
 ant.cpp
 Apollonius.cpp
 Approximation.cpp
+Arithmetic.cpp
+Arithmetic.h
 Bif.cpp
 Bif.h
 Big.h
@@ -30,7 +32,6 @@ BigMandelDerivatives.cpp
 BigManDerivatives.cpp
 BigMatrix.cpp
 BigMatrix.h
-BigNumStuff.cpp
 BigPixel.cpp
 BigTrig.cpp
 BigTrig.h
@@ -52,8 +53,12 @@ Cross.cpp
 Curves.cpp
 DDComplex.cpp
 DDComplex.h
+DDFractintFunctions.cpp
+DDFractintTrig.cpp
 DDFunctions.cpp
 DDMandelDerivativesFN.cpp
+DDMatrix.cpp
+DDMatrix.h
 DDPixel.cpp
 DDTZFunctions.cpp
 Decomp.cpp
@@ -77,12 +82,12 @@ Filter.h
 FilterData.cpp
 floatexp.h
 fourier.cpp
+fpu087.cpp
 Fract.cpp
 fract.h
 FractalMaps.cpp
 fractalp.cpp
 fractalp.h
-Fractals.cpp
 FractintFilters.cpp
 FractintFunctions.cpp
 FractintTrig.cpp
@@ -93,6 +98,7 @@ FrameCalculator.h
 FrantPAR.cpp
 Functions.cpp
 FwdDiff.cpp
+FwdDiffFn.cpp
 Genline.cpp
 Geometry.cpp
 GIFwrite.cpp
@@ -100,7 +106,6 @@ Guess.cpp
 Henon.cpp
 htmlhelp.cpp
 icon1.ico
-Ikeda.cpp
 KallesPAR.cpp
 Keyboard.cpp
 Kleinian.cpp
@@ -114,6 +119,7 @@ MandelDerivatives.cpp
 MandelDerivativesFN.cpp
 Maninit.cpp
 Manp.cpp
+Manp.h
 Manpdlg.cpp
 Manpfile.cpp
 Manpmain.cpp
@@ -156,8 +162,12 @@ preview.cpp
 Preview.h
 QDComplex.cpp
 QDComplex.h
+QDFractintFunctions.cpp
+QDFractintTrig.cpp
 QDFunctions.cpp
 QDMandelDerivativesFN.cpp
+QDMatrix.cpp
+QDMatrix.h
 QDPixel.cpp
 QDTZFunctions.cpp
 resource.h
@@ -199,14 +209,16 @@ add_subdirectory(pnglib)
 add_subdirectory(qdlib)
 add_subdirectory(zlib)
 
-target_link_libraries(manpwin PUBLIC mpeg.lib)
-target_link_libraries(manpwin PUBLIC parser.lib)
-target_link_libraries(manpwin PUBLIC pnglib.lib)
-target_link_libraries(manpwin PUBLIC qdlib.lib)
-target_link_libraries(manpwin PUBLIC zlib.lib)
-target_link_libraries(manpwin PUBLIC htmlhelp.lib)
-
-#add_library(mpfr STATIC IMPORTED)
-#set_target_properties(mpfr PROPERTIES IMPORTED_LOCATION_DEBUG C:/Github/manpwin/mpfr/build.vc15/lib/x64/Debug/mpfr.lib)
-#set_target_properties(mpfr PROPERTIES IMPORTED_LOCATION_RELEASE C:/Github/manpwin/mpfr/build.vc15/lib/x64/Release/mpfr.lib)
+target_link_libraries(manpwin PUBLIC mpeg)
+target_link_libraries(manpwin PUBLIC parser)
+target_link_libraries(manpwin PUBLIC pnglib)
+target_link_libraries(manpwin PUBLIC qdlib)
+target_link_libraries(manpwin PUBLIC zlib)
+target_link_libraries(manpwin PUBLIC htmlhelp)
 #target_link_libraries(manpwin PUBLIC mpfr)
+
+add_library(mpfr STATIC IMPORTED)
+set_target_properties(mpfr PROPERTIES IMPORTED_LOCATION_DEBUG C:/Github/manpwin/mpfr/build.vc15/lib/x64/Debug/mpfr.lib)
+set_target_properties(mpfr PROPERTIES IMPORTED_LOCATION_RELEASE C:/Github/manpwin/mpfr/build.vc15/lib/x64/Release/mpfr.lib)
+target_link_libraries(manpwin PUBLIC mpfr)
+

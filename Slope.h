@@ -9,6 +9,7 @@
 #include "filter.h"
 #include "plot.h"
 #include "BigTrig.h"
+#include "Arithmetic.h"
 
 #define	    MAX_BUMP_MAPPING_DEPTH		100
 #define	    DEFAULT_BUMP_MAPPING_STRENGTH	50
@@ -28,12 +29,30 @@ class CSlope
 								BYTE BigNumFlag, BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
 								int bits_per_pixel, BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, int precision, HANDLE ghMutex);
 	int	RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
-								BYTE BigNumFlag, BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, double *wpixels, BYTE juliaflag, 
-								int xdots, int ydots, int width, WORD *degreeIn);
+								BYTE BigNumFlag, BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
+								double *wpixels, BYTE juliaflag, int xdots, int ydots, int width, WORD *degreeIn, int precision);
+	int	RunSlopeFwdDiffDouble(int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
+								double rqlim, long threshold, CDib *Dib, double *wpixels, BYTE juliaflag, int xdots, int ydots, int width);
+	int	RunSlopeFwdDiffDD(int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
+								BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth,
+								double rqlim, long threshold, CDib *Dib, double *wpixels, BYTE juliaflag, int xdots, int ydots, int width);
+	int	RunSlopeFwdDiffQD(int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
+								BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth,
+								double rqlim, long threshold, CDib *Dib, double *wpixels, BYTE juliaflag, int xdots, int ydots, int width);
+	int	RunSlopeFwdDiffBig(int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
+								BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth,
+								double rqlim, long threshold, CDib *Dib, double *wpixels, BYTE juliaflag, int xdots, int ydots, int width);
+
+
+
+
+
 	void	InitRender(long threshold, CTrueCol *TrueCol, CDib *Dib, double *wpixels, int PaletteShift, double bump_transfer_factor, int PaletteStart, double lightDirectionDegrees, double bumpMappingDepth, double bumpMappingStrength);
 	int	RenderSlope(int xdots, int ydots, int PertColourMethod, int PalOffset, double IterDiv);
 	void	DoSlopeFwdDiffFn(Complex *z, Complex *q);
 	void	DoBigSlopeFwdDiffFn(BigComplex *z, BigComplex *q, BigComplex *bBig, BigComplex *aa3Big);
+	void	DoDDSlopeFwdDiffFn(DDComplex *z, DDComplex *q, DDComplex *bDD, DDComplex *aa3DD);
+	void	DoQDSlopeFwdDiffFn(QDComplex *z, QDComplex *q, QDComplex *bQD, QDComplex *aa3QD);
 	void	SlopeIsExiting(void);
 	bool	EndSlope;
 	double	param[NUMSLOPEDERIVPARAM];
@@ -43,7 +62,7 @@ class CSlope
     private:
 	double	cdot(Complex a, Complex b);
 	double	GiveReflection(Complex j, BYTE juliaflag, Complex Z, int *iterations, double rqlim, long threshold, Complex v);
-	double	GiveBigReflection(Complex j, BYTE juliaflag, BigComplex C, QDComplex cQD, DDComplex cDD, int *iterations, double rqlim, long threshold, Complex v);
+	double	GiveBigReflection(Complex j, BYTE juliaflag, BigComplex C, int *iterations, double rqlim, long threshold, Complex v);
 	double	GiveDDReflection(Complex j, BYTE juliaflag, DDComplex cDD, int *iterations, double rqlim, long threshold, Complex v);
 	double	GiveQDReflection(Complex j, BYTE juliaflag, QDComplex cQD, int *iterations, double rqlim, long threshold, Complex v);
 	int	BigDouble2DD(dd_real *out, BigDouble *in);
@@ -55,7 +74,21 @@ class CSlope
 	double	getGradientX(double *wpixels, int index, int width);
 	double	getGradientY(double *wpixels, int index, int width, int height);
 	int	changeBrightnessOfColorScaling(int rgb, double delta, double bump_transfer_factor);
-	void	InitFwd(BYTE BigNumFlag, BYTE juliaflag, BigComplex cBig, BigComplex *zBig, BigComplex *qBig, BigComplex *aBig, BigComplex *bBig, BigComplex *vBig, BigComplex *a2Big, BigComplex *aa3Big, Complex j, Complex c, Complex *z, Complex *q);
+	void	InitFwd(BYTE BigNumFlag, BYTE juliaflag, 
+		DDComplex cDD, DDComplex *zDD, DDComplex *qDD, DDComplex *aDD, DDComplex *bDD, DDComplex *vDD, DDComplex *a2DD, DDComplex *aa3DD,
+		QDComplex cQD, QDComplex *zQD, QDComplex *qQD, QDComplex *aQD, QDComplex *bQD, QDComplex *vQD, QDComplex *a2QD, QDComplex *aa3QD,
+		BigComplex cBig, BigComplex *zBig, BigComplex *qBig, BigComplex *aBig, BigComplex *bBig, BigComplex *vBig, BigComplex *a2Big, BigComplex *aa3Big,
+		Complex j, Complex c, Complex *z, Complex *q);
+	void	InitFwdDouble(BYTE juliaflag, Complex j, Complex c, Complex *z, Complex *q);
+	void	InitFwdDD(BYTE juliaflag, 
+		DDComplex cDD, DDComplex *zDD, DDComplex *qDD, DDComplex *aDD, DDComplex *bDD, DDComplex *vDD, DDComplex *a2DD, DDComplex *aa3DD,
+		Complex j, Complex c, Complex *z, Complex *q);
+	void	InitFwdQD(BYTE juliaflag,
+		QDComplex cQD, QDComplex *zQD, QDComplex *qQD, QDComplex *aQD, QDComplex *bQD, QDComplex *vQD, QDComplex *a2QD, QDComplex *aa3QD, 
+		Complex j, Complex c, Complex *z, Complex *q);
+	void	InitFwdBig(BYTE juliaflag,
+		BigComplex cBig, BigComplex *zBig, BigComplex *qBig, BigComplex *aBig, BigComplex *bBig, BigComplex *vBig, BigComplex *a2Big, BigComplex *aa3Big,
+		Complex j, Complex c, Complex *z, Complex *q);
 
 	HWND	hwnd;
 	int	NumThreads;
@@ -63,6 +96,7 @@ class CSlope
 	int	bits_per_pixel;
 	int	precision;
 	WORD	*degree;
+	int	ArithType = DOUBLEFLOAT;
 
 	// Fwd Diff Render Stuff
 	long	threshold;
@@ -100,7 +134,9 @@ class CSlope
 	WORD	SpecialColour;
 	Complex	t2, t3, a, b, v, a2, aa3;
 //	BigComplex	t2Big, t3Big, aBig, bBig, vBig, a2Big, aa3Big;
-	BigComplex	zNewton;
+	BigComplex	zNewtonBig;
+	DDComplex	zNewtonDD;
+	QDComplex	zNewtonQD;
 	char	variety;
 	bool	SpecialFlag;
     };

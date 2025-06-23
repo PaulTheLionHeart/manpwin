@@ -5,11 +5,13 @@
 add_library(parser 
 addstuff.cpp
 cmplx.h
-externs.h
+DDTrigFn.cpp
 fpu087.cpp
 fractint.h
 mpmath.h
 parser.cpp
+ParserFn.cpp
 prototyp.h
+QDTrigFn.cpp
 TrigFn.cpp
 )
