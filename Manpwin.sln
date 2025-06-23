@@ -1,17 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2027
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35004.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Manpwin", "Manpwin.vcxproj", "{8253B6B5-D533-470C-B39B-6E7E35B9CB70}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Manpwin64", "Manpwin.vcxproj", "{8253B6B5-D533-470C-B39B-6E7E35B9CB70}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PNGLib", "pnglib\PNGLib.vcxproj", "{F6928C87-5BEB-4AAA-AF5D-0368D9E66309}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZLib", "zlib\ZLib.vcxproj", "{F2152412-3EC2-4B1B-AC9E-7E10AEB22C26}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZLib", "ZLib\ZLib.vcxproj", "{F2152412-3EC2-4B1B-AC9E-7E10AEB22C26}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "parser", "parser\parser.vcxproj", "{1CE26221-302F-4EF9-A9B2-9445D4F67732}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mpeg", "MPEG\mpeg.vcxproj", "{3368BC86-428C-4C62-97C5-A4F4898A2EF0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qdlib", "qdlib\QDLib.vcxproj", "{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,6 +133,24 @@ Global
 		{3368BC86-428C-4C62-97C5-A4F4898A2EF0}.Static|x86.ActiveCfg = Debug|Win32
 		{3368BC86-428C-4C62-97C5-A4F4898A2EF0}.Static|x86.Build.0 = Debug|Win32
 		{3368BC86-428C-4C62-97C5-A4F4898A2EF0}.Static|x86.Deploy.0 = Debug|Win32
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Debug|Win32.Build.0 = Debug|Win32
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Debug|x64.ActiveCfg = Debug|x64
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Debug|x64.Build.0 = Debug|x64
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Debug|x86.ActiveCfg = Debug|Win32
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Debug|x86.Build.0 = Debug|Win32
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Release|Win32.ActiveCfg = Release|Win32
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Release|Win32.Build.0 = Release|Win32
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Release|x64.ActiveCfg = Release|x64
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Release|x64.Build.0 = Release|x64
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Release|x86.ActiveCfg = Release|Win32
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Release|x86.Build.0 = Release|Win32
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Static|Win32.ActiveCfg = Debug|Win32
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Static|Win32.Build.0 = Debug|Win32
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Static|x64.ActiveCfg = Debug|x64
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Static|x64.Build.0 = Debug|x64
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Static|x86.ActiveCfg = Debug|Win32
+		{3AB1A5DC-F283-4239-9D1A-0BF20C7BF5DF}.Static|x86.Build.0 = Debug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
