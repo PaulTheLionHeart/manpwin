@@ -15,16 +15,16 @@ xmlns="http://www.w3.org/TR/REC-html40">
  <o:DocumentProperties>
   <o:Author>Paul</o:Author>
   <o:LastAuthor>Paul</o:LastAuthor>
-  <o:Revision>3</o:Revision>
-  <o:TotalTime>171</o:TotalTime>
+  <o:Revision>4</o:Revision>
+  <o:TotalTime>176</o:TotalTime>
   <o:Created>2022-10-11T04:51:00Z</o:Created>
-  <o:LastSaved>2022-10-11T05:21:00Z</o:LastSaved>
+  <o:LastSaved>2025-06-24T03:45:00Z</o:LastSaved>
   <o:Pages>1</o:Pages>
-  <o:Words>259</o:Words>
-  <o:Characters>1479</o:Characters>
-  <o:Lines>12</o:Lines>
-  <o:Paragraphs>3</o:Paragraphs>
-  <o:CharactersWithSpaces>1735</o:CharactersWithSpaces>
+  <o:Words>355</o:Words>
+  <o:Characters>2024</o:Characters>
+  <o:Lines>16</o:Lines>
+  <o:Paragraphs>4</o:Paragraphs>
+  <o:CharactersWithSpaces>2375</o:CharactersWithSpaces>
   <o:Version>16.00</o:Version>
  </o:DocumentProperties>
  <o:OfficeDocumentSettings>
@@ -35,10 +35,8 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <link rel=colorSchemeMapping href="manp7pre_files/colorschememapping.xml">
 <!--[if gte mso 9]><xml>
  <w:WordDocument>
-  <w:View>Print</w:View>
   <w:Zoom>134</w:Zoom>
   <w:SpellingState>Clean</w:SpellingState>
-  <w:GrammarState>Clean</w:GrammarState>
   <w:TrackMoves>false</w:TrackMoves>
   <w:TrackFormatting/>
   <w:PunctuationKerning/>
@@ -691,7 +689,7 @@ a:link, span.MsoHyperlink
 a:visited, span.MsoHyperlinkFollowed
 	{mso-style-noshow:yes;
 	mso-style-priority:99;
-	color:purple;
+	color:#954F72;
 	mso-themecolor:followedhyperlink;
 	text-decoration:underline;
 	text-underline:single;}
@@ -710,16 +708,12 @@ p.msonormal0, li.msonormal0, div.msonormal0
 span.SpellE
 	{mso-style-name:"";
 	mso-spl-e:yes;}
-span.GramE
-	{mso-style-name:"";
-	mso-gram-e:yes;}
 .MsoChpDefault
 	{mso-style-type:export-only;
 	mso-default-props:yes;
 	font-size:10.0pt;
 	mso-ansi-font-size:10.0pt;
 	mso-bidi-font-size:10.0pt;
-	font-family:"Calibri",sans-serif;
 	mso-ascii-font-family:Calibri;
 	mso-ascii-theme-font:minor-latin;
 	mso-fareast-font-family:Calibri;
@@ -771,7 +765,7 @@ div.WordSection1
  </o:shapelayout></xml><![endif]-->
 </head>
 
-<body lang=EN-AU link=blue vlink=purple style='tab-interval:36.0pt'>
+<body lang=EN-AU link=blue vlink="#954F72" style='tab-interval:36.0pt'>
 
 <div class=WordSection1>
 
@@ -782,53 +776,68 @@ normal'><b style='mso-bidi-font-weight:normal'>Precision and Speed<o:p></o:p></b
 normal'><b style='mso-bidi-font-weight:normal'><o:p>&nbsp;</o:p></b></p>
 
 <p class=MsoNormal style='margin-bottom:0cm;margin-bottom:.0001pt;line-height:
-normal'><span class=SpellE>ManpWIN</span> uses <span class=GramE>3</span> types
-of arithmetic depending on the precision required at the depth of zoom: double
-float, <span class=SpellE>floatexp</span> and arbitrary arithmetic.<o:p></o:p></p>
+normal'><span class=SpellE>ManpWIN</span> uses 5 types of arithmetic depending
+on the precision required at the depth of zoom: double float, double-double
+float, quad-double float, <span class=SpellE>floatexp</span> and arbitrary
+arithmetic.</p>
 
 <p class=MsoNormal style='margin-bottom:0cm;margin-bottom:.0001pt;line-height:
 normal'><o:p>&nbsp;</o:p></p>
 
 <p class=MsoNormal style='margin-bottom:0cm;margin-bottom:.0001pt;line-height:
-normal'>Normal double float (64 bit) arithmetic us used to a magnification of
-about 10^13 for all calculations except for Perturbation. This is quite fast as
-the maths co-processor is used. However, once this <span class=GramE>is
-exceeded</span>, arbitrary precision arithmetic is used to gain the precision
-required at a great reduction of speed. Maximum precision is set at 3600.<o:p></o:p></p>
+normal'>Normal double float (64 bit) arithmetic us used to a magnification of about
+10^13 for all calculations except for Perturbation. This is quite fast as the
+maths co-processor is used. However, once this is exceeded, arbitrary precision
+arithmetic is used to gain the precision required at a great reduction of
+speed. Maximum precision is set at 3600.</p>
 
 <p class=MsoNormal style='margin-bottom:0cm;margin-bottom:.0001pt;line-height:
 normal'><o:p>&nbsp;</o:p></p>
 
 <p class=MsoNormal style='margin-bottom:0cm;margin-bottom:.0001pt;line-height:
 normal'>However, using Perturbation theory (<a
-href="http://www.science.eclipse.co.uk/sft_maths.pdf">SFT Maths PDF</a>), <span
-class=SpellE>ManpWIN</span> is able to gain speed by doing all the calculations
-using double float even when the precision is greater than 13. However,
-precision runs out at a precision of approximately 308 when the double float no
-longer has the exponent required to specify the width. <o:p></o:p></p>
+href="http://www.science.eclipse.co.uk/sft_maths.pdf"><u>SFT Maths PDF</u></a>),
+<span class=SpellE>ManpWIN</span> is able to gain speed by doing all the
+calculations using double float even when the precision is greater than 13.
+However, precision runs out at a precision of approximately 308 when the double
+float no longer has the exponent required to specify the width. </p>
 
 <p class=MsoNormal style='margin-bottom:0cm;margin-bottom:.0001pt;line-height:
 normal'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>Double-double floating point numbers allow for a precision
+up to 30 decimals and quad-double floating point allows up to 60 decimals.
+These are substantially faster than arbitrary precision arithmetic. Refer to <u><a
+href="https://www.davidhbailey.com/dhbpapers/qd.pdf">Library for Double-Double
+and Quad-Double Arithmetic</a></u>. These arithmetic types have been added to
+many fractals including formula<u> </u>parser that were limited to only using
+double floating point arithmetic.<o:p></o:p></p>
 
 <p class=MsoNormal style='margin-bottom:0cm;margin-bottom:.0001pt;line-height:
 normal'>An intermediate form of arithmetic, <span class=SpellE>floatexp</span>,
-uses normal double float with an extended exponent allowing zooms of up to 10^1040
-using Perturbation. The speed is a little less than double float, but still
-much faster than arbitrary precision. After this, the only way to zoom deeper
-is to use full arbitrary precision.<o:p></o:p></p>
+uses normal double float with an extended exponent allowing zooms of up to
+10^1040 using Perturbation. The speed is a little less than double float, but
+still much faster than arbitrary precision. After this, the only way to zoom
+deeper is to use full arbitrary precision.</p>
 
 <p class=MsoNormal style='margin-bottom:0cm;margin-bottom:.0001pt;line-height:
 normal'><o:p>&nbsp;</o:p></p>
 
 <p class=MsoNormal style='margin-bottom:0cm;margin-bottom:.0001pt;line-height:
-normal'>One issue with perturbation using derivative slope, is that slope calculations
-run out of precision at a precision of around 150 and arbitrary precision arithmetic
-is used do the slope calculations. This is done only once per pixel and not a
-big overhead. At a precision of 300 using slope calculations, <span
-class=SpellE>ManpWIN</span> changes to <span class=SpellE>floatexp</span> to
-prevent glitches caused by lack of precision. Calculations for slope using
+normal'>One issue with perturbation using derivative slope, is that slope
+calculations run out of precision at a precision of around 150 and arbitrary
+precision arithmetic is used do the slope calculations. This is done only once
+per pixel and not a big overhead. At a precision of 300 using slope calculations,
+<span class=SpellE>ManpWIN</span> changes to <span class=SpellE>floatexp</span>
+to prevent glitches caused by lack of precision. Calculations for slope using
 forward differencing and no slope are able to continue to a precision of 308
-before upgrading the arithmetic.<o:p></o:p></p>
+before upgrading the arithmetic.</p>
+
+<p class=MsoNormal style='margin-bottom:0cm;margin-bottom:.0001pt;line-height:
+normal'><o:p>&nbsp;</o:p></p>
+
+<p class=MsoNormal>For more information on the arbitrary precision library, see
+<u><a href="https://www.mpfr.org/">MPFR Library</a></u> for details.</p>
 
 <p class=MsoNormal><o:p>&nbsp;</o:p></p>
 
