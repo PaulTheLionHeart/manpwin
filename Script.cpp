@@ -128,6 +128,9 @@ extern	HWND		GlobalHwnd;	// This is the main windows handle
 extern	char		szStatus[];	// status bar text
 extern	CDib		Dib;
 extern	Complex		j;
+extern	BigDouble	BigBailout;
+extern	dd_real		DDBailout;
+extern	qd_real		QDBailout;
 
 PAINTSTRUCT 	StatusBar;
 RECT 		StatusBarRect;
@@ -662,10 +665,26 @@ void	UpdateAnimParamValues(void)
 	return;
     if (ParamAnimation)
 	{
+	param[ParamNumber] += divisor;
 	if (ParamNumber == 10)
-	    rqlim += divisor;
-	else
-	    param[ParamNumber] += divisor;
+	    {
+	    rqlim = param[ParamNumber];
+	    switch (MathType)
+		{
+//		case DOUBLEFLOAT:
+//		    rqlim = param[ParamNumber];
+//		    break;
+		case DOUBLEDOUBLE:
+		    DDBailout = param[ParamNumber];
+		    break;
+		case QUADDOUBLE:
+		    QDBailout = param[ParamNumber];
+		    break;
+		case ARBITRARYPREC:
+		    BigBailout = param[ParamNumber];
+		    break;
+		}
+	    }
 	}
     if (type == PERTURBATION && ParamNumber > 10)
 	{

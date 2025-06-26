@@ -452,7 +452,7 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 	    realimagQD = z->x * z->y;
 	    z->x = q->x + sqrQD.x - sqrQD.y;
 	    z->y = q->y + realimagQD + realimagQD;
-	    return QDBailoutTest(z, sqrQD, rqlim, BailoutTestType);
+	    return QDBailoutTest(z, sqrQD);
 	    }
 	case BURNINGSHIP:				// Burning Ship
 	    {
@@ -464,7 +464,7 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 	    realimagQD = fabs(z->x * z->y);
 	    z->x = sqrQD.x - sqrQD.y + q->x;
 	    z->y = realimagQD + realimagQD - q->y;
-	    return QDBailoutTest(z, sqrQD, rqlim, BailoutTestType);
+	    return QDBailoutTest(z, sqrQD);
 	    }
 
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
@@ -472,12 +472,12 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 	    z->y = -fabs(z->y);
 	    *z = z->CPolynomial(*degree);
 	    *z = *z + *q;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zQD);
 
 	case POWER:			// Power
 	    *z = z->CPolynomial(*degree);
 	    *z = *z + *q;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zQD);
 
 	case CUBIC:					// Art Matrix Cubic
 	    {
@@ -570,7 +570,7 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 		*z = *q + z->CSin();
 	    z->x += param[0];
 	    z->y += param[1];
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zQD);
 
 	case EXPFRACTAL:				// Exponential
 	    {
@@ -616,8 +616,8 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 	    qd_real m = param[1];
 	    aQD = z->CPolynomial(*degree - 1);
 	    *z = (aQD * *z) / (aQD + m) + *q;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
-	    }
+	    return QDFractintBailoutTest(&zQD);
+	}
 
 	case POLYNOMIAL:				// Polynomial
 	    {
@@ -635,7 +635,7 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 		    }
 		}
 	    *z = FinalZ + *q;
-	    return QDFractintBailoutTest(&zQD, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zQD);
 	    }
 
 	case TIERAZON:					// a group of Tierazon fractalsa
@@ -703,18 +703,17 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
     Bailout Test
 **************************************************************************/
 
-bool	CPixel::QDBailoutTest(QDComplex *z, QDComplex SqrZ, double rqlim, int BailoutTestType)
+bool	CPixel::QDBailoutTest(QDComplex *z, QDComplex SqrZ)
     {
     qd_real	magnitude;
     qd_real	manhmag;
     qd_real	manrmag;
-    qd_real	QDBailout = rqlim;
 
     switch (BailoutTestType)
 	{
 	case BAIL_MOD:
 	    magnitude = z->CSumSqr();
-	    return (magnitude > rqlim);
+	    return (magnitude > QDBailout);
 
 	case BAIL_REAL:
 	    return (SqrZ.x > QDBailout);
@@ -738,7 +737,7 @@ bool	CPixel::QDBailoutTest(QDComplex *z, QDComplex SqrZ, double rqlim, int Bailo
 
 	default:
 	    magnitude = z->CSumSqr();
-	    return (magnitude > rqlim);
+	    return (magnitude > QDBailout);
 	}
     }
 
@@ -746,19 +745,18 @@ bool	CPixel::QDBailoutTest(QDComplex *z, QDComplex SqrZ, double rqlim, int Bailo
     Bailout Test
 **************************************************************************/
 
-bool	CPixel::QDFractintBailoutTest(QDComplex *z, double rqlim, int BailoutTestType)
+bool	CPixel::QDFractintBailoutTest(QDComplex *z)
     {
     QDComplex	TempSqr;
     qd_real	magnitude;
     qd_real	manhmag;
     qd_real	manrmag;
-    qd_real	QDBailout = rqlim;
 
     switch (BailoutTestType)
 	{
 	case BAIL_MOD:
 	    magnitude = z->CSumSqr();
-	    return (magnitude > rqlim);
+	    return (magnitude > QDBailout);
 
 	case BAIL_REAL:
 	    TempSqr.x = sqr(z->x);
@@ -788,7 +786,7 @@ bool	CPixel::QDFractintBailoutTest(QDComplex *z, double rqlim, int BailoutTestTy
 
 	default:
 	    magnitude = z->CSumSqr();
-	    return (magnitude > rqlim);
+	    return (magnitude > QDBailout);
 	}
     }
 

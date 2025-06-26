@@ -185,7 +185,7 @@ int	DoAnimation(void)
     else
 	{
 	if (ANIM[i].IsParamAnim)
-	    sprintf(szStatus, "Animation: Frame %d of %d, Param Value = %f", i + 1, TotalFrames, ANIM[i].ParamValue);
+	    sprintf(szStatus, "Animation: Frame %d of %d, Param Value = %.12f", i + 1, TotalFrames, ANIM[i].ParamValue);
 	else
 	    sprintf(szStatus, "Animation: Frame %d of %d", i + 1, TotalFrames);
 	}

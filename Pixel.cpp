@@ -32,8 +32,8 @@
 	Initialise Pixel
 **************************************************************************/
 
-void	CPixel::InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, int precisionIn, int biomorphIn, int InsideMethodIn, int OutsideMethodIn, 
-		int RotationAngleIn, int xdotsIn, int ydotsIn, int nFDOptionIn, CPlot *PlotIn)
+void	CPixel::InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, dd_real DDBailoutIn, qd_real QDBailoutIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, int precisionIn, 
+		int biomorphIn, int InsideMethodIn, int OutsideMethodIn, int RotationAngleIn, int xdotsIn, int ydotsIn, int nFDOptionIn, CPlot *PlotIn)
 
     {
     type = typeIn;
@@ -41,9 +41,9 @@ void	CPixel::InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degree
     special = specialIn;
     degree = degreeIn;
     rqlim = rqlimIn;
+    DDBailout = DDBailoutIn;
+    QDBailout = QDBailoutIn;
     SpecialFlag = SpecialFlagIn;
-//    dem_delta = dem_deltaIn;
-//    dem_width = dem_widthIn;
     biomorph = biomorphIn;
     InsideMethod = InsideMethodIn;
     OutsideMethod = OutsideMethodIn;

@@ -238,6 +238,7 @@ extern	int	InitParserArithmetic(void);
 int	perform_worklist(HWND), SecondaryWndProc(void);
 void	ClearScreen(void);
 void	DisplayStatusBarInfo(int, char *);
+void    InitBailout();			// set up defaults - can be overwritten by parameter animation
 
 extern	ProcessType	OscAnimProc;
 	CFract		Fractal;
@@ -341,6 +342,7 @@ void	pfract_main(HWND hwnd, char *szSaveFileName)
 	    number = 0;					// char count for screen
 	    finished = FALSE;
 	    UpdateInit();
+	    InitBailout();
 	    if (!DataFromPNGFile)
 		perform_worklist(hwnd);
 	    if (time_to_quit)
@@ -670,6 +672,17 @@ int	SpecialFractals(HWND hwnd, CPixel *Pix)
     }
 
 /**************************************************************************
+	Setup bailout values to default
+**************************************************************************/
+
+void    InitBailout()
+    {
+    DDBailout = rqlim;
+    QDBailout = rqlim;
+    BigBailout = rqlim;
+    }
+
+/**************************************************************************
 	General escape-time engine 
 **************************************************************************/
 
@@ -693,7 +706,7 @@ int	perform_worklist(HWND hwnd)
 	Pix.InitDistEst(&xxmin, &xxmax, &yymin, &yymax, &xx3rd, &yy3rd, &distestwidth, distest);
 
     // okay, we have to get the globals into the Pixel object somehow
-    Pix.InitPixel0(type, special, subtype, &degree, rqlim, ExpandStarTrailColours, SpecialFlag, precision, biomorph, InsideMethod, OutsideMethod, RotationAngle, xdots, ydots, nFDOption, &Plot);
+    Pix.InitPixel0(type, special, subtype, &degree, rqlim, DDBailout, QDBailout, ExpandStarTrailColours, SpecialFlag, precision, biomorph, InsideMethod, OutsideMethod, RotationAngle, xdots, ydots, nFDOption, &Plot);
     Pix.InitPixel1(&TZfilter, &TrueCol, &OscProcess, period_level, distest, invert, phaseflag, wpixels, juliaflag, &closenuff, &BigCloseEnough, calcmode);
     Pix.InitPixel2(CoordSystem, UseCurrentPalette, reset_period, colors, hor, vert, mandel_width, BigHor, BigVert, BigWidth, &yymax, &Big_yymax);
     Pix.InitPixel3(dStrands, j, pairflag, &andcolor, _3dflag, &xgap, &ygap, &Big_xgap, &Big_ygap, &c, ScreenRatio, colours, &Fractal, BailoutTestType);

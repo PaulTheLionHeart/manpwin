@@ -68,6 +68,9 @@ extern	char	PNGName[];			// base name for PNG file sequence
 
 static	double	xscale, yscale;
 static	double	StartRate = -1.0, EndRate = 1.0;
+static	char	StartRateStr[MAX_PATH];		// these are used because there may be very small differences if using higher precision
+static	char	EndRateStr[MAX_PATH];
+
 static	int	ParamNumber = 0;
 static	int	frames = 100;
 	BOOL	Return2Start = FALSE;		// do we want to go backwards to the start?
@@ -167,9 +170,9 @@ DLGPROC FAR PASCAL ParamAnimDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 		SendMessage(hCtrl, BM_SETCHECK, StartImmediately, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_RETURN);
 		SendMessage(hCtrl, BM_SETCHECK, Return2Start, 0L);
-		sprintf(TempStr, "%f", StartRate);
+		sprintf(TempStr, "%.12f", StartRate);
 		SetDlgItemText(hDlg, IDC_RATE_START, TempStr);
-		sprintf(TempStr, "%f", EndRate);
+		sprintf(TempStr, "%.12f", EndRate);
 		SetDlgItemText(hDlg, IDC_RATE_END, TempStr);
 		SetDlgItemInt(hDlg, IDC_PARAM_NUM, ParamNumber, TRUE);
 		switch (type)
@@ -319,10 +322,10 @@ DLGPROC FAR PASCAL ParamAnimDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 			Return2Start = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_SHOWPALETTE);
 			TrueCol.ScriptPaletteFlag = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
-			GetDlgItemText(hDlg, IDC_RATE_START, TempStr, 100);
-			sscanf(TempStr, "%lf", &StartRate);
-			GetDlgItemText(hDlg, IDC_RATE_END, TempStr, 100);
-			sscanf(TempStr, "%lf", &EndRate);
+			GetDlgItemText(hDlg, IDC_RATE_START, StartRateStr, MAX_PATH);
+			sscanf(StartRateStr, "%lf", &StartRate);
+			GetDlgItemText(hDlg, IDC_RATE_END, EndRateStr, MAX_PATH);
+			sscanf(EndRateStr, "%lf", &EndRate);
 			for (i = 0; i < NumParams && i < 10; i++)	// pick up any changes to the initial parameter values
 			    {
 			    GetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[i], 100);

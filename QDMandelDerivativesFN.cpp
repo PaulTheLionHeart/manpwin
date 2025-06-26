@@ -127,7 +127,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    real_imag = z->x * z->y;
 	    z->x = q->x + sqr.x - sqr.y;
 	    z->y = q->y + real_imag + real_imag;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 1:						// Burning Ship
 	    sqr.x = z->x * z->x;
@@ -135,14 +135,14 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    real_imag = fabs(z->x * z->y);
 	    z->x = sqr.x - sqr.y + q->x;
 	    z->y = real_imag + real_imag - q->y;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 2:						// Burning Ship of Higher Degree
 	    z->x = fabs(z->x);
 	    z->y = -fabs(z->y);
 	    *z = z->CPolynomial(*degree);
 	    *z = *z + *q;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 	case 3:						// Perpendicular Burning Ship
 
@@ -165,7 +165,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    real_imag = z->x * fabs(z->y);
 	    z->x = sqr.x - sqr.y + q->x;
 	    z->y = real_imag + real_imag + q->y;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 4:						// Buffalo (works according to Kalles Fraktaller)
 	    sqr.x = z->x * z->x;
@@ -186,14 +186,14 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 		z->x = fabs(z->x) + q->x;
 		z->y = fabs(z->y) - q->y;
 		}
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 5:						// Perpendicular Buffalo - (according to Kalles Fraktaller)
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = (z->x) * fabs(z->y) * -2.0 - q->y;
 	    z->x = fabs(sqr.x - sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 6:						// Mandelbar (Tricorn)
 	    sqr.x = z->x * z->x;
@@ -210,7 +210,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 		z->x = (param[3] == 1.0 ? -z->x : z->x) + q->x;
 		z->y = (param[3] == 1.0 ? z->y : -z->y) + q->y;
 		}
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 7:						// Celtic
 	    sqr.x = z->x * z->x;
@@ -226,84 +226,84 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 		z->x = fabs(z->x);
 		*z = *z + *q;
 		}
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 8:						// Mandelbar Celtic
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = z->x * z->y * -2.0 + q->y;
 	    z->x = fabs(sqr.x - sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 9:						// Perpendicular Celtic
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = fabs(z->x) * z->y * -2.0 + q->y;
 	    z->x = fabs(sqr.x - sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 10:					// Cubic Flying Squirrel (Buffalo Imaginary)
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = fabs(((sqr.x * 3.0) - sqr.y) * z->y) - q->y;
 	    z->x = ((sqr.x - (sqr.y * 3.0)) * z->x) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 11:					// Heart Mandelbrot
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = fabs(z->x) * z->y * 2.0 - q->y;
 	    z->x = sqr.x - sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 12:					// Celtic Heart
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = fabs(z->x) * z->y * 2.0 - q->y;
 	    z->x = fabs(sqr.x - sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 13:					// Partial Cubic Burning Ship Real
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = ((sqr.x * 3.0) - sqr.y) * z->y + q->y;
 	    z->x = (sqr.x - (sqr.y * 3.0)) * fabs(z->x) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 14:					// Partial Cubic Burning Ship Imaginary
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = ((sqr.x * 3.0) - sqr.y) * fabs(z->y) + q->y;
 	    z->x = (sqr.x - (sqr.y * 3.0)) * z->x + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 15:					// Partial Cubic Buffalo Real (Celtic)
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = ((sqr.x * 3.0) - sqr.y) * z->y + q->y;
 	    z->x = fabs((sqr.x - (sqr.y * 3.0)) * z->x) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 16:					// Cubic Quasi Burning Ship (Buffalo Burning Ship Hybrid)
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = -fabs(((sqr.x * 3.0) - sqr.y) * z->y) + q->y;
 	    z->x = (sqr.x - (sqr.y * 3.0)) * fabs(z->x) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 17:					// Cubic Quasi Perpendicular
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = -fabs((sqr.x * 3.0) - sqr.y) * z->y + q->y;
 	    z->x = (sqr.x - (sqr.y * 3.0)) * fabs(z->x) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 18:					// Cubic Quasi Heart
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = fabs((sqr.x * 3.0) - sqr.y) * z->y + q->y;
 	    z->x = (sqr.x - (sqr.y * 3.0)) * fabs(z->x) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 //	    return ((sqr.x + sqr.y) >= rqlim);
 
     /****************************************************************
@@ -319,14 +319,14 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * z->x * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 20:					// Mandelbar 4th Order
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = -4.0 * z->x * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
     /****************************************************************
 	***Straight ABS Variations (16)
@@ -337,84 +337,84 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * fabs(z->x * z->y) * (sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 22:					// Burning Ship 4th Partial Imag
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * z->x * fabs(z->y) * (sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 23:					// Burning Ship 4th Partial Real
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * fabs(z->x) * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 24:					// Burning Ship 4th Partial Real Mbar
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = -4.0 * fabs(z->x) * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 25:					// Celtic Burning Ship 4th
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * fabs(z->x * z->y) * (sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 26:					// Celtic Burning Ship 4th Partial Imag
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * z->x * fabs(z->y) * (sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 27:					// Celtic Burning Ship 4th Partial Real
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * fabs(z->x) * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 28:					// Celtic Burning Ship 4th Partial Real Mbar
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = -4.0 * fabs(z->x) * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 29:					// Buffalo 4th Order
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * fabs(z->x * z->y * (sqr.x - sqr.y)) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 30:					// Buffalo 4th Partial Imag
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * fabs(z->x * z->y * (sqr.x - sqr.y)) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 31:					// Celtic (Buffalo 4th Partial Real)
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * z->x * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 32:					// Celtic 4th Mbar
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = -4.0 * z->x * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
     /**************************************************************************
 	Quasi ABS Variations (10)
@@ -425,42 +425,42 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    sqr.y = z->y * z->y;
 	    z->y = -4.0 * z->x * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 34:					// False Quasi Heart 4th
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * z->x * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 35:					// Celtic False Quasi Perpendicular 4th
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = -4.0 * z->x * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 36:					// Celtic False Quasi Heart 4th
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * z->x * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 37:					// Imag Quasi Perpendicular / Heart 4th
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * z->x * fabs(z->y) * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 38:					// Real Quasi Perpendicular 4th
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = -4.0 * fabs(z->x) * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 //	    return ((sqr.x + sqr.y) >= rqlim);
 
 	case 39:					// Real Quasi Heart 4th
@@ -468,28 +468,28 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * fabs(z->x) * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 40:					// Celtic Imag Quasi Perpendicular / Heart 4th
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * z->x * fabs(z->y) * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 41:					// Celtic Real Quasi Perpendicular 4th
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = -4.0 * fabs(z->x) * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 42:					// Celtic Real Quasi Heart 4th
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    z->y = 4.0 * fabs(z->x) * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
     /****************************************************************
 	5th Order Fractals:
@@ -503,7 +503,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = z->x * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 44:					// Mandelbar 5th (Vertical)
 	    sqr.x = z->x * z->x;
@@ -513,7 +513,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = -z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = z->x * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 45:					// Mandelbar 5th (horizontal)
 	    sqr.x = z->x * z->x;
@@ -523,7 +523,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = -z->x * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 46:					// Burning Ship 5th
 	    sqr.x = z->x * z->x;
@@ -533,7 +533,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = fabs(z->y) * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x) * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 47:					// Buffalo 5th
 	    sqr.x = z->x * z->x;
@@ -543,7 +543,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = fabs(z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y)) + q->y;
 	    z->x = fabs(z->x * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y)) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 48:					// Burning Ship 5th Partial
 	    sqr.x = z->x * z->x;
@@ -553,7 +553,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x) * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 49:					// Burning Ship 5th Partial Mbar
 	    sqr.x = z->x * z->x;
@@ -563,7 +563,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = -z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x) * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 50:					// Celtic 5th (Buffalo 5th Partial)
 	    sqr.x = z->x * z->x;
@@ -573,7 +573,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y)) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 51:					// Celtic 5th Mbar
 	    sqr.x = z->x * z->x;
@@ -583,7 +583,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = -z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y)) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 52:					// Quazi Burning Ship 5th (BS/Buffalo Hybrid)
 	    sqr.x = z->x * z->x;
@@ -593,7 +593,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = -fabs(z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y)) + q->y;
 	    z->x = fabs(z->x) * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 53:					// Quazi Perpendicular 5th
 	    sqr.x = z->x * z->x;
@@ -603,7 +603,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = -z->y * fabs(5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x) * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 54:					// Quazi Heart 5th
 	    sqr.x = z->x * z->x;
@@ -613,7 +613,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = z->y * fabs(5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x) * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);;
+	    return QDBailoutTest(z, sqr);
 
 	case 55:					// SimonBrot
 /**************************************************************************
@@ -634,7 +634,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    tempz.x = z->x * zabs.x - z->y * zabs.y;
 	    sqrtz = (*degree % 2 == 1) ? z->CSqrt() : 1.0;		// use square root power if degree is odd
 	    *z = tempz.CPolynomial(*degree / 2) * sqrtz + *q;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 	    }
 
 	case 56:					// SimonBrot2
@@ -651,7 +651,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    tempz = zabs;
 	    sqrtz = (*degree % 2 == 1) ? z->CSqrt() : 1.0;		// use square root power if degree is odd
 	    *z = z->CPolynomial(*degree / 2) * sqrtz * tempz + *q;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 	    }
 
 	case 57:					// Kung Fu Panda
@@ -667,7 +667,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    t2.x = fabs(t1.x);
 	    t2.y = fabs(t1.y);
 	    *z = t2 * t2 - *q;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 	    }
 
 	case 58:					// HPDZ Buffalo
@@ -686,7 +686,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    *z = w * w - w;
 	    z->x += q->x;
 	    z->y -= q->y;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 	    }
 
 	case 59:					// SzegediButterfly 1
@@ -705,7 +705,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    z->y = sqr.x - sqrt(fabs(z->y));
 	    *z += *q;
 
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 	    }
 
 	case 60:					// SzegediButterfly 2
@@ -720,7 +720,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 	    z->x = temp;
 	    *z += *q;
 
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 	    }
 	}
     return 0;

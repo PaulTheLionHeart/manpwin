@@ -220,14 +220,14 @@ int	CPixel::DDRunFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q, BY
 	    temp2DD.x += q->x;
 	    temp2DD.y += q->y;
 	    *z = temp2DD;
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case FNPLUSFNPIXFP:					//  Richard8 {c = z = pixel: z=sin(z)+sin(pixel),|z|<=50}
 	case FNPLUSFNPIXLONG:
 	    TrigFn.DDCMPLXtrig(z, &temp3DD, Fn1Index);
 	    temp3DD += temp1DD;
 	    *z = temp3DD;
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case TRIGSQRFP:						// { z=pixel: z=trig(z*z), |z|<TEST }
 	case TRIGSQR:						// to handle fractint par files
@@ -237,7 +237,7 @@ int	CPixel::DDRunFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q, BY
 	    temp1DD.x = sqrDD.x - sqrDD.y;
 	    TrigFn.DDCMPLXtrig(&temp1DD, &temp3DD, Fn1Index);
 	    *z = temp3DD;
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case TRIGXTRIGFP:					// z = trig0(z)*trig1(z)
 	case TRIGXTRIG:						// to handle fractint par files
@@ -246,7 +246,7 @@ int	CPixel::DDRunFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q, BY
 	    temp3DD = *z * temp1DD;
 	    *z = *z * temp1DD;
 	    *z = temp3DD;
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case ZXTRIGPLUSZFP:
 	case ZXTRIGPLUSZ:					// to handle fractint par files
@@ -266,7 +266,7 @@ int	CPixel::DDRunFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q, BY
 	    TrigFn.DDCMPLXtrig(z, z, Fn2Index);
 	    *z = *z * temp2DD;
 	    *z = temp1DD + *z;
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case MANDELTRIGFP:					// we split the routine to allow for different bailout routines
 	case LAMBDATRIG:					// to handle fractint par file references
@@ -335,7 +335,7 @@ int	CPixel::DDRunFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q, BY
 	    temp1DD.x += tmpexp * cosy + tDD.x;
 	    temp1DD.y += tmpexp * siny + tDD.y;
 	    *z = temp1DD;
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 	    }
 
 	case FPMANTRIGPLUSZSQRD:				// From Scientific American, July 1989 A Biomorph: z(n+1) = trig(z(n))+z(n)**2+C
@@ -348,7 +348,7 @@ int	CPixel::DDRunFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q, BY
 	    temp1DD.x += sqrDD.x - sqrDD.y + tDD.x;
 	    temp1DD.y += 2.0 * z->x * z->y + tDD.y;
 	    *z = temp1DD;
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 
 	case LJULFNFN:
@@ -365,7 +365,7 @@ int	CPixel::DDRunFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q, BY
 		TrigFn.DDCMPLXtrig(z, z, Fn2Index);
 		*z = tDD + *z;
 		}
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case LLAMBDAFNFN:
 	case FPLAMBDAFNFN:
@@ -381,20 +381,20 @@ int	CPixel::DDRunFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q, BY
 		TrigFn.DDCMPLXtrig(z, z, Fn2Index);
 		*z = tDD * *z;
 		}
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case SQRTRIGFP:						// SZSB(XYAXIS) { z=pixel, TEST=(p1+3): z=sin(z)*sin(z), |z|<TEST}
 	case SQRTRIG:						// to handle fractint par files
 	    TrigFn.DDCMPLXtrig(z, &temp1DD, Fn1Index);
 	    *z = temp1DD.CSqr();
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case SQR1OVERTRIGFP:					// z = sqr(1/trig(z))
 	case SQR1OVERTRIG:					// to handle fractint par files
 	    TrigFn.DDCMPLXtrig(z, z, Fn1Index);
 	    *z = z->CInvert();
 	    *z = z->CSqr();
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case FORMULA:
 	case SCREENFORMULA:
@@ -415,7 +415,7 @@ int	CPixel::DDZXTrigPlusZfpFractal(DDComplex *z, DDComplex *q, CTrigFn *TrigFn)	
     temp3DD = *z * temp1DD;					// tmp2 = p1*old*trig(old)
     temp1DD = *z * temp2DD;					// tmp  = p2*old
     *z = temp1DD + temp3DD;					// New  = p1*trig(old) + p2*old
-    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+    return DDFractintBailoutTest(z);
     }
 
 int	CPixel::DDScottZXTrigPlusZfpFractal(DDComplex *z, DDComplex *q, CTrigFn *TrigFn)    // z = (z*trig(z))+z
@@ -423,7 +423,7 @@ int	CPixel::DDScottZXTrigPlusZfpFractal(DDComplex *z, DDComplex *q, CTrigFn *Tri
     TrigFn->DDCMPLXtrig(z, &temp1DD, Fn1Index); 		// tmp	= trig(old)
     temp3DD = *z * temp1DD;					// New  = old*trig(old)
     *z = *z + temp3DD;						// New  = trig(old) + old
-    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+    return DDFractintBailoutTest(z);
     }
 
 int	CPixel::DDSkinnerZXTrigSubZfpFractal(DDComplex *z, DDComplex *q, CTrigFn *TrigFn)
@@ -432,7 +432,7 @@ int	CPixel::DDSkinnerZXTrigSubZfpFractal(DDComplex *z, DDComplex *q, CTrigFn *Tr
     TrigFn->DDCMPLXtrig(z, &temp1DD, Fn1Index); 		// tmp	= trig(old)
     temp3DD = *z * temp1DD;					// New  = old*trig(old)
     *z = tempDD - *z;						// New  = trig(old) + old
-    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+    return DDFractintBailoutTest(z);
     }
 
 

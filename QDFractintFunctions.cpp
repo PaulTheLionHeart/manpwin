@@ -604,7 +604,7 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 	    z->x = sqrQD.x - sqrQD.y;
 	    z->y = realimagQD + realimagQD;
 	    *z = CoefficientQD * *z + *q;
-	    return QDBailoutTest(z, sqrQD, rqlim, BailoutTestType);
+	    return QDBailoutTest(z, sqrQD);
 
 	case SPIDERFP:						// Spider(XAXIS) { c=z=pixel: z=z*z+c; c=c/2+z, |z|<=4 }
 	    sqrQD.x = sqr(z->x);
@@ -614,7 +614,7 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 	    z->y = 2 * realimagQD + tempQD.y;
 	    tempQD.x = tempQD.x / 2 + z->x;
 	    tempQD.y = tempQD.y / 2 + z->y;
-	    return QDBailoutTest(z, sqrQD, rqlim, BailoutTestType);
+	    return QDBailoutTest(z, sqrQD);
 
 	case MANOWARFP:						// From Art Matrix via Lee Skinner
 	case MANOWARJFP:					// to handle fractint par files
@@ -627,7 +627,7 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 	    temp1QD = *z;
 //	    d = z->CSumSqr();
 	    *z = temp3QD;
-	    return QDBailoutTest(z, sqrQD, rqlim, BailoutTestType);
+	    return QDBailoutTest(z, sqrQD);
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
 	case BARNSLEYM1:					// Barnsley's Mandelbrot type M1 from "Fractals Everywhere" by Michael Barnsley, p. 322
@@ -817,7 +817,7 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 	    z->y = tempQD.x * sqrQD.y + tempQD.y * sqrQD.x;
 	    sqrQD.x = z->x * z->x;
 	    sqrQD.y = z->y * z->y;
-	    return QDBailoutTest(z, sqrQD, rqlim, BailoutTestType);
+	    return QDBailoutTest(z, sqrQD);
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
 	case PHOENIXFP:
@@ -850,14 +850,14 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 	case FPMANDELZPOWER:
 	    *z = *z ^ temp2QD;
 	    *z += *q;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 	case FPMANZTOZPLUSZPWR:
 	case FPJULZTOZPLUSZPWR:
 	    tempQD = z->CPolynomial((int)param[2]);
 	    *z = *z ^ *z;
 	    *z = tempQD + *z + *q;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 	case MARKSMANDELFP:				// Mark Peterson's variation of "lambda" function
 	case MARKSMANDEL:
@@ -872,7 +872,7 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 	    temp1QD.x = CoefficientQD.x * tempQD.x - CoefficientQD.y * tempQD.y + tQD.x;
 	    temp1QD.y = CoefficientQD.x * tempQD.y + CoefficientQD.y * tempQD.x + tQD.y;
 	    *z = temp1QD;
-	    return QDBailoutTest(z, sqrQD, rqlim, BailoutTestType);
+	    return QDBailoutTest(z, sqrQD);
 
 	case QUATFP:
 	case QUATJULFP:
@@ -915,7 +915,7 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 
 	case TETRATEFP:					// Tetrate(XAXIS) { c=z=pixel: z=c^z, |z|<=(P1+3)
 	    *z = *q ^ *z;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
 

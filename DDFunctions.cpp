@@ -449,7 +449,7 @@ int	CPixel::DDRunFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
 	    realimagDD = z->x * z->y;
 	    z->x = q->x + sqrDD.x - sqrDD.y;
 	    z->y = q->y + realimagDD + realimagDD;
-	    return DDBailoutTest(z, sqrDD, rqlim, BailoutTestType);
+	    return DDBailoutTest(z, sqrDD);
 	    }
 	case BURNINGSHIP:				// Burning Ship
 	    {
@@ -458,20 +458,20 @@ int	CPixel::DDRunFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
 	    realimagDD = fabs(z->x * z->y);
 	    z->x = sqrDD.x - sqrDD.y + q->x;
 	    z->y = realimagDD + realimagDD - q->y;
-	    return DDBailoutTest(z, sqrDD, rqlim, BailoutTestType);
-	    }
+	    return DDBailoutTest(z, sqrDD);
+	}
 
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	    z->x = fabs(z->x);
 	    z->y = -fabs(z->y);
 	    *z = z->CPolynomial(*degree);
 	    *z = *z + *q;
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case POWER:			// Power
 	    *z = z->CPolynomial(*degree);
 	    *z = *z + *q;
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case CUBIC:					// Art Matrix Cubic
 	    {
@@ -564,7 +564,7 @@ int	CPixel::DDRunFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
 		*z = *q + z->CSin();
 	    z->x += param[0];
 	    z->y += param[1];
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(&zDD);
 
 	case EXPFRACTAL:				// Exponential
 	    {
@@ -610,8 +610,8 @@ int	CPixel::DDRunFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
 	    dd_real m = param[1];
 	    aDD = z->CPolynomial(*degree - 1);
 	    *z = (aDD * *z) / (aDD + m) + *q; 
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
-	    }
+	    return DDFractintBailoutTest(&zDD);
+	}
 
 	case POLYNOMIAL:				// Polynomial
 	    {
@@ -629,7 +629,7 @@ int	CPixel::DDRunFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
 		    }
 		}
 	    *z = FinalZ + *q;
-	    return DDFractintBailoutTest(&zDD, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(&zDD);
 	    }
 
 	case TIERAZON:					// a group of Tierazon fractalsa
@@ -697,18 +697,17 @@ int	CPixel::DDRunFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
     Bailout Test
 **************************************************************************/
 
-bool	CPixel::DDBailoutTest(DDComplex *z, DDComplex SqrZ, double rqlim, int BailoutTestType)
+bool	CPixel::DDBailoutTest(DDComplex *z, DDComplex SqrZ)
     {
     dd_real	magnitude;
     dd_real	manhmag;
     dd_real	manrmag;
-    dd_real	DDBailout = rqlim;
 
     switch (BailoutTestType)
 	{
 	case BAIL_MOD:
 	    magnitude = z->CSumSqr();
-	    return (magnitude > rqlim);
+	    return (magnitude > DDBailout);
 
 	case BAIL_REAL:
 	    return (SqrZ.x > DDBailout);
@@ -732,7 +731,7 @@ bool	CPixel::DDBailoutTest(DDComplex *z, DDComplex SqrZ, double rqlim, int Bailo
 
 	default:
 	    magnitude = z->CSumSqr();
-	    return (magnitude > rqlim);
+	    return (magnitude > DDBailout);
 	}
     }
 
@@ -740,19 +739,18 @@ bool	CPixel::DDBailoutTest(DDComplex *z, DDComplex SqrZ, double rqlim, int Bailo
     Bailout Test
 **************************************************************************/
 
-bool	CPixel::DDFractintBailoutTest(DDComplex *z, double rqlim, int BailoutTestType)
+bool	CPixel::DDFractintBailoutTest(DDComplex *z)
     {
     DDComplex	TempSqr;
     dd_real	magnitude;
     dd_real	manhmag;
     dd_real	manrmag;
-    dd_real	DDBailout = rqlim;
 
     switch (BailoutTestType)
 	{
 	case BAIL_MOD:
 	    magnitude = z->CSumSqr();
-	    return (magnitude > rqlim);
+	    return (magnitude > DDBailout);
 
 	case BAIL_REAL:
 	    TempSqr.x = sqr(z->x);
@@ -782,7 +780,7 @@ bool	CPixel::DDFractintBailoutTest(DDComplex *z, double rqlim, int BailoutTestTy
 
 	default:
 	    magnitude = z->CSumSqr();
-	    return (magnitude > rqlim);
+	    return (magnitude > DDBailout);
 	}
     }
 

@@ -568,11 +568,13 @@ long	CPixel::BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 
     if (user_data(hwnd) == -1)
 	return(-1);
+/*
     if (precision <= 30 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
 	*color = DoDDFract(hwnd, row, col);	// double double
     else if (precision <= 60 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
 	*color = DoQDFract(hwnd, row, col);	// quad double
     else
+*/
 	*color = DoBigFract(hwnd, row, col);	// arbitrary precision
     if (*color < 0)
 	return -1;

@@ -778,7 +778,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    sqr.y = z->y * z->y;
 	    z->x = sqr.x - sqr.y + q->x;
 	    z->y = realimag + realimag + q->y;
-	    return QDBailoutTest(z, sqr, rqlim, BailoutTestType);
+	    return QDBailoutTest(z, sqr);
 	    }
 
 	case 2:						// Nova, init: z=1; iterate: z=z-((z*z*z-1)/(3*z*z))+c
@@ -794,11 +794,11 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    z1 = z->CSqr() - *z2 * 0.5 + *q;
 	    *z2 = *z;
 	    *z = z1;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 	case 4:						// Talis, z=((z*z)/(1+z))+c
 	    *z = z->CSqr() / (*z + 1) + *q;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 	case 5:						// Newton variation, z=((z*z*z-z-1)/(3*z*z-1)-z)*c
 	    z1 = *z;
@@ -845,32 +845,32 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	case 12:					// z=z*z*z*z*z+c
 	case 13:					// z=z*z*z*z*z*z+c
 	    *z = z->CPolynomial(*degree) + *q;		// z^deg - function power
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 	case 14:					// z1=z*z+c; z=z*z+c*z2; z2=z
 	    z1 = z->CSqr() + *q;
 	    *z = z->CSqr() + *q * *z2;
 	    *z2 = z1;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 	case 15:					// Phoenix II, z1=z; z=z*z + real(c) + imag(c)*z2; z2=z1
 	    z1 = *z;
 	    *z = z->CSqr() + q->x + *z2 * q->y;
 	    *z2 = z1;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 	case 16:					// Phoenix III, z1=z; z=z*z*z +   real(c) + imag(c)*z2; z2=z1
 	    z1 = *z;
 	    *z = z->CCube() + q->x + *z2 * q->y;
 	    //z = z*z + __real__ c + __imag__ c * *z2;
 	    *z2 = z1;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 	case 17:					// Phoenix IV,  z1=z; z=z*z*z +.5*real(c) + imag(c)*z2; z2=z1
 	    z1 = *z;
 	    *z = z->CCube() + .5 * q->x + *z2 * q->y;
 	    *z2 = z1;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 	case 18:					// Newton/Mandel, z=-z/3; iterate: z=z-(z*z*z+z*z*c-z+c)/(3*z*z+2*c*z-1)
 	    *z2 = *z;
@@ -1644,13 +1644,13 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 
 	case 108:					// More Fractals, z=(z*c)/(1+z)+c; [Talis II]
 	    *z = (*z * *q) / (*z + 1) + *q;
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 	case 109:					// More Fractals, z=(c+z*z*c)/(1-z*z*c)
 	    *z2 = z->CSqr() * *q;
 	    //    *z2 = z*z*q;
 	    *z = (*q + *z2) / (-*z2 + 1);
-	    return QDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(z);
 
 	case 110:					// More Fractals, z = (c+(z^6))/(1+(z^2))
 	    z1 = *z;
@@ -1717,13 +1717,13 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    *z = *z - (*z*z1 - 1) / 3 * z1;
 	    *z = *z * *q;
 	    zd = *z - *z2;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 120:					// Flarium 07, Polynomial: z = (z*z+c)^(cn+c)
 	    z1 = *z;
 	    *z = (*z * *z + *q) ^ (*z2 + *q);
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 121:					// Flarium 08, Sharon Webb: z = z*z*z*z+1/c; [Sharon Star]
 	    z1 = *z;
@@ -1731,14 +1731,14 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    z4QD = z2->CSqr();
 	    *z = z4QD + q->CInvert();
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 122:					// Flarium 09, Sharon Webb: z = (z*z/2+c)*(z*z/2+c); [Sharon's Space Probe]
 	    z1 = *z;
 	    *z2 = z->CSqr() / 2 + *q;
 	    *z = z2->CSqr();
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 123:					// Flarium 10, Sharon Webb: z = z*z*z*z+((c/2)^2)+c; [Sharon08]
 	    {
@@ -1749,7 +1749,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    z4QD = z2a.CSqr();
 	    *z = z4QD + *z2 + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 	    }
 
 	case 124:					// Flarium 11, Sharon Webb: z = z*z*z*z+(z^(z+cn))+c
@@ -1761,14 +1761,14 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    z4QD = z2a.CSqr();
 	    *z = z4QD + *z2 + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 	    }
 
 	case 125:					// Flarium 12, Sharon Webb: z = (z+z*z/2)+c
 	    z1 = *z;
 	    *z = (*z + z->CSqr() / 2) + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 126:					// Flarium 13, Sharon Webb: z=(z*z*z*z-z2*z2*z2*z2+c)^2
 	    {
@@ -1784,7 +1784,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    *z = t.CSqr();
 	    *z2 = z1;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 	    }
 
 	case 127:					// Flarium 15, Newton Variations: z = z - (z*z*z*z-1)/(4*z*z*z) + c; [4th Order Nova]
@@ -1814,7 +1814,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    *z = z4QD + q->y + *z2 * q->x;
 	    *z2 = z1;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 	    }
 
 	case 130:					// Flarium 21, Sharon Webb: z=(1/z*z-c)*(z*z*z*z+c); [Sharon03]
@@ -1823,7 +1823,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    z4QD = z2->CSqr();
 	    *z = (z->CInvert() * *z - *q)*(z4QD + *q);
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 131:					// Flarium 25, Newton Variations: z=z-(z*z*z*z-z)/(4*z*z*z-z); z=z*c
 	    *z2 = *z;
@@ -1838,7 +1838,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    z1 = *z;
 	    *z = z->CSqr()*(*z2 + *z) / (*z2 + *z + *q) + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 133:					// Flarium 28, Derbyshire / Newton: z=z - (z*z*z-1)/(3*z*z)+c; [Nova-Mandelbrot-MultiFract]
 	    {
@@ -1864,7 +1864,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 		}
 	    *z = z->CSqr() + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 	    }
 
 	case 134:					// Flarium 29, Derbyshire / Newton: c = (z*z*z-1)/(3*z*z); z -= (z*z*z-1)/(3*z*z)*c
@@ -1885,14 +1885,14 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    *z2 = *z;
 	    *z = z->CCube() - caa3QD * *z + b;
 	    zd = *z - *z2;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 137:					// Flarium 32, Derbyshire / Newton: 3rd Order Nova in a M-Set (Try single pass)
 	    *z2 = *z;
 	    z1 = z->CSqr();
 	    *z = *z - (*z*z1 - 1) / (z1 * 3) + *q;
 	    zd = *z - *z2;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 138:					// Flarium 34, Sharon Webb: z1= z*(z*z).csin()/2; z=z1*z1 + c; [Sharon14]
 	    *z2 = *z;
@@ -1900,33 +1900,33 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    z1 = *z * t.CSin() / 2;
 	    *z = z1.CSqr() + *q;
 	    zd = *z - *z2;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 139:					// Flarium 35, Polynomial: z=c*(z.csin())
 	    *z2 = *z;
 	    *z = *q * z->CSin();
 	    zd = *z - *z2;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 140:					// Flarium 36, Polynomial: z=(c*z).csin()
 	    *z2 = *z;
 	    t = *z * *q;
 	    *z = t.CSin();
 	    zd = *z - *z2;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 141:					// Flarium 37, Polynomial: z=(z*z*z-1)/(3*z*z); z = c*(z.csin() + z.ccos())
 	    *z2 = *z;
 	    *z = *q * (z->CSin() + z->CCos());
 	    zd = *z - *z2;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 142:					// Flarium 38, Polynomial: z = z*z+c; z.set_real(z.real()*z.real()); [Variation real]
 	    *z2 = *z;
 	    *z = *z * *z + *q;
 	    z->x = z->x*z->x;
 	    zd = *z - *z2;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 143:					// Flarium 40, Polynomial: z1 = z*z*z*z; z = c*z1/4*z1 + z
 	    z1 = *z;
@@ -1934,7 +1934,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    z4QD = z2->CSqr();
 	    *z = *q * z4QD / 4 * z4QD + *z;
 	    zd = *z - z4QD;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 144:					// Flarium 41, Polynomial: z = c*(z*z*z*z).csin()
 	    z1 = *z;
@@ -1952,19 +1952,19 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    t = *z * *q;
 	    *z = z4QD + t.CSin() + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 146:					// Flarium 44, Polynomial: z=(z*z*z*z-z)/(4*z*z*z); z=c*z.csin()
 	    z1 = *z;
 	    *z = *q * z->CSin();
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 147:					// Flarium 45, Polynomial: z=(z*z*z*z-1)/(4*z*z*z); z=c*z.csin()
 	    z1 = *z;
 	    *z = *q * z->CSin();
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 148:					// Flarium 46, Sharon Webb: z1= z*(z*z).csin()/2; z=z1*z1 + c; [Sharon14 N-Method]
 	    z1 = *z;
@@ -1972,13 +1972,13 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    *z2 = t.CSin() * *z / 2;
 	    *z = z2->CSqr() + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 149:					// Flarium 49, Polynomial: z=(z*z*z*z-z)/((4*z*z*z)-z); z=c*z.csin()
 	    z1 = *z;
 	    *z = *q * z->CSin();
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 150:					// Flarium 50, Sharon Webb: z = z*z*z*z+1/c; [Sharon's Star M-Set]
 	    z1 = *z;
@@ -1986,14 +1986,14 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    z4QD = z2->CSqr();
 	    *z = z4QD + q->CInvert();
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 151:					// Flarium 51, Sharon Webb: z = (z*z/2+c)*(z*z/2+c); [Space Probe M-Set]
 	    z1 = *z;
 	    *z2 = z->CSqr() / 2 + *q;
 	    *z = z2->CSqr();
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 152:					// Flarium 52, Sharon Webb: z = z*z*z*z+t+c; [Sharon08 M-Set]
 	    {
@@ -2004,34 +2004,34 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    z4QD = z2a.CSqr();
 	    *z = z4QD + *z2 + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 	}
 
 	case 153:					// Flarium 53, Sharon Webb: z = (z+z*z/2)+c; [M-Set]
 	    z1 = *z;
 	    *z = (*z + z->CSqr() / 2) + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 154:					// Flarium 54, Polynomial: z = z*z*c+c; [M-Set]
 	    z1 = *z;
 	    *z = z->CSqr() * *q + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 155:					// Flarium 55, Polynomial: z = (z*z).csin()*z*z*c+c; [M-Set]
 	    z1 = *z;
 	    *z2 = z->CSqr();
 	    *z = z2->CSin() * z->CSqr() * *q + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 156:					// Flarium 56, Polynomial: z = (z*z+c)/(z*z-c); [M-Set]
 	    z1 = *z;
 	    *z2 = z->CSqr();
 	    *z = (*z2 + *q) / (*z2 - *q);
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 157:					// Flarium 57, Derbyshire / Newton: z=z-(z*z1-z)/((5*z1)-z)+c; [5th Order Nova Variation]
 	    z1 = *z;
@@ -2073,13 +2073,13 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    z4QD = z2->CSqr();
 	    *z = z4QD + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 162:					// Flarium 62, Polynomial: z=z*z*(1+z)/(1+z+c)+c
 	    z1 = *z;
 	    *z = z->CSqr()*(*z + 1) / (*z + *q + 1) + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 163:					// Flarium 64, PHOENIX: z1=z; z=z*z*z*z+c.real()*z2/2+c.imag()*z2/2+c; z2=z1
 	    {
@@ -2091,7 +2091,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    *z = z4QD + *z2 * (q->x * q->y) / 2 + *q;
 	    *z2 = z1;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 	}
 
 	case 164:					// Flarium 66, Newton Variations: z = ((z-(((z^2)-1)/(2*z)))^2)*c
@@ -2099,7 +2099,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    *z = *z - (z->CSqr() - 1) / (*z + *z);
 	    *z = z->CSqr() * *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 165:					// Flarium 67-69, Newton Variations: z = ((z-(((z^n)-1)/(n*(z^(n-1)))))^2)*c
 	    {
@@ -2111,7 +2111,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    *z = *z - (fn - 1) / (f1n * *degree);
 	    *z = z->CSqr() * *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 	}
 
 	case 166:					// Flarium 80, Newton Variations: z=((z*z*z*z-1)/(1-(3*z*z*z)))*c
@@ -2131,7 +2131,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    s = *z * t.CSin() / 2;
 	    *z = s.CSin() + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 	}
 
 	case 168:					// Flarium 91, Sharon Webb: z = (z*(z+z).ccos()/2); z = z*z+c; [Sharon16]
@@ -2140,7 +2140,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    *z = (*z*t.CCos() / 2);
 	    *z = z->CSqr() + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 169:					// Flarium 92, Sharon Webb: z = (z*(z+z).csin()/2); z = z*z+c; [Sharon17]
 	    z1 = *z;
@@ -2148,7 +2148,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    *z = (*z*t.CSin() / 2);
 	    *z = z->CSqr() + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 170:					// Flarium 93, Sharon Webb: z = (z*(z+z*z).csin()/2); z = z*z+c; [Sharon18]
 	    z1 = *z;
@@ -2156,7 +2156,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    *z = (*z*t.CSin() / 2);
 	    *z = z->CSqr() + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 171:					// Flarium 111, Sharon Webb: z1= z*(z*z).csin()/2; z=z1*z1 + c; [Alden's Ray Method]
 	    z1 = *z;
@@ -2165,7 +2165,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    *z2 = *z * t.CSin() / 2;
 	    *z = z2->CSqr() + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 172:					// Flarium 112-116, Polynomials: z=z^n*c+z*c; Dragon curve variations
 	    {
@@ -2175,7 +2175,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    fn = z->CPolynomial(*degree);
 	    *z = fn * *q + *z * *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 	}
 
 	case 173:					// Flarium 117, Newton Variations: z = z-(z*z*z-z*c-1)/(3*z*z+c-1)
@@ -2190,20 +2190,20 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 	    t = z->CCube()*z->CSqr();
 	    *z = t.CSin() + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 175:					// Flarium 119, Sharon Webb: z = (z+(z*z)/.192).csin() + c; [Sharon's Butterfly]
 	    z1 = *z;
 	    t = *z + (*z * *z) / 0.192;
 	    *z = t.CSin() + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 176:					// Flarium 125, Sharon Webb: z = z+z*z*z/4 + c; [Sharon21]
 	    z1 = *z;
 	    *z = *z + z->CCube() / 4 + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 
 	case 177:					// Flarium 145, Polynomial: z=z^2+c [Jaenisch method]
 	    {
@@ -2279,7 +2279,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
 		}
 	    *z = z->CPolynomial(*degree) + *q;
 	    zd = *z - z1;
-	    return QDFractintBailoutTest(&zd, rqlim, BailoutTestType);
+	    return QDFractintBailoutTest(&zd);
 	    }
 	}
     return 0;

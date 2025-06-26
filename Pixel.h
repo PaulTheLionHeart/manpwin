@@ -103,15 +103,22 @@ class CPixel
 		BigDouble *Big_xxmax, BigDouble *Big_yymin, BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio, double *xxmin,
 		double *xxmax, double *yymin, double *yymax, WORD special, BYTE juliaflag);
 
-	void	InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, int precisionIn, int biomorphIn, int InsideMethodIn, int OutsideMethodIn, 
-		int orientationIn, int xdotsIn, int ydotsIn, int nFDOptionIn, CPlot *PlotIn);
-	void	InitPixel1(CTZfilter *TZfilterIn, CTrueCol *TrueColIn, COscProcess *OscProcessIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, double *wpixelsIn, BYTE juliaflagIn, double *closenuffIn, BigDouble *BigCloseEnoughIn, BYTE calcmodeIn);
-	void	InitPixel2(int CoordSystemIn, BOOL UseCurrentPaletteIn, int reset_periodIn, int colorsIn, double horIn, double vertIn, double mandel_widthIn, BigDouble BigHorIn, BigDouble BigVertIn, BigDouble BigWidthIn, double *yymax, BigDouble *Big_yymaxIn);
-	void	InitPixel3(double dStrandsIn, Complex jIn, BYTE pairflagIn, long *andcolor, BYTE _3dflagIn, double *xgap, double *ygap, BigDouble *Big_xgap, BigDouble *Big_ygap, Complex *cIn, double ScreenRatio, WORD colours, CFract *Fract, int BailoutTestTypeIn);
-	void	InitPixel4(BigComplex *cBigIn, Complex *qIn, Complex *zIn, BigComplex *qBigIn, BigComplex *zBigIn, long thresholdIn, BYTE BigNumFlagIn, long *colorIn, int logvalIn, long *iterationIn, double f_radiusIn, double f_xcenterIn, char *LyapSequenceIn);
-	void	InitPixel5(double f_ycenterIn, int *symmetryIn, double paramIn[], double potparamIn[], int decompIn, BYTE *logtableIn, int *AutoStereo_valueIn, int widthIn, HWND hwndIn, CMatrix *MatIn, CDDMatrix *DDMatIn, CQDMatrix *QDMatIn, CBigMatrix *BigMatIn);
-	void	InitPixel6(CDib *DibIn, int *PlotTypeIn, int *oldrowIn, int *oldcolIn, int *time_to_zoom, int *time_to_restart, int *time_to_reinit, int *time_to_quit, long fillcolorIn, long *andcolorIn, int *blockindexIn, int *totpassesIn, int *curpassIn);
-	void	InitPixel7(dd_real *DDxgapIn, dd_real *DDygapIn, dd_real *DDHorIn, dd_real *DDVertIn, dd_real *DDWidthIn, dd_real *DDCloseEnoughIn, qd_real *QDxgapIn, qd_real *QDygapIn, qd_real *QDHorIn, qd_real *QDVertIn, qd_real *QDWidthIn, qd_real *QDCloseEnoughIn);
+	void	InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, dd_real DDBailoutIn, qd_real QDBailoutIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, 
+		int precisionIn, int biomorphIn, int InsideMethodIn, int OutsideMethodIn, int orientationIn, int xdotsIn, int ydotsIn, int nFDOptionIn, CPlot *PlotIn);
+	void	InitPixel1(CTZfilter *TZfilterIn, CTrueCol *TrueColIn, COscProcess *OscProcessIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, double *wpixelsIn, BYTE juliaflagIn, 
+		double *closenuffIn, BigDouble *BigCloseEnoughIn, BYTE calcmodeIn);
+	void	InitPixel2(int CoordSystemIn, BOOL UseCurrentPaletteIn, int reset_periodIn, int colorsIn, double horIn, double vertIn, double mandel_widthIn, BigDouble BigHorIn, BigDouble BigVertIn, 
+		BigDouble BigWidthIn, double *yymax, BigDouble *Big_yymaxIn);
+	void	InitPixel3(double dStrandsIn, Complex jIn, BYTE pairflagIn, long *andcolor, BYTE _3dflagIn, double *xgap, double *ygap, BigDouble *Big_xgap, BigDouble *Big_ygap, Complex *cIn, double ScreenRatio, 
+		WORD colours, CFract *Fract, int BailoutTestTypeIn);
+	void	InitPixel4(BigComplex *cBigIn, Complex *qIn, Complex *zIn, BigComplex *qBigIn, BigComplex *zBigIn, long thresholdIn, BYTE BigNumFlagIn, long *colorIn, int logvalIn, long *iterationIn, 
+		double f_radiusIn, double f_xcenterIn, char *LyapSequenceIn);
+	void	InitPixel5(double f_ycenterIn, int *symmetryIn, double paramIn[], double potparamIn[], int decompIn, BYTE *logtableIn, int *AutoStereo_valueIn, int widthIn, HWND hwndIn, CMatrix *MatIn, 
+		CDDMatrix *DDMatIn, CQDMatrix *QDMatIn, CBigMatrix *BigMatIn);
+	void	InitPixel6(CDib *DibIn, int *PlotTypeIn, int *oldrowIn, int *oldcolIn, int *time_to_zoom, int *time_to_restart, int *time_to_reinit, int *time_to_quit, long fillcolorIn, long *andcolorIn, 
+		int *blockindexIn, int *totpassesIn, int *curpassIn);
+	void	InitPixel7(dd_real *DDxgapIn, dd_real *DDygapIn, dd_real *DDHorIn, dd_real *DDVertIn, dd_real *DDWidthIn, dd_real *DDCloseEnoughIn, qd_real *QDxgapIn, qd_real *QDygapIn, qd_real *QDHorIn, 
+		qd_real *QDVertIn, qd_real *QDWidthIn, qd_real *QDCloseEnoughIn);
 	void	InitPixel8(dd_real *DDyymax, qd_real *QDyymax, MATH_TYPE *MathTypeIn, Complex RotationCentre);
 
 	void	ManageBignumPrecision(int precision);				// allow internal bignum variables to track current precision requirements
@@ -142,7 +149,7 @@ class CPixel
 	WORD	type;			// M=mand, J=Julia 1,2,4->
 	int	subtype;		// B=basin, S=stripe, N=normal
 	WORD	*degree;		// polynomial degree
-	double	rqlim;
+	double	rqlim;			// bailout
 	BYTE	SpecialFlag;
 	double	dem_delta, dem_width;	// distance estimator variables
 	int	biomorph;
@@ -330,8 +337,8 @@ class CPixel
 	void	CalcDDFloatIteration(double error, double *wpixels, int row, int col, DDComplex z, DDComplex OldZ, DDComplex OlderZ, 
 		double FloatIteration, WORD type, int subtype, WORD *degree, BYTE SpecialFlag, WORD special, int width);
 	int	DDRunTierazonFunctions(int subtype, DDComplex *z, DDComplex *q, DDComplex *z2, BYTE *SpecialFlag, long *iteration);
-	bool	DDBailoutTest(DDComplex *z, DDComplex SqrZ, double rqlim, int BailoutTestType);
-	bool	DDFractintBailoutTest(DDComplex *z, double rqlim, int BailoutTestType);
+	bool	DDBailoutTest(DDComplex *z, DDComplex SqrZ);
+	bool	DDFractintBailoutTest(DDComplex *z);
 	int	DDRunManDerFunctions(int subtype, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration);
 	int	DDInitTierazonFunctions(int subtype, DDComplex *z, DDComplex *q);
 	int	DDInitFunctions(WORD type, DDComplex *z, DDComplex *q);
@@ -342,8 +349,8 @@ class CPixel
 	void	CalcQDFloatIteration(double error, double *wpixels, int row, int col, QDComplex z, QDComplex OldZ, QDComplex OlderZ,
 		double FloatIteration, WORD type, int subtype, WORD *degree, BYTE SpecialFlag, WORD special, int width);
 	int	QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDComplex *z2, BYTE *SpecialFlag, long *iteration);
-	bool	QDBailoutTest(QDComplex *z, QDComplex SqrZ, double rqlim, int BailoutTestType);
-	bool	QDFractintBailoutTest(QDComplex *z, double rqlim, int BailoutTestType);
+	bool	QDBailoutTest(QDComplex *z, QDComplex SqrZ);
+	bool	QDFractintBailoutTest(QDComplex *z);
 	int	QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q);
 	int	QDInitManDerFunctions(int subtype, QDComplex *z, QDComplex *q);
 	int	QDInitTierazonFunctions(int subtype, QDComplex *z, QDComplex *q);

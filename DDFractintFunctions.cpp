@@ -604,7 +604,7 @@ int	CPixel::DDRunFractintFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *
 	    z->x = sqrDD.x - sqrDD.y;
 	    z->y = realimagDD + realimagDD;
 	    *z = CoefficientDD * *z + *q;
-	    return DDBailoutTest(z, sqrDD, rqlim, BailoutTestType);
+	    return DDBailoutTest(z, sqrDD);
 
 	case SPIDERFP:						// Spider(XAXIS) { c=z=pixel: z=z*z+c; c=c/2+z, |z|<=4 }
 	    sqrDD.x = sqr(z->x);
@@ -614,7 +614,7 @@ int	CPixel::DDRunFractintFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *
 	    z->y = 2 * realimagDD + tempDD.y;
 	    tempDD.x = tempDD.x / 2 + z->x;
 	    tempDD.y = tempDD.y / 2 + z->y;
-	    return DDBailoutTest(z, sqrDD, rqlim, BailoutTestType);
+	    return DDBailoutTest(z, sqrDD);
 
 	case MANOWARFP:						// From Art Matrix via Lee Skinner
 	case MANOWARJFP:					// to handle fractint par files
@@ -627,7 +627,7 @@ int	CPixel::DDRunFractintFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *
 	    temp1DD = *z;
 //	    d = z->CSumSqr();
 	    *z = temp3DD;
-	    return DDBailoutTest(z, sqrDD, rqlim, BailoutTestType);
+	    return DDBailoutTest(z, sqrDD);
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
 	case BARNSLEYM1:					// Barnsley's Mandelbrot type M1 from "Fractals Everywhere" by Michael Barnsley, p. 322
@@ -817,7 +817,7 @@ int	CPixel::DDRunFractintFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *
 	    z->y = tempDD.x * sqrDD.y + tempDD.y * sqrDD.x;
 	    sqrDD.x = z->x * z->x;
 	    sqrDD.y = z->y * z->y;
-	    return DDBailoutTest(z, sqrDD, rqlim, BailoutTestType);
+	    return DDBailoutTest(z, sqrDD);
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
 	case PHOENIXFP:
@@ -850,14 +850,14 @@ int	CPixel::DDRunFractintFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *
 	case FPMANDELZPOWER:
 	    *z = *z ^ temp2DD;
 	    *z += *q;
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case FPMANZTOZPLUSZPWR:
 	case FPJULZTOZPLUSZPWR:
 	    tempDD = z->CPolynomial((int)param[2]);
 	    *z = *z ^ *z;
 	    *z = tempDD + *z + *q;
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 	case MARKSMANDELFP:				// Mark Peterson's variation of "lambda" function
 	case MARKSMANDEL:
@@ -872,7 +872,7 @@ int	CPixel::DDRunFractintFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *
 	    temp1DD.x = CoefficientDD.x * tempDD.x - CoefficientDD.y * tempDD.y + tDD.x;
 	    temp1DD.y = CoefficientDD.x * tempDD.y + CoefficientDD.y * tempDD.x + tDD.y;
 	    *z = temp1DD;
-	    return DDBailoutTest(z, sqrDD, rqlim, BailoutTestType);
+	    return DDBailoutTest(z, sqrDD);
 
 	case QUATFP:
 	case QUATJULFP:
@@ -915,7 +915,7 @@ int	CPixel::DDRunFractintFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *
 
 	case TETRATEFP:					// Tetrate(XAXIS) { c=z=pixel: z=c^z, |z|<=(P1+3)
 	    *z = *q ^ *z;
-	    return DDFractintBailoutTest(z, rqlim, BailoutTestType);
+	    return DDFractintBailoutTest(z);
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
 
