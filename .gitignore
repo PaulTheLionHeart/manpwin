@@ -1,2 +1,9 @@
 x64
 *.filters
+build
+Release
+Debug
+*.user
+.vs
+git
+
