@@ -281,6 +281,7 @@
 #define SLOPEFORWARDDIFF	241
 #define POLYNOMIAL		242
 #define TOWER			243
+#define NUMFRACTAL		244	// dedicated to an 11 year old girl who "discovered" it
 //#define CELTIC			235
 //#define MANDELBARCELTIC		236
 //#define PERPCELTIC		237

@@ -80,7 +80,7 @@ int	CPixel::QDInitFractintFunctions(WORD type, QDComplex *z, QDComplex *q)
 		    }
 		}
 	    period_level = FALSE;			// no periodicity checking
-	    *color = 0;
+	    color = 0;
 	    if (!juliaflag)
 		*z = *q / 3;
 	    break;
@@ -560,7 +560,7 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 	    int		tmpcolor;
 	    int		i;
 
-	    color = iteration;
+	    color = *iteration;
 	    z2 = *z;
 	    z1 = z->CPolynomial(*degree - 1);
 	    *z = *z - (z1 * *z - *q - 1) / (z1 * *degree);
@@ -579,16 +579,16 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 			if (distance(rootsDD[i], z2) < thresh)
 			    {
 			    if (subtype == 'S')
-				tmpcolor = 1 + (i & 7) + ((*color & 1) << 3);
+				tmpcolor = 1 + (i & 7) + ((color & 1) << 3);
 			    else
 				tmpcolor = 1 + i;
 			    break;
 			    }
 			}
 		    if (tmpcolor == -1)
-			*color = threshold;
+			color = threshold;
 		    else
-			*color = tmpcolor;
+			color = tmpcolor;
 		    }
 
 		return(TRUE);
@@ -723,7 +723,7 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 	    //         ----------------------------------
 	    //              cdegree * old**(cdegree-1)         
 
-	    *color = *iteration;
+	    color = *iteration;
 	    cd1.x = cdegreeQD.x - 1.0;
 	    cd1.y = cdegreeQD.y;
 	    //    temp = CComplexPower(z, cd1);

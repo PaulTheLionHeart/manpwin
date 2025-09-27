@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "big.h"
+#include "Arithmetic.h"
 
 extern	double	hor;				// horizontal address
 extern	double	vert;				// vertical address

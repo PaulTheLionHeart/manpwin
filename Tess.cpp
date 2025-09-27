@@ -17,7 +17,7 @@ int	CPixel::tesseral(HWND hwnd, int user_data(HWND hwnd))
     {
     register struct tess *tp;
 
-    guessplot = (*PlotType != NOSYM && *PlotType != XAXIS);
+    guessplot = (PlotType != NOSYM && PlotType != XAXIS);
 
     DWORD *dstack = NULL;
 
@@ -236,19 +236,19 @@ void	CPixel::ClearTessMemory(DWORD *dstack)
 long	CPixel::tesschkcol(int x,int y1,int y2)
     {
     long i;
-    i = (long)Plot->GetColour((WORD)x,(WORD)(++y1));
+    i = (long)Plot.GetColour((WORD)x,(WORD)(++y1));
     while (--y2 > y1)
-	if ((long)Plot->GetColour((WORD)x,(WORD)y2) != i) return -1;
+	if ((long)Plot.GetColour((WORD)x,(WORD)y2) != i) return -1;
     return i;
     }
 
 long	CPixel::tesschkrow(int x1,int x2,int y)
     {
     long i;
-    i = (long)Plot->GetColour((WORD)x1,(WORD)y);
+    i = (long)Plot.GetColour((WORD)x1,(WORD)y);
     while (x2 > x1) 
 	{
-	if ((long)Plot->GetColour((WORD)x2,(WORD)y) != i) return -1;
+	if ((long)Plot.GetColour((WORD)x2,(WORD)y) != i) return -1;
 	--x2; 
 	}
     return i;

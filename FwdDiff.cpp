@@ -349,6 +349,14 @@ int	CSlope::RunSlopeFwdDiffBig(int user_data(HWND hwnd), char* StatusBarInfo, bo
     DWORD	index;
     long	ColourPtr;
     double	iterations;
+    double	temp_x, temp_y;
+    double	ScreenRatio = (double)xdots / (double)ydots;
+
+    temp_x = ScreenRatio / (double)(xdots - 1);
+    temp_y = 1.0 / (double)(ydots - 1);
+
+    Big_xgap = BigWidth * temp_x;
+    Big_ygap = BigWidth * temp_y;
 
     *ThreadComplete = false;
     for (y = 0; y < ydots; y++)
@@ -500,6 +508,13 @@ int	CSlope::RunSlopeFwdDiffQD(int user_data(HWND hwnd), char* StatusBarInfo, boo
     DWORD	index;
     long	ColourPtr;
     double	iterations;
+    double	temp_x, temp_y;
+    double	ScreenRatio = (double)xdots / (double)ydots;
+
+    temp_x = ScreenRatio / (double)(xdots - 1);
+    temp_y = 1.0 / (double)(ydots - 1);
+    Big_xgap = BigWidth * temp_x;
+    Big_ygap = BigWidth * temp_y;
 
     *ThreadComplete = false;
     ConvertBignumsQD(Big_xgap, Big_ygap, BigHor, BigVert, BigWidth, &QDxgap, &QDygap, &QDhor, &QDvert, &QDWidth);
@@ -647,6 +662,13 @@ int	CSlope::RunSlopeFwdDiffDD(int user_data(HWND hwnd), char* StatusBarInfo, boo
     DWORD	index;
     long	ColourPtr;
     double	iterations;
+    double	temp_x, temp_y;
+    double	ScreenRatio = (double)xdots / (double)ydots;
+
+    temp_x = ScreenRatio / (double)(xdots - 1);
+    temp_y = 1.0 / (double)(ydots - 1);
+    Big_xgap = BigWidth * temp_x;
+    Big_ygap = BigWidth * temp_y;
 
     *ThreadComplete = false;
     ConvertBignumsDD(Big_xgap, Big_ygap, BigHor, BigVert, BigWidth, &DDxgap, &DDygap, &DDhor, &DDvert, &DDWidth);
@@ -785,6 +807,13 @@ int	CSlope::RunSlopeFwdDiffDouble(int user_data(HWND hwnd), char* StatusBarInfo,
     long	ColourPtr;
     double	iterations;
     Complex	OldZ, OlderZ;
+    double	temp_x, temp_y;
+    double	ScreenRatio = (double)xdots / (double)ydots;
+
+    temp_x = ScreenRatio / (double)(xdots - 1);
+    temp_y = 1.0 / (double)(ydots - 1);
+    xgap = mandel_width * temp_x;
+    ygap = mandel_width * temp_y;
 
     *ThreadComplete = false;
     for (y = 0; y < ydots; y++)
@@ -903,8 +932,8 @@ int	CSlope::RunSlopeFwdDiffDouble(int user_data(HWND hwnd), char* StatusBarInfo,
     Slope Fractal
 **************************************************************************/
 
-int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
-	BYTE BigNumFlag, BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, double *wpixels, BYTE juliaflag, int xdots, 
+int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, /*double xgap, double ygap,*/
+	BYTE BigNumFlag, /*BigDouble Big_xgap, BigDouble Big_ygap, */BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, double *wpixels, BYTE juliaflag, int xdots, 
 	int ydots, int width, WORD *degreeIn, int precision)
 	{
 	int	i;

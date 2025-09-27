@@ -55,7 +55,7 @@ int	decimals = 10, precision;
 
 static	int	OldPrecision = 0;
 
-extern	int	ReinitBigVars(int);
+extern	int	ChangeBigPrecision(int);
 
 /**************** a handy little debugging tool *********************/
 #ifdef	_DEBUG
@@ -82,6 +82,7 @@ void	ShowBignum(BigDouble x, char *Location)
 
 void BigCornerstoFloat(void)
     {
+/*
     c.x = (double)mpfr_get_d(cBig.x.x, MPFR_RNDN);
     c.y = (double)mpfr_get_d(cBig.y.x, MPFR_RNDN);
     yymax = (double)mpfr_get_d(Big_yymax.x, MPFR_RNDN);
@@ -89,12 +90,15 @@ void BigCornerstoFloat(void)
     ygap = (double)mpfr_get_d(Big_ygap.x, MPFR_RNDN);
     z.x = (double)mpfr_get_d(zBig.x.x, MPFR_RNDN);
     z.y = (double)mpfr_get_d(zBig.y.x, MPFR_RNDN);
+*/
     hor = (double)mpfr_get_d(BigHor.x, MPFR_RNDN);
     vert = (double)mpfr_get_d(BigVert.x, MPFR_RNDN);
     mandel_width = (double)mpfr_get_d(BigWidth.x, MPFR_RNDN);
+/*
     q.x = (double)mpfr_get_d(qBig.x.x, MPFR_RNDN);
     q.y = (double)mpfr_get_d(qBig.y.x, MPFR_RNDN);
     closenuff = (double)mpfr_get_d(BigCloseEnough.x, MPFR_RNDN);
+*/
     BigNumFlag = FALSE;
     }
 
@@ -104,6 +108,7 @@ void BigCornerstoFloat(void)
 
 void FloatCornerstoBig(void)
     {
+/*
     cBig.x = c.x;
     cBig.y = c.y;
     Big_yymax = yymax;
@@ -111,13 +116,16 @@ void FloatCornerstoBig(void)
     Big_ygap = ygap;
     zBig.x = z.x;
     zBig.y = z.y;
+*/
     BigHor = hor;
     BigVert = vert;
     BigWidth = mandel_width;
+/*
     qBig.x = q.x;
     qBig.y = q.y;
     BigCloseEnough = closenuff;
     BigBailout = rqlim;
+*/
     BigNumFlag = TRUE;
     }
 /*
@@ -280,7 +288,7 @@ int	calcfracinit(void)
 	if (precision > OldPrecision + 10)
 	    {
 //  This is a cludge that resets all the internal parameters of Bignum and allows ongoing increases in the number of decimals
-	    if (ReinitBigVars(decimals) < 0)
+	    if (ChangeBigPrecision(decimals) < 0)
 		{
 		MessageBox (PixelHwnd, "Ran out of resolution - retry", "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		return FALSE; 
@@ -296,6 +304,7 @@ int	calcfracinit(void)
 //	if (init_big_dec(decimals) < 0)
 //	    return -1;
 	FloatCornerstoBig();
+/*
 	if (RotationAngle != NORMAL && RotationAngle != 90 && RotationAngle != 180 && RotationAngle != 270)
 	    {
 	    double  z_rot = (double)RotationAngle;
@@ -306,7 +315,7 @@ int	calcfracinit(void)
 	    else
 		BigMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
 	    }
-
+*/
 	}
     return 0;
     }

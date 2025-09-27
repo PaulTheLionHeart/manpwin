@@ -5,45 +5,17 @@
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
 
-#include	<stdio.h>
-#include	"manp.h"
-#include	"Fract.h"
-#include	"resource.h"
-#include	"fractype.h"
-#include	"menu.h"
-#include	"anim.h"
-#include	"polygon.h"
-#include	"plot.h"
+#include "OtherFunctions.h"
 
 #define MIN(a,b) (a <= b ? a : b)
 #define MAX(a,b) (a >= b ? a : b)
 #define MAXPOINTS 16
 
-extern	long	threshold;
-extern	double	mandel_width;			/* width of display */
-extern	double	hor;				/* horizontal address */
-extern	double	vert;				/* vertical address */
-extern	double	ScreenRatio;			// ratio of width / height for the screen
-//extern	double	param[];
-extern	WORD	type;				// fractal type
-extern	int	subtype;			// A - E
-extern	int	curpass, totpasses;
-//extern	BYTE	*PalettePtr;			// points to true colour palette
-
-static	CPoly	polygon;			// polygon class
-extern	int	xdots, ydots;
-extern	CPlot	Plot;		// image plotting routines 
-
-static	double	xscale, yscale;
-static	int	sides = 7;			// number of sides of polygon or star
-static	long	count = 250L;			// number of polygons or stars
-static	BOOL	IsStar = TRUE;			// spread colours across palette
-
 /**************************************************************************
 	Geometric Shapes Fractal Type Images
 ***************************************************************************/
 
-int	DoGeometry(void)
+int	COtherFunctions::DoGeometry(void)
 
     {
     int	    i, j, k;
@@ -90,12 +62,12 @@ int	DoGeometry(void)
 	    case 'B':					
 	    case 'C':					
 	    case 'D':					
-		t = 2 * PI / sides;
+		t = 2 * PI / Sides;
 		if (subtype == 'B' || subtype == 'C')
 		    offset = 1;
 		else
-		    offset = (sides % 2) ? sides / 2 : sides / 2 - 1;
-		for (j = 0; j < sides; j++)
+		    offset = (Sides % 2) ? Sides / 2 : Sides / 2 - 1;
+		for (j = 0; j < Sides; j++)
 		    {
 		    u[j] = x + size * cos(j * t + phase);
 		    v[j] = y + size * sin(j * t + phase);
@@ -104,7 +76,7 @@ int	DoGeometry(void)
 		    }
 		if (subtype == 'C')
 		    {
-		    for (j = 0; j < sides; j++)
+		    for (j = 0; j < Sides; j++)
 			polygon.read(a[j], b[j], j);				// load verticies
 		    polygon.init(j, colour);						// initialise vertices and colour
 		    polygon.calcs();						// find MAX,MIN
@@ -112,9 +84,9 @@ int	DoGeometry(void)
 		    }
 		else
 		    {
-		    for (j = 0; j < sides; j++)
+		    for (j = 0; j < Sides; j++)
 			{
-			k = (j + offset < sides) ? j + offset : j + offset - sides;
+			k = (j + offset < Sides) ? j + offset : j + offset - Sides;
 			Plot.genline(a[j], b[j], a[k], b[k], colour);
 			}
 		    }
@@ -124,84 +96,15 @@ int	DoGeometry(void)
     return 0;
     }
 
-DLGPROC FAR PASCAL GeometryDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam)
-     {
-     static     char	temp;
-     static     UINT	tempParam;
-     static     WORD	temp_special;
-     BOOL		bTrans ;
+/**************************************************************************
+    Get parameters for Geometry
+**************************************************************************/
 
-     switch (message)
-	  {
-	  case WM_INITDIALOG:
-	        temp = subtype;
-	        switch (subtype)
-		    {
-		    case 'A':
-			tempParam = IDC_A;
-			break;
-		    case 'B':
-			tempParam = IDC_B;
-			break;
-		    case 'C':
-			tempParam = IDC_C;
-			break;
-		    case 'D':
-			tempParam = IDC_D;
-			break;
-		    default:				// uninitialised
-			tempParam = IDC_A;
-			temp = 'A';
-			break;
-		    }
-		CheckRadioButton(hDlg, IDC_A, IDC_F, tempParam);
-		SetDlgItemInt(hDlg, IDC_PARAM1, sides, TRUE);
-		SetDlgItemInt(hDlg, IDC_PARAM2, count, TRUE);
-		SetFocus(GetDlgItem(hDlg, tempParam));
-	        return FALSE ;
-
-	  case WM_COMMAND:
-	        switch ((int) LOWORD(wParam))
-		    {
-		    case IDC_A:
-		    case IDC_B:
-		    case IDC_C:
-		    case IDC_D:
-		        switch ((int) LOWORD(wParam))
-			    {
-			    case IDC_A:
-				temp = 'A';
-				break;
-			    case IDC_B:
-				temp = 'B';
-				break;
-			    case IDC_C:
-				temp = 'C';
-				break;
-			    case IDC_D:
-				temp = 'D';
-				break;
-			    }
-
-			CheckRadioButton(hDlg, IDC_A, IDC_F, (int) LOWORD(wParam));
-		        return (DLGPROC)TRUE ;
-
-		    case IDOK:
-			count = GetDlgItemInt(hDlg, IDC_PARAM2, &bTrans, TRUE);
-			sides = GetDlgItemInt(hDlg, IDC_PARAM1, &bTrans, TRUE);
-			if (sides > MAXPOINTS)
-			    sides = MAXPOINTS;
-			if (sides < 2)
-			    sides = 2;
-			subtype = temp;
-			EndDialog (hDlg, TRUE);
-			return (DLGPROC)TRUE;
-
-		    case IDCANCEL:
-			EndDialog (hDlg, FALSE);
-			return (DLGPROC)FALSE;
-		   }
-		   break;
-	    }
-      return (DLGPROC)FALSE ;
-      }
+void	COtherFunctions::GetCount(long in)
+    {
+    count = in;
+    }
+void	COtherFunctions::GetSubtype(int in)
+    {
+    subtype = in;
+    }

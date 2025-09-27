@@ -281,6 +281,7 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 	    case FORMULA05:
 	    case SHARON:
 	    case QUAD:
+	    case NUMFRACTAL:
 		if (param[0] != 0.0 || param[1] != 0.0)
 		    fract_sym = NOSYM;
 		else if (juliaflag)
@@ -342,7 +343,7 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 
 //    if (type != FORMULA)
 	setsymmetry(fract_sym, /*thread, */1, _3dflag, decomp, pairflag, method, invert, CoordSystem, param, degree, type, subtype, calcmode, RotationAngle, Fractal, hor,
-	    vert, mandel_width, xxmax, xxmin, yymin, yymax, special, juliaflag, PlotType, BigNumFlag, Big_xxmin, Big_xxmax, Big_yymin, Big_yymax, BigHor, BigVert, BigWidth, 
+	    vert, mandel_width, xxmax, xxmin, yymin, yymax, special, juliaflag, BigNumFlag, Big_xxmin, Big_xxmax, Big_yymin, Big_yymax, BigHor, BigVert, BigWidth, 
 	    ScreenRatio /*ixstop, xxstop, iystop, yystop*/);
 
     return 0;
@@ -354,7 +355,7 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 
     void	CPixel::setsymmetry(int sym, int uselist, BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[],
 	WORD degree, WORD type, int subtype, BYTE calcmode, int RotationAngle, CFract *Fractal, double hor, double vert, double mandel_width, double *xxmax, double *xxmin,
-	double *yymin, double *yymax, WORD special, BYTE juliaflag, int *PlotType, BYTE BigNumFlag, BigDouble *Big_xxmin, BigDouble *Big_xxmax, BigDouble *Big_yymin,
+	double *yymin, double *yymax, WORD special, BYTE juliaflag, BYTE BigNumFlag, BigDouble *Big_xxmin, BigDouble *Big_xxmax, BigDouble *Big_yymin,
 	BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio)
 
 	{
@@ -365,17 +366,26 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 
 	if (sym == NOPLOT)
 	    {
-	    *PlotType = NOPLOT;
+	    PlotType = NOPLOT;
 	    return;
 	    }
-	else if (sym == NOSYM && *PlotType < FILTERPLOT)	// don't splatter filkters etc
-	    *PlotType = NOSYM;
+	else if (sym == NOSYM && PlotType < FILTERPLOT)	// don't splatter filkters etc
+	    PlotType = NOSYM;
 
 	xaxis_row = yaxis_col = -1;
 	if (BigNumFlag)
 	    {
-	    *Big_xxmin = BigHor;
-	    *Big_xxmax = BigHor + BigWidth * ScreenRatio;	// aspect ratio 
+	    if (NumberThreads <= 1)
+		{
+		*Big_xxmin = BigHor;
+		*Big_xxmax = BigHor + BigWidth * ScreenRatio;	// aspect ratio 
+		}
+	    else
+		{
+		*Big_xxmin = BigHor + (BigWidth * ScreenRatio) * ThreadNumber / NumberThreads;
+		*Big_xxmax = BigHor + (BigWidth * ScreenRatio) * (ThreadNumber + 1) / NumberThreads;
+		}
+
 	    *Big_yymin = BigVert;
 	    *Big_yymax = BigVert + BigWidth;
 
@@ -403,8 +413,16 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 	    }
 	else
 	    {
-	    *xxmin = hor;
-	    *xxmax = hor + mandel_width * ScreenRatio;			// aspect ratio 
+	    if (NumberThreads <= 1)
+		{
+		*xxmin = hor;
+		*xxmax = hor + mandel_width * ScreenRatio;			// aspect ratio 
+		}
+	    else
+		{
+		*xxmin = hor + ThreadNumber * (mandel_width * ScreenRatio) / NumberThreads;
+		*xxmax = hor + (ThreadNumber + 1) * (mandel_width * ScreenRatio) / NumberThreads;
+		}
 	    *yymin = vert;
 	    *yymax = vert + mandel_width;
 
@@ -433,21 +451,21 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 		    if (type == NEWTON)					// Newton type fractal 
 			{
 			if (subtype == 'S' || subtype == 'B')
-			    *PlotType = XAXISBASIN;
+			    PlotType = XAXISBASIN;
 			else
-			    *PlotType = XAXIS;
+			    PlotType = XAXIS;
 			}
 		    else
-			*PlotType = XAXIS;
+			PlotType = XAXIS;
 		    }
 		else
-		    *PlotType = NOSYM;
+		    PlotType = NOSYM;
 		break;
 	    case YAXIS:							// Y-axis Symmetry 
 		if (ysym_split(yaxis_col, yaxis_between/*, symmetry*/) == 0)
-		    *PlotType = YAXIS;
+		    PlotType = YAXIS;
 		else
-		    *PlotType = NOSYM;
+		    PlotType = NOSYM;
 		break;
 	    case XYAXIS:							// X-axis AND Y-axis Symmetry
 		xsym_split(xaxis_row, xaxis_between/*, symmetry*/);
@@ -458,12 +476,12 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 			if (type == NEWTON)					// Newton type fractal
 			    {
 			    if (subtype == 'S' || subtype == 'B')
-				*PlotType = XAXISBASIN;
+				PlotType = XAXISBASIN;
 			    else
-				*PlotType = XAXIS;
+				PlotType = XAXIS;
 			    }
 			else
-			    *PlotType = XAXIS;
+			    PlotType = XAXIS;
 			break;
 		    case 2:							// just yaxis symmetry
 			if (type == NEWTON)					// Newton type fractal 
@@ -474,27 +492,27 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 				*symmetry = 1;
 				}
 			    else
-				*PlotType = YAXIS;
+				PlotType = YAXIS;
 			    }
 			else
-			    *PlotType = YAXIS;
+			    PlotType = YAXIS;
 			break;
 		    case 3:							// both axes 
 			if (type == NEWTON)					// Newton type fractal 
 			    {
 			    if (subtype == 'S' || subtype == 'B')
-				*PlotType = XYAXISBASIN;
+				PlotType = XYAXISBASIN;
 			    else
-				*PlotType = XYAXIS;
+				PlotType = XYAXIS;
 			    }
 			else
-			    *PlotType = XYAXIS;
+			    PlotType = XYAXIS;
 		    }
 		break;
 	    case ORIGIN:							// Origin Symmetry 
 		if (xsym_split(xaxis_row, xaxis_between/*, symmetry*/) == 0 && ysym_split(yaxis_col, yaxis_between/*, symmetry*/) == 0)
 		    {
-		    *PlotType = ORIGIN;
+		    PlotType = ORIGIN;
 		    ixstop = xxstop;					// didn't want this changed 
 		    }
 		else

@@ -45,6 +45,7 @@ static	long    count = 10000000;
 	Apollonius Fractal Type Images
 ***************************************************************************/
 
+/*
 int	DoApolloniusIFS(void)
 
     {
@@ -99,6 +100,7 @@ int	DoApolloniusIFS(void)
 	}
     return 0;
     }
+*/
 
 /*
 <?xml version="1.0" encoding="UTF-8"?>

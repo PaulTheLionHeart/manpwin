@@ -5,6 +5,8 @@
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
 
+#include "OtherFunctions.h"
+/*
 #include	<stdio.h>
 #include	"manp.h"
 #include	"Fract.h"
@@ -63,7 +65,7 @@ extern	int	xdots, ydots;
 
 extern	CPlot	Plot;				// image plotting routines 
 extern	CDib    Dib;				// Device Independent Bitmap
-
+*/
 static	double	xscale, yscale;
 static	int	frames = 100;
 static	double	StartRate = -1.0, EndRate = 2.0;
@@ -73,14 +75,14 @@ static	double	cMax[9], cMin[9];
 	Common Display Routines
 ***************************************************************************/
 
-int	DisplayMalthus(double c1[], DWORD colour, int dimensions, CMatrix Mat)
+int	COtherFunctions::DisplayMalthus(double c1[], DWORD colour, int dimensions, CMatrix Mat/*, COscProcess OscProcess, int xAxis, int yAxis, int zAxis*/)
     {
 //    double	x, y, z, x1, y1, z1, delta = iterations / GetNumFrames();
     double	x, y, z, x1, y1, z1;
     int		j;
     static  int u, v, uOld, vOld;
 
-    if (OscAnimProc == INITANIM)
+    if (OscProcess.OscAnimProc == INITANIM)
 	{
 	for (j = 0; j < dimensions; j++)
 	    {
@@ -91,7 +93,7 @@ int	DisplayMalthus(double c1[], DWORD colour, int dimensions, CMatrix Mat)
 	    }
 	}
 
-    if (OscAnimProc == RUNANIM)
+    if (OscProcess.OscAnimProc == RUNANIM)
 	{
 	x = c1[xAxis];
 	y = c1[yAxis];
@@ -104,12 +106,12 @@ int	DisplayMalthus(double c1[], DWORD colour, int dimensions, CMatrix Mat)
 	v = (int)(((cMax[yAxis] + cMin[yAxis] + mandel_width) / 2 - y1) * yscale);
 	}
 
-    if (OscAnimProc == STANDARD || OscAnimProc == EVOLUTION)
+    if (OscProcess.OscAnimProc == STANDARD || OscProcess.OscAnimProc == EVOLUTION)
 	{
 	u = (long)((c1[xAxis] - hor) * xscale);
 	v = (long)((vert + mandel_width - c1[yAxis]) * yscale);
 	}
-    if (OscAnimProc != INITANIM)
+    if (OscProcess.OscAnimProc != INITANIM)
 	{
 	Plot.PlotPoint(u, v, colour);
 	}
@@ -120,7 +122,7 @@ int	DisplayMalthus(double c1[], DWORD colour, int dimensions, CMatrix Mat)
 	3D-Malthus Fractal Type Images
 ***************************************************************************/
 
-int	DoMalthus(void)
+int	COtherFunctions::DoMalthus(void)
 
     {
 //    int	    px, py;
@@ -131,21 +133,29 @@ int	DoMalthus(void)
     int	    colour = 1, cor = (param[3] != 0.0) ? threshold / (int) param[3] : threshold;
     CMatrix Mat;
 
+
+
+    double x_rot, y_rot, z_rot = 0.0;
+
+
+
+
+
     xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
     yscale = (double) (ydots - 1) / mandel_width;
 
-    if (OscAnimProc == INITANIM)
+    if (OscProcess.OscAnimProc == INITANIM)
 	{
 	c1[0] = x;
 	c1[1] = y;
 	c1[2] = 0;
 	for (j = 0; j < 3; j++)
 	    cMax[j] = cMin[j] = c1[j];
-	if (!_3dflag)
+//	if (!_3dflag)
 	    x_rot = y_rot = z_rot = 0.0;
 	}
 
-    if (OscAnimProc == RUNANIM)
+    if (OscProcess.OscAnimProc == RUNANIM)
 	Mat.InitTransformation((cMax[xAxis] + cMin[xAxis]) / 2, (cMax[yAxis] + cMin[yAxis]) / 2, (cMax[zAxis] + cMin[zAxis]) / 2, x_rot, y_rot, z_rot);	// translate to the centre of the object
 
     RateInc = (param[2] > 0.0) ? 0.1 / param[2] : 0.01;
@@ -308,67 +318,3 @@ int	DoMalthus(void)
     return 0;
     }
 
-/**************************************************************************
-	Dialog Control for Malthus Fractal Sub Types
-**************************************************************************/
-
-DLGPROC FAR PASCAL MalthusDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam)
-     {
-     static     char	temp;
-     static     UINT	tempParam;
-     static     WORD	temp_special;
-		char	s[100];
-
-     switch (message)
-	  {
-	  case WM_INITDIALOG:
-	        temp = subtype;
-		if (subtype == 0)
-		    {
-		    tempParam = IDC_A;
-		    temp = 'A';
-		    }
-		else
-		    tempParam = IDC_A + subtype - 'A';	    // ' ' (space) is uninitilised subtype
-		CheckRadioButton(hDlg, IDC_A, IDC_Z, tempParam);
-		sprintf(s, "%f", param[0]);
-		SetDlgItemText(hDlg, IDC_PARAM1, s);
-		sprintf(s, "%f", param[1]);
-		SetDlgItemText(hDlg, IDC_PARAM2, s);
-		sprintf(s, "%f", param[2]);
-		SetDlgItemText(hDlg, IDC_PARAM3, s);
-		sprintf(s, "%f", param[3]);
-		SetDlgItemText(hDlg, IDC_PARAM4, s);
-		SetFocus(GetDlgItem(hDlg, tempParam));
-	        return (DLGPROC)FALSE ;
-
-	  case WM_COMMAND:
-	        if ((int) LOWORD(wParam) >= IDC_A && (int) LOWORD(wParam) <= IDC_Z)
-		    {
-		    temp = (int) LOWORD(wParam) - IDC_A + 'A';
-		    CheckRadioButton(hDlg, IDC_A, IDC_Z, (int) LOWORD(wParam));
-		    return (DLGPROC)TRUE ;
-		    }
-	        switch ((int) LOWORD(wParam))
-		    {
-		    case IDOK:
-			GetDlgItemText(hDlg, IDC_PARAM1, s, 100);
-			param[0] = atof(s);
-			GetDlgItemText(hDlg, IDC_PARAM2, s, 100);
-			param[1] = atof(s);
-			GetDlgItemText(hDlg, IDC_PARAM3, s, 100);
-			param[2] = atof(s);
-			GetDlgItemText(hDlg, IDC_PARAM4, s, 100);
-			param[3] = atof(s);
-			subtype = temp;
-			EndDialog (hDlg, TRUE);
-			return (DLGPROC)TRUE;
-
-		    case IDCANCEL:
-			EndDialog (hDlg, FALSE);
-			return (DLGPROC)FALSE;
-		   }
-		   break;
-	    }
-      return (DLGPROC)FALSE ;
-      }

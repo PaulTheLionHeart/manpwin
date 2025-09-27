@@ -2,11 +2,13 @@
 
 #include	<math.h>
 #include	"mpfr.h"
+#include	"qdlib/dd_real.h"
+#include	"qdlib/qd_real.h"
 
 #define		FALSE	0
 #define		TRUE	1
 #define		zerotol 1.e-50    // 1.e-14
-#define		SAFETYMARGIN	5			// Multiply number of digits by a safety margin 
+#define		SAFETYMARGIN	4			// Multiply number of digits by a safety margin 
 
 //#define	errorcode -1.e60
 
@@ -56,6 +58,8 @@ class BigDouble
 	BigDouble BigLog10();				// log10
 	long	  BigDoubleToInt(void);			// convert a big double to int
 	double	  BigDoubleToDouble(void);		// convert a big double to double
+	int	  BigDouble2DD(dd_real *out);		// convert a big double to double-double
+	int	  BigDouble2QD(qd_real *out);		// convert a big double to quad-double
 
 	int	  ChangePrecision(int n);		// increase precision to n digits -1 means precision is out of range
 

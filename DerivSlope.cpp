@@ -1,6 +1,6 @@
-#include "FrameCalculator.h"
+#include "PertEngine.h"
 
-void	calculateFrame::BigProcessDerivativeSlope(ExpComplex ExpDC, ExpComplex ExpTemp, HANDLE ghMutex, long iteration, CTrueCol *TrueCol, int x, int y)
+void	CPerturbation::BigProcessDerivativeSlope(ExpComplex ExpDC, ExpComplex ExpTemp, HANDLE ghMutex, long iteration, CTrueCol *TrueCol, int x, int y)
     {
     BigComplex	BigDC = 0.0;
     BigComplex	BigU;
@@ -24,7 +24,7 @@ void	calculateFrame::BigProcessDerivativeSlope(ExpComplex ExpDC, ExpComplex ExpT
     ProcessDerivativeSlopeMain(reflection, ghMutex, iteration, TrueCol, x, y);
     }
 
-void	calculateFrame::ProcessDerivativeSlope(Complex dc, Complex z, HANDLE ghMutex, long iteration, CTrueCol *TrueCol, int x, int y)
+void	CPerturbation::ProcessDerivativeSlope(Complex dc, Complex z, HANDLE ghMutex, long iteration, CTrueCol *TrueCol, int x, int y)
     {
     BigComplex	BigDC = 0.0;
     BigComplex	BigU;
@@ -57,7 +57,7 @@ void	calculateFrame::ProcessDerivativeSlope(Complex dc, Complex z, HANDLE ghMute
     ProcessDerivativeSlopeMain(reflection, ghMutex, iteration, TrueCol, x, y);
     }
 
-void	calculateFrame::ProcessDerivativeSlopeMain(double reflection, HANDLE ghMutex, long iteration, CTrueCol *TrueCol, int x, int y)
+void	CPerturbation::ProcessDerivativeSlopeMain(double reflection, HANDLE ghMutex, long iteration, CTrueCol *TrueCol, int x, int y)
     {
     BYTE	b;
     RGBTRIPLE	colour;
@@ -105,7 +105,7 @@ void	calculateFrame::ProcessDerivativeSlopeMain(double reflection, HANDLE ghMute
 // Calculate the derivative slope
 //////////////////////////////////////////////////////////////////////
 
-void	calculateFrame::CalculateDerivativeSlope(Complex *dc, Complex z)
+void	CPerturbation::CalculateDerivativeSlope(Complex *dc, Complex z)
     {
     Complex temp;
     int	k;
@@ -164,7 +164,7 @@ void	calculateFrame::CalculateDerivativeSlope(Complex *dc, Complex z)
 // Calculate the derivative slope for floatexp
 //////////////////////////////////////////////////////////////////////
 
-void	calculateFrame::BigCalculateDerivativeSlope(ExpComplex *ExpDC, ExpComplex z)
+void	CPerturbation::BigCalculateDerivativeSlope(ExpComplex *ExpDC, ExpComplex z)
     {
     ExpComplex temp;
     int	k;

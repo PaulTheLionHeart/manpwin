@@ -23,7 +23,7 @@
 #include "colour.h"
 #include "OscProcess.h"
 #include "Plot.h"
-#include "FrameCalculator.h"
+#include "PertEngine.h"
 
 extern	CDib	Dib;				// Device Independent Bitmap
 extern	CFract	Fractal;			// Fractal specific stuff
@@ -106,6 +106,7 @@ extern	double	bumpMappingDepth;
 extern	double	bumpMappingStrength;
 extern	int	SlopeType;
 extern	double	LightHeight;
+extern	bool	EnableApproximation;		// use BLA on perturbation
 extern	int	PalOffset;			// begin palette here
 extern	double	IterDiv;			// divide ieration by this amount
 extern	int	PertColourMethod;		// some ideas from Kalles
@@ -402,7 +403,8 @@ DWORD	dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU |
                   WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
 
 POINT	ptSize;					// Stores DIB dimensions
-extern	Complex	j, q;
+extern	Complex	j;
+static	Complex q = 0.0;
 
 /*-----------------------------------------
 	Main Windows Entry Point
@@ -883,6 +885,7 @@ WNDPROC MenuCommand (HWND hwnd, UINT message, UINT wParam, LONG lParam)
     {
     int		status;
     char	TempStr[MAX_PATH];
+    POINTS	CursorLocShort;
 
     if (DisplayAnimation)			// we are currently displaying an animation
 	{
@@ -1276,6 +1279,7 @@ WNDPROC MenuCommand (HWND hwnd, UINT message, UINT wParam, LONG lParam)
 		InvalidateRect(hwnd, &r, FALSE);
 		InitTrueColourPalette(FALSE);
 		Plot.RefreshScreen();
+		time_to_reinit = TRUE;
 		}
 	    else
 		return 0;
@@ -1331,230 +1335,20 @@ WNDPROC MenuCommand (HWND hwnd, UINT message, UINT wParam, LONG lParam)
 		if (DialogBox (hInst, "Param3D", hwnd, (DLGPROC)Param3D) == FALSE)
 		    return 0;
 		else
-		    break;
-
-	    case IDM_STEREOPAIRSETUP:
-		if (DialogBox(hInst, "StereoPairDlg", hwnd, (DLGPROC)StereoPairDlg) == FALSE)
-		    return 0;
-		else
-		    break;
-
-	    case IDM_TOGGLE_DISPLAY_PALETTE:
-		TrueCol.DisplayPaletteFlag = !TrueCol.DisplayPaletteFlag;
-		Secondaryhwnd = hwnd;
-		Secondarymessage = message;
-		SecondarywParam = wParam;
-		SecondarylParam = lParam;
-		DisplayPalette(hwnd, TrueCol.DisplayPaletteFlag);
-		DisplayFractal(hwnd);
-		return 0;								// don't break as we don't want to reinit
-
-	    case IDM_UPDATE_FRACTAL:
-		UpdateFractal(hwnd);
+		    time_to_reinit = TRUE;
 		break;
 
-	    case IDC_FRACTYPE:
-		{
-		struct	UNDO	RestoreFract;
-
-		Undo(&RestoreFract);
-		BigNumFlag = FALSE;
-		Dib.ClearDib(0L);
-		if (InitNewFractal(hwnd) == FALSE)
+	    case IDM_3D:
+		_3dflag = !_3dflag;
+		if (_3dflag)
 		    {
-		    Redo(&RestoreFract);
-		    return 0;
+		    oldcalcmode = calcmode;
+		    pairflag = FALSE;
 		    }
 		else
-		    calcfracinit();
-		break;
-		}
-
-	    case IDM_TOGGLEPERT:
-		{
-		WORD    OldType = type;
-		int	OldSubtype = subtype;
-		if (TogglePerturbation(&type, &subtype) < 0)
-		    {
-		    type = OldType;
-		    subtype = OldSubtype;
-		    MessageBox(hwnd, "There is no equivelent method to toggle into", "Perturbation", MB_ICONEXCLAMATION | MB_OK);
-		    }
-		break;
-		}
-	    case IDM_FRACOPTIONS:
-		{
-
-#ifdef TESTFWDDIFF
-		if (DialogBox(hInst, "FractalTestDlg", hwnd, (DLGPROC)FractalTestDlg) == FALSE)
-#else
-		if (DialogBox(hInst, "FractalDlg", hwnd, (DLGPROC)FractalDlg) == FALSE)
-#endif // TESTFWDDIFF
-
-		    return 0;
-		else
-		    {
-		    if (OutsideMethod == TIERAZONFILTERS)
-			if (DialogBox (hInst, "SelectTierazonDlg", hwnd, (DLGPROC)SelectFilterDlg) == FALSE)
-			    return 0;
-		    if (OutsideMethod == TIERAZONCOLOURS)
-			if (DialogBox (hInst, "SelectTierazonDlg", hwnd, (DLGPROC)SelectColourDlg) == FALSE)
-			    return 0;
-		    TrueCol.FillPalette(REPEAT, TrueCol.PalettePtr, threshold);
-		    }
-		break;
-		}
-
-	    case IDM_FDOPTIONS:
-		if (DialogBox (hInst, "SelectFDOptionDlg", hwnd, (DLGPROC)SelectFDOptionDlg) == FALSE)
-		    return 0;
-		break;
-
-	    case IDM_FRACTALCOORDS:
-		if (DialogBox (hInst, "CoordDlg", hwnd, (DLGPROC)CoordDlg) == FALSE)
-		    return 0;
-		else
-		    break;
-	    case IDM_IMAGE_SIZE:
+		    calcmode = oldcalcmode;		// restore after 3D
 		time_to_reinit = TRUE;
-		if (DialogBox (hInst, "ImageSizeDlg", hwnd, (DLGPROC)ImageSizeDlg) == FALSE)
-		    return 0;
-		else
-		    {
-		    ClosePtrs();				// ready for next screen
-		    mainview(hwnd, FALSE);			// all screen specific stuff
-		    }
 		break;
-	    }
-	Secondaryhwnd = hwnd;
-	Secondarymessage = message;
-	SecondarywParam = wParam;
-	SecondarylParam = lParam;
-	time_to_reinit = TRUE;
-	return 0;
-	}
-    Secondaryhwnd = hwnd;
-    Secondarymessage = message;
-    SecondarywParam = wParam;
-    SecondarylParam = lParam;
-    return 0;
-    }
-
-/****************************************************************************
- *                                                                          *
- *  FUNCTION   : MenuCommand ( HWND hwnd, WORD wParam)                      *
- *                                                                          *
- *  PURPOSE    : Processes menu commands.                                   *
- *                                                                          *
- *  RETURNS    : TRUE  - if command could be processed.                     *
- *               FALSE - otherwise                                          *
- *                                                                          *
- ****************************************************************************/
-
-int	SecondaryWndProc (void)
-
-    {
-    static	HWND	hwndPlot;
-    HWND	hwnd;
-    UINT	message;
-    UINT	wParam;
-    LONG	lParam;
-    POINTS	CursorLocShort;
-
-    hwnd = Secondaryhwnd;
-    message = Secondarymessage;
-    wParam = SecondarywParam;
-    lParam = SecondarylParam;
-
-    if (time_to_zoom)
-	{
-	time_to_zoom = FALSE;
-	return 0;			// no commands to process
-	}
-    switch (wParam)
-	{
-				  // Messages from File menu
-	case IDM_NEW:
-	case IDM_REOPEN:
-	    MessageBox (hwnd, "This File Menu Option Not Yet Implemented!",
-					 "ManpWin", MB_ICONEXCLAMATION | MB_OK);
-	    MessageBeep (0);
-	    break;
- 				  // Messages from Fractals menu
-	case IDM_UPDATE_FRACTAL:
-	case IDC_FRACTYPE:
-	case IDM_FRACOPTIONS:
-	case IDM_3DPARAM:
-	case IDM_STEREOPAIRSETUP:
-	    time_to_restart = TRUE;
-	    break;
-
-				// Messages from Options menu
-	case IDC_ADDSPIRAL:
-	    addflag = !addflag;
-	    time_to_restart = TRUE;
-	    break;
-
-	case IDM_3D:
-	    _3dflag = !_3dflag;
-	    if (_3dflag)
-		{
-		oldcalcmode = calcmode;
-		pairflag = FALSE;
-		}
-	    else   
-		calcmode = oldcalcmode;		// restore after 3D
-	    time_to_restart = TRUE;
-	    break;
-
-	case IDM_IMAGE_SIZE:
-	    time_to_restart = TRUE;
-	    break;
-
-	case IDM_STEREO:
-	    if (pairflag)
-		{
-		pairflag = FALSE;
-		calcmode = oldcalcmode;		// restore after stereo pair
-		}
-	    else       
-		{
-		pairflag = 10;
-		oldcalcmode = calcmode;        
-		_3dflag = FALSE;
-		}
-	    time_to_restart = TRUE;
-	    break;
-
-	case IDM_REALTIMEJULIA:
-	    RealTimeJuliaFlag = !RealTimeJuliaFlag;
-	    if (RealTimeJuliaFlag)
-		{
-		if (!juliaflag)		// doesn't make a lot of sense if we are in julia already
-		    {
-		    InitRTJulia(hwnd);
-		    FindCursorRealPos(&CursorLocShort);
-		    if (DrawJulia(hwnd, CursorLocShort) < 0)
-			RealTimeJuliaFlag = FALSE;
-		    }
-		return 1;			// ensure that we don't splatter initial RT Julia set
-		}
-	    else
-		time_to_restart = TRUE;
-	    break;
-
-
-	case IDM_REDO:
-	    LoadUndo(FALSE);
-	    time_to_zoom = TRUE;
-	    time_to_restart = TRUE;
-	    break;
-    	
-	case IDM_UNDO:
-	    LoadUndo(TRUE);
-	    time_to_zoom = TRUE;
-	    time_to_restart = TRUE;
-	    break;
 
 	case IDM_SET_JULIA_SIZE:
 	    DialogBox (hInst, "JuliaDlg", hwnd, (DLGPROC)JuliaDlg);
@@ -1645,11 +1439,237 @@ int	SecondaryWndProc (void)
 	    time_to_restart = TRUE;
 	    break;
 
+	case IDM_STEREO:
+	    if (pairflag)
+		{
+		pairflag = FALSE;
+		calcmode = oldcalcmode;		// restore after stereo pair
+		}
+	    else
+		{
+		pairflag = 10;
+		oldcalcmode = calcmode;
+		_3dflag = FALSE;
+		}
+	    time_to_reinit = TRUE;
+	    break;
+
+	case IDM_REALTIMEJULIA:
+	    RealTimeJuliaFlag = !RealTimeJuliaFlag;
+	    if (RealTimeJuliaFlag)
+		{
+		if (!juliaflag)		// doesn't make a lot of sense if we are in julia already
+		    {
+		    InitRTJulia(hwnd);
+		    FindCursorRealPos(&CursorLocShort);
+		    if (DrawJulia(hwnd, CursorLocShort) < 0)
+			RealTimeJuliaFlag = FALSE;
+		    }
+		return (WNDPROC)1;			// ensure that we don't splatter initial RT Julia set
+		}
+	    else
+		time_to_restart = TRUE;
+	    break;
+
+	case IDM_STEREOPAIRSETUP:
+		if (DialogBox(hInst, "StereoPairDlg", hwnd, (DLGPROC)StereoPairDlg) == FALSE)
+		    return 0;
+		else
+		    time_to_reinit = TRUE;
+		break;
+
+	    case IDM_TOGGLE_DISPLAY_PALETTE:
+		TrueCol.DisplayPaletteFlag = !TrueCol.DisplayPaletteFlag;
+		Secondaryhwnd = hwnd;
+		Secondarymessage = message;
+		SecondarywParam = wParam;
+		SecondarylParam = lParam;
+		DisplayPalette(hwnd, TrueCol.DisplayPaletteFlag);
+		DisplayFractal(hwnd);
+		return 0;								// don't break as we don't want to reinit
+
+//	    case IDM_IMAGE_SIZE:
+//		time_to_restart = TRUE;
+//		break;
+
+	    case IDM_REDO:
+		LoadUndo(FALSE);
+		time_to_zoom = TRUE;
+		time_to_restart = TRUE;
+		break;
+
+	    case IDM_UNDO:
+		LoadUndo(TRUE);
+		time_to_zoom = TRUE;
+		time_to_restart = TRUE;
+		break;
+
+	    case IDM_UPDATE_FRACTAL:
+		{
+		BOOL result;
+		if (result = UpdateFractal(hwnd) ==  TRUE)
+		    time_to_reinit = TRUE;
+		break;
+		}
+
+	    case IDC_FRACTYPE:
+		{
+		struct	UNDO	RestoreFract;
+
+		BigNumFlag = FALSE;
+//		Dib.ClearDib(0L);
+		if (InitNewFractal(hwnd) == FALSE)
+		    {
+//		    Redo(&RestoreFract);
+		    return 0;
+		    }
+		else
+		    {
+		    Undo(&RestoreFract);
+		    time_to_reinit = TRUE;
+		    calcfracinit();
+		    }
+		break;
+		}
+
+	    case IDM_TOGGLEPERT:
+		{
+		WORD    OldType = type;
+		int	OldSubtype = subtype;
+		if (TogglePerturbation(&type, &subtype) < 0)
+		    {
+		    type = OldType;
+		    subtype = OldSubtype;
+		    MessageBox(hwnd, "There is no equivelent method to toggle into", "Perturbation", MB_ICONEXCLAMATION | MB_OK);
+		    }
+		else
+		    time_to_reinit = TRUE;
+		break;
+		}
+	    case IDM_FRACOPTIONS:
+		{
+
+#ifdef TESTFWDDIFF
+		if (DialogBox(hInst, "FractalTestDlg", hwnd, (DLGPROC)FractalTestDlg) == FALSE)
+#else
+		if (DialogBox(hInst, "FractalDlg", hwnd, (DLGPROC)FractalDlg) == FALSE)
+#endif // TESTFWDDIFF
+
+		    return 0;
+		else
+		    {
+		    if (OutsideMethod == TIERAZONFILTERS)
+			if (DialogBox (hInst, "SelectTierazonDlg", hwnd, (DLGPROC)SelectFilterDlg) == FALSE)
+			    return 0;
+		    if (OutsideMethod == TIERAZONCOLOURS)
+			if (DialogBox (hInst, "SelectTierazonDlg", hwnd, (DLGPROC)SelectColourDlg) == FALSE)
+			    return 0;
+		    TrueCol.FillPalette(REPEAT, TrueCol.PalettePtr, threshold);
+		    time_to_reinit = TRUE;
+		    }
+		break;
+		}
+
+	    case IDM_FDOPTIONS:
+		if (DialogBox (hInst, "SelectFDOptionDlg", hwnd, (DLGPROC)SelectFDOptionDlg) == FALSE)
+		    return 0;
+		break;
+
+	    case IDM_FRACTALCOORDS:
+		if (DialogBox (hInst, "CoordDlg", hwnd, (DLGPROC)CoordDlg) == FALSE)
+		    return 0;
+		else
+		    time_to_reinit = TRUE;
+		break;
+	    case IDM_IMAGE_SIZE:
+		if (DialogBox (hInst, "ImageSizeDlg", hwnd, (DLGPROC)ImageSizeDlg) == FALSE)
+		    return 0;
+		else
+		    {
+		    time_to_reinit = TRUE;
+		    ClosePtrs();				// ready for next screen
+		    mainview(hwnd, FALSE);			// all screen specific stuff
+		    }
+		break;
+	    }
+	Secondaryhwnd = hwnd;
+	Secondarymessage = message;
+	SecondarywParam = wParam;
+	SecondarylParam = lParam;
+//	time_to_reinit = TRUE;
+	return 0;
+	}
+    Secondaryhwnd = hwnd;
+    Secondarymessage = message;
+    SecondarywParam = wParam;
+    SecondarylParam = lParam;
+    return 0;
+    }
+
+/****************************************************************************
+ *                                                                          *
+ *  FUNCTION   : MenuCommand ( HWND hwnd, WORD wParam)                      *
+ *                                                                          *
+ *  PURPOSE    : Processes menu commands.                                   *
+ *                                                                          *
+ *  RETURNS    : TRUE  - if command could be processed.                     *
+ *               FALSE - otherwise                                          *
+ *                                                                          *
+ ****************************************************************************/
+
+int	SecondaryWndProc (void)
+
+    {
+    static	HWND	hwndPlot;
+    HWND	hwnd;
+    UINT	message;
+    UINT	wParam;
+    LONG	lParam;
+
+    hwnd = Secondaryhwnd;
+    message = Secondarymessage;
+    wParam = SecondarywParam;
+    lParam = SecondarylParam;
+
+    if (time_to_zoom)
+	{
+	time_to_zoom = FALSE;
+	return 0;			// no commands to process
+	}
+/*
+    switch (wParam)
+	{
+				  // Messages from File menu
+	case IDM_NEW:
+	case IDM_REOPEN:
+	    MessageBox (hwnd, "This File Menu Option Not Yet Implemented!",
+					 "ManpWin", MB_ICONEXCLAMATION | MB_OK);
+	    MessageBeep (0);
+	    break;
+ 				  // Messages from Fractals menu
+	case IDM_UPDATE_FRACTAL:
+	    break;
+
+	case IDC_FRACTYPE:
+	case IDM_FRACOPTIONS:
+	case IDM_3DPARAM:
+	case IDM_STEREOPAIRSETUP:
+	    time_to_restart = TRUE;
+	    break;
+
+				// Messages from Options menu
+	case IDC_ADDSPIRAL:
+	    addflag = !addflag;
+	    time_to_restart = TRUE;
+	    break;
+
+
  			      // Messages from Start menu
 	case IDM_START:
 	    time_to_restart = TRUE;
 	    break;
 	}     
+*/
 
     if (time_to_restart)
 	AutoStereoActive = FALSE;
@@ -2120,7 +2140,7 @@ void	InitFract(int type)
     Update Fractal info when existing fractal selected
   -----------------------------------------------------------*/
 
-    BOOL	UpdateFractal(HWND hwnd)
+    BOOL    UpdateFractal(HWND hwnd)
 
 	{
 	switch (type)					// further subtypes?
@@ -2144,9 +2164,7 @@ void	InitFract(int type)
 		    return FALSE;
 		break;
 	    case TIERAZON:					// Generic Tierazon Fractal
-		if (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
-		    return FALSE;
-		break;
+		return (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == TRUE);
 	    case OSCILLATORS:					// Generic Oscillator Fractal
 		MaxDimensions = OscillatorSpecific[subtype].MaxDimensions;
 		if (DialogBox(hInst, OscillatorSpecific[subtype].DialogueName, hwnd, OscillatorSpecific[subtype].DialogueType) == FALSE)
@@ -2179,13 +2197,9 @@ void	InitFract(int type)
 		break;
 	    case PERTURBATION:					// Generic Perturbation Fractal
 		Fractal.NumParam = PerturbationSpecific[subtype].numparams;	// we need to know how many params to load
-		if (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
-		    return FALSE;
-		break;
+		return (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == TRUE);
 	    default:
-		if (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
-		    return FALSE;
-		break;
+		return (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == TRUE);
 	    }
 	return FALSE;
 	}
@@ -2388,13 +2402,18 @@ DLGPROC FAR PASCAL StatusInfoDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
 	else if (precision <= 60 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
 	    sprintf(PrecisionStr, "QD Prec: %d", precision);
 	else
-	    sprintf(PrecisionStr, "Arb Prec: %d", precision);
+	    {
+	    if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
+		sprintf(PrecisionStr, "QD Prec: %d", precision);
+	    else
+		sprintf(PrecisionStr, "Arb Prec: %d", precision);
+	    }
 	}
     else
 	sprintf(PrecisionStr, "Floating Point: %d", precision);
 
     if (type == PERTURBATION)
-	wsprintf(FractalType, "Fractal: (Pert)-%s, Subtype = %d", GetFractalName(), subtype);
+	wsprintf(FractalType, "Fractal: %s-%s, Subtype = %d", (EnableApproximation) ? "(Pert-BLA)" : "(Pert)", GetFractalName(), subtype);
     else if (type == SLOPEDERIVATIVE)
 	wsprintf(FractalType, "Fractal: (Slope Der)-%s, Subtype = %d", GetFractalName(), subtype);
     else if (type == SLOPEFORWARDDIFF)
@@ -2454,6 +2473,8 @@ DLGPROC FAR PASCAL StatusInfoDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
 	if (type == SLOPEFORWARDDIFF) SlopeType = FWDDIFFSLOPE;
 	sprintf(TempStr, "\r\nSlope Type: %d", SlopeType);
 	strcat(StatusString, TempStr);
+	if (type == PERTURBATION && EnableApproximation)
+	    strcat(StatusString, "\r\nPerturbation uses BiLinear Approximation");
 	sprintf(TempStr, "\r\nSlope Shadow Angle: %lf", lightDirectionDegrees);
 	strcat(StatusString, TempStr);
 	sprintf(TempStr, "\r\nSlope Shadow Strength: %lf", bumpMappingStrength);

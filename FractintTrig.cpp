@@ -16,8 +16,8 @@
 #include	".\parser\TrigFn.h"
 
 // lotsa norty externs that will be resolved when we c++ise parser
-extern	int	FormPerPixelFloat(Complex *z);
-extern	int	FormulaFloat(Complex *z);
+extern	int	FormPerPixelFloat(Complex *z, Complex *q);
+extern	int	FormulaFloat(Complex *z, Complex *q);
 // end norty externs that will be resolved when we c++ise parser
 
 
@@ -33,7 +33,7 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	{
 	case HYPERCMPLXFP:
 	case HYPERCMPLXJFP:
-	    t = (invert) ? invertz2(*c) : *c;
+	    t = (invert) ? invertz2(c) : c;
 
 	    InitFunctions(MANDELFP, z, q);
 	    if (juliaflag)
@@ -55,7 +55,8 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 
 	case MARKSMANDELPWRFP:
 	case MARKSMANDELPWR:
-	    t = (invert) ? invertz2(*c) : *c;
+	case NUMFRACTAL:
+	    t = (invert) ? invertz2(c) : c;
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -83,7 +84,7 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	case FNPLUSFNPIXFP:				//  Richard8 {c = z = pixel: z=sin(z)+sin(pixel),|z|<=50}
 	case FNPLUSFNPIXLONG:
 	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
-	    t = (invert) ? invertz2(*c) : *c;
+	    t = (invert) ? invertz2(c) : c;
 	    if (!juliaflag)
 		{
 		*z = t;
@@ -115,7 +116,7 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
 	    if (!juliaflag)
 		{
-		t = (invert) ? invertz2(*c) : *c;
+		t = (invert) ? invertz2(c) : c;
 		*z = t;
 		}
 	    temp.x = param[0];
@@ -141,7 +142,7 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	case LLAMBDAFNFN:
 	case FPLAMBDAFNFN:
 	case FPMANLAMFNFN:				// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
-	    t = (invert) ? invertz2(*c) : *c;
+	    t = (invert) ? invertz2(c) : c;
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -163,7 +164,7 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	    break;
 	case FORMULA:
 	case SCREENFORMULA:
-	    FormPerPixelFloat(z);
+	    FormPerPixelFloat(z, q);
 	    break;
 
 
@@ -396,9 +397,22 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 	    *z = z->CSqr();
 	    return FractintBailoutTest(z);
 
+	case NUMFRACTAL:
+	    {
+	    Complex base;
+	    base.x = param[2];
+	    base.y = param[3];
+	    *z = ComplexPower(base, *z);
+	    TrigFn.CMPLXtrig(z, z, Fn1Index);
+	    *z += *q;
+	    z->x += param[0];
+	    z->y += param[1];
+	    return FractintBailoutTest(z);
+	    }
+
 	case FORMULA:
 	case SCREENFORMULA:
-	    return(FormulaFloat(z));
+	    return(FormulaFloat(z, q));
 
 
 

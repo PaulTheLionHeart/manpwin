@@ -17,6 +17,8 @@ anim.h
 ant.cpp
 Apollonius.cpp
 Approximation.cpp
+ApproximationExp.cpp
+Approximation.h
 Arithmetic.cpp
 Arithmetic.h
 Bif.cpp
@@ -26,10 +28,8 @@ BigComplex.cpp
 BigComplex.h
 BigDouble.cpp
 BigDouble.h
-BigFN.cpp
 BigFunctions.cpp
 BigMandelDerivatives.cpp
-BigManDerivatives.cpp
 BigMatrix.cpp
 BigMatrix.h
 BigPixel.cpp
@@ -39,6 +39,7 @@ BigTZ.cpp
 Bt.cpp
 BuddhaBrot.cpp
 CalcMode.cpp
+CalcMode,h
 Circle.cpp
 Clipbord.cpp
 CodeVersion.h
@@ -67,6 +68,7 @@ DerivSlope.cpp
 Dib.cpp
 Dib.h
 Dither.cpp
+Dl3quant.h
 Dl3quant.cpp
 Dostereo.cpp
 EditPal.cpp
@@ -93,8 +95,6 @@ FractintFunctions.cpp
 FractintTrig.cpp
 Fractype.h
 FracZoom.cpp
-FrameCalculator.cpp
-FrameCalculator.h
 FrantPAR.cpp
 Functions.cpp
 FwdDiff.cpp
@@ -111,6 +111,7 @@ Keyboard.cpp
 Kleinian.cpp
 KnotOsc.cpp
 Knots.cpp
+Line3d.h
 Line3d.cpp
 Lorenz.cpp
 Lsys.cpp
@@ -121,8 +122,10 @@ Maninit.cpp
 Manp.cpp
 Manp.h
 Manpdlg.cpp
+ManpEngine.cpp
 Manpfile.cpp
 Manpmain.cpp
+ManpMT.cpp
 Manpwin.cpp
 Manpwin.h
 MANPWIN.ICO
@@ -130,11 +133,11 @@ Manpwin.rc
 Matrix.cpp
 Matrix.h
 menu.h
+MiscDlg.cpp
 Miscfrac.cpp
 Mountain.cpp
 MPEGWrite.cpp
 mpfr.h
-Newton.cpp
 OscAnim.cpp
 OscDatabase.cpp
 Oscillators.cpp
@@ -145,13 +148,17 @@ OtherFunctions.cpp
 OtherFunctions.h
 ParamAnim.cpp
 Pascal.cpp
+PertEngine.h
+PertEngine.cpp
 PertFN.cpp
 PertFNFloatExp.cpp
+PertOrbit.cpp
 Perturbation.cpp
 Pixel.cpp
 Pixel.h
 Plot.cpp
 Plot.h
+Point.h
 png.cpp
 Polygon.cpp
 Polygon.h
@@ -196,6 +203,7 @@ Triangles.cpp
 trig.cpp
 TZFilterDLG.cpp
 undo.cpp
+Undo.h
 Update.cpp
 User.cpp
 Zigzag.cpp

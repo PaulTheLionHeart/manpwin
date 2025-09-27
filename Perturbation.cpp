@@ -6,7 +6,7 @@
 
 #include <process.h>
 #include <strsafe.h>
-#include "FrameCalculator.h"
+#include "PertEngine.h"
 #include "fractalp.h"
 #include "manpwin.h"
 #include "manp.h"
@@ -83,11 +83,11 @@ extern	HWND	GlobalHwnd;			// This is the main windows handle
 extern	CTrueCol    TrueCol;			// palette info
 extern	CDib	Dib;
 extern	CFract	Fractal;			// current fractal stuff
-extern	CPixel	Pix;				// routines for escape fractals
+extern	CPixel	Pixel[];			// routines for escape fractals
 
 static	CTZfilter	TZfilter[MAXTHREADS];	// Tierazon filters
 
-calculateFrame frameCalculator[MAXTHREADS];
+CPerturbation PertCalculator[MAXTHREADS];
 int	PertProgress[MAXTHREADS];
 int	*pPertProgress;
 bool	ThreadComplete[MAXTHREADS];
@@ -97,6 +97,7 @@ bool	UseMutex = false;			// trade off speed for accuracy
 double	IterDiv = 1.0;				// divide ieration by this amount
 int	PalOffset = 0;				// Start Palette here
 int	RotationAngle = 0;			// rotate image in degrees
+bool	EnableApproximation = true;		// use BLA on perturbation
 
 static	int	PerturbationPtr = 0, PerturbationNum = 0;
 	int	NumberThreads = 0;		// set the default to 0. Multi=threading is for experimentation only
@@ -126,7 +127,6 @@ typedef	struct MyData
     CTZfilter *TZfilter;			// pass through Tierazon filters
     CTrueCol *TrueCol;				// colouring scheme
     int *pPertProgress;				// pass back the status of each thread
-    PMYVARIABLES;
     int i;
     HANDLE  ghMutex;
     } MYDATA, *PMYDATA;
@@ -148,7 +148,7 @@ DWORD	WINAPI PertFunction(LPVOID lpParam)
     pDataArray = (PMYDATA)lpParam;
     int(*UserData)(HWND) = user_data;
 
-    ReturnValue = frameCalculator[pDataArray->i].calculateOneFrame(rqlim, PertStatus, degree, InsideMethod, OutsideMethod, biomorph, subtype, pDataArray->RSRA, pDataArray->IsPositive, UserData, xdots,
+    ReturnValue = PertCalculator[pDataArray->i].calculateOneFrame(rqlim, PertStatus, degree, InsideMethod, OutsideMethod, biomorph, subtype, pDataArray->RSRA, pDataArray->IsPositive, UserData, xdots,
 		pDataArray->TZfilter, pDataArray->TrueCol, pDataArray->pPertProgress, &ThreadComplete[pDataArray->i], (NumberThreads > 0), ThreadPertDelay, PertErrorMessage, pDataArray->ghMutex);
     if (ReturnValue < 0)
 	{
@@ -215,8 +215,8 @@ int	InitPerturbation(void)
 	{
 	if (OutsideMethod >= TIERAZONFILTERS)
 	    TZfilter[0].InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
-	frameCalculator[0].initialiseCalculateFrame(&Dib, &Slope, (int)Dib.DibWidth, (int)Dib.DibHeight, threshold, BigCentrex, BigCentrey, BigWidth / 2, decimals, &TZfilter[0], GlobalHwnd, 0, wpixels, param, potparam, 
-			PaletteShift, &PlotType, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, LightHeight, PertColourMethod, PalOffset, IterDiv);
+	PertCalculator[0].initialiseCalculateFrame(&Dib, &Slope, (int)Dib.DibWidth, (int)Dib.DibHeight, threshold, BigCentrex, BigCentrey, BigWidth / 2, decimals, &TZfilter[0], GlobalHwnd, 0, wpixels, param, potparam,
+			PaletteShift, &PlotType, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, LightHeight, PertColourMethod, PalOffset, IterDiv, EnableApproximation);
 	}
     else
 	{
@@ -224,9 +224,9 @@ int	InitPerturbation(void)
 	for (i = 0; i < NumberThreads; i++)
 	    {
 	    BigCentrex = (BigHor + BigWidth * ScreenRatio * (double)i / (double)NumberThreads) + (BigWidth * ((double)Dib.DibWidth / (double)(2 * NumberThreads * Dib.DibHeight)));	// find centre of each slice
-	    frameCalculator[i].initialiseCalculateFrame(&Dib, &Slope, (int)Dib.DibWidth / NumberThreads, (int)Dib.DibHeight, threshold, BigCentrex, BigCentrey, BigWidth * ScreenRatio / (2 * NumberThreads), 
+	    PertCalculator[i].initialiseCalculateFrame(&Dib, &Slope, (int)Dib.DibWidth / NumberThreads, (int)Dib.DibHeight, threshold, BigCentrex, BigCentrey, BigWidth * ScreenRatio / (2 * NumberThreads),
 			decimals, &TZfilter[i], GlobalHwnd, i, wpixels, param, potparam, PaletteShift, &PlotType, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, 
-			LightHeight, PertColourMethod, PalOffset, IterDiv);
+			LightHeight, PertColourMethod, PalOffset, IterDiv, EnableApproximation);
 	    }
 	}
 
@@ -237,7 +237,7 @@ int	InitPerturbation(void)
 	The Perturbation engine
 **************************************************************************/
 
-int	DoPerturbation(PMYVARIABLES)
+int	DoPerturbation()
     {
     int		(*UserData)(HWND) = user_data;
     int		i;
@@ -287,7 +287,7 @@ int	DoPerturbation(PMYVARIABLES)
 	    DataArrayZero.IsPositive = (param[4] == 1.0);
 	    }
 
-	status = frameCalculator[0].calculateOneFrame(rqlim, PertStatus, degree, InsideMethod, OutsideMethod, biomorph, subtype, DataArrayZero.RSRA, DataArrayZero.IsPositive, UserData, xdots, &TZfilter[0], &TrueCol, &PertProgress[0],
+	status = PertCalculator[0].calculateOneFrame(rqlim, PertStatus, degree, InsideMethod, OutsideMethod, biomorph, subtype, DataArrayZero.RSRA, DataArrayZero.IsPositive, UserData, xdots, &TZfilter[0], &TrueCol, &PertProgress[0],
 				&ThreadComplete[0], false, ThreadPertDelay, PertErrorMessage, ghMutex);
 	if (status < 0)
 	    {
@@ -380,8 +380,8 @@ int	DoPerturbation(PMYVARIABLES)
     But for some subtypes it gets complicated, so we remap a few here
     */
 
-    Slope.PaletteShift = frameCalculator[0].PaletteShift;
-    if (frameCalculator[0].SlopeType == FWDDIFFSLOPE)
+    Slope.PaletteShift = PertCalculator[0].PaletteShift;
+    if (PertCalculator[0].SlopeType == FWDDIFFSLOPE)
 	{
 //	if (subtype == 0)					// Mandelbrot
 //	    param[0] = param[5];				// transfer factor as we already know what the slope type is
@@ -395,7 +395,7 @@ int	DoPerturbation(PMYVARIABLES)
 	long	colour;
 	int	x, y;
 	DWORD	index, count = 0;
-	Pix.init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
+	Pixel[0].init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
 	Dib.ClearDib(0L);
 	index = xdots * ydots;
 	double	*ptr = wpixels;
@@ -418,7 +418,7 @@ int	DoPerturbation(PMYVARIABLES)
 		else
 		    return 0;			// oops, we don't actually have data to transform
 		if (colour > 0L)
-		    Pix.projection(x, y, colour - (long)diff / 4);
+		    Pixel[0].projection(x, y, colour - (long)diff / 4);
 		}
 	    }
 	}
@@ -1204,6 +1204,8 @@ DLGPROC FAR PASCAL PertDlg(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 	    sprintf(IterDivTxt, "%14.14lf", IterDiv);
 	    SetDlgItemText(hDlg, IDC_ITER_DIV, IterDivTxt);
 	    SetDlgItemInt(hDlg, IDC_PAL_OFFSET, PalOffset, TRUE);
+	    hCtrl = GetDlgItem(hDlg, IDC_USEBLA);
+	    SendMessage(hCtrl, BM_SETCHECK, EnableApproximation, 0L);
 
 	    for (i = Fractal.NumFunct, j = 0; i < Fractal.NumFunct + Fractal.NumParam && i < 10; i++, j++)
 		{
@@ -1278,7 +1280,8 @@ DLGPROC FAR PASCAL PertDlg(HWND hDlg, UINT message, UINT wParam, LONG lParam)
 		    bumpMappingStrength = tempSlopeRatio;
 		    IterDiv = tempIterDiv;
 		    PalOffset = tempPalOffset;
-
+		    hCtrl = GetDlgItem(hDlg, IDC_USEBLA);
+		    EnableApproximation = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 		    SlopeType = GetDlgItemInt(hDlg, ID_SLOPETYPE, &bTrans, TRUE);
 		    for (i = Fractal.NumFunct, j = 0; i < Fractal.NumFunct + Fractal.NumParam && i < 10; i++, j++)
 			{

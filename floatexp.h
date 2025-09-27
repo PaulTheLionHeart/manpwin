@@ -8,6 +8,9 @@
 #ifndef __FLOATEXP_H__
 #define __FLOATEXP_H__
 #define MAX_PREC 1020
+#ifndef sqr
+#define sqr(x) ((x)*(x))
+#endif
 
 /*
 #ifdef _GCC_
@@ -46,7 +49,13 @@ public:
 	{
 		val=a;
 		exp=0;
-		_ALIGN_(val,exp)
+		if (a == 0.0)
+		    {
+		    val = 0.0;
+		    exp = -(1L << 30);
+		    }
+		else
+		    _ALIGN_(val,exp)
 	}
 	__inline floatexp &X2()
 	    {
@@ -127,6 +136,11 @@ public:
 		exp++;
 		return *this;
 	}
+	__inline floatexp &half()
+	    {
+	    exp--;
+	    return *this;
+	    }
 	__inline floatexp &mul4()
 	{
 		exp+=2;
@@ -316,6 +330,52 @@ public:
 		_ALIGN_(val,exp)
 		return *this;
 	}
+
+	__inline floatexp sqrtExp(floatexp a)
+	    {
+	    floatexp ret;
+	    boolean isOdd = (a.exp & 1) != 0;
+	    double  temp;
+	    ret.exp = (isOdd) ? (a.exp - 1) / 2 : a.exp / 2;
+	    temp = (isOdd) ? 2.0 * a.val : a.val;
+	    ret.val = sqrt(temp);
+	    return ret;
+	    }
+
+	__inline floatexp hypotExp(floatexp x, floatexp y)
+	    {
+	    floatexp t = x * x + y * y;
+	    return sqrtExp(t);
+	    }
+
+	floatexp pow(floatexp x, int n) noexcept
+	    {
+	    switch (n)
+		{
+		case 0: return floatexp(1);
+		case 1: return x;
+		case 2: return sqr(x);
+		case 3: return x * sqr(x);
+		case 4: return sqr(sqr(x));
+		case 5: return x * sqr(sqr(x));
+		case 6: return sqr(x * sqr(x));
+		case 7: return x * sqr(x * sqr(x));
+		case 8: return sqr(sqr(sqr(x)));
+		default:
+		    {
+		    floatexp y(1);
+		    while (n > 1)
+			{
+			if (n & 1)
+			    y = y*x;
+			x = sqr(x);
+			n >>= 1;
+			}
+		    return x * y;
+		    }
+		}
+	    }
+
 /*
 #ifndef _GCC_
 	__inline floatexp &operator =(const CFixedFloat &a)

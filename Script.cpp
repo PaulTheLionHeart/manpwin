@@ -123,7 +123,7 @@ extern	CSlope		Slope[];
 extern	CTrueCol	TrueCol;	// palette info
 
 extern	CPlot		Plot;		// image plotting routines 
-extern	CPixel		Pix;		// routines for escape fractals
+extern	CPixel		Pixel[];	// routines for escape fractals
 extern	HWND		GlobalHwnd;	// This is the main windows handle
 extern	char		szStatus[];	// status bar text
 extern	CDib		Dib;
@@ -254,10 +254,10 @@ int	GenerateFractalFrame(HWND hwnd, char *FileName, int TotalFrames, int ThisFra
     if (logval)
 	init_log(hwnd);				// log colour distribution
     if (_3dflag)
-	Pix.init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
+	Pixel[0].init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
     if (pairflag)
-	Pix.init_stereo_pairs(pairflag, &AutoStereo_value);			// init stereo pair parameters
-    Pix.InitArithmetic();
+	Pixel[0].init_stereo_pairs(pairflag, &AutoStereo_value);			// init stereo pair parameters
+    Pixel[0].InitArithmetic();
     ClearScreen();
     hCursor = LoadCursor(NULL, IDC_ARROW);	// Load normal cursor.
     SetCursor(hCursor);			        // Reload arrow cursor.

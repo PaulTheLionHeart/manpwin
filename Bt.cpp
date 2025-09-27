@@ -16,19 +16,19 @@
 long	CPixel::calc_xy(HWND hwnd, int mx, int my, int user_data(HWND hwnd))
 
     {
-    *color = (long)Plot->GetColour((WORD)mx, (WORD)my);
+    color = (long)Plot.GetColour((WORD)mx, (WORD)my);
 					// see if pixel is black
-    if (*color != 0L)			// pixel is NOT black so we must have already 
+    if (color != 0L)			// pixel is NOT black so we must have already 
 	{				// calculated its color, so lets skip it 
 	repeats++;			// count successive easy ones 
-	return(*color);
+	return(color);
 	}
     repeats = 0;			// we'll have to work for this one to reset counter 
 
     col = mx;
     row = my;
-    *color = calc_frac(hwnd, row, col, user_data);
-    return(*color);
+    color = calc_frac(hwnd, row, col, user_data);
+    return(color);
     }
 
 /************************************************************************
@@ -48,7 +48,7 @@ int	CPixel::boundary_trace(HWND hwnd, int C, int R, int user_data(HWND hwnd))
 
     low_row = R;
     Dir = East;
-    bcolor = *color;
+    bcolor = color;
     C_first = C;
     iters = 0;
     repeats = 0;
@@ -199,7 +199,7 @@ int	CPixel::fillseg(int LeftX, int RightX, int R, long bcolor)
     modeON = 0;
 
     for(i = 0; i <= RightX - LeftX + 1; i++)
-	forwards[i] = (DWORD)Plot->GetColour((WORD)(LeftX + i), (WORD)R);
+	forwards[i] = (DWORD)Plot.GetColour((WORD)(LeftX + i), (WORD)R);
     for (C = LeftX; C <= RightX; C++)
 	{
 	gcolor = forwards[C - LeftX];
@@ -214,36 +214,36 @@ int	CPixel::fillseg(int LeftX, int RightX, int R, long bcolor)
 	    }
 	}
 
-    if (*PlotType == NOSYM) 				// no symmetry! easy!
-	Plot->OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
-    else if (*PlotType == XAXIS) 			// X-axis symmetry
+    if (PlotType == NOSYM) 				// no symmetry! easy!
+	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
+    else if (PlotType == XAXIS) 			// X-axis symmetry
 	{
-	Plot->OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
+	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
 	if ((i = yystop - (R - yystart)) > iystop)
-	    Plot->OutputLine((WORD)LeftX, (WORD)i, (WORD)(RightX - LeftX + 1), forwards);
+	    Plot.OutputLine((WORD)LeftX, (WORD)i, (WORD)(RightX - LeftX + 1), forwards);
 	}
-    else if (*PlotType == ORIGIN) 			// Origin symmetry
+    else if (PlotType == ORIGIN) 			// Origin symmetry
 	{
 	reverse_string(backwards, forwards, RightX - LeftX + 1);
-	Plot->OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
+	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
 	if ((i = yystop - (R - yystart)) > iystop)
-	    Plot->OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)i, (WORD)(RightX - LeftX + 1), backwards);
+	    Plot.OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)i, (WORD)(RightX - LeftX + 1), backwards);
 	}
-    else if (*PlotType == YAXIS) 			// Y-axis symmetry
+    else if (PlotType == YAXIS) 			// Y-axis symmetry
 	{
 	reverse_string(backwards, forwards, RightX - LeftX + 1);
-	Plot->OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
-	Plot->OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)R, (WORD)(RightX - LeftX + 1), backwards);
+	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
+	Plot.OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)R, (WORD)(RightX - LeftX + 1), backwards);
 	}
-    else if (*PlotType == XYAXIS) 			// X-axis and Y-axis symmetry
+    else if (PlotType == XYAXIS) 			// X-axis and Y-axis symmetry
 	{
 	reverse_string(backwards, forwards, RightX - LeftX + 1);
-	Plot->OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
-	Plot->OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)R, (WORD)(RightX - LeftX + 1), backwards);
+	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
+	Plot.OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)R, (WORD)(RightX - LeftX + 1), backwards);
 	if ((i = yystop - (R - yystart)) > iystop)
 	    {
-	    Plot->OutputLine((WORD)LeftX, (WORD)i, (WORD)(RightX - LeftX + 1), forwards);
-	    Plot->OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)i, (WORD)(RightX - LeftX + 1), backwards);
+	    Plot.OutputLine((WORD)LeftX, (WORD)i, (WORD)(RightX - LeftX + 1), forwards);
+	    Plot.OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)i, (WORD)(RightX - LeftX + 1), backwards);
 	    }
 	}
     else  						// the other symmetry types are on their own!
@@ -295,8 +295,8 @@ int	CPixel::bound_trace_main(HWND hwnd, int user_data(HWND hwnd))
 	RightX[i] = -3000;
 	}
 
-    *oldrow = *oldcol = 3000;
-    *andcolor = threshold;						// used if color = 0
+    oldrow = oldcol = 3000;
+    andcolor = threshold;						// used if color = 0
     for (currow = iystart; currow <= iystop; currow++)
 	{
 	for (curcol = ixstart; curcol <= ixstop; curcol++)
@@ -308,18 +308,18 @@ int	CPixel::bound_trace_main(HWND hwnd, int user_data(HWND hwnd))
 		add_worklist(xxstart,xxstop,currow,iystop,currow,0,worksym);
 		return -1;
 		}
-	    *color = (long)Plot->GetColour((WORD)curcol, (WORD)currow);
+	    color = (long)Plot.GetColour((WORD)curcol, (WORD)currow);
 
 	/* if pixel is BLACK (0) then we haven't done it yet!
 	so first calculate its color and call the routine
 	that will try and trace a polygon if one exists */
 
-	    if (*color == 0L)
+	    if (color == 0L)
 		{
 		reset_period = 1;
 		row = currow;
 		col = curcol;
-		if ((*color = calc_frac(hwnd, row, col, user_data)) == -1)
+		if ((color = calc_frac(hwnd, row, col, user_data)) == -1)
 		    return -1;
 		if (boundary_trace(hwnd, curcol, currow, user_data) == -1)
 		    return -1;

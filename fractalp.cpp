@@ -770,8 +770,8 @@ struct fractalspecificstuff fractalspecific[]=
 */
 
    t_popcorn,  "Step Size", "c real", "c imag", ES, ES, ES, ES, ES, ES, ES, {0.05, 3.0, 0.0, 0.0, 0,0,0,0,0,0,},
-   -4.5, -2.5, 5.0, 0, JULIAFP, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, DoPopcornFractal, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
+   -4.5, -2.5, 5.0, 0, JULIAFP, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
@@ -784,8 +784,8 @@ struct fractalspecificstuff fractalspecific[]=
 */
 
    t_popcorn + 1,  "Step Size", "c real", "c imag", ES, ES, ES, ES, ES, ES, ES, {0.05, 3.0, 0.0, 0.0, 0,0,0,0,0,0,},
-   -4.5, -2.5, 5.0, 0, JULIAFP, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, DoPopcornFractal, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
+   -4.5, -2.5, 5.0, 0, JULIAFP, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
@@ -1137,8 +1137,8 @@ struct fractalspecificstuff fractalspecific[]=
    init_mandel_df, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
 */
    t_popcornjul,  "Step Size", "c real", "c imag", ES, ES, ES, ES, ES, ES, ES, {0.05, 3.0, 0.0, 0.0, 0,0,0,0,0,0,},
-   -2.6, -2.5, 5.0, 0, JULIAFP, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, DoPopcornFractal, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
+   -2.6, -2.5, 5.0, 0, JULIAFP, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
@@ -1150,8 +1150,8 @@ struct fractalspecificstuff fractalspecific[]=
    init_mandel_df, do_mandel_df, "ParamDlg", (DLGPROC)ParamDlg, STDBAILOUT
 */
    t_popcornjul + 1,  "Step Size", "c real", "c imag", ES, ES, ES, ES, ES, ES, ES, {0.05, 3.0, 0.0, 0.0, 0,0,0,0,0,0,},
-   -2.6, -2.5, 5.0, 0, JULIAFP, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, DoPopcornFractal, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
+   -2.6, -2.5, 5.0, 0, JULIAFP, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
    {
@@ -2105,24 +2105,24 @@ struct fractalspecificstuff fractalspecific[]=
    "Malthus", "Rate", "Outer Loop Counter", "Inner Loop Counter", "Colours",ES,ES, ES, ES, ES, ES, 2.3, 38.0, 48.0, 10.0,0,0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, 0, NOSYM, 4.0,
-   NullSetup, DoMalthus, "MalthusDlg",(DLGPROC)MalthusDlg, STDBAILOUT
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
+   NULL, NULL, "MalthusDlg",(DLGPROC)MalthusDlg, STDBAILOUT
    },
    {
 //#define TRIANGLES	       210	
    "Triangles", ES, ES, ES, ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
-   -7.0, -4.0, 8.0, 0, NOFRACTAL, NOFRACTAL, 0, 0, NULL, NULL, 0, NOSYM, 4.0,
-   NullSetup, DoTriangle, "TriangleDlg", (DLGPROC)TriangleDlg, STDBAILOUT
+   -7.0, -4.0, 8.0, 0, NOFRACTAL, NOFRACTAL, 0, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
+   NULL, NULL, "TriangleDlg", (DLGPROC)TriangleDlg, STDBAILOUT
    },
    {
 //#define GEOMETRY	       211	
    "Geometric Shapes", ES, ES, ES, ES, ES, ES, ES, ES, ES, ES, 0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
-   -0.75, -0.3, 1.5, 0, NOFRACTAL, NOFRACTAL, 0, 0, NULL, NULL, 0, NOSYM, 4.0,
-   NullSetup, DoGeometry, "GeometryDlg", (DLGPROC)GeometryDlg, STDBAILOUT
+   -0.75, -0.3, 1.5, 0, NOFRACTAL, NOFRACTAL, 0, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
+   NULL, NULL, "GeometryDlg", (DLGPROC)GeometryDlg, STDBAILOUT
    },
    {
 //#define CIRCLES	       212	
@@ -2130,8 +2130,8 @@ struct fractalspecificstuff fractalspecific[]=
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
 //   -0.4,  -0.3,  2.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, 0, NOSYM, 4.0,
-   -0.25, -0.2, 2.5, 0, NOFRACTAL, NOFRACTAL, 0, 0, NULL, NULL, 0, NOSYM, 4.0,
-   NullSetup, DoCircle, "CircleDlg", (DLGPROC)CircleDlg, STDBAILOUT
+   -0.25, -0.2, 2.5, 0, NOFRACTAL, NOFRACTAL, 0, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
+   NULL, NULL, "CircleDlg", (DLGPROC)CircleDlg, STDBAILOUT
    },
    {
 //#define IKEDA	       213	
@@ -2147,16 +2147,16 @@ struct fractalspecificstuff fractalspecific[]=
    "Cross Road", "a", "b", "c", "exponent", "Subtypes 0 to 10", "Iterations", ES, ES, ES, ES, 2.23, 0.76, 0.3, 1.0, 0, 1000000.0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
-   -10.0, -5.0, 12.0, 0, NOFRACTAL, NOFRACTAL, 6, 0, NULL, NULL, 0, NOSYM, 4.0,
-   NullSetup, DoCrossRoads, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
+   -10.0, -5.0, 12.0, 0, NOFRACTAL, NOFRACTAL, 6, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
+   NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
    {
 //#define PASCALTRIANGLE	       215	
    "Pascal Triangle", "Order - (max=100)", "Modulo for the Pascal Triangle", "Low Colour", "High Colour", "Circle Size", ES, ES, ES, ES, ES, 100.0, 11.0, 4.0, 160.0, 8.0, 0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
-   -6.0, -5.0, 12.0, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, 0, NOSYM, 4.0,
-   NullSetup, DoPascal, "NumTriangleDlg", (DLGPROC)NumTriangleDlg, STDBAILOUT
+   -6.0, -5.0, 12.0, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
+   NULL, NULL, "NumTriangleDlg", (DLGPROC)NumTriangleDlg, STDBAILOUT
    },
    {
 //#define APOLLONIUS	       216
@@ -2174,8 +2174,8 @@ struct fractalspecificstuff fractalspecific[]=
    "Apollonian Circles (IFS)", "Iterations", "Colour", ES, ES, ES, ES, ES, ES, ES, ES, 10000000.0, 50.0, 0.0, 0.0, 0.0, 0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
-   -9.0, -5.0, 10.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, NOSYM, 4.0,
-   NullSetup, DoApolloniusIFS, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
+   -9.0, -5.0, 10.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
+   NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
    {
 //#define SIERPINSKIFLOWERS      218
@@ -2188,16 +2188,16 @@ struct fractalspecificstuff fractalspecific[]=
    "Sierpinski Flowers", "Passes", "Sides", "0 = Current Palette, 1 = default 256 Palette", ES, ES, ES, ES, ES, ES, ES, 8.0, 6.0, 0.0, 1.0, 0,0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
-   -10.0, -6.0, 12.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, 0, NOSYM, 4.0,
-   NullSetup, DoSierpinskiFlower, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
+   -10.0, -6.0, 12.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
+   NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
    {
 //#define ZIGZAG      219
    "Zigzag Spirals", "a", "k1", "exp 1", "exp 2", "subtype 0, 1, 2, 3", "Number of segments", ES, ES, ES, ES, 20.0, 1.0, 2.0, 2.0, 0, 100.0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, FFORMULA, SETUP_SYM,
 //   Formula, form_per_pixel, intFormulaSetup, StandardFractal, 0,
-   -0.36, -0.2, 0.4, 0, NOFRACTAL, NOFRACTAL, 6, 0, NULL, NULL, 0, NOSYM, 4.0,
-   NullSetup, DoZigzag, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
+   -0.36, -0.2, 0.4, 0, NOFRACTAL, NOFRACTAL, 6, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
+   NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
    {
 //#define GARGOYLE	       220
@@ -2274,8 +2274,8 @@ struct fractalspecificstuff fractalspecific[]=
    {
 //#define POPCORN		230
    "Popcorn",  "Threshold", "Variation (0 to 5)", "h", "a real", "a imag", ES, ES, ES, ES, ES, {50.0, 2.0, 0.05, 3.0, 0,0,0,0,0,0,},
-   -2.6, -1.8, 3.6, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, DoPopcorn, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
+   -2.6, -1.8, 3.6, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, OTHERFNINPIXEL, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
    {
 //#define MANDELBAR	       231
@@ -2360,6 +2360,14 @@ struct fractalspecificstuff fractalspecific[]=
     //#define TOWER		243
    "Ant Tower", "Speed 2D Window", "Speed 3D Window", "Background Colour 0 - 255","Ant Size 1-20","Height Scale",ES,ES, ES, ES, ES, 60.0, 60.0, 7, 4, 2.0, 0,0,0,0,0,
    -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, OTHERFNINPIXEL, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
+   },
+
+   {
+    // #define NUMFRACTAL	244	// dedicated to an 11 year old girl who "discovered" it
+   "\"Num Fractal\"",
+	realz0, imagz0,"real value of base", "imaginaryvalue of base", ES, ES, ES, ES, ES, ES, 0,0,2,0,0,0,0,0,0,0,
+   -3.5, -2.0, 4.0, 0, 2,   NOFRACTAL, 4, 1, "sin", NULL, TRIGINPIXEL + USEDOUBLEDOUBLE, NOSYM, 4.0,
    NULL, NULL, "SelectFracParams", (DLGPROC)SelectFracParams, STDBAILOUT
    },
 
@@ -4108,6 +4116,7 @@ struct BigFractalStuff BigFractalSpecific[]=
 	{ FPMANFNFN,	    NULL,			NullSetup },		// z = trig0(z)+p1 if mod(old) < p2.x and trig1(z)+p1 if mod(old) >= p2.x
 	{ FPLAMBDAFNFN,	    NULL,			NullSetup },
 	{ FPMANLAMFNFN,	    NULL,			NullSetup },		// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
+	{ NUMFRACTAL,	    NULL,			NullSetup },		// dedicated to an 11 year old girl who "discovered" it
 
 	{ BURNINGSHIP,	    NULL,			NullSetup },
 	{ SCREENFORMULA,    FormPerPixel,		Formula   },		// this is included here because all DD/QD operations are calculated from arbitrary precision.

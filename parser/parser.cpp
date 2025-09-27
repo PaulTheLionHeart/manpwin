@@ -37,7 +37,6 @@
 #include "..\BigDouble.h"
 #include "..\Arithmetic.h"
 
-
 #ifdef WATCH_MP
 double x1, y1, x2, y2;
 #endif
@@ -70,15 +69,16 @@ extern	double	vert;			// vertical address
 extern	double	mandel_width;		// width of display
 
 extern	CFract	Fractal;		// current fractal stuff
+
 void	insertFunctionNames(char *FormStr, CFract Fractal);		// insert function names in place of literal "fn1", "fn2"
 
 extern	char	lptr[][100];
 extern	int	lsys_num;
 extern	char	lsys_Label[];		// for display in type selection
 
-extern	Complex	c, j, z;
-/*extern*/ DDComplex   zDD, cDD;
-/*extern*/ QDComplex   zQD, cQD;
+static  Complex		c, z;
+static	DDComplex	zDD, cDD;
+static	QDComplex	zQD, cQD;
 
 extern	char	*str_find_ci(char *, char *);
 extern	DDComplex	DDComplexPower(DDComplex x, DDComplex y);
@@ -268,10 +268,10 @@ static	unsigned int n, NextOp, InitN;
 static	int paren, ExpectingArg;
 static	struct	ConstArg *v = (struct ConstArg *)0;      /* was static CAE fp */
 static	int InitLodPtr, InitStoPtr, InitOpPtr, LastInitOp;      /* was static CAE fp */
-static	int Delta16;
-double	fgLimit;           /* TIW 05-04-91 */
-static	double fg;
-static	int ShiftBack;     /* TIW 06-18-90 */
+//static	int Delta16;
+//double	fgLimit;           /* TIW 05-04-91 */
+//static	double fg;
+//static	int ShiftBack;     /* TIW 06-18-90 */
 static	int SetRandom;     /* MCP 11-21-91 */
 	int Randomized;
 static	unsigned long RandNum;
@@ -611,52 +611,55 @@ int isjump(char *Str, int Len)
 char maxfn = 0;
 /* TIW 03-30-91 STOP */
 
-struct FNCT_LIST far FnctList[] = {   /* TIW 03-31-91 added far */
-   {s_sin,   &StkSin},
-   {s_sinh,  &StkSinh},
-   {s_cos,   &StkCos},
-   {s_cosh,  &StkCosh},
-   {s_sqr,   &StkSqr},
-   {s_log,   &StkLog},
-   {s_exp,   &StkExp},
-   {s_abs,   &StkAbs},
-   {s_conj,  &StkConj},
-   {s_real,  &StkReal},
-   {s_imag,  &StkImag},
-   {s_ident, &dStkIdent},
-   {s_recip, &StkRecip},
-   {s_fn1,   &StkTrig0},   /* TIW 03-30-91 */
-   {s_fn2,   &StkTrig1},   /* TIW 03-30-91 */
-   {s_fn3,   &StkTrig2},   /* TIW 03-30-91 */
-   {s_fn4,   &StkTrig3},   /* TIW 03-30-91 */
-   {s_flip,  &StkFlip},    /* MCP 4-9-91 */
-   {s_tan,   &StkTan},     /* TIW 04-22-91 */
-   {s_tanh,  &StkTanh},    /* TIW 04-22-91 */
-   {s_cotan, &StkCoTan},   /* TIW 04-24-91 */
-   {s_cotanh,&StkCoTanh},  /* TIW 04-24-91 */
-   {s_cosxx, &StkCosXX},   /* PB  04-28-91 */
-   {s_srand, &StkSRand},   /* MCP 11-21-91 */
-   {s_asin,  &StkASin},    /* TIW 11-26-94 */
-   {s_asinh, &StkASinh},   /* TIW 11-26-94 */
-   {s_acos,  &StkACos},    /* TIW 11-26-94 */
-   {s_acosh, &StkACosh},   /* TIW 11-26-94 */
-   {s_atan,  &StkATan},    /* TIW 11-26-94 */
-   {s_atanh, &StkATanh},   /* TIW 11-26-94 */
-   {s_sqrt,  &StkSqrt},    /* TIW 11-26-94 */
-   {s_cabs,  &StkCAbs},    /* TIW 11-26-94 */
-   {s_floor, &StkFloor},   /* TIW 06-30-96 */
-   {s_ceil,  &StkCeil},    /* TIW 06-30-96 */
-   {s_trunc, &StkTrunc},   /* TIW 06-30-96 */
-   {s_round, &StkRound},   /* TIW 06-30-96 */
-   {"", NULL},		    // PHD 2009-10-15
-};
+struct FNCT_LIST FnctList[] = 
+    { 
+    {s_sin,   &StkSin},
+    {s_sinh,  &StkSinh},
+    {s_cos,   &StkCos},
+    {s_cosh,  &StkCosh},
+    {s_sqr,   &StkSqr},
+    {s_log,   &StkLog},
+    {s_exp,   &StkExp},
+    {s_abs,   &StkAbs},
+    {s_conj,  &StkConj},
+    {s_real,  &StkReal},
+    {s_imag,  &StkImag},
+    {s_ident, &dStkIdent},
+    {s_recip, &StkRecip},
+    {s_fn1,   &StkTrig0},   /* TIW 03-30-91 */
+    {s_fn2,   &StkTrig1},   /* TIW 03-30-91 */
+    {s_fn3,   &StkTrig2},   /* TIW 03-30-91 */
+    {s_fn4,   &StkTrig3},   /* TIW 03-30-91 */
+    {s_flip,  &StkFlip},    /* MCP 4-9-91 */
+    {s_tan,   &StkTan},     /* TIW 04-22-91 */
+    {s_tanh,  &StkTanh},    /* TIW 04-22-91 */
+    {s_cotan, &StkCoTan},   /* TIW 04-24-91 */
+    {s_cotanh,&StkCoTanh},  /* TIW 04-24-91 */
+    {s_cosxx, &StkCosXX},   /* PB  04-28-91 */
+    {s_srand, &StkSRand},   /* MCP 11-21-91 */
+    {s_asin,  &StkASin},    /* TIW 11-26-94 */
+    {s_asinh, &StkASinh},   /* TIW 11-26-94 */
+    {s_acos,  &StkACos},    /* TIW 11-26-94 */
+    {s_acosh, &StkACosh},   /* TIW 11-26-94 */
+    {s_atan,  &StkATan},    /* TIW 11-26-94 */
+    {s_atanh, &StkATanh},   /* TIW 11-26-94 */
+    {s_sqrt,  &StkSqrt},    /* TIW 11-26-94 */
+    {s_cabs,  &StkCAbs},    /* TIW 11-26-94 */
+    {s_floor, &StkFloor},   /* TIW 06-30-96 */
+    {s_ceil,  &StkCeil},    /* TIW 06-30-96 */
+    {s_trunc, &StkTrunc},   /* TIW 06-30-96 */
+    {s_round, &StkRound},   /* TIW 06-30-96 */
+    {"", NULL},		    // PHD 2009-10-15
+    };
 
-struct OP_LIST {
-   char *s;
-   void (**ptr)(void);
-};
+struct OP_LIST 
+    {
+    char *s;
+    void (**ptr)(void);
+    };
 
-struct OP_LIST far OPList[] = {
+struct OP_LIST  OPList[] = 
+    {
     {","  , &PtrStkClr  }, /*  0 */
     {"!=" , &StkNE      }, /*  1 */
     {"="  , &PtrStkSto  }, /*  2 */
@@ -674,7 +677,8 @@ struct OP_LIST far OPList[] = {
     {"*"  , &StkMul     }, /* 14 */
     {"/"  , &StkDiv     }, /* 15 */
     {"^"  , &StkPwr     }, /* 16 */
-};
+    };
+
 
 
 void NotAFnct(void) { }
@@ -1263,10 +1267,11 @@ static int ParseStr(char *Str, int pass)
 #pragma code_seg ()       /* back to normal segment */
 #endif
 
-int	FormulaFloat(Complex *zIn)		// used for direct formula parser so it can be used with real time Julia
+int	FormulaFloat(Complex *zIn, Complex *cIn)		// used for direct formula parser so it can be used with real time Julia
     {
     int	    ret;
 
+    c = *cIn;
     z = *zIn;
     ret = Formula();
     *zIn = z;
@@ -1278,7 +1283,7 @@ int	DDFormula(DDComplex *zIn, DDComplex *cIn)	// used for direct formula parser 
     int	    ret;
 
     zDD = *zIn;
-//    cDD = *cIn;
+    cDD = *cIn;
     ret = Formula();
     *zIn = zDD;
 //    *cIn = cDD;
@@ -1290,6 +1295,7 @@ int	QDFormula(QDComplex *zIn, QDComplex *cIn)	// used for direct formula parser 
     int	    ret;
 
     zQD = *zIn;
+    cQD = *cIn;
     ret = Formula();
     *zIn = zQD;
     return ret;
@@ -1354,10 +1360,11 @@ int Formula(void)
 
 extern	int	period_level;		// 0 for no periodicity checking
 
-int	FormPerPixelFloat(Complex *zIn)		// used for direct formula parser so it can be used with real time Julia
+int	FormPerPixelFloat(Complex *zIn, Complex *cIn)		// used for direct formula parser so it can be used with real time Julia
     {
     MathType = DOUBLEFLOAT;		// plain old double
     z = *zIn;
+    c = *cIn;
     FormPerPixel();
     *zIn = z;
     return 0;
@@ -2431,24 +2438,14 @@ int fpFormulaSetup(char *FormFile)
     }
 
 /*
-int DDFormulaSetup(char *FormFile)
-    {
-    int RunFormRes;              // CAE fp
-    strcpy(FormName, FormFile);	// yeah yeah, it's hard to interface two independent systems
-    MathType = DD_MATH;
-    RunFormRes = !RunForm(FormName, 0); // RunForm() returns 1 for failure
-    return RunFormRes;
-    }
-*/
-
-/* TIW added 06-20-90 so functions can be called from fractals.c */
+// TIW added 06-20-90 so functions can be called from fractals.c 
 void init_misc()
     {
     static struct ConstArg far vv[5];
     static struct Arg argfirst, argsecond;
     if (!v)
 	v = vv;
-    Arg1 = &argfirst; Arg2 = &argsecond; /* needed by all the ?Stk* functions */
+    Arg1 = &argfirst; Arg2 = &argsecond; // needed by all the ?Stk* functions
     fg = (double)(1L << bitshift);
     fgLimit = (double)0x7fffffffL / fg;
     ShiftBack = 32 - bitshift;
@@ -2457,6 +2454,7 @@ void init_misc()
     uses_p1 = uses_p2 = uses_p3 = uses_jump = uses_ismand = 0;
     uses_p4 = uses_p5 = 0;
     }
+/*
 
 /* PB 910417 here to end changed.
         Allocate sub-arrays from one main farmemalloc, using global variable
@@ -3609,7 +3607,7 @@ void	insertFunctionNames(char *FormStr, CFract Fractal)		// insert function name
 	fn1ptr = Fractal.Fn1;
 	while (p < tok - 3)
 	    *q++ = *p++;
-	for (i = 0 ; i < FnLen1; i++)					// replace "fn1" with first 3 chars of function 1 name
+	for (i = 0 ; i < (int)FnLen1; i++)					// replace "fn1" with first 3 chars of function 1 name
 	    *q++ = *fn1ptr++;
 //	for (i = 0; i <  - 3; i++)				// insert the next chars of function name if needed
 //	    *q++ = *fn1ptr++;
@@ -3624,7 +3622,7 @@ void	insertFunctionNames(char *FormStr, CFract Fractal)		// insert function name
 	fn2ptr = Fractal.Fn2;
 	while (p < tok - 3)
 	    *q++ = *p++;
-	for (i = 0; i < FnLen2; i++)					// replace "fn1" with first 3 chars of function 2 name
+	for (i = 0; i < (int)FnLen2; i++)					// replace "fn1" with first 3 chars of function 2 name
 	    *q++ = *fn2ptr++;
 //	for (i = 0; i < FnLen2 - 3; i++)				// insert the next chars of function name if needed
 //	    *q++ = *fn2ptr++;

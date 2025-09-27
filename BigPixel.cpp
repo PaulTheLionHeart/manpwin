@@ -40,7 +40,9 @@ int    CPixel::BigInitFractal(void)
     if (!IsBig)
 	return -1;
     if (fractalspecific[type].flags & FUNCTIONINPIXEL)
-	return(BigInitFunctions(type, zBig, qBig));
+	return(BigInitFunctions(type, &zBig, &qBig));
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
+	return -1;
     else if (BigFractalSpecific[BigFractPtr].big_per_pixel() < 0)
 	return -1;
     return 0;
@@ -53,7 +55,7 @@ int    CPixel::BigInitFractal(void)
 int    CPixel::BigRunFractal(void)
     {
     if (fractalspecific[type].flags & FUNCTIONINPIXEL)
-	return(BigRunFunctions(type, zBig, qBig, &SpecialFlag, iteration));
+	return(BigRunFunctions(type, &zBig, &qBig, &SpecialFlag, &iteration));
     else
 	return BigFractalSpecific[BigFractPtr].big_calctype();
     }
@@ -70,16 +72,16 @@ int	CPixel::DoBigFilter(int method, int hooper)
     CPotential	Pot;
 
     if (colours == 256 && decomp > 0)
-	*iteration = BigDecomposition(zBig->x, zBig->y);
+	iteration = BigDecomposition(zBig.x, zBig.y);
     else if (logval)
-	*iteration = (BYTE) (*(logtable + (*iteration % MAXTHRESHOLD)));
+	iteration = (BYTE) (*(logtable + (iteration % MAXTHRESHOLD)));
     else if (biomorph >= 0)
 	{
 	rqlim2 = sqrt(rqlim);
 //	BioMorphTest = rqlim2;
 	BioMorphTest = 0.5;
-	if (zBig->x.BigAbs() < BioMorphTest || zBig->y.BigAbs() < BioMorphTest)
-	    *iteration = biomorph;
+	if (zBig.x.BigAbs() < BioMorphTest || zBig.y.BigAbs() < BioMorphTest)
+	    iteration = biomorph;
 	}
     else
 	{
@@ -87,45 +89,45 @@ int	CPixel::DoBigFilter(int method, int hooper)
 	    {
 	    case EPSCROSS:
 		if (hooper == 1)
-		    *iteration = special;
+		    iteration = special;
 		else if (hooper == 2)
-		    *iteration = (special << 1);
+		    iteration = (special << 1);
 		break;
 						// these options by Richard Hughes modified by TW
 						// Add 7 to overcome negative values on the MANDEL
 	    case REAL:				// "real"
-		*iteration += zBig->x.BigDoubleToInt() + 7L;
+		iteration += zBig.x.BigDoubleToInt() + 7L;
 		break;
 	    case IMAG:	    			// "imag"
-		*iteration += zBig->y.BigDoubleToInt() + 7L;
+		iteration += zBig.y.BigDoubleToInt() + 7L;
 		break;
 	    case MULT:				// "mult"
 		temp = 0.0;
-		if (!(temp == zBig->y))
+		if (!(temp == zBig.y))
 		    {
-		    temp = zBig->x / zBig->y;
-		    *iteration = (long)((double)(*iteration) * temp.BigDoubleToDouble());
+		    temp = zBig.x / zBig.y;
+		    iteration = (long)((double)(iteration) * temp.BigDoubleToDouble());
 		    }
 		break;
 	    case SUM:				// "sum"
-		temp = zBig->x + zBig->y;
-		*iteration += temp.BigDoubleToInt();
+		temp = zBig.x + zBig.y;
+		iteration += temp.BigDoubleToInt();
 		break;
 	    case ATAN:				// "atan"
-		mpfr_atan2(temp.x, zBig->y.x, zBig->x.x, MPFR_RNDN);
-		*iteration = (long)fabs(temp.BigDoubleToDouble()*180.0 / PI);
+		mpfr_atan2(temp.x, zBig.y.x, zBig.x.x, MPFR_RNDN);
+		iteration = (long)fabs(temp.BigDoubleToDouble()*180.0 / PI);
 		break;
 	    case POTENTIAL:
-		magnitude = zBig->CSumSqr();
-		*iteration = Pot.potential(magnitude, *iteration, threshold, TrueCol, colors, potparam);
+		magnitude = zBig.CSumSqr();
+		iteration = Pot.potential(magnitude, iteration, threshold, TrueCol, colors, potparam);
 		break;
 	    }
 
 	// eliminate negative colors & wrap arounds
-	if (*iteration < 0)
-	    *iteration = 0;
-	if (*iteration > threshold && decomp <= threshold)		// for small thresholds, we can still have higher decomp levels
-	    *iteration = threshold;
+	if (iteration < 0)
+	    iteration = 0;
+	if (iteration > threshold && decomp <= threshold)		// for small thresholds, we can still have higher decomp levels
+	    iteration = threshold;
 	}
     return 0;
     }
@@ -165,7 +167,7 @@ void	CPixel::CalcBigFloatIteration(double error, double *wpixels, int row, int c
 	    {
 	    case ESCAPING:
 		{
-		BigTemp = zBig->x * zBig->x + zBig->y * zBig->y;
+		BigTemp = zBig.x * zBig.x + zBig.y * zBig.y;
 //		BigTemp1 = BigTemp.BigLog();
 //		log_zn = mpfr_get_d(BigTemp1.x, MPFR_RNDN) / SlopeDegree;
 		double  t = mpfr_get_d(BigTemp.x, MPFR_RNDN);
@@ -190,7 +192,7 @@ void	CPixel::CalcBigFloatIteration(double error, double *wpixels, int row, int c
 */
 	    case CONVERGING:
 		a = OldZ - OlderZ;
-		b = *zBig - OldZ;
+		b = zBig - OldZ;
 		BigTemp = a.x * a.x + a.y * a.y;
 		LogA = BigTemp.BigLog();
 		log_zn = log(error) - mpfr_get_d(LogA.x, MPFR_RNDN);
@@ -230,7 +232,7 @@ void	CPixel::CalcBigFloatIteration(double error, double *wpixels, int row, int c
 		break;
 */
 	    default:
-		BigTemp = zBig->x * zBig->x + zBig->y * zBig->y;
+		BigTemp = zBig.x * zBig.x + zBig.y * zBig.y;
 		BigTemp1 = BigTemp.BigLog();
 		log_zn = mpfr_get_d(BigTemp1.x, MPFR_RNDN) / SlopeDegree;
 		nu = log(log_zn / log(SlopeDegree)) / log(SlopeDegree);
@@ -293,36 +295,36 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
     savedand = 1;				// begin checking every other cycle
     savedincr = 1;				// start checking the very first time
 
-    *iteration = 0L;
+    iteration = 0L;
     real_iteration = 0;	
     phaseflag = 0;				// assume all type 5, 9 fractals same colour
 
     if (OutsideMethod >= TIERAZONFILTERS)
 	{
-	bigTemp = *qBig;
+	bigTemp = qBig;
 	tempComplex = bigTemp.CBig2Double();
-	TZfilter->InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
-	TZfilter->LoadFilterQ(tempComplex);
+	TZfilter.InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
+	TZfilter.LoadFilterQ(tempComplex);
 	}
 
     if (juliaflag)
 	{
-	qBig->x = j.x;
-	qBig->y = j.y;
-	*zBig = (invert) ? BigInvertz2(*cBig) : *cBig;
+	qBig.x = j.x;
+	qBig.y = j.y;
+	zBig = (invert) ? BigInvertz2(cBig) : cBig;
 	}
     else
 	{
-	*qBig = (invert) ? BigInvertz2(*cBig) : *cBig;
-	*zBig = 0.0;
+	qBig = (invert) ? BigInvertz2(cBig) : cBig;
+	zBig = 0.0;
 	}
 
-//    ShowBignum(zBig->x, "x before init");
-//    ShowBignum(zBig->y, "y before init");
+//    ShowBignum(zBig.x, "x before init");
+//    ShowBignum(zBig.y, "y before init");
     if (BigInitFractal() < 0)
 	return(BLUE);
-//    ShowBignum(zBig->x, "x after init");
-//    ShowBignum(zBig->y, "y after init");
+//    ShowBignum(zBig.x, "x after init");
+//    ShowBignum(zBig.y, "y after init");
     if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	{
 	magnitude = 0.0;
@@ -338,11 +340,11 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	if (calcmode == 'F')
 	    {
 	    BigOlderZ = BigOldZ;
-	    BigOldZ = *zBig;
+	    BigOldZ = zBig;
 	    }
 	if (FloatIteration >= threshold)
 	    break;
-	(*iteration)++;
+	iteration++;
 	FloatIteration++;
 
 	result = BigRunFractal();
@@ -351,25 +353,25 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	else if (result == 1)				// escape time
 	    break;
 	if (type == RATIONALMAP)
-	    return(*iteration);
+	    return(iteration);
 	/*  No point, it doesn't have a fractal nature
 
 	if (method == STARTRAIL)
 	    {
 	    if (0 < iteration && iteration < 16)
-		tantable[iteration - 1] = z->y / (z->x + 0.000001);
+		tantable[iteration - 1] = z.y / (z.x + 0.000001);
 	    }
 	else 
 	*/
 	if (InsideMethod == EPSCROSS)
 	    {
 	    hooper = 0;
-	    if (zBig->x.BigAbs() < close)
+	    if (zBig.x.BigAbs() < close)
 		{
 		hooper = 1; // close to y axis
 		break;
 		}
-	    else if (zBig->y.BigAbs() < close)
+	    else if (zBig.y.BigAbs() < close)
 		{
 		hooper = 2; // close to x axis
 		break;
@@ -377,26 +379,26 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	    }
 	else if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	    {
-	    magnitude = zBig->CSumSqr();
+	    magnitude = zBig.CSumSqr();
 	    if (magnitude < min_orbit)
 		{
 		min_orbit = magnitude;
-		min_index = (long)*iteration + 1L;
+		min_index = (long)iteration + 1L;
 		}
 	    }
 
 	else if (OutsideMethod >= TIERAZONFILTERS)
 	    {
-	    bigTemp = *zBig;
+	    bigTemp = zBig;
 	    tempComplex = bigTemp.CBig2Double();
-	    TZfilter->DoTierazonFilter(tempComplex, iteration);
+	    TZfilter.DoTierazonFilter(tempComplex, &iteration);
 	    }
 
-	if (*iteration > oldcolour)			// check periodicity
+	if (iteration > oldcolour)			// check periodicity
 	    {
-	    if ((*iteration & savedand) == 0)		// time to save a new value
+	    if ((iteration & savedand) == 0)		// time to save a new value
 		{
-		BigSaved = *zBig;
+		BigSaved = zBig;
 		if (--savedincr == 0)			// time to lengthen the periodicity?
 		    {
 		    savedand = (savedand << 1) + 1;	// longer periodicity
@@ -405,36 +407,36 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 		}
 	    else		     			// check against an old save
 		{
-		BigDouble   xAbs = BigSaved.x - zBig->x;
-		BigDouble   yAbs = BigSaved.y - zBig->y;
+		BigDouble   xAbs = BigSaved.x - zBig.x;
+		BigDouble   yAbs = BigSaved.y - zBig.y;
 
-		if (xAbs.BigAbs() < *BigCloseEnough)
-		    if (yAbs.BigAbs() < *BigCloseEnough)
-			*iteration = threshold;
+		if (xAbs.BigAbs() < BigCloseEnough)
+		    if (yAbs.BigAbs() < BigCloseEnough)
+			iteration = threshold;
 		}
 	    }
 	}
 
-    if (*iteration >= threshold && period_level)
+    if (iteration >= threshold && period_level)
 	oldcolour = 0;			// check periodicity immediately next time
     else
-	oldcolour = *iteration + 10;	// check when past this+10 next time
+	oldcolour = iteration + 10;	// check when past this+10 next time
 
     if (OutsideMethod >= TIERAZONFILTERS)
 	{
 	BigComplex	bigTemp;
 	Complex		tempComplex;
 
-	bigTemp = *zBig;
+	bigTemp = zBig;
 	tempComplex = bigTemp.CBig2Double();
-	TZfilter->EndTierazonFilter(tempComplex, iteration, TrueCol);
-	return *iteration;
+	TZfilter.EndTierazonFilter(tempComplex, &iteration, TrueCol);
+	return iteration;
 	}
 
     if (SpecialFlag)
 	return(special);		// flag for special colour
 
-    if (*iteration < threshold)
+    if (iteration < threshold)
 	{
 //	DoBigFilter(InsideMethod, hooper);
 	DoBigFilter(OutsideMethod, hooper);
@@ -443,40 +445,40 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	{
 	BigDouble	t = min_orbit.BigSqrt() * 75.0;
 	if (InsideMethod == BOF60)
-	    *iteration = (int)(t.BigDoubleToDouble());
+	    iteration = (int)(t.BigDoubleToDouble());
 	else if (InsideMethod == BOF61)
-	    *iteration = min_index;
+	    iteration = min_index;
 	else if (InsideMethod == ZMAG)
 	    {
-	    temp = zBig->CSumSqr();
-	    *iteration = (long)(temp * double(threshold >> 1) + 1.0);
+	    temp = zBig.CSumSqr();
+	    iteration = (long)(temp * double(threshold >> 1) + 1.0);
 	    }
 	else
-	    *iteration = threshold;
-	if (*iteration < 1L)
-	    *iteration = threshold;
+	    iteration = threshold;
+	if (iteration < 1L)
+	    iteration = threshold;
 	}
 
     if (type == NEWTON && subtype != 'N')
-	return (*color);				// Newton root colour
+	return (color);				// Newton root colour
 
     if ((type == SPECIALNEWT || type == MATEIN) && special != 15)  // split colours
 	{
 	if (phaseflag == 1)				// second phase
-	    *color += special;
+	    color += special;
 	else if (phaseflag == 2)			// third phase
-	    *color += (special << 1);
-	if (*iteration > threshold)
-	    *iteration -= threshold;
+	    color += (special << 1);
+	if (iteration > threshold)
+	    iteration -= threshold;
 	}						// default first phase
 
     if (calcmode == 'F')
 	{
 	SlopeError = 1.0e-9;
-	CalcBigFloatIteration(SlopeError, wpixels, row, col, *zBig, BigOldZ, BigOlderZ);
+	CalcBigFloatIteration(SlopeError, wpixels, row, col, zBig, BigOldZ, BigOlderZ);
 	}
 
-    return(*iteration);
+    return(iteration);
     }
 
     /**************************************************************************
@@ -512,58 +514,57 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 long	CPixel::BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 
     {
- //   FloatCornerstoBig(var);
     if (pairflag)		// half size screens: only do every second row / col
 	if (row % pairflag || col % pairflag)
 	    if (row != (int)ydots - 1)			// must trigger for last line
 		return(threshold);
     if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
 	{
-	if (row != *oldrow)
+	if (row != oldrow)
 	    {
 	    if (pairflag && row)		// draw row for right hand image
-		draw_right_image((short)(*oldrow));
+		draw_right_image((short)(oldrow));
 	    switch (RotationAngle)
 		{
 		case NORMAL:						// normal
-		    cBig->y = *Big_yymax - *Big_ygap * (double)row;
+		    cBig.y = Big_yymax - Big_ygap * (double)row;
 		    break;
 		case 90:						// 90 degrees
-		    cBig->x = *Big_yymax - *Big_xgap * (double)row;
+		    cBig.x = Big_yymax - Big_xgap * (double)row;
 		    break;
 		case 180:						// 180 degrees
-		    cBig->y = -(*Big_yymax - *Big_ygap * (double)row);
+		    cBig.y = -(Big_yymax - Big_ygap * (double)row);
 		    break;
 		case 270:						// 270 degrees
-		    cBig->x = -(*Big_yymax - *Big_xgap * (double)row);
+		    cBig.x = -(Big_yymax - Big_xgap * (double)row);
 		    break;
 		}
-	    *oldrow = row;
+	    oldrow = row;
 	    }
-	if (col != *oldcol)
+	if (col != oldcol)
 	    {
 	    switch (RotationAngle)
 		{
 		case NORMAL:						// normal
-		    cBig->x = *Big_xgap * (double)col + BigHor;
+		    cBig.x = Big_xgap * (double)col + BigHor;
 		    break;
 		case 90:						// 90 degrees
-		    cBig->y = *Big_ygap * (double)col + BigHor;
+		    cBig.y = Big_ygap * (double)col + BigHor;
 		    break;
 		case 180:						// 180 degrees
-		    cBig->x = -(*Big_xgap * (double)col + BigHor);
+		    cBig.x = -(Big_xgap * (double)col + BigHor);
 		    break;
 		case 270:						// 270 degrees
-		    cBig->y = -(*Big_ygap * (double)col + BigHor);
+		    cBig.y = -(Big_ygap * (double)col + BigHor);
 		    break;
 		}
-	    *oldcol = col;
+	    oldcol = col;
 	    }
 	}
     else
 	{
 	BigDouble  zero = 0.0;
-	BigMat->DoTransformation(&cBig->x, &cBig->y, &zero, *Big_xgap * (double)col + BigHor, *Big_yymax - *Big_xgap * (double)row, 0.0);
+	BigMat.DoTransformation(&cBig.x, &cBig.y, &zero, Big_xgap * (double)col + BigHor, Big_yymax - Big_xgap * (double)row, 0.0);
 	}
 
     if (user_data(hwnd) == -1)
@@ -575,13 +576,13 @@ long	CPixel::BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 	*color = DoQDFract(hwnd, row, col);	// quad double
     else
 */
-	*color = DoBigFract(hwnd, row, col);	// arbitrary precision
-    if (*color < 0)
+	color = DoBigFract(hwnd, row, col);	// arbitrary precision
+    if (color < 0)
 	return -1;
     reset_period = 0;
 
-    if (*color >= threshold)
-	*color = threshold;
+    if (color >= threshold)
+	color = threshold;
 /*
     else if (logval && logflag == TRUE)
 	color = (BYTE) (*(logtable + color));
@@ -589,19 +590,19 @@ long	CPixel::BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 
     if (calcmode == 'B')
 	{
-	if (*color >= colours)	/* don't use color 0 unless from inside */
+	if (color >= colours)	/* don't use color 0 unless from inside */
 	    if (colours < 16)
-		*color &= *andcolor;
+		color &= andcolor;
 	    else
-		*color = ((*color - 1) % *andcolor) + 1;  /* skip color zero */
+		color = ((color - 1) % andcolor) + 1;  /* skip color zero */
 	}
 
      if (_3dflag)
-	    projection(col, row, *color);
+	    projection(col, row, color);
 	else if (pairflag)
-	    do_stereo_pairs(col, row, *color);
+	    do_stereo_pairs(col, row, color);
     else
-	plot((WORD)col, (WORD)row, *color);
-    return(*color);
+	plot((WORD)col, (WORD)row, color);
+    return(color);
     }
 

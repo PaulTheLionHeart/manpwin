@@ -5329,11 +5329,7 @@ int	setup_Curve(void)
     return 0;
     }
 
-#ifdef	MULTITHREAD
-int	DoCurves(PMYVARIABLES var)
-#else
 int	DoCurves(void) 
-#endif
     {
     return (CurveSpecific[subtype].calctype());
     }

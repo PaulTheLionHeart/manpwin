@@ -18,7 +18,7 @@ using namespace qd;
 void dd_real::error(const char *msg) { 
   if (msg) { 
   /*cerr << "ERROR " << msg << endl;*/ 
-      MessageBox(GlobalHwnd, msg, "Fatal Error, I'm outta here", MB_ICONEXCLAMATION | MB_OK);
+      MessageBox(GlobalHwnd, msg, "DD Fatal Error, I'm outta here", MB_ICONEXCLAMATION | MB_OK);
       time_to_quit = true;
   }
 }
@@ -161,7 +161,7 @@ int dd_real::read(const char *s, dd_real &a) {
 
       case 'E':
       case 'e':
-        nread = std::sscanf(p+1, "%d", &e);
+        nread = sscanf_s(p+1, "%d", &e);
         done = true;
         if (nread != 1)
           return -1;

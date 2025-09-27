@@ -5,46 +5,9 @@
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
 
-#include	<stdio.h>
-#include	"manp.h"
-#include	"Fract.h"
-#include	"resource.h"
-#include	"fractype.h"
-#include	"Plot.h"
-#include	"anim.h"
-#include	"polygon.h"
+#include "OtherFunctions.h"
 
-#define MIN(a,b) (a <= b ? a : b)
-#define MAX(a,b) (a >= b ? a : b)
-#define MAXPOINTS 16
-
-extern	HWND	GlobalHwnd;				// This is the main windows handle
-
-extern	int	user_data(HWND);
-extern	int	power(int base, int n);
-extern	double	FloatPower(double base, int n);
-
-extern	int	time_to_reinit;			// time to start fractal again??
-
-extern	long	threshold;
-extern	double	mandel_width;			/* width of display */
-extern	double	hor;				/* horizontal address */
-extern	double	vert;				/* vertical address */
-extern	double	ScreenRatio;			// ratio of width / height for the screen
-extern	double	param[];
-extern	WORD	type;				// fractal type
-extern	int	subtype;			// A - V
-extern	int	curpass, totpasses;
-extern	int	xdots, ydots;
-extern	CPlot	Plot;		// image plotting routines 
-
-static	double	xscale, yscale;
-
-/**************************************************************************
-	Spiral Fractal Type Images
-***************************************************************************/
-
-int	DoZigzag(void)
+int	COtherFunctions::DoZigzag()
 
     {
     double  x, y, a, k1, xold, yold;
@@ -53,6 +16,7 @@ int	DoZigzag(void)
     int	    i, j, k, j0, k0, n;
     double  exp;
     char    c[120];
+    BYTE    subtype = 0;
 
     xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
     yscale = (double) (ydots - 1) / mandel_width;
@@ -65,20 +29,20 @@ int	DoZigzag(void)
     n = (int)param[5];
     if (k1 == 0.0)
 	k1 = 1E-30;
-    totpasses = 10;
+    *totpasses = 10;
     x = 0.1;
     y = 0.1;
 
     for (i = 0; i < n; i++)
 	{
-	if (user_data(GlobalHwnd) == -1)		// user pressed a key?
+	if (UserData(hwnd) == -1)		// user pressed a key?
 	    return -1;
 	xold = x;
 	yold = y;
-	curpass = i * 10 / 600;
+	*curpass = i * 10 / 600;
 
 	sprintf(c, "i = %d", i);
-	SetWindowText (GlobalHwnd, c);
+	SetWindowText (hwnd, c);
 
 	switch (subtype)
 	    {

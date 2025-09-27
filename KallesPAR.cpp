@@ -619,11 +619,11 @@ int	ProcessLocation(char *real, char *imag, char *zoom)
     if (BigNumFlag)
 	{
 	decimals = precision + PRECISION_FACTOR;	// for deep zooming, we'd better have enough precision
-	BigMag.ChangePrecision(precision);
-	BigHor.ChangePrecision(precision);
-	BigVert.ChangePrecision(precision);
-	BigWidth.ChangePrecision(precision);
-	OneOverMag.ChangePrecision(precision);
+	BigMag.ChangePrecision(decimals);
+	BigHor.ChangePrecision(decimals);
+	BigVert.ChangePrecision(decimals);
+	BigWidth.ChangePrecision(decimals);
+	OneOverMag.ChangePrecision(decimals);
 
 	BigBailout = rqlim;
 	ConvertString2Bignum(BigHor.x, real);
@@ -699,7 +699,7 @@ int	WriteKallesFile(HWND hwnd, char *filename)
 	BigMag = OneOverMag * 4.0;
 	ConvertBignum2String(s1, BigZreal.x);
 	ConvertBignum2String(s2, BigZimag.x);
-	ConvertBignum2String(s3, BigMag.x);
+	mpfr_sprintf(s3, "%.20Re", BigMag.x);
 	fprintf(fp, "Re: %s\nIm: %s\nZoom: %s\n", s1, s2, s3);
 
 	if (s1) { delete[] s1; s1 = NULL; }

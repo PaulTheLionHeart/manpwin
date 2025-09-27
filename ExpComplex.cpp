@@ -264,6 +264,19 @@ ExpComplex	ExpComplex::CCube()
     return  temp;
     }
 
+/**************************************************************************
+	sumsqr(x+iy)  = x*x+y*y
+***************************************************************************/
+
+floatexp	ExpComplex::CSumSqrExp()
+    {
+    floatexp	sqr_real, sqr_imag, out;
+
+    sqr_real = x * x;
+    sqr_imag = y * y;
+    out = sqr_real + sqr_imag;
+    return (out);
+    }
 
 /**************************************************************************
 	sumsqr(x+iy)  = x*x+y*y
@@ -282,6 +295,32 @@ double	ExpComplex::CSumSqr()
     }
 
 /**************************************************************************
+	multiply (x+iy) by 2 = x+x + i(y+y)
+***************************************************************************/
+
+ExpComplex	ExpComplex::CMul2()
+    {
+    ExpComplex	a;
+
+    a.x = x.X2();
+    a.y = y.X2();
+    return a;
+    }
+
+/**************************************************************************
+	half(x+iy) = x/2 + i(y/2)
+***************************************************************************/
+
+ExpComplex	ExpComplex::CHalf()
+    {
+    ExpComplex	a;
+
+    a.x = x.half();
+    a.y = y.half();
+    return a;
+    }
+
+/**************************************************************************
 	sqr(x+iy)  = x*x-y*y + i(x*y)*2
 ***************************************************************************/
 
@@ -295,6 +334,79 @@ ExpComplex	ExpComplex::CSqr()
     a.y = temp.X2();
     return a;
     }
+
+/**************************************************************************
+    Abs(x+iy)  = sqrt(x*x+y*y)
+***************************************************************************/
+
+floatexp	ExpComplex::CFabs()
+    {
+    floatexp	sqr_real, sqr_imag, u;
+    floatexp	out;
+
+    sqr_real = x * x;
+    sqr_imag = y * y;
+    out = sqr_real + sqr_imag;
+    return (out);
+    }
+
+/**************************************************************************
+    Complex Power Function
+**************************************************************************/
+
+void	ExpComplex::CPower(ExpComplex  & result, ExpComplex  & base, int exp)
+
+    {
+    floatexp	xt, yt, t2;
+
+    xt = base.x;   yt = base.y;
+
+    if (exp & 1)
+	{
+	result.x = xt;
+	result.y = yt;
+	}
+    else
+	{
+	result.x = 1.0;
+	result.y = 0.0;
+	}
+
+    exp >>= 1;
+    while (exp)
+	{
+	t2 = (xt + yt) * (xt - yt);
+	yt = xt * yt;
+	yt = yt + yt;
+	xt = t2;
+
+	if (exp & 1)
+	    {
+	    t2 = xt * result.x - yt * result.y;
+	    result.y = result.y * xt + yt * result.x;
+	    result.x = t2;
+	    }
+	exp >>= 1;
+	}
+    }
+
+/**************************************************************************
+	Evaluate a Complex Polynomial
+**************************************************************************/
+
+ExpComplex	ExpComplex::CPolynomial(int degree)
+
+    {
+    ExpComplex	temp, temp1;
+
+    temp1.x = x;
+    temp1.y = y;
+    if (degree < 0)
+	degree = 0;
+    CPower(temp, temp1, degree);
+    return  temp;
+    }
+
 
 #ifdef FUTURE
 /**************************************************************************
@@ -569,23 +681,6 @@ BigComplex	BigComplex::CExp()
     }
 
 /**************************************************************************
-	Abs(x+iy)  = sqrt(x*x+y*y)
-***************************************************************************/
-
-BigDouble	BigComplex::CFabs()
-    {
-    BigDouble	sqr_real, sqr_imag, u;
-    BigDouble	out;
-
-    mpfr_mul(sqr_real.x, x.x, x.x, MPFR_RNDN);			// sqr_real = x * x;
-    mpfr_mul(sqr_imag.x, y.x, y.x, MPFR_RNDN);			// sqr_imag = y * y;
-    mpfr_add(u.x, sqr_real.x, sqr_imag.x, MPFR_RNDN);
-    mpfr_sqrt(out.x, u.x, MPFR_RNDN);
-
-    return (out);
-    }
-
-/**************************************************************************
 	sin(x+iy)  = sin(x)cosh(y) + icos(x)sinh(y)
 ***************************************************************************/
 
@@ -673,25 +768,6 @@ double	CSumSqr(BigComplex  & Cmplx1)
     {
     BigDouble	t = ((Cmplx1.x * Cmplx1.x) + (Cmplx1.y * Cmplx1.y));
     return ((double)bftofloat(t.x));
-    }
-*/
-
-/**************************************************************************
-	Evaluate a Complex Polynomial
-**************************************************************************/
-
-/*
-extern	void	BigComplexPower(bf_t, bf_t, bf_t, bf_t, int);
-
-BigComplex	CPolynomial(BigComplex  & Cmplx1, int degree)
-
-    {
-    BigComplex	temp;
-
-    if (degree < 0)
-	degree = 0;
-    BigComplexPower(temp.x.x, temp.y.x, Cmplx1.x.x, Cmplx1.y.x, degree);
-    return  temp;
     }
 */
 

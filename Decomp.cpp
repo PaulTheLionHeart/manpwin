@@ -30,8 +30,8 @@ int	CPixel::FloatDecomposition(double z_real, double z_imag)
 
     if (BigNumFlag)
 	{
-	New.x = (zBig->x.x, MPFR_RNDN);
-	New.y = (zBig->y.x, MPFR_RNDN);
+	New.x = (zBig.x.x, MPFR_RNDN);
+	New.y = (zBig.y.x, MPFR_RNDN);
 	}
     else
 	{

@@ -115,7 +115,7 @@ extern	int	ChangeBigPrecision(int decimals);
 extern	int	ProcessFormulaString(char *);
 extern	void	cvtcentermag(double *, double *, LDBL *, double *, double *, double *);
 //extern	char	*GetFractalName(void);
-extern	CMatrix	Mat;			// transformation and roatation matrix
+//extern	CMatrix	Mat;			// transformation and rotation matrix
 
 //static	int	ReadParFile(HWND, char *);
 extern	char	FRMPath[];		// path for formula files
@@ -828,6 +828,7 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
     double	Skew;
     double	floatval[6];					// pre-parsed floating parms
     Complex	centre;
+    CMatrix	Mat;						// transformation and rotation matrix
 
     int		count, NumCorners;
     BigDouble   BigMag, temp, OneOverMag;

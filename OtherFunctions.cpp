@@ -13,14 +13,32 @@
 	Initialise functions for each pixel
 **************************************************************************/
 
-int	COtherFunctions::InitOtherFunctions(WORD type, Complex *z, Complex *q, HWND hwndIn, double *wpixels, CTrueCol *TrueColIn, CDib *DibIn, char *AntStatusIn, struct __timeb64 FrameEndIn, struct __timeb64 FrameStartIn)
+int	COtherFunctions::InitOtherFunctions(WORD type, int subtypeIn, HWND hwndIn, CTrueCol *TrueColIn, CDib *DibIn, char *AntStatusIn, struct __timeb64 FrameEndIn, struct __timeb64 FrameStartIn, double mandel_widthIn, 
+		double horIn, double vertIn, double ScreenRatioIn, int *totpassesIn, int *curpassIn, int user_dataIn(HWND hwnd), double *wpixelsIn, BYTE *DefaultPaletteIn, int CoordSystemIn, //COscProcess OscProcessIn, 
+		int xAxisIn, int yAxisIn, int zAxisIn)
     {
+    subtype = subtypeIn;
     hwnd = hwndIn;
+    wpixels = wpixelsIn;
     TrueCol = TrueColIn; 
     AntStatus = AntStatusIn; 
     FrameEnd = FrameEndIn; 
     FrameStart = FrameStartIn;
     Dib = DibIn;
+    mandel_width = mandel_widthIn;
+    hor = horIn;
+    vert = vertIn;
+    ScreenRatio = ScreenRatioIn;
+    totpasses = totpassesIn;
+    curpass = curpassIn;
+    UserData = user_dataIn;
+    wpixels = wpixelsIn;
+    DefaultPalette = DefaultPaletteIn;
+    CoordSystem = CoordSystemIn;
+    xAxis = xAxisIn;
+    yAxis = yAxisIn;
+    zAxis = zAxisIn;
+    
     Plot.InitPlot(threshold, TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE + USEWPIXELS);
 
     switch (type)
@@ -34,6 +52,16 @@ int	COtherFunctions::InitOtherFunctions(WORD type, Complex *z, Complex *q, HWND 
 	case DEMOWALK:
 	case PLASMA:
 	case DIFFUSION:
+	case CROSSROADS:
+	case ZIGZAG:
+	case CIRCLES:
+	case PASCALTRIANGLE:
+	case TRIANGLES:
+	case SIERPINSKIFLOWERS:
+	case APOLLONIUS:
+	case APOLLONIUSIFS:
+	case GEOMETRY:
+	case MALTHUS:
 	    break;		// nothing to do here
 
 	}
@@ -44,8 +72,7 @@ int	COtherFunctions::InitOtherFunctions(WORD type, Complex *z, Complex *q, HWND 
 	Run functions for each iteration
 **************************************************************************/
 
-int	COtherFunctions::RunOtherFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration, int xdots, int ydots, double param[], long threshold, double hor, double vert, double mandel_width, double ScreenRatio, int *curpass, int *totpasses, 
-		int user_data(HWND hwnd), HWND hwnd, int rotate(int dir))
+int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *iteration, int xdots, int ydots, double param[], long threshold, int rotate(int dir))
     {
     switch (type)
 	{
@@ -85,7 +112,7 @@ int	COtherFunctions::RunOtherFunctions(WORD type, Complex *z, Complex *q, BYTE *
 		{
 		for (i = 1; i < ydots - 1; i++)
 		    {
-		    if (user_data(hwnd) == -1)		// user pressed a key?
+		    if (UserData(hwnd) == -1)		// user pressed a key?
 			return -1;
 		    for (j = 1; j < xdots - 1; j++)
 			{					// compute the sum of neighbouring cells
@@ -141,7 +168,7 @@ int	COtherFunctions::RunOtherFunctions(WORD type, Complex *z, Complex *q, BYTE *
 		t = exp(temp);
 		x += sin(d * t);
 		y += cos(d * t) + skew * sin(d * t);
-		if (user_data(hwnd) == -1)		// user pressed a key?
+		if (UserData(hwnd) == -1)		// user pressed a key?
 		    return -1;
 		x1 = (int)((x - hor) * xscale);
 		y1 = (int)((vert + mandel_width - y) * yscale);
@@ -189,7 +216,7 @@ int	COtherFunctions::RunOtherFunctions(WORD type, Complex *z, Complex *q, BYTE *
 	    *totpasses = 10;
 	    for (i = 0; i < iterations * 10; i++)
 		{
-		if (user_data(hwnd) == -1)		// user pressed a key?
+		if (UserData(hwnd) == -1)		// user pressed a key?
 		    return -1;
 		*curpass = i / iterations;
 		x1 = a * (y - x) + a * tan(x);			// three Chua's equations
@@ -412,7 +439,7 @@ int	COtherFunctions::RunOtherFunctions(WORD type, Complex *z, Complex *q, BYTE *
 
 			filled = notfilled;
 			notfilled = 1 - filled;
-			if (user_data(hwnd)) 
+			if (UserData(hwnd))
 			    {
 			    abort_cellular(CELLULAR_DONE, 0);
 			    return -1;
@@ -469,7 +496,7 @@ int	COtherFunctions::RunOtherFunctions(WORD type, Complex *z, Complex *q, BYTE *
 		    Plot.OutputLine(xdots / 4, (WORD)row, (WORD)xdots - xdots / 4, (DWORD *)cell_array[filled]);
 		    Plot.genline(0, row, xdots / 4, row, 0L);							// fill rest of the screen
 		    Plot.genline(xdots - xdots / 4 - 1, row, xdots, row, 0L);
-		    if (user_data(hwnd))
+		    if (UserData(hwnd))
 			{
 			abort_cellular(CELLULAR_DONE, 0);
 			return -1;
@@ -590,16 +617,16 @@ int	COtherFunctions::RunOtherFunctions(WORD type, Complex *z, Complex *q, BYTE *
 
 	    recur_level = 0;
 	    if (param[1] == 0)
-		subDivide(0, 0, xdots - 1, ydots - 1, user_data);
+		subDivide(0, 0, xdots - 1, ydots - 1, UserData);
 	    else
 		{
 		recur1 = i = k = 1;
-		while (new_subD(0, 0, xdots - 1, ydots - 1, i, user_data) == 0)
+		while (new_subD(0, 0, xdots - 1, ydots - 1, i, UserData) == 0)
 		    {
 		    k = k * 2;
 		    if (k  >(int)max(xdots - 1, ydots - 1))
 			break;
-		    if (user_data(hwnd))
+		    if (UserData(hwnd))
 			{
 			n = 1;
 			goto done;
@@ -607,7 +634,7 @@ int	COtherFunctions::RunOtherFunctions(WORD type, Complex *z, Complex *q, BYTE *
 		    i++;
 		    }
 		}
-	    if (!user_data(hwnd))
+	    if (!UserData(hwnd))
 		n = 0;
 	    else
 		n = 1;
@@ -765,7 +792,7 @@ int	COtherFunctions::RunOtherFunctions(WORD type, Complex *z, Complex *q, BYTE *
 
 		    // Check keyboard
 		    if ((++plasma_check & 0x7f) == 1)
-			if (user_data(hwnd))
+			if (UserData(hwnd))
 			    {
 			    plasma_check--;
 			    return -1;
@@ -841,6 +868,102 @@ int	COtherFunctions::RunOtherFunctions(WORD type, Complex *z, Complex *q, BYTE *
 	case	TOWER:
 	    tower();
 	    return 0;
+
+	case POPCORN:
+	    DoPopcorn();
+	    return 0;
+
+	case CROSSROADS:
+	    DoCrossRoads();
+	    return 0;
+
+	case ZIGZAG:
+	    DoZigzag();
+	    return 0;
+
+	case TRIANGLES:
+	    DoTriangle();
+	    return 0;
+
+	case CIRCLES:
+	    DoCircles();
+	    return 0;
+
+	case SIERPINSKIFLOWERS:
+	    DoSierpinskiFlower();
+	    return 0;
+
+	case PASCALTRIANGLE:
+	    COtherFunctions::DoPascal();
+	    return 0;
+
+	case APOLLONIUSIFS:
+	    {
+	    long    n;
+	    int	    ix,iy;
+	    double  x=0.2,y=0.3,x1=0,y1=0,r=SQRT3;
+	    double  a0,b0,f1x,f1y;
+	    long    count = 10000000;
+	    DWORD   colour;
+
+	    Plot.InitPlot(threshold, TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE);
+	    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
+	    yscale = (double) (ydots - 1) / mandel_width;
+
+	    count = (long)param[0];
+	    colour = (DWORD)param[1];
+	    *totpasses = 10;
+	    srand((unsigned)time(NULL));			// randomise things
+
+	    for (n = 0; n < count; n++) 
+		{
+		if (UserData(hwnd) == -1)		// user pressed a key?
+		    return -1;
+		*curpass = n * 10 / count;
+		a0 = 3 * (1 + r - x) / (pow(1 + r - x,2.0) + y*y) - (1 + r) / (2+r);
+		b0 = 3 * y / (pow(1 + r - x,2.0) + y*y);
+		f1x = a0 / (a0*a0 + b0*b0);
+		f1y = -b0 / (a0*a0 + b0*b0);
+		switch (rand()%3) 
+		    {
+		    case 0:
+			x1 = 3 * (1 + r - x) / (pow(1 + r - x,2.0) + y*y) - (1 + r) / (2 + r);
+			y1 = 3 * y / (pow(1 + r - x,2.0) + y*y);
+			break;
+		    case 1:
+			x1 = -f1x / 2 - f1y * r / 2;
+			y1 = f1x * r / 2 - f1y / 2;
+			break;
+		    case 2:
+			x1 = -f1x / 2 + f1y * r / 2;
+			y1 = -f1x * r / 2 - f1y / 2;
+			break;
+		    }
+		if (n < 100)
+		    continue;
+		ix = (int)((x - hor) * xscale);
+		iy = (int)((vert + mandel_width - y) * yscale);
+
+		x = x1;
+		y = y1;
+		if (ix < 0 || iy < 0 || ix >= xdots || iy >= ydots)
+		    continue;
+		Plot.PlotPoint((WORD)ix, (WORD)iy, colour);
+		}
+	    }
+	    return 0;
+
+	case GEOMETRY:
+	    DoGeometry();
+	    return 0;
+
+	case MALTHUS:
+	    DoMalthus();
+	    return 0;
+
+
+
+
 
 	}
 

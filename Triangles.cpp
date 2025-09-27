@@ -5,55 +5,17 @@
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
 
-#include	<stdio.h>
-#include	"manp.h"
-#include	"Fract.h"
-#include	"resource.h"
-#include	"fractype.h"
-#include	"menu.h"
-#include	"anim.h"
-#include	"polygon.h"
-#include	"Plot.h"
+#include "OtherFunctions.h"
 
 #define MIN(a,b) (a <= b ? a : b)
 #define MAX(a,b) (a >= b ? a : b)
 #define MAXPOINTS 16
 
-extern	HWND	GlobalHwnd;				// This is the main windows handle
-
-extern	int	user_data(HWND);
-extern	int	time_to_reinit;			// time to start fractal again??
-extern	int	xdots, ydots;
-
-extern	long	threshold;
-extern	double	mandel_width;			/* width of display */
-extern	double	hor;				/* horizontal address */
-extern	double	vert;				/* vertical address */
-extern	double	ScreenRatio;			// ratio of width / height for the screen
-extern	double	param[];
-extern	WORD	type;				// fractal type
-extern	int	subtype;			// A - V
-extern	int	curpass, totpasses;
-
-extern	CPlot	Plot;		// image plotting routines 
-
-static	double	xscale, yscale;
-static	int	Passes = 8;
-static	BOOL	ExpandPalette = TRUE;		// spread colours across palette
-static	BOOL	PlotStars = TRUE;		// stars or polygons?
-static	BOOL	FillPolygon = TRUE;		// fill polygons?
-static	int	jAngle = 4, wAngle = 6;		// sets the overall shape of the fractal
-//static	int	Divisor = 3, Remainder = 3;	// who knows, I don't
-static	int	Divisor = 9, Remainder = 8;	// who knows, I don't
-static	int	Sides = 3;			// sides of polygon
-static	double	Exponent = 1.0;
-static	CPoly	polygon;			// polygon class
-
 /**************************************************************************
 	Get the power of an interger
 ***************************************************************************/
 
-int	power(int base, int n)
+int	COtherFunctions::IntPower(int base, int n)
     {
     int	i, p;
 
@@ -67,7 +29,7 @@ int	power(int base, int n)
 	Get the power of a double
 ***************************************************************************/
 
-double	FloatPower(double base, int n)
+double	COtherFunctions::FloatPower(double base, int n)
     {
     int	i;
     double p;
@@ -82,7 +44,7 @@ double	FloatPower(double base, int n)
 	Draw Box
 ***************************************************************************/
 
-void	DrawBox(int x0, int y0, int x1, int y1, DWORD colour, BOOL fill, CPlot Plot)
+void	COtherFunctions::DrawBox(int x0, int y0, int x1, int y1, DWORD colour, BOOL fill, CPlot Plot)
     {
     int	i, j, k;
 
@@ -106,7 +68,7 @@ void	DrawBox(int x0, int y0, int x1, int y1, DWORD colour, BOOL fill, CPlot Plot
 	Triangle Fractal Type Images
 ***************************************************************************/
 
-int	DoTriangle(void)
+int	COtherFunctions::DoTriangle()
 
     {
     double  u1, u2, v1, v2, size, ForthRoot;
@@ -124,13 +86,21 @@ int	DoTriangle(void)
     xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
     yscale = (double) (ydots - 1) / mandel_width;
 
-    totpasses = Passes;
+    if (Sides > MAXPOINTS)
+	Sides = MAXPOINTS;
+    if (Sides < 3)
+	Sides = 3;
+    if (Divisor == 0)		// no norty division
+	Divisor = 1;
+    if (Remainder == 0)		// no norty division
+	Remainder = 1;
+    *totpasses = Passes;
 //    z = PI * (Sides - 2) / Sides;
     z = 2.0 * PI / Sides;
     a = (subtype == 'O') ? ROOT2 : ROOT3;
     for (m = 0; m < Passes; m++)
 	{
-	curpass = m;
+	*curpass = m;
 	colour = (ExpandPalette) ? threshold * (DWORD)m / Passes : (DWORD)m;
 	switch (subtype)
 	    {
@@ -139,27 +109,27 @@ int	DoTriangle(void)
 	    case 'C':					
 	    case 'E':					
 	    case 'L':					
-		exp1 = power(3, m);
+		exp1 = IntPower(3, m);
 		break;
 	    case 'M':					
 	    case 'N':					
-		exp1 = power(Passes, m);
+		exp1 = IntPower(Passes, m);
 		break;
 	    case 'D':					
-		exp1 = power(5, m);
+		exp1 = IntPower(5, m);
 		break;
 	    case 'F':					
 	    case 'G':					
 	    case 'H':					
 	    case 'J':					
 	    case 'K':					
-		exp1 = power(5, m) + 2; 
+		exp1 = IntPower(5, m) + 2;
 		break;
 	    case 'I':					
-		exp1 = power(3, m) - 1;
+		exp1 = IntPower(3, m) - 1;
 		break;
 	    case 'O':					
-		exp1 = power(10, m);
+		exp1 = IntPower(10, m);
 		break;
 	    case 'P':					
 	    case 'Q':					
@@ -167,15 +137,15 @@ int	DoTriangle(void)
 	    case 'S':					
 	    case 'T':					
 	    case 'U':					
-		exp1 = power(8, m);
+		exp1 = IntPower(8, m);
 		break;
 	    default:					
-		exp1 = power(8, m);
+		exp1 = IntPower(8, m);
 		break;
 	    }
 	for (n = 0; n < exp1; n++)
 	    {
-	    if (user_data(GlobalHwnd) == -1)		// user pressed a key?
+	    if (UserData(hwnd) == -1)		// user pressed a key?
 		 return -1;
 	    n1 = n;
 	    x = 0;
@@ -187,7 +157,7 @@ int	DoTriangle(void)
 			{
 			l = n1 % Remainder;
 			n1 = n1 / Divisor;
-			exp = power(2, k);
+			exp = IntPower(2, k);
 			x = x + (cos((jAngle * l + 1) * PI / wAngle)) / exp;
 			y = y + (sin((jAngle * l + 1) * PI / wAngle)) / exp;
 			}
@@ -203,7 +173,7 @@ int	DoTriangle(void)
 			{
 			l = n1 % Remainder;
 			n1 = n1 / Divisor;
-			exp = power(2, k);
+			exp = IntPower(2, k);
 			x = x + ((sin((jAngle * l + 1) * PI / wAngle)) / exp) * 2;
 			y = y + ((cos((jAngle * l + 1) * PI / wAngle)) / exp) * 2;
 			}
@@ -213,7 +183,7 @@ int	DoTriangle(void)
 			{
 			l = n1 % Remainder;
 			n1 = n1 / Divisor;
-			exp = power(2, k);
+			exp = IntPower(2, k);
 			x = x + ((sin((jAngle * l + 1) * PI / wAngle)) / exp) * 2;
 			y = y + ((cos((jAngle * l + 1) * PI / wAngle)) / exp) * 2;
 			}
@@ -223,7 +193,7 @@ int	DoTriangle(void)
 			{
 			l = n1 % Remainder;
 			n1 = n1 / Divisor;
-			exp = power(2, k);
+			exp = IntPower(2, k);
 			x = x + ((cos((jAngle * l + 1) * PI / wAngle)) / exp) * 2;
 			y = y + ((sin((jAngle * l + 1) * PI / wAngle)) / exp) * 2;
 			}
@@ -237,10 +207,10 @@ int	DoTriangle(void)
 			{
 			l = n1 % Remainder;
 			n1 = n1 / Divisor;
-			exp = power(3, k);
+			exp = IntPower(3, k);
 			x = x + (cos((jAngle * l + 1) * PI / wAngle)) / exp;
 			y = y + (sin((jAngle * l + 1) * PI / wAngle)) / exp;
-			exp = power(2, k);
+			exp = IntPower(2, k);
 			x = x + (cos((jAngle * l + 1) * PI / wAngle)) / exp;
 			y = y + (sin((jAngle * l + 1) * PI / wAngle)) / exp;
 			}
@@ -250,7 +220,7 @@ int	DoTriangle(void)
 			{
 			l = n1 % Remainder;
 			n1 = n1 / Divisor;
-			exp = power(2, k);
+			exp = IntPower(2, k);
 			x = x + ((cos((jAngle * l + 1) * PI / wAngle)) / exp) * 2;
 			y = y + ((sin((jAngle * l + 1) * PI / wAngle)) / exp) * 2;
 			}
@@ -260,7 +230,7 @@ int	DoTriangle(void)
 			{
 			l = n1 % Remainder;
 			n1 = n1 / Divisor;
-			exp = power(3, k);
+			exp = IntPower(3, k);
 			x = x + ((sin((jAngle * l + 1) * PI / wAngle)) / exp) * 2;
 			y = y + ((cos((jAngle * l + 1) * PI / wAngle)) / exp) * 2;
 			}
@@ -270,7 +240,7 @@ int	DoTriangle(void)
 			{
 			l = n1 % Remainder;
 			n1 = n1 / Divisor;
-//			exp = power(2, k);
+//			exp = IntPower(2, k);
 			x = x + sin((jAngle * l + 1) * PI / wAngle);
 			y = y + cos((jAngle * l + 1) * PI / wAngle);
 			}
@@ -280,10 +250,10 @@ int	DoTriangle(void)
 			{
 			l = n1 % Remainder;
 			n1 = n1 / Divisor;
-			exp = power(2, k);
+			exp = IntPower(2, k);
 			x = x + (sin((jAngle * l + 1) * PI / wAngle)) / exp;
 			y = y + (cos((jAngle * l + 1) * PI / wAngle)) / exp;
-			exp = power(5, k);
+			exp = IntPower(5, k);
 			x = x + (sin((jAngle * l + 1) * PI / wAngle)) / exp;
 			y = y + (cos((jAngle * l + 1) * PI / wAngle)) / exp;
 			}
@@ -293,10 +263,10 @@ int	DoTriangle(void)
 			{
 			l = n1 % Remainder;
 			n1 = n1 / Divisor;
-			exp = power(10, k);
+			exp = IntPower(10, k);
 			x = x + (sin((jAngle * l + 1) * PI / wAngle)) / exp;
 			y = y + (cos((jAngle * l + 1) * PI / wAngle)) / exp;
-			exp = power(6, k);
+			exp = IntPower(6, k);
 			x = x + (sin((jAngle * l + 1) * PI / wAngle)) / exp;
 			y = y + (cos((jAngle * l + 1) * PI / wAngle)) / exp;
 			}
@@ -309,7 +279,7 @@ int	DoTriangle(void)
 			FloatExp = FloatPower(Exponent, k);
 			x = x + (sin((jAngle * l + 1) * PI / wAngle)) / FloatExp;
 			y = y + (cos((jAngle * l + 1) * PI / wAngle)) / FloatExp;
-			exp = power(5, k);
+			exp = IntPower(5, k);
 			x = x + (sin((jAngle * l + 1) * PI / wAngle)) / exp;
 			y = y + (cos((jAngle * l + 1) * PI / wAngle)) / exp;
 			}
@@ -319,14 +289,14 @@ int	DoTriangle(void)
 			{
 			l = n1 % Remainder;
 			n1 = n1 / Divisor;
-			exp = power(2, k);
+			exp = IntPower(2, k);
 			x = x + ((sin((jAngle * l + 1) * PI / wAngle)) / exp) * 2;
 			y = y + ((cos((jAngle * l + 1) * PI / wAngle)) / exp) * 2;
 			}
 		    break;
 		}
 
-	    exp = power(2, m + 1);
+	    exp = IntPower(2, m + 1);
 	    u1 = x + a / (double)exp;
 	    u2 = x - a / (double)exp;
 	    v1 = y - 1 / (double)exp;
@@ -487,237 +457,48 @@ int	DoTriangle(void)
     return 0;
     }
 
-DLGPROC FAR PASCAL TriangleDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam)
-     {
-     static     char	temp;
-     static     UINT	tempParam;
-     static     WORD	temp_special;
-     HWND		hCtrl;
-     BOOL		bTrans ;
-     char		s[24];
+/**************************************************************************
+    Get parameters for Triangles
+**************************************************************************/
 
-     switch (message)
-	  {
-	  case WM_INITDIALOG:
-	        temp = subtype;
-	        switch (subtype)
-		    {
-		    case 'A':
-			tempParam = IDC_A;
-			break;
-		    case 'B':
-			tempParam = IDC_B;
-			break;
-		    case 'C':
-			tempParam = IDC_C;
-			break;
-		    case 'D':
-			tempParam = IDC_D;
-			break;
-		    case 'E':
-			tempParam = IDC_E;
-			break;
-		    case 'F':
-			tempParam = IDC_F;
-			break;
-		    case 'G':
-			tempParam = IDC_G;
-			break;
-		    case 'H':
-			tempParam = IDC_H;
-			break;
-		    case 'I':
-			tempParam = IDC_I;
-			break;
-		    case 'J':
-			tempParam = IDC_J;
-			break;
-		    case 'K':
-			tempParam = IDC_K;
-			break;
-		    case 'L':
-			tempParam = IDC_L;
-			break;
-		    case 'M':
-			tempParam = IDC_M;
-			break;
-		    case 'N':
-			tempParam = IDC_N;
-			break;
-		    case 'O':
-			tempParam = IDC_O;
-			break;
-		    case 'P':
-			tempParam = IDC_P;
-			break;
-		    case 'Q':
-			tempParam = IDC_Q;
-			break;
-		    case 'R':
-			tempParam = IDC_R;
-			break;
-		    case 'S':
-			tempParam = IDC_S;
-			break;
-		    case 'T':
-			tempParam = IDC_T;
-			break;
-		    case 'U':
-			tempParam = IDC_U;
-			break;
-		    case 'V':
-			tempParam = IDC_V;
-			break;
-		    default:				// uninitialised
-			tempParam = IDC_A;
-			temp = 'A';
-			break;
-		    }
-		CheckRadioButton(hDlg, IDC_A, IDC_V, tempParam);
-		SetDlgItemInt(hDlg, IDC_PARAM1, (int)Passes, TRUE);
-		SetDlgItemInt(hDlg, IDC_PARAM2, (int)Remainder, TRUE);
-		SetDlgItemInt(hDlg, IDC_PARAM3, (int)Divisor, TRUE);
-		SetDlgItemInt(hDlg, IDC_PARAM4, (int)jAngle, TRUE);
-		SetDlgItemInt(hDlg, IDC_PARAM5, (int)wAngle, TRUE);
-		SetDlgItemInt(hDlg, IDC_PARAM6, (int)Sides, TRUE);
+void	COtherFunctions::GetExpandPalette(BOOL in)	// spread colours across palette
+    {
+    ExpandPalette = in;
+    }
+void	COtherFunctions::GetPlotStars(BOOL in)		// stars or polygons?
+    {
+    PlotStars = in;
+    }
+void	COtherFunctions::GetFillPolygon(BOOL in)	// fill polygons?
+    {
+    FillPolygon = in;
+    }
+void	COtherFunctions::GetjAngle(int in)
+    {
+    jAngle = in;
+    }
+void	COtherFunctions::GetwAngle(int in)		// sets the overall shape of the fractal
+    {
+    wAngle = in;
+    }
+void	COtherFunctions::GetDivisor(int in)
+    {
+    Divisor = in;
+    }
+void	COtherFunctions::GetRemainder(int in)		// who knows, I don't
+    {
+    Remainder = in;
+    }
+void	COtherFunctions::GetExponent(double in)
+    {
+    Exponent = in;
+    }
+void	COtherFunctions::GetSides(int in)		// sides of polygon
+    {
+    Sides = in;
+    }
+void	COtherFunctions::GetPasses(int in)		// number of passes
+    {
+    Passes = in;
+    }
 
-	        sprintf(s, "%3.2f", Exponent);
-		SetDlgItemText(hDlg, IDC_PARAM7, s);
-		hCtrl = GetDlgItem (hDlg, IDC_EXPANDPALETTE);
-		SendMessage(hCtrl, BM_SETCHECK, ExpandPalette, 0L);
-		hCtrl = GetDlgItem (hDlg, IDC_STAR);
-		SendMessage(hCtrl, BM_SETCHECK, PlotStars, 0L);
-		hCtrl = GetDlgItem (hDlg, IDC_FILLPOLYGON);
-		SendMessage(hCtrl, BM_SETCHECK, FillPolygon, 0L);
-		SetFocus(GetDlgItem(hDlg, tempParam));
-	        return FALSE ;
-
-	  case WM_COMMAND:
-	        switch ((int) LOWORD(wParam))
-		    {
-		    case IDC_A:
-		    case IDC_B:
-		    case IDC_C:
-		    case IDC_D:
-		    case IDC_E:
-		    case IDC_F:
-		    case IDC_G:
-		    case IDC_H:
-		    case IDC_I:
-		    case IDC_J:
-		    case IDC_K:
-		    case IDC_L:
-		    case IDC_M:
-		    case IDC_N:
-		    case IDC_O:
-		    case IDC_P:
-		    case IDC_Q:
-		    case IDC_R:
-		    case IDC_S:
-		    case IDC_T:
-		    case IDC_U:
-		    case IDC_V:
-		        switch ((int) LOWORD(wParam))
-			    {
-			    case IDC_A:
-				temp = 'A';
-				break;
-			    case IDC_B:
-				temp = 'B';
-				break;
-			    case IDC_C:
-				temp = 'C';
-				break;
-			    case IDC_D:
-				temp = 'D';
-				break;
-			    case IDC_E:
-				temp = 'E';
-				break;
-			    case IDC_F:
-				temp = 'F';
-				break;
-			    case IDC_G:
-				temp = 'G';
-				break;
-			    case IDC_H:
-				temp = 'H';
-				break;
-			    case IDC_I:
-				temp = 'I';
-				break;
-			    case IDC_J:
-				temp = 'J';
-				break;
-			    case IDC_K:
-				temp = 'K';
-				break;
-			    case IDC_L:
-				temp = 'L';
-				break;
-			    case IDC_M:
-				temp = 'M';
-				break;
-			    case IDC_N:
-				temp = 'N';
-				break;
-			    case IDC_O:
-				temp = 'O';
-				break;
-			    case IDC_P:
-				temp = 'P';
-				break;
-			    case IDC_Q:
-				temp = 'Q';
-				break;
-			    case IDC_R:
-				temp = 'R';
-				break;
-			    case IDC_S:
-				temp = 'S';
-				break;
-			    case IDC_T:
-				temp = 'T';
-				break;
-			    case IDC_U:
-				temp = 'U';
-				break;
-			    case IDC_V:
-				temp = 'V';
-				break;
-			    }
-
-			CheckRadioButton(hDlg, IDC_A, IDC_V, (int) LOWORD(wParam));
-		        return (DLGPROC)TRUE ;
-
-		    case IDOK:
-			Passes = GetDlgItemInt(hDlg, IDC_PARAM1, &bTrans, TRUE);
-			Remainder = GetDlgItemInt(hDlg, IDC_PARAM2, &bTrans, TRUE);
-			Divisor = GetDlgItemInt(hDlg, IDC_PARAM3, &bTrans, TRUE);
-			jAngle = GetDlgItemInt(hDlg, IDC_PARAM4, &bTrans, TRUE);
-			wAngle = GetDlgItemInt(hDlg, IDC_PARAM5, &bTrans, TRUE);
-			Sides = GetDlgItemInt(hDlg, IDC_PARAM6, &bTrans, TRUE);
-			if (Sides > MAXPOINTS)
-			    Sides = MAXPOINTS;
-			if (Sides < 3)
-			    Sides = 3;
-			GetDlgItemText(hDlg, IDC_PARAM7, s, 20);
-			sscanf(s, "%lf", &Exponent);
-			subtype = temp;
-			hCtrl = GetDlgItem (hDlg, IDC_EXPANDPALETTE);
-			ExpandPalette = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
-			hCtrl = GetDlgItem (hDlg, IDC_STAR);
-			PlotStars = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
-			hCtrl = GetDlgItem (hDlg, IDC_FILLPOLYGON);
-			FillPolygon = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
-			EndDialog (hDlg, TRUE);
-			return (DLGPROC)TRUE;
-
-		    case IDCANCEL:
-			EndDialog (hDlg, FALSE);
-			return (DLGPROC)FALSE;
-		   }
-		   break;
-	    }
-      return (DLGPROC)FALSE ;
-      }

@@ -18,7 +18,7 @@ using namespace qd;
 void qd_real::error(const char *msg) { 
   if (msg) { 
   /*cerr << "ERROR " << msg << endl;*/ 
-      MessageBox(GlobalHwnd, msg, "Fatal Error, I'm outta here", MB_ICONEXCLAMATION | MB_OK);
+      MessageBox(GlobalHwnd, msg, "QD Fatal Error, I'm outta here", MB_ICONEXCLAMATION | MB_OK);
       time_to_quit = true;
   }
 }
@@ -312,7 +312,7 @@ int qd_real::read(const char *s, qd_real &qd) {
       case 'E':
       case 'e':
         int nread;
-        nread = std::sscanf(p+1, "%d", &e);
+        nread = sscanf_s(p+1, "%d", &e);
         done = true;
         if (nread != 1)
           return -1;  /* read of exponent failed. */

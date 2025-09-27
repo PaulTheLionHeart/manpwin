@@ -5,50 +5,18 @@
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
 
-#include	<stdio.h>
-#include	"manp.h"
-#include	"Fract.h"
-#include	"resource.h"
-#include	"fractype.h"
-#include	"plot.h"
-#include	"anim.h"
-#include	"polygon.h"
+#include "OtherFunctions.h"
 
-#define MIN(a,b) (a <= b ? a : b)
-#define MAX(a,b) (a >= b ? a : b)
-#define MAXPOINTS 16
+#define MIN(a,b)    (a <= b ? a : b)
+#define MAX(a,b)    (a >= b ? a : b)
+#define MAXPOINTS   16
 #define	MAXARRAY    64
-
-extern	HWND	GlobalHwnd;				// This is the main windows handle
-
-extern	int	user_data(HWND);
-extern	int	power(int base, int n);
-extern	double	FloatPower(double base, int n);
-extern	void	ClearScreen(void);
-extern	CPlot	Plot;		// image plotting routines 
-
-extern	long	threshold;
-extern	double	mandel_width;			/* width of display */
-extern	double	hor;				/* horizontal address */
-extern	double	vert;				/* vertical address */
-extern	double	ScreenRatio;			// ratio of width / height for the screen
-extern	double	param[];
-extern	int	curpass, totpasses;
-extern	BYTE	default_palette[];		// default VGA colour palette
-//extern	BYTE	*PalettePtr;			// points to true colour palette
-extern	int	height, xdots, ydots, width, bits_per_pixel;
-
-static	double	xscale, yscale;
-static	int	Passes = 8;
-static	int	Sides = 6;			// sides of polygon
-static	BOOL	ExpandPalette = TRUE;		// spread colours across palette
-static	BOOL	Animate = FALSE;		// run normal Sierpinski Flower or animate
 
 /**************************************************************************
 	Sierpinski Flower Fractal Type Images
 ***************************************************************************/
 
-int	DoSierpinskiFlower(void)
+int	COtherFunctions::DoSierpinskiFlower()
 
     {
     int	    cor, k, l, m, n, n1;
@@ -70,7 +38,7 @@ int	DoSierpinskiFlower(void)
 
 //    if (Animate)
 //	return DoAnimatedSierpinskiFlower();
-    totpasses = Passes;
+    *totpasses = Passes;
     d = 0.3105 * Sides + 1.0815;			// equation for defining the distance between every polygon. It will be the same in C++
     k3 = (3.5 - 2.7) / (20 - 5) * (Sides - 5) + 2.7;	// this equation is for defining the adequate size of the figure in my BASIC
     k2 = 360360;					// this constant is justifyied to give integers in the division below. = 2*2*2*3*3*5*7*11*13
@@ -84,12 +52,12 @@ int	DoSierpinskiFlower(void)
 	{
 	if (flag)
 	    break;
-	curpass = m;
+	*curpass = m;
 	colour = (ExpandPalette) ? threshold * (DWORD)m / Passes : (DWORD)m;
-	exp1 = power(Sides, m);
+	exp1 = IntPower(Sides, m);
 	for (n = 0; n < exp1; n++)
 	    {
-	    if (user_data(GlobalHwnd) == -1)		// user pressed a key?
+	    if (UserData(hwnd) == -1)		// user pressed a key?
 		 return -1;
 	    n1 = n;
 	    x = 0;

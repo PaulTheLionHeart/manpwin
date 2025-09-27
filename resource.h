@@ -302,6 +302,7 @@
 #define IDC_RETURN                              1008
 #define IDC_SHOWCENTRE                          1008
 #define IDC_THREADENDINGDELAY                   1008
+#define IDC_USEBLA                              1008
 #define IDC_USERPATH                            1008
 #define IDC_DIM_Z1                              1009
 #define IDC_FFT                                 1009
@@ -382,6 +383,7 @@
 #define IDM_SLOPEDEGREE                         1031
 #define IDC_TOWER                               1032
 #define IDM_SLOPEERROR                          1032
+#define IDC_NUMFRACTAL                          1033
 #define IDC_ANT                                 1034
 #define IDC_QUAT                                1035
 #define IDC_DYNAMIC                             1036

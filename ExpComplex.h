@@ -67,23 +67,28 @@ class ExpComplex
 	ExpComplex * operator*=(floatexp &);
 	ExpComplex * operator++(void);
 #endif
-	bool	   operator==(ExpComplex &);
-//	ExpComplex operator^(floatexp &);
-//	ExpComplex operator^(ExpComplex &);
-//	ExpComplex operator^(BYTE &);
-	ExpComplex operator +(const ExpComplex &);	// Addition Operator
-	ExpComplex operator +(const floatexp &);	// complex add by double Operator
-	ExpComplex operator -(const ExpComplex &);	// Subtraction Operator
-	ExpComplex operator -(const floatexp &);	// complex subtract by double Operator
-	ExpComplex operator -(void);			// unary minus
-	ExpComplex operator *(const ExpComplex &);	// Multiplication Operator
-	ExpComplex operator *(const floatexp &);	// complex multiply by double Operator
-	ExpComplex operator /(const ExpComplex &);	// Division Operator
-	ExpComplex operator /(const floatexp &);	// complex divide by double Operator
-	double	   CSumSqr();				// real squared + imaginary squared
-//	floatexp   CFabs(void);				// abs
-	ExpComplex CSqr(void);				// square
-	ExpComplex CCube(void);				// cube
+	bool	    operator==(ExpComplex &);
+//	ExpComplex  operator^(floatexp &);
+//	ExpComplex  operator^(ExpComplex &);
+//	ExpComplex  operator^(BYTE &);
+	ExpComplex  operator +(const ExpComplex &);	// Addition Operator
+	ExpComplex  operator +(const floatexp &);	// complex add by double Operator
+	ExpComplex  operator -(const ExpComplex &);	// Subtraction Operator
+	ExpComplex  operator -(const floatexp &);	// complex subtract by double Operator
+	ExpComplex  operator -(void);			// unary minus
+	ExpComplex  operator *(const ExpComplex &);	// Multiplication Operator
+	ExpComplex  operator *(const floatexp &);	// complex multiply by double Operator
+	ExpComplex  operator /(const ExpComplex &);	// Division Operator
+	ExpComplex  operator /(const floatexp &);	// complex divide by double Operator
+	double	    CSumSqr();				// real squared + imaginary squared -> double
+	floatexp    CSumSqrExp();			// real squared + imaginary squared -> floatexp
+	ExpComplex  CSqr(void);				// square
+	ExpComplex  CCube(void);			// cube
+	ExpComplex  CMul2(void);			// multiply by 2
+	ExpComplex  CHalf(void);			// half
+	floatexp    CFabs();				// complex abs()
+	void	    CPower(ExpComplex  & result, ExpComplex  & base, int exp);	// Complex Power Function
+	ExpComplex  CPolynomial(int degree);		// Complex Polynomial
 /*
 	BigComplex CInvert(void);			// invert
 	BigComplex CPolynomial(int);			// take a complex number to an integer power

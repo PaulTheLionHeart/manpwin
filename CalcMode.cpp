@@ -71,12 +71,12 @@ int	CPixel::StandardCalc(HWND hwnd, int passnum, int user_data(HWND hwnd))
 		    {
 		    if ((row & 1) == 0 && row < iystop)
 			{
-			plot((WORD)col, (WORD)(row + 1), *color);
+			plot((WORD)col, (WORD)(row + 1), color);
 			if ((col & 1) == 0 && col < ixstop)
-			    plot((WORD)(col + 1), (WORD)(row + 1), *color);
+			    plot((WORD)(col + 1), (WORD)(row + 1), color);
 			}
 		    if ((col & 1) == 0 && col < ixstop)
-			plot((WORD)(++col), (WORD)row, *color);
+			plot((WORD)(++col), (WORD)row, color);
 		    }
 		}
 	    ++col;
@@ -323,7 +323,7 @@ void	CPixel::tidy_worklist()
 	Run standard plotting mode fractals
 **************************************************************************/
 
-int	CPixel::StandardCalculationMode(HWND hwnd, CSlope Slope, int user_data(HWND hwnd))
+int	CPixel::StandardCalculationMode(HWND hwnd, int user_data(HWND hwnd))
 
     {
 //    TestQDManp();

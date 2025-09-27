@@ -167,7 +167,7 @@ void	init_log(HWND hwnd)
 void	init(HWND hwnd)
 
     {
-    static	struct Arg argfirst,argsecond;
+//    static	struct Arg argfirst,argsecond;
     int	i;
 
     if (first_init)
@@ -178,7 +178,7 @@ void	init(HWND hwnd)
     colours = 256;
     bits_per_pixel = 24;
 
-    Arg1 = &argfirst; Arg2 = &argsecond;		// needed by all the ?Stk* functions
+//    Arg1 = &argfirst; Arg2 = &argsecond;		// needed by all the ?Stk* functions
     save_flag = FALSE;
     InitTrueColourPalette(FALSE);
 
@@ -269,12 +269,12 @@ int	analyse_corner(char *s)
 	if (mandel_width < DBL_MIN)
 	    mandel_width = 1.0;
 	}
-	if (s1) delete[] s1;
-	if (s2) delete[] s2;
-	if (s3) delete[] s3;
-	if (s4) delete[] s4;
-	if (s5) delete[] s5;
-	return 0;
+    if (s1) delete[] s1;
+    if (s2) delete[] s2;
+    if (s3) delete[] s3;
+    if (s4) delete[] s4;
+    if (s5) delete[] s5;
+    return 0;
     }
 
 /**************************************************************************

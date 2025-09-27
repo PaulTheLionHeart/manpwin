@@ -76,7 +76,7 @@ int	CPixel::CalculateKleinian(Complex *z)
 	return true;
 
 		//If the iterated points enters a 2-cycle , bail out.
-    if (*iteration != 0 && z->CSumSqr() < rqlim)
+    if (iteration != 0 && z->CSumSqr() < rqlim)
 	return true;
     *z = KleinianFunction(z);
     return false;

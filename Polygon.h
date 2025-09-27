@@ -5,6 +5,7 @@
 #include	"Plot.h"
 
 #define	DWORD	unsigned long
+#define	MAXPOINT    20
 
 //Declaration of class point
 class Point
@@ -16,8 +17,8 @@ class Point
 class CPoly
     {
     private:
-    Point p[20];
-    int inter[20],x,y;
+    Point p[MAXPOINT];
+    int inter[MAXPOINT],x,y;
     int v,xmin,ymin,xmax,ymax;
     public:
     int c;

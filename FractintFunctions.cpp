@@ -73,7 +73,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 		    }
 		}
 	    period_level = FALSE;			// no periodicity checking
-	    *color = 0;
+	    color = 0;
 	    if (!juliaflag)
 		*z = *q / 3;
 	    break;
@@ -111,7 +111,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case MANOWARJ:					// to handle fractint par files
 	case MANOWAR:					// to handle fractint par files
 	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
-	    t = (invert) ? invertz2(*c) : *c;
+	    t = (invert) ? invertz2(c) : c;
 	    if (juliaflag)
 		{
 		*z = t;
@@ -147,7 +147,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    temp2.x = 0.0;
 	    temp2.y = 0.0;
 	    if (juliaflag)
-		*z = *c;
+		*z = c;
 	    break;
 
 	case COMPLEXNEWTON:
@@ -192,7 +192,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case PHOENIX:
 	case MANDPHOENIXFP:
 	case MANDPHOENIX:
-	    t = (invert) ? invertz2(*c) : *c;
+	    t = (invert) ? invertz2(c) : c;
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -234,7 +234,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case MANDPHOENIXCPLX:
 	case PHOENIXCPLX:
 	case PHOENIXFPCPLX:
-	    t = (invert) ? invertz2(*c) : *c;
+	    t = (invert) ? invertz2(c) : c;
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -292,7 +292,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case FPMANZTOZPLUSZPWR:
 	case FPJULZTOZPLUSZPWR:
 	case TETRATEFP:					// Tetrate(XAXIS) { c=z=pixel: z=c^z, |z|<=(P1+3)
-	    t = (invert) ? invertz2(*c) : *c;
+	    t = (invert) ? invertz2(c) : c;
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -320,7 +320,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    {
 	    Complex pwr;
 
-	    t = (invert) ? invertz2(*c) : *c;
+	    t = (invert) ? invertz2(c) : c;
 	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
 	    if (juliaflag)
 		{
@@ -342,7 +342,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 
 	case QUATFP:
 	case QUATJULFP:
-	    t = (invert) ? invertz2(*c) : *c;
+	    t = (invert) ? invertz2(c) : c;
 	    temp = 0;
 	    if (juliaflag)
 		{
@@ -369,7 +369,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    break;
 
 	case VL:					// Beauty of Fractals pp. 125 - 127
-	    t = (invert) ? invertz2(*c) : *c;
+	    t = (invert) ? invertz2(c) : c;
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -522,6 +522,15 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    }
 	break;
 
+	case LPOPCORN:
+	case FPPOPCORN:
+	case LPOPCORNJUL:
+	case FPPOPCORNJUL:
+	case POPCORN:
+	    break;
+
+
+
 
 	}
     return 0;
@@ -543,7 +552,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    int		tmpcolor;
 	    int		i;
 
-	    color = iteration;
+	    color = *iteration;
 	    z2 = *z;
 	    z1 = z->CPolynomial(*degree - 1);
 	    *z = *z - (z1 * *z - *q - 1) / (z1 * *degree);
@@ -562,16 +571,16 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 			if (distance(roots[i], z2) < thresh)
 			    {
 			    if (subtype == 'S')
-				tmpcolor = 1 + (i & 7) + ((*color & 1) << 3);
+				tmpcolor = 1 + (i & 7) + ((color & 1) << 3);
 			    else
 				tmpcolor = 1 + i;
 			    break;
 			    }
 			}
 		    if (tmpcolor == -1)
-			*color = threshold;
+			color = threshold;
 		    else
-			*color = tmpcolor;
+			color = tmpcolor;
 		    }
 
 		return(TRUE);
@@ -702,7 +711,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    //         ----------------------------------
 	    //              cdegree * old**(cdegree-1)         
 
-	    *color = *iteration;
+	    color = *iteration;
 	    cd1.x = cdegree.x - 1.0;
 	    cd1.y = cdegree.y;
 	    //    temp = CComplexPower(z, cd1);
@@ -942,21 +951,56 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		}
 	    else Population = param[0];
 		{
-		ra = c->x;
-		rb = c->y;
+		ra = c.x;
+		rb = c.y;
 		}
-	    *color = lyapunov_cycles(filter_cycles, ra, rb, rc);
+	    color = lyapunov_cycles(filter_cycles, ra, rb, rc);
 	    z->x = Rate;						// sort of to allow filters and FwdDiff to give something!!!
 	    z->y = Population;
-	    if (TrueCol->inside_colour > 0 && *color == 0)
-		*color = TrueCol->inside_colour;
-	    else if (*color >= colors)
-		*color = colors - 1;
+	    if (TrueCol->inside_colour > 0 && color == 0)
+		color = TrueCol->inside_colour;
+	    else if (color >= colors)
+		color = colors - 1;
 	//    (*plot)((WORD)col, (WORD)row, color);
-	    *iteration = *color;
+	    *iteration = color;
 	//    return color;
 	    return TRUE;
 	    }
+
+	case LPOPCORN:
+	case FPPOPCORN:
+	case LPOPCORNJUL:
+	case FPPOPCORNJUL:
+	case POPCORN:
+	    {
+	    Complex	g_tmp_z = { 0.0 };
+	    double	g_sin_x;
+	    double	g_cos_x;
+	    double	g_magnitude = 0.0;
+	    double	StepSize = (param[0] > 0.0) ? param[0] : 0.05;
+	    Complex	C;
+
+	    C.x = param[1];
+	    C.y = param[2];
+
+	    if (C.x == 0.0 && C.y == 0)
+		C = 3.0;
+	    g_tmp_z = *z * C;
+	    FPUsincos(&g_tmp_z.x, &g_sin_x, &g_cos_x);
+	    double siny;
+	    double cosy;
+	    FPUsincos(&g_tmp_z.y, &siny, &cosy);
+	    g_tmp_z.x = g_sin_x / g_cos_x + z->x;
+	    g_tmp_z.y = siny / cosy + z->y;
+	    FPUsincos(&g_tmp_z.x, &g_sin_x, &g_cos_x);
+	    FPUsincos(&g_tmp_z.y, &siny, &cosy);
+	    z->x = z->x - siny * StepSize;
+	    z->y = z->y - g_sin_x * StepSize;
+	    return FractintBailoutTest(z);
+	    }
+
+
+
 
 
 	case FROTH:		// Froth Fractal type - per pixel 1/2/g, called with row & col set
@@ -1005,8 +1049,8 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 
 	    long	color = 0;
 
-	    x = c->x;
-	    y = c->y;
+	    x = c.x;
+	    y = c.y;
 	    magnitude = (x2 = sqr(x)) + (y2 = sqr(y));
 	    while (!found_attractor && (magnitude < rqlim) && (color < threshold))
 		{

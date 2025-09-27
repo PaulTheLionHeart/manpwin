@@ -4,7 +4,7 @@
 // Written in Microsoft Visual C++ by Paul de Leeuw.
 //////////////////////////////////////////////////////////////////////
 
-#include "FrameCalculator.h"
+#include "PertEngine.h"
 
 //////////////////////////////////////////////////////////////////////
 // Individual function point calculations
@@ -13,7 +13,7 @@
 #ifdef	ALLOW_SIN
 void	calculateFrame::PertFunctions(Complex *XRef, Complex *SinX, Complex *CosX, Complex *DeltaSubN, Complex *DeltaSub0)
 #else
-void	calculateFrame::PertFunctions(Complex *XRef, Complex *DeltaSubN, Complex *DeltaSub0)
+void	CPerturbation::PertFunctions(Complex *XRef, Complex *DeltaSubN, Complex *DeltaSub0)
 #endif
     {
     double  Dnr, Dni;
@@ -889,7 +889,7 @@ void	calculateFrame::PertFunctions(Complex *XRef, Complex *DeltaSubN, Complex *D
 #ifdef ALLOWAPPROX
 void	calculateFrame::RefFunctions(BigComplex *centre, BigComplex *Z, BigComplex *ZTimes2, int *iteration)
 #else
-void	calculateFrame::RefFunctions(BigComplex *centre, BigComplex *Z, BigComplex *ZTimes2)
+void	CPerturbation::RefFunctions(BigComplex *centre, BigComplex *Z, BigComplex *ZTimes2)
 #endif // ALLOWAPPROX
     {
     mpfr_t	TempReal, TempImag, SqrReal, SqrImag, RealImag;
@@ -902,69 +902,6 @@ void	calculateFrame::RefFunctions(BigComplex *centre, BigComplex *Z, BigComplex 
     mpfr_init(SqrReal);
     mpfr_init(SqrImag);
     mpfr_init(RealImag);
-
-#ifdef ALLOWAPPROX
-    if (MaxApproximation) 
-	{
-	if (!m_pDX || !m_pDY) 
-	    {
-	    double  ScreenRatio = (double)width / (double)height;
-	    BigDouble c = centre->x - (BigWidth + ScreenRatio);
-	    BigDouble step = (BigWidth) / (double)width;
-	    m_pDX = new double[width];
-	    for (int x = 0; x < width; x++, c += step)
-		m_pDX[x] = c.BigDoubleToDouble(/*ScalingOffset*/);
-	    c = centre->y - BigWidth;
-	    step = (BigWidth * 2) / (double)ydots;
-	    m_pDY = new double[ydots];
-	    for (int y = 0; y < ydots; y++, c += step)
-		m_pDY[y] = c.BigDoubleToDouble(/*ScalingOffset*/);
-	    }
-
-	double	m_C = cos(0.0);
-	double	m_S = sin(0.0);
-	double dbD0r, dbD0i;
-	int	g_nAddRefX, g_nAddRefY;		// screen location of reference point
-	// calculate point on screen for the reference value
-	temp = (centre->x - BigHor) / BigWidth;
-	g_nAddRefX = (int)(temp.BigDoubleToDouble() * width);
-	temp = (centre->y - BigVert) / BigWidth;
-	g_nAddRefY = (int)(temp.BigDoubleToDouble() * height);
-	if (g_nAddRefX < 0) g_nAddRefX = 0;
-	if (g_nAddRefX >= width) g_nAddRefX = width - 1;
-	if (g_nAddRefY < 0) g_nAddRefY = 0;
-	if (g_nAddRefY >= height) g_nAddRefY = height - 1;
-	dbD0r = m_pDX[width / 2] + m_C * (m_pDX[g_nAddRefX] - m_pDX[width / 2]) + m_S * (m_pDY[g_nAddRefY] - m_pDY[ydots / 2]);
-	dbD0i = m_pDY[ydots / 2] - m_S * (m_pDX[g_nAddRefX] - m_pDX[width / 2]) + m_C * (m_pDY[g_nAddRefY] - m_pDY[ydots / 2]);
-	floatexp D0r = dbD0r;
-	D0r *= Scaling;
-	floatexp D0i = dbD0i;
-	D0i *= Scaling;
-	floatexp TDnr;
-	floatexp TDni;
-	if (MaxApproximation) 
-	    {
-	    *iteration = MaxApproximation - 1;
-	    TDnr = m_APr[0] * D0r - m_APi[0] * D0i;
-	    TDni = m_APr[0] * D0i + m_APi[0] * D0r;
-	    floatexp D_r = D0r * D0r - D0i * D0i;
-	    floatexp D_i = (D0r*D0i).mul2();
-	    TDnr += m_APr[1] * D_r - m_APi[1] * D_i;
-	    TDni += m_APr[1] * D_i + m_APi[1] * D_r;
-	    int k;
-	    for (k = 2; k < m_nTerms; k++) 
-		{
-		floatexp  t = D_r * D0r - D_i * D0i;
-		D_i = D_r * D0i + D_i * D0r;
-		D_r = t;
-		TDnr += m_APr[k] * D_r - m_APi[k] * D_i;
-		TDni += m_APr[k] * D_i + m_APi[k] * D_r;
-		}
-	    }
-//	TDnr.todouble(xr);
-//	TDni.todouble(xi);
-	}
-#endif // ALLOWAPPROX
 
     switch (subtype)
 	{
@@ -1590,7 +1527,7 @@ void	calculateFrame::RefFunctions(BigComplex *centre, BigComplex *Z, BigComplex 
 // Generate Pascal's Triangle coefficients
 //////////////////////////////////////////////////////////////////////
 
-void	calculateFrame::LoadPascal(long PascalArray[], int n)
+void	CPerturbation::LoadPascal(long PascalArray[], int n)
     {
     long    j, c = 1L;
 
@@ -1608,7 +1545,7 @@ void	calculateFrame::LoadPascal(long PascalArray[], int n)
 // Laser Blaster's Code for removing absolutes from Mandelbrot derivatives
 //////////////////////////////////////////////////////////////////////
 
-double	calculateFrame::DiffAbs(const double c, const double d)
+double	CPerturbation::DiffAbs(const double c, const double d)
     {
     double cd = c + d;
 
@@ -1626,6 +1563,23 @@ double	calculateFrame::DiffAbs(const double c, const double d)
 	else
 	    return -d;
 	}
+    }
+
+//////////////////////////////////////////////////////////////////////
+// write to output in development environment
+//////////////////////////////////////////////////////////////////////
+
+// Logging
+//extern HWND hLogBox;
+void	CPerturbation::debugPrint(const std::string& msg)
+    {
+    OutputDebugStringA(msg.c_str());
+//    if (hLogBox) 
+//	{
+//	int length = GetWindowTextLengthA(hLogBox);
+//	SendMessageA(hLogBox, EM_SETSEL, (WPARAM)length, (LPARAM)length);
+//	SendMessageA(hLogBox, EM_REPLACESEL, FALSE, (LPARAM)msg.c_str());
+//	}
     }
 
 //////////////////////////////////////////////////////////////////////

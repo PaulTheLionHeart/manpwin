@@ -23,7 +23,9 @@
 
 extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
 
+extern	CDib	Dib;
 extern	CTrueCol    TrueCol;		// palette info
+extern	double 	*wpixels;		// an array of doubles holding slope modified iteration counts
 
 extern	double	hor;			// horizontal address
 extern	double	vert;			// vertical address
@@ -45,6 +47,7 @@ extern	BYTE	orig_palette[];		/* loaded palette */
 extern	WORD	type;			/* M=mand, N=Newton etc */
 extern	int	subtype;		
 extern	int	width, height, xdots, ydots, bits_per_pixel;
+extern	double	ScreenRatio;		// ratio of width / height for the screen
 
 extern	char	SCIPath[];		// path for SCI files
 
@@ -80,8 +83,8 @@ static	double	radius	= 0.25;
 static	double	Magnitude = 0.248;	// 0.5 sits neatly inside the Mandelbrot set. 0.49 gives great orbits
 static	int	PaletteShift = 0;
 
-extern	double	xgap;			// gap between pixels
-extern	double	ygap;			// gap between pixels
+//extern	double	xgap;			// gap between pixels
+//extern	double	ygap;			// gap between pixels
 
 extern	CPlot	Plot;			// image plotting routines 
 extern	Complex	j;
@@ -323,9 +326,12 @@ int	displayCurve(HWND hwnd, int JuliaAnimType)
     int	i;
     double	Divisor, DivisorX, DivisorY;
     RGBTRIPLE	rgb = {255, 255, 255};
+    double	xgap, ygap;
 
     BigNumFlag = FALSE;					// we are starting at the shallow end of the pool
     juliaflag = FALSE;
+    xgap = mandel_width * ScreenRatio / (double) xdots;
+    ygap = mandel_width / (double) ydots;
 
     if (JuliaAnimType == 0)				// linear
 	{

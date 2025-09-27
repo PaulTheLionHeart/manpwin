@@ -56,9 +56,9 @@ extern	void		BuildJuliaFormulaString(void);
 
 extern	BYTE		cycleflag;			// do colour cycling
 
-extern	Complex	z, q, c;
-extern	CPixel	Pix;		// routines for escape fractals
-extern	CPlot	Plot;		// image plotting routines 
+//extern	Complex	z, q, c;
+extern	CPixel	Pixel[];				// routines for escape fractals
+extern	CPlot	Plot;					// image plotting routines 
 
 /**************************************************************************
 	Initialise
@@ -99,14 +99,15 @@ void	RTJuliaOrbits(RGBTRIPLE colour, int count)
 
     {
     int	    i, row, col;
+    Complex	z, q;
 
     if (colour.rgbtBlue == 0 && colour.rgbtGreen == 0 && colour.rgbtRed == 0)
 	return;										// nothing to do
     z = 0;
     for (i = 0; i < count; i++)
 	{
-	Pix.RunFractal(&z, &q);
-	row = Jheight - (int)((Pix.z->y + 2.0) / Jygap);
+	Pixel[0].RunFractal(&z, &q);
+	row = Jheight - (int)((Pixel[0].z.y + 2.0) / Jygap);
 	col = (int)(z.x / Jxgap + (double)Jwidth / 2.0);
 	if (col > rect.left && col < rect.right && row > rect.top && row < rect.bottom)
 	    Plot.OutRGBpoint(col, row, colour);
@@ -140,69 +141,69 @@ int	DrawJulia(HWND hwnd, POINTS ptCurrent)
 	}
 
     RTJuliaActive = TRUE;			// block any moire requests until calcs complete
-    TempJuliaFlag = Pix.juliaflag;			// force julia calc
-    Pix.juliaflag = TRUE;
+    TempJuliaFlag = Pixel[0].juliaflag;			// force julia calc
+    Pixel[0].juliaflag = TRUE;
     switch (RotationAngle)
 	{
 	case 0:							// normal
-	    Pix.q->x = Pix.mandel_width * (double)ptCurrent.x / (double)ydots + Pix.hor;
-	    Pix.q->y = Pix.mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + Pix.vert;
+	    Pixel[0].q.x = Pixel[0].mandel_width * (double)ptCurrent.x / (double)ydots + Pixel[0].hor;
+	    Pixel[0].q.y = Pixel[0].mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + Pixel[0].vert;
 	    break;
 	case 90:						// 90 degrees
-	    Pix.q->y = -(Pix.mandel_width * (double)ptCurrent.x / (double)ydots + Pix.hor);
-	    Pix.q->x = -(Pix.mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + Pix.vert);
+	    Pixel[0].q.y = -(Pixel[0].mandel_width * (double)ptCurrent.x / (double)ydots + Pixel[0].hor);
+	    Pixel[0].q.x = -(Pixel[0].mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + Pixel[0].vert);
 	    break;
 	case 180:						// 180 degrees
-	    Pix.q->x = -(Pix.mandel_width * (double)ptCurrent.x / (double)ydots + Pix.hor);
-	    Pix.q->y = -(Pix.mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + Pix.vert);
+	    Pixel[0].q.x = -(Pixel[0].mandel_width * (double)ptCurrent.x / (double)ydots + Pixel[0].hor);
+	    Pixel[0].q.y = -(Pixel[0].mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + Pixel[0].vert);
 	    break;
 	case 270:						// 270 degrees
-	    Pix.q->y = Pix.mandel_width * (double)ptCurrent.x / (double)ydots + Pix.hor;
-	    Pix.q->x = Pix.mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + Pix.vert;
+	    Pixel[0].q.y = Pixel[0].mandel_width * (double)ptCurrent.x / (double)ydots + Pixel[0].hor;
+	    Pixel[0].q.x = Pixel[0].mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + Pixel[0].vert;
 	    break;
 	}
 
     if (type == SCREENFORMULA)
 	{
-	param[0] = Pix.q->x;
-	param[1] = Pix.q->y;
+	param[0] = Pixel[0].q.x;
+	param[1] = Pixel[0].q.y;
 	}
-    Pix.c->x = -Jwidth * Jxgap / 2.0;
+    Pixel[0].c.x = -Jwidth * Jxgap / 2.0;
 
     percent = 0;
     for (i = 0; i < Jwidth; i++)
 	{
-	Pix.c->x += Jxgap;
-	Pix.c->y = -2.0;
+	Pixel[0].c.x += Jxgap;
+	Pixel[0].c.y = -2.0;
 	display_count = (10 * i) / Jwidth;
 	if (display_count > percent)
 	    {
 	    percent = display_count;
-	    sprintf(s, "%14.14f, %14.14f, %d, %d %d%%", Pix.q->x, Pix.q->y, ptCurrent.x, ptCurrent.y, percent * 10);
+	    sprintf(s, "%14.14f, %14.14f, %d, %d %d%%", Pixel[0].q.x, Pixel[0].q.y, ptCurrent.x, ptCurrent.y, percent * 10);
 	    SetWindowText(hwnd, s);			// Show formatted text in the caption bar
 	    }
 	for (j = 0; j < Jheight >> ((type == MANDELFP && !invert) ? 1 : 0); j++)
 	    {
-	    Pix.c->y += Jygap;
-	    *Pix.z = (invert) ? Pix.invertz2(*Pix.c) : *Pix.c;
+	    Pixel[0].c.y += Jygap;
+	    Pixel[0].z = (invert) ? Pixel[0].invertz2(Pixel[0].c) : Pixel[0].c;
 	    iteration = 0;
-	    Pix.InitFractal(Pix.z, Pix.q);
+	    Pixel[0].InitFractal(&(Pixel[0].z), &(Pixel[0].q));
 	    for EVER
 		{
 		if (iteration >= threshold)
 		    break;
 		iteration += SpeedFactor;
-		result = Pix.RunFractal(Pix.z, Pix.q);
+		result = Pixel[0].RunFractal(&(Pixel[0].z), &(Pixel[0].q));
 		if (result)				// escape time
 		    break;
 		}
 	    colour = (iteration/* << SpeedFactor*/);
 	    if ((type == SPECIALNEWT || type == MATEIN) && special != 0)  // split colours
 		{
-		if (Pix.phaseflag == 1)				// second phase
-		    colour += Pix.special;
-		else if (Pix.phaseflag == 2)			// third phase
-		    colour += (Pix.special << 1);
+		if (Pixel[0].phaseflag == 1)				// second phase
+		    colour += Pixel[0].special;
+		else if (Pixel[0].phaseflag == 2)			// third phase
+		    colour += (Pixel[0].special << 1);
 		}						// default first phase
 	    Plot.PlotPoint(i, (WORD)(Jheight - j - 2), colour);
 	    if (type == MANDELFP && !invert)
@@ -213,9 +214,9 @@ int	DrawJulia(HWND hwnd, POINTS ptCurrent)
     if (ShowRTOrbits)
 	RTJuliaOrbits(OrbitColour, NUM_ORBITS);
     InvalidateRect(hwnd, &rect, FALSE);
-    sprintf(s, "%14.14f, %14.14f, %d, %d", Pix.q->x, Pix.q->y, ptCurrent.x, ptCurrent.y);
+    sprintf(s, "%14.14f, %14.14f, %d, %d", Pixel[0].q.x, Pixel[0].q.y, ptCurrent.x, ptCurrent.y);
     SetWindowText(hwnd, s);				// Show formatted text in the caption bar
-    Pix.juliaflag = TempJuliaFlag;			// restore julia to original type
+    Pixel[0].juliaflag = TempJuliaFlag;			// restore julia to original type
     RTJuliaActive = FALSE;
     return 0;
     }

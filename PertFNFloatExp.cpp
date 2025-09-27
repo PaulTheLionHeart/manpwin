@@ -4,7 +4,7 @@
 // Written in Microsoft Visual C++ by Paul de Leeuw.
 //////////////////////////////////////////////////////////////////////
 
-#include "FrameCalculator.h"
+#include "PertEngine.h"
 #include "ExpComplex.h"
 
 #define _abs(a) ((_abs_val=(a))>0?_abs_val:-_abs_val)
@@ -13,7 +13,7 @@
 // Individual function point calculations
 //////////////////////////////////////////////////////////////////////
 
-void	calculateFrame::BigPertFunctions(ExpComplex *XRef, ExpComplex *DeltaSubN, ExpComplex *DeltaSub0)
+void	CPerturbation::BigPertFunctions(ExpComplex *XRef, ExpComplex *DeltaSubN, ExpComplex *DeltaSub0)
 
     {
     floatexp	Dnr, Dni;
@@ -739,8 +739,7 @@ void	calculateFrame::BigPertFunctions(ExpComplex *XRef, ExpComplex *DeltaSubN, E
 // Laser Blaster's Code for removing absolutes from Mandelbrot derivatives
 //////////////////////////////////////////////////////////////////////
 
-
-floatexp	calculateFrame::BigDiffAbs(floatexp c, floatexp d)
+floatexp	CPerturbation::BigDiffAbs(floatexp c, floatexp d)
     {
     floatexp cd = c + d;
 
@@ -764,7 +763,7 @@ floatexp	calculateFrame::BigDiffAbs(floatexp c, floatexp d)
 //    Convert Bignum variable to FloatExp
 //////////////////////////////////////////////////////////////////////
 
-int calculateFrame::Bignum2FloatExp(floatexp *a, BigDouble b)
+int CPerturbation::Bignum2FloatExp(floatexp *a, BigDouble b)
     {
     double	value;
     long	exp;
@@ -780,10 +779,10 @@ int calculateFrame::Bignum2FloatExp(floatexp *a, BigDouble b)
     }
 
 //////////////////////////////////////////////////////////////////////
-//    Convert FloatExp variable 20 Bignum
+//    Convert FloatExp variable to Bignum
 //////////////////////////////////////////////////////////////////////
 
-int calculateFrame::FloatExp2Bignum(BigDouble *a, floatexp b)
+int CPerturbation::FloatExp2Bignum(BigDouble *a, floatexp b)
     {
     double	value;
     __int64	exp;
@@ -807,7 +806,7 @@ int calculateFrame::FloatExp2Bignum(BigDouble *a, floatexp b)
 //    Convert BigComplex variable to ExpComplex
 //////////////////////////////////////////////////////////////////////
 
-int calculateFrame::BigComplex2ExpComplex(ExpComplex *a, BigComplex b)
+int CPerturbation::BigComplex2ExpComplex(ExpComplex *a, BigComplex b)
     {
     Bignum2FloatExp(&(a->x), b.x);
     Bignum2FloatExp(&(a->y), b.y);
@@ -818,7 +817,7 @@ int calculateFrame::BigComplex2ExpComplex(ExpComplex *a, BigComplex b)
 //    Convert ExpComplex variable to BigComplex
 //////////////////////////////////////////////////////////////////////
 
-int calculateFrame::ExpComplex2BigComplex(BigComplex *a, ExpComplex b)
+int CPerturbation::ExpComplex2BigComplex(BigComplex *a, ExpComplex b)
     {
     FloatExp2Bignum(&(a->x), b.x);
     FloatExp2Bignum(&(a->y), b.y);

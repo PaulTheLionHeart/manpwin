@@ -63,7 +63,7 @@ void	COtherFunctions::TurkMite1(int maxtur, size_t rule_len, char *ru, long maxp
 	}
     else
 	{						// user defined rule
-	for (color = 0; color < rule_len; color++)
+	for (color = 0; color < (int)rule_len; color++)
 	    {						// init the rules and colors for the turkmites: 1 turn left, -1 turn right
 	    rule[color] = (ru[color] * 2) - 1;
 	    next_col[color] = color + 1;
@@ -222,7 +222,7 @@ int	COtherFunctions::ant(void)
     rule_len = strlen(rule);
     if (rule_len > 1)
 	{                            // if rule_len == 0 random rule
-	for (i = 0; i < rule_len; i++)
+	for (i = 0; i < (int)rule_len; i++)
 	    {
 	    if (rule[i] != '1')
 		rule[i] = (char) 0;

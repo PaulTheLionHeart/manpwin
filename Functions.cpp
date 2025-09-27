@@ -684,10 +684,10 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	    if (z->CSumSqr() > escape)
 		{
 		if ((alpha.x * z->y + alpha.y * z->x) <= 0.0)
-		    *color = penp[*iteration % 4];
+		    color = penp[*iteration % 4];
 		else
-		    *color = penn[*iteration % 4];
-		*iteration = *color;
+		    color = penn[*iteration % 4];
+		*iteration = color;
 		return (TRUE);
 		}
 	    temp = az * 2 + b;

@@ -2205,11 +2205,7 @@ int	setup_Knot(void)
     return 0;
     }
 
-#ifdef	MULTITHREAD
-int	DoKnots(PMYVARIABLES var)
-#else
 int	DoKnots(void) 
-#endif
     {
     return (KnotSpecific[subtype].calctype());
     }

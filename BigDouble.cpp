@@ -319,7 +319,7 @@ BigDouble	BigDouble::BigSqrt()
 
 /*********************************************************************
   l = floor(b), floor rounds down
-  Converts a bigfloat to a long 
+  Converts a bigfloat to a double 
   note: a bf value of 2.999... will be return a value of 2, not 3  
 *********************************************************************/
 
@@ -330,6 +330,61 @@ double	  BigDouble::BigDoubleToDouble()	// convert a big double to double
 
     a = mpfr_get_d(x, MPFR_RNDN);
     return a;
+    }
+
+int	BigDouble::BigDouble2DD(dd_real *out)
+    {
+    dd_real	x1, x2;
+    BigDouble	orig, t1, t2;
+    double	y1, y2;
+
+    orig = *this;
+    y1 = mpfr_get_d(x, MPFR_RNDN);	// truncate to a double
+    t1 = y1;
+    t2 = orig - t1;			// subtract truncated bit to get the remainder
+    y2 = t2.BigDoubleToDouble();	// remainder as a float
+    x1 = y1;
+    x2 = y2;
+    *out = x1 + x2;
+    if (isnan(out->x[0]) || isnan(out->x[1]))
+	{
+	//	ShowBignum(*in, "in");
+	//	ShowBignum(t1, "t1");
+	//	ShowBignum(t2, "t2");
+	*out = 0.0;
+	return -1;
+	}
+    return 0;
+    }
+
+int	BigDouble::BigDouble2QD(qd_real *out)
+    {
+    qd_real	x1, x2, x3, x4;
+    BigDouble	orig, t1, t2, t3, t4, t5, t6;
+    double	y1, y2, y3, y4;
+
+    orig = *this;
+    y1 = mpfr_get_d(x, MPFR_RNDN);	// truncate to a double
+    t1 = y1;
+    t2 = orig - t1;			// subtract truncated bit to get the remainder
+    y2 = t2.BigDoubleToDouble();	// remainder as a float
+    t3 = y2;
+    t4 = t2 - t3;
+    y3 = t4.BigDoubleToDouble();
+    t5 = y3;
+    t6 = t4 - t5;
+    y4 = t6.BigDoubleToDouble();
+    x1 = y1;
+    x2 = y2;
+    x3 = y3;
+    x4 = y4;
+    *out = x1 + x2 + x3 + x4;
+    if (isnan(out->x[0]) || isnan(out->x[1]) || isnan(out->x[2]) || isnan(out->x[3]))
+	{
+	*out = 0.0;
+	return -1;
+	}
+    return 0;
     }
 
 /*********************************************************************

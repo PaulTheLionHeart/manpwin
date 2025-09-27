@@ -10,6 +10,7 @@
 #include <string.h>
 #include <dos.h>
 #include <windows.h>
+#include <windowsx.h>
 #include <fcntl.h>
 #define  VIEWMAIN
 #include "manpwin.h"
@@ -17,7 +18,7 @@
 #include "colour.h"
 #include "fractype.h"
 #include "fractalp.h"
-//#include "default.c"
+#include "OtherFunctions.h"
 #include "resource.h"
 #include "menu.h"
 #include "Fract.h"
@@ -40,7 +41,6 @@ extern	BYTE	cycleflag;		// do colour cycling
 extern	int	logval, logflag;	// log colour map starting value and flag for use of log palette
 extern	WORD	type;			// M=mand, N=Newton etc
 extern	int	subtype;		
-extern	char	LyapSequence[];		// hold the AB sequence for Lyapunov fractals
 
 /*			    Sub types:
 Newton			    B=basin, S=stripe, N=normal
@@ -78,8 +78,6 @@ extern	double	dStrands;		// for Tierazon filters
 	long    fillcolor = -1;		// tesseral fillcolor: -1=normal 0 means don't fill
 extern	BOOL	invert;			// invert fractal
 extern	double	f_radius, f_xcenter, f_ycenter;	// inversion radius, center 
-extern	char	*InitCond[];		// initial conditions for direct formula parsing 
-extern	char	*DirectFormula[];	// formulae for direct formula parsing 
 extern	DWORD	BackgroundColour;	// set background colour for IFS and L-System fractals
 extern	int	distest, distestwidth;	// distance estimation
 extern	int	PlotType;
@@ -94,6 +92,10 @@ extern	double	bumpMappingDepth;
 extern	double	bumpMappingStrength;
 extern	double	SlopeError;			// used as error value for Newton type Fwd Diff bailout calcs
 
+extern double   rqlim;
+
+extern	char	*GetFractalName(void);
+
 // Big num declarations **********************************************************
 //extern	int	dec;
 extern	BYTE	BigNumFlag;		// True if bignum used
@@ -107,10 +109,8 @@ extern	WORD	type;			// fractal type
 
 extern	void	init_log(HWND);
 extern	int	analyse_corner(char *);
-extern	int	FindInitCond(char *Str);
-extern	int	FindFormula(char *Str);
 extern	void	ConvertBignum2String(char *s, mpfr_t num);
-extern	CMatrix	Mat;			// transformation and rotation matrix
+//extern	CMatrix	Mat;			// transformation and rotation matrix
 
 //extern	void	SaveUndo(void);
 //extern	int	atox(char);
@@ -118,7 +118,6 @@ extern	void	InitFract(int);
 
 extern	CFract	Fractal;
 extern	CTrueCol    TrueCol;
-//extern	CPixel	Pixel;		// routines for escape fractals
 
 /**************************************************************************
 	Dialog Control for 3D Parameters
@@ -198,201 +197,6 @@ DLGPROC FAR PASCAL Param3D (HWND hDlg, UINT message, UINT wParam, LONG lParam)
       return FALSE ;
       }
 
-#ifdef TESTFWDDIFF
-
-/**************************************************************************
-	Dialog Control for Fractal Parameters (test version for mFwd Diff testing)
-**************************************************************************/
-
-DLGPROC FAR PASCAL FractalTestDlg(HWND hDlg, UINT message, UINT wParam, LONG lParam)
-    {
-//    HWND		hCtrl;
-    //     static	HANDLE	hCursor;
-    //     short		nCtrlID, filterSum, i, divisor; 
-    char		s[100];
-    BOOL		bTrans;
-    static	int	temp_logval, temp_inside, temp_biomorph,
-	temp_decomp, temp_3Dthreshold;
-    static	long	temp_threshold;
-    static	short	temp_blockindex;
-    static     char	temp;
-    static     short	tempMethod;
-    static     UINT	tempParam;
-    static     WORD	temp_special;
-    static     WORD	temp_OrbitColour;
-    static     WORD	temp_orientation;
-    static     long	temp_fillcolor;
-
-    switch (message)
-	{
-	case WM_INITDIALOG:
-	    sprintf(s, "%5.2f", bump_transfer_factor);
-	    SetDlgItemText(hDlg, IDM_TRANSFACTOR, s);
-	    SetDlgItemInt(hDlg, IDM_STARTPAL, PaletteStart, TRUE);
-	    sprintf(s, "%5.2f", lightDirectionDegrees);
-	    SetDlgItemText(hDlg, IDM_LIGHTDIR, s);
-	    sprintf(s, "%5.2f", bumpMappingDepth);
-	    SetDlgItemText(hDlg, IDM_MAPDEPTH, s);
-	    sprintf(s, "%5.2f", bumpMappingStrength);
-	    SetDlgItemText(hDlg, IDM_MAPSTRENGTH, s);
-
-	    SetDlgItemInt(hDlg, IDM_TYPE, type, TRUE);
-	    SetDlgItemInt(hDlg, IDM_SUBTYPE, subtype, TRUE);
-	    SetDlgItemInt(hDlg, IDM_BAILOUTTYPE, fractalspecific[type].BailoutType, TRUE);
-	    SetDlgItemInt(hDlg, IDM_SLOPEDEGREE, fractalspecific[type].SlopeDegree, TRUE);
-	    sprintf(s, "%5.2g", SlopeError);
-	    SetDlgItemText(hDlg, IDM_SLOPEERROR, s);
-
-	    if (type == 204)													// Tierazon
-		{
-		SetDlgItemInt(hDlg, IDM_BAILOUTTYPE, TierazonSpecific[subtype].BailoutType, TRUE);
-		SetDlgItemInt(hDlg, IDM_SLOPEDEGREE, TierazonSpecific[subtype].SlopeDegree, TRUE);
-		}
-	    else if (type == 228)													// Mandel derivatives
-		{
-		SetDlgItemInt(hDlg, IDM_BAILOUTTYPE, MandelDerivSpecific[subtype].BailoutType, TRUE);
-		SetDlgItemInt(hDlg, IDM_SLOPEDEGREE, MandelDerivSpecific[subtype].SlopeDegree, TRUE);
-		}
-	    else
-		{
-		SetDlgItemInt(hDlg, IDM_BAILOUTTYPE, fractalspecific[type].BailoutType, TRUE);
-		SetDlgItemInt(hDlg, IDM_SLOPEDEGREE, fractalspecific[type].SlopeDegree, TRUE);
-		}
-
-
-	    temp = calcmode;
-	    switch (calcmode)
-		{
-		case 'G':
-		    tempParam = IDC_GUESS;
-		    break;
-		case 'B':
-		    tempParam = IDC_BOUNDARY;
-		    break;
-		case 'T':
-		    tempParam = IDC_TESSERAL;
-		    break;
-		case '1':
-		    tempParam = IDC_1PASS;
-		    break;
-		case '2':
-		    tempParam = IDC_2PASS;
-		    break;
-		case '3':
-		    tempParam = IDC_3PASS;
-		    break;
-		case 'H':
-		    tempParam = IDC_HORBLINDS;
-		    break;
-		case 'V':
-		    tempParam = IDC_VERTBLINDS;
-		    break;
-		case 'S':
-		    tempParam = IDC_SPIRAL;
-		    break;
-		case 'F':
-		    tempParam = IDC_FWDDIFF;
-		    break;
-		}
-	    CheckRadioButton(hDlg, IDC_GUESS, IDC_FWDDIFF, tempParam);
-
-	case WM_COMMAND:
-	    switch ((int)LOWORD(wParam))
-		//	        switch (wParam)
-		{
-		case IDC_GUESS:
-		case IDC_BOUNDARY:
-		case IDC_TESSERAL:
-		case IDC_1PASS:
-		case IDC_2PASS:
-		case IDC_3PASS:
-		case IDC_HORBLINDS:
-		case IDC_VERTBLINDS:
-		case IDC_SPIRAL:
-		case IDC_FWDDIFF:
-		    switch ((int)LOWORD(wParam))
-			{
-			case IDC_GUESS:
-			    temp = 'G';
-			    break;
-			case IDC_BOUNDARY:
-			    temp = 'B';
-			    break;
-			case IDC_TESSERAL:
-			    temp = 'T';
-			    break;
-			case IDC_1PASS:
-			    temp = '1';
-			    break;
-			case IDC_2PASS:
-			    temp = '2';
-			    break;
-			case IDC_3PASS:
-			    temp = '3';
-			    break;
-			case IDC_HORBLINDS:
-			    temp = 'H';
-			    break;
-			case IDC_VERTBLINDS:
-			    temp = 'V';
-			    break;
-			case IDC_SPIRAL:
-			    temp = 'S';
-			    break;
-			case IDC_FWDDIFF:
-			    temp = 'F';
-			    break;
-			}
-		    CheckRadioButton(hDlg, IDC_GUESS, IDC_FWDDIFF, (int)LOWORD(wParam));
-		    return (DLGPROC)TRUE;
-
-		case IDOK:
-		    calcmode = temp;
-
-		    GetDlgItemText(hDlg, IDM_TRANSFACTOR, s, 30);
-		    sscanf(s, "%lf", &bump_transfer_factor);
-		    PaletteStart = GetDlgItemInt(hDlg, IDM_STARTPAL, &bTrans, TRUE);
-		    GetDlgItemText(hDlg, IDM_LIGHTDIR, s, 30);
-		    sscanf(s, "%lf", &lightDirectionDegrees);
-		    GetDlgItemText(hDlg, IDM_MAPDEPTH, s, 30);
-		    sscanf(s, "%lf", &bumpMappingDepth);
-		    GetDlgItemText(hDlg, IDM_MAPSTRENGTH, s, 30);
-		    sscanf(s, "%lf", &bumpMappingStrength);
-
-		    GetDlgItemText(hDlg, IDM_SLOPEERROR, s, 30);
-		    sscanf(s, "%lg", &SlopeError);
-		    fractalspecific[type].BailoutType = GetDlgItemInt(hDlg, IDM_BAILOUTTYPE, &bTrans, TRUE);
-		    fractalspecific[type].SlopeDegree = GetDlgItemInt(hDlg, IDM_SLOPEDEGREE, &bTrans, TRUE);
-		    if (type == 204)													// Tierazon
-			{
-			TierazonSpecific[subtype].BailoutType = GetDlgItemInt(hDlg, IDM_BAILOUTTYPE, &bTrans, TRUE);
-			TierazonSpecific[subtype].SlopeDegree = GetDlgItemInt(hDlg, IDM_SLOPEDEGREE, &bTrans, TRUE);
-			}
-		    else if (type == 228)													// Mandel derivatives
-			{
-			MandelDerivSpecific[subtype].BailoutType = GetDlgItemInt(hDlg, IDM_BAILOUTTYPE, &bTrans, TRUE);
-			MandelDerivSpecific[subtype].SlopeDegree = GetDlgItemInt(hDlg, IDM_SLOPEDEGREE, &bTrans, TRUE);
-			}
-		    else
-			{
-			fractalspecific[type].BailoutType = GetDlgItemInt(hDlg, IDM_BAILOUTTYPE, &bTrans, TRUE);
-			fractalspecific[type].SlopeDegree = GetDlgItemInt(hDlg, IDM_SLOPEDEGREE, &bTrans, TRUE);
-			}
-
-		    EndDialog(hDlg, TRUE);
-		    return (DLGPROC)TRUE;
-
-		case IDCANCEL:
-		    EndDialog(hDlg, FALSE);
-		    return FALSE;
-		}
-	    break;
-	}
-    return FALSE;
-    }
-
-#else
-
 /**************************************************************************
 	Dialog Control for Fractal Parameters
 **************************************************************************/
@@ -404,6 +208,7 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 //     short		nCtrlID, filterSum, i, divisor; 
      char		s[100];
      BOOL		bTrans ;
+     CMatrix		Mat;			// transformation and rotation matrix
      static	int	temp_logval, temp_inside, temp_biomorph, temp_decomp, temp_3Dthreshold, OrigRotationAngle;
      static	long	temp_threshold;
      static	short	temp_blockindex;
@@ -1024,7 +829,6 @@ DLGPROC FAR PASCAL FractalDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam
 	  }
       return FALSE ;
       }
-#endif // TESTFWDDIFF
 
 /**************************************************************************
 	Dialog Control for Fractal Type
@@ -1508,6 +1312,9 @@ DLGPROC FAR PASCAL FractTypeDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 		    case FPPOPCORN:
 			tempParam = IDC_FRACTINTPOPCORN;
 			break;
+		    case NUMFRACTAL:
+			tempParam = IDC_NUMFRACTAL;
+			break;
 
 		    }
 		CheckRadioButton(hDlg, IDC_MANDEL, IDC_TEST, tempParam);
@@ -1979,6 +1786,9 @@ DLGPROC FAR PASCAL FractTypeDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 			break;
 			CheckRadioButton(hDlg, IDC_MANDEL, IDC_TEST, (int) LOWORD(wParam));
 		        return (DLGPROC) TRUE ;
+		    case IDC_NUMFRACTAL:
+			temp = NUMFRACTAL;
+			break;
 
 		    case IDOK:
 			type = temp;
@@ -1995,53 +1805,6 @@ DLGPROC FAR PASCAL FractTypeDlg (HWND hDlg, UINT message, UINT wParam, LONG lPar
 	    }
       return FALSE ;
       }
-
-/**************************************************************************
-	Dialog Control for Walk Type
-**************************************************************************/
-
-DLGPROC FAR PASCAL WalkDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam)
-     {
-//     static	HANDLE	hCursor;
-     char		s[100];
-//     BOOL		bTrans ;
-     static	UINT	tempPoints; 
-     static     char	temp[20];
-//     static     char	temp;
-     static     UINT	tempParam;
-
-     switch (message)
-	  {
-	  case WM_INITDIALOG:
-	        sprintf(s, "%3.2f", param[0]);
-		SetDlgItemText(hDlg, IDC_WALK_STEPSIZE, s);
-	        return (DLGPROC) TRUE ;
-
-	  case WM_COMMAND:
-	        switch ((int) LOWORD(wParam))
-//	        switch (wParam)
-		    {
-		    case IDC_WALK_STEPSIZE:
-			GetDlgItemText(hDlg, IDC_WALK_STEPSIZE, temp, 20);
-		        return (DLGPROC) TRUE ;
-
-		    case IDOK:
-			sscanf(temp, "%lf", &param[0]);
-			if (param[0] != 999.0)
-			    if (param[0] < 0.1 || param[0] > 100.0)
-				param[0] = 1.0;
-			EndDialog (hDlg, TRUE);
-			return (DLGPROC) TRUE;
-
-		    case IDCANCEL:
-			EndDialog (hDlg, FALSE);
-			return FALSE;
-		   }
-	  break;
-	  }
-      return FALSE ;
-      }
-
 
 /*-----------------------------------------
 	About View
@@ -2150,10 +1913,6 @@ int	GetCorner(char *s1, char *s2, char *s3)
 /**************************************************************************
 	Dialog Box for loading co-ordinates
 **************************************************************************/
-
-extern double   rqlim;
-
-extern	char	*GetFractalName(void);
 
 DLGPROC FAR PASCAL CoordDlg (HWND hDlg, UINT message, UINT wParam, LONG lParam)
      {
@@ -2545,221 +2304,6 @@ DLGPROC FAR PASCAL SelectFracParams(HWND hDlg, UINT message, UINT wParam, LONG l
     }
 
 /**************************************************************************
-	Dialog Box for loading functions
-**************************************************************************/
-
-DLGPROC FAR PASCAL LyapDlg(HWND hDlg, UINT message, UINT wParam, LONG lParam)
-
-    {
-    int i, j;
-    static	int	index1 = -1, index2 = -1;
-    static	int	numtrig;
-    char		s[10][100];
-    char		Bailout[120];
-    CTrigFn		TrigFn;
-
-    switch (message) 
-	{
-        case WM_INITDIALOG:
-	    sprintf(Bailout, "%14.14lf", rqlim);
-	    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
-//            SetDlgItemText(hDlg, ID_FRACNAME, 	fractalspecific[type].name);
-            for (j = 0; j < Fractal.NumParam; j++) 
-		{
-		sprintf(s[j], "%f", *Fractal.ParamValue[j]);
-		SetDlgItemText(hDlg, ID_FRACPARTX1 + j, Fractal.ParamName[j]);
-		SetDlgItemText(hDlg, ID_FRACPARAM1 + j, s[j]);
-		}
-            for (i = Fractal.NumFunct + Fractal.NumParam; i < 10; i++) 
-		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
-	    SetDlgItemText(hDlg, IDC_LYAPSEQ, LyapSequence);	// we cheat and use Fractal.Fn1 to store the Lyapunov sequence
-	    return ((DLGPROC) TRUE);
-
-        case WM_COMMAND:
-	    switch ((int) LOWORD(wParam))
-//	    switch (wParam)
-		{
-                case IDOK:
-		    GetDlgItemText(hDlg, IDC_BAILOUT, Bailout, 100);
-		    rqlim = atof(Bailout);
-		    for (j = 0; j < Fractal.NumParam; j++) 
-			{
-			GetDlgItemText(hDlg, ID_FRACPARAM1 + j, s[j], 100);
-			*Fractal.ParamValue[j] = atof(s[j]);
-			}
-		    GetDlgItemText(hDlg, IDC_LYAPSEQ, LyapSequence, 100);	// we cheat and use Fractal.Fn1 to store the Lyapunov sequence
-		    EndDialog(hDlg, TRUE);
-                    return ((DLGPROC) TRUE);
-                  
-                case IDCANCEL:
-                    EndDialog(hDlg, FALSE);
-                    return (FALSE);
-                    
-//		    return ((DLGPROC) TRUE);
-	    return ((DLGPROC) TRUE);
-	    }
-	}
-    return (FALSE);
-    }
-
-/**************************************************************************
-	Dialog Box for screen formulae
-**************************************************************************/
-
-#define	MAXFORMULASTRINGLENGTH		3600	
-
-char	FormulaString[MAXFORMULASTRINGLENGTH] = "\0";		// used to hold the full formula
-extern	char	*str_find_ci(char *, char *);
-
-void	AnalyseFormulaString(char *Startup, char *OrigStartup, char *Formula, char *Bailout, char *FormulaString)
-
-    {
-    char    *p, *s, *t, *u;
-    size_t  length = strlen(FormulaString);
-
-    char    *TempStr = new char [length + 1];
-    
-    strcpy(TempStr, FormulaString);			// protect original string
-    p = TempStr;
-
-    u = str_find_ci(TempStr, ";");			// is it a comment?
-    if (u)
-	*u = '\0';					// remove comment
-    s = str_find_ci(TempStr, ":");			// possible initial condition
-    if (s)						// initial condition is given in the string and it's not part of a comment
-	{
-	*(s - 1) = '\0';				// replace the ':' with a NULL
-	strcpy(Startup, p);
-	p = s;
-	}
-    else 
-	strcpy(Startup, OrigStartup);
-
-    if ((t = str_find_ci(p, "|")) != 0)			// bailout is given in the string
-	{ 
-	*(t - 2) = '\0';				// t - 2 so we keep the '|'
-	strcpy(Formula, p);
-	p = t - 1;
-	strcpy(Bailout, p);
-	}
-    else
-	{
-	strcpy(Formula, p);
-	strcpy(Bailout, "|z| < 4.0");
-	}
-    
-    if (TempStr) { delete[] TempStr; TempStr = NULL; }
-    }
-
-void	CreateFormulaString(char *Startup, char *Formula, char *Bailout, char *FormulaString)
-
-    {
-    char    *p, *q;
-    char    temp[MAXFORMULASTRINGLENGTH];
-
-    sprintf(temp, "%s:%s,%s", Startup, Formula, Bailout);
-    p = temp;
-    q = FormulaString;
-
-    while (*p)
-	{
-	if (*p == '\n')
-	    {
-	    *q = ',';
-	    p++; q++;
-	    }
-	else if(*p == '\r')
-	    p++;			// remove linefeeds
-	else
-	    { 
-	    *q = *p; 
-	    p++; q++;
-	    }
-	}
-    *q = '\0';
-    }
-
-DLGPROC FAR PASCAL ScrnFormDlg(HWND hDlg, UINT message, UINT wParam, LONG lParam)
-
-    {
-    int			i;
-    static	int	index = -1;
-    static	int	index1 = -1;
-    static	char	Formula[1200] = "z = z*z + c + p1";
-    static	char	Bailout[120] = "|z| < 4.0";
-    static	char	Startup[1200] = "z=c=pixel";
-    static	int	OldIndex1;		// used to check if formula has been edited. If it doesn't change, then it is either a repeat or a change ion the curremy formula
-
-    switch (message) 
-	{
-        case WM_INITDIALOG:
-	    for (i = 0; InitCond[i]; i++)
-		SendDlgItemMessage(hDlg, IDC_INITIAL, LB_ADDSTRING, (WPARAM)NULL, (LPARAM) (LPSTR) InitCond[i]);
-	    if (index == -1 || *Startup != '\0')		// index not loaded, but have a default
-		index = FindInitCond(Startup);
-            SendDlgItemMessage(hDlg, IDC_INITIAL, (UINT)LB_SETCURSEL, (WPARAM)((index == -1) ? 1 : index), 0L);
-
-	    for (i = 0; DirectFormula[i]; i++)
-		SendDlgItemMessage(hDlg, IDC_FORMULA, LB_ADDSTRING, (WPARAM)NULL, (LPARAM) (LPSTR) DirectFormula[i]);
-	    if (index1 == -1 || *Formula != '\0')		// index not loaded, but have a default
-		if (OldIndex1 != index1)			// it won't be found if the formula has been edited
-		    index1 = FindFormula(Formula);
-            SendDlgItemMessage(hDlg, IDC_FORMULA, (UINT)LB_SETCURSEL, (WPARAM)((index1 == -1) ? 0 : index1), 0L);
-	    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
-	    SetDlgItemText(hDlg, IDC_FORMULAVALUE, Formula);
-	    SetDlgItemText(hDlg, IDC_INITIALVALUE, Startup);
-	    OldIndex1 = index1;
-            return ((DLGPROC) TRUE);
-
-        case WM_COMMAND:
-	    switch ((int) LOWORD(wParam))
-//	    switch (wParam)
-		{
-                case IDOK:
-		    GetDlgItemText(hDlg, IDC_FORMULAVALUE, Formula, 1200);
-		    GetDlgItemText(hDlg, IDC_BAILOUT, Bailout, 100);
-		    GetDlgItemText(hDlg, IDC_INITIALVALUE, Startup, 1200);
-		    CreateFormulaString(Startup, Formula, Bailout, FormulaString);
-		    EndDialog(hDlg, TRUE);
-                    return ((DLGPROC) TRUE);
-                  
-                case IDCANCEL:
-                    EndDialog(hDlg, FALSE);
-                    return (FALSE);
-
-                case IDC_FORMULA:
-		    index1 = (int)SendDlgItemMessage(hDlg, IDC_FORMULA, LB_GETCURSEL, 0, 0L);
-		    if (index1 == LB_ERR) 
-			{
-			MessageBox(hDlg, "No Choice selected","Select From a List", MB_OK | MB_ICONEXCLAMATION);
-			break;
-			}
-						    index = (int)SendDlgItemMessage(hDlg, IDC_INITIAL, LB_GETCURSEL, 0, 0L);
-		    if (index < 0) index = 1;
-		    if (*DirectFormula[index1] != '\0')
-			if (OldIndex1 != index1)			// don't overwrite an edited formula
-			    AnalyseFormulaString(Startup, InitCond[index], Formula, Bailout, DirectFormula[index1]);
-		    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
-		    SetDlgItemText(hDlg, IDC_FORMULAVALUE, Formula);
-		    SetDlgItemText(hDlg, IDC_INITIALVALUE, Startup);
-		    return ((DLGPROC) TRUE);
-                case IDC_INITIAL:
-		    index = (int)SendDlgItemMessage(hDlg, IDC_INITIAL, LB_GETCURSEL, 0, 0L);
-		    if (index == LB_ERR) 
-			{
-			MessageBox(hDlg, "No Choice selected","Select From a List", MB_OK | MB_ICONEXCLAMATION);
-			break;
-			}
-		    SetDlgItemText(hDlg, IDC_INITIALVALUE, InitCond[index]);
-		    strcpy(Startup, InitCond[index]);
-//		    return ((DLGPROC) TRUE);
-	    return ((DLGPROC) TRUE);
-	    }
-	}
-    return (FALSE);
-    }
-
-/**************************************************************************
     Dialog Control for Stereo Pairs
 **************************************************************************/
 
@@ -2794,4 +2338,8 @@ DLGPROC FAR PASCAL StereoPairDlg(HWND hDlg, UINT message, UINT wParam, LONG lPar
 	}
     return FALSE;
     }
+
+
+
+
 

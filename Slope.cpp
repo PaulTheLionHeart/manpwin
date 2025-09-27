@@ -819,10 +819,9 @@ void	    CSlope::Create2DVector(Complex *v, double LightAngle)
 	Slope Fractal
 **************************************************************************/
 
-int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
-					    BYTE BigNumFlag, BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
-					    int bits_per_pixelIn, BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, int precisionIn, HANDLE ghMutex)
-//    BYTE BigNumFlag, BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, int degree, bool UsePalette, double LightAngle, double LightHeight, CTrueCol *TrueCol, CDib *Dib)
+int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, /*double xgap, double ygap, */
+					    BYTE BigNumFlag, /*BigDouble Big_xgap, BigDouble Big_ygap, */BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
+					    /*int bits_per_pixelIn, */BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, int precisionIn, HANDLE ghMutex)
     {
     Complex	c;
     BigComplex	cBig;
@@ -845,7 +844,7 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
     NumThreads = NumThreadsIn;
     subtype = subtypeIn;
     hwnd = hwndIn;
-    bits_per_pixel = bits_per_pixelIn;
+    bits_per_pixel = Dib->BitsPerPixel;
     degree = degreeIn;
 
     Create2DVector(&v, LightAngle);
@@ -857,8 +856,16 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 
     *ThreadComplete = false;
 
+    double	temp_x, temp_y;
+    double	ScreenRatio = (double) xdots / (double) ydots;
+
+    temp_x = ScreenRatio / (double)(xdots - 1);
+    temp_y = 1.0 / (double)(ydots - 1);
+
     if (BigNumFlag)
 	{
+	Big_xgap = BigWidth * temp_x;
+	Big_ygap = BigWidth * temp_y;
 	if (precision <= 30)
 	    {
 	    ConvertBignumsDD(Big_xgap, Big_ygap, BigHor, BigVert, BigWidth, &DDxgap, &DDygap, &DDhor, &DDvert, &DDWidth);
@@ -873,7 +880,11 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 	    ArithType = ARBITRARYPREC;
 	}
     else
+	{
 	ArithType = DOUBLEFLOAT;
+	xgap = mandel_width * temp_x;
+	ygap = mandel_width * temp_y;
+	}
     Plot.InitPlot(threshold, TrueCol, wpixels, xdots, height, xdots, height, Dib->BitsPerPixel, Dib, USEPALETTE);
     for (iY = 0; iY < ydots; iY++)
 	{

@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8253B6B5-D533-470C-B39B-6E7E35B9CB70}</ProjectGuid>
     <RootNamespace>Manpwin</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
     <ProjectName>Manpwin64</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -77,8 +77,8 @@
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(MPFR_DIR)\$(IntDir);$(MPIR_DIR)\$(IntDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(MPIR_DIR))\$(IntDir);$(MPFR_DIR)\$(IntDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(LibraryPath)</LibraryPath>
     <TargetName>Manpwin</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -92,12 +92,11 @@
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(MPFR_DIR)$(Platform)\$(IntDir);$(MPIR_DIR)$(Platform)\$(IntDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(MPIR_DIR)$(Platform)\$(IntDir);$(MPFR_DIR)$(Platform)\$(IntDir);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(LibraryPath)</LibraryPath>
     <TargetName>Manpwin</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(LibraryPath)</LibraryPath>
     <TargetName>$(ProjectName)</TargetName>
@@ -132,8 +131,8 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD.lib %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>oldnames.lib;odbc32.lib;mpir.lib;mpfr.lib;odbccp32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD.lib  /NODEFAULTLIB:MSVCRTD.lib "$(MPFR_DIR)$(IntDir)\mpfr.lib" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>oldnames.lib;odbc32.lib;odbccp32.lib;htmlhelp.lib;D:\c\mpfr\build.vc15\lib\Win32\Debug\mpfr.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ModuleDefinitionFile>
@@ -145,9 +144,10 @@
       </StackReserveSize>
       <StackCommitSize>
       </StackCommitSize>
-      <RandomizedBaseAddress>true</RandomizedBaseAddress>
-      <DataExecutionPrevention>true</DataExecutionPrevention>
-      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
+      <ImageHasSafeExceptionHandlers>true</ImageHasSafeExceptionHandlers>
+      <TargetMachine>NotSet</TargetMachine>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -183,7 +183,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:MSVCRTD.lib "D:\c\ManpWINMpfr\x64\Debug\qdlib.lib" </AdditionalOptions>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMT.lib "$(MSBuildProjectDirectory)\x64\Debug\qdlib.lib" </AdditionalOptions>
       <AdditionalDependencies>oldnames.lib;odbc32.lib;odbccp32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -285,13 +285,14 @@
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalOptions>/NODEFAULTLIB:LIBCMTD.lib /NODEFAULTLIB:MSVCRTD.lib "D:\c\ManpWINMpfr\x64\Debug\qdlib.lib" </AdditionalOptions>
+      <AdditionalOptions>/NODEFAULTLIB:LIBCMT.lib "D:\c\ManpWINMpfr\x64\Debug\qdlib.lib"</AdditionalOptions>
       <AdditionalDependencies>oldnames.lib;odbc32.lib;odbccp32.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -320,6 +321,7 @@
     <ClCompile Include="ant.cpp" />
     <ClCompile Include="Apollonius.cpp" />
     <ClCompile Include="Approximation.cpp" />
+    <ClCompile Include="ApproximationExp.cpp" />
     <ClCompile Include="Arithmetic.cpp" />
     <ClCompile Include="Bif.cpp" />
     <ClCompile Include="BigComplex.cpp" />
@@ -373,7 +375,7 @@
     <ClCompile Include="DDFractintFunctions.cpp" />
     <ClCompile Include="FractintTrig.cpp" />
     <ClCompile Include="FracZoom.cpp" />
-    <ClCompile Include="FrameCalculator.cpp" />
+    <ClCompile Include="PertEngine.cpp" />
     <ClCompile Include="FrantPAR.cpp" />
     <ClCompile Include="Functions.cpp" />
     <ClCompile Include="FwdDiff.cpp" />
@@ -398,10 +400,13 @@
     <ClCompile Include="Maninit.cpp" />
     <ClCompile Include="Manp.cpp" />
     <ClCompile Include="Manpdlg.cpp" />
+    <ClCompile Include="ManpEngine.cpp" />
     <ClCompile Include="Manpfile.cpp" />
     <ClCompile Include="Manpmain.cpp" />
+    <ClCompile Include="ManpMT.cpp" />
     <ClCompile Include="Manpwin.cpp" />
     <ClCompile Include="Matrix.cpp" />
+    <ClCompile Include="MiscDlg.cpp" />
     <ClCompile Include="Miscfrac.cpp" />
     <ClCompile Include="Mountain.cpp" />
     <ClCompile Include="MPEGWrite.cpp" />
@@ -414,8 +419,10 @@
     <ClCompile Include="ParamAnim.cpp" />
     <ClCompile Include="parser\fpu087.cpp" />
     <ClCompile Include="Pascal.cpp" />
+    <ClCompile Include="PertFilters.cpp" />
     <ClCompile Include="PertFN.cpp" />
     <ClCompile Include="PertFNFloatExp.cpp" />
+    <ClCompile Include="PertOrbit.cpp" />
     <ClCompile Include="Perturbation.cpp" />
     <ClCompile Include="Pixel.cpp" />
     <ClCompile Include="Plot.cpp" />
@@ -465,6 +472,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="anim.h" />
+    <ClInclude Include="Approximation.h" />
     <ClInclude Include="Arithmetic.h" />
     <ClInclude Include="Bif.h" />
     <ClInclude Include="Big.h" />
@@ -485,13 +493,13 @@
     <ClInclude Include="fract.h" />
     <ClInclude Include="fractalp.h" />
     <ClInclude Include="Fractype.h" />
-    <ClInclude Include="FrameCalculator.h" />
     <ClInclude Include="Manp.h" />
     <ClInclude Include="Manpwin.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="menu.h" />
     <ClInclude Include="OscProcess.h" />
     <ClInclude Include="OtherFunctions.h" />
+    <ClInclude Include="PertEngine.h" />
     <ClInclude Include="Pixel.h" />
     <ClInclude Include="Plot.h" />
     <ClInclude Include="Polygon.h" />

@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
 //
 // OtherFunctions.h: fractals that aren't raster based.
 //
@@ -15,6 +15,8 @@
 #include "ManpWin.h"
 #include "Pixel.h"
 #include "Manp.h"
+#include "polygon.h"
+#include "preview.h"
 
 // Error codes for Cellular
 #define BAD_T         1
@@ -40,6 +42,9 @@
 #define max(a,b)    (((a) > (b)) ? (a) : (b))
 #define min(a,b)    (((a) < (b)) ? (a) : (b))
 
+// stuff for Apollonius Fractal
+#define SQRT3    1.732050807568877193
+
 //////////////////////////////////////////////////////////////////////
 // Class definition
 //////////////////////////////////////////////////////////////////////
@@ -47,12 +52,57 @@
 class COtherFunctions
     {
     public:
-	int	InitOtherFunctions(WORD type, Complex *z, Complex *q, HWND hwndIn, double *wpixels, CTrueCol *TrueColIn, CDib *Dib, char *AntStatus, struct __timeb64 FrameEndIn, struct __timeb64 FrameStartIn);
-	int	COtherFunctions::RunOtherFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration, int xdots, int ydots, double param[], long threshold, double hor, double vert, double mandel_width, 
-		double ScreenRatio, int *curpass, int *totpasses, int user_data(HWND hwnd), HWND hwnd, int rotate(int dir));
+	int	InitOtherFunctions(WORD type, int subtypeIn, HWND hwndIn, CTrueCol *TrueColIn, CDib *DibIn, char *AntStatusIn, struct __timeb64 FrameEndIn, struct __timeb64 FrameStartIn, double mandel_widthIn, 
+		double horIn, double vertIn, double ScreenRatioIn, int *totpassesIn, int *curpassIn, int user_dataIn(HWND hwnd), double *wpixelsIn, BYTE *DefaultPaletteIn, int CoordSystemIn, //COscProcess OscProcessIn, 
+		int xAxisIn, int yAxisIn, int zAxisIn);
+	int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *iteration, int xdots, int ydots, double param[], long threshold, int rotate(int dir));
+
+	// stuff for Triangles
+	void	GetExpandPalette(BOOL);		// spread colours across palette
+	void	GetPlotStars(BOOL);		// stars or polygons?
+	void	GetFillPolygon(BOOL);		// fill polygons?
+	void	GetjAngle(int);
+	void	GetwAngle(int);			// sets the overall shape of the fractal
+	void	GetDivisor(int);
+	void	GetRemainder(int);		// who knows, I don't
+	void	GetExponent(double);
+	void	GetSides(int);			// sides of polygon
+	void	GetPasses(int);			// number of passes
+
+	// stuff for Circles
+	void	GetUseDefaultPalette(BOOL);	// standard EGA palette
+	void	GetFilledCircle(int);		// 1 = filled, 2 = unfilled, 3 = 3D
+
+	// stuff for Pascal Triangle : Escher (Sierpinski)
+	void	GetNumberIterations(int);
+	void	Getmoda(int);
+	void	Gethi(int);
+	void	Getlo(int);
+	void	GetCircleSize(int);
+
+	// stuff for geometry
+	void	GetCount(long in);
+	void	GetSubtype(int in);
+
 
     private:
 	CPlot	Plot;
+	double *wpixels;
+	COscProcess OscProcess;
+	int	subtype;
+	double	mandel_width;
+	double	hor;
+	double	vert;
+	double	ScreenRatio;
+	int	*totpasses;
+	int	*curpass;
+	int(*UserData)(HWND);
+	BYTE	*DefaultPalette;
+	int	CoordSystem;
+	int	row, col;
+	Complex	c, z;
+	HWND	hwnd;
+
 
     // Stuff for Cellular
 	void	abort_cellular(int err, int t);
@@ -63,8 +113,6 @@ class COtherFunctions
 	int	lstscreenflag;
 	int	rflag = FALSE;
 	int	rseed;
-	int	row, col;
-	HWND	hwnd;
 
 	// Stuff for DemoWalk
 	int	colors = 256;
@@ -109,9 +157,72 @@ class COtherFunctions
 	int	ant(void);
 	int	tower(void);
 
-//	void	setwait(long *wait);
-//	int	getakey();
+	// stuff for Popcorn
+	Complex g1(Complex x);
+	Complex g2(Complex x);
+	int	DoPopcorn();
+	int	variation = 0;
+	double	xmax = 1.7, xmin = -1.7, ymax = 1.7, ymin = -1.7;
+	int	max_size = 1124;
 
+	// stuff for Cross Roads
+	int	DoCrossRoads();
+	double  a = 2.23, b = 0.76, C = 0.3;
+	double	Div[24] = { 3.0, 3.0, 1.3, 1.423, 1.3, 1.3, 1.3, 1.2, 1.3, 1.0, 1.3 };
+	double	xscale, yscale;
+
+	// stuff for ZigZag
+	int	DoZigzag();
+
+	// stuff for Triangles
+	int	DoTriangle();
+	int	IntPower(int base, int n);
+	double	FloatPower(double base, int n);
+	void	DrawBox(int x0, int y0, int x1, int y1, DWORD colour, BOOL fill, CPlot Plot);
+	CPoly	polygon;			// polygon class
+
+	BOOL	ExpandPalette;			// spread colours across palette
+	BOOL	PlotStars;			// stars or polygons?
+	BOOL	FillPolygon;			// fill polygons?
+	int	jAngle, wAngle;			// sets the overall shape of the fractal
+	int	Divisor, Remainder;		// who knows, I don't
+	double	Exponent;
+	int	Sides;				// sides of polygon
+
+	// stuff for Circles
+	int	DoCircles();
+	void	ScaledCircle(double x, double y, double radius, DWORD colour);
+	int	DoFordFroth();
+	int	DoCurvedIFS();
+	BOOL	UseDefaultPalette = TRUE;	// standard EGA palette
+	int	Passes = 10;
+	int	FilledCircle = 1;		// 1 = filled, 2 = unfilled, 3 = 3D
+
+	// stuff for Sierpinski Flowers
+	int	COtherFunctions::DoSierpinskiFlower();
+
+	// stuff for Pascal Triangle : Escher (Sierpinski)
+	int	DoPascal();
+	int	NumberIterations;
+	int	moda;
+	int	hi;
+	int	lo;
+	int	CircleSize;
+
+	// stuff for Apollonian Circles
+	int	DoApolloniusIFS();
+
+	// stuff for geometry
+	int	DoGeometry();
+	int	sides;				// number of sides of polygon or star
+	long	count;				// number of polygons or stars
+	
+	// stuff for malthus
+	int	DoMalthus();
+	int	DisplayMalthus(double c1[], DWORD colour, int dimensions, CMatrix Mat);
+	int	xAxis;
+	int	yAxis;
+	int	zAxis;
 
     };
 

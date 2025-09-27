@@ -50,11 +50,11 @@ int	CPixel::QDRunFractal(QDComplex *z, QDComplex *q)
 
     {
     if (fractalspecific[type].flags & FUNCTIONINPIXEL)
-	return(QDRunFunctions(type, z, q, &SpecialFlag, iteration));
+	return(QDRunFunctions(type, z, q, &SpecialFlag, &iteration));
     else if (fractalspecific[type].flags & FRACTINTINPIXEL)
-	return(QDRunFractintFunctions(type, z, q, &SpecialFlag, iteration));
+	return(QDRunFractintFunctions(type, z, q, &SpecialFlag, &iteration));
     else if (fractalspecific[type].flags & TRIGINPIXEL)
-	return(QDRunFractintTrigFunctions(type, z, q, &SpecialFlag, iteration));
+	return(QDRunFractintTrigFunctions(type, z, q, &SpecialFlag, &iteration));
 //    else if (fractalspecific[type].flags & OTHERFNINPIXEL)
 //	return(RunOtherFunctions(type, z, q, &SpecialFlag, iteration));
     else
@@ -73,16 +73,16 @@ int	CPixel::DoQDFilter(int method, int hooper, QDComplex *z)
     CPotential	Pot;
 
     if (colours == 256 && decomp > 0)
-	*iteration = QDDecomposition(z->x, z->y);
+	iteration = QDDecomposition(z->x, z->y);
     else if (logval)
-	*iteration = (BYTE) (*(logtable + (*iteration % MAXTHRESHOLD)));
+	iteration = (BYTE) (*(logtable + (iteration % MAXTHRESHOLD)));
     else if (biomorph >= 0)
 	{
 	rqlim2 = sqrt(rqlim);
 //	BioMorphTest = rqlim2;
 	BioMorphTest = 0.5;
 	if (fabs(z->x) < BioMorphTest || fabs(z->y) < BioMorphTest)
-	    *iteration = biomorph;
+	    iteration = biomorph;
 	}
     else
 	{
@@ -90,47 +90,47 @@ int	CPixel::DoQDFilter(int method, int hooper, QDComplex *z)
 	    {
 	    case EPSCROSS:
 		if (hooper == 1)
-		    *iteration = special;
+		    iteration = special;
 		else if (hooper == 2)
-		    *iteration = (special << 1);
+		    iteration = (special << 1);
 		break;
 						// these options by Richard Hughes modified by TW
 						// Add 7 to overcome negative values on the MANDEL
 	    case REAL:				// "real"
-		*iteration += (long)to_double(z->x) + 7;
+		iteration += (long)to_double(z->x) + 7;
 		break;
 	    case IMAG:	    			// "imag"
-		*iteration += (long)to_double(z->y) + 7;
+		iteration += (long)to_double(z->y) + 7;
 		break;
 	    case MULT:				// "mult"
 		if (z->y != 0.0)
-		    *iteration = (long)((double)*iteration * to_double((z->x/z->y)));
+		    iteration = (long)((double)iteration * to_double((z->x/z->y)));
 		break;
 	    case SUM:				// "sum"
-		*iteration += (long)to_double((z->x + z->y));
+		iteration += (long)to_double((z->x + z->y));
 		break;
 	    case ATAN:				// "atan"
-		*iteration = (long)to_double(abs(atan2(z->y, z->x)*180.0/PI));
+		iteration = (long)to_double(abs(atan2(z->y, z->x)*180.0/PI));
 		break;
 	    case POTENTIAL:
 		magnitude = to_double((sqr(z->x) + sqr(z->y)));
-		*iteration = Pot.potential(magnitude, *iteration, threshold, TrueCol, colors, potparam);
+		iteration = Pot.potential(magnitude, iteration, threshold, TrueCol, colors, potparam);
 		break;
 	    case PERT1:
-		if (*iteration != threshold)
-		    *iteration = (int)((*iteration - log2(log2(z->CSumSqr()))) * 5) % 256;				//Get the index of the color array that we are going to read from. 
+		if (iteration != threshold)
+		    iteration = (int)((iteration - log2(log2(z->CSumSqr()))) * 5) % 256;				//Get the index of the color array that we are going to read from. 
 		break;
 	    case PERT2:
-		if (*iteration != threshold)
-		    *iteration = (int)(*iteration - (log(0.5*(z->CSumSqr())) - log(0.5*log(256))) / log(2)) % 256;	//Get the index of the color array that we are going to read from. 
+		if (iteration != threshold)
+		    iteration = (int)(iteration - (log(0.5*(z->CSumSqr())) - log(0.5*log(256))) / log(2)) % 256;	//Get the index of the color array that we are going to read from. 
 		break;
 	    }
 
 	// eliminate negative colors & wrap arounds
-	if (*iteration < 0)
-	    *iteration = 0;
-	if (*iteration > threshold && decomp <= threshold)		// for small thresholds, we can still have higher decomp levels
-	    *iteration = threshold;
+	if (iteration < 0)
+	    iteration = 0;
+	if (iteration > threshold && decomp <= threshold)		// for small thresholds, we can still have higher decomp levels
+	    iteration = threshold;
 	}
     return 0;
     }
@@ -303,7 +303,7 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
     savedand = 1;				// begin checking every other cycle
     savedincr = 1;				// start checking the very first time
 
-    *iteration = 0L;
+    iteration = 0L;
     real_iteration = 0;	
     phaseflag = 0;				// assume all type 5, 9 fractals same colour
 
@@ -312,8 +312,8 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 	QDTemp = qQD;
 	tempComplex.x = to_double(QDTemp.x);
 	tempComplex.y = to_double(QDTemp.y);
-	TZfilter->InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
-	TZfilter->LoadFilterQ(tempComplex);
+	TZfilter.InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
+	TZfilter.LoadFilterQ(tempComplex);
 	}
 
     if (juliaflag)
@@ -348,7 +348,7 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 	    }
 	if (FloatIteration >= threshold)
 	    break;
-	(*iteration)++;
+	(iteration)++;
 	FloatIteration++;
 
 	result = QDRunFractal(&zQD, &qQD);
@@ -357,7 +357,7 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 	else if (result == 1)				// escape time
 	    break;
 	if (type == RATIONALMAP)
-	    return(*iteration);
+	    return(iteration);
 	/*  No point, it doesn't have a fractal nature
 
 	if (method == STARTRAIL)
@@ -387,7 +387,7 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 	    if (magnitude < min_orbit)
 		{
 		min_orbit = magnitude;
-		min_index = (long)*iteration + 1L;
+		min_index = (long)iteration + 1L;
 		}
 	    }
 
@@ -396,12 +396,12 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 	    QDTemp = zQD;
 	    tempComplex.x = to_double(QDTemp.x);
 	    tempComplex.y = to_double(QDTemp.y);
-	    TZfilter->DoTierazonFilter(tempComplex, iteration);
+	    TZfilter.DoTierazonFilter(tempComplex, &iteration);
 	    }
 
-	if (*iteration > oldcolour)			// check periodicity
+	if (iteration > oldcolour)			// check periodicity
 	    {
-	    if ((*iteration & savedand) == 0)		// time to save a new value
+	    if ((iteration & savedand) == 0)		// time to save a new value
 		{
 		QDSaved = zQD;
 		if (--savedincr == 0)			// time to lengthen the periodicity?
@@ -415,17 +415,17 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 		qd_real   xAbs = QDSaved.x - zQD.x;
 		qd_real   yAbs = QDSaved.y - zQD.y;
 
-		if (abs(xAbs) < *QDCloseEnough)
-		    if (abs(yAbs) < *QDCloseEnough)
-			*iteration = threshold;
+		if (abs(xAbs) < QDCloseEnough)
+		    if (abs(yAbs) < QDCloseEnough)
+			iteration = threshold;
 		}
 	    }
 	}
 
-    if (*iteration >= threshold && period_level)
+    if (iteration >= threshold && period_level)
 	oldcolour = 0;			// check periodicity immediately next time
     else
-	oldcolour = *iteration + 10;	// check when past this+10 next time
+	oldcolour = iteration + 10;	// check when past this+10 next time
 
     if (OutsideMethod >= TIERAZONFILTERS)
 	{
@@ -435,14 +435,14 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 	QDTemp = zQD;
 	tempComplex.x = to_double(QDTemp.x);
 	tempComplex.y = to_double(QDTemp.y);
-	TZfilter->EndTierazonFilter(tempComplex, iteration, TrueCol);
-	return *iteration;
+	TZfilter.EndTierazonFilter(tempComplex, &iteration, TrueCol);
+	return iteration;
 	}
 
     if (SpecialFlag)
 	return(special);		// flag for special colour 
 
-    if (*iteration < threshold)
+    if (iteration < threshold)
 	{
 //	DoQDFilter(InsideMethod, hooper, &zQD);
 	DoQDFilter(OutsideMethod, hooper, &zQD);
@@ -451,28 +451,28 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 	{
 	qd_real	t = sqrt(min_orbit) * 75.0;
 	if (InsideMethod == BOF60)
-	    *iteration = (int)to_double(t);
+	    iteration = (int)to_double(t);
 	else if (InsideMethod == BOF61)
-	    *iteration = min_index;
+	    iteration = min_index;
 	else if (InsideMethod == ZMAG)
-	    *iteration = (int)((zQD.CSumSqr()) * (threshold >> 1) + 1);
+	    iteration = (int)((zQD.CSumSqr()) * (threshold >> 1) + 1);
 	else
-	    *iteration = threshold;
-	if (*iteration < 1L)
-	    *iteration = threshold;
+	    iteration = threshold;
+	if (iteration < 1L)
+	    iteration = threshold;
 	}
 
     if (type == NEWTON && subtype != 'N')
-	return (*color);				// Newton root colour
+	return (color);				// Newton root colour
 
     if ((type == SPECIALNEWT || type == MATEIN) && special != 0)  // split colours
 	{
 	if (phaseflag == 1)				// second phase
-	    *iteration += special;
+	    iteration += special;
 	else if (phaseflag == 2)			// third phase
-	    *iteration += (special << 1);
-	if (*iteration > threshold)
-	    *iteration -= threshold;
+	    iteration += (special << 1);
+	if (iteration > threshold)
+	    iteration -= threshold;
 	}						// default first phase
 
     if (calcmode == 'F')
@@ -481,7 +481,7 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 	 CalcQDFloatIteration(SlopeError, wpixels, row, col, zQD, QDOldZ, QDOlderZ, FloatIteration, type, subtype, degree, SpecialFlag, special, width);
 	 }
      
-    return(*iteration);
+    return(iteration);
     }
 
 /**************************************************************************
@@ -513,7 +513,8 @@ QDComplex	CPixel::QDInvertz2(QDComplex  & Cmplx1)
 /************************************************************************
 	Convert BigDouble to Quad Double
 ************************************************************************/
-
+// moved to BigDouble.cpp
+/*
 //extern	void	ShowBignum(BigDouble x, char *Location);
 int	CPixel ::BigDouble2QD(qd_real *out, BigDouble *in)
     {
@@ -543,7 +544,7 @@ int	CPixel ::BigDouble2QD(qd_real *out, BigDouble *in)
 	}
     return 0;
     }
-
+*/
 /************************************************************************
 	Calculate QD Fractal
 ************************************************************************/
@@ -551,72 +552,70 @@ int	CPixel ::BigDouble2QD(qd_real *out, BigDouble *in)
 long	CPixel::QDCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 
     {
-
- //   FloatCornerstoBig(var);
     if (pairflag)		// half size screens: only do every second row / col
 	if (row % pairflag || col % pairflag)
 	    if (row != (int)ydots - 1)			// must trigger for last line
 		return(threshold);
     if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
 	{
-	if (row != *oldrow)
+	if (row != oldrow)
 	    {
 	    if (pairflag && row)		// draw row for right hand image
-		draw_right_image((short)(*oldrow));
+		draw_right_image((short)(oldrow));
 	    switch (RotationAngle)
 		{
 		case NORMAL:						// normal
-		    cQD.y = *QDyymax - *QDygap * (double)row;
+		    cQD.y = QDyymax - QDygap * (double)row;
 		    break;
 		case 90:						// 90 degrees
-		    cQD.x = *QDyymax - *QDxgap * (double)row;
+		    cQD.x = QDyymax - QDxgap * (double)row;
 		    break;
 		case 180:						// 180 degrees
-		    cQD.y = -(*QDyymax - *QDygap * (double)row);
+		    cQD.y = -(QDyymax - QDygap * (double)row);
 		    break;
 		case 270:						// 270 degrees
-		    cQD.x = -(*QDyymax - *QDxgap * (double)row);
+		    cQD.x = -(QDyymax - QDxgap * (double)row);
 		    break;
 		}
-	    *oldrow = row;
+	    oldrow = row;
 	    }
-	if (col != *oldcol)
+	if (col != oldcol)
 	    {
 	    switch (RotationAngle)
 		{
 		case NORMAL:						// normal
-		    cQD.x = *QDxgap * (double)col + *QDHor;
+		    cQD.x = QDxgap * (double)col + QDHor;
 		    break;
 		case 90:						// 90 degrees
-		    cQD.y = *QDygap * (double)col + *QDHor;
+		    cQD.y = QDygap * (double)col + QDHor;
 		    break;
 		case 180:						// 180 degrees
-		    cQD.x = -(*QDxgap * (double)col + *QDHor);
+		    cQD.x = -(QDxgap * (double)col + QDHor);
 		    break;
 		case 270:						// 270 degrees
-		    cQD.y = -(*QDygap * (double)col + *QDHor);
+		    cQD.y = -(QDygap * (double)col + QDHor);
 		    break;
 		}
-	    *oldcol = col;
+	    oldcol = col;
 	    }
 	}
     else
 	{
 	qd_real  zero = 0.0;
 	double  z_rot = (double)RotationAngle;
-	QDMat->InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
-	QDMat->DoTransformation(&cQD.x, &cQD.y, &zero, *QDxgap * (double)col + *QDHor, *QDyymax - *QDxgap * (double)row, 0.0);
+	QDMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
+	QDMat.DoTransformation(&cQD.x, &cQD.y, &zero, QDxgap * (double)col + QDHor, QDyymax - QDxgap * (double)row, 0.0);
 	}
 
     if (user_data(hwnd) == -1)
 	return(-1);
-    *color = DoQDFract(hwnd, row, col);	// quad double
-    if (*color < 0)
+    color = DoQDFract(hwnd, row, col);	// quad double
+    if (color < 0)
 	return -1;
     reset_period = 0;
 
-    if (*color >= threshold)
-	*color = threshold;
+    if (color >= threshold)
+	color = threshold;
 /*
     else if (logval && logflag == TRUE)
 	color = (BYTE) (*(logtable + color));
@@ -624,19 +623,19 @@ long	CPixel::QDCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 
     if (calcmode == 'B')
 	{
-	if (*color >= colours)	/* don't use color 0 unless from inside */
+	if (color >= colours)	/* don't use color 0 unless from inside */
 	    if (colours < 16)
-		*color &= *andcolor;
+		color &= andcolor;
 	    else
-		*color = ((*color - 1) % *andcolor) + 1;  /* skip color zero */
+		color = ((color - 1) % andcolor) + 1;  /* skip color zero */
 	}
 
      if (_3dflag)
-	    projection(col, row, *color);
+	    projection(col, row, color);
 	else if (pairflag)
-	    do_stereo_pairs(col, row, *color);
+	    do_stereo_pairs(col, row, color);
     else
-	plot((WORD)col, (WORD)row, *color);
-    return(*color);
+	plot((WORD)col, (WORD)row, color);
+    return(color);
     }
 

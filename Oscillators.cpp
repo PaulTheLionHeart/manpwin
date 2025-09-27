@@ -42011,11 +42011,7 @@ void	LoadParams(void)
     FrameCounter = 0;
     }
 
-#ifdef	MULTITHREAD
-int	DoOscillator(PMYVARIABLES var)
-#else
 int	DoOscillator(void)
-#endif
     {
     return (OscillatorSpecific[subtype].calctype());
     }

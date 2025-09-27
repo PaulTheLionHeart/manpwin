@@ -25,11 +25,11 @@
 class CSlope
     {
     public:
-	int	RunSlopeDerivative(HWND GlobalHwnd, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtype, int NumThreads, int thread, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
-								BYTE BigNumFlag, BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
-								int bits_per_pixel, BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, int precision, HANDLE ghMutex);
-	int	RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
-								BYTE BigNumFlag, BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
+	int	RunSlopeDerivative(HWND GlobalHwnd, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtype, int NumThreads, int thread, Complex j, double mandel_width, double hor, double vert, /*double xgap, double ygap,*/
+								BYTE BigNumFlag, /*BigDouble Big_xgap, BigDouble Big_ygap, */BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
+								/*int bits_per_pixel, */BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, int precision, HANDLE ghMutex);
+	int	RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, /*double xgap, double ygap, */
+								BYTE BigNumFlag, /*BigDouble Big_xgap, BigDouble Big_ygap, */BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
 								double *wpixels, BYTE juliaflag, int xdots, int ydots, int width, WORD *degreeIn, int precision);
 	int	RunSlopeFwdDiffDouble(int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
 								double rqlim, long threshold, CDib *Dib, double *wpixels, BYTE juliaflag, int xdots, int ydots, int width);
@@ -105,6 +105,8 @@ class CSlope
 	CBigTrig	BigTrig;		// alternative thread-friendly trig functions
 	double	*wpixels;
 	double	bump_transfer_factor, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, LightHeight;
+	double	xgap, ygap;
+	BigDouble   Big_xgap, Big_ygap;
 
 	// screen ( integer) coordinate 
 	int iX, iY;

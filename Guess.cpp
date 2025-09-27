@@ -29,10 +29,10 @@ int	CPixel::solidguess(HWND hwnd, int user_data(HWND hwnd))
     unsigned int *pfxp0,*pfxp1;
     unsigned int u;
 
-    guessplot=(*PlotType != NOSYM && *PlotType != XAXIS && *PlotType != ORIGIN);
+    guessplot=(PlotType != NOSYM && PlotType != XAXIS && PlotType != ORIGIN);
 			/* check if guessing at bottom & right edges is ok */
-    bottom_guess = (*PlotType == XAXIS || (*PlotType == NOSYM && iystop+1 == (int)ydots));
-    right_guess = (*PlotType == ORIGIN || ((*PlotType == NOSYM || *PlotType == XAXIS) && ixstop+1 == (int)xdots));
+    bottom_guess = (PlotType == XAXIS || (PlotType == NOSYM && iystop+1 == (int)ydots));
+    right_guess = (PlotType == ORIGIN || ((PlotType == NOSYM || PlotType == XAXIS) && ixstop+1 == (int)xdots));
 
 		// there seems to be a bug in solid guessing at bottom and side
     bottom_guess = right_guess = 0;		// TIW march 1995
@@ -260,10 +260,10 @@ int	CPixel::guessrow(HWND hwnd, int firstpass, int y, int blocksize, int user_da
     yplushalf = y + halfblock;
     yplusblock = y + blocksize;
     prev11 = -1;
-    c24 = c12 = c13 = c22 = (long)Plot->GetColour((WORD)ixstart, (WORD)y);
-    c31 = c21 = (long)Plot->GetColour((WORD)ixstart, (WORD)((y > 0) ? ylesshalf : 0));
+    c24 = c12 = c13 = c22 = (long)Plot.GetColour((WORD)ixstart, (WORD)y);
+    c31 = c21 = (long)Plot.GetColour((WORD)ixstart, (WORD)((y > 0) ? ylesshalf : 0));
     if (yplusblock <= iystop)
-	c24 = (long)Plot->GetColour((WORD)ixstart, (WORD)yplusblock);
+	c24 = (long)Plot.GetColour((WORD)ixstart, (WORD)yplusblock);
     else if(bottom_guess == 0)
 	c24 = -1;
     guessed12 = guessed13 = 0;
@@ -300,13 +300,13 @@ int	CPixel::guessrow(HWND hwnd, int firstpass, int y, int blocksize, int user_da
 		c31 = -1;
 	    }
 	else if (y > 0)
-	    c31 = (long)Plot->GetColour((WORD)xplushalf, (WORD)ylesshalf);
+	    c31 = (long)Plot.GetColour((WORD)xplushalf, (WORD)ylesshalf);
 	if (xplusblock <= ixstop)
 	    {
 	    if(yplusblock <= iystop)
-		c44 = (long)Plot->GetColour((WORD)xplusblock, (WORD)yplusblock);
-	    c41 = (long)Plot->GetColour((WORD)xplusblock, (WORD)((y > 0) ? ylesshalf : 0));
-	    c42 = (long)Plot->GetColour((WORD)xplusblock, (WORD)y);
+		c44 = (long)Plot.GetColour((WORD)xplusblock, (WORD)yplusblock);
+	    c41 = (long)Plot.GetColour((WORD)xplusblock, (WORD)((y > 0) ? ylesshalf : 0));
+	    c42 = (long)Plot.GetColour((WORD)xplusblock, (WORD)y);
 	    }
 	else if (right_guess == 0)
 	    c41 = c42 = c44 = -1;
@@ -372,34 +372,34 @@ int	CPixel::guessrow(HWND hwnd, int firstpass, int y, int blocksize, int user_da
 		    if (guessed33 > 0)
 			plot((WORD)xplushalf, (WORD)yplushalf, c33);
 		    }
+		plotblock(1, x, yplushalf, c23, dstack);
+		plotblock(0, xplushalf, y, c32, dstack);
+		plotblock(1, xplushalf, yplushalf, c33, dstack);
 		}
-	    plotblock(1, x, yplushalf, c23, dstack);
-	    plotblock(0, xplushalf, y, c32, dstack);
-	    plotblock(1, xplushalf, yplushalf, c33, dstack);
-	    }
-	else				// repaint changed blocks
-	    {
-	    if (c23 != c22)
-		plotblock(-1, x, yplushalf, c23, dstack);
-	    if (c32 != c22)
-		plotblock(-1, xplushalf, y, c32, dstack);
-	    if (c33 != c22)
-		plotblock(-1, xplushalf, yplushalf, c33, dstack);
+	    else				// repaint changed blocks
+		{
+		if (c23 != c22)
+		    plotblock(-1, x, yplushalf, c23, dstack);
+		if (c32 != c22)
+		    plotblock(-1, xplushalf, y, c32, dstack);
+		if (c33 != c22)
+		    plotblock(-1, xplushalf, yplushalf, c33, dstack);
+		}
 	    }
 
 	  // check if some calcs in this block mean earlier guesses need fixing
 	fix21 = ((c22 != c12 || c22 != c32)
 		&& c21 == c22 && c21 == c31 && c21 == prev11
 		&& y > 0
-		&& (x == ixstart || c21 == (long)Plot->GetColour((WORD)(x - halfblock), (WORD)ylessblock))
-		&& (xplushalf > ixstop || c21 == (long)Plot->GetColour((WORD)xplushalf, (WORD)ylessblock))
-		&& c21 == (long)Plot->GetColour((WORD)x, (WORD)ylessblock));
+		&& (x == ixstart || c21 == (long)Plot.GetColour((WORD)(x - halfblock), (WORD)ylessblock))
+		&& (xplushalf > ixstop || c21 == (long)Plot.GetColour((WORD)xplushalf, (WORD)ylessblock))
+		&& c21 == (long)Plot.GetColour((WORD)x, (WORD)ylessblock));
 	fix31 = (c22 != c32
 		&& c31 == c22 && c31 == c42 && c31 == c21 && c31 == c41
 		&& y > 0 && xplushalf <= ixstop
-		&& c31 == (long)Plot->GetColour((WORD)xplushalf, (WORD)ylessblock)
-		&& (xplusblock > ixstop || c31 == (long)Plot->GetColour((WORD)xplusblock, (WORD)ylessblock))
-		&& c31 == (long)Plot->GetColour((WORD)x, (WORD)ylessblock));
+		&& c31 == (long)Plot.GetColour((WORD)xplushalf, (WORD)ylessblock)
+		&& (xplusblock > ixstop || c31 == (long)Plot.GetColour((WORD)xplusblock, (WORD)ylessblock))
+		&& c31 == (long)Plot.GetColour((WORD)x, (WORD)ylessblock));
 	prev11 = c31;				// for next time around
 	if (fix21)
 	    {
@@ -449,9 +449,9 @@ int	CPixel::guessrow(HWND hwnd, int firstpass, int y, int blocksize, int user_da
     for (i = 0;i<halfblock;++i)
 	{
 	if ((j = y + i) <= iystop) 
-	    Plot->OutputLine((WORD)xxstart, (WORD)j, (WORD)(ixstop - xxstart + 1), &dstack[xxstart]);
+	    Plot.OutputLine((WORD)xxstart, (WORD)j, (WORD)(ixstop - xxstart + 0), &dstack[xxstart]);
 	if ((j = y + i + halfblock) <= iystop)
-	    Plot->OutputLine((WORD)xxstart, (WORD)j, (WORD)(ixstop - xxstart + 1), &dstack[xxstart + (xdots * 2)]);
+	    Plot.OutputLine((WORD)xxstart, (WORD)j, (WORD)(ixstop - xxstart + 0), &dstack[xxstart + (xdots * 2)]);
 	if (save_flag)
 	    {
 	    ClearGuessMemory(dstack);
@@ -459,9 +459,9 @@ int	CPixel::guessrow(HWND hwnd, int firstpass, int y, int blocksize, int user_da
 	    }
 	}
 
-    if (*PlotType != NOSYM)			// symmetry, just vertical & origin the fast way
+    if (PlotType != NOSYM)			// symmetry, just vertical & origin the fast way
 	{
-	if (*PlotType == ORIGIN)			// origin sym, reverse lines
+	if (PlotType == ORIGIN)			// origin sym, reverse lines
 	    for (i = (ixstop + xxstart + 1) / 2; --i >= xxstart;)
 		{
 		color = dstack[i];
@@ -475,11 +475,14 @@ int	CPixel::guessrow(HWND hwnd, int firstpass, int y, int blocksize, int user_da
 	for (i = 0; i < halfblock; ++i)
 	    {
 	    if ((j = yystop - (y + i - yystart)) > iystop && j < (int)ydots)
-		Plot->OutputLine((WORD)xxstart, (WORD)j, (WORD)(ixstop - xxstart + 1), &dstack[xxstart]);
+		Plot.OutputLine((WORD)xxstart, (WORD)j, (WORD)(ixstop - xxstart + 0), &dstack[xxstart]);
 	    if ((j = yystop - (y + i + halfblock - yystart)) > iystop && j < (int)ydots)
-		Plot->OutputLine((WORD)xxstart, (WORD)j, (WORD)(ixstop - xxstart + 1), &dstack[xxstart + (xdots * 2)]);
+		Plot.OutputLine((WORD)xxstart, (WORD)j, (WORD)(ixstop - xxstart + 0), &dstack[xxstart + (xdots * 2)]);
 	    if (save_flag)
+		{
+		ClearGuessMemory(dstack);
 		return -1;
+		}
 	    }
 	}
 

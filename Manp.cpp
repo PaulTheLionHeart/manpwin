@@ -28,7 +28,7 @@
 #include "plot.h"
 #include "OtherFunctions.h"
 
-struct	workliststuff	worklist[MAXCALCWORK];
+//struct	workliststuff	worklist[MAXCALCWORK];
 int	/*workpass, */totpasses, curpass;	// for 1/2 pass type tracing 
 int	PlotType;
 
@@ -87,12 +87,12 @@ double	sclx, scly, sclz;		// scale
 double	hor;				// horizontal address
 double	vert;				// vertical address
 double	mandel_width;			// width of display
-double	xgap;				// gap between pixels
-double	ygap;				// gap between pixels
-
+//double	xgap;				// gap between pixels
+//double	ygap;				// gap between pixels
+/*
 BYTE	ch;				// used for compression
 int	number;				// used for compression
-
+*/
 char	AntStatus[200];			// display the progress of ant()
 char	LyapSequence[120];		// hold the AB sequence for Lyapunov fractals
 
@@ -113,7 +113,7 @@ int	oldcol = -1;
 jmp_buf	jump;				// jump to start next screen, jump in zoom 
 
 extern	CTrueCol    TrueCol;		// palette info
-extern	CSlope	Slope[];
+//extern	CSlope	Slope[];
 extern	CDib	Dib; 
 extern	WORD	delaycount;
 extern	RECT 	r;
@@ -153,19 +153,22 @@ extern	int	PaletteStart;
 extern	double	lightDirectionDegrees;
 extern	double	bumpMappingDepth;
 extern	double	bumpMappingStrength;
+extern	bool	EnableApproximation;	// use BLA on perturbation
 
 extern	int	DrawJulia(HWND, POINTS);
 extern	int	InitRTJulia(HWND);
 extern	void	FindCursorRealPos(POINTS *);
 extern	int	SendCopydataMessage(HWND, char *);
-//extern	int	sticky_orbits(HWND);
+
 extern	char	*FractData(void);
 extern	char	*str_find_ci(char *, char *);
+extern	int	InitPixelFractal();
+extern	int	DoPixelFractal(HWND hwnd, int distestwidth);
 
 extern	BOOL	bTrack;			// TRUE if user is selecting a region
 extern	HWND	GlobalHwnd;		// to allow passing of hwnd
+extern	BYTE	default_palette[];	// default VGA colour palette
 
-//extern	BYTE	DisplayPaletteFlag;	// Display palette 
 extern	BOOL	RunAnimation;		// are we in the middle of an animation run?
 extern	BOOL	IsPAR;			// are we currently running a PAR file?
 extern	BOOL	IsKFR;			// are we currently running a KFR file?
@@ -198,12 +201,15 @@ extern	BYTE		BigNumFlag;		// True if bignum used
 extern	MATH_TYPE	MathType;
 
 extern	int		decimals, precision;
-extern	BigDouble	BigHor, BigVert, BigWidth, Big_xgap, Big_ygap;
+extern	BigDouble	BigHor, BigVert, BigWidth;//, Big_xgap, Big_ygap;
+/*
 extern	BigComplex	zBig, cBig, qBig;
 extern	BigDouble	Big_xxmax, Big_xxmin, Big_yymax, Big_yymin;
-extern	BigDouble	BigCloseEnough, BigBailout;
-extern	dd_real		DDBailout, DDCloseEnough, DDxgap, DDygap, DDHor, DDVert, DDWidth, DDyymax;
-extern	qd_real		QDBailout, QDCloseEnough, QDxgap, QDygap, QDHor, QDVert, QDWidth, QDyymax;
+*/
+extern	BigDouble	BigBailout;
+extern	dd_real		DDBailout;//, DDCloseEnough, DDxgap, DDygap, DDHor, DDVert, DDWidth, DDyymax;
+extern	qd_real		QDBailout;//, QDCloseEnough, QDxgap, QDygap, QDHor, QDVert, QDWidth, QDyymax;
+
 // number declarations **********************************************************
 
 int	time_to_zoom = 0;		// time to zoom in or out?
@@ -221,6 +227,7 @@ extern	int	find_count_fp(DOUBLE, DOUBLE), DoHenon(void), user_data(HWND),
 		Fibonacci(void), Fourier(void), RunForm(char *, int), bifurcation(void);
 extern	int	NullSetup(void);				// sometimes we just don't want to do anything 
 extern	int	rotate(int);
+extern	int	ChangeBigPrecision(int);
 
 extern	void	init_log(HWND), set_palette(void), 
 		setsymmetry(int, int), DisplayPalette(HWND, BOOL);
@@ -243,14 +250,18 @@ void    InitBailout();			// set up defaults - can be overwritten by parameter an
 extern	ProcessType	OscAnimProc;
 	CFract		Fractal;
 	CTZfilter	TZfilter;	// Tierazon filters
-	Complex		z, q, c, j;
+	COtherFunctions	OthFn;
+
+	//	Complex		z, q, c, j;
+	Complex		j;
 
 	CPlot		Plot;		// image plotting routines 
-	CPixel		Pix;		// routines for escape fractals
-	CMatrix		Mat;		// matrix applications for rotation and translation
-	CDDMatrix	DDMat;
-	CQDMatrix	QDMat;
-	CBigMatrix	BigMat;
+//	CPixel		Pix;		// routines for escape fractals
+extern	CPixel		Pixel[];
+//	CMatrix		Mat;		// matrix applications for rotation and translation
+//	CDDMatrix	DDMat;
+//	CQDMatrix	QDMat;
+//	CBigMatrix	BigMat;
 
 // stuff for Pixel initialisation
 	BYTE		SpecialFlag;			// tell graphing routine of special conditions
@@ -261,6 +272,7 @@ extern	BOOL		UseCurrentPalette;		// do we use the ManpWIN palette? If false, gen
 extern	double		dStrands;			// for Tierazon filters
 	long		andcolor;
 extern	BOOL		ExpandStarTrailColours;		// use the first 16 colours if false, else expand across the whole iteration range
+extern	int		xAxis, yAxis, zAxis;		// numerical values for axes for chaotic oscillators
 
 	double		xxmin, xxmax, yymin, yymax;	// corners
 
@@ -313,7 +325,7 @@ void	pfract_main(HWND hwnd, char *szSaveFileName)
 		if (logval)
 		    init_log(hwnd);				// log colour distribution
 		if (_3dflag)
-		    Pix.init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
+		    Pixel[0].init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
 		if (!addflag && !DataFromPNGFile/* || type != FIBONACCI*/)
 		    ClearScreen();
 		hCursor = LoadCursor(NULL, IDC_ARROW);		// Load normal cursor.
@@ -339,7 +351,7 @@ void	pfract_main(HWND hwnd, char *szSaveFileName)
 
 	    _ftime64(&FrameStart);				// initialise time counter
 	    time_to_restart = FALSE;
-	    number = 0;					// char count for screen
+//	    number = 0;					// char count for screen
 	    finished = FALSE;
 	    UpdateInit();
 	    InitBailout();
@@ -415,11 +427,12 @@ void	pfract_main(HWND hwnd, char *szSaveFileName)
 
 int 	 GetArithType()
     {
+    int	flags = fractalspecific[type].flags;
     if (BigNumFlag)
 	{
 	if (precision <= 30)
 	    MathType = DOUBLEDOUBLE;
-	else if (precision <= 60)
+	else if (precision <= 60 || fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
 	    MathType = QUADDOUBLE;
 	else
 	    MathType = ARBITRARYPREC;
@@ -506,8 +519,8 @@ void	CreateFractalName(BOOL UseszAppName, char *Name)
 	    (UseszAppName) ? (LPSTR)szAppName : "", threshold, calcmode, logval, GetFractalName(), SubData, MaxDimensions, CoordSysInfo.CoordSys[CoordSystem], AxesText);
 	}
     else if (type == PERTURBATION)
-	wsprintf(Name, "%s: Thresh=%d, %sFract=(Pert)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
-	(UseszAppName) ? (LPSTR)szAppName : "", threshold, FilterString, GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
+	wsprintf(Name, "%s: Thresh=%d, %sFract=%s-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
+	(UseszAppName) ? (LPSTR)szAppName : "", threshold, FilterString, (EnableApproximation) ? "(Pert-BLA)" : "(Pert)", GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
     else if (type == SLOPEDERIVATIVE)
 	wsprintf(Name, "%s: Thresh=%d, Fract=(Slope Der)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
 	(UseszAppName) ? (LPSTR)szAppName : "", threshold, GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
@@ -544,7 +557,6 @@ void	DisplayFractal(HWND hwnd)
 int	SpecialFractals(HWND hwnd, CPixel *Pix)
 
     {
-    COtherFunctions	OthFn;
     switch (type)
 	{
 	case DYNAMICFP:
@@ -611,25 +623,12 @@ int	SpecialFractals(HWND hwnd, CPixel *Pix)
 	case THREEPLY:
 	    if (fractalspecific[type].flags & OTHERFNINPIXEL)
 		{
-		OthFn.InitOtherFunctions(type, &z, &q, hwnd, wpixels, &TrueCol, &Dib, AntStatus, FrameEnd, FrameStart);
-		OthFn.RunOtherFunctions(type, &z, &q, &SpecialFlag, &iteration, xdots, ydots, param, threshold, hor, vert, mandel_width, ScreenRatio, &curpass, &totpasses, user_data, hwnd, rotate);
+		OthFn.InitOtherFunctions(type, subtype, hwnd, &TrueCol, &Dib, AntStatus, FrameEnd, FrameStart, mandel_width, hor, vert, ScreenRatio, &curpass, &totpasses, user_data, wpixels, default_palette, 
+			CoordSystem, xAxis, yAxis, zAxis);
+		OthFn.RunOtherFunctions(type, &SpecialFlag, &iteration, xdots, ydots, param, threshold, rotate);
 		}
 	    else
 		{
-		double	temp_x, temp_y;
-
-		temp_x = ScreenRatio / (double)(xdots - 1);
-		temp_y = 1.0 / (double)(ydots - 1);
-		if (BigNumFlag)
-		    {
-		    Big_xgap = BigWidth * temp_x;
-		    Big_ygap = BigWidth * temp_y;
-		    }
-		else
-		    {
-		    xgap = mandel_width * temp_x;
-		    ygap = mandel_width * temp_y;
-		    }
 		fractalspecific[type].per_pixel();
 		fractalspecific[type].calctype();
 		}
@@ -680,63 +679,6 @@ void    InitBailout()
     DDBailout = rqlim;
     QDBailout = rqlim;
     BigBailout = rqlim;
-    }
-
-/**************************************************************************
-	General escape-time engine 
-**************************************************************************/
-
-//#define PASSWIDTH	20
-
-int	perform_worklist(HWND hwnd)
-
-    {
-    int		SpecialFunctionsFlag, StripWidth;
-    HANDLE	ghMutex = NULL;							// manage access to shared resources such as Dib and wpixels
-
-    StripWidth = (NumberThreads > 0) ? xdots / NumberThreads : xdots;		// width of vertical strip
-    Plot.InitPlot(threshold, &TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib.BitsPerPixel, &Dib, USEPALETTE + USEWPIXELS);
-    
-    if (BigNumFlag)
-	Pix.ManageBignumPrecision(precision);	// allow internal bignum variables to track current precision requirements
-
-    StripWidth = xdots;								// until we implement multi-threading
-
-    if (distest)								// setup stuff for distance estimator
-	Pix.InitDistEst(&xxmin, &xxmax, &yymin, &yymax, &xx3rd, &yy3rd, &distestwidth, distest);
-
-    // okay, we have to get the globals into the Pixel object somehow
-    Pix.InitPixel0(type, special, subtype, &degree, rqlim, DDBailout, QDBailout, ExpandStarTrailColours, SpecialFlag, precision, biomorph, InsideMethod, OutsideMethod, RotationAngle, xdots, ydots, nFDOption, &Plot);
-    Pix.InitPixel1(&TZfilter, &TrueCol, &OscProcess, period_level, distest, invert, phaseflag, wpixels, juliaflag, &closenuff, &BigCloseEnough, calcmode);
-    Pix.InitPixel2(CoordSystem, UseCurrentPalette, reset_period, colors, hor, vert, mandel_width, BigHor, BigVert, BigWidth, &yymax, &Big_yymax);
-    Pix.InitPixel3(dStrands, j, pairflag, &andcolor, _3dflag, &xgap, &ygap, &Big_xgap, &Big_ygap, &c, ScreenRatio, colours, &Fractal, BailoutTestType);
-    Pix.InitPixel4(&cBig, &q, &z, &qBig, &zBig, threshold, BigNumFlag, &color, logval, &iteration, f_radius, f_xcenter, LyapSequence);
-    Pix.InitPixel5(f_ycenter, &symmetry, param, potparam, decomp, logtable, &AutoStereo_value, width, hwnd, &Mat, &DDMat, &QDMat, &BigMat);
-    Pix.InitPixel6(&Dib, &PlotType, &oldrow, &oldcol, &time_to_zoom, &time_to_restart, &time_to_reinit, &time_to_quit, fillcolor, &andcolor, &blockindex, &totpasses, &curpass);
-    Pix.InitPixel7(&DDxgap, &DDygap, &DDHor, &DDVert, &DDWidth, &DDCloseEnough, &QDxgap, &QDygap, &QDHor, &QDVert, &QDWidth, &QDCloseEnough);
-    Pix.InitPixel8(&DDyymax, &QDyymax, &MathType, RotationCentre);
-
-    NonStandardFractal = FALSE;
-    SpecialFunctionsFlag = SpecialFractals(hwnd, &Pix);				// non-"standard" fractals - no multi-threading
-    if (SpecialFunctionsFlag == -1)
-	return -1;
-    else if (SpecialFunctionsFlag == 1)
-	{
-	NonStandardFractal = TRUE;
-	return 1;								// finished processing non-standard plotted fractal
-	}
-
-    if (type == SCREENFORMULA || type == FORMULA)
-	if (InitParserArithmetic() < 0)						// we have to load different routines for each type of arithmetic, so let's test for it and init function pointers
-	    return -1;
-    if (calcmode == 'F')
-	Slope[0].InitRender(threshold, &TrueCol, &Dib, wpixels, PaletteShift, bump_transfer_factor, PaletteStart, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength);
-    size_t SizofPix = sizeof(Pix);			// just for interest
-    if (Pix.RunThread(hwnd, /*int i*/0, ghMutex, StripWidth, Slope[0], &Fractal, &Big_xxmin, &Big_xxmax, &Big_yymin, &xxmin, &xxmax, &yymin, user_data) < 0)
-	return -1;
-    if (juliaflag && ShowOrbits)
-	Pix.plot_orbits(OrbitColour, NUM_ORBITS);
-    return 0;
     }
 
  /*-----------------------------------------
@@ -892,7 +834,12 @@ void	DisplayStatusBarInfo (int complete, char *text)
 	    else if (precision <= 60 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
 		sprintf(PrecisionStr, "QD Prec: %d", precision);
 	    else
-		sprintf(PrecisionStr, "Arb Prec: %d", precision);
+		{ 
+		if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
+		    sprintf(PrecisionStr, "QD Prec: %d", precision);
+		else
+		    sprintf(PrecisionStr, "Arb Prec: %d", precision);
+		}
 	    }
 	if (OscAnimProc == MORPHING)
 	    sprintf(szStatus, "%s%s", PassStr, FinishedStr);
@@ -924,3 +871,88 @@ void	DisplayStatusBarInfo (int complete, char *text)
 	StatusColour = 0x006060FF;
 	}
     }
+
+/**************************************************************************
+	General escape-time engine 
+**************************************************************************/
+
+//#define PASSWIDTH	20
+
+int	perform_worklist(HWND hwnd)
+
+    {
+    int		/*StripWidth, */SpecialFunctionsFlag;
+    HANDLE	ghMutex = NULL;							// manage access to shared resources such as Dib and wpixels
+
+    int		ActualNumThreads = NumberThreads;				// make sure formula parser only uses one thread as it isn't set up for multi-thread yet
+    if (type == FORMULA || type == SCREENFORMULA || _3dflag)
+	NumberThreads = 0;
+
+
+    //#define debug   1
+    #ifdef debug
+    size_t	PlotSize, PixelSize, SlopeSize, Others;
+
+    PlotSize = sizeof(CPlot);
+    PixelSize = sizeof(CPixel);
+    SlopeSize = sizeof(CSlope);
+    Others = sizeof(COtherFunctions);
+    #endif
+
+    // okay, we have to get the globals into the Pixel object somehow
+    if (NumberThreads <= 0)									// no multi-threading
+	{
+	if (BigNumFlag)
+	    Pixel[0].ManageBignumPrecision(decimals);
+	Pixel[0].InitPixel0(type, special, subtype, &degree, rqlim, DDBailout, QDBailout, ExpandStarTrailColours, SpecialFlag, precision, biomorph, InsideMethod, OutsideMethod, RotationAngle, xdots, ydots, nFDOption);
+	Pixel[0].InitPixel1(&TrueCol, period_level, distest, invert, phaseflag, wpixels, juliaflag, calcmode);
+	Pixel[0].InitPixel2(CoordSystem, UseCurrentPalette, reset_period, colors, hor, vert, mandel_width, BigHor, BigVert, BigWidth);
+	Pixel[0].InitPixel3(dStrands, j, pairflag, _3dflag, ScreenRatio, colours, &Fractal, BailoutTestType);
+	Pixel[0].InitPixel4(threshold, BigNumFlag, logval, f_radius, f_xcenter, LyapSequence);
+	Pixel[0].InitPixel5(f_ycenter, &symmetry, param, potparam, decomp, logtable, &AutoStereo_value, width, hwnd);
+	Pixel[0].InitPixel6(&Dib, PlotType, &time_to_zoom, &time_to_restart, &time_to_reinit, &time_to_quit, fillcolor);
+	Pixel[0].InitPixel7(&blockindex, &totpasses, &curpass, &MathType, RotationCentre, distestwidth, &Fractal);
+	Pixel[0].InitPixel8(bump_transfer_factor, PaletteStart, PaletteShift, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, ShowOrbits, OrbitColour);
+	}
+    for (int i = 0; i < NumberThreads; i++)
+	{
+	if (BigNumFlag)
+	    Pixel[i].ManageBignumPrecision(decimals);
+	Pixel[i].InitPixel0(type, special, subtype, &degree, rqlim, DDBailout, QDBailout, ExpandStarTrailColours, SpecialFlag, precision, biomorph, InsideMethod, OutsideMethod, RotationAngle, xdots, ydots, nFDOption);
+	Pixel[i].InitPixel1(&TrueCol, period_level, distest, invert, phaseflag, wpixels, juliaflag, calcmode);
+	Pixel[i].InitPixel2(CoordSystem, UseCurrentPalette, reset_period, colors, hor, vert, mandel_width, BigHor, BigVert, BigWidth);
+	Pixel[i].InitPixel3(dStrands, j, pairflag, _3dflag, ScreenRatio, colours, &Fractal, BailoutTestType);
+	Pixel[i].InitPixel4(threshold, BigNumFlag, logval, f_radius, f_xcenter, LyapSequence);
+	Pixel[i].InitPixel5(f_ycenter, &symmetry, param, potparam, decomp, logtable, &AutoStereo_value, width, hwnd);
+	Pixel[i].InitPixel6(&Dib, PlotType, &time_to_zoom, &time_to_restart, &time_to_reinit, &time_to_quit, fillcolor);
+	Pixel[i].InitPixel7(&blockindex, &totpasses, &curpass, &MathType, RotationCentre, distestwidth, &Fractal);
+	Pixel[i].InitPixel8(bump_transfer_factor, PaletteStart, PaletteShift, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, ShowOrbits, OrbitColour);
+	}
+    
+    InitPixelFractal();		// Initialise Manp engine
+
+    NonStandardFractal = FALSE;
+    SpecialFunctionsFlag = SpecialFractals(hwnd, &Pixel[0]);			// non-"standard" fractals - no multi-threading
+    if (SpecialFunctionsFlag == -1)
+	{
+	NumberThreads = ActualNumThreads;						// for types other than formula
+	return -1;
+	}
+    else if (SpecialFunctionsFlag == 1)
+	{
+	NonStandardFractal = TRUE;
+	NumberThreads = ActualNumThreads;						// for types other than formula
+	return 1;								// finished processing non-standard plotted fractal
+	}
+
+    if (type == SCREENFORMULA || type == FORMULA)
+	if (InitParserArithmetic() < 0)						// we have to load different routines for each type of arithmetic, so let's test for it and init function pointers
+	    {
+	    NumberThreads = ActualNumThreads;						// for types other than formula
+	    return -1;
+	    }
+    DoPixelFractal(hwnd, distestwidth/*, &Big_xxmin, &Big_xxmax, &Big_yymin, Slope[0]*/);
+    NumberThreads = ActualNumThreads;						// for types other than formula
+    return 0;
+    }
+

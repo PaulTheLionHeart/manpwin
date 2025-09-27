@@ -171,7 +171,7 @@ extern	Complex	RotationCentre;		// centre of rotation
 extern	int	PalOffset;		// begin palette here
 extern	double	IterDiv;		// divide ieration by this amount
 extern	int	PertColourMethod;	// some ideas from Kalles
-
+extern	bool	EnableApproximation;	// use BLA on perturbation
 extern	void	AnalysePalette(char *);
 extern	void	AnalyseDistEst(char *s);
 
@@ -496,7 +496,7 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	case LPOPCORNJUL:
 //	case BUFFALO:
 //	case PERPBUFFALO:
-	case MANDELBAR:
+//	case MANDELBAR:
 //	case CELTIC:
 //	case MANDELBARCELTIC:
 //	case PERPCELTIC:
@@ -579,6 +579,7 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	case PERTURBATION:
 	    if (!isdigit(*(str + 3)))				// new format
 		{
+		char EnableBLA[12] = "";
 		subtype = 1;					// default Mandelbrot
 		subtype = PertName2Subtype(type, SaveString);	// search database for matching subtype
 		if (subtype < 0)
@@ -587,7 +588,16 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 		    MessageBeep(0);
 		    subtype = 0;				// use first one if not found
 		    }
-		sscanf(PastQuote, "%d,%lf,%lf,%lf,%d", &SlopeType, &lightDirectionDegrees, &bumpMappingDepth, &bumpMappingStrength, &PaletteStart);
+		EnableApproximation = true;
+		sscanf(PastQuote, "%d,%lf,%lf,%lf,%d,%s", &SlopeType, &lightDirectionDegrees, &bumpMappingDepth, &bumpMappingStrength, &PaletteStart, EnableBLA);
+		if (EnableBLA)
+		    {
+		    if (strcmp(EnableBLA, "true") == 0)
+			EnableApproximation = true;
+		    else
+			EnableApproximation = false;
+		    }
+
 		OldPertFormat = false;
 		}
 	    else
@@ -787,25 +797,17 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	Get user data from keyboard
 **************************************************************************/
 
-/*
-void	analyse_command(argc, argv)
-
-int	argc;
-char	**argv;
-*/
-
 void	setup_defaults(void)
 
     {
     int	i;
 
     UpdateDelay = (type == FIBONACCI || type == FOURIER) ? 10 : 1000;
-//    method = NONE;
     InsideMethod = NONE;
     OutsideMethod = NONE;
     special = GREEN;
     degree = 3;
-//    cycles = 50;				// cycles before display
+//    cycles = 50;			// cycles before display
     subtype = 0;
 //    subtype = ' ';
     exitflag = FALSE;
@@ -814,10 +816,10 @@ void	setup_defaults(void)
 //    TrueColourFlag = FALSE;
     TrueCol.RandomDivisor = 128;
 //    TrueCol.DisplayPaletteFlag = TRUE;
-    fillcolor = -1;				// tesseral fillcolor: -1=normal 0 means don't fill     
+    fillcolor = -1;			// tesseral fillcolor: -1=normal 0 means don't fill     
     period_level = 1;
     TrueCol.inside_colour = 246;
-    TrueCol.InsideRed = 40;			// values for r, g, b channels for inside colour
+    TrueCol.InsideRed = 40;		// values for r, g, b channels for inside colour
     TrueCol.InsideGreen = 40;
     TrueCol.InsideBlue = 40;			
     threshold = 250;
@@ -829,10 +831,10 @@ void	setup_defaults(void)
 //    dumpflag = FALSE;
     grayflag = FALSE;
     CoordSystem = CARTESIAN;
-    RGBFilter = FALSE;				// don't use the plotting routine for RGB filters
+    RGBFilter = FALSE;			// don't use the plotting routine for RGB filters
     PlotType = NOSYM;
     FilterType = 1;
-    ColourMethod = 1;				// Tierazon colour methods
+    ColourMethod = 1;			// Tierazon colour methods
     BailoutTestType = BAIL_MOD;
     calcmode = 'G';
 #ifdef TESTFWDDIFF
@@ -850,6 +852,7 @@ void	setup_defaults(void)
     PalOffset = 0;
     PertColourMethod = 0;
     PalOffset = 0;
+    EnableApproximation = true;
     oldcalcmode = calcmode;
     cycleflag = FALSE;
     pairflag = FALSE;
@@ -877,7 +880,7 @@ void	setup_defaults(void)
     sclx = 0.9;
     scly = 0.9;
     sclz = 0.6;
-    CurrentDelay = 20.0;			// delay in milliseconds
+    CurrentDelay = 20.0;		// delay in milliseconds
     dStrands = 0.08;
     RGBFilter = FALSE;
     AutoStereo_value = 75;
@@ -1508,6 +1511,7 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
     RotationAngle = RotationAngle % 360;
     if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
 	RotationCentre = 0.0;
+/*
     else
 	{
 	z_rot = (double)(RotationAngle % 360);
@@ -1523,6 +1527,7 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 	else
 	    Mat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
 	}
+*/
     if (logval)
 	if (threshold >= MAXTHRESHOLD)
 	    threshold = MAXTHRESHOLD;
@@ -1688,7 +1693,7 @@ void	BasicFractData(char *info, BOOL CreateAnim)
 	case BURNINGSHIP:
 //	case BUFFALO:
 //	case PERPBUFFALO:
-	case MANDELBAR:
+//	case MANDELBAR:
 //	case CELTIC:
 //	case MANDELBARCELTIC:
 //	case PERPCELTIC:
@@ -1722,7 +1727,7 @@ void	BasicFractData(char *info, BOOL CreateAnim)
 	    break;					// default
 	case PERTURBATION:
 	    FindSubtypeName(SubTypeName, type, subtype);
-	    sprintf(s, " -f%03d\"%s\",%d,%lf,%lf,%lf,%d", type, SubTypeName, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart);
+	    sprintf(s, " -f%03d\"%s\",%d,%lf,%lf,%lf,%d,%s", type, SubTypeName, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, (EnableApproximation ? "true" : "false"));
 	    break;
 	case FRACTALMAPS:
 	case SPROTTMAPS:

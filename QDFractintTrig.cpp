@@ -55,6 +55,7 @@ int	CPixel::QDInitFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q)
 
 	case MARKSMANDELPWRFP:
 	case MARKSMANDELPWR:
+	case NUMFRACTAL:
 	    tQD = (invert) ? QDInvertz2(cQD) : cQD;
 	    tempQD.x = param[0];
 	    tempQD.y = param[1];
@@ -397,6 +398,20 @@ int	CPixel::QDRunFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q, BY
 	    *z = z->CInvert();
 	    *z = z->CSqr();
 	    return QDFractintBailoutTest(z);
+
+	case NUMFRACTAL:
+	    {
+	    QDComplex base;
+	    base.x = param[2];
+	    base.y = param[3];
+	    *z = base ^ *z;
+//	    *z = DDComplexPower(base, *z);
+	    TrigFn.QDCMPLXtrig(z, z, Fn1Index);
+	    *z += *q;
+	    z->x += param[0];
+	    z->y += param[1];
+	    return QDFractintBailoutTest(z);
+	    }
 
 	case FORMULA:
 	case SCREENFORMULA:
