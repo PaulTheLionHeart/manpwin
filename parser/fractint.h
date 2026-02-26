@@ -2,14 +2,17 @@
 
 #ifndef FRACTINT_H
 #define FRACTINT_H
-
+/*
 #ifndef WIN32
-typedef BYTE BOOLEAN;
+typedef BYTE unsigned char;
 #endif
-
+*/
+#define WIN32
 #ifdef WIN32
 #include <windows.h>
 #endif
+
+#define XFRACT
 
 #ifndef C6
 #define _fastcall       /* _fastcall is a Microsoft C6.00 extension */
@@ -79,11 +82,11 @@ typedef char * USEGTYPE;
 struct moreparams
 {
    int      type;                       /* index in fractalname of the fractal */
-   char     far *param[MAXPARAMS-4];    /* name of the parameters */
+   char     *param[MAXPARAMS-4];    /* name of the parameters */
    double   paramvalue[MAXPARAMS-4];    /* default parameter values */
 };
 
-typedef struct moreparams far       MOREPARAMS;
+typedef struct moreparams        MOREPARAMS;
 
 struct alternatemathstuff
 {
@@ -147,11 +150,18 @@ typedef struct alternatemathstuff ALTERNATE;
 
 #define MAX_JUMPS 200  /* size of JUMP_CONTROL array */
 
-typedef struct frm_jmpptrs_st {
-   int      JumpOpPtr;
-   int      JumpLodPtr;
-   int      JumpStoPtr;
-} JUMP_PTRS_ST;
+typedef struct frm_jmpptrs_st 
+    {
+    int      JumpOpPtr;
+    int      JumpLodPtr;
+    int      JumpStoPtr;
+    // ADD THESE
+    int	    JumpArg1i;
+
+    int	    DestOpPtr;
+    int	    DestLodPtr;
+    int	    DestStoPtr;
+    } JUMP_PTRS_ST;
 
 typedef struct frm_jump_st {
    int      type;

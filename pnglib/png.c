@@ -703,7 +703,7 @@ png_convert_to_rfc1123_buffer(char out[29], png_const_timep ptime)
    if (out == NULL)
       return 0;
 
-   if (ptime->year > 9999 /* RFC1123 limitation */ ||
+   if (ptime->year > 9999   || // RFC1123 limitation  
        ptime->month == 0    ||  ptime->month > 12  ||
        ptime->day   == 0    ||  ptime->day   > 31  ||
        ptime->hour  > 23    ||  ptime->minute > 59 ||

@@ -27,6 +27,10 @@
  *
  */
 
+ // let's face it, this is legacy code, so let's shut up the silly warnings
+#pragma warning(push)
+#pragma warning(disable: 4701 4706)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
@@ -617,3 +621,6 @@ int pbm_getint(FILE *file)
 
   return i;
 }
+
+#pragma warning(pop)
+

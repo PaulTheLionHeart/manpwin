@@ -27,6 +27,10 @@
  *
  */
 
+ // let's face it, this is legacy code, so let's shut up the silly warnings
+#pragma warning(push)
+#pragma warning(disable: 4701 4706)
+
 #include <stdio.h>
 #include "config.h"
 #include "global.h"
@@ -44,7 +48,7 @@ void putpict(unsigned char *frame)
   int mb_type;
   int PMV[2][2][2];
   int prev_mquant;
-  int cbp, MBAinc;
+  int cbp, MBAinc = 0;
 
   rc_init_pict(frame); /* set up rate control */
 
@@ -369,3 +373,6 @@ static void putmvs(int MV[2][2][2],int PMV[2][2][2], int mv_field_sel[2][2], int
     }
   }
 }
+
+#pragma warning(pop)
+

@@ -4,7 +4,7 @@
 // includes needed to define the prototypes 
 
 #include "mpmath.h"
-#include "..\big.h"
+#include "..\ManpWIN64\big.h"
 #include "fractint.h"
 #include "externs.h"
 #include <windows.h>

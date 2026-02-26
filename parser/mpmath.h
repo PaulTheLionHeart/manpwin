@@ -11,9 +11,9 @@
 
 #include "..\qdlib\dd_real.h"
 #include "..\qdlib\qd_real.h"
-#include "..\Complex.h"
-#include "..\DDComplex.h"
-#include "..\QDComplex.h"
+#include "..\ManpWIN64\Complex.h"
+#include "..\ManpWIN64\DDComplex.h"
+#include "..\ManpWIN64\QDComplex.h"
 
  /*** Formula Declarations ***/
 //enum MATH_TYPE { DOUBLEFLOAT, DOUBLEDOUBLE, QUADDOUBLE};
@@ -33,7 +33,7 @@ struct ConstArg {
     struct Arg a;
     };
 
-extern struct Arg *Arg1, *Arg2;
+//extern struct Arg *Arg1, *Arg2;
 
 extern void(*dtrig0)(void);
 extern void(*dtrig1)(void);
