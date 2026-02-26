@@ -564,7 +564,7 @@ void CTrigFn::CMPLXtrig(Complex *zIn, Complex *zOut, int index)
     *zOut = z;
     }
 
-int CTrigFn::FindFunct(char *Str, int NumFns)
+int CTrigFn::FindFunct(const char *Str, int NumFns)
     {
     int		n;
     size_t	size;

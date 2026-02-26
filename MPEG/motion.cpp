@@ -31,6 +31,10 @@
 #include "config.h"
 #include "global.h"
 
+// let's face it, this is legacy code, so let's shut up the silly warnings
+#pragma warning(push)
+#pragma warning(disable: 4701 4706)
+
 /* private prototypes */
 
 static void frame_ME _ANSI_ARGS_((unsigned char *oldorg, unsigned char *neworg,
@@ -1618,3 +1622,6 @@ static int variance(unsigned char *p,int lx)
   }
   return s2 - (s*s)/256;
 }
+
+#pragma warning(pop)
+

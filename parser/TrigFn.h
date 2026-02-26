@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "..\complex.h"
+#include "..\ManpWIN64\complex.h"
 #include "prototyp.h"
 
 #undef DEBUG		// not sure how this got defined
@@ -144,7 +144,7 @@ class CTrigFn
 	void Arctanhz(Complex z, Complex *rz);
 	void Arctanz(Complex z, Complex *rz);
 	Complex ComplexSqrtFloat(double x, double y);
-	int  FindFunct(char *Str, int NumFns);
+	int  FindFunct(const char *Str, int NumFns);
 
 	// double double routines
 	void DDArcsinz(DDComplex z, DDComplex *rz);
@@ -162,7 +162,7 @@ class CTrigFn
 	void QDArctanhz(QDComplex z, QDComplex *rz);
 	void QDArctanz(QDComplex z, QDComplex *rz);
 
-	char *FunctList[37] = {"sin", "sinh", "cos", "cosh", "sqr", "log", "exp", "abs", "conj", "real",
+	const char *FunctList[37] = {"sin", "sinh", "cos", "cosh", "sqr", "log", "exp", "abs", "conj", "real",
 					"imag", "ident", "recip", "fn1", "fn2", "fn3", "fn4", "flip", "tan", "tanh", 
 					"cotan", "cotanh", "cosxx", "srand", "asin", "asinh", "acos", "acosh", "atan", "atanh", 
 					"sqrt", "cabs", "floor", "ceil", "trunc", "round", ""};

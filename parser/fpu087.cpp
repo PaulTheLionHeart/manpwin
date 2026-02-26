@@ -5,7 +5,7 @@
  * fractint license conditions, blah blah blah.
  */
 
-#include "..\Complex.h"
+#include "..\ManpWIN64\Complex.h"
 
 int	DivideOverflow;
 

@@ -27,6 +27,10 @@
  *
  */
 
+ // let's face it, this is legacy code, so let's shut up the silly warnings
+#pragma warning(push)
+#pragma warning(disable: 4701 4706)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
@@ -78,3 +82,6 @@ void writeframe(char *fname, unsigned char *frame[])
   fwrite(frame[2],1,chrom_hsize*chrom_vsize,fd);
   fclose(fd);
 }
+
+#pragma warning(pop)
+
