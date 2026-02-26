@@ -45,7 +45,7 @@ typedef char * USEGTYPE;
 #endif
 
 #ifdef XFRACT
-#define difftime(now,then) ((now)-(then))
+//#define difftime(now,then) ((now)-(then))
 #endif
 
 /* for gotos in former FRACTINT.C pieces */
