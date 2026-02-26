@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{3118CDD8-6F26-45DE-B03E-D5D84EAD4E80}</ProjectGuid>
+    <RootNamespace>ManpWIN64</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(MPFR_DIR)$(IntDir);$(MPIR_DIR)$(IntDir);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>false</ConformanceMode>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>H:\c\mpir\lib\x64\$(Configuration);H:\c\mpfr\lib\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mpir.lib;mpfr.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>false</SDLCheck>
+      <ConformanceMode>false</ConformanceMode>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>H:\c\mpir\lib\x64\$(Configuration);H:\c\mpfr\lib\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>mpir.lib;mpfr.lib;htmlhelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AniInvert.cpp" />
+    <ClCompile Include="AniJulia.cpp" />
+    <ClCompile Include="anim.cpp" />
+    <ClCompile Include="ant.cpp" />
+    <ClCompile Include="Apollonius.cpp" />
+    <ClCompile Include="Approximation.cpp" />
+    <ClCompile Include="ApproximationExp.cpp" />
+    <ClCompile Include="Arithmetic.cpp" />
+    <ClCompile Include="Bif.cpp" />
+    <ClCompile Include="BigComplex.cpp" />
+    <ClCompile Include="BigDouble.cpp" />
+    <ClCompile Include="BigFunctions.cpp" />
+    <ClCompile Include="BigMandelDerivatives.cpp" />
+    <ClCompile Include="BigMatrix.cpp" />
+    <ClCompile Include="BigPixel.cpp" />
+    <ClCompile Include="BigTrig.cpp" />
+    <ClCompile Include="BigTZ.cpp" />
+    <ClCompile Include="Bt.cpp" />
+    <ClCompile Include="BuddhaBrot.cpp" />
+    <ClCompile Include="CalcMode.cpp" />
+    <ClCompile Include="Circle.cpp" />
+    <ClCompile Include="Clipbord.cpp" />
+    <ClCompile Include="Colour.cpp" />
+    <ClCompile Include="Colour1.cpp" />
+    <ClCompile Include="ColourMethod.cpp" />
+    <ClCompile Include="Complex.cpp" />
+    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="Cross.cpp" />
+    <ClCompile Include="Curves.cpp" />
+    <ClCompile Include="DDComplex.cpp" />
+    <ClCompile Include="DDFractintFunctions.cpp" />
+    <ClCompile Include="DDFractintTrig.cpp" />
+    <ClCompile Include="DDFunctions.cpp" />
+    <ClCompile Include="DDMandelDerivativesFN.cpp" />
+    <ClCompile Include="DDMatrix.cpp" />
+    <ClCompile Include="DDPixel.cpp" />
+    <ClCompile Include="DDTZFunctions.cpp" />
+    <ClCompile Include="Decomp.cpp" />
+    <ClCompile Include="Default.cpp" />
+    <ClCompile Include="DerivSlope.cpp" />
+    <ClCompile Include="Dib.cpp" />
+    <ClCompile Include="Dither.cpp" />
+    <ClCompile Include="Dl3quant.cpp" />
+    <ClCompile Include="Dostereo.cpp" />
+    <ClCompile Include="EditPal.cpp" />
+    <ClCompile Include="EditPalDlg.cpp" />
+    <ClCompile Include="ExpComplex.cpp" />
+    <ClCompile Include="FDimension.cpp" />
+    <ClCompile Include="FFT.cpp" />
+    <ClCompile Include="fibonaci.cpp" />
+    <ClCompile Include="filter.cpp" />
+    <ClCompile Include="FilterData.cpp" />
+    <ClCompile Include="fourier.cpp" />
+    <ClCompile Include="Fract.cpp" />
+    <ClCompile Include="FractalMaps.cpp" />
+    <ClCompile Include="fractalp.cpp" />
+    <ClCompile Include="FractintFilters.cpp" />
+    <ClCompile Include="FractintFunctions.cpp" />
+    <ClCompile Include="FractintTrig.cpp" />
+    <ClCompile Include="FracZoom.cpp" />
+    <ClCompile Include="FrantPAR.cpp" />
+    <ClCompile Include="Functions.cpp" />
+    <ClCompile Include="FwdDiff.cpp" />
+    <ClCompile Include="FwdDiffFn.cpp" />
+    <ClCompile Include="Genline.cpp" />
+    <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="GIFwrite.cpp" />
+    <ClCompile Include="Guess.cpp" />
+    <ClCompile Include="Henon.cpp" />
+    <ClCompile Include="htmlhelp.cpp" />
+    <ClCompile Include="KallesPAR.cpp" />
+    <ClCompile Include="Keyboard.cpp" />
+    <ClCompile Include="Kleinian.cpp" />
+    <ClCompile Include="KnotOsc.cpp" />
+    <ClCompile Include="Knots.cpp" />
+    <ClCompile Include="Line3d.cpp" />
+    <ClCompile Include="Lorenz.cpp" />
+    <ClCompile Include="Lsys.cpp" />
+    <ClCompile Include="Malthus.cpp" />
+    <ClCompile Include="MandelDerivatives.cpp" />
+    <ClCompile Include="MandelDerivativesFN.cpp" />
+    <ClCompile Include="Maninit.cpp" />
+    <ClCompile Include="Manp.cpp" />
+    <ClCompile Include="Manpdlg.cpp" />
+    <ClCompile Include="ManpEngine.cpp" />
+    <ClCompile Include="Manpfile.cpp" />
+    <ClCompile Include="Manpmain.cpp" />
+    <ClCompile Include="ManpMT.cpp" />
+    <ClCompile Include="Manpwin.cpp" />
+    <ClCompile Include="Maths.cpp" />
+    <ClCompile Include="Matrix.cpp" />
+    <ClCompile Include="MiscDlg.cpp" />
+    <ClCompile Include="Miscfrac.cpp" />
+    <ClCompile Include="Mountain.cpp" />
+    <ClCompile Include="MPEGWrite.cpp" />
+    <ClCompile Include="Newton.cpp" />
+    <ClCompile Include="OscAnim.cpp" />
+    <ClCompile Include="OscDatabase.cpp" />
+    <ClCompile Include="Oscillators.cpp" />
+    <ClCompile Include="OscMorph.cpp" />
+    <ClCompile Include="OscProcess.cpp" />
+    <ClCompile Include="OtherFunctions.cpp" />
+    <ClCompile Include="ParamAnim.cpp" />
+    <ClCompile Include="Pascal.cpp" />
+    <ClCompile Include="PertEngine.cpp" />
+    <ClCompile Include="PertFilters.cpp" />
+    <ClCompile Include="PertFN.cpp" />
+    <ClCompile Include="PertFNFloatExp.cpp" />
+    <ClCompile Include="PertOrbit.cpp" />
+    <ClCompile Include="PertSetup.cpp" />
+    <ClCompile Include="Perturbation.cpp" />
+    <ClCompile Include="Pixel.cpp" />
+    <ClCompile Include="Plot.cpp" />
+    <ClCompile Include="Plotmode.cpp" />
+    <ClCompile Include="png.cpp" />
+    <ClCompile Include="Polygon.cpp" />
+    <ClCompile Include="Popcorn.cpp" />
+    <ClCompile Include="Potential.cpp" />
+    <ClCompile Include="preview.cpp" />
+    <ClCompile Include="QDComplex.cpp" />
+    <ClCompile Include="QDFractintFunctions.cpp" />
+    <ClCompile Include="QDFractintTrig.cpp" />
+    <ClCompile Include="QDFunctions.cpp" />
+    <ClCompile Include="QDMandelDerivativesFN.cpp" />
+    <ClCompile Include="QDMatrix.cpp" />
+    <ClCompile Include="QDPixel.cpp" />
+    <ClCompile Include="QDTZFunctions.cpp" />
+    <ClCompile Include="Rotate.cpp" />
+    <ClCompile Include="RTJulia.cpp" />
+    <ClCompile Include="Savefile.cpp" />
+    <ClCompile Include="SaveVars.cpp" />
+    <ClCompile Include="Script.cpp" />
+    <ClCompile Include="SierpinskiFlowers.cpp" />
+    <ClCompile Include="Slope.cpp" />
+    <ClCompile Include="SlopeMT.cpp" />
+    <ClCompile Include="SprottLinz.cpp" />
+    <ClCompile Include="SprottMaps.cpp" />
+    <ClCompile Include="SprottOsc.cpp" />
+    <ClCompile Include="Stereo.cpp" />
+    <ClCompile Include="Surfaces.cpp" />
+    <ClCompile Include="Sym.cpp" />
+    <ClCompile Include="SymPlot.cpp" />
+    <ClCompile Include="Tess.cpp" />
+    <ClCompile Include="Tetration.cpp" />
+    <ClCompile Include="tierazon.cpp" />
+    <ClCompile Include="TierazonFunctions.cpp" />
+    <ClCompile Include="Triangles.cpp" />
+    <ClCompile Include="trig.cpp" />
+    <ClCompile Include="TZFilterDLG.cpp" />
+    <ClCompile Include="undo.cpp" />
+    <ClCompile Include="Update.cpp" />
+    <ClCompile Include="User.cpp" />
+    <ClCompile Include="Zigzag.cpp" />
+    <ClCompile Include="Zoom.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="anim.h" />
+    <ClInclude Include="Approximation.h" />
+    <ClInclude Include="Arithmetic.h" />
+    <ClInclude Include="Bif.h" />
+    <ClInclude Include="Big.h" />
+    <ClInclude Include="BigComplex.h" />
+    <ClInclude Include="BigDouble.h" />
+    <ClInclude Include="BigMatrix.h" />
+    <ClInclude Include="BigTrig.h" />
+    <ClInclude Include="CalcMode.h" />
+    <ClInclude Include="colour.h" />
+    <ClInclude Include="Complex.h" />
+    <ClInclude Include="DDComplex.h" />
+    <ClInclude Include="DDMatrix.h" />
+    <ClInclude Include="Dib.h" />
+    <ClInclude Include="Dl3quant.h" />
+    <ClInclude Include="EditPal.h" />
+    <ClInclude Include="ExpComplex.h" />
+    <ClInclude Include="Filter.h" />
+    <ClInclude Include="floatexp.h" />
+    <ClInclude Include="fract.h" />
+    <ClInclude Include="fractalp.h" />
+    <ClInclude Include="Fractype.h" />
+    <ClInclude Include="GlitchPoint.h" />
+    <ClInclude Include="gmp.h" />
+    <ClInclude Include="Line3d.h" />
+    <ClInclude Include="Manp.h" />
+    <ClInclude Include="Manpwin.h" />
+    <ClInclude Include="Matrix.h" />
+    <ClInclude Include="menu.h" />
+    <ClInclude Include="mpfr.h" />
+    <ClInclude Include="OscProcess.h" />
+    <ClInclude Include="OtherFunctions.h" />
+    <ClInclude Include="PertEngine.h" />
+    <ClInclude Include="Pixel.h" />
+    <ClInclude Include="Plot.h" />
+    <ClInclude Include="Plotmode.h" />
+    <ClInclude Include="Point.h" />
+    <ClInclude Include="Polygon.h" />
+    <ClInclude Include="Potential.h" />
+    <ClInclude Include="Preview.h" />
+    <ClInclude Include="QDComplex.h" />
+    <ClInclude Include="QDMatrix.h" />
+    <ClInclude Include="Quanterr.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Slope.h" />
+    <ClInclude Include="Sym.h" />
+    <ClInclude Include="SymPlot.h" />
+    <ClInclude Include="Tetration.h" />
+    <ClInclude Include="Timer.h" />
+    <ClInclude Include="Undo.h" />
+    <ClInclude Include="Variables.h" />
+    <ClInclude Include="Worklist.h" />
+    <ClInclude Include="Zoom.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Manpwin.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\mpeg\mpeg.vcxproj">
+      <Project>{7aae3cf8-d4ea-4cd9-9847-332dcc0593f5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\parser\parser.vcxproj">
+      <Project>{b94ad309-7c9b-4617-b679-04e8e7829b9f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\pnglib\pnglib.vcxproj">
+      <Project>{fbccbd7f-d6e0-473a-ad7c-2d47faa0a999}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\qdlib\qdlib.vcxproj">
+      <Project>{6b8ede9e-c6f9-4baf-987d-832c506d3924}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\zlib\zlib.vcxproj">
+      <Project>{0705fa62-b06d-4d1e-b849-4afe977d31ee}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
