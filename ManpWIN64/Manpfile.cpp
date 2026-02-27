@@ -521,7 +521,7 @@ MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 char *str_find_ci(char *t, char *s)
 
     {
-    register char *w, *v, *u, temp;
+    char *w, *v, *u, temp;
 
     for (u = t; *u ;u++)
 	{

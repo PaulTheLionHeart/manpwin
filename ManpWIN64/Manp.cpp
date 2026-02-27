@@ -57,7 +57,7 @@ BYTE	pairflag;			// stereo pair
 int	biomorph;			// biomorph colour 
 int	decomp;				// number of decomposition colours
 BYTE	screenflag;			// replay saved screen 
-BYTE	save_flag;			// save screen after image 
+BYTE	save_flag = 0;			// save screen after image 
 BYTE	_3dflag;			// replay saved file. 3 = 3D 
 BOOL	ZoomEdge;			// Zooming process
 BOOL	UseFractintPalette = FALSE;	// standard EGA palette
@@ -936,7 +936,7 @@ int	perform_worklist(HWND hwnd)
 	if (BigNumFlag)
 	    Pixel[i]->ManageBignumPrecision(decimals);
 	Pixel[i]->InitPixel0(type, special, subtype, &degree, rqlim, DDBailout, QDBailout, ExpandStarTrailColours, SpecialFlag, precision, biomorph, InsideMethod, OutsideMethod, RotationAngle, xdots, ydots, nFDOption);
-	Pixel[i]->InitPixel1(&TrueCol, period_level, distest, invert, phaseflag, wpixels, juliaflag, calcmode);
+	Pixel[i]->InitPixel1(&TrueCol, period_level, distest, invert, phaseflag, wpixels, juliaflag, calcmode, NonStandardFractal);
 	Pixel[i]->InitPixel2(CoordSystem, UseCurrentPalette, reset_period, colors, hor, vert, mandel_width, BigHor, BigVert, BigWidth);
 	Pixel[i]->InitPixel3(dStrands, j, pairflag, _3dflag, ScreenRatio, colours, &Fractal, BailoutTestType);
 	Pixel[i]->InitPixel4(threshold, BigNumFlag, logval, f_radius, f_xcenter, LyapSequence, ColourSpeed);

@@ -761,7 +761,7 @@ long	divide(long a, long b, int offset)
 void	fastline(const WORD x0, const WORD y0, const WORD x1, const WORD y1, const DWORD col)
 
     {
-    register WORD x, y;
+    WORD x, y;
     long	xstep, ystep, xcum = 0L, ycum = 0L;
     int	dx, dy;
 

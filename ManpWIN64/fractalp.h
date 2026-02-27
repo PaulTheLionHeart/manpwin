@@ -1763,7 +1763,7 @@ extern	int	DoDesignNewChaoticMaps();
 extern	int	DoA2DimensionalChaoticQuasiConservativeMap();
 extern	int	DoChaosHyperchaosSymmetricCoupling();
 extern	int	DoBogdanovMapBifurcations();
-extern	int	DoFractionalFormNew3DGeneralisedHénonMap();
+extern	int	DoFractionalFormNew3DGeneralisedHenonMap();
 extern	int	DoAnAlgorithmImageEncryptionUsingLogistic2DimensionalChaoticEconomicMaps();
 extern	int	DoChaosSynchronisation3DHenonMap();
 extern	int	DoChaosSynchronisationFoldMap();

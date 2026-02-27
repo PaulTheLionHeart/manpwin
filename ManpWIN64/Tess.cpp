@@ -15,7 +15,7 @@
 
 int	CPixel::tesseral(HWND hwnd, int user_data(HWND hwnd))
     {
-    register struct tess *tp;
+    struct tess *tp;
 
     guessplot = (PlotType != NOSYM && PlotType != XAXIS);
 

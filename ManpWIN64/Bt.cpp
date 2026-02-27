@@ -184,10 +184,10 @@ int	CPixel::boundary_trace(HWND hwnd, int C, int R, int user_data(HWND hwnd))
 int	CPixel::fillseg(int LeftX, int RightX, int R, long bcolor)
 
     {
-    DWORD		*forwards = NULL;
-    DWORD		*backwards = NULL;
-    register int	modeON, C;
-    int	i;
+    DWORD	*forwards = NULL;
+    DWORD	*backwards = NULL;
+    int		modeON, C;
+    int		i;
     long	gcolor;
     //BYTE	s[1200];
 
@@ -273,7 +273,7 @@ int	CPixel::fillseg(int LeftX, int RightX, int R, long bcolor)
 void	CPixel::reverse_string(DWORD *t, DWORD *s, int len)
 
     {
-    register int	i;
+    int	i;
 
     len--;
     for(i = 0; i <= len; i++)

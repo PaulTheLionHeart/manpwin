@@ -286,7 +286,7 @@ int	CPixel::combine_worklist()
 			}
 		    }
 		}
-    return(0);				/* nothing combined */
+    return(0);				// nothing combined
     }
 
 /**************************************************************************
@@ -300,7 +300,7 @@ void	CPixel::tidy_worklist()
     struct	workliststuff tempwork;
 
     while (i = combine_worklist())
-	{					/* merged two, delete the gone one */
+	{					// merged two, delete the gone one
 	while (++i < num_worklist)
 	    worklist[i-1] = worklist[i];
 	--num_worklist;
@@ -312,7 +312,7 @@ void	CPixel::tidy_worklist()
 		&& (worklist[j].yystart < worklist[i].yystart
 		|| (worklist[j].yystart == worklist[i].yystart
 		&& worklist[j].xxstart <  worklist[i].xxstart))))
-		{			/* dumb sort, swap 2 entries to correct order */
+		{			// dumb sort, swap 2 entries to correct order
 		tempwork = worklist[i];
 		worklist[i] = worklist[j];
 		worklist[j] = tempwork;
@@ -326,9 +326,6 @@ void	CPixel::tidy_worklist()
 int	CPixel::StandardCalculationMode(HWND hwnd, int user_data(HWND hwnd))
 
     {
-//    TestQDManp();
-//    return 0;
-//    *ThreadComplete = false;
     switch (calcmode)
 	{
 	case 'B':

@@ -196,7 +196,7 @@ extern	int	ProcessInvert(char *);
 extern	int	ProcessFormulaString(char *);
 extern	int	ifsload(HWND, char *);
 extern	int	get_IFS_names(HWND, char *);		// get the IFS fractal names
-extern	char	*strtok1(register char *, register const char *);	// see maninit.c 
+extern	char	*strtok1(char *, const char *);		// see maninit.c 
 //extern	void	ConvertBignum2String(char *s, mpfr_t num);
 extern	int	setup_Oscillator(void);			// sort the oscillator database alphabetically
 extern	int	setup_FractalMaps();			// sort the fractal maps database alphabetically

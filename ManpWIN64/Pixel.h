@@ -138,7 +138,7 @@ class CPixel
 
 	void	InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, dd_real DDBailoutIn, qd_real QDBailoutIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, int precisionIn,
 		int biomorphIn, int InsideMethodIn, int OutsideMethodIn, int RotationAngleIn, int xdotsIn, int ydotsIn, int nFDOptionIn);
-	void	InitPixel1(CTrueCol *TrueColIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, std::vector <float> &wpixelsIn, BYTE juliaflagIn, BYTE calcmodeIn);
+	void	InitPixel1(CTrueCol *TrueColIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, std::vector <float> &wpixelsIn, BYTE juliaflagIn, BYTE calcmodeIn, int NonStandardFractalIn);
 	void	InitPixel2(int CoordSystemIn, BOOL UseCurrentPaletteIn, int reset_periodIn, int colorsIn, double horIn, double vertIn, double mandel_widthIn, BigDouble BigHorIn, BigDouble BigVertIn, BigDouble BigWidthIn);
 	void	InitPixel3(double dStrandsIn, Complex jIn, BYTE pairflagIn, BYTE _3dflagIn, double ScreenRatioIn, WORD coloursIn, CFract *Fract, int BailoutTestTypeIn);
 	void	InitPixel4(long thresholdIn, BYTE BigNumFlagIn, int logvalIn, double f_radiusIn, double f_xcenterIn, char *LyapSequenceIn, double ColourSpeedIn);
@@ -457,7 +457,7 @@ class CPixel
 	int	LeftX[MAXHORIZONTAL];
 	int	RightX[MAXHORIZONTAL];
 	WORD	repeats;
-	BYTE	save_flag;			// save screen after image
+	BYTE	save_flag = 0;			// save screen after image
 
 	// Guess stuff
 	int	solidguess(HWND hwnd, int user_data(HWND hwnd));

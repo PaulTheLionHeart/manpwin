@@ -5,5 +5,29 @@ Release
 Debug
 *.user
 .vs
-git
 
+# build folders
+build/
+out/
+bin/
+obj/
+
+# CMake generated
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# Visual Studio generated
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.vcproj
+
+# binaries
+*.exe
+*.lib
+*.dll
+*.obj
+*.pdb
+*.suo

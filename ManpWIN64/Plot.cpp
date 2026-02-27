@@ -230,7 +230,7 @@ void	CPlot::OutRGBpoint(WORD x, WORD y, RGBTRIPLE colour)
 DWORD	CPlot::GetColour(WORD x, WORD y)
 
     {
-    DWORD	i;
+    DWORD	i, value = 0L;
 
     if (x < 0 || x >= width || y < 0 || y >= height)
 	return 0L;
@@ -239,10 +239,22 @@ DWORD	CPlot::GetColour(WORD x, WORD y)
     if (x >= 0 && x < xdots/* - 1*/ && y >= 0 && y < ydots - 1)
 	{
 	if (i < wpixels.size())
-	    return (((DWORD)(wpixels[i]) & 0x7fffffff));
+	    {
+	    value = (((DWORD)(wpixels[i]) & 0x7fffffff));
+	    if (value > (DWORD)threshold)
+		{
+		OutputDebugStringA("GetColour: pixel colour out of bounds\n");
+		value = 0L;
+		}
+	    }
+	else
+	    {
+	    OutputDebugStringA("GetColour: pixel co-ordinate out of bounds\n");
+	    value = 0L;
+	    }
 	}
 
-    return 0L;
+    return value;
     }
 
 /**************************************************************************

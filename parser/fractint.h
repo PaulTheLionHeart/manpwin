@@ -7,7 +7,10 @@
 typedef BYTE unsigned char;
 #endif
 */
+#ifndef WIN32
 #define WIN32
+#endif
+
 #ifdef WIN32
 #include <windows.h>
 #endif

@@ -5221,7 +5221,7 @@ struct OscillatorSpecificStuff FractalMapSpecific[]=
 	"Fractional Form of a New Three-Dimensional Generalised Hénon Map", "a", "b", "Colour Factor", ES, ES, ES, ES, ES, ES, ES, 0.7281, 0.5, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -1.5, -0.8, 2.4, 1, 2, 3, 3, 3, 3, NULL, 1, YAXIS, 100000.0,
-	    NullSetup, DoFractionalFormNew3DGeneralisedHénonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
+	    NullSetup, DoFractionalFormNew3DGeneralisedHenonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Further Study on the Rulkov Neuron: Geometric Control, Circuit Realisation and Chaos Encryption Map", "a", "b", "c", "d", "Colour Factor", ES, ES, ES, ES, ES, 4.0, 0.25, -1.0, 1.0, 750.0, 0.0, 0.0, 0.0, 0.0, 0.0,

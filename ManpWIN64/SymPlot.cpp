@@ -192,14 +192,13 @@ void	CPixel::PlotPixel(WORD x, WORD y, DWORD colour)
     if (*time_to_quit)
 	return;
 
-
+/*
     static LONG s_count = 0;
     LONG n = InterlockedIncrement(&s_count);
     if (n <= 5) {
 	DebugDump("PlotPixel");
 	}
 	
-/*
     char buf[256];
     sprintf(buf,
 	"USE  Pixel[0]=%p xdots=%d ydots=%d ygap=%f mandel_width=%f\n",

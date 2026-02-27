@@ -60,7 +60,7 @@ extern	int	getprecbf_mag(void);
 extern	void	ConvertString2Bignum(mpfr_t, char *);
 extern	char	*trailing(char *instr);
 extern	int	Strlicmp(const char *, const char *);
-extern	char	*strtok1(register char *, register const char *);	// required to use different
+extern	char	*strtok1(char *, const char *);	// required to use different
 extern	void	ConvertBignum2String(char *s, mpfr_t num);
 
 struct FractintFilterStuff				// database of Fractint Outside filters

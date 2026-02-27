@@ -282,7 +282,7 @@ int	analyse_corner(char *s)
 	Get 3D parameters
 **************************************************************************/
 
-char	*strtok1(register char * s1, register const char * s2)	// required to use different 
+char	*strtok1(char * s1, const char * s2)	// required to use different 
 								// static variable to main 
 								// strtok() in user.c
     {

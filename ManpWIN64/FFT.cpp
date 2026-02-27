@@ -94,8 +94,8 @@ void	fft(int n, int m)
 
     {
     double	xt, yt, c, s;
-    register int	i, j, k;
-    int	l, n1, n2, ie, ia, jt, trig_ptr, temp;
+    int		i, j, k;
+    int		l, n1, n2, ie, ia, jt, trig_ptr, temp;
 
     trig_ptr = MAX_N / n;			/* point to right part of cos & sin */
     n2 = n;

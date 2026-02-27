@@ -1,17 +1,22 @@
 # ManpWIN CMake script
-# Copyright 2025 Paul de Leeuw
+# Copyright 2026 Paul de Leeuw
 #
 
-add_library(parser 
-addstuff.cpp
-cmplx.h
-DDTrigFn.cpp
-fpu087.cpp
-fractint.h
-mpmath.h
-parser.cpp
-ParserFn.cpp
-prototyp.h
-QDTrigFn.cpp
-TrigFn.cpp
+# Parser library
+
+add_library(parser STATIC
+    addstuff.cpp
+    DDTrigFn.cpp
+    fpu087.cpp
+    parser.cpp
+    ParserFn.cpp
+    ParserCtx.cpp
+    QDTrigFn.cpp
+    TrigFn.cpp
 )
+
+target_include_directories(parser PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/ManpWIN64
+)
+

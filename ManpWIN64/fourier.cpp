@@ -133,7 +133,7 @@ char	*WriteSliders(void)
 	Write Slider values to string
 ***************************************************************************/
 
-extern	char	*strtok1(register char *, register const char *);	// required to use different 
+extern	char	*strtok1(char *, const char *);	// required to use different 
 									// static variable to main 
 									// strtok() in user.c
 

@@ -284,8 +284,8 @@ void	CPixel::interpcolour(short x0, short y0, short x1, short y1,
 void	CPixel::do_line(short x0, short y0, short x1, short y1, short col0, short col1)
 
     {
-    register short xlo, ylo;
-    register short c;
+    short xlo, ylo;
+    short c;
     short xhi, yhi;
     long a, b;
 

@@ -71,7 +71,7 @@ void	CPixel::InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degree
     c1Big = 0.0; c2Big = 0.0; cbBig = 0.0; caa3Big = 0.0; z1Big = 0.0; z2Big = 0.0; z3Big = 0.0; z4Big = 0.0; zdBig = 0.0; ztBig;
     }
 
-void	CPixel::InitPixel1(CTrueCol *TrueColIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, std::vector <float> &wpixelsIn, BYTE juliaflagIn, BYTE calcmodeIn)
+void	CPixel::InitPixel1(CTrueCol *TrueColIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, std::vector <float> &wpixelsIn, BYTE juliaflagIn, BYTE calcmodeIn, int NonStandardFractalIn)
 
     {
     TrueCol = TrueColIn;
@@ -82,6 +82,7 @@ void	CPixel::InitPixel1(CTrueCol *TrueColIn, int period_levelIn, int distestIn, 
     wpixels = wpixelsIn;
     juliaflag = juliaflagIn;
     calcmode = calcmodeIn;
+    NonStandardFractal = NonStandardFractalIn;
     }
 
 void	CPixel::InitPixel2(int CoordSystemIn, BOOL UseCurrentPaletteIn, int reset_periodIn, int colorsIn, double horIn, double vertIn, double mandel_widthIn, BigDouble BigHorIn, BigDouble BigVertIn, BigDouble BigWidthIn)

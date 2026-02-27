@@ -20,7 +20,7 @@
 void	CPlot::genline(int x0, int y0, int x1, int y1, DWORD col)
 
     {
-    register int x, y;
+    int x, y;
     long	xstep, ystep, xcum = 0L, ycum = 0L;
     int	dx, dy;
 

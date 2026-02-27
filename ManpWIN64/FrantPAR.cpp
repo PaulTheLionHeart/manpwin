@@ -138,7 +138,7 @@ extern	Complex	j;
 char	*trailing(char *instr)
 
     {
-    register char *s;
+    char *s;
 
     s = instr + strlen(instr) - 1;
     while ((*s == '\n') || (*s == ' '))
@@ -1155,7 +1155,7 @@ int	ProcessPotential(char *s)
 
 char	*leading(char *instr) // strips leading spaces 
     {
-    register char *s = instr;
+    char *s = instr;
     while (*s && isspace(*s))
 	s++;
     return s;
@@ -1163,7 +1163,7 @@ char	*leading(char *instr) // strips leading spaces
 
 char	*StripStuff(char *instr) // strips backslash and newlines 
     {
-    register char *s = instr;
+    char *s = instr;
     while (*s)
 	{
 	if (*s == '\\'/* || *s == '\n' || *s == '\r'*/)
