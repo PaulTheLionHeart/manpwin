@@ -93,30 +93,35 @@ ManpWIN/
 
 ## 🧠 Architecture Overview
 
-```mermaid
-flowchart TD
-    Repo[Git Repository]
-    App[ManpWIN64 Application]
-    Parser[Parser Engine]
-    PNG[pnglib]
-    Zlib[ZLib]
-    QD[qdlib]
-    MPEG[MPEG]
-    MPFR[MPFR Imported Library]
-    CMake[Root CMakeLists]
-    Build[Debug + Release Builds]
-    VS[Visual Studio 2022]
 
-    Repo --> CMake
-    CMake --> App
-    CMake --> Parser
-    CMake --> PNG
-    CMake --> Zlib
-    CMake --> QD
-    CMake --> MPEG
-    CMake --> MPFR
-    App --> Build
-    Build --> VS
+Git Repository
+│
+├─ ManpWIN64 (application)
+├─ parser (formula VM)
+├─ pnglib (PNG implementation)
+├─ ZLib (compression)
+├─ qdlib (quad-double arithmetic)
+├─ MPEG (video support)
+└─ mpfr (imported high precision library)
+│
+▼
+Root CMakeLists.txt
+│
+├─ add_subdirectory(parser)
+├─ add_subdirectory(pnglib)
+├─ add_subdirectory(ZLib)
+├─ add_subdirectory(qdlib)
+├─ add_subdirectory(MPEG)
+└─ imported mpfr
+│
+▼
+ManpWIN64 executable target
+│
+▼
+Debug / Release builds
+│
+▼
+Visual Studio 2022 + CMake
 
 The build uses a modular CMake architecture:
 
