@@ -117,6 +117,7 @@ flowchart TD
     CMake --> MPFR
     App --> Build
     Build --> VS
+
 The build uses a modular CMake architecture:
 
 * Each library compiled via `add_subdirectory`
