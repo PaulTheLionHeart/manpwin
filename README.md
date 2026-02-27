@@ -1,40 +1,31 @@
-# ManpWIN
+ManpWIN
 
-**ManpWIN** is a Windows fractal exploration and rendering application featuring advanced Mandelbrot and related fractal techniques including perturbation, BLA acceleration, slope shading, and a multithreaded formula parser.
+ManpWIN is a Windows fractal exploration and rendering application featuring advanced Mandelbrot and related fractal techniques including perturbation, BLA acceleration, slope shading, and a multithreaded formula parser.
 
 This repository contains a modernized CMake build system enabling reproducible Debug and Release builds with Visual Studio 2022.
+✨ Features
 
----
+    Mandelbrot and related fractals
+    Perturbation + BLA acceleration
+    Multithreaded rendering engine
+    Multithreaded formula parser
+    Slope derivative rendering modes
+    Fractint palette support
+    PNG export
+    Advanced plotting modes
+    High-precision arithmetic (MPFR)
+    Legacy algorithm preservation with modernization
 
-# ✨ Features
+🏗️ Build Requirements
 
-- Mandelbrot and related fractals
-- Perturbation + BLA acceleration
-- Multithreaded rendering engine
-- Multithreaded formula parser
-- Slope derivative rendering modes
-- Fractint palette support
-- PNG export
-- Advanced plotting modes
-- High-precision arithmetic (MPFR)
-- Legacy algorithm preservation with modernization
+    Windows 10/11
+    Visual Studio 2022
+    CMake ≥ 3.23
+    MPFR library (included as imported dependency)
 
----
+⚙️ Build Instructions
+Clone repository
 
-# 🏗️ Build Requirements
-
-- Windows 10/11
-- Visual Studio 2022
-- CMake ≥ 3.23
-- MPFR library (included as imported dependency)
-
----
-
-# ⚙️ Build Instructions
-
-## Clone repository
-
-```bash
 git clone https://github.com/PaulTheLionHeart/manpwin.git
 cd manpwin
 
@@ -70,7 +61,7 @@ ManpWIN/
  ├─ pnglib/         # PNG implementation
  ├─ ZLib/           # Compression support
  ├─ qdlib/          # Quad-double arithmetic
- ├─ MPEG/           # MPEG support
+ ├- MPEG/           # MPEG support
  ├─ mpfr/           # High precision math library
  ├─ CMakeLists.txt  # Root build configuration
 
@@ -92,30 +83,55 @@ Debug and Release builds verified via both CMake and Visual Studio
 
 🧯 Troubleshooting
 
-Blank UI
+### Missing pnglib.lib
 
-Ensure resource .rc file is included in executable sources.
+Reconfigure CMake and ensure pnglib CMakeLists builds STATIC library.
 
-pnglib not found
+### MPFR linker errors
 
-Verify add_subdirectory(pnglib) and linker language set to C.
+Ensure mpfr imported library path is correct.
 
-set_target_properties(pnglib PROPERTIES LINKER_LANGUAGE C)
+### Blank screen
 
-Runtime conflict warning - cause = mpfr compiled with different runtime
+Ensure \*.rc files are included in executable target.
 
-Resolved with:
+### Debug vs Release mismatch
 
-target_link_options(ManpWIN64 PRIVATE /NODEFAULTLIB:LIBCMTD)
-Infinite rendering loop
+Check runtime library consistency and avoid mixed CRT builds.
 
-Usually caused by:
+------------------------------------------------------------------------
 
-uninitialised variables
+## Dragon Slayer Log
 
-worklist logic errors
+-   Repository recovery
+-   Parser modernization
+-   PNG library integration
+-   MPFR linking fixes
+-   Resource compilation restoration
+-   Debug infinite loop bug hunt
+-   Palette parser fix
+-   Solid guessing initialization bug
+-   CMake stabilization
 
-palette parser bugs
+------------------------------------------------------------------------
+
+## Contributing Notes
+
+-   Never commit build directory
+-   Tag stable milestones
+-   Keep Debug and Release working
+-   Prefer incremental commits
+
+------------------------------------------------------------------------
+
+## Credits
+
+Paul the LionHeart --- Author\
+ChatGPT --- development assistance
+
+🏆 Milestone
+
+This release represents the first stable reproducible CMake build of ManpWIN with full Visual Studio 2022 compatibility.
 
 🚀 Git Workflow Used
 
@@ -133,21 +149,7 @@ Milestone tag created
 
 Master branch verified via fresh clone
 
-🏆 Milestone
-
-This release represents the first stable reproducible CMake build of ManpWIN with full Visual Studio 2022 compatibility.
-
 🙏 Credits
 
-Paul de Leeuw (LionHeart) — Author and architect of ManpWIN
-ChatGPT (OpenAI) — Development partner, debugging assistance, and documentation support
-
----
-
-# ✅ Next step (commit)
-
-```bash
-git add README.md
-git commit -m "Add project README with build guide"
-git push
-
+Paul the LionHeart --- Author\
+ChatGPT --- development assistance
