@@ -93,7 +93,7 @@ ManpWIN/
 
 ## 🧠 Architecture Overview
 
-
+```text
 Git Repository
 │
 ├─ ManpWIN64 (application)
@@ -122,6 +122,7 @@ Debug / Release builds
 │
 ▼
 Visual Studio 2022 + CMake
+```
 
 The build uses a modular CMake architecture:
 
