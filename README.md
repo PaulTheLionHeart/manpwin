@@ -166,5 +166,5 @@ This release represents the first stable reproducible CMake build of ManpWIN wit
 
 ## 🙏 Credits
 
-Paul the LionHeart — Author
-ChatGPT — Development assistance
+- Paul the LionHeart — Author
+- ChatGPT — Development assistance
