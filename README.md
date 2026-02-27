@@ -91,7 +91,6 @@ ManpWIN/
 
 ---
 
-```markdown
 ## 🧠 Architecture Overview
 
 ```mermaid
