@@ -112,7 +112,7 @@ STYLE DS_MODALFRAME | DS_SETFONT | WS_POPUP
 FONT 8, "MS Sans Serif"
 {
     EDITTEXT        IDC_PROGRAMNAME, 41, 13, 79, 12, WS_DISABLED | NOT WS_BORDER | ES_CENTER | ES_AUTOHSCROLL
-    CTEXT           "4.02b Multi-Thread Formula Parser", IDC_STATIC, 36, 28, 88, 9, SS_CENTER
+    CTEXT           "4.02c Multi-Thread Formula Parser", IDC_STATIC, 36, 28, 88, 9, SS_CENTER
     ICON            "MANPWIN", IDC_STATIC, 8, 8, 21, 20, SS_ICON
     CTEXT           "Copyright © Paul de Leeuw Computers\nhttps://www.deleeuw.com.au", IDC_STATIC, 8, 53, 144, 15, SS_CENTER
     PUSHBUTTON      "OK", IDOK, 36, 89, 88, 14, WS_GROUP | NOT WS_TABSTOP

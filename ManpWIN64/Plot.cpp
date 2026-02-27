@@ -165,7 +165,7 @@ void	CPlot::PlotPoint(WORD x, WORD y, DWORD colour)
 	    }
 	if (colour == (DWORD)threshold)			// handle inside colour
 	    {
-	    if (i > Dib->DibHeight * Dib->DibWidth * 3)
+	    if (i > (DWORD)(Dib->DibHeight * Dib->DibWidth * 3))
 		return;
 	    Dib->DibPixels[i + 0] = (BYTE)TrueCol->InsideBlue;
 	    Dib->DibPixels[i + 1] = (BYTE)TrueCol->InsideGreen;

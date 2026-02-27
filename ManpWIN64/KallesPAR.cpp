@@ -554,38 +554,26 @@ int	ConvertToKallesType(int subtype, WORD degree, int *power, int *FractalType)
 **************************************************************************/
 
 static int ProcessColours(char *value)
-
     {
     int		i;
-    int		PalSize;
     char	*tok;
     char	seps[] = ",";
-//    BYTE	swap;
 
     tok = strtok1(value, seps);
     i = 0;
     while (tok)
 	{
-	TrueCol.PalettePtr[i].rgbtRed;
+	TrueCol.PalettePtr[i].rgbtRed = (BYTE)atoi(tok);    // RED
 	tok = strtok1(NULL, seps);
-	i++;
-	TrueCol.PalettePtr[i].rgbtGreen;
+	if (!tok) break;
+	TrueCol.PalettePtr[i].rgbtGreen = (BYTE)atoi(tok);  // GREEN
 	tok = strtok1(NULL, seps);
+	if (!tok) break;
+	TrueCol.PalettePtr[i].rgbtBlue = (BYTE)atoi(tok);// BLUE
 	i++;
-	TrueCol.PalettePtr[i].rgbtBlue;
 	tok = strtok1(NULL, seps);
-	i++;
 	}
-    PalSize = i / 3;
-    TrueCol.ColoursInPALFile = PalSize;
-/*
-    for (i = 0; i < PalSize; i++)		// better swap colours to be "accurate"
-	{
-	swap = TrueCol.PalettePtr[i].rgbtRed;
-	TrueCol.PalettePtr[i].rgbtRed = TrueCol.PalettePtr[i].rgbtBlue;
-	TrueCol.PalettePtr[i].rgbtBlue = swap;
-	}
-*/
+    TrueCol.ColoursInPALFile = i;
     TrueCol.FillPalette(REPEAT, TrueCol.PalettePtr, threshold);
     return(0);
     }
@@ -595,7 +583,6 @@ static int ProcessColours(char *value)
 **************************************************************************/
 
 int	ProcessLocation(char *real, char *imag, char *zoom)
-
     {
     double	Magnification;
     BigDouble   BigMag, OneOverMag;

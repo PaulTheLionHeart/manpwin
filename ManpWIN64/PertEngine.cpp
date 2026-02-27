@@ -172,14 +172,6 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
 
     CPlotmode PlotMethod;
 
-
-
-
-    char buf[256];
-    sprintf(buf, "generateYOrder h=%d mode=%d xdots=%d ydots=%d\n", height, (int)currentYMode, xdots, height);
-    OutputDebugStringA(buf);
-
-
     if (height <= 0)
 	{
 	sprintf(PertErrorMessage, "calculateOneFrame has negative height=%d", height);
