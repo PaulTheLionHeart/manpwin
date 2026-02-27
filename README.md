@@ -28,6 +28,13 @@ This repository contains a modernized CMake build system enabling reproducible D
 * CMake ≥ 3.23
 * MPFR library (included as imported dependency)
 
+MPFR is treated as an external dependency.
+
+Users must provide an MPFR build compatible with their compiler
+and point CMake to the mpfr.lib path.
+
+This avoids ABI mismatch and keeps repository size minimal.
+
 ---
 
 ## ⚙️ Build Instructions
