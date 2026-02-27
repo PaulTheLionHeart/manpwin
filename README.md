@@ -91,8 +91,33 @@ ManpWIN/
 
 ---
 
-## 🧠 Architecture Notes
+```markdown
+## 🧠 Architecture Overview
 
+```mermaid
+flowchart TD
+    Repo[Git Repository]
+    App[ManpWIN64 Application]
+    Parser[Parser Engine]
+    PNG[pnglib]
+    Zlib[ZLib]
+    QD[qdlib]
+    MPEG[MPEG]
+    MPFR[MPFR Imported Library]
+    CMake[Root CMakeLists]
+    Build[Debug + Release Builds]
+    VS[Visual Studio 2022]
+
+    Repo --> CMake
+    CMake --> App
+    CMake --> Parser
+    CMake --> PNG
+    CMake --> Zlib
+    CMake --> QD
+    CMake --> MPEG
+    CMake --> MPFR
+    App --> Build
+    Build --> VS
 The build uses a modular CMake architecture:
 
 * Each library compiled via `add_subdirectory`
@@ -123,18 +148,23 @@ Check runtime library consistency and avoid mixed CRT builds.
 
 ---
 
-## 🐉 Dragon Slayer Log
+## 🐉 Dragon Slayer Timeline
 
-* Repository recovery
-* Parser modernization
-* PNG library integration
-* MPFR linking fixes
-* Resource compilation restoration
-* Debug infinite loop bug hunt
-* Palette parser fix
-* Solid guessing initialization bug
-* CMake stabilization
+A chronological record of major battles during the ManpWIN modernisation.
 
+- 🐲 Repository archaeology — removed legacy and duplicate source files
+- ⚔️ CMake resurrection — rebuilt modular build architecture
+- 🧱 pnglib integration — fixed missing target + linker language issues
+- 🔗 MPFR linking battle — resolved runtime conflicts and imported library setup
+- 🪟 Resource restoration — fixed blank screen by restoring `.rc` compilation
+- 🧠 Parser evolution — multithreaded formula parser stabilised
+- 🎯 Plotting expansion — new slope rendering + plotting modes added
+- 🐛 Debug infinite loop hunt — tracked worklist spin behaviour
+- 🎨 Palette parser fix — vector migration introduced subtle indexing bug
+- 🧩 Solid guessing initialization bug — uninitialised variable causing lock
+- ⚙️ CRT conflict resolution — `/NODEFAULTLIB:LIBCMTD` investigation
+- 🏰 First stable reproducible CMake build — Debug + Release verified
+- 🏷 Milestone tagged — historic stabilisation snapshot captured
 ---
 
 ## 🤝 Contributing Notes
