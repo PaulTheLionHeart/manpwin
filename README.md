@@ -47,7 +47,7 @@ The system supports exploration across both floating-point and high-precision ar
 
 ## 🎬 Animation
 
-[![Watch Animation](Docs/images/jewels_preview.png)](Docs/videos/Jewels.webm)
+[![Watch Animation](Docs/images/jewels_preview.png)]
 
 👉 [Download animation file (WEBM, ~5 MB)](Docs/videos/Jewels.webm)
 ---
