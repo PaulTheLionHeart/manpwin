@@ -11,7 +11,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <mpfr.h>
 #include "manp.h"
 #include "fractype.h"
 #include "fractalp.h"
@@ -23,6 +22,7 @@
 #include "BigDouble.h"
 #include "BigComplex.h"
 #include "colour.h"
+#include "mpfr.h"
 #include "slope.h"
 #include "pixel.h"
 #include "plot.h"
@@ -895,8 +895,7 @@ int	perform_worklist(HWND hwnd)
     HANDLE	ghMutex = NULL;							// manage access to shared resources such as Dib and wpixels
 
     int		ActualNumThreads = NumberThreads;				// make sure formula parser only uses one thread as it isn't set up for multi-thread yet
-    if (/*type == FORMULA || type == SCREENFORMULA || */(_3dflag && type != PERTURBATION))
-//    if (type == FORMULA || type == SCREENFORMULA || (_3dflag && type != PERTURBATION))
+    if ((_3dflag && type != PERTURBATION))
 	NumberThreads = 1;
 
     int activeThreads = NumberThreads;
@@ -936,7 +935,7 @@ int	perform_worklist(HWND hwnd)
 	if (BigNumFlag)
 	    Pixel[i]->ManageBignumPrecision(decimals);
 	Pixel[i]->InitPixel0(type, special, subtype, &degree, rqlim, DDBailout, QDBailout, ExpandStarTrailColours, SpecialFlag, precision, biomorph, InsideMethod, OutsideMethod, RotationAngle, xdots, ydots, nFDOption);
-	Pixel[i]->InitPixel1(&TrueCol, period_level, distest, invert, phaseflag, wpixels, juliaflag, calcmode, NonStandardFractal);
+	Pixel[i]->InitPixel1(&TrueCol, period_level, distest, invert, phaseflag, wpixels, juliaflag, calcmode);
 	Pixel[i]->InitPixel2(CoordSystem, UseCurrentPalette, reset_period, colors, hor, vert, mandel_width, BigHor, BigVert, BigWidth);
 	Pixel[i]->InitPixel3(dStrands, j, pairflag, _3dflag, ScreenRatio, colours, &Fractal, BailoutTestType);
 	Pixel[i]->InitPixel4(threshold, BigNumFlag, logval, f_radius, f_xcenter, LyapSequence, ColourSpeed);

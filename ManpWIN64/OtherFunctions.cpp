@@ -7,7 +7,8 @@
     (console drivers & serial I/O) is in separate machine libraries.
 */
 
-#include	"OtherFunctions.h"
+#include "OtherFunctions.h"
+#include "SafeStrings.h"
 
 extern std::vector<float> wpixels;
 
@@ -72,7 +73,6 @@ int	COtherFunctions::InitOtherFunctions(WORD type, int subtypeIn, HWND hwndIn, C
 	case GEOMETRY:
 	case MALTHUS:
 	    break;		// nothing to do here
-
 	}
     return 0;
     }
@@ -123,6 +123,8 @@ int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *itera
 		    {
 		    if (UserData(hwnd) == -1)		// user pressed a key?
 			return -1;
+		    if (AbortRequested())
+			return 0;
 		    for (j = 1; j < xdots - 1; j++)
 			{					// compute the sum of neighbouring cells
 			sum =
@@ -179,6 +181,8 @@ int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *itera
 		y += cos(d * t) + skew * sin(d * t);
 		if (UserData(hwnd) == -1)		// user pressed a key?
 		    return -1;
+		if (AbortRequested())
+		    return 0;
 		x1 = (int)((x - hor) * xscale);
 		y1 = (int)((vert + mandel_width - y) * yscale);
 		Plot.PlotPoint(x1, y1, colour);
@@ -227,6 +231,8 @@ int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *itera
 		{
 		if (UserData(hwnd) == -1)		// user pressed a key?
 		    return -1;
+		if (AbortRequested())
+		    return 0;
 		*curpass = i / iterations;
 		x1 = a * (y - x) + a * tan(x);			// three Chua's equations
 		y1 = x1 - y + (z / 10);
@@ -315,7 +321,7 @@ int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *itera
 	    if (randparam != 0 && randparam != -1) 
 		{
 		n = param[0];
-		sprintf(buf, "%.16g", n);		// # of digits in initial string 
+		SAFE_SPRINTF(buf, "%.16g", n);		// # of digits in initial string 
 		t = (int)strlen(buf);
 		if (t>16 || t <= 0) 
 		    {
@@ -351,7 +357,7 @@ int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *itera
 		    }
 		param[1] = n;
 		}
-	    sprintf(buf, "%.*g", rule_digits, n);
+	    SAFE_SPRINTF(buf, "%.*g", rule_digits, n);
 	    t = (int)strlen(buf);
 	    if (rule_digits < t || t < 0) 
 		{					// leading 0s could make t smaller 
@@ -992,7 +998,7 @@ void	COtherFunctions::abort_cellular(int err, int t)
 	case BAD_T:
 	     {
 	     char msg[30];
-	     sprintf(msg,"Bad t=%d, aborting\n", t);
+	     SAFE_SPRINTF(msg,"Bad t=%d, aborting\n", t);
 	     MessageBox (hwnd, msg, "View", MB_ICONEXCLAMATION | MB_OK);
 	     MessageBeep (0);
 	     }
@@ -1067,7 +1073,7 @@ void	COtherFunctions::thinking(HWND hwnd, int count)
     if (slow++ % 40 == 0)
 	{
 	thinkstate = (thinkstate + 1) & 3;
-	wsprintf(s, "Thinking. Level = <%d> %c", count, wheel[thinkstate]);
+	_snprintf_s(s, 100, _TRUNCATE, "Thinking. Level = <%d> %c", count, wheel[thinkstate]);
 	SetWindowText(hwnd, s);
 	}
     }

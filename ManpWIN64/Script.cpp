@@ -24,6 +24,7 @@
 #include "OscProcess.h"
 #include "plot.h"
 #include "pixel.h"
+#include "SafeStrings.h"
 
 #define	TWO_PI		6.28318530717958
 #define	ENDOFSCRIPT	1
@@ -189,7 +190,7 @@ char	*GenerateMPEGFileName (char *MPEGPath, char *infile)
     static	char	MPGName[MAX_PATH];
 
     _splitpath(infile, drive, dir, name, ext);				// remove extension
-    sprintf(MPGName, TEXT("%s\\%s.mpg"), MPEGPath, name);
+    SAFE_SPRINTF(MPGName, TEXT("%s\\%s.mpg"), MPEGPath, name);
     return MPGName;	
     }
 
@@ -204,7 +205,7 @@ char	*GenerateAnimFileName (char *AnimPath, char *infile)
     static	char	AnimName[MAX_PATH];
 
     _splitpath(infile, drive, dir, name, ext);				// remove extension
-    sprintf(AnimName, TEXT("%s\\%s"), AnimPath, name);
+    SAFE_SPRINTF(AnimName, TEXT("%s\\%s"), AnimPath, name);
     return AnimName;	
     }
 
@@ -273,7 +274,7 @@ int	GenerateFractalFrame(HWND hwnd, char *FileName, int TotalFrames, int ThisFra
     finished = FALSE;
     if (perform_worklist(hwnd) < 0)
 	{
-	wsprintf(s, "Can't calculate fractal in script file: %s", FileName);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "Can't calculate fractal in script file: %s", FileName);
 	MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
@@ -309,7 +310,7 @@ int	GetPNGSeqFromScript(HWND hwnd, char *FileName)
 
     if ((fp = fopen(FileName, "r")) == NULL)
 	{
-	wsprintf(s, "Can't open script file: %s for read", FileName);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "Can't open script file: %s for read", FileName);
 	MessageBox(hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep(0);
 	return -1;
@@ -317,7 +318,7 @@ int	GetPNGSeqFromScript(HWND hwnd, char *FileName)
 
     if (fgets(buf, MAXDATALINE, fp) == NULL)				// get common params
 	{
-	wsprintf(s, "Can't read parameters in script file: %s", FileName);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "Can't read parameters in script file: %s", FileName);
 	MessageBox(hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep(0);
 	fclose(fp);
@@ -391,7 +392,7 @@ int	InitScript(HWND hwnd, char *FileName, int *TotalFrames)
 //    EndIter =  threshold;
     if ((fp = fopen(FileName, "r")) == NULL)
 	{
-	wsprintf(s, "Can't open script file: %s for read", FileName);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "Can't open script file: %s for read", FileName);
 	MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -399,7 +400,7 @@ int	InitScript(HWND hwnd, char *FileName, int *TotalFrames)
 
     if (fgets(buf, MAXDATALINE, fp) == NULL)				// get common params
 	{
-	wsprintf(s, "Can't read parameters in script file: %s", FileName);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "Can't read parameters in script file: %s", FileName);
 	MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	fclose(fp);
@@ -416,7 +417,7 @@ int	InitScript(HWND hwnd, char *FileName, int *TotalFrames)
 									// now get co-ords for each image
     if (fgets(buf, MAXDATALINE, fp) == NULL)				// get common params
 	{
-	wsprintf(s, "Can't read parameters in script file: %s", FileName);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "Can't read parameters in script file: %s", FileName);
 	MessageBox (hwnd, s, "View", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	fclose(fp);
@@ -613,7 +614,7 @@ void	ShowAxisLabels(HWND hwnd)
 		*(b + 1) = 'n';
 		*(b + 2) = '\0';
 		}
-	    sprintf(text, "%s-%s", a, b);
+	    SAFE_SPRINTF(text, "%s-%s", a, b);
 	    OutputAxesStatus(GlobalHwnd, ps.hdc, HorOffset, VertOffset, NumRows, NumColumns, text);
 	    }
 	EndPaint(hwnd, &ps);
@@ -808,7 +809,7 @@ void	BuildJuliaFormulaString(void)
 	return;								// we want to keep the initial conditions
     strcpy(TempFormula, FormulaString);
     ptr = str_find_ci(TempFormula, "pixel:");
-    sprintf(FormulaString, "z = pixel:%s", ptr);			// Julia
+    _snprintf_s(FormulaString, MAXFORMULASTRINGLENGTH, _TRUNCATE, "z = pixel:%s", ptr);			// Julia
     }
 
 /*-----------------------------------------
@@ -838,10 +839,10 @@ int	RunScript(HWND hwnd, char *FileName)
 	}
     if (WritePNGList)
 	{
-	sprintf(FilenameList, "%s.lst", SaveFileOrig);
+	SAFE_SPRINTF(FilenameList, "%s.lst", SaveFileOrig);
 	if ((fl = fopen(FilenameList, "w")) == NULL)
 	    {
-	    wsprintf(s, "Can't open file: %s for read", FilenameList);
+	    _snprintf_s(s, MAXLINE, _TRUNCATE, "Can't open file: %s for read", FilenameList);
 	    MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	    MessageBeep (0);
 	    fclose(fp);
@@ -862,7 +863,7 @@ int	RunScript(HWND hwnd, char *FileName)
 	{
 	if (fgets(buf, MAXDATALINE, fp) == NULL)
 	    {
-	    wsprintf(s, "Script: Error in getting data from file: %s", FileName);
+	    _snprintf_s(s, MAXLINE, _TRUNCATE, "Script: Error in getting data from file: %s", FileName);
 	    MessageBox(hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	    fclose(fp);
 	    return -1;
@@ -878,7 +879,7 @@ int	RunScript(HWND hwnd, char *FileName)
 	    {
 	    if (fgets(buf, MAXDATALINE, fp) == NULL)
 		{
-		wsprintf(s, "Error in getting data for frame: %d", CurrentFrame);
+		_snprintf_s(s, MAXLINE, _TRUNCATE, "Error in getting data for frame: %d", CurrentFrame);
 		MessageBox(hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		fclose(fp);
 		return -1;
@@ -895,7 +896,7 @@ int	RunScript(HWND hwnd, char *FileName)
 	strcpy(ScriptName, pstr);
 
 	if (OscAnimProc != MORPHING)
-	    wsprintf (s, "Paul's Fractals: Frame %d of %d in script file %s, It=%d, BigNum=%s", CurrentFrame + 1, frames, ScriptName, threshold, (BigNumFlag) ? "T" : "F");
+	    _snprintf_s(s, MAXLINE, _TRUNCATE, "Paul's Fractals: Frame %d of %d in script file %s, It=%d, BigNum=%s", CurrentFrame + 1, frames, ScriptName, threshold, (BigNumFlag) ? "T" : "F");
 	SetWindowText (hwnd, s);			// Show formatted text in the caption bar
 	ptr = SaveFileOrig;
 	while (*ptr && *ptr != '.')			//strip extension
@@ -927,7 +928,7 @@ int	RunScript(HWND hwnd, char *FileName)
 	    AnimateClose();
 	    if (OscAnimProc != MORPHING)
 		OscProcess.CloseMorphing();
-	    wsprintf(s, "Error: Unexpected end of script: Frame %d of %d", CurrentFrame, frames);
+	    _snprintf_s(s, MAXLINE, _TRUNCATE, "Error: Unexpected end of script: Frame %d of %d", CurrentFrame, frames);
 	    MessageBox(hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	    break;
 	    }
@@ -944,10 +945,10 @@ int	RunScript(HWND hwnd, char *FileName)
 	    fprintf(fl, "%s%05d.png\n", SaveFileOrig, CurrentFrame);
 	if (WritePNGFrames)				// write frame to PNG file without loading to memory
 	    {
-	    sprintf(SaveFileName, "%s%05d.png", SaveFileOrig, CurrentFrame);
+	    SAFE_SPRINTF(SaveFileName, "%s%05d.png", SaveFileOrig, CurrentFrame);
 	    if (write_png_file(hwnd, SaveFileName, "ManpWIN", FractData()) < 0)
 		{
-		wsprintf(s, "Error: Could not write png file: <%s>", SaveFileName);
+		_snprintf_s(s, MAXLINE, _TRUNCATE, "Error: Could not write png file: <%s>", SaveFileName);
 		MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		MessageBeep (0);
 		fclose(fp);
@@ -1025,13 +1026,13 @@ void	StatusBarAnimInfo (int frame, int TotalFrames)
 
 
 #ifdef	DEBUG
-    sprintf(TotalTimeString, "Factor=%f, Rate=%f,SmoothTime=%f,LastSmoothTime=%f", factor, rate, SmoothTime, LastSmoothTime);
+    SAFE_SPRINTF(TotalTimeString, "Factor=%f, Rate=%f,SmoothTime=%f,LastSmoothTime=%f", factor, rate, SmoothTime, LastSmoothTime);
 #else
-    sprintf(TotalTimeString, "Total time=%s", ShowTime (TotalTime));
+    SAFE_SPRINTF(TotalTimeString, "Total time=%s", ShowTime (TotalTime));
 #endif
-    sprintf(FrameTimeString, "Time for Frame[%d]of[%d]=%s", frame, TotalFrames, ShowTime (FrameTime));
-    sprintf(AverageTimeString, "Ave Frame Time=%s", ShowTime (AverageTime));
-    sprintf(RemainingTimeString, "Remaining Time (Est)=%s", ShowTime (RemainingTime));
+    SAFE_SPRINTF(FrameTimeString, "Time for Frame[%d]of[%d]=%s", frame, TotalFrames, ShowTime (FrameTime));
+    SAFE_SPRINTF(AverageTimeString, "Ave Frame Time=%s", ShowTime (AverageTime));
+    SAFE_SPRINTF(RemainingTimeString, "Remaining Time (Est)=%s", ShowTime (RemainingTime));
     _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s, %s, %s, %s", TotalTimeString, FrameTimeString, AverageTimeString, RemainingTimeString);
     StatusColour = 0x0000FFFF;				// colour of status bar
     }
@@ -1103,7 +1104,7 @@ INT_PTR CALLBACK AnimStartDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGFILELIST);
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WritePNGFrames = WritePNGList = FALSE;
-			    sprintf(MPGFile, "%s", GenerateAnimFileName (MPGPath, PNGName));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (MPGPath, PNGName));
 			    SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, MPGFile);
 			    }
 			return TRUE;
@@ -1142,7 +1143,7 @@ INT_PTR CALLBACK AnimStartDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			if (WriteMPEGFrames)						// generate MPEG filename
 			    {
 			    GetDlgItemText(hDlg, IDC_SEQUENCE_NAME, TempFile, MAX_PATH);
-			    sprintf(MPGFile, "%s", GenerateMPEGFileName (MPGPath, TempFile));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateMPEGFileName (MPGPath, TempFile));
 			    }
 			EndDialog (hDlg, TRUE);
 			return TRUE;

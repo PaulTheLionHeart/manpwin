@@ -8,6 +8,7 @@
 #include <htmlhelp.h>	// PHD 24/10/2007 to allow *.CHM files
 #include <tchar.h>
 #include "manp.h"
+#include "SafeStrings.h"
 
 //extern	    TCHAR	*FullHelpFile;			// points to full path for help file
 
@@ -34,13 +35,13 @@ HWND	DoHtmlHelp(HWND hwnd, char *HelpFile, UINT uCommand)
     char	FullHelpFile[MAX_PATH];
 
     GetManpWINFilePath(Path);
-    sprintf(FullHelpFile, "%s%s", Path, HelpFile);
+    SAFE_SPRINTF(FullHelpFile, "%s%s", Path, HelpFile);
     hwndHelp = HtmlHelp(hwnd, FullHelpFile, uCommand, (DWORD)0);
     if(hwndHelp == 0)
 	{
 	char    TempString[MAXLINE];
 
-	sprintf(TempString, "Cannot find Help File %s", FullHelpFile);
+	SAFE_SPRINTF(TempString, "Cannot find Help File %s", FullHelpFile);
 	MessageBox (hwnd, TempString, "HtmlHelp()", MB_ICONEXCLAMATION | MB_OK);
 	}
 

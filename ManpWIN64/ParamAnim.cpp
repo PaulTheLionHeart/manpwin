@@ -17,6 +17,7 @@
 #include	"colour.h"
 #include	"colour.h"
 #include	"OscProcess.h"
+#include	"SafeStrings.h"
 
 #define MIN(a,b) (a <= b ? a : b)
 #define MAX(a,b) (a >= b ? a : b)
@@ -100,7 +101,7 @@ int	GenParameterScript(HWND hwnd, char *filename, int NumVariables)
 
     if ((out = fopen(filename, "w")) == NULL)
 	{
-	sprintf(s, "Cannot open output file %s\nDoes Folder exist?", filename);
+	SAFE_SPRINTF(s, "Cannot open output file %s\nDoes Folder exist?", filename);
 	MessageBox (hwnd, s, "Animation", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -173,9 +174,9 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		SendMessage(hCtrl, BM_SETCHECK, StartImmediately, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_RETURN);
 		SendMessage(hCtrl, BM_SETCHECK, Return2Start, 0L);
-		sprintf(TempStr, "%.12f", StartRate);
+		SAFE_SPRINTF(TempStr, "%.12f", StartRate);
 		SetDlgItemText(hDlg, IDC_RATE_START, TempStr);
-		sprintf(TempStr, "%.12f", EndRate);
+		SAFE_SPRINTF(TempStr, "%.12f", EndRate);
 		SetDlgItemText(hDlg, IDC_RATE_END, TempStr);
 		SetDlgItemInt(hDlg, IDC_PARAM_NUM, ParamNumber, TRUE);
 		switch (type)
@@ -203,7 +204,7 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			NumParams = DatabasePtr->numparams;
 			for (i = 0; i < NumParams && i < NUMPARAM; i++)
 			    {
-			    sprintf(s[i], "%g", DatabasePtr->paramvalue[i]);
+			    SAFE_SPRINTF(s[i], "%g", DatabasePtr->paramvalue[i]);
 			    SetDlgItemText(hDlg, ID_FRACPARTX1 + i, DatabasePtr->paramname[i]);
 			    SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[i]);
 			    }
@@ -212,7 +213,7 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			NumVariables = DatabasePtr->numvariables;
 			for (i = 0; i < NumVariables && i < NUMPARAM; i++)
 			    {
-			    sprintf(s[i], "%f", DatabasePtr->variablevalue[i]);
+			    SAFE_SPRINTF(s[i], "%f", DatabasePtr->variablevalue[i]);
 			    SetDlgItemText(hDlg, ID_FRACVARTX01 + i, DatabasePtr->variablename[i]);
 			    SetDlgItemText(hDlg, ID_FRACVAR01 + i, s[i]);
 			    }
@@ -238,13 +239,13 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    NumParams = fractalspecific[type].numparams;
 			for (i = 0; i < NumParams && i < NUMPARAM; i++)
 			    {
-			    sprintf(s[i], "%g", *Fractal.ParamValue[i]);
+			    SAFE_SPRINTF(s[i], "%g", *Fractal.ParamValue[i]);
 			    SetDlgItemText(hDlg, ID_FRACPARTX1 + i, Fractal.ParamName[i]);
 			    SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[i]);
 			    }
 			for (i = NumParams; i < NUMPARAM; i++)
 			    SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
-			sprintf(s[10], "%f", rqlim);
+			SAFE_SPRINTF(s[10], "%f", rqlim);
 			SetDlgItemText(hDlg, ID_FRACPARAM11, s[10]);
 		    }
 
@@ -278,7 +279,7 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGFILELIST);
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WritePNGFrames = WriteMemFrames = WritePNGList = FALSE;
-			    sprintf(MPGFile, "%s", GenerateAnimFileName (MPGPath, PNGName));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (MPGPath, PNGName));
 			    SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, MPGFile);
 			    }
 			return TRUE;
@@ -294,7 +295,7 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WriteMPEGFrames = FALSE;
 			    }
-//			sprintf(PNGFile, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
+//			_snprintf_s(PNGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
 //			SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGFile);
 			return TRUE;
 
@@ -309,7 +310,7 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			if (WriteMPEGFrames)						// generate MPEG filename
 			    {
 			    GetDlgItemText(hDlg, IDC_SEQUENCE_NAME, TempFile, MAX_PATH);
-			    sprintf(MPGFile, "%s", GenerateMPEGFileName (MPGPath, TempFile));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateMPEGFileName (MPGPath, TempFile));
 			    }
 
 			GetDlgItemText(hDlg, IDC_SCRIPT_FILENAME, ScriptFileName, 400);
@@ -318,7 +319,7 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    fileptr--;							// remove extension
 			if (*fileptr == '.')
 			    *fileptr = '\0';
-			strcat(ScriptFileName, ".sci");
+			strcat_s(ScriptFileName, MAX_PATH, ".sci");
 			hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
 			StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_RETURN);

@@ -45,7 +45,6 @@ CPixel::CPixel(std::vector<float>& wp)
 
 void	CPixel::InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, dd_real DDBailoutIn, qd_real QDBailoutIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, int precisionIn, 
 		int biomorphIn, int InsideMethodIn, int OutsideMethodIn, int RotationAngleIn, int xdotsIn, int ydotsIn, int nFDOptionIn)
-
     {
     type = typeIn;
     subtype = subtypeIn;
@@ -71,8 +70,7 @@ void	CPixel::InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degree
     c1Big = 0.0; c2Big = 0.0; cbBig = 0.0; caa3Big = 0.0; z1Big = 0.0; z2Big = 0.0; z3Big = 0.0; z4Big = 0.0; zdBig = 0.0; ztBig;
     }
 
-void	CPixel::InitPixel1(CTrueCol *TrueColIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, std::vector <float> &wpixelsIn, BYTE juliaflagIn, BYTE calcmodeIn, int NonStandardFractalIn)
-
+void	CPixel::InitPixel1(CTrueCol *TrueColIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, std::vector <float> &wpixelsIn, BYTE juliaflagIn, BYTE calcmodeIn/*, int NonStandardFractalIn*/)
     {
     TrueCol = TrueColIn;
     period_level = period_levelIn;
@@ -82,7 +80,7 @@ void	CPixel::InitPixel1(CTrueCol *TrueColIn, int period_levelIn, int distestIn, 
     wpixels = wpixelsIn;
     juliaflag = juliaflagIn;
     calcmode = calcmodeIn;
-    NonStandardFractal = NonStandardFractalIn;
+//    NonStandardFractal = NonStandardFractalIn;
     }
 
 void	CPixel::InitPixel2(int CoordSystemIn, BOOL UseCurrentPaletteIn, int reset_periodIn, int colorsIn, double horIn, double vertIn, double mandel_widthIn, BigDouble BigHorIn, BigDouble BigVertIn, BigDouble BigWidthIn)
@@ -204,7 +202,6 @@ RGBTRIPLE CPixel::GetSmoothedColour(double fIter, double color_speed, CTrueCol &
 **************************************************************************/
 
 int	CPixel::InitArithmetic()
-
     {
     double	temp_x, temp_y;
 
@@ -542,7 +539,6 @@ void	CPixel::CalcFloatIteration(double error, std::vector <float> &wpixels, int 
 **************************************************************************/
 
 long	CPixel::dofract(HWND hwnd, int row, int col)
-
     {
     int	real_iteration;				// actual count for orbit deletion
 
@@ -586,11 +582,6 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
 	TZfilter.InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
 	TZfilter.LoadFilterQ(q);
 	}
-
-#ifdef	DEBUG
-sprintf(ProcessType, "Filter stuff [%c],[%d][%d]", ((TierazonFilter[FilterType].rgb) ? 'T' : 'F'), method, FilterType);
-SetWindowText (hwnd, ProcessType);
-#endif
 
     if (juliaflag)
 	{
@@ -855,151 +846,148 @@ SetWindowText (hwnd, ProcessType);
     return(iteration);
     }
 
-    /**************************************************************************
-	    Invert fractal
-    **************************************************************************/
+/**************************************************************************
+    Invert fractal
+**************************************************************************/
 
-    Complex	CPixel::invertz2(Complex  & Cmplx1)
+Complex	CPixel::invertz2(Complex  & Cmplx1)
+    {
+    Complex	temp;
+    double	tempsqrx;
 
+    temp.x = Cmplx1.x;
+    temp.y = Cmplx1.y;
+    temp.x -= f_xcenter; temp.y -= f_ycenter;	// Normalize values to center of circle
+
+    tempsqrx = sqr(temp.x) + sqr(temp.y);	// Get old radius
+    if (fabs(tempsqrx) > FLT_MIN)
+	tempsqrx = f_radius / tempsqrx;
+    else
+	tempsqrx = FLT_MAX;			// a big number, but not TOO big
+    temp.x *= tempsqrx;
+    temp.y *= tempsqrx;				// Perform inversion
+    temp.x += f_xcenter;
+    temp.y += f_ycenter;			// Renormalize
+    return  temp;
+    }
+
+/************************************************************************
+	Calculate Fractal using a "standard" mode
+************************************************************************/
+
+long	CPixel::calc_frac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
+    {
+    if (BigNumFlag)
 	{
-	Complex	temp;
-	double	tempsqrx;
-
-	temp.x = Cmplx1.x;
-	temp.y = Cmplx1.y;
-	temp.x -= f_xcenter; temp.y -= f_ycenter;	// Normalize values to center of circle
-
-	tempsqrx = sqr(temp.x) + sqr(temp.y);	// Get old radius
-	if (fabs(tempsqrx) > FLT_MIN)
-	    tempsqrx = f_radius / tempsqrx;
+	if (*MathType == DOUBLEDOUBLE)
+	    return (DDCalcFrac(hwnd, row, col, user_data));
+	else if (*MathType == QUADDOUBLE)
+	    return (QDCalcFrac(hwnd, row, col, user_data));
+	else if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
+	    return (QDCalcFrac(hwnd, row, col, user_data));		// Arbitrary precision isn't available yet so let's push quad double as far as we can
 	else
-	    tempsqrx = FLT_MAX;			// a big number, but not TOO big
-	temp.x *= tempsqrx;
-	temp.y *= tempsqrx;				// Perform inversion
-	temp.x += f_xcenter;
-	temp.y += f_ycenter;			// Renormalize
-	return  temp;
+	    return (BigCalcFrac(hwnd, row, col, user_data));
 	}
 
-    /************************************************************************
-	    Calculate Fractal using a "standard" mode
-    ************************************************************************/
+//    if (NonStandardFractal)						// does fractal use standard plotting mode?
+//	return(-1);
 
-    long	CPixel::calc_frac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
-
+    if (pairflag)							// half size screens: only do every second row / col
+	if (row % pairflag || col % pairflag)
+	    if (row != (int)ydots - 1)				// must trigger for last line
+		return(threshold);
+    if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
 	{
-	if (BigNumFlag)
+	if (row != oldrow)
 	    {
-	    if (*MathType == DOUBLEDOUBLE)
-		return (DDCalcFrac(hwnd, row, col, user_data));
-	    else if (*MathType == QUADDOUBLE)
-		return (QDCalcFrac(hwnd, row, col, user_data));
-	    else if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
-		return (QDCalcFrac(hwnd, row, col, user_data));		// Arbitrary precision isn't available yet so let's push quad double as far as we can
+	    if (pairflag && row)					// draw row for right hand image
+		draw_right_image((short)(oldrow));			// PHD to fix
+	    switch (RotationAngle)
+		{
+		case NORMAL:					// normal
+		    c.y = yymax - row * ygap;
+		    break;
+		case 90:						// 90 degrees
+		    c.x = yymax - row * xgap;
+		    break;
+		case 180:						// 180 degrees
+		    c.y = -(yymax - row * ygap);
+		    break;
+		case 270:						// 270 degrees
+		    c.x = -(yymax - row * xgap);
+		    break;
+		}
+	    oldrow = row;
+	    }
+	if (col != oldcol)
+	    {
+	    switch (RotationAngle)
+		{
+		case NORMAL:					// normal
+		    c.x = col * xgap + hor;
+		    break;
+		case 90:						// 90 degrees
+		    c.y = col * ygap + hor;
+		    break;
+		case 180:						// 180 degrees
+		    c.x = -(col * xgap + hor);
+		    break;
+		case 270:						// 270 degrees
+		    c.y = -(col * ygap + hor);
+		    break;
+		}
+
+	    oldcol = col;
+	    }
+	}
+    else
+	{
+	double  zero = 0.0;
+	Mat.DoTransformation(&(c.x), &(c.y), &zero, col * xgap + hor, yymax - row * ygap, 0.0);
+	}
+    if (user_data(hwnd) == -1)
+	return(-1);
+    color = (type == CIRCLESQ || type == FPCIRCLE) ? ((int)(floor(c.CSumSqr())) & 0x00ff) : dofract(hwnd, row, col);
+    reset_period = 0;
+
+    if (color > threshold && decomp <= threshold)		// for small thresholds, we can still have higher decomp levels
+	color = threshold;
+    if (calcmode == 'B')
+	{
+	if (color >= colours)				// don't use color 0 unless from inside
+	    if (colours < 16)
+		color &= andcolor;
 	    else
-		return (BigCalcFrac(hwnd, row, col, user_data));
-	    }
-
-	if (NonStandardFractal)						// does fractal use standard plotting mode?
-	    return(-1);
-
-	if (pairflag)							// half size screens: only do every second row / col
-	    if (row % pairflag || col % pairflag)
-		if (row != (int)ydots - 1)				// must trigger for last line
-		    return(threshold);
-	if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
-	    {
-	    if (row != oldrow)
-		{
-		if (pairflag && row)					// draw row for right hand image
-		    draw_right_image((short)(oldrow));			// PHD to fix
-		switch (RotationAngle)
-		    {
-		    case NORMAL:					// normal
-			c.y = yymax - row * ygap;
-			break;
-		    case 90:						// 90 degrees
-			c.x = yymax - row * xgap;
-			break;
-		    case 180:						// 180 degrees
-			c.y = -(yymax - row * ygap);
-			break;
-		    case 270:						// 270 degrees
-			c.x = -(yymax - row * xgap);
-			break;
-		    }
-		oldrow = row;
-		}
-	    if (col != oldcol)
-		{
-		switch (RotationAngle)
-		    {
-		    case NORMAL:					// normal
-			c.x = col * xgap + hor;
-			break;
-		    case 90:						// 90 degrees
-			c.y = col * ygap + hor;
-			break;
-		    case 180:						// 180 degrees
-			c.x = -(col * xgap + hor);
-			break;
-		    case 270:						// 270 degrees
-			c.y = -(col * ygap + hor);
-			break;
-		    }
-
-		oldcol = col;
-		}
-	    }
-	else
-	    {
-	    double  zero = 0.0;
-	    Mat.DoTransformation(&(c.x), &(c.y), &zero, col * xgap + hor, yymax - row * ygap, 0.0);
-	    }
-	if (user_data(hwnd) == -1)
-	    return(-1);
-	color = (type == CIRCLESQ || type == FPCIRCLE) ? ((int)(floor(c.CSumSqr())) & 0x00ff) : dofract(hwnd, row, col);
-	reset_period = 0;
-
-	if (color > threshold && decomp <= threshold)		// for small thresholds, we can still have higher decomp levels
-	    color = threshold;
-	if (calcmode == 'B')
-	    {
-	    if (color >= colours)				// don't use color 0 unless from inside
-		if (colours < 16)
-		    color &= andcolor;
-		else
-		    color = ((color - 1) % andcolor) + 1;  // skip color zero 
-	    }
-/*
-	if ((type == SPECIALNEWT || type == MATEIN) && special != 0)  // split colours
-	    {
-	    if (phaseflag == 1)				// second phase
-		*color += special;
-	    else if (phaseflag == 2)			// third phase
-		*color += (special << 1);
-	    }						// default first phase
-*/
-
-    
-	if (*ghMutex != NULL)
-	    WaitForSingleObject(*ghMutex, INFINITE);  // no time-out interval
-	if (_3dflag)
-	    projection(col, row, color);
-	else if (pairflag)
-	    do_stereo_pairs(col, row, color);
-// we need to take symmetry into account when calculating smoothing.
-//	else if (smoothing)
-//	    {
-//	    RGBTRIPLE SmoothCol = GetSmoothedColour(FloatIteration, ColourSpeed, *TrueCol, &Plot);
-//	    Plot.OutRGBpoint(col/* + xStart*/, ydots - 1 - row, SmoothCol);
-//	    }
-	else
-	    plot((WORD)col, (WORD)row, color);
-	if (*ghMutex != NULL)
-	    ReleaseMutex(*ghMutex);
-	return(color);
+		color = ((color - 1) % andcolor) + 1;  // skip color zero 
 	}
+/*
+    if ((type == SPECIALNEWT || type == MATEIN) && special != 0)  // split colours
+	{
+	if (phaseflag == 1)				// second phase
+	    *color += special;
+	else if (phaseflag == 2)			// third phase
+	    *color += (special << 1);
+	}						// default first phase
+*/
+    
+    if (*ghMutex != NULL)
+	WaitForSingleObject(*ghMutex, INFINITE);  // no time-out interval
+    if (_3dflag)
+	projection(col, row, color);
+    else if (pairflag)
+	do_stereo_pairs(col, row, color);
+    // we need to take symmetry into account when calculating smoothing.
+    //  else if (smoothing)
+    //	    {
+    //	    RGBTRIPLE SmoothCol = GetSmoothedColour(FloatIteration, ColourSpeed, *TrueCol, &Plot);
+    //	    Plot.OutRGBpoint(col/* + xStart*/, ydots - 1 - row, SmoothCol);
+    //	    }
+    else
+	plot((WORD)col, (WORD)row, color);
+    if (*ghMutex != NULL)
+	ReleaseMutex(*ghMutex);
+    return(color);
+    }
 
 /**************************************************************************
 	Plot orbits

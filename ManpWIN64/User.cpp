@@ -24,6 +24,7 @@
 #include	"Pixel.h"
 #include	"Matrix.h"
 #include	"BigMatrix.h"
+#include	"SafeStrings.h"
 #include	"..\parser\TrigFn.h"
 
 /**************** Big Number Globals *********************/
@@ -208,7 +209,7 @@ extern	int	setup_Perturbation(void);		// count how many Perturbation fractals th
 //extern	void	FilterPoint(WORD, WORD, DWORD);
 
 int	GetParamData(HWND, LPSTR, LPSTR, LPSTR, BOOL);
-void	BasicFractData(char *, BOOL);
+void	BasicFractData(StringBuilder& sb, BOOL);
 
 //extern	double 	*wpixels;			// an array of doubles holding slope modified iteration counts
 extern	CDib		Dib;
@@ -308,9 +309,13 @@ void	output_batch(double h, double v, double w, HWND hwnd, LPSTR filename)
     char	ascii[6];
     long	i, k;
 
+    info[0] = '\0';
+    StringBuilder sb(info, sizeof(info));
+
+
     if ((fb = fopen(filename, "w")) == NULL)
 	{
-	wsprintf(s, "\nCan't open file: %s for save", filename);
+	_snprintf_s(s, 400, _TRUNCATE, "\nCan't open file: %s for save", filename);
 	MessageBox (hwnd, s, "View", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return;
@@ -339,7 +344,7 @@ void	output_batch(double h, double v, double w, HWND hwnd, LPSTR filename)
 	fprintf(fb, " -t%d", threshold);
 
 	*info = '\0';
-	BasicFractData(info, FALSE);
+	BasicFractData(sb, FALSE);
 	fprintf(fb, "%s\n", info);
 	fprintf(fb, "Palette=\n");
 	for (i = 0, k = 0; i < threshold; i++, k++)
@@ -802,7 +807,6 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 **************************************************************************/
 
 void	setup_defaults(void)
-
     {
     int	i;
 
@@ -1097,7 +1101,7 @@ void	GetParam(HWND hwnd, LPSTR filename, LPSTR szSaveFileName)
     setup_defaults();
     if ((fp = fopen(filename, "r")) == NULL)
 	{
-	wsprintf(s, "Can't open param file: %s for read", filename);
+	_snprintf_s(s, 200, _TRUNCATE, "Can't open param file: %s for read", filename);
 	MessageBox (hwnd, s, "View", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return;
@@ -1112,7 +1116,7 @@ void	GetParam(HWND hwnd, LPSTR filename, LPSTR szSaveFileName)
 					    // Add null to end string
     if (ch == -1)
 	{
-	wsprintf(s, "Can't find info in file: %s", filename);
+	_snprintf_s(s, 200, _TRUNCATE, "Can't find info in file: %s", filename);
 	MessageBox (hwnd, s, "View", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	fclose(fp);
@@ -1285,7 +1289,7 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 			    }
 			param[0] = 0.0;
 			param[1] = 0.0;
-			sprintf(s, "Deep Zooming Limit (%d decimals) exceeded", SIZEOF_BF_VARS);
+			SAFE_SPRINTF(s, "Deep Zooming Limit (%d decimals) exceeded", SIZEOF_BF_VARS);
 			MessageBox(hwnd, s, "ManpWin", MB_ICONEXCLAMATION | MB_OK);
 			MessageBeep(0);
 			return -1;
@@ -1318,7 +1322,7 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 			q = token + 8 + strlen(SaveString);	// pointer to the end of the formula string to ensure we don't trap on minus signs in the formula
 			if (analyse_fractal(hwnd, token + 2, SaveString, q) < 0)
 			    {
-			    sprintf(s, "Unknown Fractal <%d> in PAR file", type);
+			    SAFE_SPRINTF(s, "Unknown Fractal <%d> in PAR file", type);
 			    MessageBox (hwnd, s, "ManpWin", MB_ICONEXCLAMATION | MB_OK);
 			    MessageBeep (0);
 			    type = MANDELFP;
@@ -1428,9 +1432,9 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 		case 'U':				// Palette parameters (keep for hysterical reasons)
 
 #ifdef DEBUG
-wsprintf(s, " i%d,%d,%d,%d,%d,%d", 
-		RedStartInt, GreenStartInt, BlueStartInt, RedIncInt, GreenIncInt, BlueIncInt);
-MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
+		    _snprintf_s(s, 200, _TRUNCATE, " i%d,%d,%d,%d,%d,%d",
+			    RedStartInt, GreenStartInt, BlueStartInt, RedIncInt, GreenIncInt, BlueIncInt);
+		    MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
 		    if (*(token + 2))		// modify Palette parameters?
@@ -1442,9 +1446,8 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 //			TrueColourFlag = FALSE;
 
 #ifdef DEBUG
-wsprintf(s, " o%d,%d,%d,%d,%d,%d", 
-		RedStartInt, GreenStartInt, BlueStartInt, RedIncInt, GreenIncInt, BlueIncInt);
-MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
+		    _snprintf_s(s, MAXLINE, _TRUNCATE, " o%d,%d,%d,%d,%d,%d", RedStartInt, GreenStartInt, BlueStartInt, RedIncInt, GreenIncInt, BlueIncInt);
+		    MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 #endif
 		    break;
 		case 'V':				// bailout limit
@@ -1469,9 +1472,9 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 		    if (token > q)			// we are past a formula string
 			{
 #ifdef DEBUG
-			wsprintf(s, "Faulty Token <%s> in file: %s for read tok=%x, q=%x", token, filename, token, q);
+			_snprintf_s(s, 200, _TRUNCATE, "Faulty Token <%s> in file: %s for read tok=%x, q=%x", token, filename, token, q);
 #else
-			wsprintf(s, "Faulty Token <%s> in file: %s for read", token, filename);
+			_snprintf_s(s, 200, _TRUNCATE, "Faulty Token <%s> in file: %s for read", token, filename);
 #endif
 			MessageBox (hwnd, s, "Paul's Fractals", MB_ICONEXCLAMATION | MB_OK);
     			MessageBeep (0);
@@ -1479,7 +1482,7 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 #ifdef DEBUG
 		    else
 			{
-			wsprintf(s, "Inside saved string tok=%x, q=%x", token, q);
+			_snprintf_s(s, 200, _TRUNCATE, "Inside saved string tok=%x, q=%x", token, q);
 			MessageBox (hwnd, s, "Paul's Fractals", MB_ICONEXCLAMATION | MB_OK);
 			}
 #endif
@@ -1493,9 +1496,9 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 	    if (token > q)					// we are past a formula string
 		{
 #ifdef DEBUG
-		wsprintf(s, "Faulty Token <%s> (not '-') in file: %s for read tok=%x, q=%x", token, filename, token, q);
+		_snprintf_s(s, MAXLINE, _TRUNCATE, "Faulty Token <%s> (not '-') in file: %s for read tok=%x, q=%x", token, filename, token, q);
 #else
-		wsprintf(s, "Faulty Token <%s> (not '-') in file: %s for read", token, filename);
+		_snprintf_s(s, MAXLINE, _TRUNCATE, "Faulty Token <%s> (not '-') in file: %s for read", token, filename);
 #endif
 		MessageBox (hwnd, s, "Paul's Fractals", MB_ICONEXCLAMATION | MB_OK);
 		MessageBeep (0);         
@@ -1503,7 +1506,7 @@ MessageBox (hwnd, s, "", MB_ICONEXCLAMATION | MB_OK);
 #ifdef DEBUG
 	    else
 		{
-		wsprintf(s, "Inside saved string 2 tok=%x, q=%x", token, q);
+		_snprintf_s(s, MAXLINE, _TRUNCATE, "Inside saved string 2 tok=%x, q=%x", token, q);
 		MessageBox (hwnd, s, "Paul's Fractals", MB_ICONEXCLAMATION | MB_OK);
 		}
 #endif
@@ -1591,7 +1594,10 @@ char	*FractData(void)
     char	*s1 = nullptr;
     char	*s2 = nullptr;
     char	*s3 = nullptr;
-    static	char	info[SIZEOF_BF_VARS*3+12];	// extra 12 bytes for "-c", "-t", spaces and threshold
+    static	char	info[MAXDATALINE];	// extra SIZEOF_BF_VARS bytes for "-c", "-t" etc, spaces and values
+
+    info[0] = '\0';
+    StringBuilder sb(info, sizeof(info));
 
     if (BigNumFlag)
 	{
@@ -1601,11 +1607,7 @@ char	*FractData(void)
 	BigHor.ToString(s1, SIZEOF_BF_VARS, false);
 	BigVert.ToString(s2, SIZEOF_BF_VARS, false);
 	BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
-	//	ConvertBignum2String(s1, BigHor.x);
-	//	ConvertBignum2String(s2, BigVert.x);
-	//	mpfr_sprintf(s3, "%.20Re", BigWidth.x);
-	//	ConvertBignum2String(s3, BigWidth.x);
-	sprintf(info, "-c%s,%s,%s -t%d", s1, s2, s3, threshold);
+	sb.append("-c%s,%s,%s -t%d", s1, s2, s3, threshold);
 	if (s1) delete[] s1;
 	if (s2) delete[] s2;
 	if (s3) delete[] s3;
@@ -1613,13 +1615,13 @@ char	*FractData(void)
     else
 	{
 //    if (mandel_width < 0.00000001)
-//	sprintf(info, "-c%15.15f,%15.15f,%-15.6g,%6.6f,%6.6f -t%d", hor, vert, mandel_width, pert_real, pert_imag, threshold);
+//	SAFE_SPRINTF(info, "-c%15.15f,%15.15f,%-15.6g,%6.6f,%6.6f -t%d", hor, vert, mandel_width, pert_real, pert_imag, threshold);
 //    else
-//	sprintf(info, "-c%15.15f,%15.15f,%15.15f,%6.6f,%6.6f -t%d", hor, vert, mandel_width, pert_real, pert_imag, threshold);
-	    sprintf(info, "-c%24.24f,%24.24f,%24.24f -t%d", hor, vert, mandel_width, threshold);
+//	SAFE_SPRINTF(info, "-c%15.15f,%15.15f,%15.15f,%6.6f,%6.6f -t%d", hor, vert, mandel_width, pert_real, pert_imag, threshold);
+	sb.append("-c%24.24f,%24.24f,%24.24f -t%d", hor, vert, mandel_width, threshold);
 	}
-    BasicFractData(info, FALSE);
-    strcat(info, "\n");
+    BasicFractData(sb, FALSE);
+    sb.append("\n");
     return info;
     }
 
@@ -1627,60 +1629,51 @@ char	*FractData(void)
 	Fractal data to string (used to build PNG file data)
 **************************************************************************/
 
-void	BasicFractData(char *info, BOOL CreateAnim)
+void	BasicFractData(StringBuilder& sb, BOOL CreateAnim)
 
     {
-    char	s[1024];
+//    char	s[1024];
     char	SubTypeName[1024];
     int		i, flags;
 
-    sprintf(s, " -i%d,%d,%d,%d", TrueCol.inside_colour, TrueCol.InsideRed, TrueCol.InsideGreen, TrueCol.InsideBlue);
-    strcat(info, s);
+    sb.append(" -i%d,%d,%d,%d", TrueCol.inside_colour, TrueCol.InsideRed, TrueCol.InsideGreen, TrueCol.InsideBlue);
     if (calcmode == 'G')
-	sprintf(s, " -MG%d", blockindex);	// for solid guessing
+	sb.append(" -MG%d", blockindex);	// for solid guessing
     else if (calcmode == 'T')
-	sprintf(s, " -MT%ld", fillcolor);	// tesseral fill colour
+	sb.append(" -MT%ld", fillcolor);	// tesseral fill colour
     else if (calcmode == 'F')
-	sprintf(s, " -MF%f,%d,%f,%f,%f", bump_transfer_factor, PaletteStart, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength);
+	sb.append(" -MF%f,%d,%f,%f,%f", bump_transfer_factor, PaletteStart, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength);
     else
-	sprintf(s, " -M%c", calcmode);
-    strcat(info, s);
+	sb.append(" -M%c", calcmode);
 
     if (NonStandardImage)			// not full screen view
 	{
-	sprintf(s, " -G%d,%d", width, height);
-	strcat(info, s);
+	sb.append(" -G%d,%d", width, height);
 	}
     		
     if (InsideMethod)
 	{
-	sprintf(s, " -DI%03d", InsideMethod);	// display method
-	strcat(info, s);
+	sb.append(" -DI%03d", InsideMethod);	// display method
 	if (OutsideMethod > TIERAZONFILTERS)
 	    {
-	    sprintf(s, ",%f,%d,%d", dStrands, nFDOption, UseCurrentPalette);	// Parameters for the Tierazon filters
-	    strcat(info, s);
+	    sb.append(",%f,%d,%d", dStrands, nFDOption, UseCurrentPalette);	// Parameters for the Tierazon filters
 	    }
 	else if (OutsideMethod == POTENTIAL)
 	    {
-	    sprintf(s, ",%f,%f,%f", potparam[0], potparam[1], potparam[2]);	// Parameters for potential
-	    strcat(info, s);
+	    sb.append(",%f,%f,%f", potparam[0], potparam[1], potparam[2]);	// Parameters for potential
 	    }
 	}
     if (OutsideMethod)
 	{
-	sprintf(s, " -DO%03d", OutsideMethod);	// display method
-	strcat(info, s);
+	sb.append(" -DO%03d", OutsideMethod);	// display method
 	}
-    //    if (palette_flag && !CreateAnim)
+//    if (palette_flag && !CreateAnim)
 //	{
-//	sprintf(s, " -a\"%s\"", MAPFile);
-//	strcat(info, s);
+//	sb.append(" -a\"%s\"", MAPFile);
 //	}
     if (juliaflag)
 	{
-	sprintf(s, " -J%13.13f,%13.13f", j.x, j.y);
-	strcat(info, s);
+	sb.append(" -J%13.13f,%13.13f", j.x, j.y);
 	}
     switch(type)
 	{
@@ -1713,11 +1706,11 @@ void	BasicFractData(char *info, BOOL CreateAnim)
 	case FPPOPCORNJUL:
 	case LPOPCORNJUL:
 //	case PERPBURNINGSHIP:
-	    sprintf(s, " -f%03d", type);
+	    sb.append(" -f%03d", type);
 	    break;					// default
 	case NEWTON:
 	case NEWTBASIN:					// Newton Fractal (basin or stripe)
-	    sprintf(s, " -f%03d%03d%03d%03d", type, subtype, degree, special);
+	    sb.append(" -f%03d%03d%03d%03d", type, subtype, degree, special);
 	    break;
 	case HENON:
 	case MALTHUS:
@@ -1730,11 +1723,11 @@ void	BasicFractData(char *info, BOOL CreateAnim)
 	case APOLLONIUSIFS:
 	case SIERPINSKIFLOWERS:
 	case MANDELDERIVATIVES:
-	    sprintf(s, " -f%03d%d", type, subtype);
+	    sb.append(" -f%03d%d", type, subtype);
 	    break;					// default
 	case PERTURBATION:
 	    FindSubtypeName(SubTypeName, type, subtype);
-	    sprintf(s, " -f%03d\"%s\",%d,%lf,%lf,%lf,%d,%s", type, SubTypeName, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, (EnableApproximation ? "true" : "false"));
+	    sb.append(" -f%03d\"%s\",%d,%lf,%lf,%lf,%d,%s", type, SubTypeName, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, (EnableApproximation ? "true" : "false"));
 	    break;
 	case FRACTALMAPS:
 	case SPROTTMAPS:
@@ -1744,179 +1737,153 @@ void	BasicFractData(char *info, BOOL CreateAnim)
 	case OSCILLATORS:
 	    flags = ((type == OSCILLATORS) ? DisplayLines : ((type == FRACTALMAPS || type == SPROTTMAPS) ? FractalMapColouring : RemoveHiddenPixels)) + (CoordSystem << 1) + BlockAnimation + FindCentre + PerspectiveFlag;
 	    FindSubtypeName(SubTypeName, type, subtype);
-	    sprintf(s, " -f%03d\"%s\",%d,%d,%d,%d,%d,%f,%f,%f,%f", type, SubTypeName, (xAxis+1)*xSign, (yAxis+1)*ySign, zAxis+1, flags, MaxDimensions, iterations, VertBias, dt, zBias);
+	    sb.append(" -f%03d\"%s\",%d,%d,%d,%d,%d,%f,%f,%f,%f", type, SubTypeName, (xAxis+1)*xSign, (yAxis+1)*ySign, zAxis+1, flags, MaxDimensions, iterations, VertBias, dt, zBias);
 	    break;
 	case FOURIER:					// fourier;which type;harmonics;steps
-	    sprintf(s, " -f%03d%03d%03d%04d%s", type, subtype, NumHarmonics, steps, WriteSliders());
+	    sb.append(" -f%03d%03d%03d%04d%s", type, subtype, NumHarmonics, steps, WriteSliders());
 	    break;
 	case NEWTONVARIATION:				// Newton Variation fractals
 	case NEWTONPOLYGON:				// Newton Polygon types
 	case POWER:					// POWER types
 	case BURNINGSHIPPOWER:				// Burning Ship of other powers besides quadratic
-	    sprintf(s, " -f%03d%d", type, degree);
+	    sb.append(" -f%03d%d", type, degree);
 	    break;
 	case LSYSTEM:					// lsys;which one in file;order;filename
-	    sprintf(s, " -f%03d%03d%03d\"%s\"", type, lsys_ptr, degree, LSYSFile);
+	    sb.append(" -f%03d%03d%03d\"%s\"", type, lsys_ptr, degree, LSYSFile);
 	    break;
 	case CUBIC:					// CUBIC types
 	case RATIONALMAP:				// Rational Maps
 	case EXPFRACTAL:				// Exponential
-	    sprintf(s, " -f%03d%03d%03d", type, subtype, special);
+	    sb.append(" -f%03d%03d%03d", type, subtype, special);
 	    break;
 	case SPECIALNEWT:
 	case SINFRACTAL:				// sin() type fractal
 	case MATEIN:					// MATEIN
-	    sprintf(s, " -f%03d%d", type, special);
+	    sb.append(" -f%03d%d", type, special);
 	    break;
 	case FIBONACCI:					// Fibonacci Spirals
-	    sprintf(s, " -f%03d%d", type, subtype);
+	    sb.append(" -f%03d%d", type, subtype);
 	    break;
 	case TIERAZON:					// Tierazon fractals
 //	case MARCUSMANDEL:				// general Marcus fractal
-	    sprintf(s, " -f%03d%03d", type, subtype);
+	    sb.append(" -f%03d%03d", type, subtype);
 	    break;
 	case SCREENFORMULA:				// On Screen Formula fractals
 	case FORMULA:					// formula files
 	case FFORMULA:
-	    sprintf(s, " -f%03d\"%s\"", type, FormulaString);
+	    sb.append(" -f%03d\"%s\"", type, FormulaString);
 	    break;
 	case IFS:					// IFS fractals
-	    sprintf(s, " -f%03d%03d\"%s\"", type, lsys_ptr, IFSFile);
+	    sb.append(" -f%03d%03d\"%s\"", type, lsys_ptr, IFSFile);
 	    break;
 	case LYAPUNOV:					// Lyapunov fractals
-	    sprintf(s, " -f%03d -#%s", type, LyapSequence);
+	    sb.append(" -f%03d -#%s", type, LyapSequence);
 	    break;
 	default:
-	    sprintf(s, " -f%03d%d", type, subtype);
+	    sb.append(" -f%03d%d", type, subtype);
 	}
-    strcat(info, s);
     if (logval)
 	{
-	sprintf(s, " -l%d", logval);
-	strcat(info, s);
+	sb.append(" -l%d", logval);
 	}
-    sprintf(s, " -u%d,%d,%d,%d,%d,%d", TrueCol.RedStartInt, TrueCol.GreenStartInt, TrueCol.BlueStartInt, TrueCol.RedIncInt, TrueCol.GreenIncInt, TrueCol.BlueIncInt);
-    strcat(info, s);
+    sb.append(" -u%d,%d,%d,%d,%d,%d", TrueCol.RedStartInt, TrueCol.GreenStartInt, TrueCol.BlueStartInt, TrueCol.RedIncInt, TrueCol.GreenIncInt, TrueCol.BlueIncInt);
     if (pairflag)
 	{
-	sprintf(s, " -h%d", pairflag);
-	strcat(info, s);
+	sb.append(" -h%d", pairflag);
 	}
     if (RotationAngle != NORMAL)
 	{
 	if (RotationAngle != 90 && RotationAngle != 180 && RotationAngle != 270)
-	    sprintf(s, " -o%d,%lf,%lf", RotationAngle, RotationCentre.x, RotationCentre.y);
+	    sb.append(" -o%d,%lf,%lf", RotationAngle, RotationCentre.x, RotationCentre.y);
 	else
-	    sprintf(s, " -o%d", RotationAngle);
-	strcat(info, s);
+	    sb.append(" -o%d", RotationAngle);
 	}
     if (AutoStereo_value != 75)
 	{
-	sprintf(s, " -r%d", AutoStereo_value * stereo_sign);
-	strcat(info, s);
+	sb.append(" -r%d", AutoStereo_value * stereo_sign);
 	}
     if (PerspectiveFlag)
 	{
-	sprintf(s, " -2%lf,%lf,%lf,%lf,%lf,%lf", sclx, scly, sclz, x_rot, y_rot, z_rot);
-	strcat(info, s);
+	sb.append(" -2%lf,%lf,%lf,%lf,%lf,%lf", sclx, scly, sclz, x_rot, y_rot, z_rot);
 	}
     if (_3dflag || ifs_type == 1)
 	{
-	sprintf(s, " -3%lf,%lf,%lf,%lf,%lf,%lf", sclx, scly, sclz, x_rot, y_rot, z_rot);
-	strcat(info, s);
+	sb.append(" -3%lf,%lf,%lf,%lf,%lf,%lf", sclx, scly, sclz, x_rot, y_rot, z_rot);
 	}
     if (period_level != 1)
 	{
-	sprintf(s, " -p%d", period_level);
-	strcat(info, s);
+	sb.append(" -p%d", period_level);
 	}
     if (decomp > 0)
 	{
-	sprintf(s, " -k%d", decomp);
-	strcat(info, s);
+	sb.append(" -k%d", decomp);
 	}
     if (biomorph >= 0)
 	{
-	sprintf(s, " -b%d", biomorph);
-	strcat(info, s);
+	sb.append(" -b%d", biomorph);
 	}
     if (distest > 0)
 	{
-	sprintf(s, " -$%d,%d", distest, distestwidth);
-	strcat(info, s);
+	sb.append(" -$%d,%d", distest, distestwidth);
 	}
     if ((CoordSystem != CARTESIAN))
 	{
-	sprintf(s, " -q%d", CoordSystem);
-	strcat(info, s);
+	sb.append(" -q%d", CoordSystem);
 	}
     if (invert)
 	{
-	sprintf(s, " -x%f,%f,%f", f_radius, f_xcenter, f_ycenter);
-	strcat(info, s);
+	sb.append(" -x%f,%f,%f", f_radius, f_xcenter, f_ycenter);
 	}
     if (StartColourCycling > 0)
 	{
-	sprintf(s, " -y%d", StartColourCycling);
-	strcat(info, s);
+	sb.append(" -y%d", StartColourCycling);
 	}
 //    fprintf(fb, " %%1 %%2 %%3\n");
     if (Fractal.NumFunct > 0)
 	{
 	if (Fractal.NumFunct  == 1)
-	    sprintf(s, " -n%s", Fractal.Fn1);
+	    sb.append(" -n%s", Fractal.Fn1);
 	else if (Fractal.NumFunct == 2)
-	    sprintf(s, " -n%s,%s", Fractal.Fn1, Fractal.Fn2);
-	strcat(info, s);
+	    sb.append(" -n%s,%s", Fractal.Fn1, Fractal.Fn2);
 	}
     if (ColourSpeed != 0.0)		// used for colour smoothing
 	{
-	sprintf(s, " -~%lf", ColourSpeed);
-	strcat(info, s);
+	sb.append(" -~%lf", ColourSpeed);
 	}
     if (PalOffset > 0)			// begin palette here
 	{
-	sprintf(s, " -^%d", PalOffset);
-	strcat(info, s);
+	sb.append(" -^%d", PalOffset);
 	}
     if (IterDiv != 1.0)			// divide ieration by this amount
 	{
-	sprintf(s, " -@%lf", IterDiv);
-	strcat(info, s);
+	sb.append(" -@%lf", IterDiv);
 	}
 
     if (type == OSCILLATORS ||type == FRACTALMAPS || type == SPROTTMAPS ||type == SURFACES || type == KNOTS || type == CURVES)	// these have a different database
 	{
 	if (NumVariables > 0)						// variables are stored in param[10] to param[19]
 	    {
-	    sprintf(s, " -w");
-	    strcat(info, s);
+	    sb.append(" -w");
 	    for (i = 0; i < NumVariables + 10 - 1; i++)
 		{
-		sprintf(s, "%g,", param[i]);
-		strcat(info, s);
+		sb.append("%g,", param[i]);
 		}
-	    sprintf(s, "%g", param[i]);					// last one without the ','
-	    strcat(info, s);
+	    sb.append("%g", param[i]);					// last one without the ','
 	    }
 	}
     else
 	{
 	if (Fractal.NumParam > 0)
 	    {
-	    sprintf(s, " -w");
-	    strcat(info, s);
+	    sb.append(" -w");
 	    for (i = 0; i < Fractal.NumParam - 1; i++)
 		{
-		sprintf(s, "%g,", param[i]);
-		strcat(info, s);
+		sb.append("%g,", param[i]);
 		}
-	    sprintf(s, "%g", param[i]);			// last one without the ','
-	    strcat(info, s);
+	    sb.append("%g", param[i]);					// last one without the ','
 	    }
 	}
-    sprintf(s, " -v%lf,%d", *Fractal.rqlim, BailoutTestType);
-    strcat(info, s);
+    sb.append(" -v%lf,%d", *Fractal.rqlim, BailoutTestType);
     }
 
 /**************************************************************************

@@ -12,6 +12,7 @@
 #include <windows.h>
 #include <fcntl.h>
 #include <vector>
+#include <atomic>
 #define  VIEWMAIN
 #include "manpwin.h"
 #include "resource.h"
@@ -25,6 +26,7 @@ void	ClearScreen(void);
 
 void	GetRealClientRect (HWND, PRECT);
 void	SetScrollRanges(HWND);
+void	WaitForThreadsToFinish(std::vector<BYTE>& threadComplete, int numberThreads);
 
 HPALETTE 	 	hpal = NULL;
 std::vector<float> wpixels;			// an array of doubles holding slope modified iteration counts
@@ -34,6 +36,7 @@ extern	int	mandel(HWND);
 extern	void	SetupView(HWND);
 extern	void	ClosePtrs(void);
 extern	int	CopyPictureToClipboard(HWND);
+extern	void	HardStopNow(HWND hwnd, const char* reason);
 
 extern	int     file_type;
 extern	DWORD	dwStyle;			// style of current window
@@ -50,6 +53,17 @@ extern	WORD	special;			// special colour, phase etc
 //extern	BYTE	degree;				// power
 extern	HWND	CallingWindowHandle;		// Is ManpWIN called by an external window via WM_COPYDATA message?
 extern	int	ReplyUsingDIB;			// 2 for Device Context, 1 for DIB/WM_COPYDATA and 0 for clipboard
+
+extern	int	ThreadCompletionDelay;
+extern	int	ThreadEndingDelay;
+extern	int	NumberThreads;			// number of threads for multi-threading
+extern	int	CurrentRenderMode;		// to decide how to exit threads cleanly
+
+extern	std::vector<BYTE>   SlopeThreadComplete;
+extern	std::vector<BYTE>   PixelThreadComplete;// keep BYTE (you’re right)
+extern	std::vector<BYTE>   PertThreadComplete;
+
+extern	std::atomic<bool> gStopRequested;	// force early exit
 
 int		fdin;				// FILE descripter
 int		height, xdots, ydots, width, bits_per_pixel, planes;
@@ -80,7 +94,6 @@ CDib		Dib;				// Device Independent Bitmap
 **************************************************************************/
 
 int	mainview(HWND hwnd, BOOL FileFlag)
-
     {
     char		*szAppName = "Paul's Fractals";
     HANDLE		hfiledata = (HANDLE)NULL;			
@@ -125,6 +138,23 @@ int	mainview(HWND hwnd, BOOL FileFlag)
     xdots = width;
     ydots = height;
 
+    HardStopNow(hwnd, "image size change");
+
+    switch (CurrentRenderMode)
+	{
+	case RENDER_PIXEL:
+	    WaitForThreadsToFinish(PixelThreadComplete, NumberThreads);
+	    break;
+
+	case RENDER_PERT:
+	    WaitForThreadsToFinish(PertThreadComplete, NumberThreads);
+	    break;
+
+	case RENDER_SLOPE:
+	    WaitForThreadsToFinish(SlopeThreadComplete, NumberThreads);
+	    break;
+	}
+
     SetupView(hwnd);
 
     ClosePtrs();							    // ready for next screen
@@ -149,38 +179,37 @@ int	mainview(HWND hwnd, BOOL FileFlag)
 	}
     // reset all the image parameters for the pixel plotting routines
     Plot.InitPlot(threshold, &TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib.BitsPerPixel, &Dib, USEPALETTE + USEWPIXELS);
-
-
-#ifdef DEBUG
-MessageBox (hwnd, "About to decode file in mainview()!", szAppName, MB_ICONEXCLAMATION | MB_OK);
-#endif
-
-#ifdef DEBUG
-wsprintf(s, "iNumColors = %d, colours = %d", iNumColors, colours);
-MessageBox (hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
-#endif
-
-#ifdef DEBUG
-wsprintf(s, "Width = %d, Height = %d, xdots = %d, ydots = %d, order = %d, length = %d", 
-						width, height, xdots, ydots, order, length);
-MessageBox (hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
-#endif
-
-#ifdef DEBUG
-wsprintf(s, "bits_per_pixel = %d, file_type = %d, iNumColors = %d", bits_per_pixel, file_type, iNumColors);
-MessageBox (hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
-#endif
-
-#ifdef DEBUG
-wsprintf(s, "Pic mem -> screen! File colours = %d, screen colours = %ld", colours, screen_colours);
-MessageBox (hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
-#endif
-
-#ifdef DEBUG
-MessageBox (hwnd, "Leaving mainview()!", szAppName, MB_ICONEXCLAMATION | MB_OK);
-#endif
+    gStopRequested.store(false, std::memory_order_relaxed);
 
     return (TRUE);
+    }
+
+/**************************************************************************
+	Wait for all threads to be complete
+**************************************************************************/
+
+void	WaitForThreadsToFinish(std::vector<BYTE>& threadComplete, int numberThreads)
+    {
+    bool allDone = false;
+
+    while (!allDone)
+	{
+	allDone = true;
+
+	for (int i = 0; i < numberThreads; ++i)
+	    {
+	    if (threadComplete[i] == 0)
+		{
+		allDone = false;
+		break;
+		}
+	    }
+
+	if (!allDone)
+	    Sleep(ThreadCompletionDelay);
+	}
+
+    Sleep(ThreadEndingDelay);
     }
 
 /**************************************************************************
@@ -225,7 +254,7 @@ int	SendCopydataMessage(HWND hwnd, char *szAppName)
 	    FracData.cbData = Dib.pDibInf->bmiHeader.biSize + Dib.pDibInf->bmiHeader.biSizeImage;
 	    if ((MessageArray = (BYTE *)GlobalAlloc(GMEM_FIXED, Dib.pDibInf->bmiHeader.biSize + Dib.pDibInf->bmiHeader.biSizeImage + 4096L)) == NULL)
 		{
-		wsprintf(t, "Can't allocate memory for DIB Message");
+		_snprintf_s(t, 640, _TRUNCATE, "Can't allocate memory for DIB Message");
 		MessageBox (hwnd, t, szAppName, MB_ICONEXCLAMATION | MB_OK);
 		MessageArray = NULL;
 		MessageBeep (0);
@@ -238,7 +267,7 @@ int	SendCopydataMessage(HWND hwnd, char *szAppName)
 
 #ifdef DEBUG
 	test = (LPBITMAPINFO) FracData.lpData;
-	wsprintf(t, "Header info\nHeader Size (4 Bytes) = %ld\nWidth (4 Bytes) = %ld\nHeight (4 Bytes) = %ld\nImage Size (4 Bytes) = %ld\nPlanes (2 Bytes) = %d\nBits/pixel (2 Bytes) = %d\nCompression (4 Bytes) = %ld\nXPels (4 Bytes) = %ld\nYPels (4 Bytes) = %ld\nColours used (4 Bytes) = %ld\nColours impotrant (4 Bytes) = %ld\n", 
+	_snprintf_s(s, 200, _TRUNCATE, "Header info\nHeader Size (4 Bytes) = %ld\nWidth (4 Bytes) = %ld\nHeight (4 Bytes) = %ld\nImage Size (4 Bytes) = %ld\nPlanes (2 Bytes) = %d\nBits/pixel (2 Bytes) = %d\nCompression (4 Bytes) = %ld\nXPels (4 Bytes) = %ld\nYPels (4 Bytes) = %ld\nColours used (4 Bytes) = %ld\nColours impotrant (4 Bytes) = %ld\n",
 		test->bmiHeader.biSize,
 		test->bmiHeader.biWidth,
 		test->bmiHeader.biHeight,

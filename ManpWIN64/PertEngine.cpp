@@ -139,7 +139,7 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
     MaxRefIteration = MaxRefIterationIn;
     ArithType = ArithTypeIn;
 
-    ThreadComplete = 0;	    // false
+    ThreadComplete = false;
 
     if (SlopeType == DERIVSLOPE)
 	{
@@ -174,7 +174,7 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
 
     if (height <= 0)
 	{
-	sprintf(PertErrorMessage, "calculateOneFrame has negative height=%d", height);
+	_snprintf_s(PertErrorMessage, MAXLINE, _TRUNCATE, "calculateOneFrame has negative height=%d", height);
 	return -2;
 	}
 
@@ -192,7 +192,7 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
 		strcpy(UseBigWidthStr, " Duble");
 	    else
 		strcpy(UseBigWidthStr, " Exp");
-	    sprintf(StatusBarInfo, "Th=%d, (%d%%)%s", thread, lastChecked, UseBigWidthStr);
+	    _snprintf_s(StatusBarInfo, MAXLINE, _TRUNCATE, "Th=%d, (%d%%)%s", thread, lastChecked, UseBigWidthStr);
 	    if (Multi)
 		{
 		*pPertProgress = lastChecked;
@@ -211,7 +211,7 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
 	    int	iteration = 0;
 	    for (int x = StripStart; x < StripEnd; x++)
 		{
-		if (gStopRequested)
+		if (AbortRequested())
 		    return -1;
 
 		if (x >= xdots)		// <-- the whole trick
@@ -261,7 +261,7 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
 	    }
 	}
 
-    ThreadComplete = 1;	    // true
+    ThreadComplete = true;
     return 0;
     }
 

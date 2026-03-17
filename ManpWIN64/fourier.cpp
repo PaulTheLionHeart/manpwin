@@ -16,6 +16,7 @@
 #include	"Dib.h"
 #include	"preview.h"
 #include	"Plot.h"
+#include	"SafeStrings.h"
 
 #define	PREVIEW_HEIGHT	168
 #define	PREVIEW_WIDTH	180
@@ -122,8 +123,8 @@ char	*WriteSliders(void)
 	{
 	for (i = 0; i < LEVELS; i++)
 	    {
-	    sprintf(t, ",%d", level[i]);
-	    strcat(buffer, t);;
+	    SAFE_SPRINTF(t, ",%d", level[i]);
+	    strcat_s(buffer, sizeof(buffer), t);
 	    }
 	}
     return buffer;
@@ -369,7 +370,7 @@ int	FourierStep(HWND hwnd, char *FileName, int TotalFrames, int ThisStep, CPlot 
 	    {
 	    for (k = 0; k < ydots; k++)
 		{
-		if (gStopRequested)
+		if (AbortRequested())
 		    return -1;
 		address = WIDTHBYTES((DWORD)width * (DWORD)bits_per_pixel) * k + (xdots / 2 - 3) * 3;
 		memcpy(buffer, Dib.DibPixels.data() + address, (xdots / 2) * 3);
@@ -380,7 +381,7 @@ int	FourierStep(HWND hwnd, char *FileName, int TotalFrames, int ThisStep, CPlot 
 	    }
 	else 
 	    {
-	    if (gStopRequested)
+	    if (AbortRequested())
 		return -1;
 	    Plot.genline((WORD)(OldHorPos - 2), (WORD)(ydots - WaveformArray[index2]),
 		(WORD)((HorPos > OldHorPos) ? (HorPos - 2) : OldHorPos),	// remove retrace
@@ -414,7 +415,7 @@ int	Fourier(void)
 	    {
 	    if (time_to_break)
 		break;
-	    if (gStopRequested)
+	    if (AbortRequested())
 		return -1;
 	    if (FourierStep(PixelHwnd, "", steps, j, Plot) < 0)
 		return 0;
@@ -550,7 +551,7 @@ INT_PTR CALLBACK FourierTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		SendMessage(hCtrl, BM_SETCHECK, PlotCircles, 0L);
 		if (FourierPreview.InitPreview(hDlg) < 0)
 		    {
-		    wsprintf(s, "Error: No memory for preview");
+		    _snprintf_s(s, MAXLINE, _TRUNCATE, "Error: No memory for preview");
 		    MessageBox (hDlg, s, "Paul's Graphics Viewer", MB_ICONEXCLAMATION | MB_OK);
 		    }
 		else
@@ -566,7 +567,7 @@ INT_PTR CALLBACK FourierTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		hCtrl = GET_WM_COMMAND_HWND (wParam, (_int64)lParam);
 		if ((nCtrlID = ((WORD)(GetWindowLong (hCtrl, GWL_ID)))) == 0)
 		    {
-		    wsprintf(s, "Error: Scrollbar fail: <%ld>", GetLastError());
+		    _snprintf_s(s, MAXLINE, _TRUNCATE, "Error: Scrollbar fail: <%ld>", GetLastError());
 		    MessageBox (hDlg, s, "Paul's Graphics Viewer", MB_ICONEXCLAMATION | MB_OK);
 		    }
 
@@ -744,7 +745,7 @@ int	GenFourierScript(HWND hwnd, char *filename)
 
     if ((out = fopen(filename, "w")) == NULL)
 	{
-	sprintf(s, "Cannot open output file %s\nDoes Folder exist?", filename);
+	SAFE_SPRINTF(s, "Cannot open output file %s\nDoes Folder exist?", filename);
 	MessageBox (hwnd, s, "Animation", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -815,7 +816,7 @@ INT_PTR CALLBACK FourierAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			    hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGFILELIST);
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WritePNGFrames = WriteMemFrames = WritePNGList = FALSE;
-			    sprintf(MPGFile, "%s", GenerateAnimFileName (MPGPath, PNGName));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (MPGPath, PNGName));
 			    SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, MPGFile);
 			    }
 			return TRUE;
@@ -831,7 +832,7 @@ INT_PTR CALLBACK FourierAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WriteMPEGFrames = FALSE;
 			    }
-//			sprintf(PNGFile, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
+//			_snprintf_s(PNGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
 //			SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGFile);
 			return TRUE;
 
@@ -846,7 +847,7 @@ INT_PTR CALLBACK FourierAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			if (WriteMPEGFrames)						// generate MPEG filename
 			    {
 			    GetDlgItemText(hDlg, IDC_SEQUENCE_NAME, TempFile, MAX_PATH);
-			    sprintf(MPGFile, "%s", GenerateMPEGFileName (MPGPath, TempFile));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateMPEGFileName (MPGPath, TempFile));
 			    }
 
 			GetDlgItemText(hDlg, IDC_SCRIPT_FILENAME, ScriptFileName, 400);
@@ -855,7 +856,7 @@ INT_PTR CALLBACK FourierAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			    fileptr--;							// remove extension
 			if (*fileptr == '.')
 			    *fileptr = '\0';
-			strcat(ScriptFileName, ".sci");
+			strcat_s(ScriptFileName, MAX_PATH, ".sci");
 			hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
 			StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGDIRECT);

@@ -7,6 +7,7 @@
 #include "complex.h"
 #include "FloatExp.h"
 #include "ExpComplex.h"
+#include "Manpwin.h"
 
 #pragma once
 

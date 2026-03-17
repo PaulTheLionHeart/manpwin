@@ -12,10 +12,13 @@
 // 10) INIT must be executed even in VM_TEST mode, otherwise Formula() will crash.
 
 #include <cassert>
+#include <atomic>
 #include "ParserCtx.h"
 #include "parser.h"   // for Arg, and the existing globals Store/Load etc (extern)
 
 thread_local CParser* CParser::s_current = nullptr;
+
+extern	std::atomic<bool> gStopRequested;	// force early exit
 
 void CParser::InitContextFromGlobals()
     {
@@ -130,8 +133,11 @@ void CParser::RunVmInit()
     m_InitArg2i = (int)(m_ctx.Arg2 - m_ctx.s.data());
     }
 
-void CParser::RunVmIter()
+int CParser::RunVmIter()
     {
+    if (AbortRequested())
+	return RENDER_ABORTED;
+
     m_ctx.sto_pops = true;
 
     m_ctx.OpPtr = m_InitOpPtr;
@@ -144,6 +150,9 @@ void CParser::RunVmIter()
 
     while (m_ctx.OpPtr < (int)m_ctx.LastOp)
 	{
+	if (AbortRequested())
+	    return RENDER_ABORTED;
+
 	void(*fn)(void) = m_ctx.f[m_ctx.OpPtr];
 	if (fn) fn();
 
@@ -155,6 +164,7 @@ void CParser::RunVmIter()
 
 	m_ctx.OpPtr++;
 	}
+    return 0;
     }
 
 

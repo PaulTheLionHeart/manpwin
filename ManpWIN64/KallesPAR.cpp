@@ -667,7 +667,7 @@ int	WriteKallesFile(HWND hwnd, char *filename)
 	ConvertToKallesType(subtype, degree, &power, &FractalType);
     else
 	{
-	wsprintf(s, "Can only write Kalles File if type = Perturbation. Type = <%d>", type);
+	_snprintf_s(s, 200, _TRUNCATE, "Can only write Kalles File if type = Perturbation. Type = <%d>", type);
 	MessageBox(hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
@@ -676,7 +676,7 @@ int	WriteKallesFile(HWND hwnd, char *filename)
 
     if ((fp = fopen(filename, "w")) == NULL)
 	{
-	wsprintf(s, "Can't Open Kalles File: <%s>", filename);
+	_snprintf_s(s, 200, _TRUNCATE, "Can't Open Kalles File: <%s>", filename);
 	MessageBox(hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
@@ -752,7 +752,7 @@ int	ReadKallesFile(HWND hwnd, char *filename)
     RotationAngle = 0;
     if ((fp = fopen(filename, "r")) == NULL)
 	{
-	wsprintf(s, "Can't Open Kalles File: <%s>", filename);
+	_snprintf_s(s, 200, _TRUNCATE, "Can't Open Kalles File: <%s>", filename);
 	MessageBox (hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
@@ -762,7 +762,7 @@ int	ReadKallesFile(HWND hwnd, char *filename)
 	linenum++;
 	if ((i = (int)strlen(buffer)) > BUFFERSIZE - 2)
 	    {
-	    wsprintf(s, "Par Data full line: <%d>", linenum);
+	    _snprintf_s(s, 200, _TRUNCATE, "Par Data full line: <%d>", linenum);
 	    MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	    break;
 	    }

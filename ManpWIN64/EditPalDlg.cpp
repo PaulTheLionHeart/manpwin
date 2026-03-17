@@ -23,6 +23,7 @@
 #include "Preview.h"
 #include "colour.h"
 #include "Plot.h"
+#include "SafeStrings.h"
 
 extern	BYTE	cycleflag;				// do colour cycling
 extern	long	threshold;				// maximum iterations ... called maxiter in FRACTINT
@@ -80,7 +81,7 @@ INT_PTR CALLBACK EditPalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 	       hCtrl = GET_WM_COMMAND_HWND (wParam, (_int64)lParam);
 	       if ((nCtrlID = ((WORD)(GetWindowLong (hCtrl, GWL_ID)))) == 0)
 		   {
-		   wsprintf(s, "Error: Scrollbar fail: <%ld>", GetLastError());
+		   _snprintf_s(s, 480, _TRUNCATE, "Error: Scrollbar fail: <%ld>", GetLastError());
 		   MessageBox (hDlg, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		   }
 
@@ -117,32 +118,32 @@ INT_PTR CALLBACK EditPalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    {
 		    case 0:
 			SetDlgItemInt (hDlg,  IDC_START_RED, color [0], TRUE) ;
-			sprintf(StartRGB, "%02X%02X%02X", color [0], color [1], color [2]);
+			SAFE_SPRINTF(StartRGB, "%02X%02X%02X", color [0], color [1], color [2]);
 			SetDlgItemText(hDlg, IDC_STARTRGB, StartRGB);
 			break;
 		    case 1:
 			SetDlgItemInt (hDlg,  IDC_START_GREEN, color [1], TRUE) ;
-			sprintf(StartRGB, "%02X%02X%02X", color [0], color [1], color [2]);
+			SAFE_SPRINTF(StartRGB, "%02X%02X%02X", color [0], color [1], color [2]);
 			SetDlgItemText(hDlg, IDC_STARTRGB, StartRGB);
 			break;
 		    case 2:
 			SetDlgItemInt (hDlg,  IDC_START_BLUE, color [2], TRUE) ;
-			sprintf(StartRGB, "%02X%02X%02X", color [0], color [1], color [2]);
+			SAFE_SPRINTF(StartRGB, "%02X%02X%02X", color [0], color [1], color [2]);
 			SetDlgItemText(hDlg, IDC_STARTRGB, StartRGB);
 			break;
 		    case 3:
 			SetDlgItemInt (hDlg,  IDC_END_RED, color [3], TRUE) ;
-			sprintf(EndRGB, "%02X%02X%02X", color [3], color [4], color [5]);
+			SAFE_SPRINTF(EndRGB, "%02X%02X%02X", color [3], color [4], color [5]);
 			SetDlgItemText(hDlg, IDC_ENDRGB, EndRGB);
 			break;
 		    case 4:
 			SetDlgItemInt (hDlg,  IDC_END_GREEN, color [4], TRUE) ;
-			sprintf(EndRGB, "%02X%02X%02X", color [3], color [4], color [5]);
+			SAFE_SPRINTF(EndRGB, "%02X%02X%02X", color [3], color [4], color [5]);
 			SetDlgItemText(hDlg, IDC_ENDRGB, EndRGB);
 			break;
 		    case 5:
 			SetDlgItemInt (hDlg,  IDC_END_BLUE, color [5], TRUE) ;
-			sprintf(EndRGB, "%02X%02X%02X", color [3], color [4], color [5]);
+			SAFE_SPRINTF(EndRGB, "%02X%02X%02X", color [3], color [4], color [5]);
 			SetDlgItemText(hDlg, IDC_ENDRGB, EndRGB);
 			break;
 		    }
@@ -178,7 +179,7 @@ INT_PTR CALLBACK EditPalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 				&& PalPosition.y <= VERT_OFFSET + PREVIEW_HEIGHT)	// within the palette display
 		    {
 		    PalPtr = (int)((double)(PalPosition.x - HOR_OFFSET) * ((double)EditPal.LocalThreshold) / (double)PREVIEW_WIDTH);
-		    sprintf(s, "Palette Position=%d, r=%02X, g=%02X, b=%02X", 
+		    SAFE_SPRINTF(s, "Palette Position=%d, r=%02X, g=%02X, b=%02X",
 				PalPtr,				
 				TempPal[PalPtr].rgbtRed,
 				TempPal[PalPtr].rgbtGreen,

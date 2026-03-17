@@ -39,6 +39,8 @@
 #define GLOBAL /* used by global.h */
 #include "config.h"
 #include "global.h"
+#include "..\ManpWIN64\manpwin.h"
+#include "..\ManpWIN64\SafeStrings.h"
 
 /* private prototypes */
 static void init _ANSI_ARGS_((void));
@@ -72,7 +74,7 @@ int	DoMPEG(char *MPEGFile, int NumFrames, int width, int height)
   // open output file 
     if (!(outfile=fopen(MPEGFile,"wb")))
 	{
-	sprintf(errortext,"Couldn't create output file %s",MPEGFile);
+	_snprintf_s(errortext, 256, _TRUNCATE,"Couldn't create output file %s",MPEGFile);
 	error(errortext);
 	}
 
@@ -242,14 +244,14 @@ static void init()
     statfile = stdout;
   else if (!(statfile = fopen(statname,"w")))
   {
-    sprintf(errortext,"Couldn't create statistics output file %s",statname);
+      _snprintf_s(errortext, 256, _TRUNCATE,"Couldn't create statistics output file %s",statname);
     error(errortext);
   }
 }
 
 void error(char *text)			// modified to jump back to MPEGWrite.cpp
 {
-  sprintf(ErrorMessage,text);
+    _snprintf_s(ErrorMessage, 240, _TRUNCATE,text);
 //  putc('\n',stderr);
   longjmp(mark, 1);			// Return control to the setjmp point
 //  exit(1);
@@ -276,7 +278,7 @@ static void readparmfile(int NumFrames, int width, int height)
   strcpy(tplref,"-");					// default
   strcpy(iqname,"-");					// default
   strcpy(niqname,"-");					// default
-  sprintf(statname,"%s\\Stats.txt", MPGPath);		// somewhere to dump stats
+  _snprintf_s(statname, 256, _TRUNCATE,"%s\\Stats.txt", MPGPath);		// somewhere to dump stats
   inputtype = 3;					// Type = DIB. PPM but not actually used. Somehow we try to copy in the ANIM frame DIB array
   nframes = NumFrames;					// supplied by user
   frame0 = 0;						// number of first frame
@@ -384,7 +386,7 @@ static void readparmfile(int NumFrames, int width, int height)
 /*
   if (!(fd = fopen(fname,"r")))
   {
-    sprintf(errortext,"Couldn't open parameter file %s",fname);
+    SAFE_SPRINTF(errortext,"Couldn't open parameter file %s",fname);
     error(errortext);
   }
 
@@ -602,7 +604,7 @@ static void readparmfile(int NumFrames, int width, int height)
       {
         if (!quiet)
 	    {
-	    sprintf(t, "Warning: setting qscale_tab[%d] = 0\n",i);
+	    SAFE_SPRINTF(t, "Warning: setting qscale_tab[%d] = 0\n",i);
 	    WarningMPEG(t);
 	    }
         qscale_tab[i] = 0;
@@ -613,7 +615,7 @@ static void readparmfile(int NumFrames, int width, int height)
       {
         if (!quiet)
 	    {
-	    sprintf(t, "Warning: setting intravlc_tab[%d] = 0\n",i);
+	    SAFE_SPRINTF(t, "Warning: setting intravlc_tab[%d] = 0\n",i);
 	    WarningMPEG(t);
 	    }
         intravlc_tab[i] = 0;
@@ -624,7 +626,7 @@ static void readparmfile(int NumFrames, int width, int height)
       {
         if (!quiet)
 	    {
-	    sprintf(t, "Warning: setting altscan_tab[%d] = 0\n",i);
+	    SAFE_SPRINTF(t, "Warning: setting altscan_tab[%d] = 0\n",i);
 	    WarningMPEG(t);
 	    }
         altscan_tab[i] = 0;
@@ -666,7 +668,7 @@ static void readparmfile(int NumFrames, int width, int height)
       {
         if (!quiet)
 	    {
-	    sprintf(t, "Warning: setting frame_pred_frame_dct[%d] = 0\n",i);
+	    SAFE_SPRINTF(t, "Warning: setting frame_pred_frame_dct[%d] = 0\n",i);
 	    WarningMPEG(t);
 	    }
         frame_pred_dct_tab[i] = 1;
@@ -687,7 +689,7 @@ static void readparmfile(int NumFrames, int width, int height)
     {
       if (!quiet)
 	    {
-	    sprintf(t, "Warning: reducing forward horizontal search width to %d\n", (4<<motion_data[i].forw_hor_f_code)-1);
+	  SAFE_SPRINTF(t, "Warning: reducing forward horizontal search width to %d\n", (4<<motion_data[i].forw_hor_f_code)-1);
 	    WarningMPEG(t);
 	    }
       motion_data[i].sxf = (4<<motion_data[i].forw_hor_f_code)-1;
@@ -697,7 +699,7 @@ static void readparmfile(int NumFrames, int width, int height)
     {
       if (!quiet)
 	    {
-	    sprintf(t, "Warning: reducing forward vertical search width to %d\n", (4<<motion_data[i].forw_vert_f_code)-1);
+	  SAFE_SPRINTF(t, "Warning: reducing forward vertical search width to %d\n", (4<<motion_data[i].forw_vert_f_code)-1);
 	    WarningMPEG(t);
 	    }
       motion_data[i].syf = (4<<motion_data[i].forw_vert_f_code)-1;
@@ -709,7 +711,7 @@ static void readparmfile(int NumFrames, int width, int height)
       {
         if (!quiet)
 	    {
-	    sprintf(t, "Warning: reducing backward horizontal search width to %d\n", (4<<motion_data[i].back_hor_f_code)-1);
+	    SAFE_SPRINTF(t, "Warning: reducing backward horizontal search width to %d\n", (4<<motion_data[i].back_hor_f_code)-1);
 	    WarningMPEG(t);
 	    }
         motion_data[i].sxb = (4<<motion_data[i].back_hor_f_code)-1;
@@ -719,7 +721,7 @@ static void readparmfile(int NumFrames, int width, int height)
       {
         if (!quiet)
 	    {
-	    sprintf(t, "Warning: reducing backward vertical search width to %d\n", (4<<motion_data[i].back_vert_f_code)-1);
+	    SAFE_SPRINTF(t, "Warning: reducing backward vertical search width to %d\n", (4<<motion_data[i].back_vert_f_code)-1);
 	    WarningMPEG(t);
 	    }
         motion_data[i].syb = (4<<motion_data[i].back_vert_f_code)-1;
@@ -748,7 +750,7 @@ static void readquantmat()
     load_iquant = 1;
     if (!(fd = fopen(iqname,"r")))
     {
-      sprintf(errortext,"Couldn't open quant matrix file %s",iqname);
+	_snprintf_s(errortext, 256, _TRUNCATE,"Couldn't open quant matrix file %s",iqname);
       error(errortext);
     }
 
@@ -776,7 +778,7 @@ static void readquantmat()
     load_niquant = 1;
     if (!(fd = fopen(niqname,"r")))
     {
-      sprintf(errortext,"Couldn't open quant matrix file %s",niqname);
+	_snprintf_s(errortext, 256, _TRUNCATE,"Couldn't open quant matrix file %s",niqname);
       error(errortext);
     }
 

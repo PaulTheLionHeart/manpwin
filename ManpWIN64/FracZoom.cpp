@@ -20,6 +20,7 @@
 #include "BigDouble.h"
 #include "big.h"
 #include "colour.h"
+#include "SafeStrings.h"
 
 extern	double	hor;			// horizontal address
 extern	double	vert;			// vertical address
@@ -57,7 +58,7 @@ extern	int getprecbf_mag(void);
 
 extern	int	analyse_corner(char *);
 //extern	void	calcfracinit(void);
-extern	void	BasicFractData(char *, BOOL);
+extern	void	BasicFractData(StringBuilder& sb, BOOL);
 extern	void	ConvertRGB2ASCII(RGBTRIPLE, char *);
 extern	char	*GenerateMPEGFileName (char *, char *);
 extern	char	*GenerateAnimFileName (char *, char *);
@@ -137,7 +138,7 @@ int	GenZoomScript(HWND hwnd, char *filename)
     if ((out = fopen(filename, "w")) == NULL)
 	{
 	_get_errno(&err);
-	sprintf(s, "Cannot open output file %s, Error number=%d\nDoes Folder exist?", filename, err);
+	SAFE_SPRINTF(s, "Cannot open output file %s, Error number=%d\nDoes Folder exist?", filename, err);
 	MessageBox (hwnd, s, "Animation", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -164,7 +165,7 @@ int	GenZoomScript(HWND hwnd, char *filename)
 	precision = getprecbf_mag();
 	if (precision < 0)			// exceeded allowable precision
 	    {
-	    sprintf(s, "Cannot calculate precision for %s", filename);
+	    SAFE_SPRINTF(s, "Cannot calculate precision for %s", filename);
 	    MessageBox (hwnd, s, "Animation", MB_ICONEXCLAMATION | MB_OK);
 	    MessageBeep (0);
 	    return -1;
@@ -220,8 +221,10 @@ char	*AnimData(void)
 //char	s[400];
     static	char	info[MAXDATALINE];
 
-    *info = '\0';
-    BasicFractData(info, TRUE);
+    info[0] = '\0';
+    StringBuilder sb(info, sizeof(info));
+
+    BasicFractData(sb, TRUE);
     return info;
     }
 
@@ -266,11 +269,11 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		SendMessage(hCtrl, BM_SETCHECK, WriteMemFrames, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGFILELIST);
 		SendMessage(hCtrl, BM_SETCHECK, WritePNGList, 0L);
-//		sprintf(ScriptFileName, "%s%s\\Manp", ManpPath, SCIPath);
+//		_snprintf_s(ScriptFileName, MAX_PATH, _TRUNCATE, "%s%s\\Manp", ManpPath, SCIPath);
 		SetUpFilename(ScriptFileName, "sci", "Zoom");
 		SetUpFilename(PNGName, "animpng", "Zoom");
 		SetDlgItemText(hDlg, IDC_SCRIPT_FILENAME, ScriptFileName);
-//		sprintf(PNGName, "%s%s\\Manp", ManpPath, ANIMPNGPath);
+//		_snprintf_s(PNGName, MAX_PATH, _TRUNCATE, "%s%s\\Manp", ManpPath, ANIMPNGPath);
 		SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGName);
 		if (BigNumFlag)
 		    {
@@ -283,14 +286,14 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		    }
 		else
 		    {
-		    sprintf(s1, "%18.18f", hor);
-		    sprintf(s2, "%18.18f", vert);
-		    sprintf(s3, "%1.12e", mandel_width);
+		    _snprintf_s(s1, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", hor);
+		    _snprintf_s(s2, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", vert);
+		    _snprintf_s(s3, SIZEOF_BF_VARS, _TRUNCATE, "%1.12e", mandel_width);
 		    }
 		SetDlgItemText(hDlg, IDC_HOR, s1);
 		SetDlgItemText(hDlg, IDC_VERT, s2);
 		SetDlgItemText(hDlg, IDC_WIDTH_END, s3);
-	        sprintf(s, "%18.18f", StartWidth);
+		_snprintf_s(s, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", StartWidth);
 		SetDlgItemText(hDlg, IDC_WIDTH_START, s);
 		SetDlgItemInt(hDlg, IDC_THRESHOLD_START, StartIter, TRUE);
 		SetDlgItemInt(hDlg, IDC_THRESHOLD_END, threshold, TRUE);
@@ -315,7 +318,7 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGFILELIST);
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WritePNGFrames = WriteMemFrames = WritePNGList = FALSE;
-			    sprintf(MPGFile, "%s", GenerateAnimFileName (MPGPath, PNGName));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (MPGPath, PNGName));
 			    SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, MPGFile);
 			    }
 			return TRUE;
@@ -331,7 +334,7 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WriteMPEGFrames = FALSE;
 			    }
-//			sprintf(PNGFile, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
+//			_snprintf_s(PNGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
 //			SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGFile);
 			return TRUE;
 
@@ -349,7 +352,7 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    fileptr--;							// remove extension
 			if (*fileptr == '.')
 			    *fileptr = '\0';
-			strcat(ScriptFileName, ".sci");
+			strcat_s(ScriptFileName, MAX_PATH, ".sci");
 
 			StartIter = GetDlgItemInt(hDlg, IDC_THRESHOLD_START, &bTrans, TRUE);
 			EndIter = GetDlgItemInt(hDlg, IDC_THRESHOLD_END, &bTrans, TRUE);
@@ -375,7 +378,7 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			if (WriteMPEGFrames)						// generate MPEG filename
 			    {
 			    GetDlgItemText(hDlg, IDC_SEQUENCE_NAME, TempFile, MAX_PATH);
-			    sprintf(MPGFile, "%s", GenerateMPEGFileName (MPGPath, TempFile));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateMPEGFileName (MPGPath, TempFile));
 			    }
 
 			frames = GetDlgItemInt(hDlg, IDC_FRAMES, &bTrans, TRUE);
@@ -389,7 +392,7 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			sscanf(s, "%lf", &StartWidth);
 			GetDlgItemText(hDlg, IDC_WIDTH_END, s3, VariableSize);
 			buf = new char[SIZEOF_BF_VARS * 3];
-			sprintf(buf, "%s,%s,%s, %f, %f", s1, s2, s3, param[0], param[1]);	// ensure that real and imag perturbation is unchanged
+			_snprintf_s(buf, SIZEOF_BF_VARS * 3, _TRUNCATE, "%s,%s,%s, %f, %f", s1, s2, s3, param[0], param[1]);	// ensure that real and imag perturbation is unchanged
 			if (analyse_corner(buf) < 0)
 			    {
 			    double  AspectRatio = (double)xdots / (double)ydots;
@@ -406,7 +409,7 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 				hor = -2.0;
 				vert = hor / AspectRatio;
 				}
-			    sprintf(s, "Deep Zooming Limit (%d decimals) exceeded", SIZEOF_BF_VARS);
+			    SAFE_SPRINTF(s, "Deep Zooming Limit (%d decimals) exceeded", SIZEOF_BF_VARS);
 			    MessageBox (hDlg, s, "ManpWin", MB_ICONEXCLAMATION | MB_OK);
 			    MessageBeep (0);
 			    }

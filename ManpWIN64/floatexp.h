@@ -425,10 +425,10 @@ public:
 					strcpy(szTmp,"0.0000000");
 			}
 			else
-				strcat(szTmp,"00000000");
+				strcat_s(szTmp, sizeof(szTmp), "00000000");
 			tmp = tmp*partmax;
 		}
-		sprintf(szTmp+strlen(szTmp),"%.20f",tmp.todouble());
+		 _snprintf_s(szTmp+strlen(szTmp), 150000 - strlen(szTmp), _TRUNCATE,"%.20f",tmp.todouble());
 		int i, b;
 		for(i=b=6;szTmp[i];i++)
 			if(szTmp[i]!='.')

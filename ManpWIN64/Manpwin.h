@@ -1,26 +1,15 @@
 /*------------------------
    MANPWIN.H header file
   ------------------------*/
-/*
-#pragma once
-  // comment out the following line for registered version
-//#define SHAREWARE	1
 
-// comment out the following line for 16 bit version
-#define WIN95		1				// 32 bit code
-
-#ifdef	WIN95						// 32 bit code
-*/
 #undef  huge
 #define huge      
 #undef  _export
 #define _export
 
+#include <atomic>
 #include "Big.h"
-
-//#endif
-
-//#define DOUBLE		double
+#pragma once
 
 #define FILE_BMP      	0
 #define FILE_MAP     	1
@@ -46,6 +35,8 @@
 #define	VGA_PAL_SIZE	768
 #define	EGA_PAL_SIZE	16
 #define VGA_COLOURS	256
+#define	MAXFORMULASTRINGLENGTH		3600	
+
 
 // defines for inside/outside
 #define NONE		0
@@ -71,17 +62,13 @@
 #define	ANIMTIMER	1
 #define	UPDATETIMER	2
 
-#define	MAXDATALINE	SIZEOF_BF_VARS * 3 + PRECISION_FACTOR	// maximum frame data length
+#define NOMULTITHREAD	0
+#define RENDER_SLOPE	1
+#define RENDER_PERT	2
+#define RENDER_PIXEL	3
 
-/*
-struct	HenonStr		// hold variables for Henon Mapping
-{
-    double  a;
-    double  xStart;
-    double  yStart;
-    DWORD   points;
-};
-*/
+#define	MAXDATALINE	SIZEOF_BF_VARS * 4	// maximum frame data length
+
 #define	FixedGlobalAlloc(n) 	(char *)GlobalAlloc(GMEM_FIXED, n)
 #define	FixedGlobalFree(p)	GlobalFree(p)
 #define	FixedGlobalRealloc(p,n) GlobalRealloc(p,n)
@@ -91,13 +78,13 @@ struct	HenonStr		// hold variables for Henon Mapping
 #define	RGB_BLUE		2
 #define	RGB_SIZE		3
 
-/* Macro to restrict a given value to an upper or lower boundary value */
+// Macro to restrict a given value to an upper or lower boundary value
 #define BOUND(x,min,max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
 
-/* Macro to align given value to the closest DWORD (unsigned long ) */
+// Macro to align given value to the closest DWORD (unsigned long )
 #define ALIGNULONG(i)   ((i+3)/4*4)
 
-/* Macro to determine to round off the given value to the closest byte */
+// Macro to determine to round off the given value to the closest byte
 #define WIDTHBYTES(i)   ((i+31)/32*4)
 
 #define GET_2B(array,offset)  ((unsigned int) (BYTE)(array[offset]) + \
@@ -122,4 +109,13 @@ struct	HenonStr		// hold variables for Henon Mapping
 //extern	DWORD 	PASCAL	lread (int, VOID far *, DWORD);
 //extern	WORD	iNumColors;    			// Number of colors supported by device
 #endif
+
+extern std::atomic<bool> gStopRequested;
+
+// a tiny inline helper making it cleaner and easier to read.
+inline bool AbortRequested()
+    {
+    return gStopRequested.load(std::memory_order_relaxed);
+    }
+
 

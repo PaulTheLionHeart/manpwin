@@ -45,20 +45,6 @@ int	ChangeBigPrecision(int dec)
     }
 
 /*************************************************************************
-    Format string derived from a Bignum
-    mpf_get_str() generates strings without decimal points and gives the exponent
-    so we need to format it as a normal number
-*************************************************************************/
-/*
-void	ConvertBignum2String(char *s, mpfr_t num)
-    {
-    char    FormatString[24];
-
-    sprintf(FormatString, "%%.%dRf", decimals + PRECISION_FACTOR);
-    mpfr_sprintf(s, FormatString, num);
-    }
-*/
-/*************************************************************************
     Format Bignum derived from a string
     mpf_set_str() Bignum from strings in the format:
     MeN, where M = mantissa and N exponent

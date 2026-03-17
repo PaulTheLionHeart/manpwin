@@ -409,7 +409,7 @@ int	CSlope::RunSlopeFwdDiffBig(int user_data(HWND hwnd), char* StatusBarInfo, bo
 	if (int(progress * 100) != lastChecked)
 	    {
 	    lastChecked = int(progress * 10);
-	    sprintf(StatusBarInfo, "Progess (%d%%), %d Threads", int(progress * 100), NumThreads);
+	    _snprintf_s(StatusBarInfo, MAXLINE, _TRUNCATE, "Progess (%d%%), %d Threads", int(progress * 100), NumThreads);
 	    }
 	for (int strip = thread; strip < TotalStrips; strip += effectiveThreads)
 	    {
@@ -436,7 +436,7 @@ int	CSlope::RunSlopeFwdDiffBig(int user_data(HWND hwnd), char* StatusBarInfo, bo
 		    iterations++;
 		    if (iterations >= threshold)
 			break;
-		    if (gStopRequested)
+		    if (AbortRequested())
 			return -1;
 
 		    DoBigSlopeFwdDiffFn(&zBig, &qBig, &bBig, &aa3Big);
@@ -577,7 +577,7 @@ int	CSlope::RunSlopeFwdDiffQD(int user_data(HWND hwnd), char* StatusBarInfo, boo
 	if (int(progress * 100) != lastChecked)
 	    {
 	    lastChecked = int(progress * 10);
-	    sprintf(StatusBarInfo, "Progess (%d%%), %d Threads", int(progress * 100), NumThreads);
+	    _snprintf_s(StatusBarInfo, MAXLINE, _TRUNCATE, "Progess (%d%%), %d Threads", int(progress * 100), NumThreads);
 	    }
 	for (int strip = thread; strip < TotalStrips; strip += effectiveThreads)
 	    {
@@ -604,7 +604,7 @@ int	CSlope::RunSlopeFwdDiffQD(int user_data(HWND hwnd), char* StatusBarInfo, boo
 		    iterations++;
 		    if (iterations >= threshold)
 			break;
-		    if (gStopRequested)
+		    if (AbortRequested())
 			return -1;
 
 		    DoQDSlopeFwdDiffFn(&zQD, &qQD, &bQD, &aa3QD);
@@ -741,7 +741,7 @@ int	CSlope::RunSlopeFwdDiffDD(int user_data(HWND hwnd), char* StatusBarInfo, boo
 	if (int(progress * 100) != lastChecked)
 	    {
 	    lastChecked = int(progress * 10);
-	    sprintf(StatusBarInfo, "Progess (%d%%), %d Threads", int(progress * 100), NumThreads);
+	    _snprintf_s(StatusBarInfo, MAXLINE, _TRUNCATE, "Progess (%d%%), %d Threads", int(progress * 100), NumThreads);
 	    }
 	for (int strip = thread; strip < TotalStrips; strip += effectiveThreads)
 	    {
@@ -767,7 +767,7 @@ int	CSlope::RunSlopeFwdDiffDD(int user_data(HWND hwnd), char* StatusBarInfo, boo
 		    iterations++;
 		    if (iterations >= threshold)
 			break;
-		    if (gStopRequested)
+		    if (AbortRequested())
 			return -1;
 
 		    DoDDSlopeFwdDiffFn(&zDD, &qDD, &bDD, &aa3DD);
@@ -898,7 +898,7 @@ int	CSlope::RunSlopeFwdDiffDouble(int user_data(HWND hwnd), char* StatusBarInfo,
 	if (int(progress * 100) != lastChecked)
 	    {
 	    lastChecked = int(progress * 10);
-	    sprintf(StatusBarInfo, "Progess (%d%%), %d Threads", int(progress * 100), NumThreads);
+	    _snprintf_s(StatusBarInfo, MAXLINE, _TRUNCATE, "Progess (%d%%), %d Threads", int(progress * 100), NumThreads);
 	    }
 	for (int strip = thread; strip < TotalStrips; strip += effectiveThreads)
 	    {
@@ -926,7 +926,7 @@ int	CSlope::RunSlopeFwdDiffDouble(int user_data(HWND hwnd), char* StatusBarInfo,
 		    iterations++;
 		    if (iterations >= threshold)
 			break;
-		    if (gStopRequested)
+		    if (AbortRequested())
 			return -1;
 
 		    DoSlopeFwdDiffFn(&z, &q);
@@ -1005,7 +1005,7 @@ int	CSlope::RunSlopeFwdDiffDouble(int user_data(HWND hwnd), char* StatusBarInfo,
 		    else
 			ColourPtr = ((long)(iterations * PaletteShift)) % 256;
 		    }
-		if (gStopRequested)
+		if (AbortRequested())
 		    return -1;
 		Plot.PlotPoint(x, y, ColourPtr);
 		}
@@ -1154,7 +1154,7 @@ int	CSlope::RenderSlope(int xdots, int ydots, int PertColourMethod, int PalOffse
 	{
 	for (x = 0; x < xdots; x++)
 	    {
-	    if (gStopRequested)
+	    if (AbortRequested())
 		return -1;
 	    const DWORD index = (DWORD)y * (DWORD)xdots + (DWORD)x;
 	    const size_t needed = (size_t)xdots * (size_t)ydots;
@@ -1238,7 +1238,7 @@ int	CSlope::RenderSlope(int xdots, int ydots, int PertColourMethod, int PalOffse
 		colour.rgbtGreen = g;
 		colour.rgbtBlue = b;
 		}
-	    if (gStopRequested)
+	    if (AbortRequested())
 		return -1;
 	    Plot.OutRGBpoint(x, y, colour);
 	    }

@@ -13,6 +13,7 @@
 #include "manpwin.h"
 #include "resource.h"
 #include "colour.h"
+#include "SafeStrings.h"
 
 #define MAXLINE			480
 #define NONE			0		// opening bitmap loading flags
@@ -20,9 +21,7 @@
 #define NEW			2
 #define FILE_ERROR		3
 
-//int	CheckReg(char *, char *);
 int	GetManpINIPath(HWND, char *, char *);
-//int	GetPGVHelpPath(HWND);
 int	GetFilePath(HWND, char *, char *);
 int	ReadConfigFile(HWND hwnd, char *filename);
 
@@ -66,25 +65,9 @@ extern	BOOL	ZoomEdge;				// Zooming process
 extern	BOOL	UseFractintPalette;			// standard EGA palette
 extern	char	statname[];				// MPEG stat file. If statname[] == '-', stats sent to stdout.
 extern	int	NumberThreads;				// Number of threads to be used. If 0, no multi-threading. Used in perturbatio only
-extern	CTrueCol    TrueCol;		// palette info
+extern	CTrueCol    TrueCol;				// palette info
 static	char	Extension[25];				// default extension
 static	BOOL	UserPath = TRUE;			// use the path to the user data area created when ManpWIN was installed
-
-/**************************************************************************
-	Get Pathname of MANPWIN.EXE file
-**************************************************************************/
-
-/*
-int	GetManpWinFilePath(char *buffer)
-    {
-    char	*ShortName;
-
-    GetModuleFileName(NULL, buffer, FILENAME_MAX);  // Get path to this program
-    if(ShortName = strrchr(buffer, '\\'))
-	*++ShortName = '\0';
-    return 0;
-    }
-*/
 
 /**************************************************************************
 	Get Pathname for Manpwin.ini
@@ -95,34 +78,25 @@ int	GetManpWinFilePath(char *buffer)
 **************************************************************************/
 
 int	GetManpINIPath(HWND hwnd, char *ManpWinINIFile, char *ManpName)
-//int	ReadConfig(HWND hwnd)
     {
-    // CalendarReadPath points to a local variable in ReadConfig, only used for debug
-
     BYTE	status;
     HANDLE	fi;	// handle to ini file
-//    char	CalendarWritePath[MAX_PATH];
-//    char	ManpWinINIFile[MAX_PATH];
-
-//    strcat(CalendarReadPath, "Calendar.INI");	//IB 2010-07-26	this is different to PgvWritePath, because you insist in including trailing '\' in directories, unlike the rest of Windows
 
     if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA, NULL, 0, ManpINIFoundDir)))
 	{
-	strcat(ManpINIFoundDir, "\\ManpWIN");
-	sprintf(ManpWinINIFile, "%s%s", ManpINIFoundDir, "\\MANPWIN.INI");	// %AppData%\ManpWIN\ManpWIN.ini
+	strcat_s(ManpINIFoundDir, MAX_PATH, "\\ManpWIN");
+	_snprintf_s(ManpWinINIFile, MAX_PATH, _TRUNCATE, "%s%s", ManpINIFoundDir, "\\MANPWIN.INI");	// %AppData%\ManpWIN\ManpWIN.ini
 	if (!CreateDirectory(ManpINIFoundDir, NULL))
 	    {	// Directory Creation failed - probably exists
 	    fi = CreateFile(ManpWinINIFile, GENERIC_READ, FILE_SHARE_READ, NULL,OPEN_EXISTING,FILE_FLAG_SEQUENTIAL_SCAN,NULL);
 	    if (fi == INVALID_HANDLE_VALUE)	// unable to open %AppData%\ManpWIN\ManpWIN.ini
 		{	// try path to this program
 		status = ReadConfigFile(hwnd, ManpWinINIFile);
-//		strcpy(CalendarINIFile, CalendarWritePath);		// directory to write new ini file
 		return status;
 		}
 	    else    // read & write %AppData%\CALENDAR\Calendar.ini
 		{
 		CloseHandle(fi);
-//		strcpy(CalendarReadPath, CalendarWritePath);	// %AppData%\ManpWIN\ManpWIN.ini
 		status = ReadConfigFile(hwnd, ManpWinINIFile);
 		return status;
 		}
@@ -130,8 +104,6 @@ int	GetManpINIPath(HWND hwnd, char *ManpWinINIFile, char *ManpName)
 	else    // %AppData% created - obviously does not contain manpwin.ini
 	    {
 	    status = ReadConfigFile(hwnd, ManpWinINIFile);
-//	    strcat(CalendarWritePath, "\\ManpWIN.INI");	// %AppData%\ManpWIN\ManpWIN.ini
-//	    strcpy(CalendarINIFile, CalendarWritePath);		// directory to write new ini file
 	    return status;
 	    }
 	}
@@ -146,7 +118,6 @@ int	GetManpINIPath(HWND hwnd, char *ManpWinINIFile, char *ManpName)
 **************************************************************************/
 
 int	ReadConfig(HWND hwnd)
-
     {
     char	buf[MAXLINE];
     char	ConfigFile[MAXLINE];
@@ -158,51 +129,48 @@ int	ReadConfig(HWND hwnd)
     status = GetManpINIPath(hwnd, ConfigFile, "ManpWin.INI");	// find MANPWIN.INI in windows or path
 
 #ifdef DEBUG
-    wsprintf(buf, "Path = <%s>", ConfigFile);
-    //wsprintf(buf, "c:\\windows\\PGV.INI");
+    _snprintf_s(s, MAXLINE, _TRUNCATE, "Path = <%s>", ConfigFile);
     MessageBox (hwnd, buf, "ReadConfig", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
     if (*ManpINIFoundDir && UserPath)				// user prefers default locations
 	{
-//	_chdir(ManpPath);
-
-	sprintf(ANIMPNGPath, "%s\\animpng", ManpINIFoundDir);	// path for animated PNG files and LST files
-	sprintf(MPGPath, "%s\\mpg", ManpINIFoundDir);		// path for MPG files
-	sprintf(GIFPath, "%s\\gif", ManpINIFoundDir);		// path for GIF files
-	sprintf(PNGPath, "%s\\png", ManpINIFoundDir);		// path for PNG files
-	sprintf(COLPath, "%s\\col", ManpINIFoundDir);		// path for COL files
-	sprintf(MAPPath, "%s\\map", ManpINIFoundDir);		// path for MAP files
-	sprintf(SCIPath, "%s\\sci", ManpINIFoundDir);		// path for SCI files
-	sprintf(PARPath, "%s\\par", ManpINIFoundDir);		// path for PAR files
-	sprintf(KFRPath, "%s\\kfr", ManpINIFoundDir);		// path for KFR files
-	sprintf(FracPARPath, "%s\\frantpar", ManpINIFoundDir);	// path for Fractint par files
-	sprintf(IFSPath, "%s\\ifs", ManpINIFoundDir);		// path for IFS files
-	sprintf(LSYSPath, "%s\\lsys", ManpINIFoundDir);		// path for LSYS files
-	sprintf(FRMPath, "%s\\frm", ManpINIFoundDir);		// path for formula files
-	sprintf(ScriptFileName, "%s\\sci\\Manp", ManpINIFoundDir);
-	sprintf(PNGName, "%s\\animpng\\Manp", ManpINIFoundDir);
+	SAFE_SPRINTF(ANIMPNGPath, "%s\\animpng", ManpINIFoundDir);	// path for animated PNG files and LST files
+	SAFE_SPRINTF(MPGPath, "%s\\mpg", ManpINIFoundDir);		// path for MPG files
+	SAFE_SPRINTF(GIFPath, "%s\\gif", ManpINIFoundDir);		// path for GIF files
+	SAFE_SPRINTF(PNGPath, "%s\\png", ManpINIFoundDir);		// path for PNG files
+	SAFE_SPRINTF(COLPath, "%s\\col", ManpINIFoundDir);		// path for COL files
+	SAFE_SPRINTF(MAPPath, "%s\\map", ManpINIFoundDir);		// path for MAP files
+	SAFE_SPRINTF(SCIPath, "%s\\sci", ManpINIFoundDir);		// path for SCI files
+	SAFE_SPRINTF(PARPath, "%s\\par", ManpINIFoundDir);		// path for PAR files
+	SAFE_SPRINTF(KFRPath, "%s\\kfr", ManpINIFoundDir);		// path for KFR files
+	SAFE_SPRINTF(FracPARPath, "%s\\frantpar", ManpINIFoundDir);	// path for Fractint par files
+	SAFE_SPRINTF(IFSPath, "%s\\ifs", ManpINIFoundDir);		// path for IFS files
+	SAFE_SPRINTF(LSYSPath, "%s\\lsys", ManpINIFoundDir);		// path for LSYS files
+	SAFE_SPRINTF(FRMPath, "%s\\frm", ManpINIFoundDir);		// path for formula files
+	_snprintf_s(ScriptFileName, MAX_PATH, _TRUNCATE, "%s\\sci\\Manp", ManpINIFoundDir);
+	_snprintf_s(PNGName, MAX_PATH, _TRUNCATE, "%s\\animpng\\Manp", ManpINIFoundDir);
 	}
-    else if (*ManpPath)						// use the locations specified in dialogue box
+    else if (*ManpPath)							// use the locations specified in dialogue box
 	{
-	sprintf(ANIMPNGPath, "%sanimpng", ManpPath);		// path for animated PNG files and LST files
-	sprintf(MPGPath, "%smpg", ManpPath);			// path for MPG files
-	sprintf(GIFPath, "%sgif", ManpPath);			// path for GIF files
-	sprintf(PNGPath, "%spng", ManpPath);			// path for PNG files
-	sprintf(COLPath, "%scol", ManpPath);			// path for COL files
-	sprintf(MAPPath, "%smap", ManpPath);			// path for MAP files
-	sprintf(SCIPath, "%ssci", ManpPath);			// path for SCI files
-	sprintf(PARPath, "%spar", ManpPath);			// path for PAR files
-	sprintf(KFRPath, "%skfr", ManpPath);			// path for KFR files
-	sprintf(FracPARPath, "%sfrantpar", ManpPath);	// path for Fractint par files
-	sprintf(IFSPath, "%sifs", ManpPath);			// path for IFS files
-	sprintf(LSYSPath, "%slsys", ManpPath);			// path for LSYS files
-	sprintf(FRMPath, "%sfrm", ManpPath);			// path for formula files
+	SAFE_SPRINTF(ANIMPNGPath, "%sanimpng", ManpPath);		// path for animated PNG files and LST files
+	SAFE_SPRINTF(MPGPath, "%smpg", ManpPath);			// path for MPG files
+	SAFE_SPRINTF(GIFPath, "%sgif", ManpPath);			// path for GIF files
+	SAFE_SPRINTF(PNGPath, "%spng", ManpPath);			// path for PNG files
+	SAFE_SPRINTF(COLPath, "%scol", ManpPath);			// path for COL files
+	SAFE_SPRINTF(MAPPath, "%smap", ManpPath);			// path for MAP files
+	SAFE_SPRINTF(SCIPath, "%ssci", ManpPath);			// path for SCI files
+	SAFE_SPRINTF(PARPath, "%spar", ManpPath);			// path for PAR files
+	SAFE_SPRINTF(KFRPath, "%skfr", ManpPath);			// path for KFR files
+	SAFE_SPRINTF(FracPARPath, "%sfrantpar", ManpPath);		// path for Fractint par files
+	SAFE_SPRINTF(IFSPath, "%sifs", ManpPath);			// path for IFS files
+	SAFE_SPRINTF(LSYSPath, "%slsys", ManpPath);			// path for LSYS files
+	SAFE_SPRINTF(FRMPath, "%sfrm", ManpPath);			// path for formula files
 	status = DEFAULT;
 	}
     else
 	{
-	wsprintf(buf, "MANPWIN.INI could not be found in the path: %s\nIf this is not a new installation, then there is a problem with MANPWIN.INI", ConfigFile);
+	_snprintf_s(buf, MAXLINE, _TRUNCATE, "MANPWIN.INI could not be found in the path: %s\nIf this is not a new installation, then there is a problem with MANPWIN.INI", ConfigFile);
 	MessageBox (hwnd, buf, "ReadConfig", MB_ICONEXCLAMATION | MB_OK);
 	}
 
@@ -479,7 +447,6 @@ int	ReadConfigFile(HWND hwnd, char *filename)
 
 /*
 int	GetManpINIPath(HWND hwnd, char *buf, char *ManpName)
-
     {
     BYTE	flag, status;
     char	CurrentDir[_MAX_PATH];
@@ -490,7 +457,7 @@ int	GetManpINIPath(HWND hwnd, char *buf, char *ManpName)
     MessageBox (hwnd, WorkingDir, "Working Dir in", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
-    sprintf(buf, "%sManpWin.INI", WorkingDir);
+    SAFE_SPRINTF(buf, "%sManpWin.INI", WorkingDir);
 
 #ifdef DEBUG
     MessageBox (hwnd, buf, "PATH Dir", MB_ICONEXCLAMATION | MB_OK);
@@ -513,7 +480,6 @@ int	GetManpINIPath(HWND hwnd, char *buf, char *ManpName)
 **************************************************************************/
 
 int	GetFilePath(HWND hwnd, char *buffer, char *filename)
-
     {
     HMODULE	hm;
     char	*p;
@@ -537,7 +503,6 @@ int	GetFilePath(HWND hwnd, char *buffer, char *filename)
 ***************************************************************************/
 
 void	WriteManpINI(HWND hwnd, FILE *fp)
-
     {
     fprintf(fp, ";========================================================================\n");
     fprintf(fp, "; Configuration File for Paul's Fractals: © Paul de Leeuw 25/02/2020\n");
@@ -626,7 +591,6 @@ void	WriteManpINI(HWND hwnd, FILE *fp)
     }
 
 int	SaveConfig(HWND hwnd)
-
     {
     FILE	*fp;
     char	s[240];
@@ -645,24 +609,24 @@ int	SaveConfig(HWND hwnd)
 		*p = '\0';
 		break;
 		}
-	strcat(lpszNewName, ".bak");
+	strcat_s(lpszNewName, MAX_PATH, ".bak");
 	bRC = CopyFile(ManpINIFoundDir, lpszNewName, FALSE);	// keep a backup copy
 	if (!bRC && GetLastError() != 80)
 	    {
-	    sprintf(s, "File: %s not found", ManpINIFoundDir);
+	    SAFE_SPRINTF(s, "File: %s not found", ManpINIFoundDir);
 	    MessageBox (hwnd, s, "Save MANPWIN.INI", MB_ICONEXCLAMATION | MB_OK);
 	    MessageBeep (0);
 	    }
 	}
     else
 */
-	sprintf(lpszNewName, "%s\\ManpWIN.INI", ManpINIFoundDir);	// may as well create one
+    SAFE_SPRINTF(lpszNewName, "%s\\ManpWIN.INI", ManpINIFoundDir);	// may as well create one
 
     if ((fp = fopen(lpszNewName, "w")) == NULL)
 	{
-	wsprintf(s, "Can't open file: %s", lpszNewName);
+	_snprintf_s(s, 240, _TRUNCATE, "Can't open file: %s", lpszNewName);
 	MessageBox (hwnd, s, "Save ManpWIN.INI", MB_ICONEXCLAMATION | MB_OK);
-	MessageBeep (0);
+//	MessageBeep (0);
 	}
     else
 	{
@@ -677,7 +641,6 @@ int	SaveConfig(HWND hwnd)
 **************************************************************************/
 
 void	SetManpWINDir(HWND hwnd, char *path)
-
     {
     _mkdir(path); 
     }
@@ -749,13 +712,13 @@ INT_PTR CALLBACK CreateDirDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			SetManpWINDir(hDlg, MPGPath );
 			if (UserPath)
 			    {
-			    sprintf(ScriptFileName, "%s\\SCI\\Manp", ManpINIFoundDir);
-			    sprintf(PNGName, "%s\\animpng\\Manp", ManpINIFoundDir);
+			    _snprintf_s(ScriptFileName, MAX_PATH, _TRUNCATE, "%s\\SCI\\Manp", ManpINIFoundDir);
+			    _snprintf_s(PNGName, MAX_PATH, _TRUNCATE, "%s\\animpng\\Manp", ManpINIFoundDir);
 			    }
 			else
 			    {
-			    sprintf(ScriptFileName, "%s\\SCI\\Manp", ManpPath);
-			    sprintf(PNGName, "%s\\animpng\\Manp", ManpPath);
+			    _snprintf_s(ScriptFileName, MAX_PATH, _TRUNCATE, "%s\\SCI\\Manp", ManpPath);
+			    _snprintf_s(PNGName, MAX_PATH, _TRUNCATE, "%s\\animpng\\Manp", ManpPath);
 			    }
 
 			EndDialog (hDlg, TRUE);
@@ -792,7 +755,6 @@ char	*GenerateTimeString(void)
 **************************************************************************/
 
 void	SetUpFilename(char *Filename, char *Folder, char *AnimType)
-
     {
     __time64_t long_time;
     char	TimeStr[128];
@@ -802,9 +764,9 @@ void	SetUpFilename(char *Filename, char *Folder, char *AnimType)
     timeptr = _localtime64(&long_time);
     strftime(TimeStr, 128, "-%y%m%d-%H%M%S", timeptr);
     if (*ManpINIFoundDir && UserPath)				// user prefers default locations
-	sprintf(Filename, "%s\\%s\\%s%s", ManpINIFoundDir, Folder, AnimType, GenerateTimeString());
+	_snprintf_s(Filename, MAX_PATH, _TRUNCATE, "%s\\%s\\%s%s", ManpINIFoundDir, Folder, AnimType, GenerateTimeString());
     else if (*ManpPath)						// use the locations specified in dialogue box
-	sprintf(Filename, "%s\\%s\\%s", ManpPath, Folder, GenerateTimeString());
+	_snprintf_s(Filename, MAX_PATH, _TRUNCATE, "%s\\%s\\%s", ManpPath, Folder, GenerateTimeString());
     else
 	strcpy(Filename, TimeStr);
     }

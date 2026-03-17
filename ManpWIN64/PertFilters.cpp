@@ -235,7 +235,7 @@ int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTr
 	index = MaxIteration;
     if (index < 0)
 	index = 0;
-    if (gStopRequested)
+    if (AbortRequested())
 	return -1;
     if (SlopeType != DERIVSLOPE || (iteration == MaxIteration && InsideMethod > 0) || EnableApproximation)
 	{
@@ -293,7 +293,7 @@ int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, i
 	else
 	    FloatIteration = MaxIteration;
 	SlopeIndex = (((DWORD)height - 1 - y) * (DWORD)xdots) + (DWORD)x/* + xStart*/;
-	if (gStopRequested)
+	if (AbortRequested())
 	    return -1;
 	if (x >= 0 && x < Dib->DibWidth - 1 && y >= 0 && y < Dib->DibHeight - 1 && wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)
 	    wpixels[SlopeIndex] = (float)FloatIteration;
@@ -443,7 +443,7 @@ int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, i
 
     if (SlopeType != DERIVSLOPE || (iteration == MaxIteration && InsideMethod > 0) || EnableApproximation)
 	{
-	if (gStopRequested)
+	if (AbortRequested())
 	    return -1;
 	if (*PlotType == FILTERPLOT)
 	    Plot.FilterPoint(x/* + xStart*/, height - 1 - y, index, &(TZfilter.FilterRGB));

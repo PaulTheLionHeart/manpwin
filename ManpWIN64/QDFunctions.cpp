@@ -430,6 +430,7 @@ int	CPixel::QDInitFunctions(WORD type, QDComplex *z, QDComplex *q)
 	}
     return 0;
     }
+
 /**************************************************************************
 	Run functions for each iteration
 **************************************************************************/

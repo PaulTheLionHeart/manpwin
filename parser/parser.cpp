@@ -50,14 +50,10 @@ extern	MATH_TYPE MathType;
 #define MAX_OPS		250
 #define MAX_ARGS	100
 #define MAX_BOXX	8192		// max size of boxx array 
-#define rand15() (rand()&0x7FFF)
+#define	MAX_TOKEN_LEN	120
+#define MAX_FORMULA_LEN	4096
 
-#define farmemset(a,b)		memset(a,b)
-#define far_strcat(a,b)		strcat(a,b)
-#define far_strcpy(a,b)		strcpy(a,b)
-#define far_strcmp(a,b)		strcmp(a,b)
-#define far_strnicmp(a,b,c)	_strnicmp(a,b,c)
-#define far_strlen(a)		strlen(a)
+#define rand15() (rand()&0x7FFF)
 
 #define stopmsg pstopmsg
 HWND	GlobalHwnd;			// to allow passing of hwnd 
@@ -197,7 +193,7 @@ static int frm_prescan (FILE * open_file);
 
 struct token_st 
     {
-    char token_str[80];
+    char token_str[MAX_TOKEN_LEN];
     int token_type;
     int token_id;
     Complex token_const;
@@ -222,7 +218,7 @@ int pstopmsg(int x, const char *msg)
     {
     char      s[360];
 
-    wsprintf(s, "%s, ErrorType = %d", msg, x);
+    _snprintf_s(s, 360, _TRUNCATE, "%s, ErrorType = %d", msg, x);
     MessageBox (GlobalHwnd, s, "Formula Error", MB_ICONEXCLAMATION | MB_OK);
 
     return(x); // just to quiet warnings
@@ -531,8 +527,8 @@ int isjump(char *Str, int Len)
     int i;
 
     for(i = 0; *JumpList[i]; i++)
-	if(far_strlen(JumpList[i]) == (WORD)Len)
-	    if(!far_strnicmp(JumpList[i], Str, Len))
+	if(strlen(JumpList[i]) == (WORD)Len)
+	    if(!strnicmp(JumpList[i], Str, Len))
 		return i + 1;
     return 0;
     }
@@ -640,9 +636,9 @@ void (*isfunct(char *Str, int Len))(void)
 	{
 	for(n = 0; n < sizeof(FnctList) / sizeof(struct FNCT_LIST); n++) 
 	    {
-	    if(far_strlen(FnctList[n].s) == (WORD)Len)		// TIW 03-31-91 added far 
+	    if(strlen(FnctList[n].s) == (WORD)Len)		// TIW 03-31-91 added far 
 		{
-		if(!far_strnicmp(FnctList[n].s, Str, Len))	// TIW 03-31-91 added far
+		if(!strnicmp(FnctList[n].s, Str, Len))	// TIW 03-31-91 added far
 		    {
 		    // count function variables
 		    if((functnum = whichfn(Str, Len)) != 0)	// TIW 04-22-91
@@ -1234,6 +1230,8 @@ int	CParser::FormulaFloat(Complex *zIn, Complex *cIn)		// used for direct formul
     c = *cIn;
     z = *zIn;
     ret = Formula();
+    if (ret == RENDER_ABORTED)
+	return RENDER_ABORTED;
     *zIn = z;
     return ret;
     }
@@ -1246,6 +1244,8 @@ int	CParser::DDFormula(DDComplex *zIn, DDComplex *cIn)	// used for direct formul
     zDD = *zIn;
     cDD = *cIn;
     ret = Formula();
+    if (ret == RENDER_ABORTED)
+	return RENDER_ABORTED;
     *zIn = zDD;
     return ret;
     }
@@ -1258,6 +1258,8 @@ int	CParser::QDFormula(QDComplex *zIn, QDComplex *cIn)	// used for direct formul
     zQD = *zIn;
     cQD = *cIn;
     ret = Formula();
+    if (ret == RENDER_ABORTED)
+	return RENDER_ABORTED;
     *zIn = zQD;
     return ret;
     }
@@ -1265,7 +1267,7 @@ int	CParser::QDFormula(QDComplex *zIn, QDComplex *cIn)	// used for direct formul
 int CParser::Formula(void)
     {
     if (FormName[0] == 0 || overflow)
-	return 1;
+	return -1;
 
     // 1. Restore INIT snapshot
     Ctx().LodPtr = InitLodPtr;
@@ -1278,7 +1280,8 @@ int CParser::Formula(void)
 
     m_ctx.Arg1 = &m_ctx.s[0];
 
-    RunVmIter();
+    if (RunVmIter() == RENDER_ABORTED)
+	return RENDER_ABORTED;
 
     // Publish z (this is why z now changes!)
     ConstArg* vloc = m_ctx.v;  // or whatever type ::v is
@@ -1297,7 +1300,7 @@ int CParser::Formula(void)
 	    return (to_double(m_ctx.Arg1->qd.x) == 0.0);
 	}
 
-    return 1;
+    return 0;
     }
 
 extern	int	period_level;		// 0 for no periodicity checking
@@ -1424,11 +1427,14 @@ int fill_if_group(int endif_index, JUMP_PTRS_ST* jump_data)
 
 int fill_jump_struct(void)
     {		// Completes all entries in jump structure. Returns 1 on error)
+#ifdef _DEBUG
 	{
 	char b[128];
-	sprintf(b, "fill_jump_struct ENTER: uses_jump=%d jump_index=%d\n", uses_jump, jump_index);
+	_snprintf_s(b, 128, _TRUNCATE, "fill_jump_struct ENTER: uses_jump=%d jump_index=%d\n", uses_jump, jump_index);
 	OutputDebugStringA(b);
 	}
+#endif
+
     // On entry, jump_index is the number of jump functions in the formula
     int i = 0;
     int loadcount = 0;
@@ -1497,12 +1503,13 @@ int fill_jump_struct(void)
 	i = fill_if_group(i, jump_data);
 	}
 
+#ifdef _DEBUG
     {
     char b[128];
-    sprintf(b, "ParseStr END: uses_jump=%d jump_index=%d\n", uses_jump, jump_index);
+    _snprintf_s(b, 128, _TRUNCATE, "ParseStr END: uses_jump=%d jump_index=%d\n", uses_jump, jump_index);
     OutputDebugStringA(b);
     }
-
+#endif
 
     return i < 0 ? 1 : 0;
     }
@@ -1549,7 +1556,7 @@ void getfuncinfo(struct token_st * tok)
     int i;
     for(i=0; i < sizeof(FnctList)/ sizeof(struct FNCT_LIST); i++) 
 	{
-	if(!far_strcmp(FnctList[i].s, tok->token_str)) 
+	if(!strcmp(FnctList[i].s, tok->token_str)) 
 	    {
 	    tok->token_id = i;
 	    if(i >= 11 && i <= 14)
@@ -1562,7 +1569,7 @@ void getfuncinfo(struct token_st * tok)
 
     for (i=0; i < 4; i++)	//pick up flow control
 	{
-	if(!far_strcmp(JumpList[i], tok->token_str)) 
+	if(!strcmp(JumpList[i], tok->token_str)) 
 	    {
 	    tok->token_type = FLOW_CONTROL;
 	    tok->token_id   = i + 1;
@@ -1580,7 +1587,7 @@ void getvarinfo(struct token_st * tok)
 
     for(i=0; i < sizeof(Constants) / sizeof(char*); i++) 
 	{
-	if(!far_strcmp(Constants[i], tok->token_str)) 
+	if(!strcmp(Constants[i], tok->token_str)) 
 	    {
 	    tok->token_id = i;
 	    switch(i) 
@@ -1771,10 +1778,10 @@ void is_complex_constant(FILE * openfile, struct token_st * tok)
 		{
 		if (sign_value == -1) 
 		    {
-		    strcat(tok->token_str, "-");
+		    strcat_s(tok->token_str, MAX_TOKEN_LEN, "-");
 		    }
-		strcat(tok->token_str, temp_tok.token_str);
-		strcat(tok->token_str, ",");
+		strcat_s(tok->token_str, MAX_TOKEN_LEN, temp_tok.token_str);
+		strcat_s(tok->token_str, MAX_TOKEN_LEN, ",");
 		tok->token_const.x = temp_tok.token_const.x * sign_value;
 		getting_real = 0;
 		sign_value = 1;
@@ -1783,10 +1790,10 @@ void is_complex_constant(FILE * openfile, struct token_st * tok)
 		{
 		if (sign_value == -1) 
 		    {
-		    strcat(tok->token_str, "-");
+		    strcat_s(tok->token_str, MAX_TOKEN_LEN, "-");
 		    }
-		strcat(tok->token_str, temp_tok.token_str);
-		strcat(tok->token_str, ")");
+		strcat_s(tok->token_str, MAX_TOKEN_LEN, temp_tok.token_str);
+		strcat_s(tok->token_str, MAX_TOKEN_LEN, ")");
 		tok->token_const.y = temp_tok.token_const.x * sign_value;
 		tok->token_type = tok->token_const.y ? COMPLEX_CONSTANT : REAL_CONSTANT;
 		tok->token_id   = 0;
@@ -2026,7 +2033,7 @@ int frmgettoken(FILE * openfile, struct token_st * this_token)
 		{
 		for(i=0; i < sizeof(OPList)/sizeof(struct OP_LIST); i++) 
 		    {
-		    if(!far_strcmp(OPList[i].s, this_token->token_str)) 
+		    if(!strcmp(OPList[i].s, this_token->token_str)) 
 			{
 			this_token->token_id = i;
 			}
@@ -2058,7 +2065,7 @@ int frm_get_param_stuff (char * Name)
 
     if (FormName[0] == 0 ) 
 	{
-	return 0;  /*  and don't reset the pointers  */
+	return 0;  // and don't reset the pointers
 	}
     if (find_file_item(GlobalHwnd, FormFileName,Name,&entry_file)) 
 	{
@@ -2160,10 +2167,10 @@ int frm_check_name_and_sym (FILE * open_file, int report_bad_sym)
     if(i > ITEMNAMELEN) 
 	{
 	int j;
-	int k = (int)far_strlen(ParseErrs(PE_FORMULA_NAME_TOO_LARGE));
+	int k = (int)strlen(ParseErrs(PE_FORMULA_NAME_TOO_LARGE));
 	char msgbuf[100];
-	far_strcpy(msgbuf, ParseErrs(PE_FORMULA_NAME_TOO_LARGE));
-	strcat(msgbuf, ":\n   ");
+	strcpy(msgbuf, ParseErrs(PE_FORMULA_NAME_TOO_LARGE));
+	strcat_s(msgbuf, sizeof(msgbuf), ":\n   ");
 	fseek(open_file, filepos, SEEK_SET);
 	for(j = 0; j < i && j < 25; j++)
 	    msgbuf[j+k+2] = (char) getc(open_file);
@@ -2212,12 +2219,12 @@ int frm_check_name_and_sym (FILE * open_file, int report_bad_sym)
 	    }
 	if(SymStr[i].s[0] == (char) 0 && report_bad_sym) 
 	    {
-	    char far * msgbuf = (char far*) malloc(far_strlen(ParseErrs(PE_INVALID_SYM_USING_NOSYM)) + strlen(sym_buf) + 6);
-	    far_strcpy(msgbuf, ParseErrs(PE_INVALID_SYM_USING_NOSYM));
-	    far_strcat(msgbuf, ":\n   ");
-	    far_strcat(msgbuf, sym_buf);
+	    const char* err = ParseErrs(PE_INVALID_SYM_USING_NOSYM);
+	    size_t needed = strlen(err) + strlen(sym_buf) + 6 + 1;
+	    char* msgbuf = new char[needed];
+	    _snprintf_s(msgbuf, needed, _TRUNCATE, "%s:\n   %s", err, sym_buf);
 	    stopmsg(8, msgbuf);
-	    free(msgbuf);
+	    delete[] msgbuf;
 	    }
 	}
     if (c != '{') 
@@ -2256,7 +2263,7 @@ static char *PrepareFormula(FILE * File, int from_prompts1c)
     */
 
     FILE *debug_fp = NULL;
-    static   char FormulaStr[4096];
+    static   char FormulaStr[MAX_FORMULA_LEN];
     struct token_st temp_tok;
     int Done;
     long filepos = ftell(File);
@@ -2304,7 +2311,7 @@ static char *PrepareFormula(FILE * File, int from_prompts1c)
 	    ;
 	else
 	    {
-	    strcat(FormulaStr, temp_tok.token_str);
+	    strcat_s(FormulaStr, MAX_FORMULA_LEN, temp_tok.token_str);
 	    Done = 1;
 	    }
 	}
@@ -2324,7 +2331,7 @@ static char *PrepareFormula(FILE * File, int from_prompts1c)
 		fseek(File, filepos, SEEK_SET);
 		break;
 	    default:
-		strcat(FormulaStr, temp_tok.token_str);
+		strcat_s(FormulaStr, MAX_FORMULA_LEN, temp_tok.token_str);
 		break;
 	    }
 	}
@@ -2520,10 +2527,12 @@ void frm_error(FILE * open_file, long begin_frm)
 		return;
 		}
 	    }
+
+	size_t len = strlen(msgbuf);
 #if !defined (XFRACT) && !defined (WIN32)
-	sprintf(&msgbuf[strlen(msgbuf)], "Error(%d) at line %d:  %Fs\n  ", errors[j].error_number, line_number, ParseErrs(errors[j].error_number));
+	_snprintf_s(msgbuf + len, sizeof(msgbuf) - len, _TRUNCATE, "Error(%d) at line %d:  %Fs\n  ", errors[j].error_number, line_number, ParseErrs(errors[j].error_number));
 #else
-	sprintf(&msgbuf[strlen(msgbuf)], "Error(%d) at line %d:  %s\n  ", errors[j].error_number, line_number, ParseErrs(errors[j].error_number));
+	_snprintf_s(msgbuf + len, sizeof(msgbuf) - len, _TRUNCATE, "Error(%d) at line %d:  %s\n  ", errors[j].error_number, line_number, ParseErrs(errors[j].error_number));
 #endif
 	i = (int)strlen(msgbuf);
 	fseek(open_file, errors[j].start_pos, SEEK_SET);
@@ -2575,24 +2584,24 @@ void frm_error(FILE * open_file, long begin_frm)
 	while (strlen(&msgbuf[i]) <=74 && token_count--) 
 	    {
 	    frmgettoken (open_file, &tok);
-	    strcat (msgbuf, tok.token_str);
+	    strcat_s(msgbuf, sizeof(msgbuf), tok.token_str);
 	    }
 	fseek (open_file, errors[j].error_pos, SEEK_SET);
 	frmgettoken (open_file, &tok);
 	if (strlen(&msgbuf[i]) > 74)
 	    msgbuf[i + 74] = (char) 0;
-	strcat(msgbuf, "\n");
+	strcat_s(msgbuf, sizeof(msgbuf), "\n");
 	i = (int)strlen(msgbuf);
 	while (chars_to_error-- > -2)
-	    strcat (msgbuf, " ");
+	    strcat_s(msgbuf, sizeof(msgbuf), " ");
 
 	if(errors[j].error_number == PE_TOKEN_TOO_LONG) 
 	    {
 	    chars_in_error = 33;
 	    }
 	while (chars_in_error-- && strlen(&msgbuf[i]) <=74)
-	    strcat (msgbuf, "^");
-	strcat (msgbuf, "\n");
+	    strcat_s(msgbuf, sizeof(msgbuf), "^");
+	strcat_s(msgbuf, sizeof(msgbuf), "\n");
 	}
     stopmsg (8, msgbuf);
     return;
@@ -2615,13 +2624,13 @@ void display_const_lists()
     stopmsg (0, "Complex constants are:");
     for (p = complx_list; p; p=p->next_item) 
 	{
-	sprintf(msgbuf, "%f, %f\n", p->complex_const.x, p->complex_const.y);
+	_snprintf_s(msgbuf, 800, _TRUNCATE, "%f, %f\n", p->complex_const.x, p->complex_const.y);
 	stopmsg(0, msgbuf);
 	}
     stopmsg (0, "Real constants are:");
     for (p = real_list; p; p=p->next_item) 
 	{
-	sprintf(msgbuf, "%f, %f\n", p->complex_const.x, p->complex_const.y);
+	_snprintf_s(msgbuf, 800, _TRUNCATE, "%f, %f\n", p->complex_const.x, p->complex_const.y);
 	stopmsg(0, msgbuf);
 	}
     }
@@ -2671,10 +2680,10 @@ struct var_list_st far * add_var_to_list (struct var_list_st far * p, struct tok
 	{
 	if ((p = var_list_alloc()) == NULL)
 	    return NULL;
-	far_strcpy(p->name, tok.token_str);
+	strcpy(p->name, tok.token_str);
 	p->next_item = NULL;
 	}
-    else if (far_strcmp(p->name, tok.token_str) == 0) 
+    else if (strcmp(p->name, tok.token_str) == 0) 
 	{
 	}
     else 
@@ -3678,6 +3687,39 @@ int	InitParserArithmetic(void)
     }
 
 /**************************************************************************
+    Prepare formula from a direct string instead of a .frm file
+**************************************************************************/
+
+char* PrepareFormulaFromString(const char* formula)
+    {
+    if (!formula || !*formula)
+	{
+	stopmsg(8, "Empty formula");
+	return NULL;
+	}
+
+    FILE* tmp = tmpfile();
+    if (!tmp)
+	{
+	stopmsg(8, "Unable to create temporary formula file");
+	return NULL;
+	}
+
+    // Write a minimal pseudo-FRM structure
+    fprintf(tmp, "DirectFormula {\n");
+    fprintf(tmp, "    %s\n", formula);
+    fprintf(tmp, "}\n");
+
+    rewind(tmp);
+
+    char* result = PrepareFormula(tmp, 0);
+
+    fclose(tmp);
+
+    return result;
+    }
+
+/**************************************************************************
 	Process Formula String
 **************************************************************************/
 
@@ -3685,23 +3727,27 @@ int	ProcessFormulaString(char *FormulaString)
     {
     FormStr = FormulaString;		// this is a bit of a cludge to use the string parser from Fractint to parse our strings
     strcpy(FormName,"OnScreen");	// fool the parser into thinking it got a real formula from a file to get round validation checks
-//    sprintf(FormStr, "c = z = 1 / pixel:z = sqr(z) + c,|z| <= 4");
-//    sprintf(FormStr, "c = z = pixel:z = z*z*z + c,|z| <= 4");
-//    sprintf(FormStr, "c = pixel,z=1:z=z-((z*z*z*z-z)/(4*z*z*z-z)+c,|z| <= 4");
-//    sprintf(FormStr, "c = z = pixel:z=ccos(z*c)*c,|z| <= 4");
-//    sprintf(FormStr, "c=z=pixel:x=abs(real(z)),y=-abs(imag(z)), z = x+flip(y), z=z*z+ c,|z|<=4");
-//    sprintf(FormStr, "z = pixel:z = z*z + c + p1,|z| <= 4");
-//    sprintf(FormStr, "z = P1:z = (pixel ^ z) + p1,|z| <= (P2 + 3)");
-//    sprintf(FormStr, "p1 = 1.618, p2 = -4.76,e=p1, a=imag(p2)+100,  p=real(p2)+PI,  q=2*PI*fn1(p/(2*PI)),  r=real(p2)+PI-q,  Z=C=Pixel: Z=log(Z) , IF(imag(Z)>r), Z=Z+flip(2*PI), ENDIF, Z=exp(e*(Z+flip(q)))+C;  |Z|<a ");
-//    sprintf(FormStr, "a=real(p1), b=imag(p1), d=real(p2), f=imag(p2),,g=1/f, h=1/d, j=1/(f-b), z=(-a*b*g*h)^j,,k=real(p3)+1, l=imag(p3)+100, c=fn1(pixel):z=k*((a*(z^b))+(d*(z^f)))+c,,|z| < l  ");
-//    sprintf(FormStr, "a=11, b=-1.2, d=4.3, f=-6,g=1/f, h=1/d, j=1/(f-b), z=(-a*b*g*h)^j,k=0+1, l=1e+100+100, c=fn1(pixel):z=k*((a*(z^b))+(d*(z^f)))+c,|z| < l  ");
-//    sprintf(FormStr, "Z=C=Pixel:Z=log(Z),,Z=exp(1.414213562373*(Z+flip(real(p1))))+C,,|Z|<36");
-//    sprintf(FormStr, "a = real(p1), b = imag(p1), d = real(p2), f = imag(p2), g = 1 / f, h = 1 / d, j = 1 / (f - b), z = (((-a * b*g*h) ^ j) + (p4)), k = real(p3) + 1, l = imag(p3) + 100, c = fn1(pixel) : z = k * ((a*(z^b)) + (d*(z^f))) + c, | z | < l");
-//    sprintf(FormStr, "z=g=pixel, a=real(p1), b=imag(p1), c=real(p2),d = imag(p2), e = real(p3), f = imag(p3) :	h = z ^ a + (g - b)*z - g, j = c * z^d + g,z = z - e * h / j, f <= |h| ");
-//    sprintf(FormStr, "z=c=pixel: z = z * z + c,|z| < 4.0");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "c = z = 1 / pixel:z = sqr(z) + c,|z| <= 4");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "c = z = pixel:z = z*z*z + c,|z| <= 4");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "c = pixel,z=1:z=z-((z*z*z*z-z)/(4*z*z*z-z)+c,|z| <= 4");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "c = z = pixel:z=ccos(z*c)*c,|z| <= 4");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "c=z=pixel:x=abs(real(z)),y=-abs(imag(z)), z = x+flip(y), z=z*z+ c,|z|<=4");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "z = pixel:z = z*z + c + p1,|z| <= 4");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "z = P1:z = (pixel ^ z) + p1,|z| <= (P2 + 3)");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "p1 = 1.618, p2 = -4.76,e=p1, a=imag(p2)+100,  p=real(p2)+PI,  q=2*PI*fn1(p/(2*PI)),  r=real(p2)+PI-q,  Z=C=Pixel: Z=log(Z) , IF(imag(Z)>r), Z=Z+flip(2*PI), ENDIF, Z=exp(e*(Z+flip(q)))+C;  |Z|<a ");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "a=real(p1), b=imag(p1), d=real(p2), f=imag(p2),,g=1/f, h=1/d, j=1/(f-b), z=(-a*b*g*h)^j,,k=real(p3)+1, l=imag(p3)+100, c=fn1(pixel):z=k*((a*(z^b))+(d*(z^f)))+c,,|z| < l  ");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "a=11, b=-1.2, d=4.3, f=-6,g=1/f, h=1/d, j=1/(f-b), z=(-a*b*g*h)^j,k=0+1, l=1e+100+100, c=fn1(pixel):z=k*((a*(z^b))+(d*(z^f)))+c,|z| < l  ");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "Z=C=Pixel:Z=log(Z),,Z=exp(1.414213562373*(Z+flip(real(p1))))+C,,|Z|<36");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "a = real(p1), b = imag(p1), d = real(p2), f = imag(p2), g = 1 / f, h = 1 / d, j = 1 / (f - b), z = (((-a * b*g*h) ^ j) + (p4)), k = real(p3) + 1, l = imag(p3) + 100, c = fn1(pixel) : z = k * ((a*(z^b)) + (d*(z^f))) + c, | z | < l");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "z=g=pixel, a=real(p1), b=imag(p1), c=real(p2),d = imag(p2), e = real(p3), f = imag(p3) :	h = z ^ a + (g - b)*z - g, j = c * z^d + g,z = z - e * h / j, f <= |h| ");
+//    _snprintf_s(FormStr, MAXFORMULASTRINGLENGTH, _TRUNCATE, "z=c=pixel: z = z * z + c,|z| < 4.0");
+    char* parsed = PrepareFormulaFromString(FormulaString);
+    if (parsed == NULL)
+	{
+	return -1;	// Syntax error already reported by parser
+	}
     if (str_find_ci(FormStr, "fn1") || str_find_ci(FormStr, "fn2"))
 	insertFunctionNames(FormStr, Fractal);		// insert function names in place of literal "fn1", "fn2"
-//    return InitParserArithmetic();
     return 0;
     }
 
@@ -3719,7 +3765,7 @@ int get_formula_names(HWND hwnd, char *filename)	// get the fractal formula name
     strcpy(FormName, "Not Loaded Yet");
     if ((File = fopen(filename, "r")) == NULL)
 	{
-	wsprintf(s, "Can't Open Formula File: <%s>", filename);
+	_snprintf_s(s, 480, _TRUNCATE, "Can't Open Formula File: <%s>", filename);
 	MessageBox (hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}

@@ -104,17 +104,6 @@ dl3quant(uchar *inbuf, uchar *outbuf, int width, int height, int quant_to, int d
     printf("Reducing palette...\n");
 #endif
 
-/*
-This seems silly to ask every time. Best to just assume we always want to compress the colours
-
-//    if (tot_colors > 600 && PGVState != BATCH && PGVState != SLIDESHOW && PGVState != ZAAPACTIVE)
-    if (tot_colors > 600)
-	{
-	wsprintf(s, "WARNING!\nThere are %d colours in this file!\nThis will take a lot of time\nDo you wish to continue?", tot_colors - 1);
-	if (MessageBox (GlobalHwnd, s, "Quantisation", MB_ICONEXCLAMATION | MB_DEFBUTTON2 | MB_YESNO) == IDNO)
-	    return ERR_USER_ABORT;
-	}
-*/
     reduce_table(GlobalHwnd, quant_to);
 
     set_palette();
@@ -250,7 +239,7 @@ reduce_table(HWND hwnd, int num_colors) {
 //	if (display_count > percent)
 //	    {
 //	    percent = display_count;
-//	    wsprintf (s, "Quantisation Stage 1: %d%%", percent);
+//	    _snprintf_s(s, 200, _TRUNCATE, "Quantisation Stage 1: %d%%", percent);
 //	    SetWindowText (hwnd, s);		// Show formatted text in the caption bar
 //	    }
 #ifdef STATUS
@@ -276,7 +265,7 @@ reduce_table(HWND hwnd, int num_colors) {
     while (tot_colors > num_colors) {
 	err = (ulong)(~0L);
 
-//	    wsprintf (s, "Stage 2: Reducing Colours %d Down to %d", tot_colors, num_colors);
+//	    _snprintf_s(s, 200, _TRUNCATE, "Stage 2: Reducing Colours %d Down to %d", tot_colors, num_colors);
 //	    SetWindowText (hwnd, s);		// Show formatted text in the caption bar
 
 	for (i = 0; i < tot_colors; i++) {

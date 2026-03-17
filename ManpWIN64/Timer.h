@@ -1,6 +1,8 @@
 #include <chrono>
 #include <string>
 #include <cstdio>
+#include "SafeStrings.h"
+
 #pragma once
 
 struct HiResTimer
@@ -24,23 +26,23 @@ static std::string FormatElapsed(double ms)
 
     if (ms < 1000.0) {
 	// < 1 sec -> ms
-	sprintf(buf, "%.1f ms", ms);
+	SAFE_SPRINTF(buf, "%.1f ms", ms);
 	}
     else if (ms < 60'000.0) {
 	// < 1 min -> seconds
-	sprintf(buf, "%.2f s", ms / 1000.0);
+	SAFE_SPRINTF(buf, "%.2f s", ms / 1000.0);
 	}
     else if (ms < 3'600'000.0) {
 	// < 1 hour -> min:sec
 	int mins = (int)(ms / 60000.0);
 	double secs = (ms - mins * 60000.0) / 1000.0;
-	sprintf(buf, "%d m %.1f s", mins, secs);
+	SAFE_SPRINTF(buf, "%d m %.1f s", mins, secs);
 	}
     else {
 	// >= 1 hour -> hr:min
 	int hrs = (int)(ms / 3'600'000.0);
 	int mins = (int)((ms - hrs * 3'600'000.0) / 60000.0);
-	sprintf(buf, "%d h %d m", hrs, mins);
+	SAFE_SPRINTF(buf, "%d h %d m", hrs, mins);
 	}
 
     return std::string(buf);

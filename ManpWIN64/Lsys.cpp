@@ -516,7 +516,7 @@ static	int	readLSystemFile(HWND hwnd, char *str, char *filename)
 
     if ((fp = fopen(filename, "r")) == NULL)
 	{
-	wsprintf(s, "Can't Open LSystem File: <%s>", filename);
+	_snprintf_s(s, 200, _TRUNCATE, "Can't Open LSystem File: <%s>", filename);
 	MessageBox (hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
@@ -525,7 +525,7 @@ static	int	readLSystemFile(HWND hwnd, char *str, char *filename)
 	{
 	if (fgets(InLine, 160, fp) == 0)
 	    {
-	    wsprintf(s, "Can't Get LSystem Data: <%s>", filename);
+	    _snprintf_s(s, 200, _TRUNCATE, "Can't Get LSystem Data: <%s>", filename);
 	    MessageBox (hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	    return -1;
 	    }
@@ -568,7 +568,10 @@ static	int	readLSystemFile(HWND hwnd, char *str, char *filename)
 	else if (strlen(word) == 1)
 	    {
 	    if ((tok = strtok(NULL, " \011\n")) != NULL)
-		strcat(strcpy(fixed, word), tok);
+		{
+		strcpy_s(fixed, sizeof(fixed), word);
+		strcat_s(fixed, sizeof(fixed), tok);
+		}
 	    else
 		strcpy(fixed, word);
 	    save_rule(fixed, rulind++);
@@ -576,8 +579,8 @@ static	int	readLSystemFile(HWND hwnd, char *str, char *filename)
 	    }
 	else if (err < 6)
 	    {
-	    sprintf(&msgbuf[strlen(msgbuf)], 
-				    "Syntax error line %d: %s\n",linenum,word);
+	    size_t len = strlen(msgbuf);
+	    _snprintf_s(msgbuf + len, sizeof(msgbuf) - len, _TRUNCATE, "Syntax error line %d: %s\n", linenum, word);
 	    ++err;
 	    }
 	if (check)
@@ -586,8 +589,8 @@ static	int	readLSystemFile(HWND hwnd, char *str, char *filename)
 	    if (word = strtok(NULL, " \011\n"))
 		if (err < 6)
 		    {
-		    sprintf(&msgbuf[strlen(msgbuf)],
-			   "Extra text after command line %d: %s\n",linenum, word);
+		    size_t len = strlen(msgbuf);
+		    _snprintf_s(msgbuf + len, sizeof(msgbuf) - len, _TRUNCATE, "Extra text after command line %d: %s\n",linenum, word);
 		    ++err;
 		    }
 	    }
@@ -595,12 +598,12 @@ static	int	readLSystemFile(HWND hwnd, char *str, char *filename)
     fclose(fp);
     if (!ruleptrs[0] && err < 6)
 	{
-	strcat(msgbuf,"Error:  no axiom\n");
+	strcat_s(msgbuf, sizeof(msgbuf), "Error:  no axiom\n");
 	++err;
 	}
     if ((maxangle < 3 || maxangle > 50) && err < 6)
 	{
-	strcat(msgbuf,"Error:  illegal or missing angle\n");
+	strcat_s(msgbuf, sizeof(msgbuf), "Error:  illegal or missing angle\n");
 	++err;
 	}
     if (err)
@@ -720,14 +723,11 @@ void	thinking(HWND hwnd, int count)
     if (slow++ % 40 == 0)
 	{
 	thinkstate = (thinkstate + 1) & 3;
-	wsprintf(s, "Thinking. Level = <%d> %c", count, wheel[thinkstate]);
+	_snprintf_s(s, 100, _TRUNCATE, "Thinking. Level = <%d> %c", count, wheel[thinkstate]);
 	SetWindowText (hwnd, s);
 	}
     }
-
-
-
-
+       	 
 extern	int	xdots, ydots;
 #define dopoint(x,y,c) { if(x < xdots && y < ydots) Plot.PlotPoint(x,y,c); }
 
@@ -846,7 +846,7 @@ int	load_lsystems(HWND hwnd, char *filename)
     strcpy(lsys_type, "Not Loaded Yet");
     if ((fp = fopen(filename, "r")) == NULL)
 	{
-	wsprintf(s, "Can't Open LSystem File: <%s>", filename);
+	_snprintf_s(s, 250, _TRUNCATE, "Can't Open LSystem File: <%s>", filename);
 	MessageBox (hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}

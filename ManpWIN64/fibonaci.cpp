@@ -4,6 +4,7 @@
     Written in Microsoft Visual C++ by Paul de Leeuw.
 */
 
+#include <atomic>
 #include "manp.h"
 #include "colour.h"
 #include "resource.h"
@@ -13,17 +14,18 @@
 extern	int	user_data(HWND);
 
 extern	long	threshold;
-extern	int	subtype;		/* Q = quad mand, B = bifurcation */
-extern	WORD	type;			/* M=mand, J=Julia 1,2,4-> */
+extern	int	subtype;		// Q = quad mand, B = bifurcation
+extern	WORD	type;			// M=mand, J=Julia 1,2,4->
 extern	int	row, col;
 extern	int	xdots, ydots;
-extern	CPlot	Plot;		// image plotting routines 
+extern	CPlot	Plot;			// image plotting routines 
 
 extern	PAINTSTRUCT 	ps;
 extern	HDC		hdcMem;		// load picture into memory
 extern	RECT 		r;
 extern	HWND		PixelHwnd;	// pointer to handle for pixel updating
 extern	WORD		delay;
+extern	std::atomic<bool> gStopRequested;	// force early exit
 
 WORD	SpiralNo;
 
@@ -42,7 +44,6 @@ struct	fibstruct
 ***************************************************************************/
 
 void	PlotSpiral(double angle, int colour)
-
     {                                             
     int	i, j;        
     double	radius, temp;
@@ -83,7 +84,6 @@ void	PlotSpiral(double angle, int colour)
 ***************************************************************************/
 
 int	FibDelay(HWND hwnd, WORD MilliSec)
-
     {
     DWORD	tick;
                      
@@ -100,7 +100,6 @@ int	FibDelay(HWND hwnd, WORD MilliSec)
 ***************************************************************************/
 
 int	Spirals(HWND hwnd, WORD order, WORD delay, CPlot Plot)
-
     {
     int	i, j;
          
@@ -108,8 +107,12 @@ int	Spirals(HWND hwnd, WORD order, WORD delay, CPlot Plot)
 	{
 	for (j = 0; j < threshold / order; ++j)
 	    if ((j + 1) * order + i < threshold)
+		{
+		if (AbortRequested())
+		    return 0;
 		Plot.genline(FibArray[j * order + i].x, FibArray[j * order + i].y, 
 		    FibArray[(j + 1) * order + i].x, FibArray[(j + 1) * order + i].y, i % 14 + 1);
+		}
 	if (FibDelay(hwnd, delay) < 0)
 	    return -1;
 	}
@@ -121,7 +124,6 @@ int	Spirals(HWND hwnd, WORD order, WORD delay, CPlot Plot)
 ***************************************************************************/
 
 void	initFibonacci(void)
-
     {
     SpiralNo = 13;
     delay = 10;
@@ -132,7 +134,6 @@ void	initFibonacci(void)
 ***************************************************************************/
 
 int	Fibonacci(void)
-
     {
     double	angle, step;
     int	j;
@@ -144,12 +145,13 @@ int	Fibonacci(void)
 	threshold = FIBMAX - 1;
     for (j = 0; j < threshold; ++j)
 	{
+	if (AbortRequested())
+	    return 0;
 	angle += step;
 	if (angle > 360.0)
 	    angle -= 360.0;
 	PlotSpiral(angle, j);
 	}
-
 
     for (j = 0; j < threshold; ++j)
 	{

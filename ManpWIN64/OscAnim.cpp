@@ -15,6 +15,7 @@
 #include	"colour.h"
 #include	"OscProcess.h"
 #include	"Matrix.h"
+#include	"SafeStrings.h"
 
 extern	HWND	GlobalHwnd;			// This is the main windows handle
 
@@ -145,7 +146,7 @@ int	GenOscillatorScript(HWND hwnd, char *filename)
 //    x_rot = y_rot = z_rot = 0.0;
     if ((out = fopen(filename, "w")) == NULL)
 	{
-	sprintf(s, "Cannot open output file %s\nDoes Folder exist?", filename);
+	SAFE_SPRINTF(s, "Cannot open output file %s\nDoes Folder exist?", filename);
 	MessageBox (hwnd, s, "Animation", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -212,15 +213,15 @@ INT_PTR CALLBACK OscillatorAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPAR
 //		hCtrl = GetDlgItem (hDlg, IDC_PLOTLINES);
 //		SendMessage(hCtrl, BM_SETCHECK, DisplayLines, 0L);
 		if (type == OSCILLATORS)
-		    sprintf(AnimType, "Osc");
+		    SAFE_SPRINTF(AnimType, "Osc");
 		else if (type == FRACTALMAPS || type == SPROTTMAPS)
-		    sprintf(AnimType, "Map");
+		    SAFE_SPRINTF(AnimType, "Map");
 		else if (type == SURFACES)
-		    sprintf(AnimType, "Surface");
+		    SAFE_SPRINTF(AnimType, "Surface");
 		else if (type == KNOTS)
-		    sprintf(AnimType, "Knot");
+		    SAFE_SPRINTF(AnimType, "Knot");
 		else if (type == CURVES)
-		    sprintf(AnimType, "Curve");
+		    SAFE_SPRINTF(AnimType, "Curve");
 		SetUpFilename(ScriptFileName, "sci", AnimType);
 		SetUpFilename(PNGName, "animpng", AnimType);
 		SetDlgItemText(hDlg, IDC_SCRIPT_FILENAME, ScriptFileName);
@@ -241,7 +242,7 @@ INT_PTR CALLBACK OscillatorAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPAR
 		hCtrl = GetDlgItem (hDlg, IDC_SHOWCENTRE);
 		SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 		SetDlgItemInt(hDlg, IDC_RADIUS, CentrePixels, TRUE);
-		sprintf(zScaling, "%f", zBias);
+		SAFE_SPRINTF(zScaling, "%f", zBias);
 		SetDlgItemText(hDlg, IDC_ZBIAS, zScaling);
 		if (type == OSCILLATORS)
 		    {
@@ -249,7 +250,7 @@ INT_PTR CALLBACK OscillatorAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPAR
 //		    switch (subtype)	// these are NOT supported
 			{
 //			case 235:	// Lévy footprints on an african savanah after the rain
-			    wsprintf(TempStr, "Chaotic Oscillator type %d (%s) cannot configured for animation\nIt is either 2D or it is not contained within a specified volume", subtype, OscillatorSpecific[subtype].name);
+			    _snprintf_s(TempStr, MAX_PATH, _TRUNCATE, "Chaotic Oscillator type %d (%s) cannot configured for animation\nIt is either 2D or it is not contained within a specified volume", subtype, OscillatorSpecific[subtype].name);
 			    MessageBox (hDlg, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 			    EndDialog (hDlg, FALSE);
 			    return FALSE;
@@ -262,12 +263,12 @@ INT_PTR CALLBACK OscillatorAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPAR
 		    switch (subtype)	// these are NOT supported
 			{
 			case 99:	// if we ever get this far
-			    wsprintf(TempStr, "Fractal Map type %d (%s) cannot be configured for animation\nIt is either 2D or it is not contained within a specified volume", subtype, FractalMapSpecific[subtype].name);
+			    _snprintf_s(TempStr, MAX_PATH, _TRUNCATE, "Fractal Map type %d (%s) cannot be configured for animation\nIt is either 2D or it is not contained within a specified volume", subtype, FractalMapSpecific[subtype].name);
 			    MessageBox (hDlg, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 			    EndDialog (hDlg, FALSE);
 			    return FALSE;
 //			case 32:	// initialisation of subtype failed - protect the program against crashing
-//			    wsprintf(TempStr, "Fractal Map type %d does not exist", subtype);
+//			    _snprintf_s(TempStr, MAX_PATH, _TRUNCATE, "Fractal Map type %d does not exist", subtype);
 //			    MessageBox (hDlg, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 //			    EndDialog (hDlg, FALSE);
 //			    return FALSE;
@@ -292,7 +293,7 @@ INT_PTR CALLBACK OscillatorAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPAR
 			    hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGFILELIST);
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WritePNGFrames = WriteMemFrames = WritePNGList = FALSE;
-			    sprintf(MPGFile, "%s", GenerateAnimFileName (MPGPath, PNGName));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (MPGPath, PNGName));
 			    SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, MPGFile);
 			    }
 			return TRUE;
@@ -308,7 +309,7 @@ INT_PTR CALLBACK OscillatorAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPAR
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WriteMPEGFrames = FALSE;
 			    }
-//			sprintf(PNGFile, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
+//			_snprintf_s(PNGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
 //			SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGFile);
 			return TRUE;
 
@@ -336,7 +337,7 @@ INT_PTR CALLBACK OscillatorAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPAR
 			if (WriteMPEGFrames)						// generate MPEG filename
 			    {
 			    GetDlgItemText(hDlg, IDC_SEQUENCE_NAME, TempFile, MAX_PATH);
-			    sprintf(MPGFile, "%s", GenerateMPEGFileName (MPGPath, TempFile));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateMPEGFileName (MPGPath, TempFile));
 			    }
 
 			GetDlgItemText(hDlg, IDC_SCRIPT_FILENAME, ScriptFileName, 400);
@@ -345,7 +346,7 @@ INT_PTR CALLBACK OscillatorAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPAR
 			    fileptr--;							// remove extension
 			if (*fileptr == '.')
 			    *fileptr = '\0';
-			strcat(ScriptFileName, ".sci");
+			strcat_s(ScriptFileName, MAX_PATH, ".sci");
 			hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
 			StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_SHOWPALETTE);

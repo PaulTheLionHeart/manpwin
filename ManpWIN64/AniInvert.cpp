@@ -19,6 +19,7 @@
 #include "fractype.h"
 #include "complex.h"
 #include "colour.h"
+#include "SafeStrings.h"
 
 extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
 
@@ -127,7 +128,7 @@ int	CardioidInversionScript(HWND hwnd, char *filename)
 
     if ((out = fopen(filename, "w")) == NULL)
 	{
-	sprintf(s, "Cannot open output file %s\nDoes Folder exist?", filename);
+	SAFE_SPRINTF(s, "Cannot open output file %s\nDoes Folder exist?", filename);
 	MessageBox (hwnd, s, "Animation", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -198,7 +199,7 @@ int	CircleInversionScript(HWND hwnd, char *filename)
 
     if ((out = fopen(filename, "w")) == NULL)
 	{
-	sprintf(s, "Cannot open output file %s\nDoes Folder exist?", filename);
+	SAFE_SPRINTF(s, "Cannot open output file %s\nDoes Folder exist?", filename);
 	MessageBox (hwnd, s, "Animation", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -272,7 +273,7 @@ int	GenInversionScript(HWND hwnd, char *filename)
 
     if ((out = fopen(filename, "w")) == NULL)
 	{
-	sprintf(s, "Cannot open output file %s\nDoes Folder exist?", filename);
+	SAFE_SPRINTF(s, "Cannot open output file %s\nDoes Folder exist?", filename);
 	MessageBox (hwnd, s, "Animation", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -352,13 +353,13 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 		SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGName);
 		SetDlgItemInt(hDlg, IDC_THRESHOLD_START, threshold, TRUE);
 		SetDlgItemInt(hDlg, IDC_FRAMES, frames, TRUE);
-		sprintf(s, "%f", ScaleFactor);
+		SAFE_SPRINTF(s, "%f", ScaleFactor);
 		SetDlgItemText(hDlg, IDC_JULIAWIDTH, s);
 		hCtrl = GetDlgItem (hDlg, IDC_ORBITS1);
 		ShowWindow(hCtrl, SW_HIDE);
 		hCtrl = GetDlgItem (hDlg, IDC_INVERTRADIUS);
 		ShowWindow(hCtrl, SW_SHOWNORMAL);
-		sprintf(s, "%f", InvertRadius);
+		SAFE_SPRINTF(s, "%f", InvertRadius);
 		SetDlgItemText(hDlg, IDC_INVERTRADIUS, s);
 		hCtrl = GetDlgItem (hDlg, IDC_INVERTTEXT);
 		ShowWindow(hCtrl, SW_SHOWNORMAL);
@@ -367,13 +368,13 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 		switch (InvertAnimType)
 		    {
 		    case 0:						// Linear
-			sprintf(s, "%18.18f", StartX);
+			SAFE_SPRINTF(s, "%18.18f", StartX);
 			SetDlgItemText(hDlg, IDC_START_X, s);
-			sprintf(s, "%18.18f", StartY);
+			SAFE_SPRINTF(s, "%18.18f", StartY);
 			SetDlgItemText(hDlg, IDC_START_Y, s);
-			sprintf(s, "%18.18f", EndX);
+			SAFE_SPRINTF(s, "%18.18f", EndX);
 			SetDlgItemText(hDlg, IDC_END_X, s);
-			sprintf(s, "%18.18f", EndY);
+			SAFE_SPRINTF(s, "%18.18f", EndY);
 			SetDlgItemText(hDlg, IDC_END_Y, s);
 			SetDlgItemText(hDlg, IDC_LABEL01, "Start X       ");
 			SetDlgItemText(hDlg, IDC_LABEL02, "Start Y       ");
@@ -389,13 +390,13 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 			EnableWindow (hCtrl, TRUE);
 			break;
 		    case 1:						// Circular
-			sprintf(s, "%18.18f", CentreX);
+			SAFE_SPRINTF(s, "%18.18f", CentreX);
 			SetDlgItemText(hDlg, IDC_START_X, s);
-			sprintf(s, "%18.18f", CentreY);
+			SAFE_SPRINTF(s, "%18.18f", CentreY);
 			SetDlgItemText(hDlg, IDC_START_Y, s);
-			sprintf(s, "     ");
+			SAFE_SPRINTF(s, "     ");
 			SetDlgItemText(hDlg, IDC_END_X, s);
-			sprintf(s, "%18.18f", radius);
+			SAFE_SPRINTF(s, "%18.18f", radius);
 			SetDlgItemText(hDlg, IDC_END_Y, s);
 			SetDlgItemText(hDlg, IDC_LABEL01, "Centre X      ");
 			SetDlgItemText(hDlg, IDC_LABEL02, "Centre Y      ");
@@ -411,13 +412,13 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 			EnableWindow (hCtrl, TRUE);
 			break;
 		    case 2:						// Cardioid
-			sprintf(s, "     ");
+			SAFE_SPRINTF(s, "     ");
 			SetDlgItemText(hDlg, IDC_START_X, s);
-			sprintf(s, "     ");
+			SAFE_SPRINTF(s, "     ");
 			SetDlgItemText(hDlg, IDC_START_Y, s);
-			sprintf(s, "     ");
+			SAFE_SPRINTF(s, "     ");
 			SetDlgItemText(hDlg, IDC_END_X, s);
-			sprintf(s, "%18.18f", Magnitude);
+			SAFE_SPRINTF(s, "%18.18f", Magnitude);
 			SetDlgItemText(hDlg, IDC_END_Y, s);
 			SetDlgItemText(hDlg, IDC_LABEL01, "              ");
 			SetDlgItemText(hDlg, IDC_LABEL02, "              ");
@@ -451,7 +452,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 			    hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGFILELIST);
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WritePNGFrames = WriteMemFrames = WritePNGList = FALSE;
-			    sprintf(MPGFile, "%s", GenerateAnimFileName (MPGPath, PNGName));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (MPGPath, PNGName));
 			    SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, MPGFile);
 			    }
 			return TRUE;
@@ -467,20 +468,20 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WriteMPEGFrames = FALSE;
 			    }
-//			sprintf(PNGFile, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
+//			_snprintf_s(PNGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
 //			SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGFile);
 			return TRUE;
 
 		    case IDC_LINEARJUL:
 			InvertAnimType = LOWORD(wParam) - IDC_LINEARJUL;
 			CheckRadioButton(hDlg, IDC_LINEARJUL, IDC_CARDIOID, (int) LOWORD(wParam));
-			sprintf(s, "%18.18f", StartX);
+			SAFE_SPRINTF(s, "%18.18f", StartX);
 			SetDlgItemText(hDlg, IDC_START_X, s);
-			sprintf(s, "%18.18f", StartY);
+			SAFE_SPRINTF(s, "%18.18f", StartY);
 			SetDlgItemText(hDlg, IDC_START_Y, s);
-			sprintf(s, "%18.18f", EndX);
+			SAFE_SPRINTF(s, "%18.18f", EndX);
 			SetDlgItemText(hDlg, IDC_END_X, s);
-			sprintf(s, "%18.18f", EndY);
+			SAFE_SPRINTF(s, "%18.18f", EndY);
 			SetDlgItemText(hDlg, IDC_END_Y, s);
 			SetDlgItemText(hDlg, IDC_LABEL01, "Start X       ");
 			SetDlgItemText(hDlg, IDC_LABEL02, "Start Y       ");
@@ -499,13 +500,13 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 		    case IDC_CIRCULAR:
 			InvertAnimType = LOWORD(wParam) - IDC_LINEARJUL;
 			CheckRadioButton(hDlg, IDC_LINEARJUL, IDC_CARDIOID, (int) LOWORD(wParam));
-			sprintf(s, "%18.18f", CentreX);
+			SAFE_SPRINTF(s, "%18.18f", CentreX);
 			SetDlgItemText(hDlg, IDC_START_X, s);
-			sprintf(s, "%18.18f", CentreY);
+			SAFE_SPRINTF(s, "%18.18f", CentreY);
 			SetDlgItemText(hDlg, IDC_START_Y, s);
-			sprintf(s, "     ");
+			SAFE_SPRINTF(s, "     ");
 			SetDlgItemText(hDlg, IDC_END_X, s);
-			sprintf(s, "%18.18f", radius);
+			SAFE_SPRINTF(s, "%18.18f", radius);
 			SetDlgItemText(hDlg, IDC_END_Y, s);
 			SetDlgItemText(hDlg, IDC_LABEL01, "Centre X      ");
 			SetDlgItemText(hDlg, IDC_LABEL02, "Centre Y      ");
@@ -524,13 +525,13 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 		    case IDC_CARDIOID:
 			InvertAnimType = LOWORD(wParam) - IDC_LINEARJUL;
 			CheckRadioButton(hDlg, IDC_LINEARJUL, IDC_CARDIOID, (int) LOWORD(wParam));
-			sprintf(s, "     ");
+			SAFE_SPRINTF(s, "     ");
 			SetDlgItemText(hDlg, IDC_START_X, s);
-			sprintf(s, "     ");
+			SAFE_SPRINTF(s, "     ");
 			SetDlgItemText(hDlg, IDC_START_Y, s);
-			sprintf(s, "     ");
+			SAFE_SPRINTF(s, "     ");
 			SetDlgItemText(hDlg, IDC_END_X, s);
-			sprintf(s, "%18.18f", Magnitude);
+			SAFE_SPRINTF(s, "%18.18f", Magnitude);
 			SetDlgItemText(hDlg, IDC_END_Y, s);
 			SetDlgItemText(hDlg, IDC_LABEL01, "              ");
 			SetDlgItemText(hDlg, IDC_LABEL02, "              ");
@@ -589,7 +590,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 			    fileptr--;							// remove extension
 			if (*fileptr == '.')
 			    *fileptr = '\0';
-			strcat(ScriptFileName, ".sci");
+			strcat_s(ScriptFileName, MAX_PATH, ".sci");
 
 //			hCtrl = GetDlgItem (hDlg, IDC_ORBITS1);
 //			ShowOrbits = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
@@ -615,7 +616,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 			if (WriteMPEGFrames)						// generate MPEG filename
 			    {
 			    GetDlgItemText(hDlg, IDC_SEQUENCE_NAME, TempFile, MAX_PATH);
-			    sprintf(MPGFile, "%s", GenerateMPEGFileName (MPGPath, TempFile));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateMPEGFileName (MPGPath, TempFile));
 			    }
 
 			switch (InvertAnimType)

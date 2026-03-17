@@ -93,24 +93,24 @@ typedef struct moreparams        MOREPARAMS;
 
 struct alternatemathstuff
 {
-   int type;                    /* index in fractalname of the fractal */
-   int math;                    /* kind of math used */
+   int type;                    // index in fractalname of the fractal
+   int math;                    // kind of math used
 #ifdef XFRACT
-   int (*orbitcalc)();  /* function that calculates one orbit */
+   int (*orbitcalc)();		// function that calculates one orbit
 #else
-   int (*orbitcalc)(void);      /* function that calculates one orbit */
+   int (*orbitcalc)(void);      // function that calculates one orbit
 #endif
-   int (*per_pixel)(void);      /* once-per-pixel init */
-   int (*per_image)(void);      /* once-per-image setup */
+   int (*per_pixel)(void);      // once-per-pixel init
+   int (*per_image)(void);      // once-per-image setup
 };
 
-#ifdef WIN32		     /* PHD 13/4/02 ALTERNATE is a key word in MS C++ */
+#ifdef WIN32			// PHD 13/4/02 ALTERNATE is a key word in MS C++
 typedef struct alternatemathstuff ALTERNATE1;
 #else
 typedef struct alternatemathstuff ALTERNATE;
 #endif
 
-/* defines for symmetry */
+// defines for symmetry
 #define  NOSYM          0
 #define  XAXIS_NOPARM  -1
 #define  XAXIS          1
@@ -137,7 +137,7 @@ typedef struct alternatemathstuff ALTERNATE;
 #endif
 //typedef  _LCMPLX LCMPLX;
 
-/* 3D stuff - formerly in 3d.h */
+// 3D stuff - formerly in 3d.h
 #ifndef dot_product
 #define dot_product(v1,v2)  ((v1)[0]*(v2)[0]+(v1)[1]*(v2)[1]+(v1)[2]*(v2)[2])  /* TW 7-09-89 */
 #endif
@@ -146,12 +146,12 @@ typedef struct alternatemathstuff ALTERNATE;
 #undef PI
 #endif
 #define PI 3.14159265358979323846
-#define SPHERE    init3d[0]             /* sphere? 1 = yes, 0 = no  */
-#define ILLUMINE  (FILLTYPE>4)  /* illumination model       */
+#define SPHERE    init3d[0]             // sphere? 1 = yes, 0 = no
+#define ILLUMINE  (FILLTYPE>4)		// illumination model    
 
 #define MAXCALCWORK 12
 
-#define MAX_JUMPS 200  /* size of JUMP_CONTROL array */
+#define MAX_JUMPS 200			// size of JUMP_CONTROL array
 
 typedef struct frm_jmpptrs_st 
     {
@@ -172,28 +172,27 @@ typedef struct frm_jump_st {
    int      DestJumpIndex;
 } JUMP_CONTROL_ST;
 
-struct baseunit { /* smallest part of a fractint 'gene' */
-   void *addr               ; /* address of variable to be referenced */
-   void (*varyfunc)(struct baseunit*,int,int); /* pointer to func used to vary it */
-                              /* takes random number and pointer to var*/
-   int mutate ;  /* flag to switch on variation of this variable */
-                  /* 0 for no mutation, 1 for x axis, 2 for y axis */
-                  /* in steady field maps, either x or y=yes in random modes*/ 
-   char name[16]; /* name of variable (for menu ) */
-   char level;    /* mutation level at which this should become active */
-};
+struct baseunit 
+    {			// smallest part of a fractint 'gene'
+    void *addr;		// address of variable to be referenced
+    void (*varyfunc)(struct baseunit*,int,int); // pointer to func used to vary it
+			// takes random number and pointer to var
+    int mutate ;	// flag to switch on variation of this variable
+			// 0 for no mutation, 1 for x axis, 2 for y axis
+			// in steady field maps, either x or y=yes in random modes
+    char name[16];	// name of variable (for menu )
+    char level;		// mutation level at which this should become active
+    };
 
 //typedef struct baseunit    GENEBASE;
 //#define sign(x) (((x) < 0) ? -1 : ((x) != 0)  ? 1 : 0)
 
-/* 
- * The following typedefs allow declaring based data
- * types that are stored in the code segment under MSC,
- * and thus may be overlaid. Use only for constant data.
- * Be sure to use the data right away, since arrays thus
- * declared do not exist when the overlay they belong to
- * is swapped out.
- */
+ // The following typedefs allow declaring based data
+ // types that are stored in the code segment under MSC,
+ // and thus may be overlaid. Use only for constant data.
+ // Be sure to use the data right away, since arrays thus
+ // declared do not exist when the overlay they belong to
+ // is swapped out.
 
 #ifdef	WIN32
 

@@ -1321,6 +1321,8 @@ double	CPerturbation::DiffAbs(const double c, const double d)
 
 void	CPerturbation::debugPrint(const std::string& msg)
     {
+#ifdef _DEBUG
     OutputDebugStringA(msg.c_str());
+#endif
     }
 

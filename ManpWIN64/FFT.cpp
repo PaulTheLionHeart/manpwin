@@ -402,7 +402,7 @@ INT_PTR CALLBACK FastFourierDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 //		SetFocus(GetDlgItem(hDlg, tempParam));
 		if (TimeScreen.InitPreview(hDlg) < 0)
 		    {
-		    wsprintf(s, "Error: No memory for preview");
+		    _snprintf_s(s, MAXLINE, _TRUNCATE, "Error: No memory for preview");
 		    MessageBox (hDlg, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 //		    delete [] real;
 //		    delete [] imag;
@@ -410,7 +410,7 @@ INT_PTR CALLBACK FastFourierDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		    }
 		if (FreqScreen.InitPreview(hDlg) < 0)
 		    {
-		    wsprintf(s, "Error: No memory for FFT");
+		    _snprintf_s(s, MAXLINE, _TRUNCATE, "Error: No memory for FFT");
 		    MessageBox (hDlg, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		    TimeScreen.PreviewDib.CloseDibPtrs();
 //		    delete [] real;
@@ -426,7 +426,7 @@ INT_PTR CALLBACK FastFourierDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		hCtrl = GET_WM_COMMAND_HWND (wParam, (_int64)lParam);
 		if ((nCtrlID = ((WORD)(GetWindowLong (hCtrl, GWL_ID)))) == 0)
 		    {
-		    wsprintf(s, "Error: Scrollbar fail: <%ld>", GetLastError());
+		    _snprintf_s(s, MAXLINE, _TRUNCATE, "Error: Scrollbar fail: <%ld>", GetLastError());
 		    MessageBox (hDlg, s, "Paul's Fractals", MB_ICONEXCLAMATION | MB_OK);
 		    }
 

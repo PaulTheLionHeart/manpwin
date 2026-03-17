@@ -4,6 +4,7 @@
 
 #include <windows.h>
 #include <vector>
+#include <atomic>
 #include "Dib.h"
 #include "manpwin.h"
 #include "manp.h"

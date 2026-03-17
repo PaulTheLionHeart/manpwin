@@ -10,6 +10,7 @@
 #include "Dib.h"
 #include "Anim.h"
 #include "Colour.h"
+#include "SafeStrings.h"
 
 #define	ENDOFSCRIPT	1
 
@@ -165,7 +166,7 @@ BYTE *LoadFrameDib(int FrameNumber)
 	ptr = Dib.DibPixels.data();
 	}
 //	ptr = (AnimationForward) ? ANIM[FrameNumber].animDIB.DibPixels : ANIM[TotalFrames - FrameNumber - 1].animDIB.DibPixels;
-    sprintf(s, "Writing MPEG Frame %d of %d", FrameNumber + 1, gTotalFrames);
+    SAFE_SPRINTF(s, "Writing MPEG Frame %d of %d", FrameNumber + 1, gTotalFrames);
 //    RefreshScreen();
     InvalidateRect(GlobalHwnd, &r, FALSE);
 
@@ -200,13 +201,13 @@ int	SetupAnimationFrameList(char *LSTFile, char *MPEGFile, int *width, int *heig
     *width = 0;
     *height = 0;
 
-    sprintf(ListFilename, "%s\\%s", ANIMPNGPath, LSTFile);
+    SAFE_SPRINTF(ListFilename, "%s\\%s", ANIMPNGPath, LSTFile);
     for (i = 0; i < MAXANIM; ++i)
 	Filenames[i] = NULL;				// start with a clean slate
 
     if ((fp = fopen(ListFilename, "r")) == NULL)
 	{
-	wsprintf(s, "Can't open PNG list file: %s for read", LSTFile);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "Can't open PNG list file: %s for read", LSTFile);
 	MessageBox (GlobalHwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
@@ -226,7 +227,7 @@ int	SetupAnimationFrameList(char *LSTFile, char *MPEGFile, int *width, int *heig
 		{
 		strcpy(MPGPath, trailing(buf + 16));
 		if (*(MPGPath + strlen(MPGPath) - 1) != '\\')		// don't expect user to do this!!
-		    strcat(MPGPath, "\\");
+		    strcat_s(MPGPath, MAX_PATH, "\\");
 		continue;
 		}
 	    if (strnicmp(buf, "#MPEGName=", 10) == 0)
@@ -245,7 +246,7 @@ int	SetupAnimationFrameList(char *LSTFile, char *MPEGFile, int *width, int *heig
 	    {
 	    if ((Filenames[FileCount] = new char[MAX_PATH]) == NULL)
 		{
-		wsprintf(s, "Can't get memory for PNG list file");
+		_snprintf_s(s, MAXLINE, _TRUNCATE, "Can't get memory for PNG list file");
 		MessageBox (GlobalHwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		return -1;
 		}
@@ -258,7 +259,7 @@ int	SetupAnimationFrameList(char *LSTFile, char *MPEGFile, int *width, int *heig
     fclose(fp);
     if (*width == 0 || *height == 0)
 	{
-	sprintf(s, "Can't read parameters in PNG list file: %s", LSTFile);
+	SAFE_SPRINTF(s, "Can't read parameters in PNG list file: %s", LSTFile);
 	MessageBox (GlobalHwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}

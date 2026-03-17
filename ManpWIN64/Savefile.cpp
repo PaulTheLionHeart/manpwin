@@ -75,78 +75,78 @@ void SaveFileInitialize (HWND hwnd, HINSTANCE hInst)
      }
 
 INT_PTR CALLBACK SaveMAPFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-     {
-//     *lpstrFileName = '\0';
-     sprintf(lpstrFileName, "Manp%s", GenerateTimeString());
-     ofn1.lpstrInitialDir   	= MAPPath ;
-     ofn1.hwndOwner	   	= hwnd ;
-     ofn1.lpstrFile	   	= lpstrFileName ;
-     ofn1.lpstrFileTitle    	= lpstrTitleName ;
-//     ofn1.Flags		   	= OFN_CREATEPROMPT;
-     ofn1.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_PATHMUSTEXIST;
-     ofn1.lpstrFilter = szMAPFilter;
+    {
+//    *lpstrFileName = '\0';
+    _snprintf_s(lpstrFileName, MAX_PATH, _TRUNCATE, "Manp%s", GenerateTimeString());
+    ofn1.lpstrInitialDir   	= MAPPath ;
+    ofn1.hwndOwner	   	= hwnd ;
+    ofn1.lpstrFile	   	= lpstrFileName ;
+    ofn1.lpstrFileTitle    	= lpstrTitleName ;
+//    ofn1.Flags		   	= OFN_CREATEPROMPT;
+    ofn1.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_PATHMUSTEXIST;
+    ofn1.lpstrFilter = szMAPFilter;
 
-     if (GetSaveFileName (&ofn1) == 0)
-         return -1;
-     save_file_type = FILE_MAP;
+    if (GetSaveFileName (&ofn1) == 0)
+	return -1;
+    save_file_type = FILE_MAP;
 
 #ifdef DEBUG
-wsprintf(s, "File Mask = %s", lpstrFileName);
-MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
+     _snprintf_s(s, MAXLINE, _TRUNCATE, "File Mask = %s", lpstrFileName);
+    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
-     return 0;
-     }
+    return 0;
+    }
 
 INT_PTR CALLBACK SaveColFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-     {
+    {
 //     *lpstrFileName = '\0';
-     sprintf(lpstrFileName, "Manp%s", GenerateTimeString());
+    _snprintf_s(lpstrFileName, MAX_PATH, _TRUNCATE, "Manp%s", GenerateTimeString());
 
-     ofn1.lpstrInitialDir   	= COLPath ;
-     ofn1.hwndOwner	   	= hwnd ;
-     ofn1.lpstrFile	   	= lpstrFileName ;
-     ofn1.lpstrFileTitle    	= lpstrTitleName ;
-//     ofn1.Flags		   	= OFN_CREATEPROMPT;
-     ofn1.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_PATHMUSTEXIST;
-     ofn1.lpstrFilter = szColFilter;
+    ofn1.lpstrInitialDir   	= COLPath ;
+    ofn1.hwndOwner	   	= hwnd ;
+    ofn1.lpstrFile	   	= lpstrFileName ;
+    ofn1.lpstrFileTitle    	= lpstrTitleName ;
+//    ofn1.Flags		   	= OFN_CREATEPROMPT;
+    ofn1.Flags = OFN_OVERWRITEPROMPT | OFN_HIDEREADONLY | OFN_PATHMUSTEXIST;
+    ofn1.lpstrFilter = szColFilter;
 
-     if (GetSaveFileName (&ofn1) == 0)
-         return -1;
-     save_file_type = FILE_COL;
+    if (GetSaveFileName (&ofn1) == 0)
+	return -1;
+    save_file_type = FILE_COL;
 
 #ifdef DEBUG
-wsprintf(s, "File Mask = %s", lpstrFileName);
-MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
+    _snprintf_s(s, MAXLINE, _TRUNCATE, "File Mask = %s", lpstrFileName);
+    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
-     return 0;
-     }
+    return 0;
+    }
 
 
 INT_PTR CALLBACK SavePNGOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-     {
-//     char	s[480];
-     char	*fileptr;
-//     FILE	*fp;
-     char   *pngptr = ".png";
-     BOOL	ReturnValue;
+    {
+//    char	s[480];
+    char	*fileptr;
+//    FILE	*fp;
+    char   *pngptr = ".png";
+    BOOL	ReturnValue;
 
-//     *lpstrFileName = '\0';
-     sprintf(lpstrFileName, "Manp%s", GenerateTimeString());
+//    *lpstrFileName = '\0';
+    _snprintf_s(lpstrFileName, MAX_PATH, _TRUNCATE, "Manp%s", GenerateTimeString());
 
-     ofn1.lpstrInitialDir   	= PNGPath ;
-     ofn1.hwndOwner	   	= hwnd ;
-     ofn1.lpstrFile	   	= lpstrFileName ;
-     ofn1.lpstrFilter		= szPngFilter;
-     ofn1.lpstrDefExt		= "png";
-     ofn1.nFilterIndex		= 1;
-     save_file_type		= FILE_PNG;
+    ofn1.lpstrInitialDir   	= PNGPath ;
+    ofn1.hwndOwner	   	= hwnd ;
+    ofn1.lpstrFile	   	= lpstrFileName ;
+    ofn1.lpstrFilter		= szPngFilter;
+    ofn1.lpstrDefExt		= "png";
+    ofn1.nFilterIndex		= 1;
+    save_file_type		= FILE_PNG;
 
-     if (ReturnValue = GetSaveFileName(&ofn1) == 0)
-	 return -1;
-     fileptr = lpstrFileName;
-     while (*(++fileptr))
+    if (ReturnValue = GetSaveFileName(&ofn1) == 0)
+	return -1;
+    fileptr = lpstrFileName;
+    while (*(++fileptr))
 	if (*fileptr == '.')	// remove extension
 	    {
 	    *fileptr = '\0';
@@ -154,36 +154,36 @@ INT_PTR CALLBACK SavePNGOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitl
 	    }
 	
 	save_file_type = FILE_PNG;
-	strcat(lpstrFileName, pngptr);
+	strcat_s(lpstrFileName, MAX_PATH, pngptr);
 
 #ifdef DEBUG
-wsprintf(s, "File Mask = %s", lpstrFileName);
-MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "File Mask = %s", lpstrFileName);
+	MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
-     return 0;
-     }
+    return 0;
+    }
 
 BOOL SaveGIFOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-     {
-     char	*fileptr;
-     char	*gifptr = ".gif";
+    {
+    char	*fileptr;
+    char	*gifptr = ".gif";
 
-//     *lpstrFileName = '\0';
-     sprintf(lpstrFileName, "Manp%s", GenerateTimeString());
+//    *lpstrFileName = '\0';
+    _snprintf_s(lpstrFileName, MAX_PATH, _TRUNCATE, "Manp%s", GenerateTimeString());
 
-     ofn1.lpstrInitialDir   	= GIFPath ;
-     ofn1.hwndOwner	   	= hwnd ;
-     ofn1.lpstrFile	   	= lpstrFileName ;
-     ofn1.lpstrFilter		= szGIFFilter;
-     ofn1.lpstrDefExt		= "gif";
-     ofn1.nFilterIndex		= 1;
-     save_file_type		= FILE_GIF;
+    ofn1.lpstrInitialDir   	= GIFPath ;
+    ofn1.hwndOwner	   	= hwnd ;
+    ofn1.lpstrFile	   	= lpstrFileName ;
+    ofn1.lpstrFilter		= szGIFFilter;
+    ofn1.lpstrDefExt		= "gif";
+    ofn1.nFilterIndex		= 1;
+    save_file_type		= FILE_GIF;
 
-     if (GetSaveFileName (&ofn1) == 0)
-         return -1;
-     fileptr = lpstrFileName;
-     while (*(++fileptr))
+    if (GetSaveFileName (&ofn1) == 0)
+	return -1;
+    fileptr = lpstrFileName;
+    while (*(++fileptr))
 	if (*fileptr == '.')	// remove extension
 	    {
 	    *fileptr = '\0';
@@ -191,36 +191,36 @@ BOOL SaveGIFOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
 	    }
 	
 	save_file_type = FILE_GIF;
-	strcat(lpstrFileName, gifptr);
+	strcat_s(lpstrFileName, MAX_PATH, gifptr);
 
 #ifdef DEBUG
-wsprintf(s, "File Mask = %s", lpstrFileName);
-MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "File Mask = %s", lpstrFileName);
+	MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
-     return 0;
-     }
+    return 0;
+    }
 
 BOOL SaveMPGOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-     {
-     char	*fileptr;
-     char	*mpgptr = ".mpg";
+    {
+    char	*fileptr;
+    char	*mpgptr = ".mpg";
 
-//     *lpstrFileName = '\0';
-     sprintf(lpstrFileName, "Manp%s", GenerateTimeString());
+//    *lpstrFileName = '\0';
+    _snprintf_s(lpstrFileName, MAX_PATH, _TRUNCATE, "Manp%s", GenerateTimeString());
 
-     ofn1.lpstrInitialDir   	= MPGPath ;
-     ofn1.hwndOwner	   	= hwnd ;
-     ofn1.lpstrFile	   	= lpstrFileName ;
-     ofn1.lpstrFilter		= szMPGFilter;
-     ofn1.lpstrDefExt		= "mpg";
-     ofn1.nFilterIndex		= 1;
-     save_file_type		= FILE_MPG;
+    ofn1.lpstrInitialDir   	= MPGPath ;
+    ofn1.hwndOwner	   	= hwnd ;
+    ofn1.lpstrFile	   	= lpstrFileName ;
+    ofn1.lpstrFilter		= szMPGFilter;
+    ofn1.lpstrDefExt		= "mpg";
+    ofn1.nFilterIndex		= 1;
+    save_file_type		= FILE_MPG;
 
-     if (GetSaveFileName (&ofn1) == 0)
-         return -1;
-     fileptr = lpstrFileName;
-     while (*(++fileptr))
+    if (GetSaveFileName (&ofn1) == 0)
+	return -1;
+    fileptr = lpstrFileName;
+    while (*(++fileptr))
 	if (*fileptr == '.')	// remove extension
 	    {
 	    *fileptr = '\0';
@@ -228,15 +228,15 @@ BOOL SaveMPGOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
 	    }
 	
 	save_file_type = FILE_MPG;
-	strcat(lpstrFileName, mpgptr);
+	strcat_s(lpstrFileName, MAX_PATH, mpgptr);
 
 #ifdef DEBUG
-wsprintf(s, "File Mask = %s", lpstrFileName);
-MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "File Mask = %s", lpstrFileName);
+	MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
-     return 0;
-     }
+    return 0;
+    }
 
 INT_PTR CALLBACK SaveParOpenDlg(HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
     {
@@ -245,7 +245,7 @@ INT_PTR CALLBACK SaveParOpenDlg(HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitle
     //     FILE	*fp;
     char   *parptr = ".par";
     //     *lpstrFileName = '\0';
-    sprintf(lpstrFileName, "Manp%s", GenerateTimeString());
+    _snprintf_s(lpstrFileName, MAX_PATH, _TRUNCATE, "Manp%s", GenerateTimeString());
 
     ofn1.lpstrInitialDir = PARPath;
     ofn1.hwndOwner = hwnd;
@@ -266,10 +266,10 @@ INT_PTR CALLBACK SaveParOpenDlg(HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitle
 	    }
 
     save_file_type = FILE_PAR;
-    strcat(lpstrFileName, parptr);
+    strcat_s(lpstrFileName, MAX_PATH, parptr);
 
 #ifdef DEBUG
-    wsprintf(s, "File Mask = %s", lpstrFileName);
+    _snprintf_s(s, MAXLINE, _TRUNCATE, "File Mask = %s", lpstrFileName);
     MessageBox(hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
@@ -283,7 +283,7 @@ INT_PTR CALLBACK SaveKfrOpenDlg(HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitle
     //     FILE	*fp;
     char   *kfrptr = ".kfr";
     //     *lpstrFileName = '\0';
-    sprintf(lpstrFileName, "Manp%s", GenerateTimeString());
+    _snprintf_s(lpstrFileName, MAX_PATH, _TRUNCATE, "Manp%s", GenerateTimeString());
 
     ofn1.lpstrInitialDir = KFRPath;
     ofn1.hwndOwner = hwnd;
@@ -304,10 +304,10 @@ INT_PTR CALLBACK SaveKfrOpenDlg(HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitle
 	    }
 
     save_file_type = FILE_KFR;
-    strcat(lpstrFileName, kfrptr);
+    strcat_s(lpstrFileName, MAX_PATH, kfrptr);
 
 #ifdef DEBUG
-    wsprintf(s, "File Mask = %s", lpstrFileName);
+    _snprintf_s(s, MAXLINE, _TRUNCATE, "File Mask = %s", lpstrFileName);
     MessageBox(hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
@@ -321,7 +321,7 @@ INT_PTR CALLBACK SaveParImageOpenDlg(HWND hwnd, LPSTR lpstrFileName, LPSTR lpstr
     char   *parptr = ".par";
     char   *pngptr = ".png";
     //     *lpstrFileName = '\0';
-    sprintf(TimeString, "Manp%s", GenerateTimeString());
+    _snprintf_s(TimeString, 480, _TRUNCATE, "Manp%s", GenerateTimeString());
     strcpy(lpstrFileName, TimeString);
 
     ofn1.lpstrInitialDir = PARPath;
@@ -343,10 +343,10 @@ INT_PTR CALLBACK SaveParImageOpenDlg(HWND hwnd, LPSTR lpstrFileName, LPSTR lpstr
 	    }
 
     save_file_type = FILE_PAR;
-    strcat(lpstrFileName, parptr);
+    strcat_s(lpstrFileName, MAX_PATH, parptr);
 
 #ifdef DEBUG
-    wsprintf(s, "File Mask = %s", lpstrFileName);
+    _snprintf_s(s, MAXLINE, _TRUNCATE, "File Mask = %s", lpstrFileName);
     MessageBox(hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 #endif
     SaveFile(hwnd, lpstrFileName, lpstrTitleName);
@@ -372,14 +372,11 @@ INT_PTR CALLBACK SaveParImageOpenDlg(HWND hwnd, LPSTR lpstrFileName, LPSTR lpstr
 	    }
 
     save_file_type = FILE_PNG;
-    strcat(lpstrFileName, pngptr);
+    strcat_s(lpstrFileName, MAX_PATH, pngptr);
     return 0;
     }
 
-
-
 void	SaveFile (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-
     { 
     char      s[360];
 
@@ -394,7 +391,7 @@ void	SaveFile (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
 	case FILE_PNG:
 	    if (write_png_file(hwnd, lpstrFileName, "ManpWIN", FractData()) < 0)
 		{
-		wsprintf(s, "Error: Could not write file: <%s>", lpstrFileName);
+		_snprintf_s(s, 360, _TRUNCATE, "Error: Could not write file: <%s>", lpstrFileName);
 		MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		MessageBeep (0);
 		return;
@@ -404,7 +401,7 @@ void	SaveFile (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
 	case FILE_GIF:
 	    if (write_gif_file(lpstrFileName, "ManpWIN") < 0)
 		{
-		wsprintf(s, "Error: Could not write file: <%s>", lpstrFileName);
+		_snprintf_s(s, 360, _TRUNCATE, "Error: Could not write file: <%s>", lpstrFileName);
 		MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		MessageBeep (0);
 		return;
@@ -414,7 +411,7 @@ void	SaveFile (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
 	case FILE_MPG:
 	    if (MPEGWrite(lpstrFileName) < 0)
 		{
-		wsprintf(s, "Error: Could not write file: <%s>", lpstrFileName);
+		_snprintf_s(s, 360, _TRUNCATE, "Error: Could not write file: <%s>", lpstrFileName);
 		MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		MessageBeep (0);
 		return;
@@ -422,7 +419,7 @@ void	SaveFile (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
 //	    MessageBeep (0);
 	    break;
 	default:	
-	     wsprintf(s, "Error: File type not Supported: <%s>", lpstrFileName);
+	    _snprintf_s(s, 360, _TRUNCATE, "Error: File type not Supported: <%s>", lpstrFileName);
 	     MessageBox (hwnd, s, "Paul's Fractal Generator", MB_ICONEXCLAMATION | MB_OK);
 	}
     }

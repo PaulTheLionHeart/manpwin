@@ -9,6 +9,7 @@
 #include "..\ManpWIN64\fract.h"
 #include "..\ManpWIN64\BigDouble.h"
 #include "..\ManpWIN64\Arithmetic.h"
+#include "..\ManpWIN64\Manpwin.h"
 
 #pragma once
 
@@ -23,6 +24,12 @@
 #ifndef MAXLOADS
 #define MAXLOADS 64
 #endif
+
+#ifndef RENDER_ABORTED
+#define RENDER_ABORTED -1
+#endif
+
+
 
 struct Arg;
 struct ConstArg;
@@ -100,7 +107,7 @@ public:
 //    CParser();
 
     void RunVmInit();               // executes INIT section
-    void RunVmIter();               // executes ITER section
+    int RunVmIter();               // executes ITER section
     void InitContextFromGlobals();
 
     static thread_local CParser* s_current;

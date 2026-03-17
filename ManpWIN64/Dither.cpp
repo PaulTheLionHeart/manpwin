@@ -591,31 +591,31 @@ LPBITMAPINFOHEADER  Dither(WORD NewBitsPerPixel)
 	switch(ReturnCode)
 	    {
 	    case ERR_INIT_TABLE:
-	    	wsprintf(s, "Error Initialising Quantisation Table");
+		_snprintf_s(s, 300, _TRUNCATE, "Error Initialising Quantisation Table");
 	    	break;
 	    case ERR_USER_ABORT:
-	    	wsprintf(s, "User Abort");
+		_snprintf_s(s, 300, _TRUNCATE, "User Abort");
 	    	break;
 	    case ERR_QUANTISE_IMAGE:
-	    	wsprintf(s, "Error Quantising Image");
+		_snprintf_s(s, 300, _TRUNCATE, "Error Quantising Image");
 	    	break;
 	    case ERR_DCQ_START:
-	    	wsprintf(s, "Error Starting DCQ");
+		_snprintf_s(s, 300, _TRUNCATE, "Error Starting DCQ");
 	    	break;
 	    case ERR_BUILD_TABLE:
-	    	wsprintf(s, "Error Building Quantisation Table");
+		_snprintf_s(s, 300, _TRUNCATE, "Error Building Quantisation Table");
 	    	break;
 	    case ERR_CREATE_DIB_FAIL:
-	    	wsprintf(s, "Cannot Create DIB for Quantisation");
+		_snprintf_s(s, 300, _TRUNCATE, "Cannot Create DIB for Quantisation");
 	    	break;
 	    case ERR_IMAGE_MEMORY_FAIL:
-	    	wsprintf(s, "Insufficient Memory for Quantisation");
+		_snprintf_s(s, 300, _TRUNCATE, "Insufficient Memory for Quantisation");
 	    	break;
 	    case ERR_ILLEGAL_BITS_PIXEL:
-	    	wsprintf(s, "Illegal Quantisation bits per pixel <%d>", NewBitsPerPixel);
+		_snprintf_s(s, 300, _TRUNCATE, "Illegal Quantisation bits per pixel <%d>", NewBitsPerPixel);
 	    	break;
 	    case ERR_ILLEGAL_DITHER_TYPE:
-	    	wsprintf(s, "Illegal Dithering Requested");
+		_snprintf_s(s, 300, _TRUNCATE, "Illegal Dithering Requested");
 	    	break;
 	    }
 	MessageBox (GlobalHwnd, s, "Quantisation", MB_ICONEXCLAMATION | MB_OK);

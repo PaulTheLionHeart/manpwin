@@ -59,7 +59,7 @@ static void putDC(sVLCtable *tab,int val)
   if (absval>2047 || (mpeg1 && absval>255))
   {
     /* should never happen */
-    sprintf(errortext,"DC value out of range (%d)\n",val);
+      _snprintf_s(errortext, 256, _TRUNCATE,"DC value out of range (%d)\n",val);
     error(errortext);
   }
 
@@ -109,7 +109,7 @@ void putAC(int run,int signed_level,int vlcformat)
   /* make sure run and level are valid */
   if (run<0 || run>63 || level==0 || level>2047 || (mpeg1 && level>255))
   {
-    sprintf(errortext,"AC value out of range (run=%d, signed_level=%d)\n",
+      _snprintf_s(errortext, 256, _TRUNCATE,"AC value out of range (run=%d, signed_level=%d)\n",
       run,signed_level);
     error(errortext);
   }

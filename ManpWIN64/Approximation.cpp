@@ -53,7 +53,7 @@ void BLAS::createOneStep(std::vector<Complex> &Ref, int m, double epsilon, BLA* 
     Complex A, B;
     double mA, r, r2 = 0.0;
 
-    if (gStopRequested)
+    if (AbortRequested())
 	return;
     if (m >= MaxIter)
 	m = MaxIter - 1;	// Avoid out of bounds access
@@ -117,7 +117,7 @@ void BLAS::createOneStep(std::vector<Complex> &Ref, int m, double epsilon, BLA* 
 			if (fabs(epsilon) < 1e-300)
 			    {
 			    char buf[128];
-			    sprintf(buf, "epsilon underflow: %.3e", epsilon);
+			     _snprintf_s(buf, 128, _TRUNCATE, "epsilon underflow: %.3e", epsilon);
 			    OutputDebugStringA(buf);
 			    }
 	    */
@@ -207,7 +207,7 @@ void BLAS::merge(double blaSize, long divisor)
 
 void BLAS::init(int M, std::vector<Complex> &Ref, double blaSize, int powerIn, int subtypeIn, long MaxIterIn, double param[])
     {
-    if (gStopRequested)
+    if (AbortRequested())
 	return;
     power = powerIn;
     subtype = subtypeIn;
@@ -256,7 +256,7 @@ void BLAS::init(int M, std::vector<Complex> &Ref, double blaSize, int powerIn, i
 	{
 	for(int i = 0; i < firstLevel && i < elementsPerLevel.size(); i++) 
 	    {
-	    if (gStopRequested)
+	    if (AbortRequested())
 		return;
 	    removedTotal += elementsPerLevel[i];
 	    }
@@ -331,7 +331,7 @@ void BLAS::init(std::vector<Complex> &Ref, double blaSize, double epsilon, long 
     done = 0;
     for (int m = 0; m < elements; m++) 
 	{
-	if (gStopRequested)
+	if (AbortRequested())
 	    return;
 	if (b[firstLevel].size() <= m)
 	    break;
@@ -350,7 +350,7 @@ const BLA * BLAS::lookup(int m, double z2, int iterations, int max_iterations) c
     int ix = (m - 1) >> firstLevel;
     for (int level = firstLevel; level < L; ++level) 
 	{
-	if (gStopRequested)
+	if (AbortRequested())
 	    return nullptr;
 
         int ixm = (ix << level) + 1;
@@ -391,5 +391,7 @@ BLA	BLA::BLALStep(double r2, Complex A, Complex B, int l)
 //extern HWND hLogBox;
 void	BLAS::debugPrint(const std::string& msg)
     {
+#ifdef _DEBUG
     OutputDebugStringA(msg.c_str());
+#endif
     }

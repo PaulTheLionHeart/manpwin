@@ -36,6 +36,8 @@
 #include <windows.h>
 #include "config.h"
 #include "global.h"
+#include "..\ManpWIN64\manpwin.h"
+#include "..\ManpWIN64\SafeStrings.h"
 
 ////////////////////////////////////////// PHD 2012/04/24
 //#define BYTE	unsigned char
@@ -98,10 +100,10 @@ static void read_y_u_v(char *fname,unsigned char *frame[])
   chrom_vsize = (chroma_format!=CHROMA420) ? vertical_size
                                            : vertical_size>>1;
 
-  sprintf(name,"%s.Y",fname);
+  SAFE_SPRINTF(name,"%s.Y",fname);
   if (!(fd = fopen(name,"rb")))
   {
-    sprintf(errortext,"Couldn't open %s\n",name);
+    _snprintf_s(errortext, 256, _TRUNCATE,"Couldn't open %s\n",name);
     error(errortext);
   }
   for (i=0; i<vertical_size; i++)
@@ -109,10 +111,10 @@ static void read_y_u_v(char *fname,unsigned char *frame[])
   fclose(fd);
   border_extend(frame[0],horizontal_size,vertical_size,FrameWidth,FrameHeight);
 
-  sprintf(name,"%s.U",fname);
+  SAFE_SPRINTF(name,"%s.U",fname);
   if (!(fd = fopen(name,"rb")))
   {
-    sprintf(errortext,"Couldn't open %s\n",name);
+    _snprintf_s(errortext, 256, _TRUNCATE,"Couldn't open %s\n",name);
     error(errortext);
   }
   for (i=0; i<chrom_vsize; i++)
@@ -120,10 +122,10 @@ static void read_y_u_v(char *fname,unsigned char *frame[])
   fclose(fd);
   border_extend(frame[1],chrom_hsize,chrom_vsize,chrom_width,chrom_height);
 
-  sprintf(name,"%s.V",fname);
+  SAFE_SPRINTF(name,"%s.V",fname);
   if (!(fd = fopen(name,"rb")))
   {
-    sprintf(errortext,"Couldn't open %s\n",name);
+    _snprintf_s(errortext, 256, _TRUNCATE,"Couldn't open %s\n",name);
     error(errortext);
   }
   for (i=0; i<chrom_vsize; i++)
@@ -145,10 +147,11 @@ static void read_yuv(char *fname,unsigned char *frame[])
   chrom_vsize = (chroma_format!=CHROMA420) ? vertical_size
                                            : vertical_size>>1;
 
-  sprintf(name,"%s.yuv",fname);
+#include "..\ManpWIN64\manpwin.h"
+  (name,"%s.yuv",fname);
   if (!(fd = fopen(name,"rb")))
   {
-    sprintf(errortext,"Couldn't open %s\n",name);
+    _snprintf_s(errortext, 256, _TRUNCATE,"Couldn't open %s\n",name);
     error(errortext);
   }
 
@@ -282,11 +285,12 @@ static int read_ppm(char *fname,unsigned char *frame[], int FrameNumber)
 
   if (inputtype == T_PPM)		// PHD 2012/04/24
       {
-      sprintf(name,"%s.ppm",fname);
+#include "..\ManpWIN64\manpwin.h"
+      (name,"%s.ppm",fname);
 
       if (!(fd = fopen(name,"rb")))
       {
-	sprintf(errortext,"Couldn't open %s\n",name);
+	_snprintf_s(errortext, 256, _TRUNCATE,"Couldn't open %s\n",name);
 	error(errortext);
       }
 

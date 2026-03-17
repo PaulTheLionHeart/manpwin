@@ -4208,6 +4208,7 @@ char	*DirectFormula[] =
     "z = sqr(sin(z))+c+p1 ; Test nested functions PHD 2020-07-30",
     "IF (zc < 0),  z = z - p1, ELSE, z = z - zc - p1 ,ENDIF, zc = z*c; Sylvie Gallet, March 1997",
     "z1 = conj(z), z = z1 * z1 + c + p1; Tricorn - Test conjugation PHD 2021-01-03",
+    "z = fn1(fn2(z)) + c + p1; Test nested functions PHD 2026-03-05",
     "if (imag(c) > 0), z1 = z*z+pixel, else, z1 = z*z*z+pixel, endif, z = z1; Test condtional PHD 2020-07-30",
     "if (imag(c) > 0 && real(c) > 0), z1 = z*z+pixel+p1, elseif (imag(c) > 0 && real(c) < 0), z1 = z*z*z+pixel+p1, elseif (imag(c) < 0 && real(c) > 0), z1 = z*z*z*z*z+pixel+p1, else, z1 = z*z*z*z+pixel+p1,endif, z = z1; Test condtional PHD 2020-07-30",
     "z = (z^z) + asin(z),z = sin(z)+p1; Nice Fractal from FractRacer: use \'z=atanh(pixel)\' as the initial condition",
@@ -11958,7 +11959,7 @@ void	PrintOsc(int OscillatorNum)		// used for listing oscillator and fractal map
 	{
 	if ((err = fopen_s(&fp, "d:\\temp\\OscDump.txt", "w+")) != 0)
 	    {
-	    wsprintf(s, "Can't Open Oscillator File: <d:\\temp\\OscDump.txt>");
+	    _snprintf_s(s, 150, _TRUNCATE, "Can't Open Oscillator File: <d:\\temp\\OscDump.txt>");
 	    MessageBox (GlobalHwnd, s, "ManpWIN Osc Dump", MB_ICONEXCLAMATION | MB_OK);
 	    return;
 	    }
@@ -11970,7 +11971,7 @@ void	PrintOsc(int OscillatorNum)		// used for listing oscillator and fractal map
 	{
 	if ((err = fopen_s(&fp, "d:\\temp\\MapDump.txt", "w+")) != 0)
 	    {
-	    wsprintf(s, "Can't Open Map File: <d:\\temp\\MapDump.txt>");
+	    _snprintf_s(s, 150, _TRUNCATE, "Can't Open Map File: <d:\\temp\\MapDump.txt>");
 	    MessageBox(GlobalHwnd, s, "ManpWIN Map Dump", MB_ICONEXCLAMATION | MB_OK);
 	    return;
 	    }
@@ -11982,7 +11983,7 @@ void	PrintOsc(int OscillatorNum)		// used for listing oscillator and fractal map
 	{
 	if ((err = fopen_s(&fp, "d:\\temp\\SprottDump.txt", "w+")) != 0)
 	    {
-	    wsprintf(s, "Can't Open SprottMap File: <d:\\temp\\SprottDump.txt>");
+	    _snprintf_s(s, 150, _TRUNCATE, "Can't Open SprottMap File: <d:\\temp\\SprottDump.txt>");
 	    MessageBox(GlobalHwnd, s, "ManpWIN Sprott Map Dump", MB_ICONEXCLAMATION | MB_OK);
 	    return;
 	    }
@@ -11994,7 +11995,7 @@ void	PrintOsc(int OscillatorNum)		// used for listing oscillator and fractal map
 	{
 	if ((err = fopen_s(&fp, "d:\\temp\\SurfaceDump.txt", "w+")) != 0)
 	    {
-	    wsprintf(s, "Can't Open Survace File: <d:\\temp\\SurfaceDump.txt>");
+	    _snprintf_s(s, 150, _TRUNCATE, "Can't Open Survace File: <d:\\temp\\SurfaceDump.txt>");
 	    MessageBox (GlobalHwnd, s, "ManpWIN Surface Dump", MB_ICONEXCLAMATION | MB_OK);
 	    return;
 	    }
@@ -12006,7 +12007,7 @@ void	PrintOsc(int OscillatorNum)		// used for listing oscillator and fractal map
 	{
 	if ((err = fopen_s(&fp, "d:\\temp\\KnotDump.txt", "w+")) != 0)
 	    {
-	    wsprintf(s, "Can't Open Knot File: <d:\\temp\\KnotDump.txt>");
+	    _snprintf_s(s, 150, _TRUNCATE, "Can't Open Knot File: <d:\\temp\\KnotDump.txt>");
 	    MessageBox (GlobalHwnd, s, "ManpWIN Knot Dump", MB_ICONEXCLAMATION | MB_OK);
 	    return;
 	    }
@@ -12018,7 +12019,7 @@ void	PrintOsc(int OscillatorNum)		// used for listing oscillator and fractal map
 	{
 	if ((err = fopen_s(&fp, "d:\\temp\\CurveDump.txt", "w+")) != 0)
 	    {
-	    wsprintf(s, "Can't Open Curve File: <d:\\temp\\CurveDump.txt>");
+	    _snprintf_s(s, 150, _TRUNCATE, "Can't Open Curve File: <d:\\temp\\CurveDump.txt>");
 	    MessageBox (GlobalHwnd, s, "ManpWIN Curve Dump", MB_ICONEXCLAMATION | MB_OK);
 	    return;
 	    }

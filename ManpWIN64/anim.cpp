@@ -19,6 +19,8 @@
 #include "Dib.h"
 #include "Anim.h"
 #include "manp.h"
+#include "SafeStrings.h"
+
 //#include "OscProcess.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +103,9 @@ void	LoadAnimationFrame(char *buf, char *FrameInfo, int Frame, double ParamValue
 
     if (time_to_quit)
 	{
+	#ifdef _DEBUG
 	OutputDebugStringA("LoadAnimationFrame: User initiated time to quit\n");
+	#endif
 	return;
 	}
 
@@ -117,7 +121,7 @@ void	LoadAnimationFrame(char *buf, char *FrameInfo, int Frame, double ParamValue
     size_t len = strlen(buf);
     AnimFrame.animFrameData.resize(len + 1);
     memcpy(AnimFrame.animFrameData.data(), buf, len + 1);
-    sprintf(AnimFrame.FrameFilename, "%s%04d.png", SaveFileOrig, Frame);
+    SAFE_SPRINTF(AnimFrame.FrameFilename, "%s%04d.png", SaveFileOrig, Frame);
     _snprintf_s(AnimFrame.FrameInfo, MAX_PATH, _TRUNCATE, "%s", FrameInfo);
 //    strcpy(AnimFrame.FrameInfo, FrameInfo);
     AnimFrame.ParamValue = ParamValue;
@@ -233,7 +237,7 @@ int	DoAnimation(void)
     assert(gCurrentFrame >= 0 && gCurrentFrame < gTotalFrames);
 
     CreateFractalName(FALSE, Name);
-    sprintf (s, "<%d>of<%d>: Speed %3.1f frames per second, Info%s", gCurrentFrame + 1, gTotalFrames, 1000.0 / CurrentDelay, Name);
+    _snprintf_s(s, 2400, _TRUNCATE, "<%d>of<%d>: Speed %3.1f frames per second, Info%s", gCurrentFrame + 1, gTotalFrames, 1000.0 / CurrentDelay, Name);
     SetWindowText(GlobalHwnd, s);				// Show formatted text in the caption bar
     if (ANIM[gCurrentFrame].IsMorphAnim)				// we display exis info in status bar
 //	strcpy(szStatus, ANIM[i].FrameInfo);
@@ -358,7 +362,7 @@ int	SaveIndividualFrames(void)
 
     for (size_t i = 0; i < ANIM.size(); i++)
 	{
-	sprintf(s, "Writing Frame %d of %d. Filename = %s", (int)i + 1, gTotalFrames, ANIM[i].FrameFilename);
+	SAFE_SPRINTF(s, "Writing Frame %d of %d. Filename = %s", (int)i + 1, gTotalFrames, ANIM[i].FrameFilename);
 	SetWindowText (GlobalHwnd, s);			// Show formatted text in the caption bar
 
 	if (!BuildDibFromAnimFrame(ANIM[i], Dib))
@@ -368,7 +372,7 @@ int	SaveIndividualFrames(void)
 	    {
 	    if (write_png_file(GlobalHwnd, ANIM[i].FrameFilename, "ManpWIN", ANIM[i].animFrameData.data()) < 0)
 		{
-		wsprintf(s, "Error: Could not write file: <%s>", SaveFileName);
+		_snprintf_s(s, MAXLINE, _TRUNCATE, "Error: Could not write file: <%s>", SaveFileName);
 		MessageBox(GlobalHwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		MessageBeep(0);
 		return -1;

@@ -484,7 +484,7 @@ void calc_vbv_delay()
     /* picture not completely in buffer at intended decoding time */
     if (!quiet)
 	{
-	sprintf(s,"vbv_delay underflow! (decoding_time=%.1f, t_EOP=%.1f\n)", decoding_time, bitcnt_EOP*90000.0/bit_rate);
+	_snprintf_s(s, 120, _TRUNCATE,"vbv_delay underflow! (decoding_time=%.1f, t_EOP=%.1f\n)", decoding_time, bitcnt_EOP*90000.0/bit_rate);
 	WarningMPEG(s);
 	}
   }
@@ -511,7 +511,7 @@ void calc_vbv_delay()
   {
     if (!quiet)
 	{
-	sprintf(s,"vbv_delay underflow: %d\n",vbv_delay);
+	_snprintf_s(s, 120, _TRUNCATE,"vbv_delay underflow: %d\n",vbv_delay);
         WarningMPEG(s);
 	}
 
@@ -522,7 +522,7 @@ void calc_vbv_delay()
   {
     if (!quiet)
 	{
-	sprintf(s,"vbv_delay overflow: %d\n",vbv_delay);
+	_snprintf_s(s, 120, _TRUNCATE,"vbv_delay overflow: %d\n",vbv_delay);
         WarningMPEG(s);
 	}
     vbv_delay = 65535;

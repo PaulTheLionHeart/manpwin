@@ -16,7 +16,6 @@
 **************************************************************************/
 
 int	CPixel::PerformWorklist(int NumberThreadsIn, int ThreadNumber, BYTE *ThreadComplete, HANDLE *ghMutexIn, int user_data(HWND hwnd))
-
     {
     int		StripWidth;
 
@@ -70,8 +69,6 @@ int	CPixel::RunThread(HWND hwnd, int ThreadNumberIn, int StripWidthIn, CSlope *S
     // This is required for symmetry, double-pass modes,
     // and full-screen Julia rendering.
 
-
-
     if (NumberThreads <= 1)
 	{
 	xStart = 0;
@@ -82,22 +79,16 @@ int	CPixel::RunThread(HWND hwnd, int ThreadNumberIn, int StripWidthIn, CSlope *S
 	xStart = (ThreadNumber * xdots) / NumberThreads;
 	xEnd = ((ThreadNumber + 1) * xdots) / NumberThreads;
 	}
+
     StripWidth = StripWidthIn;
     if (!num_worklist)					// no worklist from saved file
 	{						// default setup a new worklist
 	iystart = ixstart = yystart = xxstart = yybegin = 0;
 	ixstart = xxstart = xStart;
-//	ixstart = xxstart = StripWidth * ThreadNumber;
 	iystop = yystop = ydots - 1;
-//	ixstop = xxstop = xdots - 1;
 	ixstop = xxstop = xEnd - 1;
-//	ixstop = xxstop = StripWidth * (ThreadNumber + 1) - 1;	// should be -1 but it leaves some lines in the image
 	num_worklist = 1;
 	workpass = 0;
-//	worklist[0].xxstart = 0;
-//	worklist[0].xxstart = StripWidth * ThreadNumber;
-//	worklist[0].xxstop = xdots - 1;
-//	worklist[0].xxstop = StripWidth * (ThreadNumber + 1) - 1;	// should be -1 but it leaves some lines in the image
 	worklist[0].xxstart = xStart;
 	worklist[0].xxstop = xEnd - 1;
 	worklist[0].yystart = worklist[0].yybegin = 0;
@@ -118,9 +109,9 @@ int	CPixel::RunThread(HWND hwnd, int ThreadNumberIn, int StripWidthIn, CSlope *S
 	for (i = 0; i < num_worklist; ++i)
 	    worklist[i] = worklist[i + 1];
 
-//	ManageBignumPrecision(precision);
-	FindSymmetry(_3dflag, decomp, pairflag, OutsideMethod, invert, CoordSystem, param, *degree, type, subtype, calcmode, RotationAngle, Fractal, hor, vert, mandel_width, BigNumFlag, &Big_xxmin, &Big_xxmax, &Big_yymin, 
+	FindSymmetry(_3dflag, decomp, pairflag, OutsideMethod, invert, CoordSystem, param, *degree, type, subtype, calcmode, RotationAngle, Fractal, hor, vert, mandel_width, BigNumFlag, &Big_xxmin, &Big_xxmax, &Big_yymin,
 	    &Big_yymax, BigHor, BigVert, BigWidth, ScreenRatio, &xxmin, &xxmax, &yymin, &yymax, special, juliaflag);
+
 	if (pairflag)
 	    init_stereo_pairs(pairflag, AutoStereo_value);			// init stereo pair parameters
 

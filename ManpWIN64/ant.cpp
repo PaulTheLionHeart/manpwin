@@ -21,6 +21,7 @@
 #include "OtherFunctions.h"
 #include "plot.h"
 #include "resource.h"
+#include "SafeStrings.h"
 
 // possible value of idir e relative movement in the 4 directions
 // for x 0, 1, 0, -1
@@ -101,7 +102,7 @@ void	COtherFunctions::TurkMite1(int maxtur, size_t rule_len, char *ru, long maxp
 	    lastChecked = int(progress * 100);
 	    _ftime64(&FrameEnd);					// initialise time counter
 	    ElapsedTime = (double)(FrameEnd.time) + (double)(FrameEnd.millitm) / 1000.0 - (double)(FrameStart.time) - (double)(FrameStart.millitm) / 1000.0;
-	    sprintf(AntStatus, "Progress = (%d%%), Time %s", int(progress * 100), ShowTime(ElapsedTime));
+	    _snprintf_s(AntStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), ShowTime(ElapsedTime));
 	    if (AntTime < FrameEnd.time)
 		DisplayStatusBarInfo(INCOMPLETE, "");
 	    }
@@ -218,7 +219,7 @@ int	COtherFunctions::ant(void)
     maxpts = (long) param[1];
     maxpts = labs(maxpts);
    //wait = abs(orbit_delay);
-    sprintf(rule, "%.17g", param[0]);
+    SAFE_SPRINTF(rule, "%.17g", param[0]);
     rule_len = strlen(rule);
     if (rule_len > 1)
 	{                            // if rule_len == 0 random rule
@@ -308,7 +309,7 @@ int	COtherFunctions::tower(void)
 	    lastChecked = int(progress * 100);
 	    _ftime64(&FrameEnd);					// initialise time counter
 	    ElapsedTime = (double)(FrameEnd.time) + (double)(FrameEnd.millitm) / 1000.0 - (double)(FrameStart.time) - (double)(FrameStart.millitm) / 1000.0;
-	    sprintf(AntStatus, "Progress = (%d%%), Time %s", int(progress * 100), ShowTime(ElapsedTime));
+	    _snprintf_s(AntStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), ShowTime(ElapsedTime));
 	    if (AntTime < FrameEnd.time)
 		DisplayStatusBarInfo(INCOMPLETE, "");
 	    }
@@ -414,7 +415,7 @@ int	COtherFunctions::tower(void)
 	    lastChecked = int(progress * 100);
 	    _ftime64(&FrameEnd);					// initialise time counter
 	    ElapsedTime = (double)(FrameEnd.time) + (double)(FrameEnd.millitm) / 1000.0 - (double)(FrameStart.time) - (double)(FrameStart.millitm) / 1000.0;
-	    sprintf(AntStatus, "Progress = (%d%%), Time %s", int(progress * 100), ShowTime(ElapsedTime));
+	    _snprintf_s(AntStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), ShowTime(ElapsedTime));
 	    if (AntTime < FrameEnd.time)
 		DisplayStatusBarInfo(INCOMPLETE, "");
 	    }

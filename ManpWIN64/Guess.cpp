@@ -23,7 +23,6 @@
 */
 
 int	CPixel::solidguess(HWND hwnd, int user_data(HWND hwnd))
-
     {
     int i,x,y,xlim,ylim,blocksize;
     unsigned int *pfxp0,*pfxp1;
@@ -48,11 +47,11 @@ int	CPixel::solidguess(HWND hwnd, int user_data(HWND hwnd))
 
 
 #ifdef DEBUG
-wsprintf(s, "xxstart=%d,xxstop=%d,yystart=%d,yystop=%d,yystart=%d", xxstart,xxstop,yystart,yystop,yystart);
+    _snprintf_s(s, MAXLINE, _TRUNCATE, "xxstart=%d,xxstop=%d,yystart=%d,yystop=%d,yystart=%d", xxstart,xxstop,yystart,yystop,yystart);
 MessageBox (hwnd, s, "guess()", MB_ICONEXCLAMATION | MB_OK);
 #endif
 #ifdef DEBUG
-wsprintf(s, "maxblock=%d,halfblock=%d,guessplot=%d,right_guess=%d,bottom_guess=%d", maxblock,halfblock,guessplot,right_guess,bottom_guess);
+_snprintf_s(s, MAXLINE, _TRUNCATE, "maxblock=%d,halfblock=%d,guessplot=%d,right_guess=%d,bottom_guess=%d", maxblock,halfblock,guessplot,right_guess,bottom_guess);
 MessageBox (hwnd, s, "guess()", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
@@ -170,7 +169,7 @@ MessageBox (hwnd, "2.", "guess()", MB_ICONEXCLAMATION | MB_OK);
 
 
 #ifdef DEBUG
-wsprintf(s, "Pass = %d", workpass);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "Pass = %d", workpass);
 MessageBox (hwnd, s, "guess()", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
@@ -220,7 +219,6 @@ void	CPixel::ClearGuessMemory(DWORD *dstack)
 **************************************************************************/
 
 int	CPixel::guessrow(HWND hwnd, int firstpass, int y, int blocksize, int user_data(HWND hwnd))
-
     {
     long	x, i, j	,color;
     long	xplushalf, xplusblock;
@@ -241,7 +239,7 @@ int	CPixel::guessrow(HWND hwnd, int firstpass, int y, int blocksize, int user_da
 
     if (NonStandardImage)
 	{
-	wsprintf(s, "firstpass=%d,y=%d,blocksize=%d", firstpass,y,blocksize);
+	_snprintf_s(s, 200, _TRUNCATE, "firstpass=%d,y=%d,blocksize=%d", firstpass,y,blocksize);
 	MessageBox (hwnd, s, "guess()", MB_ICONEXCLAMATION | MB_OK);
 	}
     #endif
@@ -495,7 +493,6 @@ int	CPixel::guessrow(HWND hwnd, int firstpass, int y, int blocksize, int user_da
 **************************************************************************/
 
 void	CPixel::plotblock(int buildrow, int x, int y, long colour, DWORD *dstack)
-
     {
     int i,xlim,ylim;
 
@@ -529,7 +526,6 @@ void	CPixel::plotblock(int buildrow, int x, int y, long colour, DWORD *dstack)
 **************************************************************************/
 
 int	CPixel::ssg_blocksize(void)
-
     {
     int	blocksize, i;
    // blocksize 4 if <300 rows, 8 if 300-599, 16 if 600-1199, 32 if >=1200

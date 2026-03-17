@@ -48,7 +48,7 @@ int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> 
 
     while (iterations < MaxIteration) 			// perturbation iteration
 	{
-	if (gStopRequested)
+	if (AbortRequested())
 	    return -1;
 	ZCoordinateMagnitudeSquared = z.CSumSqr();
 	if (ZCoordinateMagnitudeSquared >= bailout) 

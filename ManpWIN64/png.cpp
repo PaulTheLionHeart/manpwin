@@ -14,6 +14,7 @@
 #include "manp.h"
 #include "Dib.h"
 #include "colour.h"
+#include "SafeStrings.h"
 #define PNG_READ_oFFs_SUPPORTED
 #define PNG_INTERNAL
 #define	PNG_SETJMP_SUPPORTED
@@ -93,7 +94,7 @@ static	void	png_default_warning(png_structp png_ptr, png_const_charp message)
     if (png_ptr != NULL && png_ptr->error_ptr != NULL)
 	name = (char *)png_ptr->error_ptr;
 //    fprintf(STDERR, "%s: PNGLib warning: %s\n", name, message);
-    sprintf(PNG_error_buffer, "PNGLib warning: %s\n", message);
+    SAFE_SPRINTF(PNG_error_buffer, "PNGLib warning: %s\n", message);
     }
 
 // This is the default error handling function.  Note that replacements for this function MUST NOT RETURN, or the program will likely crash.  This
@@ -140,7 +141,7 @@ int	decode_png_header(HWND hwnd, char *infile, char *szAppName)
 
     if ((fp = fopen(infile,"rb")) == NULL) 
 	{
-	wsprintf(s, "Unable to open file: %s", infile);
+	_snprintf_s(s, 480, _TRUNCATE, "Unable to open file: %s", infile);
 	MessageBox (hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -171,7 +172,7 @@ int	decode_png_header(HWND hwnd, char *infile, char *szAppName)
     // Setting jmpbuf for read struct
     if (setjmp(png_jmpbuf(read_ptr)))
 	{
-	wsprintf(s, "Error: %s in PNG file: %s", PNG_error_buffer, infile);
+	_snprintf_s(s, 480, _TRUNCATE, "Error: %s in PNG file: %s", PNG_error_buffer, infile);
 	MessageBox (hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	png_destroy_read_struct(&read_ptr, &read_info_ptr, &end_info_ptr);
@@ -243,7 +244,7 @@ int   png_decoder(HWND hwnd, char *szAppName, char *infile)
     // Setting jmpbuf for read struct
     if (setjmp(png_jmpbuf(read_ptr)))
 	{
-	wsprintf(s, "Error: %s in PNG file: %s", PNG_error_buffer, infile);
+	_snprintf_s(s, 480, _TRUNCATE, "Error: %s in PNG file: %s", PNG_error_buffer, infile);
 	MessageBox(hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep(0);
 	png_destroy_read_struct(&read_ptr, &read_info_ptr, &end_info_ptr);
@@ -260,7 +261,7 @@ int   png_decoder(HWND hwnd, char *szAppName, char *infile)
 	if (read_ptr != NULL)
 	    png_destroy_read_struct(&read_ptr, &read_info_ptr, &end_info_ptr);
 	fclose(fp);
-	sprintf(s, "Not enough memory: %d bytes for line buffer in PNG file: ", linesize);
+	SAFE_SPRINTF(s, "Not enough memory: %d bytes for line buffer in PNG file: ", linesize);
 	MessageBox(hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
@@ -319,7 +320,7 @@ int	read_png_file(HWND hwnd, char *infile)
     SetCursor(hCursor);
     if (decode_png_header(hwnd, infile, "ManpWin") < 0)
 	{
-	wsprintf(s, "Error: Could not read header in file: <%s> for read", infile);
+	_snprintf_s(s, 120, _TRUNCATE, "Error: Could not read header in file: <%s> for read", infile);
 	MessageBox (hwnd, s, "ManpWin", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -332,7 +333,7 @@ int	read_png_file(HWND hwnd, char *infile)
 
     if (png_decoder(hwnd, infile, "ManpWin") < 0)
 	{
-	wsprintf(s, "Error: Could not open file: <%s> for read", infile);
+	_snprintf_s(s, 120, _TRUNCATE, "Error: Could not open file: <%s> for read", infile);
 	MessageBox (hwnd, s, "ManpWin", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -368,7 +369,7 @@ int	write_png_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
 	hCursor = LoadCursor((HINSTANCE)NULL, IDC_ARROW);		// Load pointer cursor.
 	SetCursor(hCursor);
 	fprintf(stderr, "can't open %s\n", outfile);
-	wsprintf(s, "PNG can't open output file: %s", outfile);
+	_snprintf_s(s, 480, _TRUNCATE, "PNG can't open output file: %s", outfile);
 	MessageBox (hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -397,7 +398,7 @@ int	write_png_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
     // Setting jmpbuf for read struct
     if (setjmp(png_jmpbuf(write_ptr)))
 	{
-	wsprintf(s, "Error: %s in PNG file: %s", PNG_error_buffer, outfile);
+	_snprintf_s(s, 480, _TRUNCATE, "Error: %s in PNG file: %s", PNG_error_buffer, outfile);
 	MessageBox (hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	png_destroy_write_struct(&write_ptr, &write_info_ptr);
@@ -420,7 +421,7 @@ int	write_png_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
 	png_destroy_write_struct(&write_ptr, &write_info_ptr);
 	hCursor = LoadCursor((HINSTANCE)NULL, IDC_ARROW);	// Load pointer cursor.
 	SetCursor(hCursor);
-	wsprintf(s, "Error: can't allocate memory for row pointer in PNG file: %s", PNG_error_buffer, outfile);
+	_snprintf_s(s, 480, _TRUNCATE, "Error: can't allocate memory for row pointer %s, in PNG file: %s", PNG_error_buffer, outfile);
 	MessageBox (hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;

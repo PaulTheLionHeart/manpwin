@@ -9,7 +9,8 @@
 
 #include "Plot.h"
 
-extern	std::vector<float> wpixels; // global vector
+extern	std::vector<float> wpixels;		// global vector
+extern	std::atomic<bool> gStopRequested;	// force early exit
 
 ///////////////////////////////////////////////////////////////////////
 // Explicitly initialize reference members or pointers to null/defaults
@@ -89,7 +90,13 @@ void	CPlot::InitPlot(long thresholdIn, CTrueCol *TrueColIn, std::vector <float> 
     {
     threshold = thresholdIn;			// maximun iterations
     TrueCol = TrueColIn;			// palette info
-    wpixels = wpixelsIn;			// floating point iterations for each pixels
+
+    // in your default constructor CPlot::CPlot() : wpixels(::wpixels) { } it’s already bound to the global
+    // in the other ctor CPlot(std::vector<float>& wp) : wpixels(wp) { } it’s already bound to the right vector
+    // you are already passing the global wpixels everywhere anyway
+    // If you remove that assignment, InitPlot() becomes a pure “set pointers and sizes” call, which is what we want.
+    // This is a really big stability win for a very small edit.
+//    wpixels = wpixelsIn;			// floating point iterations for each pixels
     xdots = xdotsIn;
     ydots = ydotsIn; 
     height = heightIn; 
@@ -141,16 +148,22 @@ void	CPlot::PlotPoint(WORD x, WORD y, DWORD colour)
     {
     DWORD	i;
     DWORD	local_width;
-    DWORD	address;
+//    DWORD	address;
 
+    if (AbortRequested())
+	return;
     if (x >= Dib->DibWidth || y >= Dib->DibHeight)
 	{
+#ifdef _DEBUG
 	OutputDebugStringA("PlotPoint: co-ordinates out of bounds\n");
+#endif
 	return;
 	}
     if (Dib->DibPixels.empty())
 	{
+#ifdef _DEBUG
 	OutputDebugStringA("PlotPoint: Pixels are null\n");
+#endif
 	return;
 	}
     if (flags & USEPALETTE)
@@ -160,13 +173,13 @@ void	CPlot::PlotPoint(WORD x, WORD y, DWORD colour)
 	i = ((DWORD) (Dib->DibHeight - 1 - y) * (DWORD) (local_width + 3 - ((local_width - 1) % 4)) + (DWORD)(x * 3));
 	if (i + 3 > Dib->DibPixels.size()) 
 	    {
+#ifdef _DEBUG
 	    OutputDebugStringA("PlotPoint: pixel write out of bounds\n");
+#endif
 	    return;
 	    }
 	if (colour == (DWORD)threshold)			// handle inside colour
 	    {
-	    if (i > (DWORD)(Dib->DibHeight * Dib->DibWidth * 3))
-		return;
 	    Dib->DibPixels[i + 0] = (BYTE)TrueCol->InsideBlue;
 	    Dib->DibPixels[i + 1] = (BYTE)TrueCol->InsideGreen;
 	    Dib->DibPixels[i + 2] = (BYTE)TrueCol->InsideRed;
@@ -183,21 +196,24 @@ void	CPlot::PlotPoint(WORD x, WORD y, DWORD colour)
 	i = ((DWORD)y * (DWORD)width) + (DWORD)x;
 
 	if (flags & USEWPIXELS)
-//	if (calcmode != 'F' && type != PERTURBATION && type != SLOPEFORWARDDIFF)		// these cases get wpixels directly from forward differencing algorithms
 	    {
-	    if (wpixels.size() != Dib->DibHeight * Dib->DibWidth)	// we probably resized the image
-		return;
-	    if (x >= 0 && x < width && y >= 0 && y < ydots)
-		wpixels[i] = (float)colour;
+	    if (x < width && y < ydots) 
+		{
+		const size_t idx = (size_t)y * (size_t)width + (size_t)x;
+		if (idx < wpixels.size())
+		    wpixels[idx] = (float)colour;
+		else
+		    return; // or debug message
+		}
 	    }
 	}
     else
 	{
-	if (x < width && y < height)
-	    {
-	    address = (WIDTHBYTES((DWORD)width * (DWORD)bits_per_pixel) * y);
-	    memcpy(Dib->DibPixels.data() + address + x * 3L, &colour, 3);
-	    }
+	const size_t stride = WIDTHBYTES((DWORD)width * (DWORD)bits_per_pixel);
+	const size_t offset = (size_t)stride * (size_t)y + (size_t)x * 3;
+	if (offset + 3 > Dib->DibPixels.size()) 
+	    return;
+	memcpy(Dib->DibPixels.data() + offset, &colour, 3);
 	}
     }
 
@@ -211,12 +227,15 @@ void	CPlot::OutRGBpoint(WORD x, WORD y, RGBTRIPLE colour)
     DWORD	i;
     DWORD	local_width;
     // first do screen
-    if (x < 0 || x >= Dib->DibWidth || y < 0 || y >= Dib->DibHeight)
+    if (x >= Dib->DibWidth || y >= Dib->DibHeight)
 	return;
     local_width = WIDTHBYTES((DWORD)xdots * (DWORD)Dib->BitsPerPixel);
     i = ((DWORD)(Dib->DibHeight - 1 - y) * (DWORD)(local_width + 3 - ((local_width - 1) % 4)) + (DWORD)(x * 3));
-    if (i + 3 > Dib->DibPixels.size()) {
+    if (i + 3 > Dib->DibPixels.size()) 
+	{
+#ifdef _DEBUG
 	OutputDebugStringA("PlotPoint: pixel write out of bounds\n");
+#endif
 	return;
 	}
     if (!Dib->DibPixels.empty())
@@ -232,7 +251,7 @@ DWORD	CPlot::GetColour(WORD x, WORD y)
     {
     DWORD	i, value = 0L;
 
-    if (x < 0 || x >= width || y < 0 || y >= height)
+    if (x >= width || y >= height)
 	return 0L;
     i = ((long)y * (long)xdots) + (long)x;
 
@@ -243,13 +262,17 @@ DWORD	CPlot::GetColour(WORD x, WORD y)
 	    value = (((DWORD)(wpixels[i]) & 0x7fffffff));
 	    if (value > (DWORD)threshold)
 		{
+#ifdef _DEBUG
 		OutputDebugStringA("GetColour: pixel colour out of bounds\n");
+#endif
 		value = 0L;
 		}
 	    }
 	else
 	    {
+#ifdef _DEBUG
 	    OutputDebugStringA("GetColour: pixel co-ordinate out of bounds\n");
+#endif
 	    value = 0L;
 	    }
 	}
@@ -267,13 +290,19 @@ void	CPlot::OutputLine(WORD x0, WORD line, WORD length, DWORD *buffer)
     DWORD	i, k;
     DWORD	local_width;
     WORD	j;
-    if (x0 < 0 || x0 >= width || line < 0 || line >= height - 1 || (x0 + length) < 0 || (x0 + length) > width)
+
+    if (AbortRequested())
+	return;
+    if (x0 >= width || line >= height - 1 || (x0 + length) < 0 || (x0 + length) > width)
 	return;
 
     local_width = WIDTHBYTES((DWORD)width * (DWORD)bits_per_pixel);
     i = ((long) (height - 1 - line) * (long) (local_width + 3 - ((local_width - 1) % 4)) + (long)(x0 * 3));
-    if (i + 3 > Dib->DibPixels.size()) {
+    if (i + 3 > Dib->DibPixels.size()) 
+	{
+#ifdef _DEBUG
 	OutputDebugStringA("PlotPoint: pixel write out of bounds\n");
+#endif
 	return;
 	}
     k = ((long) line * (long) width) + (long) x0;
@@ -316,8 +345,11 @@ void	CPlot::RefreshScreen(void)
 	{
 	local_width = WIDTHBYTES((DWORD)width * (DWORD)bits_per_pixel);
 	i = ((long) (height - 1 - j) * (long) (local_width + 3 - ((local_width - 1) % 4)));
-	if (i + 3 > Dib->DibPixels.size()) {
+	if (i + 3 > Dib->DibPixels.size()) 
+	    {
+#ifdef _DEBUG
 	    OutputDebugStringA("PlotPoint: pixel write out of bounds\n");
+#endif
 	    return;
 	    }
 	k = ((long) j * (long) width);
@@ -347,6 +379,8 @@ void	CPlot::RefreshScreen(void)
 
 void	CPlot::DoPlot(int x, int y, DWORD colour)
     {
+    if (AbortRequested())
+	return;
     if (x >= 0 && y >= 0 && x < xdots && y < ydots)				// allow underflow testing
 	PlotPoint(x, y, colour);
     }
@@ -449,6 +483,8 @@ void	CPlot::FilterPoint(WORD x, WORD y, DWORD colour, RGBTRIPLE *FilterRGB)	//
     DWORD	address;
     long	i;
 
+    if (AbortRequested())
+	return;
     if (x < xdots && y < ydots)
 	{
 	address = (WIDTHBYTES((DWORD)xdots * (DWORD)Dib->BitsPerPixel) * (ydots - y - 1));

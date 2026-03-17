@@ -22,6 +22,7 @@
 #include "BigDouble.h"
 #include "big.h"
 #include "pixel.h"
+#include "SafeStrings.h"
 #include "..\parser\TrigFn.h"
 
 #define	INSIDE	TRUE
@@ -196,7 +197,7 @@ int	AnalyseFormula(char *FormulaData)
 	q++;
 	}
     *q = '\0';
-    sprintf(filename, "%s\\%s", FRMPath, temp);
+    SAFE_SPRINTF(filename, "%s\\%s", FRMPath, temp);
     if (tok = str_find_ci(FormulaData, "formulaname="))
 	{
 	p = tok;
@@ -237,7 +238,7 @@ int	AnalyseIFS(HWND hwnd, char *ifsdata)
 	q++;
 	}
     *q = '\0';
-    sprintf(filename, "%s\\%s", IFSPath, temp);
+    SAFE_SPRINTF(filename, "%s\\%s", IFSPath, temp);
     if (tok = str_find_ci(ifsdata, "ifs="))
 	{
 	p = tok;
@@ -326,8 +327,8 @@ int	AnalyseFunction(char *Trigdata)
 	return -1;
 
 #ifdef DEBUG
-wsprintf(s, "Length %d", strlen(Trigdata));
-MessageBox (hwnd, Trigdata, s, MB_ICONEXCLAMATION | MB_OK);
+    _snprintf_s(s, 1024, _TRUNCATE, "Length %d", strlen(Trigdata));
+    MessageBox (hwnd, Trigdata, s, MB_ICONEXCLAMATION | MB_OK);
 #endif   
 
     strcpy(s, Trigdata);			// don't splatter main string
@@ -670,7 +671,7 @@ static int ParseColours(char *value)
 	    }
 	*q = '\0';
 	if (str_find_ci(MAPFile, "map") == 0)		// some fractint par files assume the extension 
-	    strcat(MAPFile, ".map");
+	    strcat_s(MAPFile, MAX_PATH, ".map");
 	FilePalette(GlobalHwnd, MAPFile, "Fractint Par: Get Colour Map");
 	TrueCol.FillPalette(REPEAT, TrueCol.PalettePtr, threshold);
 	TrueCol.FinalisePalette(256, threshold);
@@ -678,7 +679,7 @@ static int ParseColours(char *value)
 #ifdef DEBUG
     for (i = 0; i < 8; i++)
 	{
-	wsprintf(s, "Col[%d]: %d %d %d", i, *(PalettePtr + 3 * i), 
+	_snprintf_s(s, 150, _TRUNCATE, "Col[%d]: %d %d %d", i, *(PalettePtr + 3 * i),
 				    *(PalettePtr + 3 * i + 1), *(PalettePtr + 3 * i + 2));
 	MessageBox (hwnd, s, "File colours", MB_ICONEXCLAMATION | MB_OK);
 	}
@@ -688,7 +689,7 @@ static int ParseColours(char *value)
 	}
     else 
 	{
-	wsprintf (MAPFile, "Colour info from Fractint Par File");
+	_snprintf_s(MAPFile, _MAX_PATH, _TRUNCATE, "Colour info from Fractint Par File");
 	i = smooth = 0;
 	while (*value) 
 	    {
@@ -831,7 +832,7 @@ static int ParseColours(char *value)
 #ifdef DEBUG
     for (i = 0; i < 16; i++)
 	{
-	wsprintf(s, "Col[%d]: %d %d %d", i, *(PalettePtr + 3 * i), 
+	_snprintf_s(s, 150, _TRUNCATE, "Col[%d]: %d %d %d", i, *(PalettePtr + 3 * i),
 				    *(PalettePtr + 3 * i + 1), *(PalettePtr + 3 * i + 2));
 	MessageBox (hwnd, s, "Par colours", MB_ICONEXCLAMATION | MB_OK);
 	}
@@ -1206,7 +1207,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
     invert = FALSE;
     if ((fp = fopen(filename, "r")) == NULL)
 	{
-	wsprintf(s, "Can't Open par File: <%s>", filename);
+	_snprintf_s(s, 200, _TRUNCATE, "Can't Open par File: <%s>", filename);
 	MessageBox (hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
@@ -1216,7 +1217,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	char	*a, *b;
 	if (fgets(InLine, 160, fp) == 0)
 	    {
-	    wsprintf(s, "Can't Get FRACTINT Par Data: <%s>", filename);
+	    _snprintf_s(s, 200, _TRUNCATE, "Can't Get FRACTINT Par Data: <%s>", filename);
 	    MessageBox (hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	    fclose(fp);
 	    return -1;
@@ -1247,12 +1248,12 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	if ((word = strchr(InLine1,';')))	// strip comment
 	    *word = 0;
 	strcpy(InLine, StripStuff(InLine1));
-	strcat(buffer, leading(InLine));
+	strcat_s(buffer, sizeof(buffer), leading(InLine));
 	if (str_find_ci(InLine, "}"))
 	     break;
 	if ((i = (int)strlen(buffer)) > BUFFERSIZE - 160)
 	    {
-	    wsprintf(s, "Par Data full, line: <%d>", linenum);
+	    _snprintf_s(s, 200, _TRUNCATE, "Par Data full, line: <%d>", linenum);
 	    MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	    break;
 	    }
@@ -1300,16 +1301,16 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	    switch (type)
 		{
 		case LSYSTEM:
-		    wsprintf(s, "Error in L-system file");
+		    _snprintf_s(s, 200, _TRUNCATE, "Error in L-system file");
 		    break;
 		case IFS:
-		    wsprintf(s, "Error in IFS file");
+		    _snprintf_s(s, 200, _TRUNCATE, "Error in IFS file");
 		    break;
 		case FORMULA:
-		    wsprintf(s, "Error in Formula file");
+		    _snprintf_s(s, 200, _TRUNCATE, "Error in Formula file");
 		    break;
 		default:
-		    wsprintf(s, "Fractal type <%s> not supported by ManpWin", temp);
+		    _snprintf_s(s, 200, _TRUNCATE, "Fractal type <%s> not supported by ManpWin", temp);
 		    break;
 		}
 	    MessageBox (hwnd, s, "Reading Fractint Par File", MB_ICONEXCLAMATION | MB_OK);
@@ -1326,14 +1327,14 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	    {
 	    if (fgets(InLine, 160, fp) == 0)
 		{
-		wsprintf(s, "Can't Find formula in the FRACTINT Par Data: <%s>", filename);
+		_snprintf_s(s, 200, _TRUNCATE, "Can't Find formula in the FRACTINT Par Data: <%s>", filename);
 		MessageBox(hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 		fclose(fp);
 		return -1;
 		}
 
 #ifdef DEBUG
-	    wsprintf(s, "Line %d, <%s>", linenum, InLine);
+	    _snprintf_s(s, 200, _TRUNCATE, "Line %d, <%s>", linenum, InLine);
 	    MessageBox(hwnd, s, "Finding Par", MB_ICONEXCLAMATION | MB_OK);
 #endif   
 
@@ -1348,7 +1349,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	    {
 
 #ifdef DEBUG
-	    wsprintf(s, "Line %d, <%s>, <%s>", linenum, InLine, lptr[lsys_ptr]);
+	    _snprintf_s(s, 200, _TRUNCATE, "Line %d, <%s>, <%s>", linenum, InLine, lptr[lsys_ptr]);
 	    MessageBox(hwnd, s, "Reading Par File", MB_ICONEXCLAMATION | MB_OK);
 #endif   
 
@@ -1357,13 +1358,12 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 
 	    if ((word = strchr(InLine, ';')))	// strip comment
 		*word = 0;
-	    //	    strcat(temp, InLine + 2);
-	    strcat(temp, InLine);
+	    strcat_s(temp, BUFFERSIZE, InLine);
 	    if (str_find_ci(InLine, "}"))
 		break;
 	    if ((i = (int)strlen(temp)) > BUFFERSIZE - 200)
 		{
-		wsprintf(s, "Par Frm Data full, line: <%d>", linenum);
+		_snprintf_s(s, 200, _TRUNCATE, "Par Frm Data full, line: <%d>", linenum);
 		MessageBox(hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		fclose(fp);
 		break;
@@ -1423,7 +1423,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
     if (type == FRACTPAR)				// if we haven't found a fractal, then we still have fractal type FRACTPAR
 	{
 	type = MANDELFP;
-	wsprintf(s, "No fractal type was found <%s>. Assume Mandelbrot", temp);
+	_snprintf_s(s, 200, _TRUNCATE, "No fractal type was found <%s>. Assume Mandelbrot", temp);
 	MessageBox (hwnd, s, "Reading Fractint Par File", MB_ICONEXCLAMATION | MB_OK);
 	}
     fclose(fp);
@@ -1481,7 +1481,7 @@ int	load_par(HWND hwnd, char *filename)
     strcpy(par_type, "Not Loaded Yet");
     if ((fp = fopen(filename, "r")) == NULL)
 	{
-	wsprintf(s, "Can't Open Par File: <%s>", filename);
+	_snprintf_s(s, 250, _TRUNCATE, "Can't Open Par File: <%s>", filename);
 	MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}

@@ -6,6 +6,7 @@
 */
 
 #include "OtherFunctions.h"
+#include "SafeStrings.h"
 
 int	COtherFunctions::DoZigzag()
 
@@ -41,7 +42,7 @@ int	COtherFunctions::DoZigzag()
 	yold = y;
 	*curpass = i * 10 / 600;
 
-	sprintf(c, "i = %d", i);
+	SAFE_SPRINTF(c, "i = %d", i);
 	SetWindowText (hwnd, c);
 
 	switch (subtype)

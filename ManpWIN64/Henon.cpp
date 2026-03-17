@@ -68,7 +68,7 @@ int	DoHenon(void)
     yscale = (double) (ydots - 1) / mandel_width;
     for (j = 0; j < orbitn; ++j)			/* main loop j = orbit no. */
 	{
-//	wsprintf (s, "Henon Mapping Orbit %d of %d", j, orbitn);
+//	_snprintf_s(s, MAXLINE, _TRUNCATE, "Henon Mapping Orbit %d of %d", j, orbitn);
 //	SetWindowText (GlobalHwnd, s);
 	for (i = 0; i < HenonPoints; ++i)
 	    {

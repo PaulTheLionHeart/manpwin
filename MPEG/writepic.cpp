@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include "config.h"
 #include "global.h"
+#include "..\ManpWIN64\SafeStrings.h"
 
 void writeframe(char *fname, unsigned char *frame[])
 
@@ -53,30 +54,30 @@ void writeframe(char *fname, unsigned char *frame[])
     return;
 
   /* Y */
-  sprintf(name,"%s.Y",fname);
+  _snprintf_s(name, 128, _TRUNCATE,"%s.Y",fname);
   if (!(fd = fopen(name,"wb")))
-  {
-    sprintf(errortext,"Couldn't create %s\n",name);
+    {
+    _snprintf_s(errortext, 256, _TRUNCATE,"Couldn't create %s\n",name);
     error(errortext);
-  }
+    }
   fwrite(frame[0],1,horizontal_size*vertical_size,fd);
   fclose(fd);
 
   /* Cb */
-  sprintf(name,"%s.U",fname);
+  SAFE_SPRINTF(name,"%s.U",fname);
   if (!(fd = fopen(name,"wb")))
   {
-    sprintf(errortext,"Couldn't create %s\n",name);
+    _snprintf_s(errortext, 256, _TRUNCATE,"Couldn't create %s\n",name);
     error(errortext);
   }
   fwrite(frame[1],1,chrom_hsize*chrom_vsize,fd);
   fclose(fd);
 
   /* Cr */
-  sprintf(name,"%s.V",fname);
+  SAFE_SPRINTF(name,"%s.V",fname);
   if (!(fd = fopen(name,"wb")))
   {
-    sprintf(errortext,"Couldn't create %s\n",name);
+    _snprintf_s(errortext, 256, _TRUNCATE,"Couldn't create %s\n",name);
     error(errortext);
   }
   fwrite(frame[2],1,chrom_hsize*chrom_vsize,fd);

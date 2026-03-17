@@ -14,6 +14,7 @@
 #include "manpwin.h"
 #include "Dib.h"
 #include "Anim.h"
+#include "SafeStrings.h"
 
 //#define	ALLOWGIFANIMSAVE
 #define MAXLINE		150		/* length of line */
@@ -186,7 +187,7 @@ int	write_gif_file(char *outfile, char *title)
 	{
 	hCursor = LoadCursor((HINSTANCE)NULL, IDC_ARROW);		// Load pointer cursor.
 	SetCursor(hCursor);
-	wsprintf(s, "GIF can't open output file: %s", outfile);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "GIF can't open output file: %s", outfile);
 	MessageBox (GlobalHwnd, s, title, MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
@@ -219,7 +220,7 @@ int	write_gif_file(char *outfile, char *title)
 
     if ((extrabuffer = new char [linesize]) == NULL)
 	{
-	wsprintf(s, "Not enough memory: %d bytes for line buffer in JPEG file ", "GIF write", linesize);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "Not enough memory: %d bytes for line buffer in JPEG file %s", linesize, "GIF write");
 	MessageBox(GlobalHwnd, s, "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	CleanupGIF(fp, bp, extrabuffer);
 	SetCursor(hStdCursor);
@@ -294,7 +295,7 @@ if (!GIFWriteScreenDesc(output_file,lpbi,GIFSIG87))
 	    return -1;
 	    }
 
-	wsprintf (s, "Writing GIF frame <%d>of<%d>: ", i + 1, gTotalFrames);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "Writing GIF frame <%d>of<%d>: ", i + 1, gTotalFrames);
 	SetWindowText(GlobalHwnd, s);			// Show formatted text in the caption bar
 	if (!GIFWriteImageDesc(fp, i, lpbi))
 	    {
@@ -597,7 +598,7 @@ int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
 	if (display_count > percent)
 	    {
 	    percent = display_count;
-	    sprintf (s, "Writing File: %d%%", percent * 10);
+	    SAFE_SPRINTF(s, "Writing File: %d%%", percent * 10);
 //	    SetWindowText(GlobalHwnd, s);
 	    }
 

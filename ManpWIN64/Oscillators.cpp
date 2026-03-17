@@ -15,6 +15,7 @@
 #include	"menu.h"
 #include	"anim.h"
 #include	"OscProcess.h"
+#include	"SafeStrings.h"
 
 extern	HWND	GlobalHwnd;			// This is the main windows handle
 
@@ -42165,7 +42166,7 @@ return FALSE;
 
 void	Axes2Text(char *text, int x, int y, int z)
     {
-    sprintf(text, "%c%c%c", ((x < 10) ? '0' + x : 'A' - 10 + x), ((y < 10) ? '0' + y : 'A' - 10 + y), ((z < 10) ? '0' + z : 'A' - 10 + z));
+    _snprintf_s(text, 16, _TRUNCATE, "%c%c%c", ((x < 10) ? '0' + x : 'A' - 10 + x), ((y < 10) ? '0' + y : 'A' - 10 + y), ((z < 10) ? '0' + z : 'A' - 10 + z));
     }
 
 void	Text2Axes(int *x, int *y, int *z, char *text)
@@ -42248,7 +42249,7 @@ INT_PTR CALLBACK SelectOscParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 	    NumParams = DatabasePtr->numparams;
 	    for (i = 0; i < NumParams && i < NUMPARAM; i++)
 		{
-		sprintf(s[i], "%g", DatabasePtr->paramvalue[i]);
+		SAFE_SPRINTF(s[i], "%g", DatabasePtr->paramvalue[i]);
 		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, DatabasePtr->paramname[i]);
 		SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[i]);
 		}
@@ -42258,7 +42259,7 @@ INT_PTR CALLBACK SelectOscParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 	    NumVariables = DatabasePtr->numvariables;
 	    for (i = 0; i < NumVariables && i < NUMPARAM; i++)
 		{
-		sprintf(s[i], "%g", DatabasePtr->variablevalue[i]);
+		SAFE_SPRINTF(s[i], "%g", DatabasePtr->variablevalue[i]);
 		SetDlgItemText(hDlg, ID_FRACVARTX01 + i, DatabasePtr->variablename[i]);
 		SetDlgItemText(hDlg, ID_FRACVAR01 + i, s[i]);
 		}
@@ -42288,11 +42289,11 @@ INT_PTR CALLBACK SelectOscParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 	    SetDlgItemInt(hDlg, IDC_Y, yAxis + 1, TRUE);
 	    SetDlgItemInt(hDlg, IDC_Z, zAxis + 1, TRUE);
 	    SetDlgItemInt(hDlg, IDC_NUMDIM, MaxDimensions, TRUE);
-	    sprintf(DeltaTString, "%g", dt);
+	    SAFE_SPRINTF(DeltaTString, "%g", dt);
 	    SetDlgItemText(hDlg, IDC_DT, DeltaTString);
-	    sprintf(VertScaling, "%g", VertBias);
+	    SAFE_SPRINTF(VertScaling, "%g", VertBias);
 	    SetDlgItemText(hDlg, IDC_VERTBIAS, VertScaling);
-//	    sprintf(zScaling, "%f", zBias);
+//	    SAFE_SPRINTF(zScaling, "%f", zBias);
 //	    SetDlgItemText(hDlg, IDC_ZBIAS, zScaling);
 	    Axes2Text(AxesText, xAxis + 1, yAxis + 1, zAxis + 1);
 	    SetDlgItemText(hDlg, IDC_DIMTEXT, AxesText);

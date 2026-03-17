@@ -302,7 +302,7 @@ void CTZfilter::FDimension(int FilterType, long *iteration)
 		case 8:
 		    // FD Addition
 
-		    //wsprintf (cstr, "step 1");
+		    //_snprintf_s(cstr, MAXLINE, _TRUNCATE, "step 1");
 		    //MessageBox(NULL, cstr, "Debug", MB_OK);					
 
 		    rj = ((dFDx+dFDy) * 200 * dFactor);

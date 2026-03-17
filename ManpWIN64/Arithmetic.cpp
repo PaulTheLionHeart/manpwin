@@ -20,6 +20,7 @@ This program is written in "standard" C.Hardware dependant code
 #include	"BigMatrix.h"
 #include	"DDComplex.h"
 #include	"QDComplex.h"
+#include	"SafeStrings.h"
 
 #define max(a,b)    (((a) > (b)) ? (a) : (b))
 
@@ -69,7 +70,7 @@ void	ShowBignum(BigDouble x, char *Location)
     char    ss[24];
 //    ConvertBignum2String(s1, x.x);
     x.ToString(s1, SIZEOF_BF_VARS + 1, false);
-    sprintf(ss, "bflength=%d", (int)strlen(s1));
+    SAFE_SPRINTF(ss, "bflength=%d", (int)strlen(s1));
     MessageBox(PixelHwnd, s1, Location, MB_ICONEXCLAMATION | MB_OK);
     //    MessageBox (PixelHwnd, s1, ss, MB_ICONEXCLAMATION | MB_OK);
     if (s1) { delete[] s1; s1 = NULL; }

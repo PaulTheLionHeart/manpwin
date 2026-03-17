@@ -1008,7 +1008,7 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 	if (int(progress * 100) != lastChecked)
 	    {
 	    lastChecked = int(progress * 100);
-	    sprintf(StatusBarInfo, "Progess (%d%%), %d Threads", int(progress * 100), NumThreads);
+	    _snprintf_s(StatusBarInfo, MAXLINE, _TRUNCATE, "Progess (%d%%), %d Threads", int(progress * 100), NumThreads);
 	    }
 	for (int strip = thread; strip < TotalStrips; strip += effectiveThreads)
 	    {
@@ -1020,7 +1020,7 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 		{
 		if (user_data(hwnd) < 0)
 		    return -1;
-		if (gStopRequested)
+		if (AbortRequested())
 		    return -1;
 
 		gPixelsDone.fetch_add(1, std::memory_order_relaxed);
@@ -1051,7 +1051,7 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 		    }
 		if (ghMutex != NULL)
 		    WaitForSingleObject(ghMutex, INFINITE);  // no time-out interval
-		if (gStopRequested)
+		if (AbortRequested())
 		    return -1;
 		if (smoothing)
 		    {
@@ -1077,7 +1077,7 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 			final.rgbtGreen = (BYTE)(base.rgbtGreen * br);
 			final.rgbtBlue	= (BYTE)(base.rgbtBlue  * br);
 			// plot using thread-local plot
-			if (gStopRequested.load(std::memory_order_relaxed))
+			if (AbortRequested())
 			    return -1;
 
 			// hard bounds check using the dimensions this worker is responsible for

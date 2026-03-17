@@ -25,6 +25,7 @@
 #include "BigDouble.h"
 #include "big.h"
 #include "pixel.h"
+#include "SafeStrings.h"
 #include "..\parser\cmplx.h"
 #include "..\parser\TrigFn.h"
 //#define	MAXTHRESHOLD	10000
@@ -139,11 +140,11 @@ INT_PTR CALLBACK Param3D (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	        sprintf(s, "%2.4f", sclx);
+		SAFE_SPRINTF(s, "%2.4f", sclx);
 		SetDlgItemText(hDlg, IDC_XSCALE, s);
-	        sprintf(s, "%2.4f", scly);
+		SAFE_SPRINTF(s, "%2.4f", scly);
 		SetDlgItemText(hDlg, IDC_YSCALE, s);
-	        sprintf(s, "%2.4f", sclz);
+		SAFE_SPRINTF(s, "%2.4f", sclz);
 		SetDlgItemText(hDlg, IDC_ZSCALE, s);
 		SetDlgItemInt(hDlg, IDC_XROTATE, (int)x_rot, TRUE);
 		SetDlgItemInt(hDlg, IDC_YROTATE, (int)y_rot, TRUE);
@@ -228,7 +229,7 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 	  case WM_INITDIALOG:
 //		dStrands = 0.08;
 		SetDlgItemInt(hDlg, IDM_THRESHOLD, threshold, TRUE);
-		sprintf(s, "%02X%02X%02X", OrbitColour.rgbtRed, OrbitColour.rgbtGreen, OrbitColour.rgbtBlue);
+		SAFE_SPRINTF(s, "%02X%02X%02X", OrbitColour.rgbtRed, OrbitColour.rgbtGreen, OrbitColour.rgbtBlue);
 		SetDlgItemText(hDlg, IDC_ORBITCOL, s);
 		SetDlgItemInt(hDlg, IDM_ROTDEG, RotationAngle, TRUE);
 		SetDlgItemInt(hDlg, IDM_THRESH_OFF, Offset3D, TRUE);
@@ -243,27 +244,27 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		SetDlgItemInt(hDlg, IDM_BAILOUT, (int)potparam[2], TRUE);
 		SetDlgItemInt(hDlg, IDC_DISTEST, distest, TRUE);
 		SetDlgItemInt(hDlg, IDC_DISTESTWIDTH, distestwidth, TRUE);
-	        sprintf(s, "%7.7f", f_radius);
+		SAFE_SPRINTF(s, "%7.7f", f_radius);
 		SetDlgItemText(hDlg, IDM_RADIUS, s);
-	        sprintf(s, "%7.7f", f_xcenter);
+		SAFE_SPRINTF(s, "%7.7f", f_xcenter);
 		SetDlgItemText(hDlg, IDM_CENTREX, s);
-	        sprintf(s, "%7.7f", f_ycenter);
+		SAFE_SPRINTF(s, "%7.7f", f_ycenter);
 		SetDlgItemText(hDlg, IDM_CENTREY, s);
-	        sprintf(s, "%2.2f", dStrands);
+		SAFE_SPRINTF(s, "%2.2f", dStrands);
 		SetDlgItemText(hDlg, IDM_STALKS, s);
-		sprintf(s, "%06X", BackgroundColour);
+		SAFE_SPRINTF(s, "%06X", BackgroundColour);
 		SetDlgItemText(hDlg, IDC_BKGROUNDCOLOUR, s);
 
-		sprintf(s, "%5.2f", ColourSpeed);
+		SAFE_SPRINTF(s, "%5.2f", ColourSpeed);
 		SetDlgItemText(hDlg, IDM_COLOURSPEED, s);
-		sprintf(s, "%5.2f", bump_transfer_factor);
+		SAFE_SPRINTF(s, "%5.2f", bump_transfer_factor);
 		SetDlgItemText(hDlg, IDM_TRANSFACTOR, s);
 		SetDlgItemInt(hDlg, IDM_STARTPAL, PaletteStart, TRUE);
-		sprintf(s, "%5.2f", lightDirectionDegrees);
+		SAFE_SPRINTF(s, "%5.2f", lightDirectionDegrees);
 		SetDlgItemText(hDlg, IDM_LIGHTDIR, s);
-		sprintf(s, "%5.2f", bumpMappingDepth);
+		SAFE_SPRINTF(s, "%5.2f", bumpMappingDepth);
 		SetDlgItemText(hDlg, IDM_MAPDEPTH, s);
-		sprintf(s, "%5.2f", bumpMappingStrength);
+		SAFE_SPRINTF(s, "%5.2f", bumpMappingStrength);
 		SetDlgItemText(hDlg, IDM_MAPSTRENGTH, s);
 		
 		TempBailoutTest = BailoutTestType;
@@ -1947,9 +1948,9 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 	  case WM_INITDIALOG:
 	      if (Fractal.FractName == NULL)
 		  InitFract(type);
-	      sprintf(JuliaReal, "%lf", j.x);
-	      sprintf(JuliaImag, "%lf", j.y);
-	      sprintf(Bailout, "%lf", rqlim);
+	      SAFE_SPRINTF(JuliaReal, "%lf", j.x);
+	      SAFE_SPRINTF(JuliaImag, "%lf", j.y);
+	      SAFE_SPRINTF(Bailout, "%lf", rqlim);
 	      SetDlgItemText(hDlg, IDC_JULIAREAL, JuliaReal);
 	      SetDlgItemText(hDlg, IDC_JULIAIMAG, JuliaImag);
 	      SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
@@ -1971,9 +1972,9 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 		  }
 	      else
 		  {
-		  sprintf(s1, "%18.18f", hor);
-		  sprintf(s2, "%18.18f", vert);
-		  sprintf(s3, "%18.18f", mandel_width);
+		  _snprintf_s(s1, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", hor);
+		  _snprintf_s(s2, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", vert);
+		  _snprintf_s(s3, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", mandel_width);
 		  }
 	      
 	      SetDlgItemText(hDlg, IDC_XCOORD, s1);
@@ -1995,7 +1996,7 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 		  }
 	      for (i = Fractal.NumFunct, k = 0; i < Fractal.NumFunct + Fractal.NumParam && i < 10; i++, k++) 
 		  {
-		  sprintf(s[k], "%f", *Fractal.ParamValue[k]);
+		  SAFE_SPRINTF(s[k], "%f", *Fractal.ParamValue[k]);
 		  SetDlgItemText(hDlg, ID_FRACPARTX1 + i, fractalspecific[type].paramname[k]);
 		  SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[k]);
 		  hCtrl = GetDlgItem (hDlg, ID_FRACPARAM1 + i);
@@ -2018,7 +2019,7 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 			GetDlgItemText(hDlg, IDC_XCOORD, s1, SIZEOF_BF_VARS);
 			GetDlgItemText(hDlg, IDC_YCOORD, s2, SIZEOF_BF_VARS);
 			GetDlgItemText(hDlg, IDC_WIDTH, s3, SIZEOF_BF_VARS);
-//			sprintf(buf, "%s,%s,%s", s1, s2, s3);
+//			SAFE_SPRINTF(buf, "%s,%s,%s", s1, s2, s3);
 //			if (analyse_corner(buf) < 0)
 			if (GetCorner(s1, s2, s3) < 0)
 			    {
@@ -2038,7 +2039,7 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 				}
 			    param[0] = 0.0;
 			    param[1] = 0.0;
-			    sprintf(t, "Deep Zooming Limit (%d decimals) exceeded", SIZEOF_BF_VARS);	
+			    SAFE_SPRINTF(t, "Deep Zooming Limit (%d decimals) exceeded", SIZEOF_BF_VARS);
 			    MessageBox (hDlg, t, "ManpWin", MB_ICONEXCLAMATION | MB_OK);
 			    MessageBeep (0);
 			    }
@@ -2099,11 +2100,11 @@ INT_PTR CALLBACK ParamDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-		sprintf(s1, "%18.18f", param[0]);
-		sprintf(s2, "%18.18f", param[1]);
-		sprintf(s3, "%18.18f", param[2]);
-		sprintf(s4, "%18.18f", param[3]);
-		sprintf(s5, "%18.18f", param[4]);
+		_snprintf_s(s1, DBL_MANT_DIG, _TRUNCATE, "%18.18f", param[0]);
+		_snprintf_s(s2, DBL_MANT_DIG, _TRUNCATE, "%18.18f", param[1]);
+		_snprintf_s(s3, DBL_MANT_DIG, _TRUNCATE, "%18.18f", param[2]);
+		_snprintf_s(s4, DBL_MANT_DIG, _TRUNCATE, "%18.18f", param[3]);
+		_snprintf_s(s5, DBL_MANT_DIG, _TRUNCATE, "%18.18f", param[4]);
 
 		SetDlgItemText(hDlg, IDC_PARAM0, s1);
 		SetDlgItemText(hDlg, IDC_PARAM1, s2);
@@ -2159,7 +2160,7 @@ INT_PTR CALLBACK SelectFracParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM
     switch (message) 
 	{
         case WM_INITDIALOG:
-	    sprintf(Bailout, "%14.14lf", rqlim);
+	    SAFE_SPRINTF(Bailout, "%14.14lf", rqlim);
 	    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
 	    numtrig = Fractal.TotalFunctions;
             SetDlgItemText(hDlg, ID_FRACNAME, 	GetFractalName());
@@ -2204,7 +2205,7 @@ INT_PTR CALLBACK SelectFracParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		}
             for (i = Fractal.NumFunct, j = 0; i < Fractal.NumFunct + Fractal.NumParam && i < 10; i++, j++) 
 		{
-		sprintf(s[j], "%f", *Fractal.ParamValue[j]);
+		SAFE_SPRINTF(s[j], "%f", *Fractal.ParamValue[j]);
 		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, Fractal.ParamName[j]);
 		SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[j]);
 		}

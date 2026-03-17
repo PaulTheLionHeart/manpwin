@@ -22,6 +22,7 @@
 #include "resource.h"
 #include "Preview.h"
 #include "colour.h"
+#include "SafeStrings.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -210,16 +211,16 @@ void	CEditPal::SetupValues(HWND hDlg, int color[], int StartIter, int EndIter, s
     RedEnd = TempPal[EndIter].rgbtBlue & 0x00FF;
     GreenEnd = TempPal[EndIter].rgbtGreen & 0x00FF;
     BlueEnd = TempPal[EndIter].rgbtRed & 0x00FF;
-    sprintf(StartRGB, "%02X%02X%02X", RedStart, GreenStart, BlueStart);
-    sprintf(EndRGB, "%02X%02X%02X", RedEnd, GreenEnd, BlueEnd);
+    _snprintf_s(StartRGB, 8, _TRUNCATE, "%02X%02X%02X", RedStart, GreenStart, BlueStart);
+    _snprintf_s(EndRGB, 8, _TRUNCATE, "%02X%02X%02X", RedEnd, GreenEnd, BlueEnd);
     if (SetDlgItemInt(hDlg, IDC_STARTITER, StartIter, TRUE) == 0)
 	{
-	sprintf(s, "failure type %ld", GetLastError());
+	SAFE_SPRINTF(s, "failure type %ld", GetLastError());
 	MessageBox(hDlg, s, "StartIter", MB_ICONEXCLAMATION | MB_OK);
 	}
     if (SetDlgItemInt(hDlg, IDC_ENDITER, EndIter, TRUE) == 0)
 	{
-	sprintf(s, "failure type %ld", GetLastError());
+	SAFE_SPRINTF(s, "failure type %ld", GetLastError());
 	MessageBox(hDlg, s, "EndIter", MB_ICONEXCLAMATION | MB_OK);
 	}
 

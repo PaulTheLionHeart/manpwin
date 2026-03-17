@@ -491,7 +491,7 @@ INT_PTR CALLBACK MountainDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	       hCtrl = (HWND)GET_WM_COMMAND_HWND (wParam, (_int64)lParam);
 	       if ((nCtrlID = ((WORD)(GetWindowLong (hCtrl, GWL_ID)))) == 0)
 		   {
-		   wsprintf(s, "Error: Scrollbar fail: <%ld>", GetLastError());
+		   _snprintf_s(s, 480, _TRUNCATE, "Error: Scrollbar fail: <%ld>", GetLastError());
 		   MessageBox  (hDlg, s, "Paul's Graphics Viewer", MB_ICONEXCLAMATION | MB_OK);
 		   }
 

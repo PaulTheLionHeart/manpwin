@@ -25,6 +25,7 @@
 #include "OscProcess.h"
 #include "Plot.h"
 #include "PertEngine.h"
+#include "SafeStrings.h"
 
 extern	CDib	Dib;				// Device Independent Bitmap
 extern	CFract	Fractal;			// Fractal specific stuff
@@ -446,7 +447,7 @@ int PASCAL WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 			  NULL, NULL, hInstance, NULL);
     GlobalHwnd = hwnd;
 
-    wsprintf(argumentFileName, lpszCmdLine, hwnd);	// in case we want to analyse arguments
+    _snprintf_s(argumentFileName, MAX_PATH + MAXDATALINE, _TRUNCATE, lpszCmdLine, hwnd);	// in case we want to analyse arguments
 
     UpdateWindow (hwnd);
     type = MANDELFP;
@@ -474,7 +475,7 @@ void	DoCaption (HWND hwnd, char *szTitleName)
      {
      char szCaption [184];
 
-     wsprintf (szCaption, "%s", (LPSTR) (szTitleName));
+     _snprintf_s(szCaption, 184, _TRUNCATE, "%s", (LPSTR) (szTitleName));
      SetWindowText (hwnd, szCaption);
      }
 
@@ -508,19 +509,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		SetScrollPos(hwnd, SB_HORZ, 0, FALSE);
 
 #ifdef DEBUG
-wsprintf(TempString, "About to enter mainview() in WM_CREATE! argument = <%s>", argumentFileName);
-MessageBox (hwnd, TempString, szAppName, MB_ICONEXCLAMATION | MB_OK);
+		_snprintf_s(TempString, 480, _TRUNCATE, "About to enter mainview() in WM_CREATE! argument = <%s>", argumentFileName);
+		MessageBox (hwnd, TempString, szAppName, MB_ICONEXCLAMATION | MB_OK);
 #endif
 
 	       if (*argumentFileName != '\0')				// command line filename
 		   {
-		   wsprintf(TempString, "View File %s", szFileName);
+		   _snprintf_s(TempString, 480, _TRUNCATE, "View File %s", szFileName);
 		   DoCaption(hwnd, TempString);
 		   CopyArgument(hwnd, szFileName, argumentFileName);	// ensure correct filename copied
 
 #ifdef DEBUG
-wsprintf(TempString, "About to enter mainview() in WM_CREATE! file = <%s>", szFileName);
-MessageBox (hwnd, TempString, szAppName, MB_ICONEXCLAMATION | MB_OK);
+		   _snprintf_s(TempString, 480, _TRUNCATE, "About to enter mainview() in WM_CREATE! file = <%s>", szFileName);
+		    MessageBox (hwnd, TempString, szAppName, MB_ICONEXCLAMATION | MB_OK);
 #endif
 
 		   SendMessage (hwnd, WM_COMMAND, IDM_OPEN_PAR, 0L);	// let the user try
@@ -729,7 +730,7 @@ MessageBox (hwnd, TempString, szAppName, MB_ICONEXCLAMATION | MB_OK);
 
 	  case WM_COPYDATA:
 #ifdef	DEBUG
-		sprintf(TempString, "hWnd=%8.8X, wParam=%8.8X, lParam=%8.8X\ncopydata = <%s>", hwnd, wParam, lParam, 
+	      SAFE_SPRINTF(TempString, "hWnd=%8.8X, wParam=%8.8X, lParam=%8.8X\ncopydata = <%s>", hwnd, wParam, lParam,
 		  ((PCOPYDATASTRUCT)lParam) -> lpData);
 		MessageBox (hwnd, TempString, "Received Copydata message", MB_ICONEXCLAMATION | MB_OK);
 #endif
@@ -1031,7 +1032,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 				break;
 				}	// else fall through
 			default:
-			    wsprintf(TempStr, "Fractal type %d (%s) cannot be configured for animation!\nChange the fractal type first", type, fractalspecific[type].name);
+			    _snprintf_s(TempStr, MAX_PATH, _TRUNCATE, "Fractal type %d (%s) cannot be configured for animation!\nChange the fractal type first", type, fractalspecific[type].name);
 			    MessageBox (hwnd, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 			    status = 0;
 			    break;
@@ -1040,7 +1041,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		case IDM_JULIA_ANIM:
 		    if (type == PERTURBATION || type == OSCILLATORS || type == FRACTALMAPS || type == CURVES || type == KNOTS || type == SPROTTMAPS || type == SURFACES || type == BUDDHABROT || type == CURLICUES || type == MANDELCLOUD || type == DYNAMICFP)
 			{
-			wsprintf(TempStr, "Fractal type %d (%s) cannot be configured for Julia animation!\nChange the fractal type first", type, fractalspecific[type].name);
+			_snprintf_s(TempStr, MAX_PATH, _TRUNCATE, "Fractal type %d (%s) cannot be configured for Julia animation!\nChange the fractal type first", type, fractalspecific[type].name);
 			MessageBox(hwnd, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 			}
 		    else
@@ -1622,7 +1623,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		    {
 		    time_to_reinit = TRUE;
 		    HardStopNow(hwnd, "image size change");
-		    ClosePtrs();				// ready for next screen
+//		    ClosePtrs();				// ready for next screen
 		    mainview(hwnd, FALSE);			// all screen specific stuff
 		    }
 		break;
@@ -1671,40 +1672,6 @@ int	SecondaryWndProc (void)
 	time_to_zoom = FALSE;
 	return 0;			// no commands to process
 	}
-/*
-    switch (wParam)
-	{
-				  // Messages from File menu
-	case IDM_NEW:
-	case IDM_REOPEN:
-	    MessageBox (hwnd, "This File Menu Option Not Yet Implemented!",
-					 "ManpWin", MB_ICONEXCLAMATION | MB_OK);
-	    MessageBeep (0);
-	    break;
- 				  // Messages from Fractals menu
-	case IDM_UPDATE_FRACTAL:
-	    break;
-
-	case IDC_FRACTYPE:
-	case IDM_FRACOPTIONS:
-	case IDM_3DPARAM:
-	case IDM_STEREOPAIRSETUP:
-	    time_to_restart = TRUE;
-	    break;
-
-				// Messages from Options menu
-	case IDC_ADDSPIRAL:
-	    addflag = !addflag;
-	    time_to_restart = TRUE;
-	    break;
-
-
- 			      // Messages from Start menu
-	case IDM_START:
-	    time_to_restart = TRUE;
-	    break;
-	}     
-*/
 
     if (time_to_restart)
 	AutoStereoActive = FALSE;
@@ -1768,7 +1735,6 @@ void	SetupView(HWND hwnd)
   -----------------------------------------------------------*/
 
 void	FindCursorRealPos(POINTS *ptReal)
-
     {
     static	POINT	CursorLocLong;
 
@@ -1782,7 +1748,6 @@ void	FindCursorRealPos(POINTS *ptReal)
   -----------------------------------------------------------*/
 
 void	InitFract(int type)
-
     {
     int	i;
 
@@ -1805,8 +1770,7 @@ void	InitFract(int type)
 	Setup Fractal defaults when new fractal selected
   -----------------------------------------------------------*/
 
-    BOOL	InitNewFractal(HWND hwnd)
-
+BOOL	InitNewFractal(HWND hwnd)
     {
     static  int	OldType;
 
@@ -2176,7 +2140,6 @@ void	InitFract(int type)
   -----------------------------------------------------------*/
 
     BOOL    UpdateFractal(HWND hwnd)
-
 	{
 	switch (type)					// further subtypes?
 	    {
@@ -2189,47 +2152,31 @@ void	InitFract(int type)
 		time_to_load = FALSE;
 		if (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
 		    return FALSE;
-		if (!fpFormulaSetup(FRMFile))
-		    return FALSE;
-		break;
+		return (fpFormulaSetup(FRMFile));
 	    case SCREENFORMULA:					// On screen Formula Fractal
 		if (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
 		    return FALSE;
-		if (ProcessFormulaString(FormulaString) == -1)
-		    return FALSE;
-		break;
+		return !(ProcessFormulaString(FormulaString) == -1);
 	    case TIERAZON:					// Generic Tierazon Fractal
 		return (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == TRUE);
 	    case OSCILLATORS:					// Generic Oscillator Fractal
 		MaxDimensions = OscillatorSpecific[subtype].MaxDimensions;
-		if (DialogBox(hInst, OscillatorSpecific[subtype].DialogueName, hwnd, OscillatorSpecific[subtype].DialogueType) == FALSE)
-		    return FALSE;
-		break;
+		return (DialogBox(hInst, OscillatorSpecific[subtype].DialogueName, hwnd, OscillatorSpecific[subtype].DialogueType) == TRUE);
 	    case FRACTALMAPS:					// Generic Fractal Map
 		MaxDimensions = FractalMapSpecific[subtype].MaxDimensions;
-		if (DialogBox(hInst, FractalMapSpecific[subtype].DialogueName, hwnd, FractalMapSpecific[subtype].DialogueType) == FALSE)
-		    return FALSE;
-		break;
+		return (DialogBox(hInst, FractalMapSpecific[subtype].DialogueName, hwnd, FractalMapSpecific[subtype].DialogueType) == TRUE);
 	    case SPROTTMAPS:					// Generic Sprott Fractal Map
 		MaxDimensions = SprottMapSpecific[subtype].MaxDimensions;
-		if (DialogBox(hInst, SprottMapSpecific[subtype].DialogueName, hwnd, SprottMapSpecific[subtype].DialogueType) == FALSE)
-		    return FALSE;
-		break;
+		return (DialogBox(hInst, SprottMapSpecific[subtype].DialogueName, hwnd, SprottMapSpecific[subtype].DialogueType) == TRUE);
 	    case SURFACES:					// Generic Fractal Map
 		MaxDimensions = SurfaceSpecific[subtype].MaxDimensions;
-		if (DialogBox(hInst, SurfaceSpecific[subtype].DialogueName, hwnd, SurfaceSpecific[subtype].DialogueType) == FALSE)
-		    return FALSE;
-		break;
+		return (DialogBox(hInst, SurfaceSpecific[subtype].DialogueName, hwnd, SurfaceSpecific[subtype].DialogueType) == TRUE);
 	    case KNOTS:					// Generic Fractal Map
 		MaxDimensions = KnotSpecific[subtype].MaxDimensions;
-		if (DialogBox(hInst, SurfaceSpecific[subtype].DialogueName, hwnd, KnotSpecific[subtype].DialogueType) == FALSE)
-		    return FALSE;
-		break;
+		return (DialogBox(hInst, SurfaceSpecific[subtype].DialogueName, hwnd, KnotSpecific[subtype].DialogueType) == TRUE);
 	    case CURVES:					// Generic Fractal Map
 		MaxDimensions = CurveSpecific[subtype].MaxDimensions;
-		if (DialogBox(hInst, SurfaceSpecific[subtype].DialogueName, hwnd, CurveSpecific[subtype].DialogueType) == FALSE)
-		    return FALSE;
-		break;
+		return (DialogBox(hInst, SurfaceSpecific[subtype].DialogueName, hwnd, CurveSpecific[subtype].DialogueType) == TRUE);
 	    case PERTURBATION:					// Generic Perturbation Fractal
 		Fractal.NumParam = PerturbationSpecific[subtype].numparams;	// we need to know how many params to load
 		return (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == TRUE);
@@ -2293,7 +2240,7 @@ int	CopyArgument(HWND hwnd, char *FileName, char *CommandStr)
 	    if (toupper(*token) == 'S')		// outputfilename 
 		{
 		AutoSaveFlag = TRUE;
-		sprintf(szSaveFileName, "%s", token + 1);
+		SAFE_SPRINTF(szSaveFileName, "%s", token + 1);
 		}
 	    else if (toupper(*token) == 'E')	// Exit after completion
 		AutoExitFlag = TRUE;
@@ -2328,8 +2275,8 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	  case WM_INITDIALOG:
 		cycleflag = FALSE;
 		GetCursorPos(&CursorLocLong);
-		sprintf(PixelLoc, "%ld, %ld", CursorLocLong.x, CursorLocLong.y);
-		sprintf(JuliaLoc, "%14.14f, %14.14f", q.x, q.y);
+		SAFE_SPRINTF(PixelLoc, "%ld, %ld", CursorLocLong.x, CursorLocLong.y);
+		SAFE_SPRINTF(JuliaLoc, "%14.14f, %14.14f", q.x, q.y);
 		SetDlgItemText(hDlg, IDC_PIXEL, PixelLoc);
 		SetDlgItemText(hDlg, IDC_JULIALOC, JuliaLoc);
 	        return TRUE ;
@@ -2354,7 +2301,7 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
     x = ((double)ptCurrent.x/(double)xdots) * mandel_width * ScreenRatio + hor;
     y = ((double)(ydots - ptCurrent.y)/(double)ydots) * mandel_width + vert;
-    sprintf(s, "x=<%lf>,y=<%lf>", x, y);
+    SAFE_SPRINTF(s, "x=<%lf>,y=<%lf>", x, y);
     SetWindowText (hwnd, s);
     }
 
@@ -2395,6 +2342,8 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
     if (StatusString == NULL)
 	return TRUE;
 
+    StatusString[0] = '\0';
+    StringBuilder sb(StatusString, SIZEOF_BF_VARS * 4);
     if (BigNumFlag)
 	{
 	Big_centrex = BigHor + (BigWidth * (ScreenRatio / 2.0));
@@ -2437,7 +2386,7 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	    _snprintf_s(PassStr, GENERALFIELDLENGTH, _TRUNCATE, "Pass %d of %d", curpass, totpasses);
 	    break;
 	    //	default:
-	    //	    sprintf(PassStr, "Pass %d of %d", curpass, totpasses); 
+	    //	    SAFE_SPRINTF(PassStr, "Pass %d of %d", curpass, totpasses); 
 	    //	    break;
 	}
     _snprintf_s(FinishedStr, GENERALFIELDLENGTH, _TRUNCATE, "%s", (finished) ? ", Image Complete" : " ");
@@ -2472,7 +2421,7 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Sub=%d", GetFractalName(), subtype);
     else if (type == CUBIC)
 	{
-	char	ch;
+	char	ch = 0x20;
 	if (subtype == 0)   ch = 'B';
 	if (subtype == 1)   ch = 'C';
 	if (subtype == 2)   ch = 'F';
@@ -2484,16 +2433,16 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
     else
 	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Subtype = %d", GetFractalName(), subtype);
 
-    sprintf(ParamStr, "Params: ");
+    SAFE_SPRINTF(ParamStr, "Params: ");
     for (int i = 0; i < NUMPARAM; i++)
 	{
 	if ((fabs(param[i]) < 0.00001 || fabs(param[i]) > 100000.0) && param[i] != 0.0)
 	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9e", i, param[i]);
 	else
 	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9f", i, param[i]);
-	strcat(ParamStr, TempStr);
+	SAFE_APPEND(ParamStr, PARAMLENGTH, TempStr);
 	}
-    _snprintf_s(StatusString, SIZEOF_BF_VARS * 4, _TRUNCATE, "%s\r\nPixel [%d][%d], %s%s\r\n%s\r\nThreshold: %ld\r\nArith=%s\r\n%s\r\nBailout: %f\r\nImage Size: [%d][%d] ",
+    sb.append("%s\r\nPixel [%d][%d], %s%s\r\n%s\r\nThreshold: %ld\r\nArith=%s\r\n%s\r\nBailout: %f\r\nImage Size: [%d][%d] ",
 	FractalType, col, row, PassStr, FinishedStr, PositionString, threshold, PrecisionStr, ParamStr, rqlim, xdots, ydots);
     if (Fractal.NumFunct == 1)
 	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, "\r\nFn = %s", Fractal.Fn1);
@@ -2501,89 +2450,79 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, "\r\nFn1 = %s,Fn2 = %s", Fractal.Fn1, Fractal.Fn2);
     else
 	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, " ");
-    strcat(StatusString, SubData);
     if (RotationAngle != 0)
 	{
 	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nRotation Angle: %d\r\nRotation Centre: %lf, %lf\r\nMagnification: %le", RotationAngle, RotationCentre.x, RotationCentre.y, (BigNumFlag) ? 1.0 / (double)precision : 2.0 / mandel_width);
-	strcat(StatusString, TempStr);
+	sb.append("%s", TempStr);
 	}
 
     if (juliaflag)
 	{
 	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nJulia: %lf, %lf", j.x, j.y);
-	strcat(StatusString, TempStr);
+	sb.append("%s", TempStr);
 	}
 
     if (type == PERTURBATION || type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF)
 	{
-	strcat(StatusString, "\r\nPerturbation and Slope Parameters-");
+	sb.append("\r\nPerturbation and Slope Parameters-");
 	if (type == SLOPEDERIVATIVE) SlopeType = DERIVSLOPE;
 	if (type == SLOPEFORWARDDIFF) SlopeType = FWDDIFFSLOPE;
-	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nSlope Type: %d", SlopeType);
-	strcat(StatusString, TempStr);
+	sb.append("\r\nSlope Type: %d", SlopeType);
 	if (type == PERTURBATION && EnableApproximation)
-	    strcat(StatusString, "\r\nPerturbation uses BiLinear Approximation");
-	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nSlope Shadow Angle: %lf", lightDirectionDegrees);
-	strcat(StatusString, TempStr);
-	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nSlope Shadow Strength: %lf", bumpMappingStrength);
-	strcat(StatusString, TempStr);
-	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nSlope Shadow Depth: %lf", bumpMappingDepth);
-	strcat(StatusString, TempStr);
-	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nPalette Start: %d", PaletteStart);
-	strcat(StatusString, TempStr);
-	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nSlope Light Height: %lf", LightHeight);
-	strcat(StatusString, TempStr);
-	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nColour Offset: %d", PalOffset);
-	strcat(StatusString, TempStr);
-	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nIteration Divisor: %lf", IterDiv);
-	strcat(StatusString, TempStr);
-	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nPert Colour Method: %d", PertColourMethod);
-	strcat(StatusString, TempStr);
+	    sb.append("\r\nPerturbation uses BiLinear Approximation");
+	sb.append("\r\nSlope Shadow Angle: %lf", lightDirectionDegrees);
+	sb.append("\r\nSlope Shadow Strength: %lf", bumpMappingStrength);
+	sb.append("\r\nSlope Shadow Depth: %lf", bumpMappingDepth);
+	sb.append("\r\nPalette Start: %d", PaletteStart);
+	sb.append("\r\nSlope Light Height: %lf", LightHeight);
+	sb.append("\r\nColour Offset: %d", PalOffset);
+	sb.append("\r\nIteration Divisor: %lf", IterDiv);
+	sb.append("\r\nPert Colour Method: %d", PertColourMethod);
 	}
     if (IsPAR)
 	{
-	strcat(StatusString, "\r\nPAR file=");
-	strcat(StatusString, PARFile);
+	sb.append("\r\nPAR file=");
+	sb.append("%s", PARFile);
 	}
     else if (IsKFR)
 	{
-	strcat(StatusString, "\r\nKFR file=");
-	strcat(StatusString, KFRFile);
+	sb.append("\r\nKFR file=");
+	sb.append("%s", KFRFile);
 	}
     else if (WasFractPar)
 	{
-	strcat(StatusString, "\r\nFractPAR file=");
-	strcat(StatusString, FracPARFile);
-	strcat(StatusString, "\r\nItemName=");
-	strcat(StatusString, lptr[lsys_ptr]);
+	sb.append("\r\nFractPAR file=");
+	sb.append("%s", FracPARFile);
+	sb.append("\r\nItemName=");
+	sb.append("%s", lptr[lsys_ptr]);
 	}
     else if (type == IFS)
 	{
-	strcat(StatusString, "\r\nIFS file=");
-	strcat(StatusString, IFSFile);
-	strcat(StatusString, "\r\nItemName=");
-	strcat(StatusString, lptr[lsys_ptr]);
+	sb.append("\r\nIFS file=");
+	sb.append("%s", IFSFile);
+	sb.append("\r\nItemName=");
+	sb.append("%s", lptr[lsys_ptr]);
 	}
     else if (type == LSYSTEM)
 	{
-	strcat(StatusString, "\r\nL System file=");
-	strcat(StatusString, LSYSFile);
-	strcat(StatusString, "\r\nItemName=");
-	strcat(StatusString, lptr[lsys_ptr]);
+	sb.append("\r\nL System file=");
+	sb.append("%s", LSYSFile);
+	sb.append("\r\nItemName=");
+	sb.append("%s", lptr[lsys_ptr]);
 	}
     else if (type == FORMULA)
 	{
-	strcat(StatusString, "\r\nFormula file=");
-	strcat(StatusString, FRMFile);
-	strcat(StatusString, "\r\nItemName=");
-	strcat(StatusString, lptr[lsys_ptr]);
+	sb.append("\r\nFormula file=");
+	sb.append("%s", FRMFile);
+	sb.append("\r\nItemName=");
+	sb.append("%s", lptr[lsys_ptr]);
 	}
     //    DialogBox(hInst, "StatusInfoDlg", hwnd, StatusInfoDlg);
 //    MessageBox (hwnd, StatusString, fractalspecific[type].name, MB_ICONEXCLAMATION | MB_OK);
     if (TrueCol.IsMAPFile)
 	{
-	strcat(StatusString, "\r\nMAP file=");
-	strcat(StatusString, MAPFile);
+	sb.append("\r\nMAP file=");
+	sb.append("%s", MAPFile);
 	}
     if (InsideMethod > NONE || OutsideMethod > NONE)
 	{
@@ -2595,12 +2534,12 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	    _snprintf_s(FilterString, GENERALFIELDLENGTH, _TRUNCATE, "\r\nFilter=%d, ", InsideMethod);
 	else
 	    _snprintf_s(FilterString, GENERALFIELDLENGTH, _TRUNCATE, "\r\nFilter=%d, ", OutsideMethod);
-	strcat(StatusString, FilterString);
+	sb.append("%s", FilterString);
 	}
     if (ColourSpeed != 0.0)		// used for colour smoothing
 	{
 	_snprintf_s(ColourData, SHORTFIELDLENGTH, _TRUNCATE, "\r\nColour Speed for Smoothing=%lf, ", ColourSpeed);
-	strcat(StatusString, ColourData);
+	sb.append("%s", ColourData);
 	}
 
     switch (message)

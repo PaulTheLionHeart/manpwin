@@ -31,6 +31,7 @@
 #include <string.h>
 #include "config.h"
 #include "global.h"
+#include "..\ManpWIN64\SafeStrings.h"
 
 extern	void	WarningMPEG(char *);
 
@@ -63,11 +64,10 @@ void putseq()
   for (i=0; i<nframes; i++)
   {
     if (!quiet)
-    {
-      sprintf(s,"Encoding frame %d ",i);
-
-      fflush(stderr);
-    }
+	{
+	_snprintf_s(s, 120, _TRUNCATE,"Encoding frame %d ",i);
+	fflush(stderr);
+	}
 
     /* f0: lowest frame number in current GOP
      *
@@ -194,7 +194,7 @@ void putseq()
         -(4<<back_vert_f_code),(4<<back_vert_f_code)-1);
     }
 
-    sprintf(name,tplorg,f+frame0);
+    _snprintf_s(name, 256, _TRUNCATE, tplorg, f+frame0);
     if (readframe(name,neworg, i) < 0)
 	return;
 
@@ -202,7 +202,7 @@ void putseq()
     {
       if (!quiet)
       {
-        sprintf(s,"\nfirst field  (%s) ",topfirst ? "top" : "bot");
+	  SAFE_SPRINTF(s,"\nfirst field  (%s) ",topfirst ? "top" : "bot");
 	WarningMPEG(s);
         fflush(stderr);
       }
@@ -237,11 +237,11 @@ void putseq()
       stats();
 
       if (!quiet)
-      {
-        sprintf(s,"second field (%s) ",topfirst ? "bot" : "top");
-	WarningMPEG(s);
-        fflush(stderr);
-      }
+	    {
+	    _snprintf_s(s, 120, _TRUNCATE,"second field (%s) ",topfirst ? "bot" : "top");
+	    WarningMPEG(s);
+	    fflush(stderr);
+	    }
 
       pict_struct = topfirst ? BOTTOM_FIELD : TOP_FIELD;
 
@@ -322,7 +322,7 @@ void putseq()
       stats();
     }
 
-    sprintf(name,tplref,f+frame0);
+    SAFE_SPRINTF(name,tplref,f+frame0);
     writeframe(name,newref);
 
   }

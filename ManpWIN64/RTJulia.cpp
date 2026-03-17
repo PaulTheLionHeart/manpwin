@@ -17,6 +17,7 @@
 #include "complex.h"
 #include "pixel.h"
 #include "plot.h"
+#include "SafeStrings.h"
 
 #define	JULIA_SIZE	4.0
 #define	THUMB_SIZE	6
@@ -84,8 +85,8 @@ int	InitRTJulia(HWND hwnd)
     if (type == SCREENFORMULA)			// force julia version using startup of "z = pixel:" (I can't think of a better way)
 	{
 	BuildJuliaFormulaString();
-//	sprintf(FormulaString, "z = pixel:%s,|z| <= %f", FormulaStringPointer, rqlim);			// Julia
-//	sprintf(FormulaString, "c = z = 1 / pixel:%s + p1,|z| <= %f", FormulaStringPointer, rqlim);	// Invert
+//	_snprintf_s(FormulaString, MAXFORMULASTRINGLENGTH, _TRUNCATE, "z = pixel:%s,|z| <= %f", FormulaStringPointer, rqlim);			// Julia
+//	_snprintf_s(FormulaString, MAXFORMULASTRINGLENGTH, _TRUNCATE, "c = z = 1 / pixel:%s + p1,|z| <= %f", FormulaStringPointer, rqlim);	// Invert
 	if (ProcessFormulaString(FormulaString) == -1)
 	    return -1;
 //	ProcessFormulaString("z = pixel:z = z*z + c + p1,|z| <= 4");
@@ -137,7 +138,7 @@ int	DrawJulia(HWND hwnd, POINTS ptCurrent)
     if ((fractalspecific[type].flags & FUNCTIONINPIXEL) == 0 && (fractalspecific[type].flags & FRACTINTINPIXEL) == 0 && (fractalspecific[type].flags & TRIGINPIXEL) == 0)
 	{
 	char	s[100];
-	sprintf(s, "Real Time Julia is not available for fractal [%d]", type);
+	SAFE_SPRINTF(s, "Real Time Julia is not available for fractal [%d]", type);
 	MessageBox(hwnd, s, "RTJulia", MB_OK);
 	return -1;
 	}
@@ -181,7 +182,7 @@ int	DrawJulia(HWND hwnd, POINTS ptCurrent)
 	if (display_count > percent)
 	    {
 	    percent = display_count;
-	    sprintf(s, "%14.14f, %14.14f, %d, %d %d%%", Pixel[0]->q.x, Pixel[0]->q.y, ptCurrent.x, ptCurrent.y, percent * 10);
+	    SAFE_SPRINTF(s, "%14.14f, %14.14f, %d, %d %d%%", Pixel[0]->q.x, Pixel[0]->q.y, ptCurrent.x, ptCurrent.y, percent * 10);
 	    SetWindowText(hwnd, s);			// Show formatted text in the caption bar
 	    }
 	for (j = 0; j < Jheight >> ((type == MANDELFP && !invert) ? 1 : 0); j++)
@@ -216,7 +217,7 @@ int	DrawJulia(HWND hwnd, POINTS ptCurrent)
     if (ShowRTOrbits)
 	RTJuliaOrbits(OrbitColour, NUM_ORBITS);
     InvalidateRect(hwnd, &rect, FALSE);
-    sprintf(s, "%14.14f, %14.14f, %d, %d", Pixel[0]->q.x, Pixel[0]->q.y, ptCurrent.x, ptCurrent.y);
+    SAFE_SPRINTF(s, "%14.14f, %14.14f, %d, %d", Pixel[0]->q.x, Pixel[0]->q.y, ptCurrent.x, ptCurrent.y);
     SetWindowText(hwnd, s);				// Show formatted text in the caption bar
     Pixel[0]->juliaflag = TempJuliaFlag;			// restore julia to original type
     RTJuliaActive = FALSE;

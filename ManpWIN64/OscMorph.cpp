@@ -13,6 +13,7 @@
 #include	"fractalp.h"
 #include	"anim.h"
 #include	"OscProcess.h"
+#include	"SafeStrings.h"
 
 extern	long	threshold;
 extern	double	mandel_width;			// width of display
@@ -57,7 +58,6 @@ extern	COscProcess	OscProcess;
 **************************************************************************/
 
 int	GenOscMorphScript(HWND hwnd, char *filename) 
-
     {
     int		i, k;
     char	s[120];
@@ -66,7 +66,7 @@ int	GenOscMorphScript(HWND hwnd, char *filename)
 
     if ((out = fopen(filename, "w")) == NULL)
 	{
-	sprintf(s, "Cannot open output file %s\nDoes Folder exist?", filename);
+	SAFE_SPRINTF(s, "Cannot open output file %s\nDoes Folder exist?", filename);
 	MessageBox (hwnd, s, "Animation", MB_ICONEXCLAMATION | MB_OK);
 	MessageBeep (0);
 	return -1;
@@ -123,15 +123,15 @@ INT_PTR CALLBACK OscMorphAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
 		SendMessage(hCtrl, BM_SETCHECK, StartImmediately, 0L);
 		if (type == OSCILLATORS)
-		    sprintf(AnimType, "Osc");
+		    SAFE_SPRINTF(AnimType, "Osc");
 		else if (type == FRACTALMAPS || type == SPROTTMAPS)
-		    sprintf(AnimType, "Map");
+		    SAFE_SPRINTF(AnimType, "Map");
 		else if (type == SURFACES)
-		    sprintf(AnimType, "Surface");
+		    SAFE_SPRINTF(AnimType, "Surface");
 		else if (type == KNOTS)
-		    sprintf(AnimType, "Knot");
+		    SAFE_SPRINTF(AnimType, "Knot");
 		else if (type == CURVES)
-		    sprintf(AnimType, "Curve");
+		    SAFE_SPRINTF(AnimType, "Curve");
 		SetUpFilename(ScriptFileName, "sci", AnimType);
 		SetUpFilename(PNGName, "animpng", AnimType);
 		SetDlgItemText(hDlg, IDC_SCRIPT_FILENAME, ScriptFileName);
@@ -169,7 +169,7 @@ INT_PTR CALLBACK OscMorphAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			    hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGFILELIST);
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WritePNGFrames = WriteMemFrames = WritePNGList = FALSE;
-			    sprintf(MPGFile, "%s", GenerateAnimFileName (MPGPath, PNGName));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (MPGPath, PNGName));
 			    SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, MPGFile);
 			    }
 			return TRUE;
@@ -185,7 +185,7 @@ INT_PTR CALLBACK OscMorphAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			    SendMessage(hCtrl, BM_SETCHECK, FALSE, 0L);
 			    WriteMPEGFrames = FALSE;
 			    }
-			sprintf(PNGFile, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
+			_snprintf_s(PNGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateAnimFileName (ANIMPNGPath, PNGName));
 			SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGFile);
 			return TRUE;
 
@@ -205,7 +205,7 @@ INT_PTR CALLBACK OscMorphAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			if (WriteMPEGFrames)						// generate MPEG filename
 			    {
 			    GetDlgItemText(hDlg, IDC_SEQUENCE_NAME, TempFile, MAX_PATH);
-			    sprintf(MPGFile, "%s", GenerateMPEGFileName (MPGPath, TempFile));
+			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateMPEGFileName (MPGPath, TempFile));
 			    }
 
 			GetDlgItemText(hDlg, IDC_SCRIPT_FILENAME, ScriptFileName, 400);
@@ -214,7 +214,7 @@ INT_PTR CALLBACK OscMorphAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			    fileptr--;							// remove extension
 			if (*fileptr == '.')
 			    *fileptr = '\0';
-			strcat(ScriptFileName, ".sci");
+			strcat_s(ScriptFileName, MAX_PATH, ".sci");
 			hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
 			StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_SHOWPALETTE);

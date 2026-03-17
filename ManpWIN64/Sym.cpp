@@ -14,7 +14,6 @@ Symmetry plot setup x axis
 **************************************************************************/
 
 int	CPixel::xsym_split(int xaxis_row, int xaxis_between/*, int *symmetry*/)
-
     {
     int	i;
 
@@ -60,7 +59,6 @@ Symmetry plot setup y axis
 **************************************************************************/
 
 int	CPixel::ysym_split(int yaxis_col, int yaxis_between/*, int *symmetry*/)
-
     {
     int	i;
 
@@ -289,16 +287,7 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 		else
 		    fract_sym = fractalspecific[type].symmetry;
 		break;
-/*
-	    case MARCUSMANDEL:
-		if (param[0] != 0.0 || param[1] != 0.0)
-		    fract_sym = NOSYM;
-		else if (juliaflag)
-		    fract_sym = NOSYM;
-		else
-		    fract_sym = NOSYM;
-		break;
-*/
+
 	    case TIERAZON:
 	    case MANDELDERIVATIVES:
 		if (juliaflag)
@@ -371,102 +360,126 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
     Set up proper symmetrical plot functions
     **************************************************************************/
 
-    void	CPixel::setsymmetry(int sym, int uselist, BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[],
+void	CPixel::setsymmetry(int sym, int uselist, BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[],
 	WORD degree, WORD type, int subtype, BYTE calcmode, int RotationAngle, CFract *Fractal, double hor, double vert, double mandel_width, double *xxmax, double *xxmin,
 	double *yymin, double *yymax, WORD special, BYTE juliaflag, BYTE BigNumFlag, BigDouble *Big_xxmin, BigDouble *Big_xxmax, BigDouble *Big_yymin,
 	BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio)
+    {
+    int		xaxis_row, yaxis_col;				// pixel number for origin 
+    int		xaxis_between = 0, yaxis_between = 0;		// if axis between 2 pixels, not on one 
+    double	ftemp;
+    BigDouble	t1, xAbs, yAbs;
 
+    if (sym == NOPLOT)
 	{
-	int		xaxis_row, yaxis_col;				// pixel number for origin 
-	int		xaxis_between = 0, yaxis_between = 0;		// if axis between 2 pixels, not on one 
-	double	ftemp;
-	BigDouble	t1, xAbs, yAbs;
+	PlotType = NOPLOT;
+	return;
+	}
+    else if (sym == NOSYM && PlotType < FILTERPLOT)			// don't splatter filkters etc
+	PlotType = NOSYM;
 
-	if (sym == NOPLOT)
+    xaxis_row = yaxis_col = -1;
+    if (BigNumFlag)
+	{
+	if (NumberThreads <= 1)
 	    {
-	    PlotType = NOPLOT;
-	    return;
-	    }
-	else if (sym == NOSYM && PlotType < FILTERPLOT)			// don't splatter filkters etc
-	    PlotType = NOSYM;
-
-	xaxis_row = yaxis_col = -1;
-	if (BigNumFlag)
-	    {
-	    if (NumberThreads <= 1)
-		{
-		*Big_xxmin = BigHor;
-		*Big_xxmax = BigHor + BigWidth * ScreenRatio;		// aspect ratio 
-		}
-	    else
-		{
-		*Big_xxmin = BigHor + (BigWidth * ScreenRatio) * ThreadNumber / NumberThreads;
-		*Big_xxmax = BigHor + (BigWidth * ScreenRatio) * (ThreadNumber + 1) / NumberThreads;
-		}
-
-	    *Big_yymin = BigVert;
-	    *Big_yymax = BigVert + BigWidth;
-
-	    xAbs = *Big_xxmin + *Big_xxmax;
-	    yAbs = *Big_yymin + *Big_yymax;
-
-	    if (yAbs.BigAbs() < Big_yymin->BigAbs() + Big_yymax->BigAbs())	// axis is on screen 
-		{
-		t1 = -(*Big_yymax) / (*Big_yymin - *Big_yymax);
-		ftemp = (double)mpfr_get_d(t1.x, MPFR_RNDN) * (ydots - 1) + 0.25;
-		xaxis_row = (int)ftemp;
-		xaxis_between = (int)(ftemp - xaxis_row >= 0.5);
-		if (uselist == 0 && (!xaxis_between || (xaxis_row + 1) * 2 != (int)ydots))
-		    xaxis_row = -1;						// can't split screen, so dead center or not at all 
-		}
-	    if (xAbs.BigAbs() < Big_xxmin->BigAbs() + Big_xxmax->BigAbs())	// axis is on screen 
-		{
-		t1 = -(*Big_xxmin) / (*Big_xxmax - *Big_xxmin);
-		ftemp = (double)mpfr_get_d(t1.x, MPFR_RNDN) * (xdots - 1) + 0.25;
-		yaxis_col = (int)ftemp;
-		yaxis_between = (int)(ftemp - yaxis_col >= 0.5);
-		if (uselist == 0 && (!yaxis_between || (yaxis_col + 1) * 2 != (int)xdots))
-		    yaxis_col = -1;						// can't split screen, so dead center or not at all
-		}
+	    *Big_xxmin = BigHor;
+	    *Big_xxmax = BigHor + BigWidth * ScreenRatio;		// aspect ratio 
 	    }
 	else
 	    {
-	    if (NumberThreads <= 1)
+	    *Big_xxmin = BigHor + (BigWidth * ScreenRatio) * ThreadNumber / NumberThreads;
+	    *Big_xxmax = BigHor + (BigWidth * ScreenRatio) * (ThreadNumber + 1) / NumberThreads;
+	    }
+
+	*Big_yymin = BigVert;
+	*Big_yymax = BigVert + BigWidth;
+
+	xAbs = *Big_xxmin + *Big_xxmax;
+	yAbs = *Big_yymin + *Big_yymax;
+
+	if (yAbs.BigAbs() < Big_yymin->BigAbs() + Big_yymax->BigAbs())	// axis is on screen 
+	    {
+	    t1 = -(*Big_yymax) / (*Big_yymin - *Big_yymax);
+	    ftemp = (double)mpfr_get_d(t1.x, MPFR_RNDN) * (ydots - 1) + 0.25;
+	    xaxis_row = (int)ftemp;
+	    xaxis_between = (int)(ftemp - xaxis_row >= 0.5);
+	    if (uselist == 0 && (!xaxis_between || (xaxis_row + 1) * 2 != (int)ydots))
+		xaxis_row = -1;						// can't split screen, so dead center or not at all 
+	    }
+	if (xAbs.BigAbs() < Big_xxmin->BigAbs() + Big_xxmax->BigAbs())	// axis is on screen 
+	    {
+	    t1 = -(*Big_xxmin) / (*Big_xxmax - *Big_xxmin);
+	    ftemp = (double)mpfr_get_d(t1.x, MPFR_RNDN) * (xdots - 1) + 0.25;
+	    yaxis_col = (int)ftemp;
+	    yaxis_between = (int)(ftemp - yaxis_col >= 0.5);
+	    if (uselist == 0 && (!yaxis_between || (yaxis_col + 1) * 2 != (int)xdots))
+		yaxis_col = -1;						// can't split screen, so dead center or not at all
+	    }
+	}
+    else
+	{
+	if (NumberThreads <= 1)
+	    {
+	    *xxmin = hor;
+	    *xxmax = hor + mandel_width * ScreenRatio;			// aspect ratio 
+	    }
+	else
+	    {
+	    *xxmin = hor + ThreadNumber * (mandel_width * ScreenRatio) / NumberThreads;
+	    *xxmax = hor + (ThreadNumber + 1) * (mandel_width * ScreenRatio) / NumberThreads;
+	    }
+	*yymin = vert;
+	*yymax = vert + mandel_width;
+
+	if (fabs(*yymin + *yymax) < fabs(*yymin) + fabs(*yymax))	// axis is on screen 
+	    {
+	    ftemp = (0.0 - *yymax) / (*yymin - *yymax) * (ydots - 1) + 0.25;
+	    xaxis_row = (int)ftemp;
+	    xaxis_between = (int)(ftemp - xaxis_row >= 0.5);
+	    if (uselist == 0 && (!xaxis_between || (xaxis_row + 1) * 2 != (int)ydots))
+		xaxis_row = -1;						// can't split screen, so dead center or not at all 
+	    }
+	if (fabs(*xxmin + *xxmax) < fabs(*xxmin) + fabs(*xxmax))	// axis is on screen 
+	    {
+	    ftemp = (0.0 - *xxmin) / (*xxmax - *xxmin) * ((int)xdots - 1) + 0.25;
+	    yaxis_col = (int)ftemp;
+	    yaxis_between = (int)(ftemp - yaxis_col >= 0.5);
+	    if (uselist == 0 && (!yaxis_between || (yaxis_col + 1) * 2 != (int)xdots))
+		yaxis_col = -1;						// can't split screen, so dead center or not at all 
+	    }
+	}
+    switch (sym)								// symmetry switch 
+	{
+	case XAXIS:							// X-axis Symmetry 
+	    if (xsym_split(xaxis_row, xaxis_between/*, symmetry*/) == 0)
 		{
-		*xxmin = hor;
-		*xxmax = hor + mandel_width * ScreenRatio;			// aspect ratio 
+		if (type == NEWTON)					// Newton type fractal 
+		    {
+		    if (subtype == 'S' || subtype == 'B')
+			PlotType = XAXISBASIN;
+		    else
+			PlotType = XAXIS;
+		    }
+		else
+		    PlotType = XAXIS;
 		}
 	    else
+		PlotType = NOSYM;
+	    break;
+	case YAXIS:							// Y-axis Symmetry 
+	    if (ysym_split(yaxis_col, yaxis_between/*, symmetry*/) == 0)
+		PlotType = YAXIS;
+	    else
+		PlotType = NOSYM;
+	    break;
+	case XYAXIS:							// X-axis AND Y-axis Symmetry
+	    xsym_split(xaxis_row, xaxis_between/*, symmetry*/);
+	    ysym_split(yaxis_col, yaxis_between/*, symmetry*/);
+	    switch (worksym & 3)
 		{
-		*xxmin = hor + ThreadNumber * (mandel_width * ScreenRatio) / NumberThreads;
-		*xxmax = hor + (ThreadNumber + 1) * (mandel_width * ScreenRatio) / NumberThreads;
-		}
-	    *yymin = vert;
-	    *yymax = vert + mandel_width;
-
-	    if (fabs(*yymin + *yymax) < fabs(*yymin) + fabs(*yymax))	// axis is on screen 
-		{
-		ftemp = (0.0 - *yymax) / (*yymin - *yymax) * (ydots - 1) + 0.25;
-		xaxis_row = (int)ftemp;
-		xaxis_between = (int)(ftemp - xaxis_row >= 0.5);
-		if (uselist == 0 && (!xaxis_between || (xaxis_row + 1) * 2 != (int)ydots))
-		    xaxis_row = -1;						// can't split screen, so dead center or not at all 
-		}
-	    if (fabs(*xxmin + *xxmax) < fabs(*xxmin) + fabs(*xxmax))	// axis is on screen 
-		{
-		ftemp = (0.0 - *xxmin) / (*xxmax - *xxmin) * ((int)xdots - 1) + 0.25;
-		yaxis_col = (int)ftemp;
-		yaxis_between = (int)(ftemp - yaxis_col >= 0.5);
-		if (uselist == 0 && (!yaxis_between || (yaxis_col + 1) * 2 != (int)xdots))
-		    yaxis_col = -1;						// can't split screen, so dead center or not at all 
-		}
-	    }
-	switch (sym)								// symmetry switch 
-	    {
-	    case XAXIS:							// X-axis Symmetry 
-		if (xsym_split(xaxis_row, xaxis_between/*, symmetry*/) == 0)
-		    {
-		    if (type == NEWTON)					// Newton type fractal 
+		case 1:							// just xaxis symmetry 
+		    if (type == NEWTON)					// Newton type fractal
 			{
 			if (subtype == 'S' || subtype == 'B')
 			    PlotType = XAXISBASIN;
@@ -475,92 +488,48 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 			}
 		    else
 			PlotType = XAXIS;
-		    }
-		else
-		    PlotType = NOSYM;
-		break;
-	    case YAXIS:							// Y-axis Symmetry 
-		if (ysym_split(yaxis_col, yaxis_between/*, symmetry*/) == 0)
-		    PlotType = YAXIS;
-		else
-		    PlotType = NOSYM;
-		break;
-	    case XYAXIS:							// X-axis AND Y-axis Symmetry
-		xsym_split(xaxis_row, xaxis_between/*, symmetry*/);
-		ysym_split(yaxis_col, yaxis_between/*, symmetry*/);
-		switch (worksym & 3)
-		    {
-		    case 1:							// just xaxis symmetry 
-			if (type == NEWTON)					// Newton type fractal
-			    {
-			    if (subtype == 'S' || subtype == 'B')
-				PlotType = XAXISBASIN;
-			    else
-				PlotType = XAXIS;
-			    }
-			else
-			    PlotType = XAXIS;
-			break;
-		    case 2:							// just yaxis symmetry
-			if (type == NEWTON)					// Newton type fractal 
-			    {
-			    if (subtype == 'S' || subtype == 'B')
-				{						// got no routine for this case 
-				ixstop = xxstop;				// fix what split should not have done
-				*symmetry = 1;
-				}
-			    else
-				PlotType = YAXIS;
+		    break;
+		case 2:							// just yaxis symmetry
+		    if (type == NEWTON)					// Newton type fractal 
+			{
+			if (subtype == 'S' || subtype == 'B')
+			    {						// got no routine for this case 
+			    ixstop = xxstop;				// fix what split should not have done
+			    *symmetry = 1;
 			    }
 			else
 			    PlotType = YAXIS;
-			break;
-		    case 3:							// both axes 
-			if (type == NEWTON)					// Newton type fractal 
-			    {
-			    if (subtype == 'S' || subtype == 'B')
-				PlotType = XYAXISBASIN;
-			    else
-				PlotType = XYAXIS;
-			    }
+			}
+		    else
+			PlotType = YAXIS;
+		    break;
+		case 3:							// both axes 
+		    if (type == NEWTON)					// Newton type fractal 
+			{
+			if (subtype == 'S' || subtype == 'B')
+			    PlotType = XYAXISBASIN;
 			else
 			    PlotType = XYAXIS;
-		    }
-		break;
-	    case ORIGIN:							// Origin Symmetry 
-		if (xsym_split(xaxis_row, xaxis_between/*, symmetry*/) == 0 && ysym_split(yaxis_col, yaxis_between/*, symmetry*/) == 0)
-		    {
-		    PlotType = ORIGIN;
-		    ixstop = xxstop;					// didn't want this changed 
-		    }
-		else
-		    {
-		    iystop = yystop;					// in case first split worked 
-		    *symmetry = 1;
-		    worksym = 0x30;					// let it recombine with others like it 
-		    }
-		break;
-	    default:							// no symmetry 
-		break;
-	    }
+			}
+		    else
+			PlotType = XYAXIS;
+		}
+	    break;
+	case ORIGIN:							// Origin Symmetry 
+	    if (xsym_split(xaxis_row, xaxis_between/*, symmetry*/) == 0 && ysym_split(yaxis_col, yaxis_between/*, symmetry*/) == 0)
+		{
+		PlotType = ORIGIN;
+		ixstop = xxstop;					// didn't want this changed 
+		}
+	    else
+		{
+		iystop = yystop;					// in case first split worked 
+		*symmetry = 1;
+		worksym = 0x30;					// let it recombine with others like it 
+		}
+	    break;
+	default:							// no symmetry 
+	    break;
 	}
-
-    /**************************************************************************
-	Init symmetry for standard plotting mode fractals
-**************************************************************************/
-/*
-void	CCalcMode::InitCalcModeSym(int subtypeIn, WORD typeIn, BYTE _3dflagIn, BYTE pairflagIn, int decompIn, int methodIn, BOOL invertIn, double paramIn[], BYTE degreeIn, 
-	double *xxminIn, double *xxmaxIn, double *yyminIn, double *yymaxIn, double horIn, double vertIn, double mandel_widthIn, double	ScreenRatioIn, int CoordSystemIn, 
-	WORD specialIn, int orientationIn, CFract *FractalIn, BYTE BigNumFlagIn, BigDouble *Big_xxmaxIn, BigDouble *Big_xxminIn, BigDouble *Big_yymaxIn, 
-	BigDouble *Big_yyminIn, BigDouble BigHorIn, BigDouble BigVertIn, BigDouble BigWidthIn)
-    {
-    subtype = subtypeIn; type = typeIn; _3dflag = _3dflagIn; pairflag = pairflagIn; decomp = decompIn; method = methodIn; invert = invertIn; degree = degreeIn;
-    xxmin = xxminIn; xxmax = xxmaxIn; yymin = yyminIn; yymax = yymaxIn; hor = horIn; vert = vertIn; mandel_width = mandel_widthIn; ScreenRatio = ScreenRatioIn;
-    CoordSystem = CoordSystemIn; special = specialIn; orientation = orientationIn; Fractal = FractalIn; BigNumFlag = BigNumFlagIn; Big_xxmax = Big_xxmaxIn; 
-    Big_xxmin = Big_xxminIn; Big_yymax = Big_yymaxIn; Big_yymin = Big_yyminIn; BigHor = BigHorIn; BigVert = BigVertIn; BigWidth = BigWidthIn;
-    for (int i = 0; i < NUMPERTPARAM; i++)
-	param[i] = paramIn[i];
-
     }
 
-*/

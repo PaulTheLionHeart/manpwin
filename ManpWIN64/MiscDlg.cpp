@@ -6,6 +6,7 @@
 #include <windowsx.h>
 #include "OtherFunctions.h"
 #include "resource.h"
+#include "SafeStrings.h"
 
 extern	char	LyapSequence[];		// hold the AB sequence for Lyapunov fractals
 extern	CFract	Fractal;
@@ -38,7 +39,7 @@ INT_PTR CALLBACK PlasmaDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	        sprintf(s, "%2.2f", param[0]);
+	      SAFE_SPRINTF(s, "%2.2f", param[0]);
 		SetDlgItemText(hDlg, IDC_PLASMA_GRAIN, s);
 	        return TRUE ;
 
@@ -136,7 +137,7 @@ INT_PTR CALLBACK CellularDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	        sprintf(s, "%2.0f", param[1]);
+		SAFE_SPRINTF(s, "%2.0f", param[1]);
 		SetDlgItemText(hDlg, IDC_CELL_RULE, s);
 		SetDlgItemInt(hDlg, IDC_INIT_STRING, (int)param[0], TRUE);
 		SetDlgItemInt(hDlg, IDC_CELL_TYPE, (int)param[2], TRUE);
@@ -197,7 +198,7 @@ INT_PTR CALLBACK WalkDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    sprintf(s, "%3.2f", param[0]);
+	    SAFE_SPRINTF(s, "%3.2f", param[0]);
 	    SetDlgItemText(hDlg, IDC_WALK_STEPSIZE, s);
 	    return TRUE;
 
@@ -243,12 +244,12 @@ INT_PTR CALLBACK LyapDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message) 
 	{
         case WM_INITDIALOG:
-	    sprintf(Bailout, "%14.14lf", rqlim);
+	    SAFE_SPRINTF(Bailout, "%14.14lf", rqlim);
 	    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
 //            SetDlgItemText(hDlg, ID_FRACNAME, 	fractalspecific[type].name);
             for (j = 0; j < Fractal.NumParam; j++) 
 		{
-		sprintf(s[j], "%f", *Fractal.ParamValue[j]);
+		SAFE_SPRINTF(s[j], "%f", *Fractal.ParamValue[j]);
 		SetDlgItemText(hDlg, ID_FRACPARTX1 + j, Fractal.ParamName[j]);
 		SetDlgItemText(hDlg, ID_FRACPARAM1 + j, s[j]);
 		}
@@ -288,7 +289,6 @@ INT_PTR CALLBACK LyapDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	Dialog Box for screen formulae
 **************************************************************************/
 
-#define	MAXFORMULASTRINGLENGTH		3600	
 
 char	FormulaString[MAXFORMULASTRINGLENGTH] = "\0";		// used to hold the full formula
 extern	char	*str_find_ci(char *, char *);
@@ -339,7 +339,7 @@ void	CreateFormulaString(char *Startup, char *Formula, char *Bailout, char *Form
     char    *p, *q;
     char    temp[MAXFORMULASTRINGLENGTH];
 
-    sprintf(temp, "%s:%s,%s", Startup, Formula, Bailout);
+    SAFE_SPRINTF(temp, "%s:%s,%s", Startup, Formula, Bailout);
     p = temp;
     q = FormulaString;
 
@@ -938,7 +938,7 @@ INT_PTR CALLBACK TriangleDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 	    SetDlgItemInt(hDlg, IDC_PARAM5, 6, TRUE);
 	    SetDlgItemInt(hDlg, IDC_PARAM6, 3, TRUE);
 
-	    sprintf(s, "%3.2f", 1.0);
+	    SAFE_SPRINTF(s, "%3.2f", 1.0);
 	    SetDlgItemText(hDlg, IDC_PARAM7, s);
 	    hCtrl = GetDlgItem(hDlg, IDC_EXPANDPALETTE);
 	    SendMessage(hCtrl, BM_SETCHECK, TRUE, 0L);
@@ -1198,13 +1198,13 @@ INT_PTR CALLBACK MalthusDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		else
 		    tempParam = IDC_A + subtype - 'A';	    // ' ' (space) is uninitilised subtype
 		CheckRadioButton(hDlg, IDC_A, IDC_Z, tempParam);
-		sprintf(s, "%f", param[0]);
+		SAFE_SPRINTF(s, "%f", param[0]);
 		SetDlgItemText(hDlg, IDC_PARAM1, s);
-		sprintf(s, "%f", param[1]);
+		SAFE_SPRINTF(s, "%f", param[1]);
 		SetDlgItemText(hDlg, IDC_PARAM2, s);
-		sprintf(s, "%f", param[2]);
+		SAFE_SPRINTF(s, "%f", param[2]);
 		SetDlgItemText(hDlg, IDC_PARAM3, s);
-		sprintf(s, "%f", param[3]);
+		SAFE_SPRINTF(s, "%f", param[3]);
 		SetDlgItemText(hDlg, IDC_PARAM4, s);
 		SetFocus(GetDlgItem(hDlg, tempParam));
 	        return FALSE ;

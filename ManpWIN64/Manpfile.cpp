@@ -14,6 +14,7 @@
 #include "fractype.h"
 #include "pixel.h"
 #include "Plot.h"
+#include "SafeStrings.h"
 
 extern	int     file_type;
 //extern	PAINTSTRUCT 	ps;
@@ -271,7 +272,7 @@ INT_PTR CALLBACK PARFileOpenDlg (HWND hwnd, char *lpstrFileName, char *lpstrTitl
 
 #ifdef DEBUG
 char	s[200];
-wsprintf(s, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
+_snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
 MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 //file_type = FILE_BMP;
 #endif
@@ -310,7 +311,7 @@ INT_PTR CALLBACK KFRFileOpenDlg(HWND hwnd, char *lpstrFileName, char *lpstrTitle
 
 #ifdef DEBUG
     char	s[200];
-    wsprintf(s, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
+    _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
     MessageBox(hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
     //file_type = FILE_BMP;
 #endif
@@ -349,8 +350,8 @@ INT_PTR CALLBACK PNGFileOpenDlg (HWND hwnd, char *lpstrFileName, char *lpstrTitl
          return -1;
 
 #ifdef DEBUG
-wsprintf(s, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
+     _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
+    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 //file_type = FILE_BMP;
 #endif
 
@@ -385,8 +386,8 @@ INT_PTR CALLBACK SCIFileOpenDlg (HWND hwnd, char *lpstrFileName, char *lpstrTitl
          return -1;
 
 #ifdef DEBUG
-wsprintf(s, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
+     _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
+    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 //file_type = FILE_BMP;
 #endif
 
@@ -420,8 +421,8 @@ INT_PTR CALLBACK LsysFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTit
      file_type = FILE_LSY;
 
 #ifdef DEBUG
-wsprintf(s, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
+     _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
+    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 //file_type = FILE_BMP;
 #endif
 
@@ -448,8 +449,8 @@ INT_PTR CALLBACK FormulaFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstr
      file_type = FILE_FRM;
 
 #ifdef DEBUG
-wsprintf(s, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
+     _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
+    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 //file_type = FILE_BMP;
 #endif
 
@@ -476,8 +477,8 @@ INT_PTR CALLBACK FractintParFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR l
      file_type = FILE_FPR;
 
 #ifdef DEBUG
-wsprintf(s, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
+     _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
+    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 //file_type = FILE_BMP;
 #endif
 
@@ -504,8 +505,8 @@ INT_PTR CALLBACK IFSFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitl
      file_type = FILE_IFS;
 
 #ifdef DEBUG
-wsprintf(s, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
+     _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
+    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 //file_type = FILE_BMP;
 #endif
 
@@ -584,10 +585,10 @@ short	FilePalette(HWND hwnd, char *infile, char *szAppName)
 
     if (!(fip = fopen(infile, "r")))
 	{
-	sprintf(TempFile, "%s\\%s", MAPPath, infile);
+	SAFE_SPRINTF(TempFile, "%s\\%s", MAPPath, infile);
 	if (!(fip = fopen(TempFile, "r")))
 	    {
-	    wsprintf(s, "Can't Open Map File: <%s> Using default", TempFile);
+	    _snprintf_s(s, 150, _TRUNCATE, "Can't Open Map File: <%s> Using default", TempFile);
 	    MessageBox (hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
 	    MessageBeep (0);
 	    return 0;

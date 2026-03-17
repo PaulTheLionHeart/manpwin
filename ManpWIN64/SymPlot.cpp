@@ -8,6 +8,7 @@
 */
 
 #include "Pixel.h"
+#include "SafeStrings.h"
 
 /**************************************************************************
 	Select appropriate symmetry plot 
@@ -200,7 +201,7 @@ void	CPixel::PlotPixel(WORD x, WORD y, DWORD colour)
 	}
 	
     char buf[256];
-    sprintf(buf,
+    SAFE_SPRINTF(buf,
 	"USE  Pixel[0]=%p xdots=%d ydots=%d ygap=%f mandel_width=%f\n",
 	Pixel[0].get(),
 	Pixel[0]->xdots,
@@ -215,7 +216,7 @@ void	CPixel::PlotPixel(WORD x, WORD y, DWORD colour)
 void CPixel::DebugDump(const char* tag) const
     {
     char buf[256];
-    sprintf(buf, "%s: this=%p xdots=%d ydots=%d xgap=%f ygap=%f mandel_width=%f\n",
+    SAFE_SPRINTF(buf, "%s: this=%p xdots=%d ydots=%d xgap=%f ygap=%f mandel_width=%f\n",
 	tag, this, xdots, ydots, xgap, ygap, mandel_width);
     OutputDebugStringA(buf);
     }

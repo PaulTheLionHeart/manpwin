@@ -19,6 +19,7 @@
 #include "resource.h"
 #include "colour.h"
 #include "Plot.h"
+#include "SafeStrings.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 extern	HWND	GlobalHwnd;		// This is the main windows handle
@@ -148,7 +149,7 @@ int	DisplayRGB(POINTS ptCurrent)
     char	s[80];
 
     RGBAddress(ptCurrent.x, ptCurrent.y, &colour);
-    wsprintf (s, "Colour <%02X,%02X,%02X> at %d, %d", colour.rgbtRed, colour.rgbtGreen, colour.rgbtBlue, ptCurrent.x, ptCurrent.y);
+    _snprintf_s(s, 80, _TRUNCATE, "Colour <%02X,%02X,%02X> at %d, %d", colour.rgbtRed, colour.rgbtGreen, colour.rgbtBlue, ptCurrent.x, ptCurrent.y);
     SetWindowText (GlobalHwnd, s);
 
     return 0;
@@ -271,10 +272,7 @@ INT_PTR CALLBACK InsideDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
     static short color[3];
     HWND	  hwndParent, hCtrl;
     short	  nCtrlID, nIndex;
-    //     BOOL	  bTrans ;
-#ifdef	WIN95								// 32 bit code
     char	  s[480];
-#endif
 
     PreviewColour.HorOffset = HOR_OFFSET;						// dimensions of preview window
     PreviewColour.VertOffset = VERT_OFFSET;
@@ -308,7 +306,7 @@ INT_PTR CALLBACK InsideDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 	    hCtrl = GET_WM_COMMAND_HWND(wParam, (_int64)lParam);
 	    if ((nCtrlID = ((WORD)(GetWindowLong(hCtrl, GWL_ID)))) == 0)
 		{
-		wsprintf(s, "Error: Scrollbar fail: <%ld>", GetLastError());
+		_snprintf_s(s, 480, _TRUNCATE, "Error: Scrollbar fail: <%ld>", GetLastError());
 		MessageBox(hDlg, s, "Paul's Graphics Viewer", MB_ICONEXCLAMATION | MB_OK);
 		}
 
@@ -400,7 +398,7 @@ INT_PTR CALLBACK DisplayRGBDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	    b = (WORD)(BackgroundColour & 0xff);
 	    g = (WORD)((BackgroundColour >> 8) & 0xff);
 	    r = (WORD)((BackgroundColour >> 16) & 0xff);
-	    sprintf(s, "%02X%02X%02X", r, g, b);
+	    SAFE_SPRINTF(s, "%02X%02X%02X", r, g, b);
 	    SetDlgItemText(hDlg, IDC_RGB, s);
 	    SetDlgItemInt(hDlg, IDC_RGBRED, r, TRUE);
 	    SetDlgItemInt(hDlg, IDC_RGBGREEN, g, TRUE);
@@ -475,7 +473,7 @@ INT_PTR CALLBACK ColourDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 	    hCtrl = GET_WM_COMMAND_HWND(wParam, (_int64)lParam);
 	    if ((nCtrlID = ((WORD)(GetWindowLong(hCtrl, GWL_ID)))) == 0)
 		{
-		wsprintf(s, "Error: Scrollbar fail: <%ld>", GetLastError());
+		_snprintf_s(s, 480, _TRUNCATE, "Error: Scrollbar fail: <%ld>", GetLastError());
 		MessageBox(hDlg, s, "Paul's Graphics Viewer", MB_ICONEXCLAMATION | MB_OK);
 		}
 

@@ -400,7 +400,7 @@ INT_PTR CALLBACK ApolloniusDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		    }
 		if (CircleScreen.InitPreview(hDlg) < 0)
 		    {
-		    wsprintf(s, "Error: No memory for preview");
+		    _snprintf_s(s, MAXLINE, _TRUNCATE, "Error: No memory for preview");
 		    MessageBox (hDlg, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		    EndDialog (hDlg, FALSE);
 		    }
@@ -412,7 +412,7 @@ INT_PTR CALLBACK ApolloniusDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		hCtrl = GET_WM_COMMAND_HWND (wParam, (_int64)lParam);
 		if ((nCtrlID = ((WORD)(GetWindowLong (hCtrl, GWL_ID)))) == 0)
 		    {
-		    wsprintf(s, "Error: Scrollbar fail: <%ld>", GetLastError());
+		    _snprintf_s(s, MAXLINE, _TRUNCATE, "Error: Scrollbar fail: <%ld>", GetLastError());
 		    MessageBox (hDlg, s, "Paul's Graphics Viewer", MB_ICONEXCLAMATION | MB_OK);
 		    }
 

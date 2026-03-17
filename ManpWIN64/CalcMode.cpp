@@ -14,7 +14,6 @@
 **************************************************************************/
 
 int	CPixel::OneOrTwoPass(HWND hwnd, int user_data(HWND hwnd))
-
     {
     int	i;
 
@@ -53,7 +52,6 @@ int	CPixel::OneOrTwoPass(HWND hwnd, int user_data(HWND hwnd))
 **************************************************************************/
 
 int	CPixel::StandardCalc(HWND hwnd, int passnum, int user_data(HWND hwnd))
-
     {
     *curpass = passnum;
     row = yybegin;
@@ -93,7 +91,6 @@ int	CPixel::StandardCalc(HWND hwnd, int passnum, int user_data(HWND hwnd))
 **************************************************************************/
 
 int	CPixel::Spiral(HWND hwnd, int user_data(HWND hwnd))
-
     {
     int	xmin, xmax, ymin, ymax, row, col, i;
 
@@ -153,7 +150,6 @@ int	CPixel::Spiral(HWND hwnd, int user_data(HWND hwnd))
 **************************************************************************/
 
 int	CPixel::Blinds(HWND hwnd, int user_data(HWND hwnd))
-
     {
     int	i;
     *totpasses = PASSWIDTH;
@@ -205,7 +201,6 @@ int	CPixel::Blinds(HWND hwnd, int user_data(HWND hwnd))
 **************************************************************************/
 
 int	CPixel::DoBlinds(HWND hwnd, int user_data(HWND hwnd))
-
     {
     int	i;
 
@@ -245,7 +240,6 @@ int	CPixel::add_worklist(int xfrom, int xto, int yfrom, int yto, int ybegin, int
 **************************************************************************/
 
 int	CPixel::combine_worklist()
-
     {
     int	i, j;
 
@@ -294,7 +288,6 @@ int	CPixel::combine_worklist()
 **************************************************************************/
 
 void	CPixel::tidy_worklist()
-
     {
     int	i, j;
     struct	workliststuff tempwork;
@@ -324,7 +317,6 @@ void	CPixel::tidy_worklist()
 **************************************************************************/
 
 int	CPixel::StandardCalculationMode(HWND hwnd, int user_data(HWND hwnd))
-
     {
     switch (calcmode)
 	{
@@ -368,27 +360,7 @@ int	CPixel::StandardCalculationMode(HWND hwnd, int user_data(HWND hwnd))
 		return -1;
 	}
 
-//    *ThreadComplete = true;
     return 0;
     }
 
-/**************************************************************************
-	Init standard plotting mode fractals
-**************************************************************************/
 
-//void	CCalcMode::InitCalcMode0(struct workliststuff *worklistIn, int *symmetryIn)
-//    {
-//    symmetry = symmetryIn;
-//    for (int i = 0; i < MAXCALCWORK; i++)
-//	worklist[i] = &worklistIn[i];
-//    }
-//void	CCalcMode::InitCalcMode1(int *totpassesIn, int *curpassIn, long *colorIn, int reset_periodIn, BYTE calcmodeIn, long thresholdIn, BYTE juliaflagIn,
-//    long fillcolorIn, int *blockindexIn, BYTE save_flagIn, int *time_to_zoomIn, int *time_to_restartIn, int *time_to_reinitIn, int *time_to_quitIn,
-//    CTrueCol *TrueColIn, CDib *DibIn, double *wpixelsIn, long *andcolorIn, int *oldrowIn, int *oldcolIn, int *PlotTypeIn, int threadIn)
-
-//    {
-//    totpasses = totpassesIn; curpass = curpassIn; color = colorIn; reset_period = reset_periodIn; calcmode = calcmodeIn; threshold = thresholdIn; juliaflag = juliaflagIn;
-//    fillcolor = fillcolorIn; blockindex = blockindexIn; save_flag = save_flagIn; time_to_zoom = time_to_zoomIn; time_to_restart = time_to_restartIn;
-//    time_to_reinit = time_to_reinitIn; time_to_quit = time_to_quitIn; TrueCol = TrueColIn; Dib = DibIn; wpixels = wpixelsIn; /*andcolor = andcolorIn; oldrow = oldrowIn;
-//    oldcol = oldcolIn; PlotType = PlotTypeIn; thread = threadIn;
-//    }

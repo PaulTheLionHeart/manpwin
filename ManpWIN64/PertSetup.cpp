@@ -65,9 +65,11 @@ void	PertSetupArithType(int &ArithType, int subtype, long MaxIteration, int prec
 	if (ArithType == EXP_UNSUPPORTED || ArithType == DBL_UNSUPPORTED)
 	    EnableApproximation = false;		// we don't support these fractals with BLA
 	}
+#ifdef _DEBUG
     char	buf[256];
-    sprintf(buf, "PertSetupArithType: precision = %d, ArithType = %d\n", precision, ArithType);
+    SAFE_SPRINTF(buf, "PertSetupArithType: precision = %d, ArithType = %d\n", precision, ArithType);
     OutputDebugStringA(buf);
+#endif
     }
 
 //////////////////////////////////////////////////////////////////////
@@ -85,7 +87,7 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
     DWORD	lastUpdateTick = GetTickCount();
     int		lastPercent = -1;
     double	ZoomRadius = mpfr_get_d(BigWidth.x, MPFR_RNDN);
-    char	buf[256];
+//    char	buf[256];
 
     SimpleTimer  tRef;
     tRef.start();
@@ -104,7 +106,7 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
     zBig = 0.0;
     for (int i = 0; i <= maxIteration; i++)
 	{
-	if (gStopRequested)
+	if (AbortRequested())
 	    return -1;
 	if (ArithType == FLOATEXP || ArithType == EXP_UNSUPPORTED)
 	    {
@@ -151,8 +153,14 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 
     double refSeconds = tRef.stop_ms();
     auto s = FormatElapsed(refSeconds);
-    sprintf(buf, "Reference build: %s, MaxIter = %d, MaxRefIter = %d\n", s.c_str(), maxIteration, MaxRefIteration);
+
+#ifdef _DEBUG
+    {
+    char    buf[256];
+    SAFE_SPRINTF(buf, "Reference build: %s, MaxIter = %d, MaxRefIter = %d\n", s.c_str(), maxIteration, MaxRefIteration);
     OutputDebugStringA(buf);
+    }
+#endif
 
     SimpleTimer  tBla;
     tBla.start();
@@ -177,11 +185,15 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 	    }
 	}
 
+#ifdef _DEBUG
+    {
+    char    buf[256];
     double blaSeconds = tBla.stop_ms();
     s = FormatElapsed(blaSeconds);
-    sprintf(buf, "BLA build: %s\n", s.c_str());
+    SAFE_SPRINTF(buf, "BLA build: %s\n", s.c_str());
     OutputDebugStringA(buf);
-
+    }
+#endif
     return 0;
     }
 

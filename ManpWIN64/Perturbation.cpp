@@ -25,6 +25,7 @@
 #include "pixel.h"
 #include "plotmode.h"
 #include "Timer.h"
+#include "SafeStrings.h"
 
 #define		MAXTHREADS	40
 
@@ -103,9 +104,10 @@ extern	std::vector<std::unique_ptr<CPixel>> Pixel;	// routines for escape fracta
 //extern	CPixel	Pixel[];			// routines for escape fractals
 
 std::vector<CPerturbation>  	PertCalculator;
+std::vector<BYTE>		PertThreadComplete;
+
 static std::vector<CTZfilter>	TZfilter;
 static std::vector<int>		PertProgress;
-static std::vector<BYTE>	ThreadComplete;
 static std::vector<HANDLE>	hThread;
 static std::vector<PMYDATA>	pDataArray;
 int	*pPertProgress;
@@ -119,8 +121,10 @@ bool	EnableApproximation = true;		// use BLA on perturbation
 std::atomic<long> gPixelsDone = 0;
 
 static	int	PerturbationPtr = 0, PerturbationNum = 0;
-	int	NumberThreads = 1;		// set the default to 1. Multi=threading is for experimentation only
-	int	SlopeType;
+
+int	NumberThreads = 1;			// set the default to 1. Multi=threading is for experimentation only
+int	SlopeType;
+int	CurrentRenderMode = NOMULTITHREAD;	// to decide how to exit threads cleanly
 
 int	ThreadCreationDelay = 5;		// not sure if these are required
 int	ThreadCompletionDelay = 2;
@@ -251,7 +255,7 @@ void HardStopNow(HWND hwnd, const char* reason)
     //    PauseUiTimers(hwnd);
     //    RequestRenderStop();
     //    JoinRenderThreads();
-    gStopRequested.store(true);
+    gStopRequested.store(true, std::memory_order_relaxed);
     }
 
 /**************************************************************************
@@ -260,22 +264,17 @@ void HardStopNow(HWND hwnd, const char* reason)
 
 DWORD	WINAPI PertFunction(LPVOID lpParam)
     {
-    PMYDATA pDataArray;
-    int	    ReturnValue;
-
-    pDataArray = (PMYDATA)lpParam;
+    PMYDATA p = (PMYDATA)lpParam;
+    int	    ThreadNum = p->i;
     int(*UserData)(HWND) = user_data;
+    int	    ret = 0;
 
-    ReturnValue = PertCalculator[pDataArray->i].calculateOneFrame(rqlim, PertStatus, degree, InsideMethod, OutsideMethod, biomorph, subtype, pDataArray->RSRA, pDataArray->IsPositive, UserData, xdots,	*(pDataArray->TZfilter), 
-	*(pDataArray->TrueCol), pDataArray->pPertProgress, ThreadComplete[pDataArray->i], (NumberThreads > 0), ThreadPertDelay, PertErrorMessage, pDataArray->ArithType, pDataArray->MaxRefIteration, pDataArray->SlopeDegree, pDataArray->ghMutex);
-    if (ReturnValue < 0)
-	{
-	if (ReturnValue == -2)			// actual error, else user input
-	    ErrorHandler(PertErrorMessage);
-	Sleep(50);				// give the threads time to close
-	return -1;
-	}
-    return 0;
+    PertThreadComplete[ThreadNum] = false;
+    ret = PertCalculator[ThreadNum].calculateOneFrame(rqlim, PertStatus, degree, InsideMethod, OutsideMethod, biomorph, subtype, p->RSRA, p->IsPositive, UserData, xdots, *(p->TZfilter),
+	*(p->TrueCol), p->pPertProgress, PertThreadComplete[ThreadNum], (NumberThreads > 0), ThreadPertDelay, PertErrorMessage, p->ArithType, p->MaxRefIteration, p->SlopeDegree, p->ghMutex);
+    // --- ALWAYS mark completion ---
+    PertThreadComplete[ThreadNum] = true;
+    return ret;
     }
 
 /**************************************************************************
@@ -312,7 +311,7 @@ int	InitPerturbation(void)
     PertCalculator.resize(activeThreads);
     TZfilter.resize(activeThreads);
     PertProgress.resize(activeThreads);
-    ThreadComplete.resize(activeThreads);
+    PertThreadComplete.resize(activeThreads);
     hThread.resize(activeThreads);
     pDataArray.resize(activeThreads, nullptr);
     
@@ -330,39 +329,26 @@ int	InitPerturbation(void)
     if (OutsideMethod >= TIERAZONFILTERS)
 	for (i = 0; i < NumberThreads; i++)
 	    TZfilter[i].InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
-/*
-    if (NumberThreads == 1)									// no multi-threading
+
+    for (i = 0; i < NumberThreads; i++)
 	{
-	PertCalculator[0].AttachSharedTables(&XSubN, &ExpXSubN, &Bla);
-	if (OutsideMethod >= TIERAZONFILTERS)
-	    TZfilter[0].InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
-	PertCalculator[0].initialiseCalculateFrame(&Dib, &Slope, 0, (int)Dib.DibWidth, (int)Dib.DibHeight, threshold, BigCentreX, BigCentreY, BigWidth, decimals, &TZfilter[0], GlobalHwnd, 0, wpixels, param, potparam,
-		PaletteShift, &PlotType, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, LightHeight, PertColourMethod, PalOffset, IterDiv, EnableApproximation, _3dflag, ColourSpeed, NumberThreads);
-	}
-    else
-*/
-	{
-//	i = 1;
-	for (i = 0; i < NumberThreads; i++)
+	if (i >= 0 && i < (int)PertCalculator.size())
 	    {
-	    if (i >= 0 && i < (int)PertCalculator.size())
-		{
-		int threadWidth = (int)Dib.DibWidth / NumberThreads;
-		int xStart = i * threadWidth;
-		int xEnd = (i == NumberThreads - 1) ? xdots : xStart + threadWidth;
-		int baseWidth = xdots / NumberThreads;
-		int rem = xdots % NumberThreads;
+	    int threadWidth = (int)Dib.DibWidth / NumberThreads;
+	    int xStart = i * threadWidth;
+	    int xEnd = (i == NumberThreads - 1) ? xdots : xStart + threadWidth;
+	    int baseWidth = xdots / NumberThreads;
+	    int rem = xdots % NumberThreads;
 
-		xStart = i * baseWidth + min(i, rem);
-		xEnd = xStart + baseWidth + (i < rem ? 1 : 0);
+	    xStart = i * baseWidth + min(i, rem);
+	    xEnd = xStart + baseWidth + (i < rem ? 1 : 0);
 
-		PertCalculator[i].AttachSharedTables(&XSubN, &ExpXSubN, &Bla);
-		if (OutsideMethod >= TIERAZONFILTERS)
-		    TZfilter[i].InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
-		PertCalculator[i].initialiseCalculateFrame(&Dib, &Slope, xStart, xEnd, (int)Dib.DibHeight, threshold, BigCentreX, BigCentreY, BigWidth,
-			    decimals, &TZfilter[i], GlobalHwnd, i, wpixels, param, potparam, PaletteShift, &PlotType, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, 
-			    LightHeight, PertColourMethod, PalOffset, IterDiv, EnableApproximation, _3dflag, ColourSpeed, NumberThreads);
-		}
+	    PertCalculator[i].AttachSharedTables(&XSubN, &ExpXSubN, &Bla);
+	    if (OutsideMethod >= TIERAZONFILTERS)
+		TZfilter[i].InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
+	    PertCalculator[i].initialiseCalculateFrame(&Dib, &Slope, xStart, xEnd, (int)Dib.DibHeight, threshold, BigCentreX, BigCentreY, BigWidth,
+			decimals, &TZfilter[i], GlobalHwnd, i, wpixels, param, potparam, PaletteShift, &PlotType, SlopeType, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, PaletteStart, 
+			LightHeight, PertColourMethod, PalOffset, IterDiv, EnableApproximation, _3dflag, ColourSpeed, NumberThreads);
 	    }
 	}
 
@@ -374,7 +360,7 @@ int	InitPerturbation(void)
 	RefData.valid = false;		// reference backup isn't valid unless the whole ref/bla tables are complete
 	if (ReferenceZoomPoint(ReferenceCoordinate, threshold, user_data, PertStatus, pPertProgress, rqlim, ArithType, degree, BigWidth, SlopeDegree) < 0)
 	    {
-	    sprintf(PertErrorMessage, "User Activity at ReferenceZoomPoint()");
+	    SAFE_SPRINTF(PertErrorMessage, "User Activity at ReferenceZoomPoint()");
 	    XSubN.clear();
 	    ExpXSubN.clear();
 	    if (EnableApproximation)
@@ -394,6 +380,8 @@ int	InitPerturbation(void)
     else
 	RefData.valid = true;
 
+    gStopRequested.store(false, std::memory_order_relaxed); // NEW: reset flag before starting threads
+    CurrentRenderMode = RENDER_PERT;
     return 0;
     }
 
@@ -405,11 +393,10 @@ int	DoPerturbation()
     {
     int		(*UserData)(HWND) = user_data;
     int		i;
-//    DWORD	ExitCode;
     DWORD	dwThreadId[MAXTHREADS];
     int		flag;//, status;
     HANDLE	ghMutex = NULL;									// manage access to shared resources such as Dib and wpixels
-    char	buf[256];
+//    char	buf[256];
 
     if (UseMutex)										// stuff speed, we want a good image
 	ghMutex = CreateMutex(NULL, 0, NULL);
@@ -445,107 +432,94 @@ int	DoPerturbation()
     SimpleTimer tPertRender;
     tPertRender.start();
 
-/*
-    if (NumberThreads <= 0)						// no multi-threading
+    CurrentRenderMode = RENDER_PERT;
+
+    for (i = 0; i < NumberThreads; i++)
 	{
+	pDataArray[i] = (PMYDATA)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(MYDATA));
+
+	if (pDataArray[i] == NULL)
+	    {
+	    // don't start this thread, just move on
+	    SAFE_SPRINTF(PertErrorMessage, "Can't find memory for data array in thread %d", i);
+	    ErrorHandler(PertErrorMessage);
+	    break;
+	    }
+
 	if (PerturbationSpecific[subtype].RedShiftRider == 1)
 	    {
-	    DataArrayZero.RSRA.x = param[1];
-	    DataArrayZero.RSRA.y = param[2];
+	    pDataArray[i]->RSRA.x = param[1];
+	    pDataArray[i]->RSRA.y = param[2];
 	    degree = (int)param[3];
-	    DataArrayZero.IsPositive = (param[4] == 1.0);
+	    pDataArray[i]->IsPositive = (param[4] == 1.0);
 	    }
 
-	status = PertCalculator[0].calculateOneFrame(rqlim, PertStatus, degree, InsideMethod, OutsideMethod, biomorph, subtype, DataArrayZero.RSRA, DataArrayZero.IsPositive, UserData, xdots, TZfilter[0], TrueCol, &PertProgress[0],
-				ThreadComplete[0], false, ThreadPertDelay, PertErrorMessage, ArithType, MaxRefIteration, SlopeDegree, ghMutex);
-	if (status < 0)
+	pDataArray[i]->i = i;
+	pDataArray[i]->pPertProgress = &PertProgress[i];
+	pDataArray[i]->TrueCol = &TrueCol;
+	pDataArray[i]->TZfilter = &TZfilter[i];
+	pDataArray[i]->ghMutex = ghMutex;
+	pDataArray[i]->ArithType = ArithType;
+	pDataArray[i]->MaxRefIteration = MaxRefIteration;
+	pDataArray[i]->SlopeDegree = SlopeDegree;
+
+	hThread[i] = CreateThread(
+	    NULL,					// default security attributes
+	    0L,						// use default stack size = 0
+	    (LPTHREAD_START_ROUTINE)PertFunction,	// thread function 
+	    pDataArray[i],				// argument to thread function 
+	    0,						// use default creation flags 
+	    &dwThreadId[i]);				// returns the thread identifier 
+	if (hThread[i] == NULL)
 	    {
-	    sprintf(PertErrorMessage, "CreateThread failed in single thread version");
-	    return -1;
+	    SAFE_SPRINTF(PertErrorMessage, "CreateThread failed in thread %d", i);
+	    ErrorHandler(PertErrorMessage);
+	    break;
 	    }
+	SetThreadPriority(hThread[i], THREAD_PRIORITY_LOWEST);
+	CloseHandle(hThread[i]);
+	Sleep(ThreadCreationDelay);
 	}
-    else
-*/
+
+    flag = 0;						// make sure all threads are finished
+
+    totpasses = 100;
+    while (flag == 0)
 	{
+	if (user_data(GlobalHwnd) == -1)		// user pressed a key?
+	    {
+	    gStopRequested.store(true, std::memory_order_relaxed);
+#ifdef _DEBUG
+	    OutputDebugStringA("[AbortRequested] keypress detected\n");
+#endif
+	    }
+	flag = 1;
+	curpass = 100;
 	for (i = 0; i < NumberThreads; i++)
 	    {
-	    pDataArray[i] = (PMYDATA)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(MYDATA));
-
-	    if (pDataArray[i] == NULL)
-		{
-		// don't start this thread, just move on
-		sprintf(PertErrorMessage, "Can't find memory for data array in thread %d", i);
-		ErrorHandler(PertErrorMessage);
-		break;
-		}
-
-	    if (PerturbationSpecific[subtype].RedShiftRider == 1)
-		{
-		pDataArray[i]->RSRA.x = param[1];
-		pDataArray[i]->RSRA.y = param[2];
-		degree = (int)param[3];
-		pDataArray[i]->IsPositive = (param[4] == 1.0);
-		}
-
-	    pDataArray[i]->i = i;
-	    pDataArray[i]->pPertProgress = &PertProgress[i];
-	    pDataArray[i]->TrueCol = &TrueCol;
-	    pDataArray[i]->TZfilter = &TZfilter[i];
-	    pDataArray[i]->ghMutex = ghMutex;
-	    pDataArray[i]->ArithType = ArithType;
-	    pDataArray[i]->MaxRefIteration = MaxRefIteration;
-	    pDataArray[i]->SlopeDegree = SlopeDegree;
-
-	    hThread[i] = CreateThread(
-		NULL,						// default security attributes
-		0L,						// use default stack size = 0
-		(LPTHREAD_START_ROUTINE)PertFunction,		// thread function 
-		pDataArray[i],					// argument to thread function 
-		0,						// use default creation flags 
-		&dwThreadId[i]);				// returns the thread identifier 
-	    if (hThread[i] == NULL)
-		{
-		sprintf(PertErrorMessage, "CreateThread failed in thread %d", i);
-		ErrorHandler(PertErrorMessage);
-		break;
-		}
-	    SetThreadPriority(hThread[i], THREAD_PRIORITY_LOWEST);
-	    CloseHandle(hThread[i]);
-	    Sleep(ThreadCreationDelay);
-	    }
-
-	flag = 0;						// make sure all threads are finished
-
-	totpasses = 100;
-	while (flag == 0)
-	    {
-	    if (user_data(GlobalHwnd) == -1)			// user pressed a key?
-		{
-		Sleep(2500);
+	    if (i < 0 || i >= (int)PertThreadComplete.size())
 		return -1;
-		}
-	    flag = 1;
-	    curpass = 100;
-	    for (i = 0; i < NumberThreads; i++)
-		{
-		if (i < 0 || i >= (int)ThreadComplete.size())
-		    return -1;
-		if (curpass > PertProgress[i])
-		    curpass = PertProgress[i];			// display the slowest thread
-		if (ThreadComplete[i] == 0)			// false
-		    flag = 0;
-		}
-	    if (!RunAnimation)
-		DisplayStatusBarInfo(INCOMPLETE, "");
-	    Sleep(ThreadCompletionDelay);			// give the threads time to close
+	    if (curpass > PertProgress[i])
+		curpass = PertProgress[i];			// display the slowest thread
+	    if (PertThreadComplete[i] == 0)			// false
+		flag = 0;
 	    }
-	Sleep(ThreadEndingDelay);				// make sure all threads are closed before leaving
+	if (!RunAnimation)
+	    DisplayStatusBarInfo(INCOMPLETE, "");
+	Sleep(ThreadCompletionDelay);			// give the threads time to close
 	}
+    Sleep(ThreadEndingDelay);				// make sure all threads are closed before leaving
 
+#ifdef _DEBUG
+    {
+    char    buf[256];
     double pertSeconds = tPertRender.stop_ms();
     auto s = FormatElapsed(pertSeconds);
-    sprintf(buf, "Pert Render: %s\n", s.c_str());
+    SAFE_SPRINTF(buf, "Pert Render: %s\n", s.c_str());
     OutputDebugStringA(buf);
+    }
+#endif
+    CurrentRenderMode = NOMULTITHREAD;
 
     /*
     Perturbation parameters have a standard mainly based on forward differencing which is the dominant subtype. 
@@ -582,11 +556,16 @@ int	DoPerturbation()
 	CloseHandle(ghMutex);
 	ghMutex = NULL;
 	}
-    double slopeSeconds = tCalcSlope.stop_ms();
-    s = FormatElapsed(slopeSeconds);
-    sprintf(buf, "fwd diff slope (if used): %s\n", s.c_str());
-    OutputDebugStringA(buf);
 
+#ifdef _DEBUG
+    {
+    char    buf[256];
+    double slopeSeconds = tCalcSlope.stop_ms();
+    auto s = FormatElapsed(slopeSeconds);
+    SAFE_SPRINTF(buf, "fwd diff slope (if used): %s\n", s.c_str());
+    OutputDebugStringA(buf);
+    }
+#endif
     return 0;
     }
 
@@ -668,12 +647,14 @@ int	TogglePerturbation(WORD *type, int *subtype)
     if (*type == MANDELFP || *type == MANDEL)
 	{
 	*type = PERTURBATION;
+	rqlim = 1000.0;
 	*subtype = 0;
 	}
     else if (*type == POWER)
 	{
 	*type = PERTURBATION;
 	*subtype = 1;
+	rqlim = 1000.0;
 	param[2] = degree;
 	}
     else if (*type == REDSHIFTRIDER)
@@ -689,6 +670,7 @@ int	TogglePerturbation(WORD *type, int *subtype)
     else if (*type == SLOPEDERIVATIVE)
 	{
 	*type = PERTURBATION;
+	rqlim = 1000.0;
 	switch (*subtype)
 	    {
 	    case 0:
@@ -737,6 +719,7 @@ int	TogglePerturbation(WORD *type, int *subtype)
     else if (*type == PERTURBATION)
 	{
 	*type = MANDELDERIVATIVES;		// for most types - exceptions handled separately
+	rqlim = 4.0;
 	juliaflag = FALSE;
 	switch (*subtype)
 	    {
@@ -1019,6 +1002,7 @@ int	TogglePerturbation(WORD *type, int *subtype)
     else if (*type == MANDELDERIVATIVES)
 	{
 	*type = PERTURBATION;
+	rqlim = 1000.0;
 	switch (*subtype)
 	    {
 	    case 0:
@@ -1357,16 +1341,16 @@ INT_PTR CALLBACK PertDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    sprintf(Bailout, "%4.4lf", rqlim);
+	    SAFE_SPRINTF(Bailout, "%4.4lf", rqlim);
 	    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
 	    SetDlgItemText(hDlg, ID_FRACNAME, GetFractalName());
 	    SetDlgItemInt(hDlg, ID_STARTPALETTE, PaletteStart, TRUE);
 	    SetDlgItemInt(hDlg, ID_SLOPEANGLE, (UINT)lightDirectionDegrees, TRUE);
 	    SetDlgItemInt(hDlg, ID_SLOPERATIO, (UINT)bumpMappingStrength, TRUE);
 	    SetDlgItemInt(hDlg, ID_SLOPEPOWER, (UINT)bumpMappingDepth, TRUE);
-	    sprintf(IterDivTxt, "%4.4lf", IterDiv);
+	    SAFE_SPRINTF(IterDivTxt, "%4.4lf", IterDiv);
 	    SetDlgItemText(hDlg, IDC_ITER_DIV, IterDivTxt);
-	    sprintf(SmoothTxt, "%4.4lf", ColourSpeed);
+	    SAFE_SPRINTF(SmoothTxt, "%4.4lf", ColourSpeed);
 	    SetDlgItemText(hDlg, IDC_SMOOTHING, SmoothTxt);
 	    SetDlgItemInt(hDlg, IDC_PAL_OFFSET, PalOffset, TRUE);
 	    hCtrl = GetDlgItem(hDlg, IDC_USEBLA);
@@ -1374,7 +1358,7 @@ INT_PTR CALLBACK PertDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 	    for (i = Fractal.NumFunct, j = 0; i < Fractal.NumFunct + Fractal.NumParam && i < 10; i++, j++)
 		{
-		sprintf(s[j], "%f", *Fractal.ParamValue[j]);
+		SAFE_SPRINTF(s[j], "%f", *Fractal.ParamValue[j]);
 		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, Fractal.ParamName[j]);
 		SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[j]);
 		}

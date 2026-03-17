@@ -25,6 +25,7 @@
 #include "colour.h"
 #include "Anim.h"
 #include "Matrix.h"
+#include "SafeStrings.h"
 
 // norty globals
 extern	PAINTSTRUCT 	ps;
@@ -691,7 +692,7 @@ int	COscProcess::SetupMorph(int axes, long iterations)
 	    if (*zAxis >= axes)
 		*zAxis = 0;
 	    }
-//	wsprintf(str, "Setting up axes: %d, %d, %d", *xAxis + 1, *yAxis + 1, *zAxis + 1);
+//	_snprintf_s(str, MAXLINE, _TRUNCATE, "Setting up axes: %d, %d, %d", *xAxis + 1, *yAxis + 1, *zAxis + 1);
 	DisplayStatusBarInfo(INCOMPLETE, "");		// display status bar
 	switch (type)			// This loads up the fractal info for all points for each axis
 	    {
@@ -870,9 +871,9 @@ int	COscProcess::MorphStep(HWND hwnd, char *FileName, char *MoreInfo, int TotalF
 		}
 	    }
 	}
-    wsprintf(s, "Animating: Frame %d of %d", ThisStep + 1, TotalFrames);
+    _snprintf_s(s, MAXLINE, _TRUNCATE, "Animating: Frame %d of %d", ThisStep + 1, TotalFrames);
     DisplayStatusBarInfo(INCOMPLETE, s);		// display status bar
-    wsprintf(MoreInfo, "Paul's Fractals: Frame %d of %d Axes: %d-%d to %d-%d", ThisStep + 1, TotalFrames, In1[AxisIndex] + 1, In2[AxisIndex] + 1, Out1[AxisIndex] + 1, Out2[AxisIndex] + 1);
+    _snprintf_s(MoreInfo, MAXLINE, _TRUNCATE, "Paul's Fractals: Frame %d of %d Axes: %d-%d to %d-%d", ThisStep + 1, TotalFrames, In1[AxisIndex] + 1, In2[AxisIndex] + 1, Out1[AxisIndex] + 1, Out2[AxisIndex] + 1);
     SetWindowText(hwnd, s);			// Show formatted text in the caption bar
     return 0;
     }
@@ -921,7 +922,7 @@ int	COscProcess::ChooseOsc(int x, int y)
 	*zAxis = (*xAxis == 0) ? 1 : 0;
 	}
 
-//    sprintf(s, "h=%d, v=%d row=%d, col=%d, xAxis=%d, yAxis=%d, zAxis=%d", x, y, row, col, *xAxis, *yAxis, *zAxis);
+//    SAFE_SPRINTF(s, "h=%d, v=%d row=%d, col=%d, xAxis=%d, yAxis=%d, zAxis=%d", x, y, row, col, *xAxis, *yAxis, *zAxis);
 //    MessageBox(hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
     for (i = 0; i < axes; i++)
 	{
@@ -1050,7 +1051,7 @@ void	COscProcess::OutputAxesLabel(HWND hwnd, HDC hdc, int x, int y)
 	*(b + 1) = 'n';
 	*(b + 2) = '\0';
 	}
-    sprintf(text, "Displaying axes: %s-%s", a, b);
+    SAFE_SPRINTF(text, "Displaying axes: %s-%s", a, b);
     DisplayStatusBarInfo(INFORMATION, text);		// display status bar
 //    Dib->Text2Dib(hdc, &AxisRect, 0x00ffffff, 0L, &lf, TRANSPARENT, text);
     }

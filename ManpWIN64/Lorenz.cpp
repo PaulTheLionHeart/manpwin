@@ -17,6 +17,7 @@
 #include "Matrix.h"
 #include "Complex.h"
 #include "Fract.h"
+#include "SafeStrings.h"
 #include "..\parser\TrigFn.h"
 
 #define NUMIFS	  32	 /* number of ifs functions in ifs array */
@@ -1584,7 +1585,7 @@ int ifsload(HWND hwnd, char *filename)
 	    sscanf(token,"%f",&suffix[i]);
 	    if (++i >= NUMIFS*rowsize) 
 		{
-		sprintf(msg,"IFS definition has too many lines = %d", i);
+		SAFE_SPRINTF(msg,"IFS definition has too many lines = %d", i);
 		MessageBox (hwnd, msg, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 		ret = -1;
 		break;
@@ -1595,7 +1596,7 @@ int ifsload(HWND hwnd, char *filename)
 
     if ((i % rowsize) != 0) 
 	{
-	sprintf(msg,"invalid IFS definition rowsize = %d, params = %d", rowsize, i);
+	SAFE_SPRINTF(msg,"invalid IFS definition rowsize = %d, params = %d", rowsize, i);
 	MessageBox (hwnd, msg, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	ret = -2;
 	}
@@ -1631,7 +1632,7 @@ int find_file_item(HWND hwnd, char *filename,char *itemname,FILE **infile)
 
     if ((*infile = fopen(filename,"rb")) == NULL) 
 	{
-	wsprintf(buf, "Can't Open File: <%s>", filename);
+	_snprintf_s(buf, 200, _TRUNCATE, "Can't Open File: <%s>", filename);
 	MessageBox (hwnd, buf, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	return(-1);
 	}
@@ -1683,7 +1684,7 @@ int find_file_item(HWND hwnd, char *filename,char *itemname,FILE **infile)
 	    }
 	}
     fclose(*infile);
-    sprintf(buf,"'%s' definition not found",itemname);
+    SAFE_SPRINTF(buf,"'%s' definition not found",itemname);
     MessageBox (hwnd, buf, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
     return(-1);
     }
@@ -1707,7 +1708,7 @@ int find_file_item(HWND hwnd, char *filename,char *itemname,FILE **infile)
 
     if ((File = fopen(IFSFileName, "rt")) == NULL) 
 	{
-	sprintf(msg, "I Can't find %s", IFSFileName);
+	SAFE_SPRINTF(msg, "I Can't find %s", IFSFileName);
 	MessageBox (hwnd, msg, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	return(-1);
 	}
