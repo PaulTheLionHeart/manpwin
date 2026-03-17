@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <mpfr.h>
 #include "manp.h"
 #include "fractype.h"
 #include "fractalp.h"
@@ -22,7 +23,6 @@
 #include "BigDouble.h"
 #include "BigComplex.h"
 #include "colour.h"
-#include "mpfr.h"
 #include "slope.h"
 #include "pixel.h"
 #include "plot.h"

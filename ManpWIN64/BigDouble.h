@@ -1,7 +1,9 @@
 #pragma once
 
 #include	<math.h>
-#include	"mpfr.h"
+#pragma once
+#include <mpfr.h>
+//#pragma message("MPFR version (header): " MPFR_VERSION_STRING)
 #include	"../qdlib/dd_real.h"
 #include	"../qdlib/qd_real.h"
 
@@ -22,7 +24,7 @@ class BigDouble
 	BigDouble(const double & value)
 	    {
 	    bitcount = decimals * SAFETYMARGIN;
-	    mpfr_init2(x, bitcount);
+	    mpfr_init2(x, bitcount);	
 	    mpfr_set_d(x, value, MPFR_RNDN);
 	    }
 

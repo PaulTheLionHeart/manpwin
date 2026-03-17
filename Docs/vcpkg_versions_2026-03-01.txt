@@ -1,0 +1,21 @@
+C:\vcpkg>vcpkg list
+gmp:x64-windows                                   6.3.0#3             The GNU Multiple Precision Arithmetic Library
+gmp:x64-windows-static                            6.3.0#3             The GNU Multiple Precision Arithmetic Library
+libpng:x64-windows-static                         1.6.55              libpng is a library implementing an interface fo...
+mpfr:x64-windows-static                           4.2.2               The MPFR library is a C library for multiple-pre...
+vcpkg-cmake-config:x64-windows                    2024-05-23
+vcpkg-cmake-get-vars:x64-windows                  2025-05-29
+vcpkg-cmake:x64-windows                           2024-04-23
+zlib:x64-windows-static                           1.3.1               A compression library
+
+C:\vcpkg>vcpkg list
+gmp:x64-windows                                   6.3.0#3             The GNU Multiple Precision Arithmetic Library
+gmp:x64-windows-static                            6.3.0#3             The GNU Multiple Precision Arithmetic Library
+libpng:x64-windows-static                         1.6.55              libpng is a library implementing an interface fo...
+mpfr:x64-windows-static                           4.2.2               The MPFR library is a C library for multiple-pre...
+vcpkg-cmake-config:x64-windows                    2024-05-23
+vcpkg-cmake-get-vars:x64-windows                  2025-05-29
+vcpkg-cmake:x64-windows                           2024-04-23
+zlib:x64-windows-static                           1.3.1               A compression library
+
+C:\vcpkg>

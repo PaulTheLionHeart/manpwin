@@ -64,7 +64,6 @@ extern	void	LoadTextPalette(char *, int);
 extern	void	setup_defaults(void);
 
 extern	CDib	Dib;				// Device Independent Bitmap
-extern	"C"	png_text	TextData[];
 
 static	png_structp	read_ptr;
 static	png_infop	read_info_ptr, end_info_ptr;
@@ -136,12 +135,8 @@ static	void	png_default_read_data(png_structp png_ptr, png_bytep data, png_size_
 **************************************************************************/
 
 int	decode_png_header(HWND hwnd, char *infile, char *szAppName)
-
     {
     char	s[480];
-    int		interlace_type, compression_type, filter_type;
-
-//    temphwnd = hwnd;			// yeah, yeah should be done properly using pointers!!
 
     if ((fp = fopen(infile,"rb")) == NULL) 
 	{
@@ -189,19 +184,46 @@ int	decode_png_header(HWND hwnd, char *infile, char *szAppName)
     png_set_read_status_fn(read_ptr, NULL);
     // Reading info struct
     png_read_info(read_ptr, read_info_ptr);
-   // flip the rgb pixels to bgr 
-    if (read_ptr->color_type == PNG_COLOR_TYPE_RGB || read_ptr->color_type == PNG_COLOR_TYPE_RGB_ALPHA)
-	png_set_bgr(read_ptr);
 
     // Transferring info struct
-    if (png_get_IHDR(read_ptr, read_info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bit_depth, &color_type, &interlace_type, &compression_type, &filter_type))
-	    png_set_IHDR(write_ptr, write_info_ptr, width, height, bit_depth, color_type, interlace_type, compression_type, filter_type);
+    png_uint_32 width_u = 0, height_u = 0;
+    int bit_depth = 0, color_type = 0, interlace = 0, compression = 0, filter = 0;
 
-    width = (WORD)(read_ptr->width);				// with of file
-    height = (WORD)(read_ptr->height);				// height of file
-    bits_per_pixel = (WORD)(read_ptr->pixel_depth);		// number of bits per pixel
-//    png_get_PLTE(read_ptr, read_info_ptr, &palette, &num_palette);
-//    memcpy(TrueCol.PalettePtr, read_ptr->palette, RGB_SIZE * read_ptr->num_palette);	// read palette
+    png_get_IHDR(read_ptr, read_info_ptr,
+	&width_u, &height_u,
+	&bit_depth, &color_type,
+	&interlace, &compression, &filter);
+
+    // Apply transforms
+    if (bit_depth == 16)
+	png_set_strip_16(read_ptr);
+
+    if (color_type == PNG_COLOR_TYPE_PALETTE)
+	png_set_palette_to_rgb(read_ptr);
+
+    if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
+	png_set_expand_gray_1_2_4_to_8(read_ptr);
+
+    if (png_get_valid(read_ptr, read_info_ptr, PNG_INFO_tRNS))
+	png_set_tRNS_to_alpha(read_ptr);
+
+    if (color_type == PNG_COLOR_TYPE_GRAY ||
+	color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
+	png_set_gray_to_rgb(read_ptr);
+
+    png_set_strip_alpha(read_ptr);
+    png_set_bgr(read_ptr);
+
+    // ---- FINALISE ----
+    png_read_update_info(read_ptr, read_info_ptr);
+
+    // NOW query final output format
+    int channels = png_get_channels(read_ptr, read_info_ptr);
+    bit_depth = png_get_bit_depth(read_ptr, read_info_ptr);
+
+    bits_per_pixel = channels * bit_depth;			// number of bits per pixel
+    width = (int)width_u;					// with of file
+    height = (int)height_u;					// height of file
     return 0;
     }
 
@@ -210,14 +232,11 @@ int	decode_png_header(HWND hwnd, char *infile, char *szAppName)
  *************************************************************************/
 
 int   png_decoder(HWND hwnd, char *szAppName, char *infile)
-
     {
     DWORD	linesize;
     char	s[480];
     long	i;
     int		num_text;
-    long	bytes;
-    long	bytes_per_pixel;
     BYTE	*LinePtr = Dib.DibPixels.data();
     png_bytep	*row_pointers;
 
@@ -232,10 +251,9 @@ int   png_decoder(HWND hwnd, char *szAppName, char *infile)
 	return (-1);
 	}
 
-    bytes = WIDTHBYTES((DWORD)read_ptr->width * (DWORD)Dib.BitsPerPixel);
-    bytes_per_pixel = bytes / (DWORD)read_ptr->width;
-    linesize = (Dib.BitsPerPixel > 8) ? (WORD)WIDTHBYTES((DWORD)Dib.DibWidth * (DWORD)Dib.BitsPerPixel) : Dib.DibWidth;
-
+    // NOW query rowbytes
+    png_size_t rowbytes = png_get_rowbytes(read_ptr, read_info_ptr);
+    linesize = WIDTHBYTES(Dib.DibWidth * Dib.BitsPerPixel);
     if ((row_pointers = new png_bytep[Dib.DibHeight]) == NULL)
 	{
 	// free the structures 
@@ -260,30 +278,21 @@ int   png_decoder(HWND hwnd, char *szAppName, char *infile)
 	{
 	for (i = 0; i < (WORD)num_text; i++)
 	    {
-	    if (strncmp(TextData[i].key, "Comment", 7) == 0)
+	    if (strncmp(text_ptr[i].key, "Comment", 7) == 0)
 		{
-		if (TextData[i].text_length > 0)
+		if (text_ptr[i].text_length > 0)
 		    {
 		    setup_defaults();
-		    GetParamData(hwnd, infile, TextData[i].text, "", TRUE);
+		    GetParamData(hwnd, infile, text_ptr[i].text, "", TRUE);
 		    }
 		}
-// do we really need to store this?
-//	    if (strncmp(TextData[i].key, "Pixels", 6) == 0)
-//		{
-//		if (TextData[i].text_length > (size_t)(width * height))			// yep, we have pixels
-//		    LoadIterationsDatabase(TextData[i].text, (int)TextData[i].text_length);
-//		}
-	    if (strncmp(TextData[i].key, "Palette", 7) == 0)
+	    if (strncmp(text_ptr[i].key, "Palette", 7) == 0)
 		{
-		if (TextData[i].text_length > 16)		// yep, we have a palette override palette in file if this is found
-		    LoadTextPalette(TextData[i].text, (int)TextData[i].text_length);
+		if (text_ptr[i].text_length > 16)		// yep, we have a palette override palette in file if this is found
+		    LoadTextPalette(text_ptr[i].text, (int)text_ptr[i].text_length);
 		}
 	    }
 	}
-
-   // clean up after the read, and free any memory allocated 
-    png_destroy_read_struct(&read_ptr, &read_info_ptr, &end_info_ptr);
 
    // free the structures and line buffer
     // clean up after the read, and free any memory allocated 
@@ -292,9 +301,7 @@ int   png_decoder(HWND hwnd, char *szAppName, char *infile)
     // free the structures and line buffer
     if (row_pointers != NULL)
 	delete[] row_pointers;
-    // close the file 
     fclose(fp);
-   // that's it 
     return(0);
     }
 

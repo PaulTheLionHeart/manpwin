@@ -1,0 +1,10 @@
+{
+  "name": "manpwin",
+  "version": "1.0",
+  "dependencies": [
+    "zlib",
+    "libpng",
+    "gmp",
+    "mpfr"
+  ]
+}
