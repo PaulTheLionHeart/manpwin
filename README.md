@@ -39,11 +39,11 @@ The system supports exploration across both floating-point and high-precision ar
 
 ### High-Precision Fractal Rendering
 
-![Fractal](docs/images/fractal.png)
+![Fractal](Docs/images/fractal.png)
 
 ### ManpWIN Interface
 
-![ManpWIN UI](docs/images/fractal_ui.jpg)
+![ManpWIN UI](Docs/images/fractal_ui.jpg)
 
 ---
 
