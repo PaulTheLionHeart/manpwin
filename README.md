@@ -35,6 +35,18 @@ The system supports exploration across both floating-point and high-precision ar
 
 ---
 
+## 🖼️ Example Output
+
+### High-Precision Fractal Rendering
+
+![Fractal](docs/images/fractal.png)
+
+### ManpWIN Interface
+
+![ManpWIN UI](docs/images/fractal_ui.jpg)
+
+---
+
 ## 📊 Project Status
 
 ManpWIN has reached a stable and reproducible build state with a fully functional multithreaded rendering pipeline.
