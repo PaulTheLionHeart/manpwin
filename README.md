@@ -45,6 +45,10 @@ The system supports exploration across both floating-point and high-precision ar
 
 ![ManpWIN UI](Docs/images/fractal_ui.jpg)
 
+## 🎬 Animation
+
+[![Watch Animation](docs/images/jewels_preview.png)](docs/videos/Jewels.webm)
+
 ---
 
 ## 📊 Project Status
