@@ -614,7 +614,7 @@ png_write_image(png_structrp png_ptr, png_bytepp image, HWND hwnd)
       for (i = 0, rp = image; i < png_ptr->height; i++, rp++)
       {
 	  int 	percent = (i * 100) / png_ptr->height;
-	  sprintf(s, "Writing file data: %d%%", percent);
+	  _snprintf_s(s, 200, _TRUNCATE, "Writing file data: %d%%", percent);
 	  SetWindowText(hwnd, s);
 	  png_write_row(png_ptr, *rp);
       }
