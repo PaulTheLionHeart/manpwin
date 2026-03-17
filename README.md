@@ -2,7 +2,7 @@
 
 ManpWIN is a Windows fractal exploration and rendering application featuring advanced Mandelbrot and related fractal techniques including perturbation, BLA acceleration, slope shading, and a multithreaded formula parser.
 
-This repository contains a modernized CMake build system enabling reproducible Debug and Release builds with Visual Studio 2022.
+This repository contains a fully reproducible CMake-based build system supporting consistent Debug and Release builds with Visual Studio 2022.
 
 ---
 
@@ -17,7 +17,54 @@ This repository contains a modernized CMake build system enabling reproducible D
 * PNG export
 * Advanced plotting modes
 * High-precision arithmetic (MPFR)
-* Legacy algorithm preservation with modernization
+* Preservation of legacy algorithms with modern execution architecture
+
+---
+
+## 🔬 Use Cases
+
+ManpWIN is designed for both visual exploration and mathematical experimentation:
+
+- Deep zoom Mandelbrot and fractal structure analysis
+- Perturbation-based extreme scale rendering
+- Investigation of orbit behaviour and numerical stability
+- Custom formula experimentation via VM-based parser
+- Educational demonstrations of fractal dynamics
+
+The system supports exploration across both floating-point and high-precision arithmetic domains.
+
+---
+
+## 📊 Project Status
+
+ManpWIN has reached a stable and reproducible build state with a fully functional multithreaded rendering pipeline.
+
+### Current State
+
+- ✔ Deterministic rendering across Mandelbrot, perturbation, and formula modes
+- ✔ Stable multithreaded execution (worklist + parser)
+- ✔ Verified Debug and Release builds via CMake + Visual Studio 2022
+- ✔ Successful deep zoom exploration (including extreme perturbation ranges)
+- ✔ This includes ongoing collaboration and interest from the mathematical community.
+
+### Known Characteristics
+
+- Very deep zoom levels may require careful initialisation of perturbation state
+- Some advanced modes (e.g. slope + bignum trig) are still under refinement
+- Memory usage after large renders is not yet aggressively reduced
+
+### Direction
+
+The project is transitioning from a legacy fractal renderer into a:
+
+> **high-precision, research-oriented fractal exploration platform**
+
+with ongoing work in:
+
+- Deterministic initialisation at extreme scales
+- Memory lifecycle management
+- Advanced numerical stability
+- Further parser and VM evolution
 
 ---
 
@@ -178,6 +225,9 @@ A chronological record of major battles during the ManpWIN modernisation.
 - ⚙️ CRT conflict resolution — `/NODEFAULTLIB:LIBCMTD` investigation
 - 🏰 First stable reproducible CMake build — Debug + Release verified
 - 🏷 Milestone tagged — historic stabilisation snapshot captured
+-  🧭 Stability phase reached — deterministic behaviour restored across rendering modes
+-  🔬 Research interest — project now attracting mathematical exploration and extension
+
 ---
 
 ## 🤝 Contributing Notes
@@ -191,7 +241,7 @@ A chronological record of major battles during the ManpWIN modernisation.
 
 ## 🏆 Milestone
 
-This release represents the first stable reproducible CMake build of ManpWIN with full Visual Studio 2022 compatibility.
+This release represents the first stable, reproducible CMake-based build of ManpWIN with full Visual Studio 2022 compatibility.
 
 ---
 
@@ -204,6 +254,17 @@ This release represents the first stable reproducible CMake build of ManpWIN wit
 * Debug and Release builds validated
 * Milestone tag created
 * Master branch verified via fresh clone
+
+---
+
+## 🔁 Reproducibility
+
+A key goal of the modernisation effort is reproducibility:
+
+- Clean CMake-based builds
+- Controlled dependency handling
+- Verified Debug and Release parity
+- Deterministic rendering across runs (within current numerical limits)
 
 ---
 
