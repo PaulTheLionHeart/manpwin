@@ -1321,6 +1321,9 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		    case NUMFRACTAL:
 			tempParam = IDC_NUMFRACTAL;
 			break;
+		    case HAILSTONE:
+			tempParam = IDC_HAILSTONE;
+			break;
 
 		    }
 		CheckRadioButton(hDlg, IDC_MANDEL, IDC_TEST, tempParam);
@@ -1794,6 +1797,9 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		        return  TRUE ;
 		    case IDC_NUMFRACTAL:
 			temp = NUMFRACTAL;
+			break;
+		    case IDC_HAILSTONE:
+			temp = HAILSTONE;
 			break;
 
 		    case IDOK:

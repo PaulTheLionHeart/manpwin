@@ -25,7 +25,8 @@ MANPWIN MENU
         MENUITEM "Open Kalles Fraktaler File\tK", IDM_OPEN_KALLES
         MENUITEM "&Save Parameters\tS", IDM_SAVEPAR
         MENUITEM "Save Im&age...\tA", IDM_SAVEIMAGE
-        MENUITEM "Save Both Parameters and Image\t<Ctrl><Shft>S", IDM_SAVE_PAR_AND_IMAGE
+	MENUITEM "Save S&VG Vector Image...",   IDM_SAVE_SVG
+	MENUITEM "Save Both Parameters and Image\t<Ctrl><Shft>S", IDM_SAVE_PAR_AND_IMAGE
         MENUITEM "Save Kalles Fraktaler File\t<Ctrl>K", IDM_SAVE_KALLES
         MENUITEM SEPARATOR
         MENUITEM "E&xit\tESC or Enter", IDM_EXIT
@@ -112,12 +113,12 @@ STYLE DS_MODALFRAME | DS_SETFONT | WS_POPUP
 FONT 8, "MS Sans Serif"
 {
     EDITTEXT        IDC_PROGRAMNAME, 41, 13, 79, 12, WS_DISABLED | NOT WS_BORDER | ES_CENTER | ES_AUTOHSCROLL
-    CTEXT           "4.02c Multi-Thread Formula Parser", IDC_STATIC, 36, 28, 88, 9, SS_CENTER
+    CTEXT           "4.02d Multi-Thread Formula Parser", IDC_STATIC, 36, 28, 88, 9, SS_CENTER
     ICON            "MANPWIN", IDC_STATIC, 8, 8, 21, 20, SS_ICON
     CTEXT           "Copyright © Paul de Leeuw Computers\nhttps://www.deleeuw.com.au", IDC_STATIC, 8, 53, 144, 15, SS_CENTER
     PUSHBUTTON      "OK", IDOK, 36, 89, 88, 14, WS_GROUP | NOT WS_TABSTOP
     CTEXT           "ABN 72 360 822 562", IDC_STATIC, 37, 75, 86, 8, SS_CENTER
-    CTEXT           "17/03/2026", IDC_STATIC, 55, 41, 40, 8, SS_CENTER
+    CTEXT           "20/03/2026", IDC_STATIC, 55, 41, 40, 8, SS_CENTER
 }
 
 
@@ -907,15 +908,16 @@ FONT 8, "MS Sans Serif", 0, 0, 1
     AUTORADIOBUTTON "Perturbation", IDC_PERTURBATION, 15, 24, 91, 8
     AUTORADIOBUTTON "Mandelbrot abs() Derivatives including Buffalo, Celtic etc", IDC_MANDELDERIVATIVES, 15, 37, 107, 17, BS_MULTILINE
     AUTORADIOBUTTON "Newton", IDC_NEWTON, 15, 58, 43, 10
-    AUTORADIOBUTTON "Power", IDC_POWER, 15, 69, 34, 9
-    AUTORADIOBUTTON "Polynomial", IDC_POLYNOMIAL, 15, 81, 49, 8
-    AUTORADIOBUTTON "Circle Squared", IDC_CIRCLE, 15, 92, 59, 10
-    AUTORADIOBUTTON "Sine Function", IDC_SIN, 15, 104, 60, 10
-    AUTORADIOBUTTON "Exponential Function", IDC_EXP, 15, 116, 80, 10
-    AUTORADIOBUTTON "Fibonacci Spirals", IDC_FIB, 15, 128, 66, 10
-    AUTORADIOBUTTON "Mountain Landscape", IDC_MOUNTAIN, 15, 140, 83, 8
-    AUTORADIOBUTTON "Fourier Analysis", IDC_FOURIER, 15, 151, 66, 10
-    AUTORADIOBUTTON "Fast Fourier Transform", IDC_FFT, 15, 163, 86, 8
+    AUTORADIOBUTTON "Power", IDC_POWER, 15, 68, 34, 9
+    AUTORADIOBUTTON "Polynomial", IDC_POLYNOMIAL, 15, 80, 49, 8
+    AUTORADIOBUTTON "Circle Squared", IDC_CIRCLE, 15, 90, 59, 10
+    AUTORADIOBUTTON "Sine Function", IDC_SIN, 15, 100, 60, 10
+    AUTORADIOBUTTON "Exponential Function", IDC_EXP, 15, 111, 80, 10
+    AUTORADIOBUTTON "Fibonacci Spirals", IDC_FIB, 15, 122, 66, 10
+    AUTORADIOBUTTON "Mountain Landscape", IDC_MOUNTAIN, 15, 133, 83, 8
+    AUTORADIOBUTTON "Fourier Analysis", IDC_FOURIER, 15, 143, 66, 10
+    AUTORADIOBUTTON "Fast Fourier Transform", IDC_FFT, 15, 154, 86, 8
+    AUTORADIOBUTTON "Hailstone Sequence", IDC_HAILSTONE, 15, 164, 80, 8
     AUTORADIOBUTTON "Hénon Mapping", IDC_HENON, 15, 174, 66, 10
     AUTORADIOBUTTON "Numeric Gargoyles", IDC_GARGOYLE, 15, 186, 75, 8
     AUTORADIOBUTTON "Burning Ship", IDC_BURNINGSHIP, 15, 197, 56, 8
@@ -1093,6 +1095,34 @@ FONT 8, "Ms Shell Dlg"
     LTEXT           "Number of Polygons", IDC_STATIC, 14, 129, 64, 8, SS_LEFT
     LTEXT           "If degree is less than 5, stars can't be formed and the fractal will default to a polygon.", IDC_STATIC, 21, 82, 115, 24, SS_LEFT
     LTEXT           "Degree (max 48)", IDC_STATIC, 14, 113, 53, 8, SS_LEFT
+}
+
+
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
+HAILSTONEDLG DIALOGEX 0, 0, 200, 180
+STYLE DS_3DLOOK | DS_CENTER | DS_MODALFRAME | DS_SHELLFONT | WS_CAPTION | WS_VISIBLE | WS_POPUP | WS_SYSMENU
+CAPTION "Hailstone Sequence Options"
+FONT 8, "Ms Shell Dlg", 0, 0, 1
+{
+    GROUPBOX        "Starting Point", IDC_STATIC, 10, 10, 180, 35
+    LTEXT           "Start X:", IDC_STATIC, 20, 25, 30, 8, SS_LEFT
+    EDITTEXT        IDC_HAILSTONE_STARTX, 55, 23, 50, 12, ES_AUTOHSCROLL
+    LTEXT           "Start Y:", IDC_STATIC, 115, 25, 30, 8, SS_LEFT
+    EDITTEXT        IDC_HAILSTONE_STARTY, 150, 23, 35, 12, ES_AUTOHSCROLL
+    GROUPBOX        "Transformation Preset", IDC_STATIC, 10, 50, 180, 30
+    LTEXT           "Preset:", IDC_STATIC, 20, 65, 30, 8, SS_LEFT
+    COMBOBOX        IDC_HAILSTONE_PRESET, 55, 63, 130, 60, WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST
+    GROUPBOX        "Computation", IDC_STATIC, 10, 85, 180, 25
+    LTEXT           "Max Iterations:", IDC_STATIC, 20, 97, 55, 8, SS_LEFT
+    EDITTEXT        IDC_HAILSTONE_MAXITER, 80, 95, 50, 12, ES_AUTOHSCROLL | ES_NUMBER
+    GROUPBOX        "Display Options", IDC_STATIC, 10, 115, 180, 45
+    AUTOCHECKBOX    "Show Axes", IDC_HAILSTONE_SHOWAXES, 20, 128, 60, 10
+    AUTOCHECKBOX    "Show Point Labels", IDC_HAILSTONE_SHOWLABELS, 20, 141, 75, 10
+    AUTOCHECKBOX    "Show Dots", IDC_HAILSTONE_SHOWDOTS, 100, 128, 60, 10
+    AUTOCHECKBOX    "Detect Cycles", IDC_HAILSTONE_DETECTCYCLES, 100, 141, 60, 10
+    DEFPUSHBUTTON   "OK", IDOK, 45, 160, 50, 14
+    PUSHBUTTON      "Cancel", IDCANCEL, 105, 160, 50, 14
 }
 
 

@@ -282,6 +282,7 @@
 #define POLYNOMIAL		242
 #define TOWER			243
 #define NUMFRACTAL		244	// dedicated to an 11 year old girl who "discovered" it
+#define HAILSTONE		245	// 2D Hailstone sequence visualization with cycle detection
 //#define CELTIC			235
 //#define MANDELBARCELTIC		236
 //#define PERPCELTIC		237

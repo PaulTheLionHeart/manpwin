@@ -26,6 +26,7 @@
 #include "Plot.h"
 #include "PertEngine.h"
 #include "SafeStrings.h"
+#include "OtherFunctions.h"
 
 extern	CDib	Dib;				// Device Independent Bitmap
 extern	CFract	Fractal;			// Fractal specific stuff
@@ -169,6 +170,7 @@ extern	INT_PTR CALLBACK 	SavePNGOpenDlg(HWND, LPSTR, LPSTR);
 extern	INT_PTR CALLBACK 	SaveParOpenDlg(HWND, LPSTR, LPSTR);
 extern	INT_PTR CALLBACK	SaveKfrOpenDlg(HWND, LPSTR, LPSTR);
 extern	INT_PTR CALLBACK 	SaveParImageOpenDlg(HWND, LPSTR, LPSTR);
+extern	INT_PTR CALLBACK	SaveSVGOpenDlg(HWND, LPSTR, LPSTR);
 extern	void	SaveFile(HWND, LPSTR, LPSTR);
 extern	INT_PTR CALLBACK 	SaveColFileOpenDlg(HWND, LPSTR, LPSTR);
 extern	INT_PTR CALLBACK 	SaveMAPFileOpenDlg(HWND, LPSTR, LPSTR);
@@ -540,6 +542,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_SAVEPAR, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_SAVEIMAGE, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_SAVE_PAR_AND_IMAGE, MF_ENABLED);
+			 // SVG export only available for Hailstone (sequence visualization, not pixel-based fractals)
+			 EnableMenuItem((HMENU)(_int64)wParam, IDM_SAVE_SVG, (type == HAILSTONE) ? MF_ENABLED : MF_GRAYED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_EXIT, MF_ENABLED);
 			 break;
 		    case 1:	   // Edit Dialogs menu
@@ -566,6 +570,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_IMAGE_SIZE, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_START, MF_ENABLED);
 			 EnableMenuItem((HMENU)(_int64)wParam, IDM_STEREOPAIRSETUP, MF_ENABLED);
+			 // Hailstone toggle menu items - only enabled when viewing Hailstone fractal
+			 EnableMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_AXES, (type == HAILSTONE) ? MF_ENABLED : MF_GRAYED);
+			 EnableMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_LABELS, (type == HAILSTONE) ? MF_ENABLED : MF_GRAYED);
+			 EnableMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_DOTS, (type == HAILSTONE) ? MF_ENABLED : MF_GRAYED);
 			 break;
 		    case 4:	   // Animation Dialogs menu
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_SETUPANIMATION, MF_ENABLED);
@@ -603,6 +611,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		CheckMenuItem((HMENU)(_int64)wParam, IDM_USEDEFAULTPALETTE, (UseFractintPalette ? MF_CHECKED : MF_UNCHECKED));
 		CheckMenuItem((HMENU)(_int64)wParam, IDM_DISPLAYLOC, (DisplayLoc ? MF_CHECKED : MF_UNCHECKED));
 //		CheckMenuItem((HMENU)wParam, IDM_SHOWSTATUSBAR, (ShowStatusBar ? MF_CHECKED : MF_UNCHECKED));
+		// Hailstone toggle menu checkmarks
+		extern COtherFunctions* g_pOtherFunctions;
+		if (g_pOtherFunctions && type == HAILSTONE)
+		    {
+		    CheckMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_AXES, (g_pOtherFunctions->ShowAxes ? MF_CHECKED : MF_UNCHECKED));
+		    CheckMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_LABELS, (g_pOtherFunctions->ShowPointLabels ? MF_CHECKED : MF_UNCHECKED));
+		    CheckMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_DOTS, (g_pOtherFunctions->ShowDots ? MF_CHECKED : MF_UNCHECKED));
+		    }
 
 		break;
 		
@@ -1205,7 +1221,11 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		save_palette(hwnd, szSaveFileName, "Save Colour Parameters");
 		strcpy(MAPFile, szSaveFileName);				// palette file to reflect the current map
 		}
+	    return 0;
 
+	case IDM_SAVE_SVG:							// SVG vector file
+	    if (SaveSVGOpenDlg(hwnd, szSaveFileName, szTitleName) == 0)
+		SaveFile(hwnd, szSaveFileName, szTitleName);
 	    return 0;
 
 	case IDM_OPEN_PAR:
@@ -1348,159 +1368,177 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	case IDM_FRACTALCOORDS:
 	case IDM_TIERAZON_COLOUR:
 	case IDM_TOGGLE_DISPLAY_PALETTE:
-	switch (wParam)
-	    {
-	    case IDM_3DPARAM:
-		if (DialogBox (hInst, "Param3D", hwnd, Param3D) == FALSE)
-		    return 0;
-		else
+	case IDM_HAILSTONE_TOGGLE_AXES:
+	case IDM_HAILSTONE_TOGGLE_LABELS:
+	case IDM_HAILSTONE_TOGGLE_DOTS:
+	    switch (wParam)
+		{
+		case IDM_3DPARAM:
+		    if (DialogBox (hInst, "Param3D", hwnd, Param3D) == FALSE)
+			return 0;
+		    else
+			time_to_reinit = TRUE;
+		    break;
+
+		case IDM_3D:
+		    _3dflag = !_3dflag;
+		    if (_3dflag)
+			{
+			oldcalcmode = calcmode;
+			pairflag = FALSE;
+			}
+		    else
+			calcmode = oldcalcmode;		// restore after 3D
 		    time_to_reinit = TRUE;
+		    break;
+
+	    case IDM_SET_JULIA_SIZE:
+		DialogBox (hInst, "JuliaDlg", hwnd, JuliaDlg);
 		break;
 
-	    case IDM_3D:
-		_3dflag = !_3dflag;
-		if (_3dflag)
+	    case IDM_JULIA:
+		juliaflag = !juliaflag;
+		if (juliaflag)
 		    {
-		    oldcalcmode = calcmode;
-		    pairflag = FALSE;
+		    double  AspectRatio = (double)xdots / (double)ydots;
+		    if (BigNumFlag)
+			{
+			temp_1 = (double)mpfr_get_d(BigHor.x, MPFR_RNDN);
+			temp_2 = (double)mpfr_get_d(BigWidth.x, MPFR_RNDN);
+			j.x = temp_1 + (temp_2 * (double)xdots / (double)ydots) / 2.0;
+			temp_1 = (double)mpfr_get_d(BigVert.x, MPFR_RNDN);
+			j.y = temp_1 + temp_2 / 2.0;
+			Big_oldhor = BigHor;
+			Big_oldvert = BigVert;
+			Big_oldwidth = BigWidth;
+			if (AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
+			    {
+			    BigWidth = 4.0;
+			    BigVert = -2.0;
+			    BigHor = BigVert * AspectRatio;
+			    }
+			else
+			    {
+			    BigWidth = 4.0 / AspectRatio;
+			    BigHor = -2.0;
+			    BigVert = BigHor / AspectRatio;
+			    }
+			}
+		    else
+			{
+			if (RealTimeJuliaFlag)
+			    j = q;
+			else
+			    {
+			    j.x = hor + (mandel_width * (double) xdots / (double) ydots) / 2.0;
+			    j.y = vert + mandel_width / 2.0;    
+			    }
+			oldhor = hor;		// store values during julia transformations
+			oldvert = vert;
+			oldwidth = mandel_width;
+			if (AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
+			    {
+			    mandel_width = 4.0;
+			    vert = -2.0;
+			    hor = vert * AspectRatio;
+			    }
+			else
+			    {
+			    mandel_width = 4.0 / AspectRatio;
+			    hor = -2.0;
+			    vert = hor / AspectRatio;
+			    }
+			}
 		    }
 		else
-		    calcmode = oldcalcmode;		// restore after 3D
+		    {
+		    if (oldwidth == 0.0)	// we have not done any Mandelbrot yet
+			{
+			oldwidth = 4.0;
+			oldvert = j.y - oldwidth / 2.0;
+			oldhor = j.x - (oldwidth * (double) xdots / (double) ydots) / 2.0;
+			}
+		    if (BigNumFlag)
+			{
+			BigHor = Big_oldhor;
+			BigVert = Big_oldvert;
+			BigWidth = Big_oldwidth;
+			}
+		    else
+			{
+			hor = oldhor;
+			vert = oldvert;
+			mandel_width = oldwidth;
+			}
+		    if (RealTimeJuliaFlag)
+			{
+			InitRTJulia(hwnd);
+			FindCursorRealPos(&CursorLocShort);
+			if (DrawJulia(hwnd, CursorLocShort) < 0)
+			    RealTimeJuliaFlag = FALSE;
+			}
+		    }
+		HardStopNow(hwnd, "Julia");
+		time_to_restart = TRUE;
+		break;
+
+	    case IDM_STEREO:
+		if (pairflag)
+		    {
+		    pairflag = FALSE;
+		    calcmode = oldcalcmode;		// restore after stereo pair
+		    }
+		else
+		    {
+		    pairflag = 10;
+		    oldcalcmode = calcmode;
+		    _3dflag = FALSE;
+		    }
+
+		HardStopNow(hwnd, "Stereo");
 		time_to_reinit = TRUE;
 		break;
 
-	case IDM_SET_JULIA_SIZE:
-	    DialogBox (hInst, "JuliaDlg", hwnd, JuliaDlg);
-	    break;
-
-	case IDM_JULIA:
-	    juliaflag = !juliaflag;
-	    if (juliaflag)
-		{
-		double  AspectRatio = (double)xdots / (double)ydots;
-		if (BigNumFlag)
-		    {
-		    temp_1 = (double)mpfr_get_d(BigHor.x, MPFR_RNDN);
-		    temp_2 = (double)mpfr_get_d(BigWidth.x, MPFR_RNDN);
-		    j.x = temp_1 + (temp_2 * (double)xdots / (double)ydots) / 2.0;
-		    temp_1 = (double)mpfr_get_d(BigVert.x, MPFR_RNDN);
-		    j.y = temp_1 + temp_2 / 2.0;
-		    Big_oldhor = BigHor;
-		    Big_oldvert = BigVert;
-		    Big_oldwidth = BigWidth;
-		    if (AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
-			{
-			BigWidth = 4.0;
-			BigVert = -2.0;
-			BigHor = BigVert * AspectRatio;
-			}
-		    else
-			{
-			BigWidth = 4.0 / AspectRatio;
-			BigHor = -2.0;
-			BigVert = BigHor / AspectRatio;
-			}
-		    }
-		else
-		    {
-		    if (RealTimeJuliaFlag)
-			j = q;
-		    else
-			{
-			j.x = hor + (mandel_width * (double) xdots / (double) ydots) / 2.0;
-			j.y = vert + mandel_width / 2.0;    
-			}
-		    oldhor = hor;		// store values during julia transformations
-		    oldvert = vert;
-		    oldwidth = mandel_width;
-		    if (AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
-			{
-			mandel_width = 4.0;
-			vert = -2.0;
-			hor = vert * AspectRatio;
-			}
-		    else
-			{
-			mandel_width = 4.0 / AspectRatio;
-			hor = -2.0;
-			vert = hor / AspectRatio;
-			}
-		    }
-		}
-	    else
-		{
-		if (oldwidth == 0.0)	// we have not done any Mandelbrot yet
-		    {
-		    oldwidth = 4.0;
-		    oldvert = j.y - oldwidth / 2.0;
-		    oldhor = j.x - (oldwidth * (double) xdots / (double) ydots) / 2.0;
-		    }
-		if (BigNumFlag)
-		    {
-		    BigHor = Big_oldhor;
-		    BigVert = Big_oldvert;
-		    BigWidth = Big_oldwidth;
-		    }
-		else
-		    {
-		    hor = oldhor;
-		    vert = oldvert;
-		    mandel_width = oldwidth;
-		    }
+	    case IDM_REALTIMEJULIA:
+		RealTimeJuliaFlag = !RealTimeJuliaFlag;
 		if (RealTimeJuliaFlag)
 		    {
-		    InitRTJulia(hwnd);
-		    FindCursorRealPos(&CursorLocShort);
-		    if (DrawJulia(hwnd, CursorLocShort) < 0)
-			RealTimeJuliaFlag = FALSE;
+		    if (!juliaflag)		// doesn't make a lot of sense if we are in julia already
+			{
+			InitRTJulia(hwnd);
+			FindCursorRealPos(&CursorLocShort);
+			if (DrawJulia(hwnd, CursorLocShort) < 0)
+			    RealTimeJuliaFlag = FALSE;
+			}
+		    return 1;			// ensure that we don't splatter initial RT Julia set
 		    }
-		}
-	    HardStopNow(hwnd, "Julia");
-	    time_to_restart = TRUE;
-	    break;
-
-	case IDM_STEREO:
-	    if (pairflag)
-		{
-		pairflag = FALSE;
-		calcmode = oldcalcmode;		// restore after stereo pair
-		}
-	    else
-		{
-		pairflag = 10;
-		oldcalcmode = calcmode;
-		_3dflag = FALSE;
-		}
-
-	    HardStopNow(hwnd, "Stereo");
-	    time_to_reinit = TRUE;
-	    break;
-
-	case IDM_REALTIMEJULIA:
-	    RealTimeJuliaFlag = !RealTimeJuliaFlag;
-	    if (RealTimeJuliaFlag)
-		{
-		if (!juliaflag)		// doesn't make a lot of sense if we are in julia already
-		    {
-		    InitRTJulia(hwnd);
-		    FindCursorRealPos(&CursorLocShort);
-		    if (DrawJulia(hwnd, CursorLocShort) < 0)
-			RealTimeJuliaFlag = FALSE;
-		    }
-		return 1;			// ensure that we don't splatter initial RT Julia set
-		}
-	    else
-		{
-		HardStopNow(hwnd, "RTJulia");
-		time_to_restart = TRUE;
-		}
-	    break;
-
-	case IDM_STEREOPAIRSETUP:
-		if (DialogBox(hInst, "StereoPairDlg", hwnd, StereoPairDlg) == FALSE)
-		    return 0;
 		else
-		    time_to_reinit = TRUE;
+		    {
+		    HardStopNow(hwnd, "RTJulia");
+		    time_to_restart = TRUE;
+		    }
+		break;
+
+	    case IDM_STEREOPAIRSETUP:
+		    if (DialogBox(hInst, "StereoPairDlg", hwnd, StereoPairDlg) == FALSE)
+			return 0;
+		    else
+			time_to_reinit = TRUE;
+		    break;
+
+	    case IDM_HAILSTONE_TOGGLE_AXES:
+		g_pOtherFunctions->ShowAxes = !g_pOtherFunctions->ShowAxes;
+		time_to_reinit = TRUE;
+		break;
+
+	    case IDM_HAILSTONE_TOGGLE_LABELS:
+		g_pOtherFunctions->ShowPointLabels = !g_pOtherFunctions->ShowPointLabels;
+		time_to_reinit = TRUE;
+		break;
+
+	    case IDM_HAILSTONE_TOGGLE_DOTS:
+		g_pOtherFunctions->ShowDots = !g_pOtherFunctions->ShowDots;
+		time_to_reinit = TRUE;
 		break;
 
 	    case IDM_TOGGLE_DISPLAY_PALETTE:

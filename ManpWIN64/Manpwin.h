@@ -25,6 +25,7 @@
 #define FILE_MPG	11
 #define FILE_LST	12
 #define FILE_KFR	13	// Kalles KFR
+#define FILE_SVG	14	// SVG vector graphics
 
 #define TRUE		1
 #define FALSE		0

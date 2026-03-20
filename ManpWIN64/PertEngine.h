@@ -1,7 +1,7 @@
 #pragma once
 #include <windows.h>
 #include "mpfr.h"
-#include "Point.h"
+//#include "Point.h"
 #include "filter.h"
 #include "Dib.h"
 #include "colour.h"
@@ -79,7 +79,7 @@ class CPerturbation
 	void	AttachSharedTables(const std::vector<Complex>* xs, const std::vector<ExpComplex>* exs, const BLAS* bla/*, int maxRefIter*/);
 
 	int	BigComplex2ExpComplex(ExpComplex *a, BigComplex b);
-	void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree);
+//	void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subtype);
 
 	int	SlopeType;
 	int	PaletteShift = 0;
@@ -158,7 +158,9 @@ class CPerturbation
 	int	xdots;
 	int	width, height;
 	int	MaxIteration;
-	int	power, subtype, biomorph; 
+	int	power = 3;
+	int	subtype = 0; 
+	int	biomorph = -1; 
 	int	InsideMethod;			// the number of the inside filter
 	int	OutsideMethod;			// the number of the outside filter
 

@@ -44,6 +44,7 @@ static	char	ManpPath[_MAX_PATH] = "";		// path for ManpWin.EXE where needed
 	char	IFSPath[_MAX_PATH] = "";		// path for IFS files
 	char	LSYSPath[_MAX_PATH] = "";		// path for LSYS files
 	char	FRMPath[_MAX_PATH] = "";		// path for Formula files
+	char	SVGPath[_MAX_PATH] = "";		// path for SVG files
 
 	char	PNGFile[_MAX_PATH] = "";		// PNG file
 	char	MPGFile[_MAX_PATH] = "";		// MPG file

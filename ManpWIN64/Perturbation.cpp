@@ -41,7 +41,7 @@ extern	int	SlopeDegree;
 extern	int	user_data(HWND);
 extern	void	DisplayStatusBarInfo(int, char *);
 extern	char	*GetFractalName(void);
-extern	int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND hwnd), char* StatusBarInfo, int *pPertProgress, double bailout, int ArithType, int power, BigDouble BigWidth, int &SlopeDegree);
+extern	int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND hwnd), char* StatusBarInfo, int *pPertProgress, double bailout, int ArithType, int power, BigDouble BigWidth, int &SlopeDegree, int subtype);
 extern	void	PertSetupArithType(int &ArithType, int subtype, long MaxIteration, int precision, BYTE BigNumFlag);
 extern	void	ShowBignum(BigDouble x, char *Location);
 
@@ -182,8 +182,6 @@ bool	CheckValidRef(BigComplex ReferenceCoordinate, BigDouble BigWidth, int maxIt
 
 void Run3DAfterRender()
     {
-//    CPixel Pixel;	// crash tinkle tinkle
-//    size_t  fred = sizeof(Pixel[0]);	    // 1.8 MBytes
     if (!_3dflag)
 	return;
     if (wpixels.empty())
@@ -355,10 +353,12 @@ int	InitPerturbation(void)
     BigComplex	ReferenceCoordinate;
     ReferenceCoordinate.x = BigCentreX;
     ReferenceCoordinate.y = BigCentreY;
+
+    CurrentRenderMode = NOMULTITHREAD;		    // must be NOMULTITHREAD before creating reference point as we are not waiting for threads to end until we get into pert
     if (CheckValidRef(ReferenceCoordinate, BigWidth, threshold, rqlim, RefData, degree, ArithType) == false)		// we don't have a valid ref so we'd better build it
 	{
 	RefData.valid = false;		// reference backup isn't valid unless the whole ref/bla tables are complete
-	if (ReferenceZoomPoint(ReferenceCoordinate, threshold, user_data, PertStatus, pPertProgress, rqlim, ArithType, degree, BigWidth, SlopeDegree) < 0)
+	if (ReferenceZoomPoint(ReferenceCoordinate, threshold, user_data, PertStatus, pPertProgress, rqlim, ArithType, degree, BigWidth, SlopeDegree, subtype) < 0)
 	    {
 	    SAFE_SPRINTF(PertErrorMessage, "User Activity at ReferenceZoomPoint()");
 	    XSubN.clear();

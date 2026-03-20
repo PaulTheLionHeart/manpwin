@@ -6,7 +6,7 @@
 #pragma once
 
 //**************************************************************************
-#define	MAXTYPE	244				// Remember to edit this when we add fractals
+#define	MAXTYPE	245				// Remember to edit this when we add fractals
 //**************************************************************************
 
 #define	NUMPARAM		10
@@ -2416,6 +2416,7 @@ extern	INT_PTR CALLBACK	CircleDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	NumTriangleDlg (HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	ApolloniusDlg (HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	SelectOscillatorDlg (HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK	HailstoneDlg(HWND, UINT, WPARAM, LPARAM);
 
 extern	int init_Marcus();			// generic Marcus fractal
 extern	int do_Marcus();

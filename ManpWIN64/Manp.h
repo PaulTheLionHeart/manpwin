@@ -84,6 +84,7 @@ struct workliststuff		// work list entry for std escape time engines
 #define	INITIALISING	2
 #define	INFORMATION	3
 #define	CALCULATINGREF	4
+#define	CLOSINGTHREADS	5
 
 //extern	WORD	colours;
 

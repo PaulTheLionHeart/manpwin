@@ -2373,6 +2373,13 @@ struct fractalspecificstuff fractalspecific[]=
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
+   {
+	// #define HAILSTONE	245	// 2D Hailstone sequence visualization with cycle detection
+   "Hailstone Sequence", "Start X", "Start Y", "Max Iterations", "Subtype", "Flags", ES, ES, ES, ES, ES, -10.0, 6.0, 150.0, 0,0,0,0,0,0,0,
+   -20.0, -20.0, 40.0, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 1.0,
+   NULL, NULL, "HAILSTONEDLG", HailstoneDlg, STDBAILOUT
+   },
+
 /*
    {
 //#define MARCUSMANDEL		233	// general Marcus fractal - use subtype to specify which one.

@@ -693,8 +693,23 @@
 #define ID_FRACVARTX09                          40069
 #define ID_FRACVARTX10                          40070
 #define IDC_KLEINIAN                            40080
+// Hailstone dialog controls
+#define IDC_HAILSTONE_STARTX			40101
+#define IDC_HAILSTONE_STARTY			40102
+#define IDC_HAILSTONE_MAXITER			40103
+#define IDC_HAILSTONE_DETECTCYCLES		40104
+#define IDC_HAILSTONE_SHOWAXES			40105
+#define IDC_HAILSTONE_SHOWLABELS		40106
+#define IDC_HAILSTONE_SHOWDOTS			40107
+#define IDC_HAILSTONE				40108
+#define IDD_HAILSTONE_DLG			40109
+#define IDM_HAILSTONE_TOGGLE_AXES		40110
+#define IDM_HAILSTONE_TOGGLE_LABELS		40111
+#define IDM_HAILSTONE_TOGGLE_DOTS		40112
+#define IDC_HAILSTONE_PRESET			40113
+#define IDM_SAVE_SVG				40120
 #define IDC_BG_BLUE                             50000
-#define IDC_TEST                                50000
 #define IDC_QUADRUPTWO                          50001
 #define IDC_THREEPLY                            50003
 #define IDC_CHIP                                50005
+#define IDC_TEST                                51000

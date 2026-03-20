@@ -7,6 +7,7 @@
 #include "OtherFunctions.h"
 #include "resource.h"
 #include "SafeStrings.h"
+#include "Hailstone.h"
 
 extern	char	LyapSequence[];		// hold the AB sequence for Lyapunov fractals
 extern	CFract	Fractal;
@@ -1239,3 +1240,115 @@ INT_PTR CALLBACK MalthusDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 	    }
       return FALSE ;
       }
+/**************************************************************************
+	Dialog Control for Hailstone Sequence
+**************************************************************************/
+
+INT_PTR CALLBACK HailstoneDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+    static HailstoneConfig config;
+    HWND hCtrl;
+    BOOL bTrans;
+
+    switch (message)
+	{
+	case WM_INITDIALOG:
+	    // Initialize from current OthFn settings
+	    config.showAxes = OthFn.GetShowAxesValue();
+	    config.showPointLabels = OthFn.GetShowPointLabelsValue();
+	    config.showDots = OthFn.GetShowDotsValue();
+	    config.preset = HailstonePreset::CURRENT_2D;  // Default preset
+	    config.startX = -10;
+	    config.startY = 6;
+	    config.maxIterations = 150;
+	    config.detectCycles = true;
+
+	    // Set dialog controls
+	    SetDlgItemInt(hDlg, IDC_HAILSTONE_STARTX, config.startX, TRUE);
+	    SetDlgItemInt(hDlg, IDC_HAILSTONE_STARTY, config.startY, TRUE);
+	    SetDlgItemInt(hDlg, IDC_HAILSTONE_MAXITER, config.maxIterations, FALSE);
+
+	    // Populate preset combobox
+	    hCtrl = GetDlgItem(hDlg, IDC_HAILSTONE_PRESET);
+	    SendMessage(hCtrl, CB_ADDSTRING, 0, (LPARAM)"Current 2D Hailstone");
+	    SendMessage(hCtrl, CB_ADDSTRING, 0, (LPARAM)"Simple Collatz");
+	    SendMessage(hCtrl, CB_ADDSTRING, 0, (LPARAM)"Symmetric Variant");
+	    SendMessage(hCtrl, CB_ADDSTRING, 0, (LPARAM)"Coordinate Swap");
+	    SendMessage(hCtrl, CB_ADDSTRING, 0, (LPARAM)"Bounded Growth");
+	    SendMessage(hCtrl, CB_SETCURSEL, 0, 0L);  // Select first item
+
+	    hCtrl = GetDlgItem(hDlg, IDC_HAILSTONE_DETECTCYCLES);
+	    SendMessage(hCtrl, BM_SETCHECK, config.detectCycles ? BST_CHECKED : BST_UNCHECKED, 0L);
+
+	    hCtrl = GetDlgItem(hDlg, IDC_HAILSTONE_SHOWAXES);
+	    SendMessage(hCtrl, BM_SETCHECK, config.showAxes ? BST_CHECKED : BST_UNCHECKED, 0L);
+
+	    hCtrl = GetDlgItem(hDlg, IDC_HAILSTONE_SHOWLABELS);
+	    SendMessage(hCtrl, BM_SETCHECK, config.showPointLabels ? BST_CHECKED : BST_UNCHECKED, 0L);
+
+	    hCtrl = GetDlgItem(hDlg, IDC_HAILSTONE_SHOWDOTS);
+	    SendMessage(hCtrl, BM_SETCHECK, config.showDots ? BST_CHECKED : BST_UNCHECKED, 0L);
+
+	    return TRUE;
+
+	case WM_COMMAND:
+	    switch ((int)LOWORD(wParam))
+		{
+		case IDOK:
+		{
+		// Get values from dialog
+		config.startX = GetDlgItemInt(hDlg, IDC_HAILSTONE_STARTX, &bTrans, TRUE);
+		config.startY = GetDlgItemInt(hDlg, IDC_HAILSTONE_STARTY, &bTrans, TRUE);
+		config.maxIterations = GetDlgItemInt(hDlg, IDC_HAILSTONE_MAXITER, &bTrans, FALSE);
+
+		if (config.maxIterations < 10) config.maxIterations = 10;
+		if (config.maxIterations > 500) config.maxIterations = 500;
+
+		// Get selected preset
+		hCtrl = GetDlgItem(hDlg, IDC_HAILSTONE_PRESET);
+		int presetIndex = (int)SendMessage(hCtrl, CB_GETCURSEL, 0, 0L);
+		config.preset = (HailstonePreset)presetIndex;
+
+		hCtrl = GetDlgItem(hDlg, IDC_HAILSTONE_DETECTCYCLES);
+		config.detectCycles = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+
+		hCtrl = GetDlgItem(hDlg, IDC_HAILSTONE_SHOWAXES);
+		config.showAxes = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+
+		hCtrl = GetDlgItem(hDlg, IDC_HAILSTONE_SHOWLABELS);
+		config.showPointLabels = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+
+		hCtrl = GetDlgItem(hDlg, IDC_HAILSTONE_SHOWDOTS);
+		config.showDots = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+
+		// Update OthFn with the new settings
+		OthFn.GetShowAxes(config.showAxes);
+		OthFn.GetShowPointLabels(config.showPointLabels);
+		OthFn.GetShowDots(config.showDots);
+
+		// Store starting point and max iterations in param array
+		param[0] = (double)config.startX;
+		param[1] = (double)config.startY;
+		param[2] = (double)config.maxIterations;
+		param[3] = (double)presetIndex;  // Store preset selection
+
+		 // --- Pack flags into param[4] ---
+		int flags = 0;
+		if (config.showAxes)        flags |= HS_SHOW_AXES;
+		if (config.showPointLabels) flags |= HS_SHOW_LABELS;
+		if (config.showDots)        flags |= HS_SHOW_DOTS;
+		if (config.detectCycles)    flags |= HS_DETECT_CYCLES;
+
+		param[4] = (double)flags;
+		EndDialog(hDlg, TRUE);
+		return TRUE;
+		}
+
+		case IDCANCEL:
+		    EndDialog(hDlg, FALSE);
+		    return FALSE;
+		}
+	    break;
+	}
+    return FALSE;
+    }

@@ -27,6 +27,7 @@
 #include "pixel.h"
 #include "plot.h"
 #include "OtherFunctions.h"
+#include "SafeStrings.h"
 
 //struct	workliststuff	worklist[MAXCALCWORK];
 int	/*workpass, */totpasses, curpass;	// for 1/2 pass type tracing 
@@ -295,7 +296,7 @@ void	pfract_main(HWND hwnd, char *szSaveFileName)
     POINTS	CursorLocShort;
 #ifdef DEBUG
     int	i;
-    wsprintf(s, "time_to_restart = %d, time_to_reinit = %d", time_to_restart, time_to_reinit);
+    _snprintf_s(s, 360, _TRUNCATE, "time_to_restart = %d, time_to_reinit = %d", time_to_restart, time_to_reinit);
     MessageBox (hwnd, s, "Entering user_data()", MB_ICONEXCLAMATION | MB_OK);
 #endif
 
@@ -351,7 +352,7 @@ void	pfract_main(HWND hwnd, char *szSaveFileName)
 #ifdef DEBUG
 	    for (i = 0; i < 32; i++)
 		{
-		wsprintf(s, "Col[%d]: %d %d %d", i, *(PalettePtr + 3 * i), 
+		_snprintf_s(s, 360, _TRUNCATE, "Col[%d]: %d %d %d", i, *(PalettePtr + 3 * i),
 					    *(PalettePtr + 3 * i + 1), *(PalettePtr + 3 * i + 2));
 		MessageBox (hwnd, s, "File colours", MB_ICONEXCLAMATION | MB_OK);
 		}
@@ -388,7 +389,7 @@ void	pfract_main(HWND hwnd, char *szSaveFileName)
 		{
 		if (write_png_file(hwnd, szSaveFileName, "ManpWIN", FractData()) < 0)
 		    {
-		    wsprintf(s, "Error: Could not write file: <%s>", szSaveFileName);
+		    _snprintf_s(s, 360, _TRUNCATE, "Error: Could not write file: <%s>", szSaveFileName);
 		    MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		    MessageBeep (0);
 		    AutoSaveFlag = false;
@@ -403,7 +404,7 @@ void	pfract_main(HWND hwnd, char *szSaveFileName)
 	    }
 	}
 #ifdef DEBUG
-    wsprintf(s, "NonStandardFractal = %d", NonStandardFractal);
+    _snprintf_s(s, 200, _TRUNCATE, "NonStandardFractal = %d", NonStandardFractal);
     MessageBox (hwnd, s, "Entering user_data()", MB_ICONEXCLAMATION | MB_OK);
 #endif
     }
@@ -480,13 +481,13 @@ void	CreateFractalName(BOOL UseszAppName, char *Name)
 	}
 
     if (Fractal.NumFunct == 1)
-	sprintf(SubData, "Fn=%s", Fractal.Fn1);
+	SAFE_SPRINTF(SubData, "Fn=%s", Fractal.Fn1);
     else if (Fractal.NumFunct == 2 && type != OSCILLATORS)			// we use NumFunct to display dimensions
-	sprintf(SubData, "Fn1=%s,Fn2=%s", Fractal.Fn1, Fractal.Fn2);
+	SAFE_SPRINTF(SubData, "Fn1=%s,Fn2=%s", Fractal.Fn1, Fractal.Fn2);
     else if (type == FORMULA || type == LSYSTEM || type == FRACTPAR || type == IFS)
-	sprintf(SubData, "Sub=%s", lsys_type);
+	SAFE_SPRINTF(SubData, "Sub=%s", lsys_type);
     else if (type == TIERAZON || type == CROSSROADS || type == ZIGZAG || type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
-	sprintf(SubData, "Sub=%d", subtype);
+	SAFE_SPRINTF(SubData, "Sub=%d", subtype);
     else if (type == CUBIC)
 	{
 	char	ch;
@@ -494,50 +495,50 @@ void	CreateFractalName(BOOL UseszAppName, char *Name)
 	if (param[0] == 1.0)   ch = 'C';
 	if (param[0] == 2.0)   ch = 'F';
 	if (param[0] == 3.0)   ch = 'K';
-	sprintf(SubData, "Sub=C%cIN", ch);
+	SAFE_SPRINTF(SubData, "Sub=C%cIN", ch);
 	}
     else if (type == MALTHUS || type == TRIANGLES || type == GEOMETRY || type == CIRCLES || type == PASCALTRIANGLE)
-	sprintf(SubData, "Sub=%c", subtype);
+	SAFE_SPRINTF(SubData, "Sub=%c", subtype);
     else if (type == SCREENFORMULA)
-	sprintf(SubData, "Frm=<%s>", FormulaString);
+	SAFE_SPRINTF(SubData, "Frm=<%s>", FormulaString);
     else 
-	sprintf(SubData, "Sub=%d", subtype);
+	SAFE_SPRINTF(SubData, "Sub=%d", subtype);
     if (BigNumFlag)
-	sprintf(PrecisionData, "Precision=%d", precision);
+	SAFE_SPRINTF(PrecisionData, "Precision=%d", precision);
     else
-	sprintf(PrecisionData, "");
+	SAFE_SPRINTF(PrecisionData, "");
 
     if (InsideMethod > NONE || OutsideMethod > NONE)
 	{
 	if (OutsideMethod > TIERAZONCOLOURS)
-	    sprintf(FilterString, "TZColour=%d, ", ColourMethod);
+	    SAFE_SPRINTF(FilterString, "TZColour=%d, ", ColourMethod);
 	else if (OutsideMethod > TIERAZONFILTERS)
-	    sprintf(FilterString, "TZFilter=%d, ", FilterType);
+	    SAFE_SPRINTF(FilterString, "TZFilter=%d, ", FilterType);
 	else if (InsideMethod > NONE)
-	    sprintf(FilterString, "Filter=%d, ", InsideMethod);
+	    SAFE_SPRINTF(FilterString, "Filter=%d, ", InsideMethod);
 	else
-	    sprintf(FilterString, "Filter=%d, ", OutsideMethod);
+	    SAFE_SPRINTF(FilterString, "Filter=%d, ", OutsideMethod);
 	}
     else
-	sprintf(FilterString, "");
+	SAFE_SPRINTF(FilterString, "");
 	              
     if (type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
 	{
-	wsprintf(Name, "%s: Thresh=%d, Plot=%c, Log=%d, Fract=%s, %s, Max Dim=%d, Co-ordSys=%s, Axes=%s", 
+	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, Plot=%c, Log=%d, Fract=%s, %s, Max Dim=%d, Co-ordSys=%s, Axes=%s",
 	    (UseszAppName) ? (LPSTR)szAppName : "", threshold, calcmode, logval, GetFractalName(), SubData, MaxDimensions, CoordSysInfo.CoordSys[CoordSystem], AxesText);
 	}
     else if (type == PERTURBATION)
-	wsprintf(Name, "%s: Thresh=%d, %sFract=%s-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
+	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, %sFract=%s-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
 	(UseszAppName) ? (LPSTR)szAppName : "", threshold, FilterString, (EnableApproximation) ? "(Pert-BLA)" : "(Pert)", GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
     else if (type == SLOPEDERIVATIVE)
-	wsprintf(Name, "%s: Thresh=%d, Fract=(Slope Der)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
+	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, Fract=(Slope Der)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
 	(UseszAppName) ? (LPSTR)szAppName : "", threshold, GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
     else if (type == SLOPEFORWARDDIFF)
-	wsprintf(Name, "%s: Thresh=%d, Fract=(Slope Fwd)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
+	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, Fract=(Slope Fwd)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
 	(UseszAppName) ? (LPSTR)szAppName : "", threshold, GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
     else
 	{
-	wsprintf(Name, "%s: Thresh=%d, Plot=%c, NumThreads=%d, %sLog=%d, Fract=%s, %s, Jul=%c, %s, Deg=%d, Spec=%d, 3D=%c, %s", 
+	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, Plot=%c, NumThreads=%d, %sLog=%d, Fract=%s, %s, Jul=%c, %s, Deg=%d, Spec=%d, 3D=%c, %s",
 	    (UseszAppName) ? (LPSTR)szAppName : "", threshold, calcmode, NumberThreads, FilterString, logval, GetFractalName(), SubData,
 	    ((juliaflag) ? 'T' : 'F'), ArithString, degree, special, ((_3dflag) ? 'T' : 'F'), PrecisionData);
 	}
@@ -548,7 +549,6 @@ void	CreateFractalName(BOOL UseszAppName, char *Name)
 **************************************************************************/
 
 void	DisplayFractal(HWND hwnd)
-
     {
     char    Name[6400];
 
@@ -563,8 +563,16 @@ void	DisplayFractal(HWND hwnd)
 #include"BigTrig.h"
 
 int	SpecialFractals(HWND hwnd, CPixel *Pix)
-
     {
+    if (type < 0 || type >= FRACTPAR)
+	{
+#if defined(_DEBUG)
+	char    buf[128];
+	SAFE_SPRINTF(buf, "Invalid type [%d] in SpecialFractals\n", type);
+	OutputDebugStringA(buf);
+#endif
+	return -1;
+	}
     switch (type)
 	{
 	case DYNAMICFP:
@@ -629,6 +637,7 @@ int	SpecialFractals(HWND hwnd, CPixel *Pix)
 	case ICON:
 	case QUADRUPTWO:
 	case THREEPLY:
+	case HAILSTONE:
 	    if (fractalspecific[type].flags & OTHERFNINPIXEL)
 		{
 		OthFn.InitOtherFunctions(type, subtype, hwnd, &TrueCol, &Dib, AntStatus, FrameEnd, FrameStart, mandel_width, hor, vert, ScreenRatio, &curpass, &totpasses, user_data, wpixels, CoordSystem, xAxis, yAxis, zAxis);
@@ -707,12 +716,12 @@ char	*ShowTime (double time)
     if (hr == 0)
 	{
 	if (min == 0)
-	    sprintf(TimeString, "%d.%1d sec", sec, tenths);
+	    SAFE_SPRINTF(TimeString, "%d.%1d sec", sec, tenths);
 	else
-	    sprintf(TimeString, "%d min, %d sec", min, sec);
+	    SAFE_SPRINTF(TimeString, "%d min, %d sec", min, sec);
 	}
     else
-	sprintf(TimeString, "%d hr, %d min", hr, min);
+	SAFE_SPRINTF(TimeString, "%d hr, %d min", hr, min);
     return (TimeString);
     }
   
@@ -731,7 +740,7 @@ void	GenPositionStr (char *PositionStr)
 
     if (type == FOURIER)					// there's no fractal dimensions here
 	return;
-//	wsprintf(s, "Hor = %f, Vert = %f, Width = %f", hor, vert, mandel_width); 
+//	_snprintf_s(s, MAXLINE, _TRUNCATE, "Hor = %f, Vert = %f, Width = %f", hor, vert, mandel_width); 
     if (BigNumFlag)
 	{
 	Big_centrex = BigHor + (BigWidth * ((double) width / (double) (2 * height)));
@@ -793,14 +802,14 @@ void	DisplayStatusBarInfo (int complete, char *text)
 	    case 'T':
 	    case '1':
 	    case 'F':
-		sprintf(PassStr, "Pass 1 of 1");
+		SAFE_SPRINTF(PassStr, "Pass 1 of 1");
 		break;
 	    case '2':
 	    case 'G':
 	    case 'S':
 	    case 'V':
 	    case 'H':
-		sprintf(PassStr, "Pass %d of %d", curpass, totpasses); 
+		SAFE_SPRINTF(PassStr, "Pass %d of %d", curpass, totpasses);
 		break;
 	    default: 
 		*PassStr = '\0';
@@ -832,23 +841,23 @@ void	DisplayStatusBarInfo (int complete, char *text)
 	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Image Completed in %s, %s, Lyapunov Sequence='%s'", ShowTime(ElapsedTime), PositionStr, LyapSequence);
 	else
 	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Image Completed in %s, %s", ShowTime(ElapsedTime), PositionStr);
-//	    sprintf(szStatus, "Image Completed in %s, %s", ShowTime (ElapsedTime), PositionStr);
+//	    SAFE_SPRINTF(szStatus, "Image Completed in %s, %s", ShowTime (ElapsedTime), PositionStr);
 	}
     else if (complete == INCOMPLETE)
 	{
-	sprintf(FinishedStr, ", Time %s", ShowTime (ElapsedTime));
+	SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime (ElapsedTime));
 	if (BigNumFlag)	    // now we have double double and quad double...
 	    {
 	    if (precision <= 30 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
-		sprintf(PrecisionStr, "DD Prec: %d", precision);
+		SAFE_SPRINTF(PrecisionStr, "DD Prec: %d", precision);
 	    else if (precision <= 60 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
-		sprintf(PrecisionStr, "QD Prec: %d", precision);
+		SAFE_SPRINTF(PrecisionStr, "QD Prec: %d", precision);
 	    else
 		{ 
 		if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
-		    sprintf(PrecisionStr, "QD Prec: %d", precision);
+		    SAFE_SPRINTF(PrecisionStr, "QD Prec: %d", precision);
 		else
-		    sprintf(PrecisionStr, "Arb Prec: %d", precision);
+		    SAFE_SPRINTF(PrecisionStr, "Arb Prec: %d", precision);
 		}
 	    }
 	if (OscAnimProc == MORPHING)
@@ -870,10 +879,16 @@ void	DisplayStatusBarInfo (int complete, char *text)
 	}
     else if (complete == CALCULATINGREF)
 	{
-	sprintf(FinishedStr, ", Time %s", ShowTime(ElapsedTime));
-	sprintf(PrecisionStr, "Arb Prec: %d", precision);
+	SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime(ElapsedTime));
+	SAFE_SPRINTF(PrecisionStr, "Arb Prec: %d", precision);
 	_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s", PertStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
 	StatusColour = 0x00FFFF80;
+	}
+    else if (complete == CLOSINGTHREADS)			// so the user knows what's happening
+	{
+	SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime(ElapsedTime));
+	_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Closing Threads, %s", FinishedStr);
+	StatusColour = 0x80FFFF80;
 	}
     else							// initialising
 	{
@@ -889,7 +904,6 @@ void	DisplayStatusBarInfo (int complete, char *text)
 //#define PASSWIDTH	20
 
 int	perform_worklist(HWND hwnd)
-
     {
     int		/*StripWidth, */SpecialFunctionsFlag;
     HANDLE	ghMutex = NULL;							// manage access to shared resources such as Dib and wpixels
@@ -956,6 +970,16 @@ int	perform_worklist(HWND hwnd)
     else
 	{
 	OutputDebugStringA("Pixel objects not initialised\n");
+	return -1;
+	}
+
+       if (type < 0 || type >= FRACTPAR)
+	{
+#if defined(_DEBUG)
+	char    buf[128];
+	SAFE_SPRINTF(buf, "Invalid type [%d] in perform_worklist before SpecialFractals()\n", type);
+	OutputDebugStringA(buf);
+#endif
 	return -1;
 	}
 

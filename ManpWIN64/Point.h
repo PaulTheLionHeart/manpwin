@@ -1,3 +1,4 @@
+#ifdef SPLAT
 #pragma once
 
 class Point
@@ -14,3 +15,4 @@ public:
 	int getY() { return y; };
 	int getIteration() { return iteration; };
 };
+#endif
