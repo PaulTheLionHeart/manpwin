@@ -51,10 +51,6 @@
 			<param name="Local" value="html/manp7sfk.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
-			<param name="Name" value="Creating Animations">
-			<param name="Local" value="html\manp7ani.htm">
-			</OBJECT>
-		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Colour Cycling">
 			<param name="Local" value="html/manp7sog.htm">
 			</OBJECT>
@@ -85,7 +81,7 @@
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Options Menu">
-			<param name="Local" value="html/manp7w1c.htm">
+			<param name="Local" value="html/manp7opt.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Animation Menu">

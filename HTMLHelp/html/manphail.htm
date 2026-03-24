@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Hailstone Sequence</title>
+
+<style>
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    line-height: 1.6;
+    max-width: 1000px;
+    margin: 20px;
+}
+
+h1 { color: #ffd700; }
+h2 { color: #4fd1ff; }
+h3 { color: #88ff66; }
+h4 { color: #99ddff; font-weight: normal; }
+
+code, pre {
+    background-color: #111;
+    padding: 8px;
+    border-radius: 5px;
+    display: block;
+}
+
+a {
+    color: #66ccff;
+    text-decoration: underline;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Hailstone Sequence</h1>
+
+<p><i>Visualisation of a 2D Collatz (hailstone) sequence.</i></p>
+
+<h2>Overview</h2>
+
+<p>
+The Hailstone Sequence in ManpWIN is a discrete dynamical system operating on
+integer coordinates (Z × Z). Starting from an initial point, transformation rules
+based on parity (even or odd values) generate a sequence of points that either
+form cycles or diverge outward.
+</p>
+
+<p>
+Unlike traditional fractals based on complex numbers, the Hailstone sequence
+explores behaviour on an integer lattice, revealing surprising structure from
+simple rules.
+</p>
+
+<h2>Access</h2>
+
+<p>
+Fractal Type: <b>Hailstone</b>
+</p>
+
+<h2>Configuration</h2>
+
+<h3>Starting Point</h3>
+<ul>
+<li><b>Start X</b> – initial X coordinate</li>
+<li><b>Start Y</b> – initial Y coordinate</li>
+<li>Default: (-10, 6)</li>
+</ul>
+
+<h3>Iterations</h3>
+<ul>
+<li><b>Max Iterations</b> – limits sequence length</li>
+</ul>
+
+<h3>Display Options</h3>
+<ul>
+<li>Show Axes</li>
+<li>Show Point Labels</li>
+<li>Show Dots</li>
+</ul>
+
+<h2>Transformation Rules</h2>
+
+<p>The default 2D Hailstone system applies the following rules:</p>
+
+<pre>
+(x even, y even) -> (x/2, y/2)
+(x even, y odd)  -> (x/2 + 1, 3y - 1)
+(x odd, y even)  -> (3x ? 1, y/2 - 1)
+(x odd, y odd)   -> (3x + 1, 3y - 3)
+</pre>
+
+<h2>Visualisation</h2>
+
+<p>The display shows:</p>
+
+<ul>
+<li>Sequence path as connected line segments</li>
+<li>Cycle detection highlighted in magenta</li>
+<li>Optional coordinate axes and tick marks</li>
+<li>Point labels showing (N, X, Y)</li>
+</ul>
+
+<h2>Behaviour</h2>
+
+<p>If a sequence remains bounded, it must eventually enter a repeating cycle,
+as there are only a finite number of integer points within any bounded region.</p>
+
+<ul>
+<li><b>Cycling</b> – returns to a previous point and repeats</li>
+<li><b>Divergence</b> – grows without bound</li>
+</ul>
+
+<p>
+If a sequence remains bounded, it must eventually cycle due to the finite number
+of integer points within any region.
+</p>
+
+<h2>Examples</h2>
+
+<ul>
+<li>(-10, 6) – complex behaviour before cycling</li>
+<li>(1, 1) – rapid cycle</li>
+<li>(-20, 15) – divergence</li>
+<li>(0, 0) – origin behaviour</li>
+</ul>
+
+<h2>Notes</h2>
+
+<p>
+This implementation was inspired by work from Mark Smith.
+</p>
+
+<h3>Acknowledgement</h3>
+
+<p>
+Original repository:<br>
+<a href="https://github.com/markhassellsmith/manpwin">
+https://github.com/markhassellsmith/manpwin
+</a>
+</p>
+
+<hr>
+<footer>
+  ManpWIN Help &copy; March 2026
+</footer>
+
+</body>
+</html>

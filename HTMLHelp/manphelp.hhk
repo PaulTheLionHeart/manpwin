@@ -1,406 +1,1926 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
-<HTML>
-<HEAD>
-<meta name="GENERATOR" content="Microsoft&reg; HTML Help Workshop 4.1">
-<!-- Sitemap 1.0 -->
-</HEAD><BODY>
 <UL>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="16 colour Graphics Modes">
-		<param name="Name" value="Known Limitations">
-		<param name="Local" value="html/manp7yuo.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="256 colour Graphics Modes">
-		<param name="Name" value="Known Limitations">
-		<param name="Local" value="html/manp7yuo.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="3D">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="3D Plotting">
-		<param name="Name" value="3D Plotting">
-		<param name="Local" value="html/manp7w1c.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Add spirals">
-		<param name="Name" value="3D Plotting">
-		<param name="Local" value="html/manp7w1c.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Bifurcation">
-		<param name="Name" value="Mandelbrot">
-		<param name="Local" value="html/manp7vow.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Biomorph">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Blinds">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Boundary Tracing">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Change image size">
-		<param name="Name" value="3D Plotting">
-		<param name="Local" value="html/manp7w1c.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Circle Squared">
-		<param name="Name" value="Mandelbrot">
-		<param name="Local" value="html/manp7vow.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Colour Cycling">
-		<param name="Name" value="3D Plotting">
-		<param name="Local" value="html/manp7w1c.htm">
-		<param name="Name" value="Colour Cycling">
-		<param name="Local" value="html/manp7sog.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Colour Menu">
-		<param name="Name" value="Colour Menu">
-		<param name="Local" value="html/manp7w1e.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Command line options">
-		<param name="Name" value="Parameter files">
-		<param name="Local" value="html/manp7vn4.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Contents">
-		<param name="Name" value="Contents">
-		<param name="Local" value="html/manp4c6w.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Copy image to clipboard">
-		<param name="Name" value="Edit">
-		<param name="Local" value="html/manp7vzm.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Co-ordinate System">
-		<param name="Local" value="html\manp7w1f.htm">
-		<param name="URL" value="html\manp7osc.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Cubic">
-		<param name="Name" value="Mandelbrot">
-		<param name="Local" value="html/manp7vow.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Decomposition">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Disclaimer">
-		<param name="Name" value="Disclaimer">
-		<param name="Local" value="html/manp9s8g.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Display location">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Dithering">
-		<param name="Name" value="Known Limitations">
-		<param name="Local" value="html/manp7yuo.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Double pass">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Edit">
-		<param name="Name" value="Edit">
-		<param name="Local" value="html/manp7vzm.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="End">
-		<param name="Name" value="Keyboard Commands">
-		<param name="Local" value="html/manp7yr4.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="ENTER">
-		<param name="Name" value="Keyboard Commands">
-		<param name="Local" value="html/manp7yr4.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="ESCAPE">
-		<param name="Name" value="Keyboard Commands">
-		<param name="Local" value="html/manp7yr4.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Exit">
-		<param name="Name" value="Open">
-		<param name="Local" value="html/manp7vzk.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Exponential">
-		<param name="Name" value="Mandelbrot">
-		<param name="Local" value="html/manp7vow.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="F1">
-		<param name="Name" value="Keyboard Commands">
-		<param name="Local" value="html/manp7yr4.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Fibonacci Spirals">
-		<param name="Name" value="Mandelbrot">
-		<param name="Local" value="html/manp7vow.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Fractal Options">
-		<param name="Name" value="Fractals">
-		<param name="Local" value="html/manp7vzp.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Fractal Types">
-		<param name="Name" value="Fractals">
-		<param name="Local" value="html/manp7vzp.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Fractals">
-		<param name="Name" value="Fractals">
-		<param name="Local" value="html/manp8els.htm">
-		<param name="Name" value="Fractals">
-		<param name="Local" value="html/manp7vzp.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Help">
-		<param name="Name" value="Paul's Fractal Generation Program">
-		<param name="Local" value="html/manp7w1h.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="History">
-		<param name="Name" value="History">
-		<param name="Local" value="html/manp7qy8.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Home">
-		<param name="Name" value="Keyboard Commands">
-		<param name="Local" value="html/manp7yr4.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Julia">
-		<param name="Name" value="3D Plotting">
-		<param name="Local" value="html/manp7w1c.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Keyboard Commands">
-		<param name="Name" value="Keyboard Commands">
-		<param name="Local" value="html/manp7yr4.htm">
-		<param name="Name" value="Colour Cycling">
-		<param name="Local" value="html/manp7sog.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Known Limitations">
-		<param name="Name" value="Known Limitations">
-		<param name="Local" value="html/manp7yuo.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Left Arrow">
-		<param name="Name" value="Keyboard Commands">
-		<param name="Local" value="html/manp7yr4.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Log scale">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Mandelbrot">
-		<param name="Name" value="Mandelbrot">
-		<param name="Local" value="html/manp7vow.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Matein Fractal">
-		<param name="Name" value="Mandelbrot">
-		<param name="Local" value="html/manp7vow.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Newton">
-		<param name="Name" value="Mandelbrot">
-		<param name="Local" value="html/manp7vow.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Open">
-		<param name="Name" value="Open">
-		<param name="Local" value="html/manp7vzk.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Options Menu">
-		<param name="Name" value="Colour Cycling">
-		<param name="Local" value="html/manp7sog.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Oscillator">
-		<param name="Local" value="html\manp7osc.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Page Down">
-		<param name="Name" value="Keyboard Commands">
-		<param name="Local" value="html/manp7yr4.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Page Up">
-		<param name="Name" value="Keyboard Commands">
-		<param name="Local" value="html/manp7yr4.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Palette files">
-		<param name="Name" value="Colour Menu">
-		<param name="Local" value="html/manp7w1e.htm">
-		<param name="Name" value="Colour Cycling">
-		<param name="Local" value="html/manp7sog.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Parameter files">
-		<param name="Name" value="Parameter files">
-		<param name="Local" value="html/manp7vn4.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Paul's Fractal Generation Program">
-		<param name="Name" value="Paul's Fractal Generation Program">
-		<param name="Local" value="html/manp7w1h.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Plotting mode">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Power">
-		<param name="Name" value="Mandelbrot">
-		<param name="Local" value="html/manp7vow.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Rational Maps">
-		<param name="Name" value="Mandelbrot">
-		<param name="Local" value="html/manp7vow.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="RDS">
-		<param name="Name" value="3D Plotting">
-		<param name="Local" value="html/manp7w1c.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Right Arrow">
-		<param name="Name" value="Keyboard Commands">
-		<param name="Local" value="html/manp7yr4.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Saveas">
-		<param name="Name" value="Open">
-		<param name="Local" value="html/manp7vzk.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Sine Function">
-		<param name="Name" value="Mandelbrot">
-		<param name="Local" value="html/manp7vow.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Single pass">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Solid Guessing">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Special Newton">
-		<param name="Name" value="Mandelbrot">
-		<param name="Local" value="html/manp7vow.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Stereograms">
-		<param name="Name" value="3D Plotting">
-		<param name="Local" value="html/manp7w1c.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Teserral Plotting">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Threshold">
-		<param name="Name" value="Plotting mode">
-		<param name="Local" value="html/manp7w1f.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="True colour files">
-		<param name="Name" value="Colour Menu">
-		<param name="Local" value="html/manp7w1e.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Version 1.0">
-		<param name="Name" value="Version 1.0">
-		<param name="Local" value="html/manp7r00.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Version 2.0">
-		<param name="Name" value="Version 2.0">
-		<param name="Local" value="html/manp7r1s.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Version 2.1">
-		<param name="Name" value="Version 2.1">
-		<param name="Local" value="html/manp7r3k.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Version 2.2">
-		<param name="Name" value="Version 2.2">
-		<param name="Local" value="html/manp7r5c.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Version 2.3">
-		<param name="Name" value="Version 2.3">
-		<param name="Local" value="html/manp7r74.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Version 2.8">
-		<param name="Name" value="Version 2.8">
-		<param name="Local" value="html/manp7r8w.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Zoom along edge">
-		<param name="Name" value="3D Plotting">
-		<param name="Local" value="html/manp7w1c.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Zoom from centre">
-		<param name="Name" value="3D Plotting">
-		<param name="Local" value="html/manp7w1c.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Zooming">
-		<param name="Name" value="Zooming">
-		<param name="Local" value="html/manp7sfk.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Zooming In">
-		<param name="Name" value="Zooming">
-		<param name="Local" value="html/manp7sfk.htm">
-		</OBJECT>
-	<LI> <OBJECT type="text/sitemap">
-		<param name="Name" value="Zooming Out">
-		<param name="Name" value="Zooming">
-		<param name="Local" value="html/manp7sfk.htm">
-		</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="3D and Oscillator Animation (Ctrl+O)">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="3D Plot (3)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Access">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Acknowledgement">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Acknowledgments">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Add Images (Y)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Additional Contributions">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Additional ManpWIN Fractals">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Analytic Derivative">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Animation">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Animation Menu">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Animation Menu">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Animation Setup Example">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="ant">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Ant Automaton, (type=ant)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Apollonian Circles">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Arbitrary Precision">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Arithmetic">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Arithmetic Notes">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Arithmetic Types">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Art-Matrix Fractals">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Axes Display">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Background Colour">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Bailout">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Bailout">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Bailout">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Bailout">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Bailout Test">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="barnsleyj1">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="barnsleyj2">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="barnsleyj3">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="barnsleym1">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="barnsleym2">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="barnsleym3">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Basic Parameters">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Behaviour">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="bif+sinpi">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="bif=sinpi">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="biflambda">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="bifmay">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="bifstewart">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="bifurcation">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Bifurcation, (type=bifxxx)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Biomorph Colour">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Bla">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Bla">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Bla">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Bounded length approximation">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Burning ship">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Burning ship">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Burning ship">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="cellular">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Change Image Size (Shift+Z)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="chip">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="circle">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Circle, (type=circle)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Circles">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="cmplxmarksjul">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="cmplxmarksmand">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7col.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7w1e.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7pal.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7sog.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7yuo.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7vzp.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7vlc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour Controls">
+    <param name="Local" value="html\manp7w1e.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour Cycling">
+    <param name="Local" value="html\manp7sog.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour Menu">
+    <param name="Local" value="html\manp7w1e.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour Menu">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Colour Smoothing">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Commands">
+    <param name="Local" value="html\manp7vzp.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Commands">
+    <param name="Local" value="html\manp7w1h.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Common Examples">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Compatibility">
+    <param name="Local" value="html\manp7yuo.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Complex Plane and Julia Sets">
+    <param name="Local" value="html\manp8els.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Configuration">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Contents">
+    <param name="Local" value="html\manp7vlc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Controls During Animation">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Coordinate System">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Coordinate Systems">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Creating Videos with ManpMovieMaker">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Cross Roads">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Curlicues">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Curves">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Decomposition Colour">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Derivative">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Derivative">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Derivative">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Derivative">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Description">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Description">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Details">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Details">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Development and Heritage">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Development Notes">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="diffusion">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Disclaimer">
+    <param name="Local" value="html\manp9s8g.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Disclaimer">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Display Location (B)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Display Options">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Distance Estimation">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Distance Estimator">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Double Precision">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Double-Double and Quad-Double">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="During Animation">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="dynamic">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Edit Menu">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Edit Menu">
+    <param name="Local" value="html\manp7vzm.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Edit Operations">
+    <param name="Local" value="html\manp7vzm.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Editing Colours">
+    <param name="Local" value="html\manp7pal.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Enhancements">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Escher-Sierpinski">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="escher_julia">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Evolution">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Evolution">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Example">
+    <param name="Local" value="html\manp7sfk.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Example">
+    <param name="Local" value="html\manp7vlc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Example">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Example">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Example 1">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Example 2 (Julia)">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Examples">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Examples">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Explanations and Justification">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Extended Tokens">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Features">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="File Handling">
+    <param name="Local" value="html\manp7yuo.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="File Menu">
+    <param name="Local" value="html\manp7vzk.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="File Menu">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="File Operations">
+    <param name="Local" value="html\manp7vzk.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Final Comments">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Flarium Fractals">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Floatexp">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Flow Control">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="fn(z*z)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="fn*fn">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="fn*z+z">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="fn+fn">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Format">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Format Notes">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="formula">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Formula Parser">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Formula, (type=formula)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Forward Differencing">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Foundations">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fourier Animation (Shift+F)">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractal Contributions">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractal Exploration">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractal Menu">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractal Menu">
+    <param name="Local" value="html\manp7vzp.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractal Options">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractal Type Encoding">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractal Types Supported">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractals">
+    <param name="Local" value="html\manp8els.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractals and Nature">
+    <param name="Local" value="html\manp8els.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractals and Waveforms">
+    <param name="Local" value="html\manp8els.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractint Integration">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="frothybasin">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Full History">
+    <param name="Local" value="html\manp7qy8.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="General Format">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="General Parameters">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Generate Statistics File for MPEG Generation">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="gingerbread">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Hailstone Sequence">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="halley">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Halley, (type=halley)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Help">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Help Menu">
+    <param name="Local" value="html\manp7w1h.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="henon">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Henon Attractors, (type=henon)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="High Precision and Perturbation">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="hopalong">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="How It Works">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="hypercomplex">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="hypercomplexj">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Icon, Label= (type=icon/icon3d)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="IFS">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Ikeda Animation (Ctrl+I)">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Ikeda Attractor">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Input and Control">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Inside Filters">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Inversion Animation (Shift+I)">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Iterations">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="julfn+exp">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="julfn+zsqrd">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="julia">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia">
+    <param name="Local" value="html\manp8els.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia Animation (J)">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia Fractal (Space)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia Sets (type=julia)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julia Toggle Spacebar Commands">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="julia(fn||fn)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="julia4">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="julia_inverse">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="julibrot">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Julibrots, (type=julibrot)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="julzpower">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="julzzpwr">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Keyboard Commands">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Knots">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Known Limitations">
+    <param name="Local" value="html\manp7yuo.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="L-Systems, (type=lsystem)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="lambda">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Lambda Sets, (type=lambda)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="lambda(fn||fn)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="lambdafn">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Lambdafn, (type=lambdafn)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Latest Release">
+    <param name="Local" value="html\manp7qy8.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="latoocarfian">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Legal Notice">
+    <param name="Local" value="html\manp9s8g.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Light Direction">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Log Value">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="lorenz3d1">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="lorenz3d3">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="lorenz3d4">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="lsystem">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="lyapunov">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="magnet1j">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="magnet1m">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="magnet2j">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="magnet2m">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Malthus Population Growth">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Malthus Rate Animation (M)">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="mandel">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="mandel(fn||fn)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="mandel4">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelbrot">
+    <param name="Local" value="html\manp8els.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelbrot">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelbrot">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelbrot">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelbrot">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelbrot">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelbrot">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelbrot">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelbrot">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelbrot">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelbrot Derivatives:">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="mandelcloud">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelcloud, (type=mandelcloud)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="mandelfn">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mandelfn, (type=mandelfn)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="mandellambda">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="mandphoenix">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="mandphoenixclx">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="manfn+exp">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="manfn+zsqrd">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="manlam(fn||fn)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="manowar">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="manowarj">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="ManpWIN Help">
+    <param name="Local" value="html\manp7vlc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="manzpower">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="manzzpwr">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Maps in ManpWIN">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Marcus Fractals">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Marcus Fractals">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="marksjulia">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="marksmandel">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="marksmandelpwr">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Martin">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mathematical Sources">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mec-Spiders Web">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Menus">
+    <param name="Local" value="html\manp7vlc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="More About Colour">
+    <param name="Local" value="html\manp7col.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Morphing">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Morphing (Shift+M)">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Multi-thread">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Multi-thread">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Multi-thread">
+    <param name="Local" value="html\manp7yuo.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Multi-thread">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Multi-thread">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Multi-thread">
+    <param name="Local" value="html\manp7qy8.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Multi-threading">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Multi-threading">
+    <param name="Local" value="html\manp7yuo.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="newtbasin">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="newton">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Newton, (type=newton)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manp7col.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manp7pal.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manp7yuo.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manp8els.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manp7sog.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Notes">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Number of Variables">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Numeric Triangles">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Operator Precedence">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Options Menu">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Orbit Colour">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Orbit Fractals">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Oscillators and Fractal Maps">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Oscillators, Attractors and Dynamic Systems">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Other Fractal Types">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Outside Filters">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7col.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7pal.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7yuo.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7vzp.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp8els.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7sog.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7sfk.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Overview">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette">
+    <param name="Local" value="html\manp7col.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette">
+    <param name="Local" value="html\manp7w1e.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette">
+    <param name="Local" value="html\manp7sog.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette">
+    <param name="Local" value="html\manp7pal.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette (MAP) Mode">
+    <param name="Local" value="html\manp7col.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette Definition">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette Editing">
+    <param name="Local" value="html\manp7pal.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette Operations">
+    <param name="Local" value="html\manp7pal.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Palette Scaling">
+    <param name="Local" value="html\manp7pal.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Parameter Animation (P)">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Parameter Animation (P)">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Parameter Exploration">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Parameter Files and Command Line Options">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Parameters">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Paul's Fractal Generation Program">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Perturbation">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Perturbation">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Perturbation">
+    <param name="Local" value="html\manp7yuo.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Perturbation">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Perturbation">
+    <param name="Local" value="html\manp7sfk.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Perturbation">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Perturbation">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Perturbation">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Perturbation">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Perturbation">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Perturbation">
+    <param name="Local" value="html\manp7qy8.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="phoenix">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="phoenixcplx">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="pickover">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="plasma">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Plasma Clouds, (type=plasma)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Plotting Methods">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="popcorn">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="popcornjul">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Precision and Limits">
+    <param name="Local" value="html\manp7sfk.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Precision and Speed">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Predefined Variables">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Previous Release">
+    <param name="Local" value="html\manp7qy8.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="quadruptwo">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="quat">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Quaternion, Label= (type=quat,quatjul)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="quatjul">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Radius / Centre">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Random Dot Stereogram (R)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Real Time Julia (Ctrl+Space)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Reference">
+    <param name="Local" value="html\manp7vlc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Related Topics">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Related Topics">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Rendering & Features">
+    <param name="Local" value="html\manp7yuo.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Rendering Options">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Rendering Techniques">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Revision History">
+    <param name="Local" value="html\manp7qy8.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="rossler3D">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Rotation">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Rotation">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Rotation">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Rotation and Axes">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Saving the Palette">
+    <param name="Local" value="html\manp7pal.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="See Also">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Selected Fractal Systems">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Selecting a Range">
+    <param name="Local" value="html\manp7pal.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Set Real Time Julia Thumbnail Size (Shift+Space)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Setup Folder Paths">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Setup Multi-threading for Perturbation and Slope (Ctrl+M)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Setup Options Menu">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Setup Stereo Pair (Shift+D)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="sierpinski">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Sierpinski Flowers">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Slope">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Slope">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Slope">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Slope">
+    <param name="Local" value="html\manp7qy8.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Slope">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Slope">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Slope">
+    <param name="Local" value="html\manp7yuo.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Slope">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Slope and Arithmetic">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Slope Fractals">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Slope Shading">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Special Colour">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Special Function Notes">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Specific ManpWIN Fractals">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="spider">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="sqr(1/fn)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="sqr(fn)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Stars and Polygons">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Start">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Starting Point">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Stereo Pairs (Z)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Stopping Animation">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Strange Attractors">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Summary of Fractal Types Found in Fractint">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Surfaces">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Surfaces, Knots and Curves">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Switching Modes">
+    <param name="Local" value="html\manp7col.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Symmetry Options">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Tesseral Fill Colour">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="test">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="tetrate">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="threeply">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Threshold">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Tierazon Colouring">
+    <param name="Local" value="html\manp7col.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="TieraZon Fractals">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="tim's_error">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Toggle Display Palette (Shift+T)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Toggle Random Dot Stereogram Guide Spots (Shift+R)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Transfer Factor">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Transformation Rules">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="True Colour Mode">
+    <param name="Local" value="html\manp7col.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="unity">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Unity, (type=unity)">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Usage">
+    <param name="Local" value="html\manp7sog.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Use Default (Fractint) Palette (Ctrl+P)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Using Oscillators">
+    <param name="Local" value="html\manp7osc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Visualisation">
+    <param name="Local" value="html\manphail.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="volterra-lotka">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Width Factor">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="ZigZag Spirals">
+    <param name="Local" value="html\manp7mar.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp7vlc.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp8els.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp7for.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp7col.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp7yr4.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp7hgw.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp7sfk.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp7pre.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp7vow.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom">
+    <param name="Local" value="html\manp4c6w.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom Along Edge (E)">
+    <param name="Local" value="html\manp7w1c.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom Animation (Ctrl+A)">
+    <param name="Local" value="html\manp7w1d.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zoom Modes">
+    <param name="Local" value="html\manp7sfk.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zooming">
+    <param name="Local" value="html\manp7sfk.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zooming In">
+    <param name="Local" value="html\manp7sfk.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Zooming Out">
+    <param name="Local" value="html\manp7sfk.htm">
+</OBJECT>
 </UL>
-</BODY></HTML>

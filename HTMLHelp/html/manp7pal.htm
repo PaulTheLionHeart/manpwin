@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Palette Editing</title>
+
+<style>
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+}
+
+h1 { color: #ffd700; }
+h2 { color: #4fd1ff; }
+h3 { color: #88ff66; }
+
+code {
+    background-color: #111;
+    padding: 4px 6px;
+    border-radius: 4px;
+}
+
+a {
+    color: #66ccff;
+    text-decoration: underline;
+}
+
+pre {
+    background-color: #111;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+table {
+    margin-top: 10px;
+    border-collapse: collapse;
+}
+
+td {
+    padding: 6px 14px 6px 0;
+    vertical-align: top;
+    font-size: 1.05em;
+}
+
+td:empty + td {
+    font-size: 1.05em;
+    color: #cccccc;
+}
+
+code.token {
+    background-color: #1a1a1a;
+    color: #67ff00;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1.2em;
+    letter-spacing: 0.5px;
+}
+
+td:first-child + td {
+    font-weight: 600;
+    color: #ffffff;
+}
+
+td:empty + td {
+    font-weight: normal;
+    color: #bbbb55;
+    font-size: 1.0em;
+}
+
+code.token:hover {
+    background-color: #222;
+    color: #ffdd55;
+}
+
+footer {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #888888;
+}
+</style>
+
+</head>
+
+<h1>Palette Editing</h1>
+
+<h2>Overview</h2>
+
+<p>
+ManpWIN provides an interactive palette editor for modifying colour maps used
+in fractal rendering. This allows precise control over colour ranges, gradients,
+and effects.
+</p>
+
+<img src="../images/EditPal.jpg" alt="Palette Editor">
+
+<h2>Selecting a Range</h2>
+
+<p>
+To modify part of the palette:
+</p>
+
+<ul>
+<li>Click and drag the left mouse button across the palette bar</li>
+<li>This selects the range of colours to be edited</li>
+</ul>
+
+<p>
+The selected region can then be modified using the available controls.
+</p>
+
+<h2>Editing Colours</h2>
+
+<p>
+The editor allows control over the start and end of the selected range:
+</p>
+
+<ul>
+<li>Set RGB values directly (Red, Green, Blue)</li>
+<li>Adjust values using the increment controls</li>
+<li>Enter colours using hexadecimal format (RRGGBB)</li>
+</ul>
+
+<p>
+Changes are applied across the selected range, allowing smooth gradients or
+sharp transitions.
+</p>
+
+<h2>Palette Operations</h2>
+
+<p>
+The following operations are available:
+</p>
+
+<ul>
+<li><b>Change Range</b> – apply new colour values to the selected range</li>
+<li><b>Invert Colours</b> – reverse colours within the selection</li>
+<li><b>Greyscale</b> – convert the selection to greyscale</li>
+<li><b>Rotate Colours</b> – shift colours cyclically</li>
+<li><b>Swap Red/Green/Blue</b> – exchange colour channels</li>
+</ul>
+
+<h2>Palette Scaling</h2>
+
+<p>
+For fractals with high iteration counts:
+</p>
+
+<ul>
+<li><b>Stretch Palette</b> – spreads colours across a larger range</li>
+<li><b>Repeat Palette</b> – repeats the palette to cover more iterations</li>
+</ul>
+
+<p>
+These options are useful when the palette appears compressed or lacks detail
+at higher iteration levels.
+</p>
+
+<h2>Saving the Palette</h2>
+
+<p>
+Once editing is complete:
+</p>
+
+<ul>
+<li>The updated palette is applied immediately to the current image</li>
+<li>The palette can be saved using the Colour Menu (<b>Q</b> or <b>Ctrl+N</b>)</li>
+</ul>
+
+<p>
+Saving the palette allows it to be reused in future renders or parameter files.
+</p>
+
+<h2>Notes</h2>
+
+<p>
+Palette editing is an experimental and creative process. Small changes can
+produce dramatically different visual results, so experimentation is encouraged.
+</p>
+
+<hr>
+<footer>
+    ManpWIN Help &copy; March 2026
+</footer>
+
+</body>
+</html>

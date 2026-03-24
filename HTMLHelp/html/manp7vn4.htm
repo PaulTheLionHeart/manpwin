@@ -1,182 +1,334 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<HTML>
-<HEAD>
-<META HTTP-EQUIV="Content-Type" Content="text/html; charset=Windows-1252">
-<TITLE>Parameter files</TITLE>
-</HEAD>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Parameter Files and Command Line Options</title>
 
-<BODY BGCOLOR="#FFFFFF" TEXT="#000000">
+<style>
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+}
+
+h1 { color: #ffd700; }
+h2 { color: #4fd1ff; }
+h3 { color: #88ff66; }
 
-<OBJECT TYPE="application/x-oleobject" CLASSID="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
-	<PARAM NAME="Keyword" VALUE="Parameter files">
-	<PARAM NAME="Keyword" VALUE="Command line options">
-</OBJECT>
+code {
+    background-color: #111;
+    padding: 4px 6px;
+    border-radius: 4px;
+}
 
-<P><A NAME="pg410"></A><B>Parameter Files and Command Line Options</B> </P>
+pre {
+    background-color: #111;
+    padding: 10px;
+    border-radius: 5px;
+}
 
-<P>Parameter files are used to save favourite areas and parameters for fractals currently being processed. Their main advantage is that they take very little room to store.  </P>
+table {
+    margin-top: 10px;
+    border-collapse: collapse;
+}
 
-<P>The main parameters are:  </P>
+td {
+    padding: 4px 12px 4px 0;
+    vertical-align: top;
+}
 
-<P>-cScreen dimensions Xleft, Ytop, Height </P>
+code.token {
+    background-color: #1a1a1a;
+    color: #ffd700;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1.2em;
+    letter-spacing: 0.5px;
+}
 
-<P>-mScreen processing method: </P>
+td:first-child {
+    width: 80px;
+}
 
-<P>1=1pass </P>
+code.token:hover {
+    background-color: #222;
+    color: #ffdd55;
+}
 
-<P>2=2pass </P>
+</style>
 
-<P>G=Guessing followed by passes </P>
+</head>
 
-<P>B=Boundary Tracing </P>
+<body>
 
-<P>T=Terresal </P>
+<h1>Parameter Files and Command Line Options</h1>
 
-<P>H=Horizontal Blinds </P>
+<h2>Overview</h2>
 
-<P>V=Vertical Blinds </P>
+<p>
+Parameter files are used to save favourite locations and settings for fractals.
+They are compact and allow quick restoration of complex views.
+</p>
 
-<P>-jIf present indicates Julia set. x,y location follows flag </P>
+<hr>
 
-<P>-tThreshold beyond which iteration halts 1 - 32000 </P>
+<h2>General Parameters</h2>
 
-<P>-iThe 'inside' colour: 0 - 255 </P>
+<table>
 
-<P>-3Plot as 3D. This is followed by: </P>
+<tr><td><code class="token">-c</code></td><td>Screen dimensions: Xleft, Ytop, Height</td></tr>
 
-<P>Scaling x </P>
+<tr><td><code class="token">-m</code></td><td>Screen processing method:</td></tr>
 
-<P>Scaling y </P>
+<tr><td></td><td>
+1 = 1 pass<br>
+2 = 2 pass<br>
+G = Guessing + passes<br>
+B = Boundary Tracing<br>
+T = Tesseral (tiling method)<br>
+H = Horizontal Blinds<br>
+V = Vertical Blinds
+</td></tr>
 
-<P>Scaling z </P>
+<tr><td><code class="token">-j</code></td><td>Julia set flag followed by x,y location</td></tr>
 
-<P>Rotation x (deg) </P>
+<tr><td><code class="token">-t</code></td><td>Maximum iterations (historically called "threshold") (1 - 50,000,000)</td></tr>
 
-<P>Rotation y (deg) </P>
+<tr><td><code class="token">-i</code></td><td>Inside colour (0 – 255)</td></tr>
 
-<P>Rotation z (deg) </P>
+<tr><td><code class="token">-3</code></td><td>3D plotting parameters:</td></tr>
 
-<P>-uTrue Colour Palette. This is followed by: </P>
+<tr><td></td><td>
+Scaling X, Y, Z<br>
+Rotation X, Y, Z (degrees)
+</td></tr>
 
-<P>Start Red Colour </P>
+<tr><td><code class="token">-u</code></td><td>True colour palette:</td></tr>
 
-<P>Start Green Colour </P>
+<tr><td></td><td>
+Start RGB values<br>
+RGB increment values
+</td></tr>
 
-<P>Start Blue Colour </P>
+<tr><td><code class="token">-s</code></td><td>Save image (PNG format)</td></tr>
 
-<P>Red Increment value </P>
+<tr><td><code class="token">-o</code></td><td>Rotation parameter (context-dependent)</td></tr>
 
-<P>Green Increment value </P>
+<tr><td><code class="token">-e</code></td><td>Exit after completion</td></tr>
 
-<P>Blue Increment value </P>
+<tr><td><code class="token">-p</code></td><td>Periodicity</td></tr>
 
-<P>-sSaveAs filename (in PNG foprmat) </P>
+<tr><td><code class="token">-r</code></td><td>AutoStereo depth</td></tr>
 
-<P>-oStereo pairs </P>
+<tr><td><code class="token">-b</code></td><td>Biomorph colour</td></tr>
 
-<P>-eExit after completion </P>
+<tr><td><code class="token">-k</code></td><td>Decomposition colours (power of 2)</td></tr>
 
-<P>-pPeriodicity </P>
+<tr><td><code class="token">-l</code></td><td>Logarithmic palette (with start value)</td></tr>
 
-<P>-rAutoStereo depth </P>
+<tr><td><code class="token">-a</code></td><td>Palette filename</td></tr>
+</table>
 
-<P>-bBiomorph colour </P>
 
-<P>-kNumber of decomposition colours (power of 2) </P>
+<h2>Extended Tokens</h2>
 
-<P>-lLogarithmic palette (followed by starting value) </P>
+<p>
+Additional single-character tokens are used internally and in parameter files
+to control specialised behaviour.
+</p>
 
-<P>-aPalette filename </P>
+<table>
 
-<P>The following are ManpWIN fractal types: </P>
+<tr><td><code class="token">-~</code></td><td>Colour smoothing</td></tr>
+<tr><td><code class="token">-^</code></td><td>Palette shift</td></tr>
+<tr><td><code class="token">-@</code></td><td>Iteration scaling (divide iterations)</td></tr>
+<tr><td><code class="token">-#</code></td><td>Lyapunov sequence</td></tr>
 
-<P>000Mandelbrot fractal </P>
+<tr><td><code class="token">-$</code></td><td>Distance estimation</td></tr>
+<tr><td><code class="token">-2</code></td><td>3D oscillator rotation</td></tr>
+<tr><td><code class="token">-D</code></td><td>Filter method</td></tr>
+<tr><td><code class="token">-F</code></td><td>Fractal type</td></tr>
 
-<P>078Newton fractal followed by the power </P>
+<tr><td><code class="token">-G</code></td><td>Screen size</td></tr>
+<tr><td><code class="token">-H</code></td><td>Stereo pairs</td></tr>
+<tr><td><code class="token">-N</code></td><td>Function selection</td></tr>
+<tr><td><code class="token">-Q</code></td><td>Coordinate system</td></tr>
 
-<P>048Bifurcation fractal followed by the type </P>
+<tr><td><code class="token">-V</code></td><td>Bailout limit</td></tr>
+<tr><td><code class="token">-W</code></td><td>Parameter list</td></tr>
+<tr><td><code class="token">-X</code></td><td>Invert fractal</td></tr>
+<tr><td><code class="token">-Y</code></td><td>Palette starting offset</td></tr>
+<tr><td><code class="token">-Z</code></td><td>Parameter requirements</td></tr>
 
-<P>049Cubic fractal followed by the type and 'special colour' </P>
+</table>
 
-<P>050Power fractal followed by the power </P>
+<p>
+These tokens are specified after the <code class="token">-</code> prefix in parameter files.
+</p>
 
-<P>052Circle Squared fractal </P>
+<p>
+Some of these tokens originate from early versions of ManpWIN and Fractint,
+and remain for compatibility with existing parameter files.
+</p>
 
-<P>053Special Newton </P>
+<hr>
 
-<P>054Rational Maps followed by type </P>
+<h2>Fractal Type Encoding</h2>
 
-<P>055Sin fractal </P>
+<p>
+Fractal types in ManpWIN are encoded using a numeric identifier followed by
+optional parameters. These identifiers correspond to internal fractal definitions.
+</p>
 
-<P>056Exponentialfractal </P>
+<h3>Format</h3>
 
-<P>057'MATEIN' fractal </P>
+<pre>
+-f&lt;type&gt;[parameters]
+</pre>
 
-<P>The following fractal types from Fractint are supported by ManpWIN:  </P>
+<p>
+Examples:
+</p>
 
-<P>013Barnsley1 </P>
+<pre>
+-f004        Mandelbrot
+-f0503       Power fractal (power = 3)
+-f049B5      Cubic fractal (subtype B, colour option 5)
+</pre>
 
-<P>015Barnsley2 </P>
+<hr>
 
-<P>028Barnsley3 </P>
+<h3>Parameters</h3>
 
-<P>128Cellular </P>
+<p>
+Additional values may follow the fractal type depending on the selected fractal.
+These may include:
+</p>
 
-<P>129Frothy Basin </P>
+<ul>
+<li><b>Subtype</b> – variant of the fractal</li>
+<li><b>Degree / Power</b> – exponent used in iteration</li>
+<li><b>Special</b> – colouring or behavioural modifier</li>
+<li><b>Additional parameters</b> – context-specific values</li>
+</ul>
 
-<P>090Ginger Bread Man </P>
+<hr>
 
-<P>120Hopalong </P>
+<h3>Notes</h3>
 
-<P>040Kamtorus </P>
+<ul>
+<li>The available fractal types are extensive and continue to evolve.</li>
+<li>Some types originate from Fractint and legacy implementations.</li>
+<li>Others are specific to ManpWIN (e.g. Oscillators, Maps, Hailstone).</li>
+<li>Certain fractals use subtype lookup tables or named variants.</li>
+</ul>
 
-<P>042Kamtorus 3D </P>
+<p>
+These codes can be determined by selecting a fractal and saving a parameter file from within ManpWIN.
+</p>
 
-<P>010Lambda Exponent </P>
+<hr>
 
-<P>063Lorenz </P>
+<h3>Common Examples</h3>
 
-<P>084Lorenz 3D 1 </P>
+<table>
+<tr><td>004</td><td>Mandelbrot</td></tr>
+<tr><td>050</td><td>Power fractals</td></tr>
+<tr><td>078</td><td>Newton fractals</td></tr>
+<tr><td>223</td><td>Burning Ship</td></tr>
+<tr><td>245</td><td>Hailstone</td></tr>
+</table>
 
-<P>124Lorenz 3D 2 </P>
+<h2>Examples</h2>
 
-<P>125Lorenz 3D 3 </P>
+<h3>Example 1</h3>
 
-<P>126Lorenz 3D 4 </P>
+<pre>
+-c-1.593327993602331,-0.401367434793618,1.818688275512788 
+-t250 
+-i246 
+-M1 
+-f049B5
+</pre>
 
-<P>123Lyapunov </P>
+<p>
+Corner, threshold, inside colour, 1-pass rendering, cubic fractal (type B, colour 5)
+</p>
 
-<P>127Mandel Cloud </P>
+<pre>
+-u60,120,30,100,255,200 
+-3 0.900000,0.900000,0.600000,10.000000,5.000000,0.000000 
+-p0
+</pre>
 
-<P>082MandelLambda </P>
+<p>
+True colour palette, 3D parameters, periodicity
+</p>
 
-<P>122Martin </P>
+<hr>
 
-<P>089Picover </P>
+<h3>Example 2 (Julia)</h3>
 
-<P>007Plasma </P>
+<pre>
+-c-2.66667,-2.0000,4.00000 
+-t250 
+-i246 
+-MG2 
+-J-0.752109827,0.10027855 
+-u60,120,30,100,255,200 
+-p0
+</pre>
 
-<P>086Rossler </P>
+<hr>
 
-<P>012Sierpinski </P>
+<h2>Palette Definition</h2>
 
-<P>093Spider </P>
+<p>
+Parameter files may include a palette definition used for colouring the fractal.
+This is stored as a compact encoded string following the <code class="token">Palette=</code> keyword.
+</p>
 
-<P>092Unity </P>
+<h3>Format</h3>
 
-<P>130Walk </P>
+<pre>
+Palette=
+&lt;encoded palette data&gt;
+</pre>
 
-<P>These codes can be found by selecting the fractal and saving a parameter file.  </P>
+<p>
+The palette data is stored as a continuous encoded sequence representing colour values.
+This format is optimised for compact storage rather than readability.
+</p>
 
-<P>Example 1:  </P>
+<h3>Notes</h3>
 
-<P>-c-1.593327993602331,-0.401367434793618,1.818688275512788 -t250 -i246 -M1 -f049B5 Corner; threshold; inside colour; 1 pass; fractal type 49 (cubic) of type B with a special colour of 5  </P>
+<ul>
+<li>The palette is automatically interpreted by ManpWIN when loading the parameter file.</li>
+<li>It defines either palette-based or true-colour gradients depending on context.</li>
+<li>The encoded format is not intended for manual editing.</li>
+</ul>
 
-<P>-u60,120,30,100,255,200 -30.900000,0.900000,0.600000,10.000000,5.000000,0.000000 -p0 True colour palette; 3D params; periodicity level  </P>
+<h3>Example</h3>
 
-<P>Example 2 (Julia):  </P>
+<pre>
+Palette=
+0000c2000WA0cYA0000ec20e0G5ecYAeKH5LwJ5LKlFLwnFLKH5zwJ5zKlFzwnFz...
+</pre>
 
-<P>-c-2.66667,-2.0000,4.00000 -t250 -i246 -MG2 -J-0.752109827,0.10027855 -u60,120,30,100,255,200 -p0  </P>
+<p>
+(The full palette string may be several lines long.)
+</p>
 
-</BODY>
-</HTML>
+<p>
+Palette data is generated internally or via the palette editor and is typically
+not modified directly by users.
+</p>
+
+<footer>
+ManpWIN Help &copy; March 2026
+</footer>
+
+</body>
+</html>

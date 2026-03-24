@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Fractal Options</title>
+
+<style>
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+    max-width: 1000px;
+}
+
+h1 { color: #ffd700; }
+h2 { color: #4fd1ff; }
+h3 { color: #88ff66; }
+h4 { color: #99ddff; font-weight: normal; }
+
+code, pre {
+    background-color: #111;
+    padding: 8px;
+    border-radius: 5px;
+    display: block;
+}
+
+a {
+    color: #66ccff;
+    text-decoration: underline;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Fractal Options</h1>
+
+<h2>Overview</h2>
+
+<p>
+The Fractal Options dialog provides detailed control over how fractals are calculated,
+coloured, and displayed. These settings affect rendering behaviour, colouring methods,
+and mathematical interpretation.
+</p>
+
+<p>
+Access this dialog using the <b>X</b> key.
+</p>
+
+<hr>
+
+<h2>Basic Parameters</h2>
+
+<h3>Threshold</h3>
+<p>Controls bailout sensitivity. Higher values allow more iterations before escape.</p>
+
+<h3>Tesseral Fill Colour</h3>
+<p>Colour used when tesseral rendering is enabled. A value of -1 disables this feature.</p>
+
+<h3>Log Value</h3>
+<p>Applies logarithmic scaling to colouring. A value of 0 disables log scaling.</p>
+
+<h3>Biomorph Colour</h3>
+<p>Highlights points near axes. A value of -1 disables this effect.</p>
+
+<h3>Decomposition Colour</h3>
+<p>Applies colouring based on angular decomposition.</p>
+
+<h3>Special Colour</h3>
+<p>Used by certain fractal types for custom colouring effects.</p>
+
+<h3>Orbit Colour</h3>
+<p>Sets orbit display colour (RGB hex format).</p>
+
+<h3>Background Colour</h3>
+<p>Used for L-systems and IFS fractals.</p>
+
+<h3>Radius / Centre</h3>
+<p>Defines the region of interest for rendering.</p>
+
+<hr>
+
+<h2>Plotting Methods</h2>
+
+<p>
+Determines how the fractal is rendered.
+</p>
+
+<ul>
+<li><b>Solid Guessing</b> - Fast rendering using interpolation</li>
+<li><b>Boundary Tracing</b> - Traces edges of fractal regions</li>
+<li><b>Tesseral</b> - Block-based rendering</li>
+<li><b>Single / Double Pass</b> - Progressive refinement</li>
+<li><b>Horizontal / Vertical Blinds</b> - Strip-based rendering</li>
+<li><b>Spiral Inwards</b> - Spiral rendering pattern</li>
+<li><b>Slope Forward Differencing</b> - Enables slope shading</li>
+</ul>
+
+<h3>Colour Smoothing</h3>
+<p>Smooths colour transitions between iteration bands.</p>
+
+<h3>Transfer Factor</h3>
+<p>Controls colour scaling intensity.</p>
+
+<h3>Light Direction</h3>
+<p>Defines light angle for slope shading.</p>
+
+<hr>
+
+<h2>Outside Filters</h2>
+
+<p>
+Applied to points outside the fractal set.
+</p>
+
+<ul>
+<li>Real, Imaginary, Sum, Multiply</li>
+<li>ArcTan</li>
+<li>Perturbation Filters</li>
+<li>Epsilon Cross</li>
+<li>Star Trails</li>
+<li>Potential Slope</li>
+<li>TieraZon Filters</li>
+</ul>
+
+<p><b>No Outside Filter</b> disables all effects.</p>
+
+<hr>
+
+<h2>Inside Filters</h2>
+
+<p>
+Applied to points inside the fractal set.
+</p>
+
+<ul>
+<li>Z Magnitude</li>
+<li>Beauty of Fractals (various modes)</li>
+<li>No Inside Filter</li>
+</ul>
+
+<hr>
+
+<h2>Distance Estimation</h2>
+
+<h3>Distance Estimator</h3>
+<p>Enables distance-based rendering.</p>
+
+<h3>Width Factor</h3>
+<p>Controls thickness of rendered boundaries.</p>
+
+<hr>
+
+<h2>Bailout Test</h2>
+
+<p>
+Defines how escape conditions are evaluated.
+</p>
+
+<ul>
+<li>MOD</li>
+<li>Real</li>
+<li>Imaginary</li>
+<li>OR / AND</li>
+<li>Manh / Mann</li>
+</ul>
+
+<hr>
+
+<h2>Coordinate System</h2>
+
+<p>
+Transforms the coordinate space used for rendering.
+</p>
+
+<ul>
+<li>Cartesian</li>
+<li>Spherical</li>
+<li>Cylindrical</li>
+<li>Parabolic</li>
+<li>Paraboloidal</li>
+<li>Elliptical</li>
+<li>Toroidal</li>
+<li>Prolate / Oblate Spheroidal</li>
+<li>Bispherical</li>
+<li>Conical</li>
+<li>Bipolar</li>
+</ul>
+
+<hr>
+
+<h2>Rotation</h2>
+
+<p>
+Applies rotation to the rendered image.
+</p>
+
+<ul>
+<li>0 deg (normal)</li>
+<li>90, 180, 270 deg</li>
+<li>Custom angle</li>
+</ul>
+
+<hr>
+
+<h2>Notes</h2>
+
+<p>
+Not all options apply to every fractal type. Behaviour may vary depending on the
+rendering mode (standard, perturbation, slope, or non-raster fractals).
+</p>
+
+<hr>
+
+<footer>
+  ManpWIN Help &copy; March 2026
+</footer>
+
+</body>
+</html>
