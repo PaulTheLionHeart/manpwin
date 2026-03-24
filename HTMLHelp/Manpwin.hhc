@@ -10,6 +10,10 @@
 		</OBJECT>
 	<UL>
 		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Contents">
+			<param name="Local" value="html/manp7vlc.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="What is ManpWIN?">
 			<param name="Local" value="html/manp4c6w.htm">
 			</OBJECT>
@@ -23,7 +27,7 @@
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Attractors from Oscillators">
-			<param name="Local" value="html\manp7osc.htm">
+			<param name="Local" value="html/manp7osc.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Disclaimer">
