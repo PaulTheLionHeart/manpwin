@@ -8,26 +8,29 @@ Debug
 
 # build folders
 build/
+build/
+build_debug/
+build_release/
 out/
 bin/
 obj/
 
-# CMake generated
+# Visual Studio
+*.vcxproj.user
+*.vcxproj.filters
+*.sln.docstates
+
+# CMake
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 
-# Visual Studio generated
-*.sln
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
-*.vcproj
-
-# binaries
+# Binaries
 *.exe
-*.lib
 *.dll
+*.lib
 *.obj
 *.pdb
-*.suo
+
+# vcpkg artifacts (local)
+vcpkg_installed/

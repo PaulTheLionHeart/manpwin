@@ -33,17 +33,20 @@ add_subdirectory(pnglib)
 add_subdirectory(ZLib)
 add_subdirectory(MPEG)
 
-# MPFR
-add_library(mpfr STATIC IMPORTED)
-set_target_properties(mpfr PROPERTIES
-    IMPORTED_LOCATION_DEBUG
-    "C:/Github/manpwin/mpfr/build.vc15/lib/x64/Debug/mpfr.lib"
-    IMPORTED_LOCATION_RELEASE
-    "C:/Github/manpwin/mpfr/build.vc15/lib/x64/Release/mpfr.lib"
-    IMPORTED_LOCATION_RELWITHDEBINFO
-    "C:/Github/manpwin/mpfr/build.vc15/lib/x64/Release/mpfr.lib"
-    IMPORTED_LOCATION_MINSIZEREL
-    "C:/Github/manpwin/mpfr/build.vc15/lib/x64/Release/mpfr.lib"
+find_path(GMP_INCLUDE_DIR gmp.h)
+find_library(GMP_LIBRARY gmp)
+
+find_path(MPFR_INCLUDE_DIR mpfr.h)
+find_library(MPFR_LIBRARY mpfr)
+
+target_include_directories(parser PUBLIC
+    ${GMP_INCLUDE_DIR}
+    ${MPFR_INCLUDE_DIR}
+)
+
+target_link_libraries(parser PUBLIC
+    ${GMP_LIBRARY}
+    ${MPFR_LIBRARY}
 )
 
 target_link_libraries(ManpWIN64 PRIVATE
@@ -52,6 +55,7 @@ target_link_libraries(ManpWIN64 PRIVATE
     parser
     mpeg
     qdlib
-    mpfr
+    ${GMP_LIBRARY}
+    ${MPFR_LIBRARY}
     htmlhelp
 )
