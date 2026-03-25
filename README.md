@@ -211,12 +211,12 @@ A key goal of the modernisation effort is reproducibility:
 <table>
 <tr>
 <td align="center">
-🦁<br>
+<br>
 <b>Paul the LionHeart</b><br>
 <img src="Docs/images/lionheart.png" width="120">
 </td>
 <td align="center">
-🤖<br>
+<br>
 <b>ChatGPT</b><br>
 <img src="Docs/images/chatty.png" width="120">
 </td>
