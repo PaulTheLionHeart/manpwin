@@ -125,16 +125,19 @@ build_debug.bat
 
 ## 📁 Project Structure
 
+```
 ManpWIN/
-├─ ManpWIN64/
-├─ parser/
-├─ pnglib/
-├─ ZLib/
-├─ qdlib/
-├─ MPEG/
-├─ CMakeLists.txt
+├─ ManpWIN64/     # Main application sources
+├─ parser/        # Formula parser engine
+├─ pnglib/        # PNG implementation
+├─ ZLib/          # Compression support
+├─ qdlib/         # Quad-double arithmetic
+├─ MPEG/          # MPEG support
+├─ CMakeLists.txt # Root build configuration
+```
 
-External Dependencies (via vcpkg):
+### External Dependencies (via vcpkg)
+
 - MPFR
 - GMP
 - libpng
