@@ -34,8 +34,6 @@ ManpWIN is designed for both visual exploration and mathematical experimentation
 - Custom formula experimentation via VM-based parser
 - Educational demonstrations of fractal dynamics
 
-The system supports exploration across both floating-point and high-precision arithmetic domains.
-
 ---
 
 ## 🖼️ Example Output
@@ -65,40 +63,19 @@ ManpWIN has reached a stable and reproducible build state with a fully functiona
 - ✔ Deterministic rendering across Mandelbrot, perturbation, and formula modes
 - ✔ Stable multithreaded execution (worklist + parser)
 - ✔ Verified Debug and Release builds via CMake + Visual Studio 2022
-- ✔ Successful deep zoom exploration (including extreme perturbation ranges)
+- ✔ Successful deep zoom exploration
 - ✔ Ongoing collaboration and interest from the mathematical community
-
-### Known Characteristics
-
-- Very deep zoom levels may require careful initialisation of perturbation state
-- Some advanced modes (e.g. slope + bignum trig) are still under refinement
-- Memory usage after large renders is not yet aggressively reduced
-
-### Direction
-
-The project is transitioning from a legacy fractal renderer into a:
-
-> **high-precision, research-oriented fractal exploration platform**
-
-with ongoing work in:
-
-- Deterministic initialisation at extreme scales
-- Memory lifecycle management
-- Advanced numerical stability
-- Further parser and VM evolution
 
 ---
 
 ## 🏗️ Build Requirements
 
-* Windows 10/11  
-* Visual Studio 2022 (with C++ tools)  
-* CMake ≥ 3.23  
-* vcpkg installed at:
-
+- Windows 10/11  
+- Visual Studio 2022 (with C++ tools)  
+- CMake ≥ 3.23  
+- vcpkg installed at:
 
 C:\vcpkg
-
 
 ---
 
@@ -106,150 +83,82 @@ C:\vcpkg
 
 ### 1. Clone repository
 
-
 git clone https://github.com/PaulTheLionHeart/manpwin.git
-
 cd manpwin
-
 
 ---
 
 ### 2. Configure (CMake + vcpkg)
 
-
 cmake -B build -S . ^
--DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
--DVCPKG_TARGET_TRIPLET=x64-windows
-
-
-This step:
-- installs required libraries (MPFR, GMP, libpng, zlib)
-- generates Visual Studio build files
+  -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
+  -DVCPKG_TARGET_TRIPLET=x64-windows
 
 ---
 
 ### 3. Build
 
-#### Release
-
+Release:
 cmake --build build --config Release
 
-
-#### Debug
-
+Debug:
 cmake --build build --config Debug
-
 
 ---
 
 ### 4. Run
 
-**Release**
-
+Release:
 build\Release\ManpWIN64.exe
 
-
-**Debug**
-
+Debug:
 build\Debug\ManpWIN64.exe
-
 
 ---
 
-### 🟢 Alternative (recommended)
-
-Use the provided batch files:
-
+### Alternative (recommended)
 
 build_release.bat
 build_debug.bat
-
-
-These automatically configure and build the project using the correct settings.
 
 ---
 
 ## 📁 Project Structure
 
-
 ManpWIN/
-├─ ManpWIN64/ # Main application sources
-├─ parser/ # Formula parser engine
-├─ pnglib/ # PNG implementation
-├─ ZLib/ # Compression support
-├─ qdlib/ # Quad-double arithmetic
-├─ MPEG/ # MPEG support
-├─ CMakeLists.txt # Root build configuration
+├─ ManpWIN64/
+├─ parser/
+├─ pnglib/
+├─ ZLib/
+├─ qdlib/
+├─ MPEG/
+├─ CMakeLists.txt
 
-
-### External Dependencies (via vcpkg)
-
-- MPFR (high precision math)
-- GMP (arbitrary precision arithmetic)
+External Dependencies (via vcpkg):
+- MPFR
+- GMP
 - libpng
 - zlib
 
 ---
 
-## 🧠 Architecture Overview
+## 🧯 Troubleshooting
 
-```text
-Git Repository
-│
-├─ ManpWIN64 (application)
-├─ parser (formula VM)
-├─ pnglib (PNG implementation)
-├─ ZLib (compression)
-├─ qdlib (quad-double arithmetic)
-├─ MPEG (video support)
-│
-▼
-External dependencies via vcpkg
-(MPFR, GMP, libpng, zlib)
-│
-▼
-Root CMakeLists.txt
-│
-├─ add_subdirectory(parser)
-├─ add_subdirectory(pnglib)
-├─ add_subdirectory(ZLib)
-├─ add_subdirectory(qdlib)
-├─ add_subdirectory(MPEG)
-│
-▼
-ManpWIN64 executable target
-│
-▼
-Debug / Release builds
-│
-▼
-Visual Studio 2022 + CMake
+Missing pnglib.lib:
+Reconfigure CMake and ensure pnglib builds as STATIC.
 
-The build uses a modular CMake architecture:
+MPFR / GMP errors:
+Ensure vcpkg is installed and toolchain is set.
 
-Each library compiled via add_subdirectory
-Dependencies managed via vcpkg
-Resource (.rc) file included in executable target to restore Windows menus
-Runtime mismatch resolved via /NODEFAULTLIB:LIBCMTD
-Debug and Release builds verified via both CMake and Visual Studio
-🧯 Troubleshooting
-Missing pnglib.lib
+Blank screen:
+Ensure .rc files are included.
 
-Reconfigure CMake and ensure pnglib CMakeLists builds a STATIC library.
+Debug vs Release mismatch:
+Check runtime library consistency.
 
-MPFR / GMP errors
+---
 
-Ensure vcpkg is installed and the toolchain file is correctly specified during configure.
-
-Blank screen
-
-Ensure *.rc files are included in executable target.
-
-Debug vs Release mismatch
-
-Check runtime library consistency and avoid mixed CRT builds.
-
-🐉 Dragon Slayer Timeline
+## 🐉 Dragon Slayer Timeline
 
 A chronological record of major battles during the ManpWIN modernisation.
 
@@ -266,34 +175,51 @@ A chronological record of major battles during the ManpWIN modernisation.
 ⚙️ CRT conflict resolution — /NODEFAULTLIB:LIBCMTD investigation
 🏰 First stable reproducible CMake build — Debug + Release verified
 🏷 Milestone tagged — historic stabilisation snapshot captured
-🧭 Stability phase reached — deterministic behaviour restored across rendering modes
+🧭 Stability phase reached — First stable CMake build
 🔬 Research interest — project now attracting mathematical exploration and extension
-🤝 Contributing Notes
-Never commit build directory
-Tag stable milestones
-Keep Debug and Release working
-Prefer incremental commits
-🏆 Milestone
 
-This release represents the first stable, reproducible CMake-based build of ManpWIN with full Visual Studio 2022 compatibility.
+---
 
-🚀 Git Workflow Used
-Stabilisation branch created
-Legacy build artifacts removed
-CMake modularized
-Dependencies integrated via vcpkg
-Debug and Release builds validated
-Milestone tag created
-Master branch verified via fresh clone
-🔁 Reproducibility
+## 🤝 Contributing Notes
+
+- Never commit build directory
+- Tag stable milestones
+- Keep Debug and Release working
+- Prefer incremental commits
+
+---
+
+## 🏆 Milestone
+
+First stable reproducible CMake build achieved.
+
+## 🔁 Reproducibility
+
+---
 
 A key goal of the modernisation effort is reproducibility:
 
-Clean CMake-based builds
-Controlled dependency handling
-Verified Debug and Release parity
-Deterministic rendering across runs (within current numerical limits)
-Dependency management via vcpkg ensures consistent builds across systems
-🙏 Credits
-Paul the LionHeart — Author
-ChatGPT — Development assistance
+- Clean CMake-based builds
+- Controlled dependency handling via vcpkg
+- Verified Debug and Release parity
+- Deterministic rendering across runs (within current numerical limits)
+
+---
+
+## 🙏 Credits
+
+<table>
+<tr>
+<td align="center">
+🦁<br>
+<b>Paul the LionHeart</b><br>
+<img src="Docs/images/lionheart.png" width="120">
+</td>
+<td align="center">
+🤖<br>
+<b>ChatGPT</b><br>
+<img src="Docs/images/chatty.png" width="120">
+</td>
+</tr>
+</table>
+
