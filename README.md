@@ -162,22 +162,21 @@ Check runtime library consistency.
 
 A chronological record of major battles during the ManpWIN modernisation.
 
-🐲 Repository archaeology — removed legacy and duplicate source files
-⚔️ CMake resurrection — rebuilt modular build architecture
-🧱 pnglib integration — fixed missing target + linker language issues
-🔗 MPFR linking battle — resolved dependency integration via vcpkg
-🪟 Resource restoration — fixed blank screen by restoring .rc compilation
-🧠 Parser evolution — multithreaded formula parser stabilised
-🎯 Plotting expansion — new slope rendering + plotting modes added
-🐛 Debug infinite loop hunt — tracked worklist spin behaviour
-🎨 Palette parser fix — vector migration introduced subtle indexing bug
-🧩 Solid guessing initialization bug — uninitialised variable causing lock
-⚙️ CRT conflict resolution — /NODEFAULTLIB:LIBCMTD investigation
-🏰 First stable reproducible CMake build — Debug + Release verified
-🏷 Milestone tagged — historic stabilisation snapshot captured
-🧭 Stability phase reached — First stable CMake build
-🔬 Research interest — project now attracting mathematical exploration and extension
-
+- 🐲 Repository archaeology — removed legacy and duplicate source files  
+- ⚔️ CMake resurrection — rebuilt modular build architecture  
+- 🧱 pnglib integration — fixed missing target + linker language issues  
+- 🔗 MPFR linking battle — resolved dependency integration via vcpkg  
+- 🪟 Resource restoration — fixed blank screen by restoring `.rc` compilation  
+- 🧠 Parser evolution — multithreaded formula parser stabilised  
+- 🎯 Plotting expansion — new slope rendering + plotting modes added  
+- 🐛 Debug infinite loop hunt — tracked worklist spin behaviour  
+- 🎨 Palette parser fix — vector migration introduced subtle indexing bug  
+- 🧩 Solid guessing initialization bug — uninitialised variable causing lock  
+- ⚙️ CRT conflict resolution — `/NODEFAULTLIB:LIBCMTD` investigation  
+- 🏰 First stable reproducible CMake build — Debug + Release verified  
+- 🏷 Milestone tagged — historic stabilisation snapshot captured  
+- 🧭 Stability phase reached — deterministic behaviour restored  
+- 🔬 Research interest — project now attracting mathematical exploration  
 ---
 
 ## 🤝 Contributing Notes
