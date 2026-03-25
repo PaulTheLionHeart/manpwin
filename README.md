@@ -215,13 +215,15 @@ A key goal of the modernisation effort is reproducibility:
 <td align="center">
 <br>
 <b>Paul the LionHeart</b><br>
-<img src="Docs/images/lionheart.png" width="120">
+<img src="Docs/images/lionheart.png" width="120"><br>
+<sub>Author</sub>
 </td>
+
 <td align="center">
 <br>
 <b>ChatGPT</b><br>
-<img src="Docs/images/chatty.png" width="120">
+<img src="Docs/images/chatty.png" width="120"><br>
+<sub>Workshop Assistant</sub>
 </td>
 </tr>
 </table>
-
