@@ -105,7 +105,7 @@ void	PertSetupArithType(int &ArithType, int subtype, long MaxIteration, int prec
 // Some code is written in raw MPFR code to optimise speed
 //////////////////////////////////////////////////////////////////////
 
-void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subtype, double param[], RefScratch& scratch)
+void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subtype, WORD power, double param[], RefScratch& scratch)
     {
 //    mpfr_t	TempReal, TempImag, SqrReal, SqrImag, RealImag;
     BigDouble	zisqr, zrsqr, realimag, temp, RealImagSqr;
@@ -114,7 +114,7 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 
     Complex	rsrA = { param[1], param[2] };			// TheRedshiftRider value of a
     bool	rsrSign = (param[4] == 1.0);			// TheRedshiftRider sign true if positive
-    int		power = (int)param[3];
+//    int		power = (int)param[3];
 
     switch (subtype)
 	{
@@ -703,7 +703,7 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 	    }
 
 	// Calculate the set
-	RefFunctions(&centre, &zBig, SlopeDegree, subtype, param, scratch);
+	RefFunctions(&centre, &zBig, SlopeDegree, subtype, power, param, scratch);
 	if (EnableApproximation && !WeHaveMaxRefIteration)			// only needed for BLA
 	    {
 	    CoordinateMagnitudeSquared = zBig.CSumSqr();			// no point in further testing once we have MaxRefIteration
