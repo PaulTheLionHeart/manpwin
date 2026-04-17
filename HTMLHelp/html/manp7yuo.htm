@@ -122,6 +122,11 @@ Perturbation rendering does not support all filter and colouring methods.
 </li>
 
 <li>
+  Perturbation rendering currently applies to supported fractal types and is not
+  yet fully integrated with the template framework.
+</li>
+
+<li>
 Slope rendering is not available for all fractals or all rendering modes.
 </li>
 
@@ -133,6 +138,17 @@ precision arithmetic) may fall back to slower but stable implementations.
 <li>
 Certain advanced combinations of features (e.g. high precision + slope + complex
 formulas) may result in reduced performance.
+</li>
+
+<li>
+  The program continues to evolve, with ongoing improvements to numerical
+  stability, perturbation methods, and high-precision rendering.
+</li>
+
+<li>
+  While double-double (DD) and quad-double (QD) precision significantly extend
+  zoom depth, they remain finite precision formats. At extreme zoom levels,
+  numerical errors may become visible.
 </li>
 </ul>
 
@@ -192,6 +208,36 @@ Interrupted renders cannot be resumed.
 </li>
 </ul>
 
+<h2>Limitations on Tierazon Fractals</h2>
+
+<h3>Tierazon Trigonometric Fractals</h3>
+
+<ul>
+<li>
+Some Tierazon fractals use transcendental functions (sin, cos, sinh, cosh, exp).
+</li>
+
+<li>
+These functions can grow very rapidly for large arguments, making them unsuitable for deep zooming in double-double or quad-double precision.
+</li>
+
+<li>
+In such cases, ManpWIN applies internal stability limits to prevent numerical overflow and excessive computation time.
+</li>
+
+<li>
+As a result, some fractals may lose fine detail at extreme zoom levels. Deep zooming is not recommended for these specific subtypes.
+</li>
+</ul>
+
+<h3>Other Tierazon Fractals</h3>
+
+<ul>
+<li>
+Some Tierazon fractals do not behave correctly in double-double or quad-double precision. For these cases, arbitrary precision (MPFR) may be used, but at a significant cost in rendering speed.
+</li>
+</ul>
+
 <h2>Notes</h2>
 
 <ul>
@@ -202,7 +248,8 @@ being addressed as legacy code is modernised.
 </ul>
 
 <p style="color:#bbbbbb;">
-These limitations reflect the flexibility and experimental nature of advanced fractal exploration.
+These limitations reflect the advanced and evolving nature of high-precision
+  fractal exploration.
 </p>
 
 <hr>

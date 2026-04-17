@@ -93,7 +93,46 @@ ManpWIN has undergone continuous development over many years, with ongoing
 improvements to performance, precision, and fractal exploration capabilities.
 </p>
 
-<h2>Latest Release (March 2026)</h2>
+<h2>Latest Release (April 2026)</h2>
+
+<p><b>ManpWIN 4.02f</b></p>
+
+<h3>Recent Improvements</h3>
+
+<p>
+  This update improves the robustness of ManpWIN's perturbation engine and
+  numerical stability across multiple precision modes, while introducing
+  template-based infrastructure for future extensions.
+</p>
+
+<ul>
+  <li>
+    <b>Perturbation fix:</b> corrected an issue caused by an uninitialised power value
+    when reference generation was moved outside the <code>CPerturbation</code> class.
+  </li>
+  <li>
+    <b>Rendering reliability:</b> prevents incorrect fractal output that could appear
+    after toggling under certain conditions.
+  </li>
+  <li>
+    <b>Template framework:</b> introduced template-based infrastructure,
+    providing a foundation for extending fractal types and future perturbation support.
+  </li>
+  <li>
+    <b>Arithmetic stability:</b> stabilised trigonometric functions across multiple
+    arithmetic types.
+  </li>
+  <li>
+    <b>DD/QD improvements:</b> corrected error handling in double-double and
+    quad-double precision modes.
+  </li>
+  <li>
+    <b>General stability:</b> improved consistency for high-precision rendering,
+    especially for cubic and higher-order fractals.
+  </li>
+</ul>
+
+<h2>Previous Releases</h2>
 
 <p><b>ManpWIN 4.02e</b></p>
 
@@ -105,8 +144,6 @@ improvements to performance, precision, and fractal exploration capabilities.
 <li>Standardised formatting and layout across help pages</li>
 <li>General cleanup and polish of documentation</li>
 </ul>
-
-<h2>Previous Releases</h2>
 
 <p><b>ManpWIN 4.02d</b></p>
 

@@ -810,12 +810,44 @@ ManpWIN includes the full range of TieraZon fractals, with selected
 types accessible directly through the interface.
 </p>
 
-<h2>Flarium Fractals</h2>
+<h3>Flarium Fractals</h3>
 
 <p>
 Flarium fractals share similarities with TieraZon fractals. Unique
 Flarium variants are included in addition to the TieraZon set.
 </p>
+
+<h3>Newton Mset Fractals</h3>
+
+<ul>
+<li>
+Newton fractals are based on an iterative method used to find the roots of equations.
+</li>
+
+<li>
+In traditional Newton fractals, each pixel is used as an initial guess and the iteration converges toward a root of the equation.
+</li>
+
+<li>
+In a Newton Mset, the pixel value is included directly in the equation, meaning each pixel effectively solves a different equation.
+</li>
+
+<li>
+The starting value is typically chosen from a "critical point" of the function, where the second derivative is zero.
+</li>
+
+<li>
+Iterations follow the Newton method:
+<br>
+Z[n+1] = Z[n] - f(Z[n]) / f'(Z[n])
+</li>
+
+<li>
+Because each pixel has a different value of C, Newton Mset fractals can produce highly intricate and varied structures compared to traditional Newton fractals.
+</li>
+</ul>
+
+<p><i>Concept inspired by Newton Mset techniques described by Paul Carlson.</i></p>
 
 <h2>Marcus Fractals</h2>
 
