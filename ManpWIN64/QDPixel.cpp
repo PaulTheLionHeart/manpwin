@@ -282,7 +282,7 @@ void	CPixel::CalcQDFloatIteration(double error, std::vector <float> &wpixels, in
 	Run fractal
 **************************************************************************/
 
-long	CPixel::DoQDFract(HWND hwnd, int row, int col)
+long	CPixel::DoQDFract(HWND hwnd, int row, int col, BigComplex cBig)
 
     {
     long	real_iteration;			// actual count for orbit deletion
@@ -294,10 +294,13 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 //    double	tantable[16];			// used for Star Trails
     qd_real	close = 0.01;
 
+    if (cBig.x.BigDouble2QD(&cQD.x) < 0) return 0L;
+    if (cBig.y.BigDouble2QD(&cQD.y) < 0) return 0L;
+
     magnitude = 0.0;
     min_orbit = 100000.0;
 
-/*  No point, it doesn't have a fractal nature
+/*  No point, STARTRAIL doesn't have a fractal nature
     if (method == STARTRAIL)
 	{
 	int	i;
@@ -372,8 +375,6 @@ long	CPixel::DoQDFract(HWND hwnd, int row, int col)
 	    return(BLUE);				// division by zero (Was Blue)
 	else if (result == 1)				// escape time
 	    break;
-	if (type == RATIONALMAP)
-	    return(iteration);
 	/*  No point, it doesn't have a fractal nature
 
 	if (method == STARTRAIL)
@@ -524,134 +525,5 @@ QDComplex	CPixel::QDInvertz2(QDComplex  & Cmplx1)
     temp.x += f_xcenter;
     temp.y += f_ycenter;			// Renormalize
     return  temp;
-    }
-
-/************************************************************************
-	Convert BigDouble to Quad Double
-************************************************************************/
-// moved to BigDouble.cpp
-/*
-//extern	void	ShowBignum(BigDouble x, char *Location);
-int	CPixel ::BigDouble2QD(qd_real *out, BigDouble *in)
-    {
-    qd_real	x1, x2, x3, x4;
-    BigDouble	t1, t2, t3, t4, t5, t6;
-    double	y1, y2, y3, y4;
-
-    y1 = in->BigDoubleToDouble();	// truncate to a double
-    t1 = y1;
-    t2 = *in - t1;			// subtract truncated bit to get the remainder
-    y2 = t2.BigDoubleToDouble();	// remainder as a float
-    t3 = y2;
-    t4 = t2 - t3;
-    y3 = t4.BigDoubleToDouble();
-    t5 = y3;
-    t6 = t4 - t5;
-    y4 = t6.BigDoubleToDouble();
-    x1 = y1;
-    x2 = y2;
-    x3 = y3;
-    x4 = y4;
-    *out = x1 + x2 + x3 + x4;
-    if (isnan(out->x[0]) || isnan(out->x[1]) || isnan(out->x[2]) || isnan(out->x[3]))
-	{
-	*out = 0.0;
-	return -1;
-	}
-    return 0;
-    }
-*/
-/************************************************************************
-	Calculate QD Fractal
-************************************************************************/
-
-long	CPixel::QDCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
-
-    {
-    if (pairflag)		// half size screens: only do every second row / col
-	if (row % pairflag || col % pairflag)
-	    if (row != (int)ydots - 1)			// must trigger for last line
-		return(threshold);
-    if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
-	{
-	if (row != oldrow)
-	    {
-	    if (pairflag && row)		// draw row for right hand image
-		draw_right_image((short)(oldrow));
-	    switch (RotationAngle)
-		{
-		case NORMAL:						// normal
-		    cQD.y = QDyymax - QDygap * (double)row;
-		    break;
-		case 90:						// 90 degrees
-		    cQD.x = QDyymax - QDxgap * (double)row;
-		    break;
-		case 180:						// 180 degrees
-		    cQD.y = -(QDyymax - QDygap * (double)row);
-		    break;
-		case 270:						// 270 degrees
-		    cQD.x = -(QDyymax - QDxgap * (double)row);
-		    break;
-		}
-	    oldrow = row;
-	    }
-	if (col != oldcol)
-	    {
-	    switch (RotationAngle)
-		{
-		case NORMAL:						// normal
-		    cQD.x = QDxgap * (double)col + QDHor;
-		    break;
-		case 90:						// 90 degrees
-		    cQD.y = QDygap * (double)col + QDHor;
-		    break;
-		case 180:						// 180 degrees
-		    cQD.x = -(QDxgap * (double)col + QDHor);
-		    break;
-		case 270:						// 270 degrees
-		    cQD.y = -(QDygap * (double)col + QDHor);
-		    break;
-		}
-	    oldcol = col;
-	    }
-	}
-    else
-	{
-	qd_real  zero = 0.0;
-	double  z_rot = (double)RotationAngle;
-	QDMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
-	QDMat.DoTransformation(&cQD.x, &cQD.y, &zero, QDxgap * (double)col + QDHor, QDyymax - QDxgap * (double)row, 0.0);
-	}
-
-    if (user_data(hwnd) == -1)
-	return(-1);
-    color = DoQDFract(hwnd, row, col);	// quad double
-    if (color < 0)
-	return -1;
-    reset_period = 0;
-
-    if (color >= threshold)
-	color = threshold;
-/*
-    else if (logval && logflag == TRUE)
-	color = (BYTE) (*(logtable + color));
-*/
-
-    if (calcmode == 'B')
-	{
-	if (color >= colours)	/* don't use color 0 unless from inside */
-	    if (colours < 16)
-		color &= andcolor;
-	    else
-		color = ((color - 1) % andcolor) + 1;  /* skip color zero */
-	}
-
-     if (_3dflag)
-	    projection(col, row, color);
-	else if (pairflag)
-	    do_stereo_pairs(col, row, color);
-    else
-	plot((WORD)col, (WORD)row, color);
-    return(color);
     }
 

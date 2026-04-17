@@ -283,7 +283,7 @@ void	CPixel::CalcDDFloatIteration(double error, std::vector <float> &wpixels, in
 	Run fractal
 **************************************************************************/
 
-long	CPixel::DoDDFract(HWND hwnd, int row, int col)
+long	CPixel::DoDDFract(HWND hwnd, int row, int col, BigComplex cBig)
 
     {
     long	real_iteration;			// actual count for orbit deletion
@@ -297,6 +297,8 @@ long	CPixel::DoDDFract(HWND hwnd, int row, int col)
 
     magnitude = 0.0;
     min_orbit = 100000.0;
+    if (cBig.x.BigDouble2DD(&cDD.x) < 0) return 0L;
+    if (cBig.y.BigDouble2DD(&cDD.y) < 0) return 0L;
 
 /*  No point, it doesn't have a fractal nature
     if (method == STARTRAIL)
@@ -373,8 +375,6 @@ long	CPixel::DoDDFract(HWND hwnd, int row, int col)
 	    return(BLUE);				// division by zero (Was Blue)
 	else if (result == 1)				// escape time
 	    break;
-	if (type == RATIONALMAP)
-	    return(iteration);
 	/*  No point, it doesn't have a fractal nature
 
 	if (method == STARTRAIL)
@@ -525,132 +525,5 @@ DDComplex	CPixel::DDInvertz2(DDComplex  & Cmplx1)
     temp.x += f_xcenter;
     temp.y += f_ycenter;			// Renormalize
     return  temp;
-    }
-
-/************************************************************************
-	Convert BigDouble to DoubleDouble
-************************************************************************/
-// moved to BigDouble.cpp
-/*
-//extern	void	ShowBignum(BigDouble x, char *Location);
-int	CPixel::BigDouble2DD(dd_real *out, BigDouble *in)
-    {
-    dd_real	x1, x2;
-    BigDouble	t1, t2;
-    double	y1, y2;
-
-    y1 = in->BigDoubleToDouble();	// truncate to a double
-    t1 = y1;
-    t2 = *in - t1;			// subtract truncated bit to get the remainder
-    y2 = t2.BigDoubleToDouble();	// remainder as a float
-    x1 = y1;
-    x2 = y2;
-    *out = x1 + x2;
-    if (isnan(out->x[0]) || isnan(out->x[1]))
-	{
-//	ShowBignum(*in, "in");
-//	ShowBignum(t1, "t1");
-//	ShowBignum(t2, "t2");
-	*out = 0.0;
-	return -1;
-	}
-    return 0;
-    }
-*/
-/************************************************************************
-	Calculate DD Fractal
-************************************************************************/
-
-long	CPixel::DDCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
-
-    {
-
- //   FloatCornerstoBig(var);
-    if (pairflag)		// half size screens: only do every second row / col
-	if (row % pairflag || col % pairflag)
-	    if (row != (int)ydots - 1)			// must trigger for last line
-		return(threshold);
-
-    if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
-	{
-	if (row != oldrow)
-	    {
-	    if (pairflag && row)		// draw row for right hand image
-		draw_right_image((short)(oldrow));
-	    switch (RotationAngle)
-		{
-		case NORMAL:						// normal
-		    cDD.y = DDyymax - DDygap * (double)row;
-		    break;
-		case 90:						// 90 degrees
-		    cDD.x = DDyymax - DDxgap * (double)row;
-		    break;
-		case 180:						// 180 degrees
-		    cDD.y = -(DDyymax - DDygap * (double)row);
-		    break;
-		case 270:						// 270 degrees
-		    cDD.x = -(DDyymax - DDxgap * (double)row);
-		    break;
-		}
-	    oldrow = row;
-	    }
-	if (col != oldcol)
-	    {
-	    switch (RotationAngle)
-		{
-		case NORMAL:						// normal
-		    cDD.x = DDxgap * (double)col + DDHor;
-		    break;
-		case 90:						// 90 degrees
-		    cDD.y = DDygap * (double)col + DDHor;
-		    break;
-		case 180:						// 180 degrees
-		    cDD.x = -(DDxgap * (double)col + DDHor);
-		    break;
-		case 270:						// 270 degrees
-		    cDD.y = -(DDygap * (double)col + DDHor);
-		    break;
-		}
-	    oldcol = col;
-	    }
-	}
-    else
-	{
-	dd_real  zero = 0.0;
-	double  z_rot = (double)RotationAngle;
-	DDMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
-	DDMat.DoTransformation(&cDD.x, &cDD.y, &zero, DDxgap * (double)col + DDHor, DDyymax - DDxgap * (double)row, 0.0);
-	}
-
-    if (user_data(hwnd) == -1)
-	return(-1);
-    color = DoDDFract(hwnd, row, col);	// double double
-    if (color < 0)
-	return -1;
-    reset_period = 0;
-
-    if (color >= threshold)
-	color = threshold;
-/*
-    else if (logval && logflag == TRUE)
-	color = (BYTE) (*(logtable + color));
-*/
-
-    if (calcmode == 'B')
-	{
-	if (color >= colours)	/* don't use color 0 unless from inside */
-	    if (colours < 16)
-		color &= andcolor;
-	    else
-		color = ((color - 1) % andcolor) + 1;  /* skip color zero */
-	}
-
-     if (_3dflag)
-	    projection(col, row, color);
-	else if (pairflag)
-	    do_stereo_pairs(col, row, color);
-    else
-	plot((WORD)col, (WORD)row, color);
-    return(color);
     }
 

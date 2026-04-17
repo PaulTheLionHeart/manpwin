@@ -7,13 +7,15 @@
     (console drivers & serial I/O) is in separate machine libraries.
 */
 
-#include	<math.h>
-#include	"manp.h"
-#include	"fractype.h"
-#include	"Complex.h"
-#include	"pixel.h"
-#include	"Fract.h"
-#include	"..\parser\TrigFn.h"
+#include <math.h>
+#include "manp.h"
+#include "fractype.h"
+#include "Complex.h"
+#include "pixel.h"
+#include "Fract.h"
+#include "BailoutTemplate.h"
+#include "FractintTrigTemplate.h"
+#include "..\parser\TrigFn.h"
 
 // lotsa norty externs that will be resolved when we c++ise parser
 //extern	int	FormPerPixelFloat(Complex *z, Complex *q);
@@ -34,8 +36,12 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	case HYPERCMPLXFP:
 	case HYPERCMPLXJFP:
 	    t = (invert) ? invertz2(c) : c;
-
 	    InitFunctions(MANDELFP, z, q);
+	    InitFractintTrigFunctionsT<Complex, double>(type, z, q, juliaflag, invert, c, qc, qci, qcj, qck, t, temp, temp1, temp2, temp4, sqr, Fn2Index, param);
+	    break;
+/*
+
+
 	    if (juliaflag)
 		{
 		*z = *q;
@@ -52,11 +58,14 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	    qcj = param[2];
 	    qck = param[3];
 	    break;
-
-	case MARKSMANDELPWRFP:
-	case MARKSMANDELPWR:
-	case NUMFRACTAL:
+*/
+/*
 	    t = (invert) ? invertz2(c) : c;
+	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
+	    InitFractintTrigFunctionsT<Complex>(type, z, q, juliaflag, invert, c, qc, qci, qcj, qck, t, temp, temp1, temp2, temp4, sqr, Fn2Index, param);
+	    break;
+*/
+/*
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -79,28 +88,13 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 //	    CMPLXpwr(z, temp1, temp1);
 	    temp1 = *z ^ temp1;
 	    break;
+*/
 
-
+	case MARKSMANDELPWRFP:
+	case MARKSMANDELPWR:
+	case NUMFRACTAL:
 	case FNPLUSFNPIXFP:				//  Richard8 {c = z = pixel: z=sin(z)+sin(pixel),|z|<=50}
 	case FNPLUSFNPIXLONG:
-	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
-	    t = (invert) ? invertz2(c) : c;
-	    if (!juliaflag)
-		{
-		*z = t;
-		}
-	    temp.x = param[0];
-	    temp.y = param[1];
-	    temp2.x = param[2];
-	    temp2.y = param[3];
-	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
-	    z->x += temp.x;				// initial pertubation of parameters set 
-	    z->y += temp.y;
-	    temp4 = *z;
-	    TrigFn.CMPLXtrig(&temp4, &temp1, Fn2Index);
-	    temp1 = temp1 * temp2;
-	    break;
-
 	case TRIGSQRFP:					// { z=pixel: z=trig(z*z), |z|<TEST }
 	case TRIGSQR:					// to handle fractint par files
 	case TRIGXTRIGFP:				// z = trig0(z)*trig1(z)
@@ -113,18 +107,6 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	case SQRTRIG:					// to handle fractint par files
 	case SQR1OVERTRIGFP:				// z = sqr(1/trig(z))
 	case SQR1OVERTRIG:				// to handle fractint par files
-	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
-	    if (!juliaflag)
-		{
-		t = (invert) ? invertz2(c) : c;
-		*z = t;
-		}
-	    temp.x = param[0];
-	    temp.y = param[1];
-	    temp2.x = param[2];
-	    temp2.y = param[3];
-	    break;
-
 	case MANDELTRIGFP:
 	case MANDELTRIG:
 	case FPMANTRIGPLUSEXP:				// another Scientific American biomorph type: z(n+1) = e**z(n) + trig(z(n)) + C
@@ -142,32 +124,15 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	case LLAMBDAFNFN:
 	case FPLAMBDAFNFN:
 	case FPMANLAMFNFN:				// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
+	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
 	    t = (invert) ? invertz2(c) : c;
-	    temp.x = param[0];
-	    temp.y = param[1];
-	    temp2.x = param[2];
-	    temp2.y = param[3];
-	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
-	    if (juliaflag)
-		{
-		t.x = q->x;
-		t.y = q->y;
-		}
-	    else
-		{
-		z->x = t.x + param[0];
-		z->y = t.y + param[1];
-		}
-	    sqr.x = sqr(z->x);				// precalculated value for regular Mandelbrot
-	    sqr.y = sqr(z->y);
-	    temp1 = *z;
+	    InitFractintTrigFunctionsT<Complex, double>(type, z, q, juliaflag, invert, c, qc, qci, qcj, qck, t, temp, temp1, temp2, temp4, sqr, Fn2Index, param);
 	    break;
+
 //	case FORMULA:
 //	case SCREENFORMULA:
 //	    FormPerPixelFloat(z, q);
 //	    break;
-
-
 
 	}
     return 0;
@@ -186,267 +151,67 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 	{
 	case HYPERCMPLXFP:
 	case HYPERCMPLXJFP:
-	    {
-	    _HCMPLX hold, hnew;
-	    double  magnitude;
-
-	    hold.x = z->x;
-	    hold.y = z->y;
-	    hold.z = temp.x;
-	    hold.t = temp.y;
-
-	    TrigFn.HComplexTrig(&hold, &hnew, Fn1Index);
-
-	    hnew.x += qc;
-	    hnew.y += qci;
-	    hnew.z += qcj;
-	    hnew.t += qck;
-
-	    z->x = hnew.x;
-	    z->y = hnew.y;
-	    //   z.x = New.x;			// to allow filters to work
-	    //   z.y = New.y;
-	    temp.x = hnew.z;
-	    temp.y = hnew.t;
-
-	    // Check bailout
-	    magnitude = sqr(z->x) + sqr(z->y) + sqr(temp.x) + sqr(temp.y);
-	    if (magnitude > rqlim) 
-		return 1;
-	    return(0);
-	    }
-
 	case MARKSMANDELPWRFP:
 	case MARKSMANDELPWR:
-	    TrigFn.CMPLXtrig(z, &temp2, Fn1Index);	// how do we make this work? #include	".\parser\mpmath.h" of course... loads globals
-	    temp2 = temp1 * temp2;
-	    temp2.x += q->x;
-	    temp2.y += q->y;
-	    *z = temp2;
-	    return FractintBailoutTest(z);
-
-	case FNPLUSFNPIXFP:				//  Richard8 {c = z = pixel: z=sin(z)+sin(pixel),|z|<=50}
+	case FNPLUSFNPIXFP:					//  Richard8 {c = z = pixel: z=sin(z)+sin(pixel),|z|<=50}
 	case FNPLUSFNPIXLONG:
-	    TrigFn.CMPLXtrig(z, &temp3, Fn1Index);
-	    temp3 += temp1;
-	    *z = temp3;
-	    return FractintBailoutTest(z);
-
-	case TRIGSQRFP:					// { z=pixel: z=trig(z*z), |z|<TEST }
-	case TRIGSQR:					// to handle fractint par files
-	    sqr.x = sqr(z->x);				// precalculated value for regular Mandelbrot
-	    sqr.y = sqr(z->y);
-	    temp1.y = (z->x + z->x) * z->y;
-	    temp1.x = sqr.x - sqr.y;
-	    TrigFn.CMPLXtrig(&temp1, &temp3, Fn1Index);
-	    *z = temp3;
-	    return FractintBailoutTest(z);
-
-	case TRIGXTRIGFP:				// z = trig0(z)*trig1(z)
-	case TRIGXTRIG:					// to handle fractint par files
-	    TrigFn.CMPLXtrig(z, &temp1, Fn1Index);
-	    TrigFn.CMPLXtrig(z, z, Fn2Index);
-	    temp3 = *z * temp1;
-	    *z = *z * temp1;
-	    *z = temp3;
-	    return FractintBailoutTest(z);
-
+	case TRIGSQRFP:						// { z=pixel: z=trig(z*z), |z|<TEST }
+	case TRIGSQR:						// to handle fractint par files
+	case TRIGXTRIGFP:					// z = trig0(z)*trig1(z)
+	case TRIGXTRIG:						// to handle fractint par files
 	case ZXTRIGPLUSZFP:
-	case ZXTRIGPLUSZ:				// to handle fractint par files
-	    if (temp.x == 1.0 && temp.y == 0.0 && temp2.y == 0.0)
-		{
-		if (temp2.x == 1.0)			// Scott variant
-		    return(ScottZXTrigPlusZfpFractal(z, q, &TrigFn));
-		else if (temp2.x == -1.0)		// Skinner variant
-		    return(SkinnerZXTrigSubZfpFractal(z, q, &TrigFn));
-		}
-	    return(ZXTrigPlusZfpFractal(z, q, &TrigFn));
+	case ZXTRIGPLUSZ:					// to handle fractint par files
+	    return FractintTrigIterT<Complex, double>(type, z, q, temp, temp1, temp2, temp3, sqr, qc, qci, qcj, qck,
+		Fn1Index, Fn2Index, rqlim, BailoutTestType);
 
-	case TRIGPLUSTRIGFP:				// z = trig0(z)*p1+trig1(z)*p2
-	case TRIGPLUSTRIG:				// to handle fractint par files
-	    TrigFn.CMPLXtrig(z, &temp1, Fn1Index);
-	    temp1 = temp2 * temp1;
-	    TrigFn.CMPLXtrig(z, z, Fn2Index);
-	    *z = *z * temp2;
-	    *z = temp1 + *z;
-	    return FractintBailoutTest(z);
+	case TRIGPLUSTRIGFP:
+	case TRIGPLUSTRIG:
+	    return TrigPlusTrigFractalT<Complex, double>(z, temp1, temp2, Fn1Index, Fn2Index, rqlim, BailoutTestType);
 
-	case MANDELTRIGFP:						// we split the routine to allow for different bailout routines
-	case LAMBDATRIG:						// to handle fractint par file references
+	case MANDELTRIGFP:
+	case LAMBDATRIG:
 	case LAMBDATRIGFP:
 	case MANDELTRIG:
-	    {
-	    double  siny, cosy, tmpexp;
-	    const char    *Fn1;
+	    return MandelTrigFractalT<Complex, double>(z, temp1, temp3, t, Fn1Index, rqlim);
 
-	    Fn1 = TrigFn.FunctList[Fn1Index];
+	case FPMANTRIGPLUSEXP:
+	    return ManTrigPlusExpFractalT<Complex, double>(z, temp1, t, Fn1Index, rqlim, BailoutTestType);
 
-	    if (strcmp(Fn1, "sin") == 0 || strcmp(Fn1, "cos") == 0)
-		{
-		if (fabs(z->y) >= rqlim) return(1);			// sin,cos */
-		TrigFn.CMPLXtrig(z, &temp1, Fn1Index); 					// temp1 = trig(old)
-		temp3 = temp1 * t;					// New = longparm*trig(old) 
-		*z = temp3;
-		}
-	    else if (strcmp(Fn1, "exp") == 0)				// exp added so that "bows" fractal from FRACTINT.par runs properly
-		{
-		// found this in  "Science of Fractal Images"
-		if (fabs(z->y) >= 1.0e8) return(1);
-		if (fabs(z->x) >= 6.4e2) return(1);
-		siny = sin(z->y);
-		cosy = cos(z->y);
-
-		if (z->x >= rqlim && cosy >= 0.0) return(1);
-		tmpexp = exp(z->x);
-		temp1.x = tmpexp * cosy;
-		temp1.y = tmpexp * siny;
-
-		//multiply by lamda
-		temp3.x = t.x * temp1.x - t.y * temp1.y;
-		temp3.y = t.y * temp1.x + t.x * temp1.y;
-		*z = temp3;
-		}
-	    else if (strcmp(Fn1, "sinh") == 0 || strcmp(Fn1, "cosh") == 0)
-		{
-		if (fabs(z->x) >= rqlim) return(1);
-		TrigFn.CMPLXtrig(z, &temp1, Fn1Index); 					// temp1 = trig(old)
-		temp3 = t * temp1;					// New = longparm*trig(old)
-		*z = temp3;
-		}
-	    else
-		{
-		if (fabs(z->y) >= rqlim) return(1);
-		TrigFn.CMPLXtrig(z, &temp1, Fn1Index); 					// tmp = trig(old)
-		temp3 = t * temp1;					// New = longparm*trig(old)
-		*z = temp3;
-		}
-
-	    return 0;
-	    }
-
-	case FPMANTRIGPLUSEXP:				// another Scientific American biomorph type: z(n+1) = e**z(n) + trig(z(n)) + C
-	    {
-	    double  siny, cosy, tmpexp;
-	    if (fabs(z->x) >= 6.4e2) return(1);		// DOMAIN errors
-	    tmpexp = exp(z->x);
-	    siny = sin(z->y);
-	    cosy = cos(z->y);
-	    TrigFn.CMPLXtrig(z, &temp1, Fn1Index);
-							// New =   trig(old) + e**old + C 
-	    temp1.x += tmpexp * cosy + t.x;
-	    temp1.y += tmpexp * siny + t.y;
-	    *z = temp1;
-	    return FractintBailoutTest(z);
-	    }
-
-	case FPMANTRIGPLUSZSQRD:			// From Scientific American, July 1989 A Biomorph: z(n+1) = trig(z(n))+z(n)**2+C
-	case FPJULTRIGPLUSZSQRD:			// to handle fractint par file references:
-	case LMANTRIGPLUSZSQRD:				// to handle fractint par file references
-	case LJULTRIGPLUSZSQRD:				// to handle fractint par file references
-	    sqr.x = sqr(z->x);
-	    sqr.y = sqr(z->y);
-	    TrigFn.CMPLXtrig(z, &temp1, Fn1Index);
-	    temp1.x += sqr.x - sqr.y + t.x;
-	    temp1.y += 2.0 * z->x * z->y + t.y;
-	    *z = temp1;
-	    return FractintBailoutTest(z);
-
+	case FPMANTRIGPLUSZSQRD:
+	case FPJULTRIGPLUSZSQRD:
+	case LMANTRIGPLUSZSQRD:
+	case LJULTRIGPLUSZSQRD:
+	    return ManTrigPlusZSqrFractalT<Complex, double>(z, temp1, sqr, t, Fn1Index, rqlim, BailoutTestType);
 
 	case LJULFNFN:
 	case FPJULFNFN:
-	case FPMANFNFN:					// z = trig0(z)+p1 if mod(old) < p2.x and trig1(z)+p1 if mod(old) >= p2.x
+	case FPMANFNFN:
 	case LMANFNFN:
-	    if (z->CSumSqr() < temp2.x)
-		{
-		TrigFn.CMPLXtrig(z, z, Fn1Index);
-		*z = t + *z;
-		}
-	    else
-		{
-		TrigFn.CMPLXtrig(z, z, Fn2Index);
-		*z = t + *z;
-		}
-	    return FractintBailoutTest(z);
+	    return FnFnPlusFractalT<Complex, double>(z, t, temp2, Fn1Index, Fn2Index, rqlim, BailoutTestType);
 
 	case LLAMBDAFNFN:
 	case FPLAMBDAFNFN:
 	case LMANLAMFNFN:
-	case FPMANLAMFNFN:				// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
-	    if (z->CSumSqr() < temp2.x)
-		{
-		TrigFn.CMPLXtrig(z, z, Fn1Index);
-		*z = t * *z;
-		}
-	    else
-		{
-		TrigFn.CMPLXtrig(z, z, Fn2Index);
-		*z = t * *z;
-		}
-	    return FractintBailoutTest(z);
+	case FPMANLAMFNFN:
+	    return FnFnMulFractalT<Complex, double>(z, t, temp2, Fn1Index, Fn2Index, rqlim, BailoutTestType);
 
-	case SQRTRIGFP:					// SZSB(XYAXIS) { z=pixel, TEST=(p1+3): z=sin(z)*sin(z), |z|<TEST}
-	case SQRTRIG:					// to handle fractint par files
-	    TrigFn.CMPLXtrig(z, &temp1, Fn1Index);
-	    *z = temp1.CSqr();
-	    return FractintBailoutTest(z);
+	case SQRTRIGFP:
+	case SQRTRIG:
+	    return SqrTrigFractalT<Complex, double>(z, temp1, Fn1Index, rqlim, BailoutTestType);
 
-	case SQR1OVERTRIGFP:				// z = sqr(1/trig(z))
-	case SQR1OVERTRIG:				// to handle fractint par files
-	    TrigFn.CMPLXtrig(z, z, Fn1Index);
-	    *z = z->CInvert();
-	    *z = z->CSqr();
-	    return FractintBailoutTest(z);
+	case SQR1OVERTRIGFP:
+	case SQR1OVERTRIG:
+	    return Sqr1OverTrigFractalT<Complex, double>(z, Fn1Index, rqlim, BailoutTestType);
 
 	case NUMFRACTAL:
-	    {
-	    Complex base;
-	    base.x = param[2];
-	    base.y = param[3];
-	    *z = ComplexPower(base, *z);
-	    TrigFn.CMPLXtrig(z, z, Fn1Index);
-	    *z += *q;
-	    z->x += param[0];
-	    z->y += param[1];
-	    return FractintBailoutTest(z);
-	    }
-
+	    return NumFractalT<Complex, double>(z, q, Fn1Index, rqlim, BailoutTestType, param);
+	    
 //	case FORMULA:
 //	case SCREENFORMULA:
 //	    return(FormulaFloat(z, q));
 
-
-
-
 	}
     return 0;
-    }
-
-
-int	CPixel::ZXTrigPlusZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn)	// z = (p1*z*trig(z))+p2*z
-    {
-    TrigFn->CMPLXtrig(z, &temp1, Fn1Index); 	// tmp  = trig(old)
-    temp1 = temp * temp1;		// tmp  = p1*trig(old)
-    temp3 = *z * temp1;			// tmp2 = p1*old*trig(old)
-    temp1 = *z * temp2;			// tmp  = p2*old
-    *z = temp1 + temp3;			// New  = p1*trig(old) + p2*old
-    return FractintBailoutTest(z);
-    }
-
-int	CPixel::ScottZXTrigPlusZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn)    // z = (z*trig(z))+z
-    {
-    TrigFn->CMPLXtrig(z, &temp1, Fn1Index); 	// tmp	= trig(old)
-    temp3 = *z * temp1;			// New  = old*trig(old)
-    *z = *z + temp3;			// New  = trig(old) + old
-    return FractintBailoutTest(z);
-    }
-
-int	CPixel::SkinnerZXTrigSubZfpFractal(Complex *z, Complex *q, CTrigFn *TrigFn)
-    {
-    // z = (z*trig(z))-z 
-    TrigFn->CMPLXtrig(z, &temp1, Fn1Index); 	// tmp	= trig(old)
-    temp3 = *z * temp1;			// New  = old*trig(old)
-    *z = temp - *z;			// New  = trig(old) + old
-    return FractintBailoutTest(z);
     }
 
 

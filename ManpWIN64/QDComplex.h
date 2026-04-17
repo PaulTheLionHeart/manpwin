@@ -91,6 +91,8 @@ class QDComplex
 	void		CPower(QDComplex  & result, QDComplex  & base, int exp);
 	QDComplex	QDComplexPower(QDComplex x, QDComplex y);
 	double		CSumSqr();		// real squared + imaginary squared
+	QDComplex	CSinUnSafe(void);	// sine of a complex number
+	QDComplex	CCosUnSafe(void);	// cosine
 
 	qd_real	x, y;
     };

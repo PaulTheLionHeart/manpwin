@@ -1,13 +1,11 @@
 
-
 // simple example of QD usage to illustrate linking process
 // Alex Kaiser, LBNL, 6/3/2010
 
-#include  "QDComplex.h"
-#include  "pixel.h"
-
-//extern	    int QDFormPerPixel(QDComplex *zIn, QDComplex *qIn);	// norty declarations because this is in the formula parser
-//extern	    int QDFormula(QDComplex *zIn, QDComplex *qIn);
+#include "QDComplex.h"
+#include "pixel.h"
+#include "FunctionTemplate.h"
+#include "BailoutTemplate.h"
 
 /**************************************************************************
 	Initialise functions for each pixel
@@ -40,13 +38,7 @@ int	CPixel::QDInitFunctions(WORD type, QDComplex *z, QDComplex *q)
     because its real and imaginary parts do not obey the Cauchy–Riemann equations.
 ***************************************************************************/
 	case BURNINGSHIP:				// Burning Ship
-	    if (!juliaflag)
-		{
-		z->x = q->x + param[0];
-		z->y = q->y + param[1];
-		}
-	    sqrQD = 0;
-	    realimagQD = 0.0;
+	    Init_Basic<QDComplex>(z, q, param, juliaflag, sqrQD, realimagQD);
 	    break;
 /**************************************************************************
     The Burning Ship fractal for Higher Powers
@@ -80,141 +72,43 @@ int	CPixel::QDInitFunctions(WORD type, QDComplex *z, QDComplex *q)
 	case JULIA4:
 	case MANDEL4FP:
 	case MANDEL4:
-	    *degree = (int)param[0];
-	    if (*degree < 1)
-		*degree = 1;
-		if (type == JULIA4FP || type == JULIA4 || type == MANDEL4FP || type == MANDEL4)	// handle legacy Fractint types
-		    *degree = 4;
-	    if (!juliaflag)
-		{
-		z->x = q->x + param[1];
-		z->y = q->y + param[2];
-		}
+	    Init_Power<QDComplex>(type, z, q, param, juliaflag, degree);
 	    break;
 
 	case CUBIC:					// Art Matrix Cubic
+	    Init_Cubic<QDComplex>(z, q, param, juliaflag, subtype, special, aQD, bQD, a2QD, aa3QD, t2QD, t3QD, tempQD, vQD);
+	    break;
+	    
+	case SPECIALNEWT:				// Art Matrix Newton
+	    Init_SPECIALNEWT<QDComplex>(z, q, aQD, bQD, lm5QD, lp5QD);
+	    break;
+	    
+	case MATEIN:					// Art Matriuc Matein fractal
 	    {
-	    QDComplex	t2, t3, temp;
-	    switch ((int)param[0])
-		{
-		case 0:
-		    subtype = 'B';
-		    break;
-		case 1:
-		    subtype = 'C';
-		    break;
-		case 2:
-		    subtype = 'F';
-		    break;
-		case 3:
-		    subtype = 'K';
-		    break;
-		default:
-		    subtype = 'B';
-		    break;
-		}
-	    if ((int)param[1] < 0)
-		special = 0;
-	    else
-		special = (int)param[1];
-
 	    period_level = FALSE;			// no periodicity checking
-	    if (subtype == 'B')				// CBIN 
-		{
-		t3 = *q * 3;				// T3 = 3*T
-		t2 = q->CSqr();				// T2 = T*T
-		aQD = (t2 + 1) / t3;			// A  = (T2 + 1)/T3
-							// B  = 2*A*A*A + (T2 - 2)/T3    
-		temp = aQD.CCube() * 2;			// 2*A*A*A
-		bQD = (t2 - 2) / t3 + temp;		// B  = 2*A*A*A + (T2 - 2)/T3
-		}
-	    else if (subtype == 'C' || subtype == 'F')	// CCIN or CFIN
-		{
-		aQD = *q;				// A = T
-							// find B = T + 2*T*T*T
-		temp = q->CCube();			// B = T*T*T
-		if (subtype == 'C')
-		    bQD = temp + temp + *q;		// B = B * 2 + T
-		else
-		    {
-		    bQD = (temp - *q) * 2;		// B = B * 2 - 2 * T
-		    a2QD = aQD + aQD;
-		    }
-		}
-	    else if (subtype == 'K')			// CKIN 
-		{
-		aQD = 0.0;
-		vQD = 0.0;
-		bQD = *q;				// B = T
-		}
-	    aa3QD = aQD.CSqr() * 3;				// AA3 = A*A*3
-	    if (!juliaflag)
-		*z = -aQD;				// Z = -A
+	    int ret = Init_MATEIN<QDComplex, qd_real>(z, q, param, juliaflag, ozQD, tempQD, distance, absolute);
+	    if (ret < 0)
+		return ret;   // propagate rejection
 	    break;
 	    }
-
-	case SPECIALNEWT:				// Art Matrix Newton
-	    l2QD = q->CSqr();				// L2 = L*L
-	    aQD = -l2QD + 0.25;				// A = ( .25,0) - L2
-	    bQD = -l2QD - 0.75;				// B = (-.75,0) - L2 
-	    lm5QD = *q - 0.5;				// LM5 = L - (.5,0)
-	    lp5QD = *q + 0.5;				// LP5 = L + (.5,0)
-	    break;
-
-/*
-	case MATEIN:					// Art Matriuc Matein fractal
-	    if ((absolute = q->CSumSqr()) > 1.0)
-		return(-1);				// not inside set
-	    if (!juliaflag)
-		*z = 1;
-
-	    for (int i = 0; i < 100; ++i)		// DO 300 I = 1,100 
-		{
-		temp = z->CInvert();			// 300  Z = L*(Z + 1/Z)
-		*z = *q * (*z + temp);
-		}
-
-	    distance = 1.0;				// D = 1
-	    oz = z->CInvert();				// OZ = 1/Z
-	    break;
-*/
 
 	case EXPFRACTAL:				// there's no initialisation for exp()
 	    break;
 
 	case SINFRACTAL:				// Sine
-	    if (!juliaflag)
-		*z = param[3];
+	    Init_SINFRACTAL<QDComplex>(z, q, param, juliaflag);
 	    break;
 
 	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
-	    a.x = param[0];
-	    a.y = param[1];
-	    *degree = (int)param[2];
-	    if (!juliaflag)
-		{
-		z->x = q->x + param[3];
-		z->y = q->y + param[4];
-		}
+	    Init_REDSHIFTRIDER<QDComplex>(z, q, param, juliaflag, aQD, degree);
 	    break;
 
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
-	    *degree = (int)param[0];
-	    if (*degree < 1)
-		*degree = 1;
-	    if (!juliaflag)
-		{
-		z->x = q->x + param[2];
-		z->y = q->y + param[3];
-		}
+	    Init_TALIS<QDComplex>(z, q, param, juliaflag, degree);
 	    break;
 
 	case POLYNOMIAL:				// Polynomial
-	    if (!juliaflag)
-		{
-		z->x = q->x + param[0];
-		z->y = q->y + param[1];
-		}
+	    Init_POLYNOMIAL<QDComplex>(z, q, param, juliaflag);
 	    for (int i = 0; i < MAXPOLYDEG; i++)	// find highest order of polynomial to help with forward differencing calculations
 		{
 		if (param[2 + i] != 0.0)
@@ -225,24 +119,21 @@ int	CPixel::QDInitFunctions(WORD type, QDComplex *z, QDComplex *q)
 		}
 	    break;
 
-/*
 	case RATIONALMAP:				// Art Matrix Rational Map 
+	    {
+	    // -----------------------------------
+	    // 1. CONTROL LOGIC (CPixel responsibility)
+	    // -----------------------------------
+
 	    switch ((int)param[0])
 		{
-		case 0:
-		    subtype = 'A';
-		    break;
-		case 1:
-		    subtype = 'B';
-		    break;
-		default:
-		    subtype = 'A';
-		    break;
+		case 0: subtype = 'A'; break;
+		case 1: subtype = 'B'; break;
+		default: subtype = 'A'; break;
 		}
-	    if ((int)param[1] < 0)
-		special = 0;
-	    else
-		special = (int)param[1];
+	    special = ((int)param[1] < 0) ? 0 : (int)param[1];
+
+	    // threshold / palette logic stays here
 	    if (threshold != OldThreshold)
 		{
 		OldThreshold = threshold;
@@ -254,73 +145,29 @@ int	CPixel::QDInitFunctions(WORD type, QDComplex *z, QDComplex *q)
 		    }
 		}
 
-	    if (subtype == 'A')
-		{
-		cmcc = *q - q->CSqr();			// CMCC = C - C*C
-		temp = -*q + 2;
-		a = temp / cmcc;			// A = (2 - C)/CMCC
-		temp = cmcc + 1;
-		b = -temp / cmcc;			// B = -(CMCC + 1)/CMCC
+	    // -----------------------------------
+	    // 2. PURE MATH (TEMPLATE CALL)
+	    // -----------------------------------
 
-							// ALPHA = 1/(C*C * (B + B + B*B/A) * (2*A*C + B))
-		temp = a * *q * 2 + b;			// 2*A*C + B
-		temp1 = b.CSqr() / a + b + b;		// (B + B + B*B/A)
-		temp3 = q->CSqr()*temp1*temp;
-		alpha = temp3.CInvert();
-		}
-	    else if (subtype == 'B')
-		{
-		a = *q;
-		b = a + 1;
-		temp = a.CSqr() - 1;
-		alpha = a / temp;			// ALPHA = A/(A*A - 1)
-		}
-	    else
-		return(ERROR);				// unknown subtype
+	    int ret = Init_RATIONALMAP<QDComplex, qd_real>(z, q, param, juliaflag, subtype, aQD, bQD, alphaQD, tempQD, temp1QD, temp3QD);
 
-							// ESCAPE  =   4/ABS(ALPHA)
-							// ESCAPE  =   ESCAPE*ESCAPE
-	    if (alpha.x != 0.0 || alpha.y != 0.0)
-		escape = 16.0 / alpha.CSumSqr();
+	    if (ret < 0)
+		return ret;
+
+	    // -----------------------------------
+	    // 3. POST-MATH STATE (CPixel responsibility)
+	    // -----------------------------------
+
+	    // escape + epsilon
+	    if (alphaQD.x != 0.0 || alphaQD.y != 0.0)
+		escapeQD = 16.0 / alphaQD.CSumSqr();
 	    else
 		return(FALSE);				// no naughty division
-	    epsilon = 0.000001 / escape;		// EPSILN = 0.000001/ESCAPE 
+	    epsilonQD = 0.000001 / escapeQD;		// EPSILN = 0.000001/ESCAPE 
 
-	    der = 1.0;					// DER = 1.0 
-	    if (!juliaflag)
-		{					// Z = -B/(A + A)
-		temp = -a * 2;
-		*z = b / temp;
-		}
-	    // iterating Z  = 1/(A*Z*Z + B*Z + 1) has various proterties:
-	    // 	   Z  = 1/(A*Z*Z + B*Z + 1)
-	    // Julia   Z  = 1/(A*Z*Z + B*Z + 1)
-	    // Julia   Z  = 1/(A*Z*Z + B*Z + 1)
-	    // ?????   Z  = 1/(A*Z*Z + B*Z + 1)
-
-	    int	zcount;
-	    switch (subtype)
-		{
-		case 'A':
-		    if (juliaflag)
-			zcount = 4;
-		    else
-			zcount = 2;
-		    break;
-		case 'B':
-		    zcount = 3;
-		    break;
-		}
-
-	    for (int i = 0; i < zcount; ++i)
-		{
-							// 1/(A*Z*Z + B*Z + 1)
-		temp = b * *z + 1;			// B*Z + 1
-		temp1 = z->CSqr()*a + temp;		// (A*Z*Z + B*Z + 1)
-		*z = temp1.CInvert();			// Z = 1/(A*Z*Z + B*Z + 1)
-		}
+	    derQD = 1.0;				// DER = 1.0 
+	    }
 	    break;
-*/
 
 	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
 	    QDInitManDerFunctions(subtype, z, q);
@@ -419,11 +266,11 @@ int	CPixel::QDInitFunctions(WORD type, QDComplex *z, QDComplex *q)
 
 */
 /*
-	case TETRATION:					// a specific Tierazon fractal
+	case TETRATION:					// a Paul Bourke fractal
 	    InitTetration(z, q);
 	    break;
 
-	case KLEINIAN:					// a specific Tierazon fractal
+	case KLEINIAN:					// a Paul Bourke fractal
 	    InitKleinian(z, q);
 	    break;
 */
@@ -444,120 +291,20 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 	case MANDELFP:					// Mandelbrot
 	case MANDEL:					// to handle fractint par files
 	case JULIA:					// to handle fractint par files
-	    {
-	    qd_real	realimagQD;
-	    QDComplex	sqrQD;
-
-	    sqrQD.x = z->x * z->x;
-	    sqrQD.y = z->y * z->y;
-	    realimagQD = z->x * z->y;
-	    z->x = q->x + sqrQD.x - sqrQD.y;
-	    z->y = q->y + realimagQD + realimagQD;
-	    return QDBailoutTest(z, sqrQD);
-	    }
+	case JULIAFP:					// like he said
+	case POWER:					// Power
+	case JULIA4FP:
+	case JULIA4:
+	case MANDEL4FP:
+	case MANDEL4:
 	case BURNINGSHIP:				// Burning Ship
-	    {
-	    qd_real	t, realimagQD;
-	    QDComplex	sqrQD;
-
-	    sqrQD.x = z->x * z->x;
-	    sqrQD.y = z->y * z->y;
-	    realimagQD = fabs(z->x * z->y);
-	    z->x = sqrQD.x - sqrQD.y + q->x;
-	    z->y = realimagQD + realimagQD - q->y;
-	    return QDBailoutTest(z, sqrQD);
-	    }
-
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
-	    z->x = fabs(z->x);
-	    z->y = -fabs(z->y);
-	    *z = z->CPolynomial(*degree);
-	    *z = *z + *q;
-	    return QDFractintBailoutTest(&zQD);
-
-	case POWER:			// Power
-	    *z = z->CPolynomial(*degree);
-	    *z = *z + *q;
-	    return QDFractintBailoutTest(&zQD);
-
 	case CUBIC:					// Art Matrix Cubic
-	    {
-	    QDComplex	temp;
-
-	    if (subtype == 'K')				// CKIN
-		{
-		*z = z->CCube() + bQD;			// Z = Z*Z*Z + B
-		z->x += param[2];
-		z->y += param[3];
-		}
-	    else
-		{
-		temp = z->CCube() + bQD;		// Z = Z*Z*Z + B
-		*z = temp - aa3QD * *z;			// Z = Z*Z*Z - AA3*Z + B
-		z->x += param[2];
-		z->y += param[3];
-		}
-	    if (z->CSumSqr() > 100.0)
-		return (TRUE);
-	    else
-		{
-		if (subtype == 'F')
-		    {
-		    if (q->CSumSqr() < 0.111111)
-			{
-			*iteration = special;
-			*SpecialFlag = TRUE;		// for decomp and biomorph
-			return (TRUE);
-			}
-		    vQD = *z + a2QD;
-		    }
-		else if (subtype == 'K')
-		    vQD = *z - vQD;
-		else
-		    vQD = *z - aQD;
-		if (vQD.CSumSqr() <= 0.000001)
-		    {
-		    *iteration = special;
-		    *SpecialFlag = TRUE;		// for decomp and biomorph 
-		    return (TRUE);
-		    }
-		return (FALSE);
-		}
-	    }
+	    return FunctionsDispatch<QDComplex, qd_real, WORD>(this, type, z, q, degree, sqrQD, realimagQD,
+		aQD, a2QD, aa3QD, bQD, vQD, tempQD, param, SpecialFlag, iteration, special, subtype, BailoutTestType, rqlim);
 
 	case SPECIALNEWT:				// Art Matrix Newton
-	    {
-	    if ((int)param[0] < 0)
-		special = 2;
-	    else
-		special = (int)param[0];
-	    QDComplex z2 = z->CSqr();			// z2 = z*z
-							// Z  =  (2*Z*Z2 + A)/(3*Z2 + B)
-	    QDComplex top = z2 * *z * 2 + aQD;
-	    QDComplex bottom = z2 * 3 + bQD;
-	    *z = top / bottom;
-	    z->x += param[1];
-	    z->y += param[2];
-	    vQD = *z - 1.0;
-	    if (vQD.CSumSqr() <= 0.000001)
-		{
-		phaseflag = 0;				// first phase
-		return(TRUE);
-		}
-	    vQD = *z - lm5QD;
-	    if (vQD.CSumSqr() <= 0.000001)
-		{
-		phaseflag = 1;				// second phase
-		return(TRUE);
-		}
-	    vQD = *z + lp5QD;
-	    if (vQD.CSumSqr() <= 0.000001)
-		{
-		phaseflag = 2;				// third phase
-		return(TRUE);
-		}
-	    return(FALSE);
-	    }
+	    return Iter_SPECIALNEWT<QDComplex>(z, q, aQD, bQD, lm5QD, lp5QD, vQD, param, phaseflag, special);
 
 /**************************************************************************
     Determine count before 'Z' becomes unstable
@@ -565,79 +312,26 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
     sin(x+iy)  = sin(x)cosh(y) + icos(x)sinh(y)
 ***************************************************************************/
 	case SINFRACTAL:				// Sine
-	    if (param[2] == 0.0)
-		*z = *q * z->CSin();
-	    else
-		*z = *q + z->CSin();
-	    z->x += param[0];
-	    z->y += param[1];
-	    return QDFractintBailoutTest(&zQD);
+	    return Iter_SINFRACTAL<QDComplex>(this, z, q, param, BailoutTestType, rqlim);
+
+	case MATEIN:					// Art Matriuc Matein fractal
+	    return Iter_MATEIN<QDComplex>(z, q, ozQD, tempQD, distance, absolute, param, epsilon, escape, phaseflag);
 
 	case EXPFRACTAL:				// Exponential
-	    {
-	    int compare;
-
-	    *degree = (int)(fabs(param[3]));
-	    for (int i = 0; i < *degree; i++)
-		*z = z->CExp();
-
-	    if (param[4] == 0.0)
-		*z = *q * *z;				// Z = L*EXP(Z)
-	    else
-		*z = *q + *z;				// Z = L*EXP(Z)
-							// Complex Exponent: e^(x+iy) = (e^x) * cos(y) + i * (e^x) * sin(y) 
-	    switch ((int)param[0])
-		{
-		case 0:
-		    subtype = 'R';
-		    compare = (z->x >= rqlim);
-		    break;
-		case 1:
-		    subtype = 'I';
-		    compare = (z->y >= rqlim);
-		    break;
-		case 2:
-		    subtype = 'M';
-		    compare = (z->x >= rqlim || z->x <= -rqlim || z->y >= rqlim || z->y <= -rqlim);
-		    break;
-		default:
-		    subtype = 'R';
-		    compare = (z->x >= rqlim);
-		    break;
-		}
-	    z->x += param[1];
-	    z->y += param[2];
-	    if (compare)
-		return(TRUE);
-	    return(FALSE);
-	    }
+	    return Iter_EXP_FRACTAL<QDComplex>(z, q, param, degree, subtype, rqlim);
+	    
+	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
+	    return Iter_REDSHIFTRIDER<QDComplex, double>(this, z, q, aQD, param, degree, BailoutTestType, rqlim);
 
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
-	    {
-	    qd_real m = param[1];
-	    aQD = z->CPolynomial(*degree - 1);
-	    *z = (aQD * *z) / (aQD + m) + *q;
-	    return QDFractintBailoutTest(&zQD);
-	}
+	    return Iter_TALIS<QDComplex>(this, z, q, aQD, param, degree, BailoutTestType, rqlim);
 
 	case POLYNOMIAL:				// Polynomial
-	    {
-	    QDComplex	InitialZ = zQD;
-	    QDComplex	FinalZ = { 0.0, 0.0 };
+	    return Iter_POLYNOMIAL<QDComplex>(this, z, q, param, BailoutTestType, rqlim);
 
-	    for (int m = 0; m < MAXPOLYDEG; m++)
-		{
-		QDComplex ComplexTemp = InitialZ;
-		if (param[2 + m] != 0.0)
-		    {
-		    for (int k = 0; k < MAXPOLYDEG - m - 1; k++)
-			ComplexTemp *= InitialZ;
-		    FinalZ += (ComplexTemp * param[2 + m]);
-		    }
-		}
-	    *z = FinalZ + *q;
-	    return QDFractintBailoutTest(&zQD);
-	    }
+	case RATIONALMAP:				// Art Matrix Rational Map
+	    return Iter_RATIONALMAP<QDComplex, qd_real>(this, z, q, aQD, bQD, param, derQD, escapeQD, epsilonQD,
+		iteration, threshold, special, alphaQD, &color);
 
 	case TIERAZON:					// a group of Tierazon fractalsa
 	    return (QDRunTierazonFunctions(subtype, z, q, &z2QD, SpecialFlag, iteration));
@@ -698,97 +392,6 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 //	    return (QDFormula(z, q));
 	}
     return 0;
-    }
-
-/**************************************************************************
-    Bailout Test
-**************************************************************************/
-
-bool	CPixel::QDBailoutTest(QDComplex *z, QDComplex SqrZ)
-    {
-    qd_real	magnitude;
-    qd_real	manhmag;
-    qd_real	manrmag;
-
-    switch (BailoutTestType)
-	{
-	case BAIL_MOD:
-	    magnitude = z->CSumSqr();
-	    return (magnitude > QDBailout);
-
-	case BAIL_REAL:
-	    return (SqrZ.x > QDBailout);
-
-	case BAIL_IMAG:
-	    return (SqrZ.y > QDBailout);
-
-	case BAIL_OR:
-	    return (SqrZ.x > QDBailout || SqrZ.y > QDBailout);
-
-	case BAIL_AND:
-	    return (SqrZ.x > QDBailout && SqrZ.y > QDBailout);
-
-	case MANH:
-	    manhmag = abs(z->x) + abs(z->y);
-	    return (sqr(manhmag) > QDBailout);
-
-	case MANR:
-	    manrmag = z->x + z->y;	    // don't need abs() since we square it next
-	    return (sqr(manrmag) > QDBailout);
-
-	default:
-	    magnitude = z->CSumSqr();
-	    return (magnitude > QDBailout);
-	}
-    }
-
-/**************************************************************************
-    Bailout Test
-**************************************************************************/
-
-bool	CPixel::QDFractintBailoutTest(QDComplex *z)
-    {
-    QDComplex	TempSqr;
-    qd_real	magnitude;
-    qd_real	manhmag;
-    qd_real	manrmag;
-
-    switch (BailoutTestType)
-	{
-	case BAIL_MOD:
-	    magnitude = z->CSumSqr();
-	    return (magnitude > QDBailout);
-
-	case BAIL_REAL:
-	    TempSqr.x = sqr(z->x);
-	    return (TempSqr.x > QDBailout);
-
-	case BAIL_IMAG:
-	    TempSqr.y = sqr(z->y);
-	    return (TempSqr.y > QDBailout);
-
-	case BAIL_OR:
-	    TempSqr.x = sqr(z->x);
-	    TempSqr.y = sqr(z->y);
-	    return (TempSqr.x > QDBailout || TempSqr.y > QDBailout);
-
-	case BAIL_AND:
-	    TempSqr.x = sqr(z->x);
-	    TempSqr.y = sqr(z->y);
-	    return (TempSqr.x > QDBailout && TempSqr.y > QDBailout);
-
-	case MANH:
-	    manhmag = abs(z->x) + abs(z->y);
-	    return (sqr(manhmag) > QDBailout);
-
-	case MANR:
-	    manrmag = z->x + z->y;	    // don't need abs() since we square it next
-	    return (sqr(manrmag) > QDBailout);
-
-	default:
-	    magnitude = z->CSumSqr();
-	    return (magnitude > QDBailout);
-	}
     }
 
 

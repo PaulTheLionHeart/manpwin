@@ -92,6 +92,8 @@ class DDComplex
 //	void		DDComplexPower(DDComplex  & result, DDComplex x, DDComplex y);
 	DDComplex	DDComplexPower(DDComplex x, DDComplex y);
 	double		CSumSqr();		// real squared + imaginary squared
+	DDComplex	CSinUnSafe(void);	// sine of a complex number
+	DDComplex	CCosUnSafe(void);	// cosine
 
 	dd_real	x, y;
     };
