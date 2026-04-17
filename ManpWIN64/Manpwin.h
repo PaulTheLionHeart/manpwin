@@ -8,6 +8,7 @@
 #define _export
 
 #include <atomic>
+#include <exception>
 #include "Big.h"
 #pragma once
 

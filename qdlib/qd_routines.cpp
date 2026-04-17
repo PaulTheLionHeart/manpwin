@@ -2,11 +2,14 @@
 // Also a few routines needed for conversion
 // PHD 20241221
 
-#include  <Windows.h>
-#include  "qd_real.h"
+#include <Windows.h>
+#include <atomic>
+#include "qd_real.h"
+#include "FractalAbort.h"
 
 extern	HWND	GlobalHwnd;			// This is the main windows handle
 extern	int	time_to_quit;			// time to quit?
+extern	std::atomic<bool> gStopRequested;	// force early exit
 
 using namespace qd;
 
@@ -15,13 +18,17 @@ using namespace qd;
 /////////////////////////////////////////////////////////////////////
 
     /* This routine is called whenever a fatal error occurs. */
-void qd_real::error(const char *msg) { 
-  if (msg) { 
-  /*cerr << "ERROR " << msg << endl;*/ 
-      MessageBox(GlobalHwnd, msg, "QD Fatal Error, I'm outta here", MB_ICONEXCLAMATION | MB_OK);
-      time_to_quit = true;
-  }
-}
+void qd_real::error(const char *msg)
+    {
+    if (!msg) return;
+
+    if (gFatalErrorOccurred.exchange(true))
+	return;
+
+    gStopRequested.store(true);
+    MessageBox(GlobalHwnd, msg, "QD Fatal Error, I'm outta here", MB_ICONEXCLAMATION | MB_OK);
+    throw FractalAbort();
+    }
 
 /* Some useful constants. */
 const qd_real qd_real::_2pi = qd_real(6.283185307179586232e+00,

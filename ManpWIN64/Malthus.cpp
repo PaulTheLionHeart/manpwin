@@ -6,66 +6,7 @@
 */
 
 #include "OtherFunctions.h"
-/*
-#include	<stdio.h>
-#include	"manp.h"
-#include	"Fract.h"
-#include	"resource.h"
-#include	"fractype.h"
-#include	"menu.h"
-#include	"anim.h"
-#include	"colour.h"
-#include	"plot.h"
-#include	"Matrix.h"
 
-extern	int	user_data(HWND);
-extern	char	*AnimData(void);
-extern	void	ConvertRGB2ASCII(BYTE, BYTE, BYTE, char *);
-extern	char	*GenerateMPEGFileName (char *, char *);
-extern	char	*GenerateAnimFileName (char *, char *);
-extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
-//extern	void	InitTransformation(double tx, double ty, double tz);
-//extern	void	DoTransformation(double *x1, double *y1, double *z1, double x, double y, double z);
-
-extern	BOOL	WritePNGFrames;			// write frames to PNG files
-extern	BOOL	WriteMemFrames;			// write frames to memory
-extern	BOOL	WritePNGList;			// write PNG filenames to a *lst file
-extern	BOOL	WriteMPEGFrames;		// write frames directly to an MPEG file
-extern	double 	*wpixels;			// an array of doubles holding slope modified iteration counts
-
-extern	char	MPGPath[];			// path for MPEG files
-extern	char	MPGFile[];			// MPEG file
-extern	char	PNGName[];			// base name for PNG file sequence
-extern	char	ANIMPNGPath[];			// path for animated PNG files and LST files
-extern	char	PNGFile[];			// PNG file
-extern	char	ScriptFileName[];		// base name for script file 
-
-extern	long	threshold;
-extern	double	mandel_width;			// width of display
-extern	double	hor;				// horizontal address
-extern	double	vert;				// vertical address
-extern	double	ScreenRatio;			// ratio of width / height for the screen
-extern	double	param[];
-extern	WORD	type;				// fractal type
-extern	int	subtype;			// A - E
-extern	char	PNGName[];			// base name for PNG file sequence
-//extern	BYTE	*PalettePtr;			// points to true colour palette
-extern	CTrueCol    TrueCol;			// palette info
-extern	BOOL	StartImmediately;		// immediate start of animation generation
-//extern	BYTE	ScriptPaletteFlag;		// Display palette 
-extern	ProcessType	OscAnimProc;
-
-extern	double	x_rot;				// angle display plane to x axis
-extern	double	y_rot;				// angle display plane to y axis
-extern	double	z_rot;				// angle display plane to z axis
-extern	BYTE	_3dflag;			// generate image in 3D
-extern	int	xAxis, yAxis, zAxis;		// numerical values for axes for chaotic oscillators
-
-extern	int	xdots, ydots;
-
-extern	CPlot	Plot;				// image plotting routines 
-extern	CDib    Dib;				// Device Independent Bitmap
-*/
 static	double	xscale, yscale;
 static	int	frames = 100;
 static	double	StartRate = -1.0, EndRate = 2.0;

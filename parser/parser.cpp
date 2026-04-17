@@ -204,7 +204,7 @@ int 	 GetMathType()
     int	  Arith;
     if (BigNumFlag)
 	{
-	if (precision <= 30)
+	if (precision <= DDPRECISION)
 	    Arith = DOUBLEDOUBLE;
 	else
 	    Arith = QUADDOUBLE;

@@ -83,10 +83,8 @@ class CPixel
 	long	dofract(HWND hwnd, int row, int col);
 	long	DoBigFract(HWND hwnd, int row, int col);
 	long	BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd));
-	long	DDCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd));
-	long	QDCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd));
-	long	DoDDFract(HWND hwnd, int row, int col);
-	long	DoQDFract(HWND hwnd, int row, int col);
+	long	DoDDFract(HWND hwnd, int row, int col, BigComplex cBig);
+	long	DoQDFract(HWND hwnd, int row, int col, BigComplex cBig);
 	int	RunFractal(Complex *z, Complex *q);
 	int	DDRunFractal(DDComplex *z, DDComplex *q);
 	int	QDRunFractal(QDComplex *z, QDComplex *q);
@@ -303,7 +301,8 @@ class CPixel
 		BigDouble *Big_yymin, BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio);
 
 	int	InitArithmetic();
-//	int	BigDouble2QD(qd_real *out, BigDouble *in);
+	long	GetPenP(int i) const { return penp[i]; }
+	long	GetPenN(int i) const { return penn[i]; }
 
     private:
 	int	DoFilter(int method, int hooper);
@@ -315,10 +314,10 @@ class CPixel
 	DDComplex	DDInvertz2(DDComplex  & Cmplx1);
 	QDComplex	QDInvertz2(QDComplex  & Cmplx1);
 	BigComplex	BigInvertz2(BigComplex  & Cmplx1);
-	bool	BailoutTest(Complex *z, Complex SqrZ);
-	bool	BigBailoutTest(BigComplex *z, BigComplex SqrZ);
-	bool	FractintBailoutTest(Complex *z);
-	bool	BigFractintBailoutTest(BigComplex *z);
+//	bool	BailoutTest(Complex *z, Complex SqrZ);
+//	bool	BigBailoutTest(BigComplex *z, BigComplex SqrZ);
+//	bool	FractintBailoutTest(Complex *z);
+//	bool	BigFractintBailoutTest(BigComplex *z);
 	// some fractal routines
 	int	InitFunctions(WORD type, Complex *z, Complex *q);
 	int	RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration);
@@ -330,9 +329,11 @@ class CPixel
 	int	RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration);
 	int	DDRunFractintFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration);
 	int	QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialFlag, long *iteration);
+	int	BigRunFractintFunctions(WORD type, BigComplex *z, BigComplex *q, BYTE *SpecialFlag, long *iteration);
 	int	InitFractintTrigFunctions(WORD type, Complex *z, Complex *q);
 	int	DDInitFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q);
 	int	QDInitFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q);
+	int	BigInitFractintFunctions(WORD type, BigComplex *z, BigComplex *q);
 	int	RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration);
 	int	DDRunFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration);
 	int	QDRunFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialFlag, long *iteration);
@@ -374,12 +375,9 @@ class CPixel
 	int	ChangeBigPrecision(int dec);
 
 	// double double functions
-//	int	BigDouble2DD(dd_real *out, BigDouble *in);
 	void	CalcDDFloatIteration(double error, std::vector <float> &wpixels, int row, int col, DDComplex z, DDComplex OldZ, DDComplex OlderZ,
 		double FloatIteration, WORD type, int subtype, WORD *degree, BYTE SpecialFlag, WORD special, int width);
 	int	DDRunTierazonFunctions(int subtype, DDComplex *z, DDComplex *q, DDComplex *z2, BYTE *SpecialFlag, long *iteration);
-	bool	DDBailoutTest(DDComplex *z, DDComplex SqrZ);
-	bool	DDFractintBailoutTest(DDComplex *z);
 	int	DDRunManDerFunctions(int subtype, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration);
 	int	DDInitTierazonFunctions(int subtype, DDComplex *z, DDComplex *q);
 	int	DDInitFunctions(WORD type, DDComplex *z, DDComplex *q);
@@ -389,8 +387,6 @@ class CPixel
 	void	CalcQDFloatIteration(double error, std::vector <float> &wpixels, int row, int col, QDComplex z, QDComplex OldZ, QDComplex OlderZ,
 		double FloatIteration, WORD type, int subtype, WORD *degree, BYTE SpecialFlag, WORD special, int width);
 	int	QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDComplex *z2, BYTE *SpecialFlag, long *iteration);
-	bool	QDBailoutTest(QDComplex *z, QDComplex SqrZ);
-	bool	QDFractintBailoutTest(QDComplex *z);
 	int	QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q);
 	int	QDInitManDerFunctions(int subtype, QDComplex *z, QDComplex *q);
 	int	QDInitTierazonFunctions(int subtype, QDComplex *z, QDComplex *q);
@@ -510,7 +506,9 @@ class CPixel
 	Complex	a, a2, aa3, b, l2, lm5, lp5, oz, sqr, t2, t3, v;	// local variables for functions
 	Complex temp, temp1, temp2, temp3, temp4;
 	DDComplex tempDD, temp1DD, temp2DD, temp3DD, temp4DD;
+	DDComplex ozDD, t2DD, t3DD;	// local variables for functions
 	QDComplex tempQD, temp1QD, temp2QD, temp3QD, temp4QD;
+	QDComplex ozQD, t2QD, t3QD;				// local variables for functions
 	double	real_imag, absolute, distance;
 	HWND	hwnd;
 	int	BailoutTestType = BAIL_MOD;
@@ -520,8 +518,8 @@ class CPixel
 	BigComplex	tempBig, temp1Big, temp2Big, temp3Big;
 
 	// local variables for bignum Mandelbrot Derivatives
-	BigComplex	sqrBig, sqrsqrBig;
-	BigDouble	realimagBig, RealImagSqrBig, tBig;
+	BigComplex	sqrBig, sqrsqrBig, tBig;
+	BigDouble	realimagBig, RealImagSqrBig;
 
 	// local variables for rational maps
 	int	OldThreshold = 0;					// check to see if threshold changes
@@ -529,8 +527,14 @@ class CPixel
 	int	pennref[4] = { 9, 10, 11, 12 };
 	int	penp[4];
 	int	penn[4];
-	Complex	alpha, cmcc;
 	double	escape, epsilon, der;
+	dd_real	escapeDD, epsilonDD, derDD;
+	qd_real	escapeQD, epsilonQD, derQD;
+	BigDouble	escapeBig, epsilonBig, derBig;
+	Complex	alpha;
+	DDComplex	alphaDD;
+	QDComplex	alphaQD;
+	BigComplex	alphaBig;
 
 									// local variables for Mandelbrot Derivatives
 	Complex	sqrsqr;
@@ -564,18 +568,26 @@ class CPixel
 	Complex	Coefficient;
 	DDComplex	CoefficientDD;
 	QDComplex	CoefficientQD;
+	BigComplex	CoefficientBig;
 	double	foldxinitx, foldyinity, foldxinity, foldyinitx;
 	Complex	roots[MAXROOTS];			// roots
 	DDComplex	rootsDD[MAXROOTS];
 	QDComplex	rootsQD[MAXROOTS];
+	BigComplex	rootsBig[MAXROOTS];
 	Complex	croot, cdegree;
 	DDComplex	crootDD, cdegreeDD;
 	QDComplex	crootQD, cdegreeQD;
+	BigComplex	crootBig, cdegreeBig;
 	double	thresh;
+	dd_real	threshDD;
+	qd_real	threshQD;
+	BigDouble threshBig;
+
 	int	root;
 	double	qc, qci, qcj, qck;			// These are for quaternions and hypercomplex
 	dd_real	qcDD, qciDD, qcjDD, qckDD;
 	qd_real	qcQD, qciQD, qcjQD, qckQD;
+	BigDouble	qcBig, qciBig, qcjBig, qckBig;
 	int	PhoenixType = ZERO;
 	int	PhoenixDegree;
 

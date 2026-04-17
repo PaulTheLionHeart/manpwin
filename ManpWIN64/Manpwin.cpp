@@ -2430,9 +2430,9 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
     _snprintf_s(FinishedStr, GENERALFIELDLENGTH, _TRUNCATE, "%s", (finished) ? ", Image Complete" : " ");
     if (BigNumFlag)	    // now we have double double and quad double...
 	{
-	if (precision <= 30 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+	if (precision <= DDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
 	    _snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "DD Prec: %d", precision);
-	else if (precision <= 60 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+	else if (precision <= QDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
 	    _snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "QD Prec: %d", precision);
 	else
 	    {

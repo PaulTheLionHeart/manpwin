@@ -298,7 +298,6 @@ void	ConvertASCII2RGB(RGBTRIPLE &rgb, char *buf)
 **************************************************************************/
 
 void	output_batch(double h, double v, double w, HWND hwnd, LPSTR filename)
-
     {
     FILE	*fb;				// batch file   
     char	s[400];
@@ -992,7 +991,6 @@ int FindFunct(char *Str)
     }
 
 void	GetFunctions(char *s)
-
     {
     char	*t;
     char	fn1[16], fn2[16];
@@ -1036,7 +1034,6 @@ void	GetFunctions(char *s)
 **************************************************************************/
 
 void	GetParamsList(char *s)
-
     {
     char	*t;
 
@@ -1062,7 +1059,6 @@ void	GetParamsList(char *s)
 **************************************************************************/
 
 void	GetBailout(char *s)
-
     {
     char	*t;
     int		count;
@@ -1085,7 +1081,6 @@ void	GetBailout(char *s)
 **************************************************************************/
 
 void	GetParam(HWND hwnd, LPSTR filename, LPSTR szSaveFileName)  
-
     {   
 						// we don't allocate this because we have no idea of the size before we open the file
     char	string[SIZEOF_BF_VARS*3];	// times 3 because of x, y, width
@@ -1167,7 +1162,6 @@ void	GetParam(HWND hwnd, LPSTR filename, LPSTR szSaveFileName)
 **************************************************************************/
 
 void	AnalyseFwdDiff(char *s)
-
     {
     char	*t;
 
@@ -1209,7 +1203,6 @@ void	RemoveQuotes(char *out, char *in)
 **************************************************************************/
 
 int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, BOOL IsPNG)  
-
     {						// Establish string and get the first token:
     char	*token;
     char	seps[]   = " \t\n";
@@ -1524,9 +1517,9 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 	z_rot = (double)(RotationAngle % 360);
 	if (BigNumFlag)
 	    {
-	    if (precision <= 30)
+	    if (precision <= DDPRECISION)
 		DDMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
-	    else if (precision <= 60)
+	    else if (precision <= QDPRECISION)
 		QDMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
 	    else
 		BigMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
@@ -1589,7 +1582,6 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 **************************************************************************/
 
 char	*FractData(void)
-
     {
     char	*s1 = nullptr;
     char	*s2 = nullptr;
@@ -1630,7 +1622,6 @@ char	*FractData(void)
 **************************************************************************/
 
 void	BasicFractData(StringBuilder& sb, BOOL CreateAnim)
-
     {
 //    char	s[1024];
     char	SubTypeName[1024];
@@ -1891,7 +1882,6 @@ void	BasicFractData(StringBuilder& sb, BOOL CreateAnim)
 **************************************************************************/
 
 void	SaveTextPalette(char *PaletteBuffer)
-
     {
     int		i;
     char	*p;
@@ -1915,7 +1905,6 @@ void	SaveTextPalette(char *PaletteBuffer)
 **************************************************************************/
 
 void	LoadTextPalette(char *PaletteBuffer, int length)
-
     {
     int		i, j, count;
     char	*p;

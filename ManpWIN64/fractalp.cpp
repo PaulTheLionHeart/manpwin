@@ -1838,7 +1838,7 @@ struct fractalspecificstuff fractalspecific[]=
    "Rational Map",
       "Subtype: 0 = type A, 1 = type B", "special colour", realz0, imagz0, ES, ES,ES, ES, ES, ES,
       0.0, 24.0, 0.0, 0.0,0,0,0,0,0,0,
-   -3.5555556, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 4.0,
+   -3.5555556, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -3205,22 +3205,22 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"10.) z=z*z*z+c",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 3.0, 0.0, 4.0, XYAXIS, 3, ESCAPING
+	    NULL, NULL, 3.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, 3, ESCAPING
 	},
 	{
 	"11.) z=z*z*z*z+c",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 4.0, 0.0, 4.0, XAXIS, 4, ESCAPING
+	    NULL, NULL, 4.0, 0.0, 0.0, 0.0, 4.0, XAXIS, 4, ESCAPING
 	},
 	{
 	"12.) z=z*z*z*z*z+c",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 5.0, 0.0, 4.0, XYAXIS, 5, ESCAPING
+	    NULL, NULL, 5.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, 5, ESCAPING
 	},
 	{
 	"13.) z=z*z*z*z*z*z+c",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 6.0, 0.0, 4.0, XAXIS, 6, ESCAPING
+	    NULL, NULL, 6.0, 0.0, 0.0, 0.0, 4.0, XAXIS, 6, ESCAPING
 	},
 	{
 	"14.) z1=z*z+c; z=z*z+c*z2; z2=z",
@@ -3285,52 +3285,52 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"26.) Newton/Mandel, 5th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 5.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 5.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"27.) Newton/Mandel, 7th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 7.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 7.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"28.) Newton/Mandel, 9th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 9.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 9.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"29.) Newton/Mandel, 13th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 13.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 13.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"30.) Newton/Mandel, 8th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 8.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 8.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"31.) Newton/Mandel, Newton Diamond",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 5.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 5.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"32.) Newton/Mandel, Newton Pentagon",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 6.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 6.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"33.) Newton/Mandel, Newton Hexagon",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 7.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 7.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"34.) Newton/Mandel, Newton Octagon",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 9.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 9.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"35.) Newton/Mandel, 9th order Newton Flower",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 13.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 13.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"36.) Newton Variations, z=z-(z*z*z*z*c-z+c)/(4*z*z*z*c)",
@@ -3415,42 +3415,42 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"52.) Newton/Mandel, 8th order Newton flower",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 8.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 8.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"53.) Newton/Mandel, 6th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 6.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 6.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"54.) More Newton Msets, 15th order Newton Mset flower",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 15.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 15.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"55.) More Newton Msets, 4th order Newton's apple",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 4.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 4.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"56.) More Newton Msets, 25th order Newton Mset flower",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 25.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 25.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"57.) More Newton Msets, 38th order Newton Mset flower",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 38.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 38.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"58.) More Newton Msets, 50th order Newton Mset flower",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 50.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 50.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"59.) More Newton Msets, 5th order Newton Mset",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 6.0, 0.0, 4.0, XAXIS, -1, CONVERGING
+	    NULL, NULL, 6.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, CONVERGING
 	},
 	{
 	"60.) More Newton Msets, 18th order Newton Mset flower",
@@ -3570,17 +3570,17 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"83.) Quartets, t=0; z1=z; z=z*z*z-t*t*t+c; z=z1",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 3.0, 0.0, 4.0, XYAXIS, 4, ESCAPING
+	    NULL, NULL, 3.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, 4, ESCAPING
 	},
 	{
 	"84.) Quartets, t=0; z1=z; z=z*z*z*z-t*t*t*t+c; t=z1", 
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 4.0, 0.0, 4.0, XAXIS, 4, ESCAPING
+	    NULL, NULL, 4.0, 0.0, 0.0, 0.0, 4.0, XAXIS, 4, ESCAPING
 	},
 	{
 	"85.) Quartets, z2=z; z=(z^4)+c; c=z2",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 4.0, 0.0, 4.0, XAXIS, 4, ESCAPING
+	    NULL, NULL, 4.0, 0.0, 0.0, 0.0, 4.0, XAXIS, 4, ESCAPING
 	},
 	{
 	"86.) Newton Variations, z=z-((z^4)-z)/(4*(z^3)-1); z=z*z*c",
@@ -3635,7 +3635,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"96.) Quartets, z1=z; z=z*z*z*z+z2/2+c;; z2=z1",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 4.0, 0.0, 4.0, XAXIS, -1, ESCAPING
+	    NULL, NULL, 4.0, 0.0, 0.0, 0.0, 4.0, XAXIS, -1, ESCAPING
 	},
 	{
 	"97.) Polynomials, z = z*z+c*(1+sqrt(z))",
@@ -3685,7 +3685,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"106.) More Fractals, 5th order N/Mset",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 5.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
+	    NULL, NULL, 5.0, 0.0, 0.0, 0.0, 4.0, XYAXIS, -1, CONVERGING
 	},
 	{
 	"107.) More Fractals, z1 = z; z = sin(z) - c; c = 1/(z*50); [quartet]", 
@@ -3756,7 +3756,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"120.) Flarium 07, Polynomial: z = (z*z+c)^(cn+c)",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 3.0, 0.0, 1000.0, NOSYM, -1, ESCAPING
+	    NULL, NULL, 3.0, 0.0, 0.0, 0.0, 1000.0, NOSYM, -1, ESCAPING
 	},
 	{
 	"121.) Flarium 08, Sharon Webb: z = z*z*z*z+1/c; [Sharon Star]",
@@ -3816,7 +3816,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"132.) Flarium 27, Polynomial: z=z*z*(cn+z)/(cn+z+c)+c",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 3.0, 0.0, 1000.0, XAXIS, 2, ESCAPING
+	    NULL, NULL, 3.0, 0.0, 0.0, 0.0, 1000.0, XAXIS, 2, ESCAPING
 	},
 	{
 	"133.) Flarium 28, Derbyshire / Newton: z=z - (z*z*z-1)/(3*z*z)+c; [Nova-Mandelbrot-MultiFract]",
@@ -3981,7 +3981,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"165.) Flarium 67-69, Newton Variations: z = ((z-(((z^n)-1)/(n*(z^(n-1)))))^2)*c; ",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 3.0, 0.0, 1000.0, XAXIS, 2, ESCAPING
+	    NULL, NULL, 3.0, 0.0, 0.0, 0.0, 1000.0, XAXIS, 2, ESCAPING
 	},
 	{
 	"166.) Flarium 80, Newton Variations: z=((z*z*z*z-1)/(1-(3*z*z*z)))*c",
@@ -4016,7 +4016,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 	{
 	"172.) Flarium 112-116, Polynomials: z=z^n*c+z*c; Dragon curve variations",
 	    NULL, NULL,
-	    NULL, NULL, 0.0, 0.0, 3.0, 0.0, 1000.0, XAXIS, -1, ESCAPING
+	    NULL, NULL, 3.0, 0.0, 0.0, 0.0, 1000.0, XAXIS, -1, ESCAPING
 	},
 	{
 	"173.) Flarium 117, Newton Variations: z = z-(z*z*z-z*c-1)/(3*z*z+c-1)",
@@ -4142,7 +4142,8 @@ struct BigFractalStuff BigFractalSpecific[]=
 //	{ PERPBUFFALO,	    init_big_mandel,		Do_big_PerpBuffalo },
 //	{ MANDELBAR,	    init_big_mandel,		Do_big_Mandelbar },
 //	{ REDSHIFTRIDER,    init_big_RedShiftRider,	Do_big_RedShiftRider },
-//	{ REDSHIFTRIDER,    NULL,			NullSetup },
+	{ RATIONALMAP,	    NULL,			NullSetup },
+	{ REDSHIFTRIDER,    NULL,			NullSetup },
 	{ SLOPEDERIVATIVE,  InitSlopeFractal,		DoSlopeFractal },	// this function runs both float and bignum
 	{ SLOPEFORWARDDIFF, InitSlopeFractal,		DoSlopeFractal },	// same function used but splits depending on type
 	{ POLYNOMIAL,	    NULL,			NullSetup },

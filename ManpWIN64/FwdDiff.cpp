@@ -1078,12 +1078,12 @@ int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusB
 
 	if (BigNumFlag)
 	    {
-	    if (precision <= 30)
+	    if (precision <= DDPRECISION)
 		{
 		ArithType = DOUBLEDOUBLE;
 		return RunSlopeFwdDiffDD(user_data, StatusBarInfo, ThreadComplete, j, mandel_width, hor, vert, xgap, ygap, Big_xgap, Big_ygap, BigHor, BigVert, BigWidth, rqlim, threshold, Dib, wpixels, juliaflag, xdots, ydots, width);
 		}
-	    else if (precision <= 60)
+	    else if (precision <= QDPRECISION)
 		{
 		ArithType = QUADDOUBLE;
 		return RunSlopeFwdDiffQD(user_data, StatusBarInfo, ThreadComplete, j, mandel_width, hor, vert, xgap, ygap, Big_xgap, Big_ygap, BigHor, BigVert, BigWidth, rqlim, threshold, Dib, wpixels, juliaflag, xdots, ydots, width);

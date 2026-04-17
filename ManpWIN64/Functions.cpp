@@ -7,11 +7,13 @@
     (console drivers & serial I/O) is in separate machine libraries.
 */
 
-#include	<math.h>
-#include	"manp.h"
-#include	"fractype.h"
-#include	"Complex.h"
-#include	"pixel.h"
+#include <math.h>
+#include "manp.h"
+#include "fractype.h"
+#include "Complex.h"
+#include "pixel.h"
+#include "FunctionTemplate.h"
+#include "BailoutTemplate.h"
 
 /**************************************************************************
 	Initialise functions for each pixel
@@ -44,13 +46,7 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
     because its real and imaginary parts do not obey the Cauchy–Riemann equations.
 ***************************************************************************/
 	case BURNINGSHIP:				// Burning Ship
-	    if (!juliaflag)
-		{
-		z->x = q->x + param[0];
-		z->y = q->y + param[1];
-		}
-	    sqr = 0;
-	    real_imag = 0.0;
+	    Init_Basic<Complex>(z, q, param, juliaflag, sqr, real_imag);
 	    break;
 /**************************************************************************
     The Burning Ship fractal for Higher Powers
@@ -84,134 +80,43 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 	case JULIA4:
 	case MANDEL4FP:
 	case MANDEL4:
-	    *degree = (int)param[0];
-	    if (*degree < 1)
-		*degree = 1;
-		if (type == JULIA4FP || type == JULIA4 || type == MANDEL4FP || type == MANDEL4)	// handle legacy Fractint types
-		    *degree = 4;
-	    if (!juliaflag)
-		{
-		z->x = q->x + param[1];
-		z->y = q->y + param[2];
-		}
+	    Init_Power<Complex>(type, z, q, param, juliaflag, degree);
 	    break;
 
 	case CUBIC:					// Art Matrix Cubic
-	    switch ((int)param[0])
-		{
-		case 0:
-		    subtype = 'B';
-		    break;
-		case 1:
-		    subtype = 'C';
-		    break;
-		case 2:
-		    subtype = 'F';
-		    break;
-		case 3:
-		    subtype = 'K';
-		    break;
-		default:
-		    subtype = 'B';
-		    break;
-		}
-	    if ((int)param[1] < 0)
-		special = 0;
-	    else
-		special = (int)param[1];
-
-	    period_level = FALSE;			// no periodicity checking
-	    if (subtype == 'B')				// CBIN 
-		{
-		t3 = *q * 3;				// T3 = 3*T
-		t2 = q->CSqr();				// T2 = T*T
-		a = (t2 + 1) / t3;			// A  = (T2 + 1)/T3
-							// B  = 2*A*A*A + (T2 - 2)/T3    
-		temp = a.CCube() * 2;			// 2*A*A*A
-		b = (t2 - 2) / t3 + temp;		// B  = 2*A*A*A + (T2 - 2)/T3
-		}
-	    else if (subtype == 'C' || subtype == 'F')	// CCIN or CFIN
-		{
-		a = *q;					// A = T
-							// find B = T + 2*T*T*T
-		temp = q->CCube();			// B = T*T*T
-		if (subtype == 'C')
-		    b = temp + temp + *q;		// B = B * 2 + T
-		else
-		    {
-		    b = (temp - *q) * 2;		// B = B * 2 - 2 * T
-		    a2 = a + a;
-		    }
-		}
-	    else if (subtype == 'K')			// CKIN 
-		{
-		a = 0;
-		v = 0;
-		b = *q;					// B = T
-		}
-	    aa3 = a.CSqr() * 3;				// AA3 = A*A*3
-	    if (!juliaflag)
-		*z = -a;				// Z = -A
+	    Init_Cubic<Complex>(z, q, param, juliaflag,	subtype, special, a, b, a2, aa3, t2, t3, temp, v);
 	    break;
 
 	case SPECIALNEWT:				// Art Matrix Newton
-	    l2 = q->CSqr();				// L2 = L*L
-	    a = -l2 + 0.25;				// A = ( .25,0) - L2
-	    b = -l2 - 0.75;				// B = (-.75,0) - L2 
-	    lm5 = *q - 0.5;				// LM5 = L - (.5,0)
-	    lp5 = *q + 0.5;				// LP5 = L + (.5,0)
+	    Init_SPECIALNEWT<Complex>(z, q, a, b, lm5, lp5);
 	    break;
 
 	case MATEIN:					// Art Matriuc Matein fractal
-	    if ((absolute = q->CSumSqr()) > 1.0)
-		return(-1);				// not inside set
-	    if (!juliaflag)
-		*z = 1;
-
-	    for (int i = 0; i < 100; ++i)		// DO 300 I = 1,100 
-		{
-		temp = z->CInvert();			// 300  Z = L*(Z + 1/Z)
-		*z = *q * (*z + temp);
-		}
-
-	    distance = 1.0;				// D = 1
-	    oz = z->CInvert();				// OZ = 1/Z
+	    {
+	    period_level = FALSE;			// no periodicity checking
+	    int ret = Init_MATEIN<Complex, double>(z, q, param, juliaflag, oz, temp, distance, absolute);
+	    if (ret < 0)
+		return ret;   // propagate rejection
 	    break;
+	    }
 
 	case SINFRACTAL:				// Sine
-	    if (!juliaflag)
-		*z = param[3];
+	    Init_SINFRACTAL<Complex>(z, q, param, juliaflag);
 	    break;
 
 	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
-	    a.x = param[0];
-	    a.y = param[1];
-	    *degree = (int)param[2];
-	    if (!juliaflag)
-		{
-		z->x = q->x + param[3];
-		z->y = q->y + param[4];
-		}
+	    Init_REDSHIFTRIDER<Complex>(z, q, param, juliaflag, a, degree);
 	    break;
 
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
-	    *degree = (int)param[0];
-	    if (*degree < 1)
-		*degree = 1;
-	    if (!juliaflag)
-		{
-		z->x = q->x + param[2];
-		z->y = q->y + param[3];
-		}
+	    Init_TALIS<Complex>(z, q, param, juliaflag, degree);
 	    break;
 
 	case POLYNOMIAL:				// Polynomial
-	    if (!juliaflag)
-		{
-		z->x = q->x + param[0];
-		z->y = q->y + param[1];
-		}
-	    for (int i = 0; i < MAXPOLYDEG; i++)	// find highest order of polynomial to help with forward differencing calculations
+	    Init_POLYNOMIAL<Complex>(z, q, param, juliaflag);
+
+	    // keep this outside template
+	    for (int i = 0; i < MAXPOLYDEG; i++)
 		{
 		if (param[2 + i] != 0.0)
 		    {
@@ -222,22 +127,20 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 	    break;
 
 	case RATIONALMAP:				// Art Matrix Rational Map 
+	    {
+	    // -----------------------------------
+	    // 1. CONTROL LOGIC (CPixel responsibility)
+	    // -----------------------------------
+
 	    switch ((int)param[0])
 		{
-		case 0:
-		    subtype = 'A';
-		    break;
-		case 1:
-		    subtype = 'B';
-		    break;
-		default:
-		    subtype = 'A';
-		    break;
+		case 0: subtype = 'A'; break;
+		case 1: subtype = 'B'; break;
+		default: subtype = 'A'; break;
 		}
-	    if ((int)param[1] < 0)
-		special = 0;
-	    else
-		special = (int)param[1];
+	    special = ((int)param[1] < 0) ? 0 : (int)param[1];
+
+	    // threshold / palette logic stays here
 	    if (threshold != OldThreshold)
 		{
 		OldThreshold = threshold;
@@ -249,32 +152,20 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 		    }
 		}
 
-	    if (subtype == 'A')
-		{
-		cmcc = *q - q->CSqr();			// CMCC = C - C*C
-		temp = -*q + 2;
-		a = temp / cmcc;			// A = (2 - C)/CMCC
-		temp = cmcc + 1;
-		b = -temp / cmcc;			// B = -(CMCC + 1)/CMCC
+	    // -----------------------------------
+	    // 2. PURE MATH (TEMPLATE CALL)
+	    // -----------------------------------
 
-							// ALPHA = 1/(C*C * (B + B + B*B/A) * (2*A*C + B))
-		temp = a * *q * 2 + b;			// 2*A*C + B
-		temp1 = b.CSqr() / a + b + b;		// (B + B + B*B/A)
-		temp3 = q->CSqr()*temp1*temp;
-		alpha = temp3.CInvert();
-		}
-	    else if (subtype == 'B')
-		{
-		a = *q;
-		b = a + 1;
-		temp = a.CSqr() - 1;
-		alpha = a / temp;			// ALPHA = A/(A*A - 1)
-		}
-	    else
-		return(ERROR);				// unknown subtype
+	    int ret = Init_RATIONALMAP<Complex, double>(z, q, param, juliaflag,	subtype, a, b, alpha, temp, temp1, temp3);
 
-							// ESCAPE  =   4/ABS(ALPHA)
-							// ESCAPE  =   ESCAPE*ESCAPE
+	    if (ret < 0)
+		return ret;
+
+	    // -----------------------------------
+	    // 3. POST-MATH STATE (CPixel responsibility)
+	    // -----------------------------------
+
+	    // escape + epsilon
 	    if (alpha.x != 0.0 || alpha.y != 0.0)
 		escape = 16.0 / alpha.CSumSqr();
 	    else
@@ -282,38 +173,7 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 	    epsilon = 0.000001 / escape;		// EPSILN = 0.000001/ESCAPE 
 
 	    der = 1.0;					// DER = 1.0 
-	    if (!juliaflag)
-		{					// Z = -B/(A + A)
-		temp = -a * 2;
-		*z = b / temp;
-		}
-	    // iterating Z  = 1/(A*Z*Z + B*Z + 1) has various proterties:
-	    // 	   Z  = 1/(A*Z*Z + B*Z + 1)
-	    // Julia   Z  = 1/(A*Z*Z + B*Z + 1)
-	    // Julia   Z  = 1/(A*Z*Z + B*Z + 1)
-	    // ?????   Z  = 1/(A*Z*Z + B*Z + 1)
-
-	    int	zcount;
-	    switch (subtype)
-		{
-		case 'A':
-		    if (juliaflag)
-			zcount = 4;
-		    else
-			zcount = 2;
-		    break;
-		case 'B':
-		    zcount = 3;
-		    break;
-		}
-
-	    for (int i = 0; i < zcount; ++i)
-		{
-							// 1/(A*Z*Z + B*Z + 1)
-		temp = b * *z + 1;			// B*Z + 1
-		temp1 = z->CSqr()*a + temp;		// (A*Z*Z + B*Z + 1)
-		*z = temp1.CInvert();			// Z = 1/(A*Z*Z + B*Z + 1)
-		}
+	    }
 	    break;
 
 	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
@@ -366,10 +226,6 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 
 	case NOVA:
 	    InitTierazonFunctions(2, z, q);
-//	    if (*degree < 2)
-//		*degree = 2;
-//	    z->x = 1.0 + param[1];
-//	    z->y = 0.0 + param[2];
 	    break;
 
 	case QUAD:					// a specific Tierazon fractal
@@ -411,11 +267,11 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 #define TEDDY			189
 
 */
-	case TETRATION:					// a specific Tierazon fractal
+	case TETRATION:					// a Paul Bourke fractal
 	    InitTetration(z, q);
 	    break;
 
-	case KLEINIAN:					// a specific Tierazon fractal
+	case KLEINIAN:					// a Paul Bourke fractal
 	    InitKleinian(z, q);
 	    break;
 	}
@@ -435,277 +291,51 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	case MANDEL:					// to handle fractint par files
 	case JULIA:					// to handle fractint par files
 	case JULIAFP:					// like he said
-
-	    sqr.x = z->x * z->x;
-	    sqr.y = z->y * z->y;
-	    real_imag = z->x * z->y;
-	    z->x = q->x + sqr.x - sqr.y;
-	    z->y = q->y + real_imag + real_imag;
-	    return BailoutTest(z, sqr);
-/*
-	    {
-	    Complex z2 = {z->x * z->x, z->y * z->y};
-	    Complex one = {1.0,0.0};
-	    *z = (*z * *z * *z) / (one + z2) + *q;
-	    return (z->CSumSqr() >= rqlim);
-	    }
-
-	    {
-	    z->y += q->y * sin(z->x);
-	    z->x += q->x * z->y;
-	    return (z->CSumSqr() >= rqlim);
-	    }
-*/
 	case POWER:					// Power
 	case JULIA4FP:
 	case JULIA4:
 	case MANDEL4FP:
 	case MANDEL4:
-	    *z = z->CPolynomial(*degree);
-	    *z = *z + *q;
-	    return FractintBailoutTest(z);
-//	    return (z->CSumSqr() >= rqlim);
-
 	case BURNINGSHIP:				// Burning Ship
-	    sqr.x = z->x * z->x;
-	    sqr.y = z->y * z->y;
-	    real_imag = fabs(z->x * z->y);
-	    z->x = sqr.x - sqr.y + q->x;
-	    z->y = real_imag + real_imag - q->y;
-	    return BailoutTest(z, sqr);
-
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
-	    z->x = fabs(z->x);
-	    z->y = -fabs(z->y);
-	    *z = z->CPolynomial(*degree);
-	    *z = *z + *q;
-	    return FractintBailoutTest(z);
-
 	case CUBIC:					// Art Matrix Cubic
-	    if (subtype == 'K')				// CKIN
-		{
-		*z = z->CCube() + b;			// Z = Z*Z*Z + B
-		z->x += param[2];
-		z->y += param[3];
-		}
-	    else
-		{
-		temp = z->CCube() + b;			// Z = Z*Z*Z + B
-		*z = temp - aa3 * *z;			// Z = Z*Z*Z - AA3*Z + B
-		z->x += param[2];
-		z->y += param[3];
-		}
-	    if (z->CSumSqr() > 100.0)
-		return (TRUE);
-	    else
-		{
-		if (subtype == 'F')
-		    {
-		    if (q->CSumSqr() < 0.111111)
-			{
-			*iteration = special;
-			*SpecialFlag = TRUE;		// for decomp and biomorph
-			return (TRUE);
-			}
-		    v = *z + a2;
-		    }
-		else if (subtype == 'K')
-		    v = *z - v;
-		else
-		    v = *z - a;
-		if (v.CSumSqr() <= 0.000001)
-		    {
-		    *iteration = special;
-		    *SpecialFlag = TRUE;		// for decomp and biomorph 
-		    return (TRUE);
-		    }
-		return (FALSE);
-		}
+	    return FunctionsDispatch<Complex, double, WORD>(this, type, z, q, degree, sqr, real_imag, a, a2, aa3, b, v,
+		temp, param, SpecialFlag, iteration, special, subtype, BailoutTestType, rqlim);
 
 	case SPECIALNEWT:				// Art Matrix Newton
-	    {
-	    if ((int)param[0] < 0)
-		special = 2;
-	    else
-		special = (int)param[0];
-	    Complex z2 = z->CSqr();			// z2 = z*z
-							// Z  =  (2*Z*Z2 + A)/(3*Z2 + B)
-	    Complex top = z2 * *z * 2 + a;
-	    Complex bottom = z2 * 3 + b;
-	    *z = top / bottom;
-	    z->x += param[1];
-	    z->y += param[2];
-	    v = *z - 1;
-	    if (v.CSumSqr() <= 0.000001)
-		{
-		phaseflag = 0;				// first phase
-		return(TRUE);
-		}
-	    v = *z - lm5;
-	    if (v.CSumSqr() <= 0.000001)
-		{
-		phaseflag = 1;				// second phase
-		return(TRUE);
-		}
-	    v = *z + lp5;
-	    if (v.CSumSqr() <= 0.000001)
-		{
-		phaseflag = 2;				// third phase
-		return(TRUE);
-		}
-	    return(FALSE);
-	    }
+	    return Iter_SPECIALNEWT<Complex>(
+		z, q, a, b, lm5, lp5, v, param, phaseflag, special);
 
 	case MATEIN:					// Art Matriuc Matein fractal
-	    epsilon = 0.01;
-	    escape = 10.0E20;
-	    *z = *q * (*z + oz);			// Z = L*(Z + OZ)
-	    z->x += param[0];
-	    z->y += param[1];
-	    oz = z->CInvert();				// OZ = 1/Z
-	    temp = -oz / *z + 1;			// T = 1 - OZ/Z
-							// D = D*ABSL*(REAL(T)*REAL(T) + IMAG(T)*IMAG(T))
-	    distance = distance * absolute * temp.CSumSqr();
+	    return Iter_MATEIN<Complex>(z, q, oz, temp, distance, absolute, param, epsilon, escape, phaseflag);
 
-	    if (distance <= epsilon)
-		{
-		phaseflag = 0;			// first phase
-		return(TRUE);
-		}
-	    if (distance > escape)
-		{
-		phaseflag = 1;			// second phase
-		return(TRUE);
-		}
-	    return(FALSE);
-
-/**************************************************************************
-    Determine count before 'Z' becomes unstable
-    Z = L*SIN(Z)
-    sin(x+iy)  = sin(x)cosh(y) + icos(x)sinh(y)
-***************************************************************************/
 	case SINFRACTAL:				// Sine
-	    if (param[2] == 0.0)
-		*z = *q * z->CSin();
-	    else
-		*z = *q + z->CSin();
-	    z->x += param[0];
-	    z->y += param[1];
-	    return FractintBailoutTest(z);
+	    return Iter_SINFRACTAL<Complex>(this, z, q, param, BailoutTestType, rqlim);
 
 	case EXPFRACTAL:				// Exponential
-	    {
-	    int compare;
+	    return Iter_EXP_FRACTAL<Complex>(z, q, param, degree, subtype, rqlim);
 
-	    *degree = (int)(fabs(param[3]));
-	    for (int i = 0; i < *degree; i++)
-		*z = z->CExp();
-
-	    if (param[4] == 0.0)
-		*z = *q * *z;				// Z = L*EXP(Z)
-	    else
-		*z = *q + *z;				// Z = L*EXP(Z)
-							// Complex Exponent: e^(x+iy) = (e^x) * cos(y) + i * (e^x) * sin(y) 
-	    switch ((int)param[0])
-		{
-		case 0:
-		    subtype = 'R';
-		    compare = (z->x >= rqlim);
-		    break;
-		case 1:
-		    subtype = 'I';
-		    compare = (z->y >= rqlim);
-		    break;
-		case 2:
-		    subtype = 'M';
-		    compare = (z->x >= rqlim || z->x <= -rqlim || z->y >= rqlim || z->y <= -rqlim);
-		    break;
-		default:
-		    subtype = 'R';
-		    compare = (z->x >= rqlim);
-		    break;
-		}
-	    z->x += param[1];
-	    z->y += param[2];
-	    if (compare)
-		return(TRUE);
-	    return(FALSE);
-	    }
-
-	case THORN:					// Thorn Fractal
+	case THORN:					// Thorn Fractal (Small and difficult to template - leave it as it is.
 	    {
 	    double a1 = z->x;
 	    double b1 = z->y;
 	    z->x = a1 / cos(b1) + q->x;
 	    z->y = b1 / sin(a1) + q->y;
-	    return FractintBailoutTest(z);
+	    return DoBailout(BailoutTestType, z, rqlim);
 	    }
 
 	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
-	    *z = a * *z * *z + ((param[5] == 1.0) ? 1.0 : -1.0) * z->CPolynomial(*degree);
-	    *z = *z + *q;
-	    return FractintBailoutTest(z);
+	    return Iter_REDSHIFTRIDER<Complex, double>(this, z, q, a, param, degree, BailoutTestType, rqlim);
 
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
-	    {
-	    double m = param[1];
-	    a = z->CPolynomial(*degree - 1);
-	    *z = (a * *z) / (m + a) + *q;
-	    return FractintBailoutTest(z);
-	    }
+	    return Iter_TALIS<Complex>(this, z, q, a, param, degree, BailoutTestType, rqlim);
 
 	case POLYNOMIAL:				// Polynomial
-	    {
-	    Complex	InitialZ = *z;
-	    Complex	FinalZ = { 0.0, 0.0 };
+	    return Iter_POLYNOMIAL<Complex>(this, z, q, param, BailoutTestType, rqlim);
 
-	    for (int m = 0; m < MAXPOLYDEG; m++)
-		{
-		Complex BigComplexTemp = InitialZ;
-		if (param[2 + m] != 0.0)
-		    {
-		    for (int k = 0; k < MAXPOLYDEG - m - 1; k++)
-			BigComplexTemp *= InitialZ;
-		    FinalZ += (BigComplexTemp * param[2 + m]);
-		    }
-		}
-	    *z = FinalZ + *q;
-	    return FractintBailoutTest(z);
-	    }
-
-	case RATIONALMAP:				// Art Matrix Rational Map 
-	    {
-	    Complex az = a * *z;			// AZ = A*Z
-	    temp = az * *z + 1;
-	    temp1 = b * *z + temp;
-	    *z = temp1.CInvert();			// Z = 1/(AZ*Z + B*Z + 1)
-	    z->x += param[2];
-	    z->y += param[3];
-	    if (z->CSumSqr() > escape)
-		{
-		if ((alpha.x * z->y + alpha.y * z->x) <= 0.0)
-		    color = penp[*iteration % 4];
-		else
-		    color = penn[*iteration % 4];
-		*iteration = color;
-		return (TRUE);
-		}
-	    temp = az * 2 + b;
-	    Complex d = z->CSqr()*temp;			// D = (2*AZ + B)*Z*Z
-	    double dist = d.CSumSqr();
-	    der *= dist;				// DER  =   DER*(REAL(D)*REAL(D) + IMAG(D)*IMAG(D))
-	    if (der < epsilon)
-		{
-		*iteration = threshold;
-		return(TRUE);
-		}
-	    if (*iteration >= threshold)
-		{
-		*iteration = special;
-		return(TRUE);
-		}
-	    return(FALSE);				// continue iterations
-	    }
+	case RATIONALMAP:				// Art Matrix Rational Map
+	    return Iter_RATIONALMAP<Complex, double>(this, z, q, a, b, param, der, escape, epsilon,
+		iteration, threshold, special, alpha, &color);
 
 	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
 	    return (RunManDerFunctions(subtype, z, q, SpecialFlag, iteration));
@@ -773,45 +403,4 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
     return 0;
     }
 
-/**************************************************************************
-    Bailout Test
-**************************************************************************/
-
-bool	CPixel::BailoutTest(Complex *z, Complex SqrZ)
-    {
-    double  magnitude;
-    double  manhmag;
-    double  manrmag;
-
-    switch (BailoutTestType)
-	{
-	case BAIL_MOD:
-	    magnitude = SqrZ.x + SqrZ.y;
-	    return (magnitude >= rqlim);
-
-	case BAIL_REAL:
-	    return (SqrZ.x >= rqlim);
-	
-	case BAIL_IMAG:
-	    return (SqrZ.y >= rqlim);
-
-	case BAIL_OR:
-	    return (SqrZ.x >= rqlim || SqrZ.y >= rqlim);
-	
-	case BAIL_AND:
-	    return (SqrZ.x >= rqlim && SqrZ.y >= rqlim);
-
-	case MANH:
-	    manhmag = fabs(z->x) + fabs(z->y);
-	    return ((manhmag * manhmag) >= rqlim);
-
-	case MANR:
-	    manrmag = z->x + z->y;	    // don't need abs() since we square it next
-	    return ((manrmag * manrmag) >= rqlim);
-
-	default:
-	    magnitude = SqrZ.x + SqrZ.y;
-	    return (magnitude >= rqlim);
-	}
-    }
 

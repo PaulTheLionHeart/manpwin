@@ -296,7 +296,6 @@ extern	void	ShowBignum(BigDouble, char *);
 #endif
 
 int	ZoomIn(HWND hwnd, RECT *Rect)
-
     {
     double	hor_factor, vert_factor, width_factor;
     int		ytop, ybottom, xleft, xright;
@@ -369,7 +368,6 @@ int	ZoomIn(HWND hwnd, RECT *Rect)
 ****************************************************************************/
 
 int	ZoomOut(HWND hwnd, RECT *Rect)
-
     {
     double	half_win_aspect, width_factor;
     double	centrex, centrey;				// centre of window

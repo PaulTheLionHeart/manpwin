@@ -84,7 +84,7 @@ void	LoadTierazonParams(void)
 	case 132:					// Flarium 27, Polynomial: z=z*z*(cn+z)/(cn+z+c)+c
 	case 165:					// Flarium 67-69, Newton Variations: z = ((z-(((z^n)-1)/(n*(z^(n-1)))))^2)*c
 	case 172:					// Flarium 112-116, Polynomials: z=z^n*c+z*c; Dragon curve variations
-	case 177:					// Flarium 145, Polynomial: z=z^2+c [Jaenisch method]
+//	case 177:					// Flarium 145, Polynomial: z=z^2+c [Jaenisch method]
 	    Fractal.NumParam = 3;
 	    Fractal.ParamName[0] = "Polynomial Degree (>= 2)";
 	    Fractal.ParamName[1] = "Real Perturbation of Z(0)";

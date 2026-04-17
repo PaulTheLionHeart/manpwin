@@ -32,24 +32,72 @@ double CSlope::cdot(Complex a, Complex b)
 	Convert bignum to double double
 ***********************************************************************/
 
-int	CSlope::BigDouble2DD(dd_real *out, BigDouble *in)
+int CSlope::BigDouble2DD(dd_real* out, BigDouble* in)
     {
-    dd_real	x1, x2;
-    BigDouble	t1, t2;
-    double	y1, y2;
-    
-    y1 = in->BigDoubleToDouble();	// truncate to a double
-    t1 = y1;
-    t2 = *in - t1;			// subtract truncated bit to get the remainder
-    y2 = t2.BigDoubleToDouble();	// remainder as a float
-    x1 = y1;
-    x2 = y2;
-    *out = x1 + x2;
+    if (!out || !in)
+	return -1;
+
+    if (*in == 0.0)
+	{
+	*out = 0.0;
+	return 0;
+	}
+
+    BigDouble a = *in;
+    int sign = 1;
+
+    if (a < 0.0)
+	{
+	sign = -1;
+	a = -a;
+	}
+
+    // --- Normalize using double approximation ---
+    double approx = a.BigDoubleToDouble();
+    if (!std::isfinite(approx) || approx == 0.0)
+	{
+	*out = 0.0;
+	return -1;
+	}
+
+    int exp2;
+    std::frexp(approx, &exp2);
+
+    // Scale BigDouble to ~[0.5,1)
+    BigDouble m = a;
+    m = m * pow(2.0, -exp2);   // replace with exact scale if available
+
+    // --- Extract limbs ---
+    double y1 = m.BigDoubleToDouble();
+    BigDouble r1 = m - y1;
+
+    double y2 = r1.BigDoubleToDouble();
+
+    if (!std::isfinite(y1) || !std::isfinite(y2))
+	{
+	*out = 0.0;
+	return -1;
+	}
+
+    if (sign < 0)
+	{
+	y1 = -y1;
+	y2 = -y2;
+	}
+
+    // --- Rescale ---
+    y1 = std::ldexp(y1, exp2);
+    y2 = std::ldexp(y2, exp2);
+
+    // --- Construct DD ---
+    *out = dd_real(y1, y2);
+
     if (isnan(out->x[0]) || isnan(out->x[1]))
 	{
 	*out = 0.0;
 	return -1;
 	}
+
     return 0;
     }
 
@@ -71,6 +119,86 @@ int	CSlope::ConvertBignumsDD(BigDouble Big_xgap, BigDouble Big_ygap, BigDouble B
 /***********************************************************************
 	Convert bignum to quad double
 ***********************************************************************/
+/*
+int CSlope::BigDouble2QD(qd_real* out, BigDouble* in)
+    {
+    if (!out || !in)
+	return -1;
+
+    if (*in == 0.0)
+	{
+	*out = 0.0;
+	return 0;
+	}
+
+    BigDouble a = *in;
+    int sign = 1;
+
+    if (a < 0.0)
+	{
+	sign = -1;
+	a = -a;
+	}
+
+    // --- Normalize ---
+    double approx = a.BigDoubleToDouble();
+    if (!std::isfinite(approx) || approx == 0.0)
+	{
+	*out = 0.0;
+	return -1;
+	}
+
+    int exp2;
+    std::frexp(approx, &exp2);
+
+    BigDouble m = a;
+    m = m * pow(2.0, -exp2);   // TODO: replace with exact scaling later
+
+    // --- Extract limbs ---
+    double y1 = m.BigDoubleToDouble();
+    BigDouble r1 = m - y1;
+
+    double y2 = r1.BigDoubleToDouble();
+    BigDouble r2 = r1 - y2;
+
+    double y3 = r2.BigDoubleToDouble();
+    BigDouble r3 = r2 - y3;
+
+    double y4 = r3.BigDoubleToDouble();
+
+    if (!std::isfinite(y1) || !std::isfinite(y2) ||
+	!std::isfinite(y3) || !std::isfinite(y4))
+	{
+	*out = 0.0;
+	return -1;
+	}
+
+    if (sign < 0)
+	{
+	y1 = -y1;
+	y2 = -y2;
+	y3 = -y3;
+	y4 = -y4;
+	}
+
+    // --- Rescale ---
+    y1 = std::ldexp(y1, exp2);
+    y2 = std::ldexp(y2, exp2);
+    y3 = std::ldexp(y3, exp2);
+    y4 = std::ldexp(y4, exp2);
+
+    // --- Construct QD (important: use constructor!) ---
+    *out = qd_real(y1, y2, y3, y4);
+
+    if (isnan(out->x[0]) || isnan(out->x[1]) ||
+	isnan(out->x[2]) || isnan(out->x[3]))
+	{
+	*out = 0.0;
+	return -1;
+	}
+
+    return 0;
+    }
 
 int	CSlope::BigDouble2QD(qd_real *out, BigDouble *in)
     {
@@ -100,6 +228,8 @@ int	CSlope::BigDouble2QD(qd_real *out, BigDouble *in)
 	}
     return 0;
     }
+*/
+
 
 /***********************************************************************
 	Convert bignum variables to quad double
@@ -108,11 +238,21 @@ int	CSlope::BigDouble2QD(qd_real *out, BigDouble *in)
 int	CSlope::ConvertBignumsQD(BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth,
     qd_real *QDxgap, qd_real *QDygap, qd_real *QDhor, qd_real *QDvert, qd_real *QDWidth)
     {
+    if (Big_xgap.BigDouble2QD(QDxgap) < 0) return -1;
+    if (Big_ygap.BigDouble2QD(QDygap) < 0) return -1;
+    if (BigHor.BigDouble2QD(QDhor) < 0) return -1;
+    if (BigVert.BigDouble2QD(QDvert) < 0) return -1;
+    if (BigWidth.BigDouble2QD(QDWidth) < 0) return -1;
+
+
+/*
+
     if (BigDouble2QD(QDxgap, &Big_xgap) < 0) return -1;
     if (BigDouble2QD(QDygap, &Big_ygap) < 0) return -1;
     if (BigDouble2QD(QDhor, &BigHor) < 0) return -1;
     if (BigDouble2QD(QDvert, &BigVert) < 0) return -1;
     if (BigDouble2QD(QDWidth, &BigWidth) < 0) return -1;
+*/
     return 0;
     }
 
@@ -963,12 +1103,12 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 	{
 	Big_xgap = BigWidth * temp_x;
 	Big_ygap = BigWidth * temp_y;
-	if (precision <= 30)
+	if (precision <= DDPRECISION)
 	    {
 	    ConvertBignumsDD(Big_xgap, Big_ygap, BigHor, BigVert, BigWidth, &DDxgap, &DDygap, &DDhor, &DDvert, &DDWidth);
 	    ArithType = DOUBLEDOUBLE;
 	    }
-	else if (precision <= 60)
+	else if (precision <= QDPRECISION)
 	    {
 	    ConvertBignumsQD(Big_xgap, Big_ygap, BigHor, BigVert, BigWidth, &QDxgap, &QDygap, &QDhor, &QDvert, &QDWidth);
 	    ArithType = QUADDOUBLE;

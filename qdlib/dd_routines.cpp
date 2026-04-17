@@ -2,26 +2,36 @@
 // Also a few routines needed for conversion
 // PHD 20241221
 
-#include  <Windows.h>
-#include  "qd_real.h"
+#include <Windows.h>
+#include <atomic>
+#include "qd_real.h"
+#include "FractalAbort.h"
 
 extern	HWND	GlobalHwnd;			// This is the main windows handle
 extern	int	time_to_quit;			// time to quit?
+extern	std::atomic<bool> gStopRequested;	// force early exit
 
 using namespace qd;
+
+std::atomic<bool> gFatalErrorOccurred{ false };
 
 /////////////////////////////////////////////////////////////////////
 // A cludge to get around these routines not being found during link. 
 /////////////////////////////////////////////////////////////////////
 
-    /* This routine is called whenever a fatal error occurs. */
-void dd_real::error(const char *msg) { 
-  if (msg) { 
-  /*cerr << "ERROR " << msg << endl;*/ 
-      MessageBox(GlobalHwnd, msg, "DD Fatal Error, I'm outta here", MB_ICONEXCLAMATION | MB_OK);
-      time_to_quit = true;
-  }
-}
+    // This routine is called whenever a fatal error occurs. 
+void dd_real::error(const char *msg)
+    {
+    if (!msg) return;
+
+    // prevent repeated errors
+    if (gFatalErrorOccurred.exchange(true))
+	return;
+
+    gStopRequested.store(true);
+    MessageBox(GlobalHwnd, msg,	"DD Fatal Error, I'm outta here", MB_ICONEXCLAMATION | MB_OK);
+    throw FractalAbort();
+    }
 
 // Computes the square root of a double in double-double precision. 
 //   NOTE: d must not be negative.        

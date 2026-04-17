@@ -439,9 +439,9 @@ int 	 GetArithType()
     int	flags = fractalspecific[type].flags;
     if (BigNumFlag)
 	{
-	if (precision <= 30)
+	if (precision <= DDPRECISION)
 	    MathType = DOUBLEDOUBLE;
-	else if (precision <= 60 || fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
+	else if (precision <= QDPRECISION || fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
 	    MathType = QUADDOUBLE;
 	else
 	    MathType = ARBITRARYPREC;
@@ -733,7 +733,7 @@ void	GenPositionStr (char *PositionStr)
 
     {     
     double	centrex, centrey;
-    BigDouble	Big_centrex, Big_centrey;
+//    BigDouble	Big_centrex, Big_centrey;
 
     if (!PositionStr) return;
     PositionStr[0] = '\0';   // <-- CRITICAL: always initialize
@@ -743,19 +743,34 @@ void	GenPositionStr (char *PositionStr)
 //	_snprintf_s(s, MAXLINE, _TRUNCATE, "Hor = %f, Vert = %f, Width = %f", hor, vert, mandel_width); 
     if (BigNumFlag)
 	{
-	Big_centrex = BigHor + (BigWidth * ((double) width / (double) (2 * height)));
-	Big_centrey = BigVert + (BigWidth / 2.0);
+	BigDouble Big_centrex(BigHor);
+	BigDouble Big_centrey(BigVert);
 
-	char *s1 = nullptr, *s2 = nullptr, *s3 = nullptr;
-	mpfr_asprintf(&s1, "%.36Rf", Big_centrex.x);
-	mpfr_asprintf(&s2, "%.36Rf", Big_centrey.x);
-	mpfr_asprintf(&s3, "%.12Re", BigWidth.x);
+	BigDouble temp;
+	BigDouble factor;
+	BigDouble denom;
 
-	_snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X = %s,Y = %s,Width = %s", s1, s2, s3);
+	factor = BigDouble((double)width);
+	denom = BigDouble((double)(2 * height));
+	factor = factor / denom;
 
-	if (s1) mpfr_free_str(s1);
-	if (s2) mpfr_free_str(s2);
-	if (s3) mpfr_free_str(s3);
+	// Big_centrex = BigHor + BigWidth * factor
+	temp = BigWidth;
+	temp *= factor;
+	Big_centrex += temp;
+
+	// Big_centrey = BigVert + BigWidth / 2
+	temp = BigWidth;
+	temp = temp.BigHalf();
+	Big_centrey += temp;
+
+
+	char buf1[256], buf2[256], buf3[256];
+
+	mpfr_snprintf(buf1, sizeof(buf1), "%.36Rf", Big_centrex.x);
+	mpfr_snprintf(buf2, sizeof(buf2), "%.36Rf", Big_centrey.x);
+	mpfr_snprintf(buf3, sizeof(buf3), "%.12Re", BigWidth.x);
+	_snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X = %s,Y = %s,Width = %s", buf1, buf2, buf3);
 	}
     else 
 	{
@@ -848,15 +863,15 @@ void	DisplayStatusBarInfo (int complete, char *text)
 	SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime (ElapsedTime));
 	if (BigNumFlag)	    // now we have double double and quad double...
 	    {
-	    if (precision <= 30 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+	    if (precision <= DDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
 		SAFE_SPRINTF(PrecisionStr, "DD Prec: %d", precision);
-	    else if (precision <= 60 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+	    else if (precision <= QDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
 		SAFE_SPRINTF(PrecisionStr, "QD Prec: %d", precision);
 	    else
 		{ 
-		if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
-		    SAFE_SPRINTF(PrecisionStr, "QD Prec: %d", precision);
-		else
+//		if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
+//		    SAFE_SPRINTF(PrecisionStr, "QD Prec: %d", precision);
+//		else
 		    SAFE_SPRINTF(PrecisionStr, "Arb Prec: %d", precision);
 		}
 	    }

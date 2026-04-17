@@ -47,17 +47,18 @@ class BigComplex
 	BigComplex & operator =(const double &);	// Assignment to a double Operator
 	BigComplex & operator =(const ExpComplex &);	// Assignment to a ExpComplex Operator
 	BigComplex & operator+=(const BigComplex &);
-	BigComplex & operator+=(BigDouble&);
+	BigComplex & operator+=(const BigDouble&);
+	BigComplex & operator+=(double rhs);
 	BigComplex & operator-=(const BigComplex &);
-	BigComplex & operator-=(BigDouble &);
+	BigComplex & operator-=(const BigDouble &);
 	BigComplex & operator*=(const BigComplex &);
-	BigComplex & operator*=(BigDouble &);
+	BigComplex & operator*=(const BigDouble &);
 	BigComplex & operator++(void);			// prefix ++ operator
 //	BigComplex & operator++(int);			// postfix ++ operator
 
 	bool	   operator==(const BigComplex &) const;
-	BigComplex operator^(BigDouble &);
-	BigComplex operator^(BigComplex &);
+	BigComplex operator^(const BigDouble &) const;
+	BigComplex operator^(const BigComplex &) const;
 	BigComplex operator^(WORD &);
 	BigComplex operator +(const BigComplex &);	// Addition Operator
 	BigComplex operator +(const BigDouble &);	// complex add by double Operator
@@ -69,25 +70,29 @@ class BigComplex
 	BigComplex operator *(const BigDouble &);	// complex multiply by double Operator
 	BigComplex operator /(const BigComplex &);	// Division Operator
 	BigComplex operator /(const BigDouble &);	// complex divide by double Operator
+
+//	void	   CSin(BigComplex& result) const;
+
 	BigComplex CSqr(void);				// square
 	BigComplex CCube(void);				// cube
 	BigComplex CInvert(void);			// invert
 	double	   CSumSqr(void);			// real squared + imaginary squared
 	BigComplex CPolynomial(int);			// take a complex number to an integer power
-	BigComplex CSin(void);				// sine of a complex number
-	BigComplex CCos(void);				// cosine
+	BigComplex CSin(void) const;			// sine of a complex number
+	BigComplex CCos(void) const;			// cosine
 	BigComplex CTan();				// tangent
-	BigComplex CSinh();				// hyperbolic sine of a complex number
-	BigComplex CCosh();				// hyperbolic cosine
+	BigComplex CSinh() const;			// hyperbolic sine of a complex number
+	BigComplex CCosh() const;			// hyperbolic cosine
 	BigComplex CTanh();				// hyperbolic tangent
-	BigComplex CExp(void);				// exponent
+	BigComplex CExp(void) const;			// exponent
 	BigComplex CDouble(void);			// double   r = 2*n
 	BigComplex CHalf(void);				// half	    r = n/2
-	BigComplex CLog(void);				// log
+	BigComplex CLog() const;			// log
 	BigDouble  CFabs(void);				// abs
-	BigComplex BigComplexPower(BigComplex &);	// a^b
+	BigComplex BigComplexPower(const BigComplex &) const;	// a^b
 	BigComplex CSqrt(void);				// square root
-	Complex CBig2Double(void);		// convert BigComplex to Complex
+	Complex    CBig2Double(void);		// convert BigComplex to Complex
+	BigComplex  BigComplex2DDComplex(const BigComplex& in);
 
 //	void	   MTCExp(BigComplex *out, BigComplex in, BigDouble t1, BigDouble t2, BigDouble t3, BigDouble t4);
 //	void	   MTCSin(BigComplex *out, BigComplex in, BigDouble t1, BigDouble t2, BigDouble t3, BigDouble t4);
@@ -118,3 +123,4 @@ class BigComplex
 //extern	BigComplex	CLog(BigComplex  &);		// log
 //extern	Complex	CComplexPower(Complex  &, Complex &);	// take a complex number to a complex power
 // now replaced with operator z^x where z and x are both complex.
+

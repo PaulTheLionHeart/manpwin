@@ -41,7 +41,9 @@ int    CPixel::BigInitFractal(void)
 	return -1;
     if (fractalspecific[type].flags & FUNCTIONINPIXEL)
 	return(BigInitFunctions(type, &zBig, &qBig));
-    else if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL || fractalspecific[type].flags & FORMULAINPIXEL)    // Bignum versions not yet available
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL)
+	return(BigInitFractintFunctions(type, &zBig, &qBig));
+    else if (/*fractalspecific[type].flags & FRACTINTINPIXEL || */fractalspecific[type].flags & TRIGINPIXEL || fractalspecific[type].flags & FORMULAINPIXEL)    // Bignum versions not yet available
 	return -1;
     else if (BigFractalSpecific[BigFractPtr].big_per_pixel() < 0)
 	return -1;
@@ -56,6 +58,8 @@ int    CPixel::BigRunFractal(void)
     {
     if (fractalspecific[type].flags & FUNCTIONINPIXEL)
 	return(BigRunFunctions(type, &zBig, &qBig, &SpecialFlag, &iteration));
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL)
+	return(BigRunFractintFunctions(type, &zBig, &qBig, &SpecialFlag, &iteration));
     else
 	return BigFractalSpecific[BigFractPtr].big_calctype();
     }
@@ -65,7 +69,6 @@ int    CPixel::BigRunFractal(void)
 **************************************************************************/
 
 int	CPixel::DoBigFilter(int method, int hooper)
-
     {
     double	magnitude = 0.0;
     BigDouble	temp, BioMorphTest;
@@ -257,7 +260,6 @@ void	CPixel::CalcBigFloatIteration(double error, std::vector <float> &wpixels, i
 //extern    void	ShowBignum(BigDouble x, char *Location);		// use for debugging
 
 long	CPixel::DoBigFract(HWND hwnd, int row, int col)
-
     {
     long	real_iteration;			// actual count for orbit deletion
     BigComplex	bigTemp;
@@ -352,10 +354,7 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	    return(BLUE);				// division by zero (Was Blue)
 	else if (result == 1)				// escape time
 	    break;
-	if (type == RATIONALMAP)
-	    return(iteration);
 	/*  No point, it doesn't have a fractal nature
-
 	if (method == STARTRAIL)
 	    {
 	    if (0 < iteration && iteration < 16)
@@ -486,7 +485,6 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
      **************************************************************************/
 
     BigComplex	CPixel::BigInvertz2(BigComplex  & Cmplx1)
-
 	{
 	BigComplex	temp;
 	BigDouble	tempsqrx, BigRadius = f_radius;
@@ -507,13 +505,79 @@ long	CPixel::DoBigFract(HWND hwnd, int row, int col)
 	return  temp;
 	}
 
+/**************************************************************************
+MPFR DIRECT ROUTING FOR SELECTED TIERAZON SUBTYPES
+
+Certain Tierazon/Flarium fractals (e.g. subtypes 3, 51, 126, 129)
+are numerically unstable or outright incorrect when evaluated using
+lower-precision arithmetic (double-double / quad-double).
+
+These formulas typically involve:
+    - iterative accumulation (e.g. Phoenix-style)
+    - higher-order terms
+    - or transcendental functions (sin/cos/exp)
+
+which cause precision loss or divergence in DD/QD long before the
+interesting structure is reached.
+
+To ensure correctness, we detect these subtypes early (here in calc_frac)
+and force execution through the MPFR (BigComplex) path.
+
+IMPORTANT:
+- This decision must be made here because arithmetic type selection
+  (DD/QD/Big) happens before fractal iteration begins.
+- Routing later (inside Tierazon functions) is too late.
+- We bypass DD/QD entirely to avoid incorrect intermediate states.
+
+PERFORMANCE NOTE:
+- MPFR is slower, but these subtypes are not reliable in DD/QD anyway.
+- This is a correctness-first decision.
+
+FUTURE WORK:
+- Investigate adaptive precision selection per pixel or per region
+- Optimise MPFR path (reuse temporaries, reduce allocations)
+- Possibly re-enable DD/QD for these subtypes if stability improves
+
+**************************************************************************/
+
+static bool IsDirectMPFRTierazonSubtype(int subtype)
+    {
+    switch (subtype)
+	{
+	//	case 3:		// removed because we fixed DD/QD trig
+	//	case 51:	// removed because it crashes mpfr
+	case 126:
+	case 129:
+	    return true;
+	default:
+	    return false;
+	}
+    }
+
+static bool ForceDirectMPFRForCurrentFractal(int subtype, WORD type)
+    {
+    // Pseudocode:
+    // 1. Is the current fractal a Tierazon/Flarium style fractal?
+    // 2. If not, return false.
+    // 3. Read the current Tierazon subtype from the existing settings/state.
+    // 4. Return IsDirectMPFRTierazonSubtype(subtype).
+
+    if (type != TIERAZON)   // replace with your real condition
+	return false;
+
+    return IsDirectMPFRTierazonSubtype(subtype);
+    }
+
 /************************************************************************
 	Calculate Big Fractal
 ************************************************************************/
 
 long	CPixel::BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
-
     {
+    BigDouble tempRowY;
+    BigDouble tempRowX;
+    BigDouble tempColX;
+    BigDouble tempColY;
     if (pairflag)		// half size screens: only do every second row / col
 	if (row % pairflag || col % pairflag)
 	    if (row != (int)ydots - 1)			// must trigger for last line
@@ -522,61 +586,129 @@ long	CPixel::BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 	{
 	if (row != oldrow)
 	    {
-	    if (pairflag && row)		// draw row for right hand image
+	    if (pairflag && row)
 		draw_right_image((short)(oldrow));
+
 	    switch (RotationAngle)
 		{
-		case NORMAL:						// normal
-		    cBig.y = Big_yymax - Big_ygap * (double)row;
+		case NORMAL:
+		    Big_ygap.MulInt(tempRowY, row);
+		    cBig.y = Big_yymax - tempRowY;
 		    break;
-		case 90:						// 90 degrees
-		    cBig.x = Big_yymax - Big_xgap * (double)row;
+
+		case 90:
+		    Big_xgap.MulInt(tempRowX, row);
+		    cBig.x = Big_yymax - tempRowX;
 		    break;
-		case 180:						// 180 degrees
-		    cBig.y = -(Big_yymax - Big_ygap * (double)row);
+
+		case 180:
+		    Big_ygap.MulInt(tempRowY, row);
+		    cBig.y = -(Big_yymax - tempRowY);
 		    break;
-		case 270:						// 270 degrees
-		    cBig.x = -(Big_yymax - Big_xgap * (double)row);
+
+		case 270:
+		    Big_xgap.MulInt(tempRowX, row);
+		    cBig.x = -(Big_yymax - tempRowX);
 		    break;
 		}
+
 	    oldrow = row;
 	    }
 	if (col != oldcol)
 	    {
 	    switch (RotationAngle)
 		{
-		case NORMAL:						// normal
-		    cBig.x = Big_xgap * (double)col + BigHor;
+		case NORMAL:
+		    Big_xgap.MulInt(tempColX, col);
+		    cBig.x = tempColX + BigHor;
 		    break;
-		case 90:						// 90 degrees
-		    cBig.y = Big_ygap * (double)col + BigHor;
+
+		case 90:
+		    Big_ygap.MulInt(tempColY, col);
+		    cBig.y = tempColY + BigHor;
 		    break;
-		case 180:						// 180 degrees
-		    cBig.x = -(Big_xgap * (double)col + BigHor);
+
+		case 180:
+		    Big_xgap.MulInt(tempColX, col);
+		    cBig.x = -(tempColX + BigHor);
 		    break;
-		case 270:						// 270 degrees
-		    cBig.y = -(Big_ygap * (double)col + BigHor);
+
+		case 270:
+		    Big_ygap.MulInt(tempColY, col);
+		    cBig.y = -(tempColY + BigHor);
 		    break;
 		}
+
 	    oldcol = col;
 	    }
 	}
     else
 	{
 	BigDouble  zero = 0.0;
-	BigMat.DoTransformation(&cBig.x, &cBig.y, &zero, Big_xgap * (double)col + BigHor, Big_yymax - Big_xgap * (double)row, 0.0);
+	BigDouble brow(row);
+	BigDouble bcol(col);
+	BigMat.DoTransformation(&cBig.x, &cBig.y, &zero, Big_xgap * bcol + BigHor, Big_yymax - Big_xgap * brow, 0.0);
 	}
+
+/*
+    static bool dumped = false;
+    if (!dumped && row == ydots / 2 && col == xdots / 2)
+	{
+	dumped = true;
+
+	dd_real ddx, ddy;
+	qd_real qdx, qdy;
+
+	cBig.x.BigDouble2DD(&ddx);
+	cBig.y.BigDouble2DD(&ddy);
+
+	cBig.x.BigDouble2QD(&qdx);
+	cBig.y.BigDouble2QD(&qdy);
+
+	BigDouble backDDx, backDDy;
+	BigDouble backQDx, backQDy;
+
+	backDDx.DD2BigDouble(ddx);
+	backDDy.DD2BigDouble(ddy);
+	backQDx.QD2BigDouble(qdx);
+	backQDy.QD2BigDouble(qdy);
+
+	char bufBigX[256], bufBigY[256];
+	char bufDDX[256], bufDDY[256];
+	char bufQDX[256], bufQDY[256];
+
+	cBig.x.ToString(bufBigX, sizeof(bufBigX), true);
+	cBig.y.ToString(bufBigY, sizeof(bufBigY), true);
+
+	backDDx.ToString(bufDDX, sizeof(bufDDX), true);
+	backDDy.ToString(bufDDY, sizeof(bufDDY), true);
+
+	backQDx.ToString(bufQDX, sizeof(bufQDX), true);
+	backQDy.ToString(bufQDY, sizeof(bufQDY), true);
+
+	OutputDebugStringA("=== CENTER PIXEL TEST ===\n");
+	OutputDebugStringA((std::string("Big X: ") + bufBigX + "\n").c_str());
+	OutputDebugStringA((std::string("DD  X: ") + bufDDX + "\n").c_str());
+	OutputDebugStringA((std::string("QD  X: ") + bufQDX + "\n").c_str());
+	OutputDebugStringA((std::string("Big Y: ") + bufBigY + "\n").c_str());
+	OutputDebugStringA((std::string("DD  Y: ") + bufDDY + "\n").c_str());
+	OutputDebugStringA((std::string("QD  Y: ") + bufQDY + "\n").c_str());
+	}
+*/
+
 
     if (user_data(hwnd) == -1)
 	return(-1);
-/*
-    if (precision <= 30 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
-	*color = DoDDFract(hwnd, row, col);	// double double
-    else if (precision <= 60 && fractalspecific[type].flags & USEDOUBLEDOUBLE)
-	*color = DoQDFract(hwnd, row, col);	// quad double
-    else
-*/
+    // Force MPFR for known precision-sensitive Tierazon subtypes
+    // (DD/QD produce incorrect results for these)
+    if (ForceDirectMPFRForCurrentFractal(subtype, type))
 	color = DoBigFract(hwnd, row, col);	// arbitrary precision
+    else if (precision <= DDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+	color = DoDDFract(hwnd, row, col, cBig);	// double double
+    else if (precision <= QDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+	color = DoQDFract(hwnd, row, col, cBig);	// quad double
+    else
+	color = DoBigFract(hwnd, row, col);		// arbitrary precision
     if (color < 0)
 	return -1;
     reset_period = 0;
@@ -590,17 +722,19 @@ long	CPixel::BigCalcFrac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 
     if (calcmode == 'B')
 	{
-	if (color >= colours)	/* don't use color 0 unless from inside */
+	if (color >= colours)			// don't use color 0 unless from inside
+	    {
 	    if (colours < 16)
 		color &= andcolor;
 	    else
-		color = ((color - 1) % andcolor) + 1;  /* skip color zero */
+		color = ((color - 1) % andcolor) + 1;  // skip color zero 
+	    }
 	}
 
      if (_3dflag)
-	    projection(col, row, color);
-	else if (pairflag)
-	    do_stereo_pairs(col, row, color);
+	projection(col, row, color);
+    else if (pairflag)
+	do_stereo_pairs(col, row, color);
     else
 	plot((WORD)col, (WORD)row, color);
     return(color);

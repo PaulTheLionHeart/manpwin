@@ -39,6 +39,415 @@ extern	WORD	UpdateDelay;			// delay in milliseconds
 extern	ProcessType	OscAnimProc;		// trap certain keyboatd activity when animating
 extern	CTrueCol    TrueCol;			// palette info
 
+#undef	TEST_TRIG 
+
+
+#ifdef TEST_TRIG
+
+#include <thread>
+#include <vector>
+
+std::atomic<bool> done[8] = {};
+
+void WorkerCSin(int id)
+    {
+    CBigTrig trig;
+
+    BigComplex in, out;
+    in = 0.0;
+    in.x.ChangePrecision(256);
+    in.y.ChangePrecision(256);
+    out.x.ChangePrecision(256);
+    out.y.ChangePrecision(256);
+
+    in.x = 0.5;
+    in.y = 0.25;
+
+    for (int i = 0; i < 50000; ++i)
+	{
+	trig.CSin(&out, in);
+	}
+
+    char bx[256], by[256];
+    out.x.ToString(bx, sizeof(bx), true);
+    out.y.ToString(by, sizeof(by), true);
+
+    for (int i = 0; i < 50000; ++i)
+	{
+	BigComplex w;
+	trig.CSin(&w, in);
+	}
+
+    // ADD THIS BLOCK RIGHT HERE
+    if (id == 0)
+	{
+	BigComplex ref = in;
+	ref = ref.CSin(); // MPFR version
+
+	char rx[256], ry[256];
+	ref.x.ToString(rx, sizeof(rx), true);
+	ref.y.ToString(ry, sizeof(ry), true);
+
+	OutputDebugStringA(
+	    ("REF: x=" + std::string(rx) + " y=" + std::string(ry) + "\n").c_str());
+	}
+
+    // THEN your existing print
+    out.x.ToString(bx, sizeof(bx), true);
+    out.y.ToString(by, sizeof(by), true);
+
+    OutputDebugStringA(
+	("Thread " + std::to_string(id) +
+	    " done: x=" + bx + " y=" + by + "\n").c_str());
+
+    OutputDebugStringA(
+	("Thread " + std::to_string(id) +
+	    " done: x=" + bx + " y=" + by + "\n").c_str());
+    OutputDebugStringA(("Thread " + std::to_string(id) + " EXIT\n").c_str());
+    done[id] = true;
+    }
+
+
+void TestMultiThreadCSin()
+    {
+    const int NUM_THREADS = 8;
+
+    std::vector<std::thread> threads;
+
+    for (int i = 0; i < NUM_THREADS; ++i)
+	{
+	threads.emplace_back(WorkerCSin, i);
+	}
+
+    for (auto& t : threads)
+	t.join();
+
+    for (int i = 0; i < 8; ++i)
+	{
+	if (!done[i])
+	    {
+	    OutputDebugStringA(("Thread " + std::to_string(i) + " MISSING\n").c_str());
+	    }
+	}
+
+    OutputDebugStringA("Multi-thread CSin test complete\n");
+    }
+
+static void DebugBDShort(const char* label, const BigDouble& v)
+    {
+    char buf[128];
+    mpfr_snprintf(buf, sizeof(buf), "%.20Re", v.x);
+    std::string msg = std::string(label) + " = " + buf + "\n";
+    OutputDebugStringA(msg.c_str());
+    }
+
+
+void TestSingleCSin()
+    {
+    CBigTrig trig;
+
+    BigComplex in, sout, cout, sref, cref;
+    BigDouble pi;
+    pi.ChangePrecision(256);
+    pi.SetPi();
+
+    in = 0.0;
+
+    in.x.ChangePrecision(256);
+    in.y.ChangePrecision(256);
+    cout.x.ChangePrecision(256);
+    cout.y.ChangePrecision(256);
+    cref.x.ChangePrecision(256);
+    cref.y.ChangePrecision(256);
+    sout.x.ChangePrecision(256);
+    sout.y.ChangePrecision(256);
+    sref.x.ChangePrecision(256);
+    sref.y.ChangePrecision(256);
+
+    in.x = 0.5;
+    in.y = 0.25;
+
+    in.x = 1.0;
+    in.y = 0.0;
+
+    in.x = pi / 2;
+    in.y = 0.0;
+
+    in.x = pi;
+    in.y = 0.0;
+/*
+    in.x = 3 * pi / 2;
+    in.y = 0;
+
+    in.x = pi * 2;
+    in.y = 0;
+
+    in.x = pi / 2 - 1e-10;
+    in.y = 0.0;
+
+    in.x = 0;
+    in.y = 1;
+*/
+    in.x = -pi * 3;
+    in.y = 0;
+
+    in.x = 1.0;
+    in.y = 250.0;
+
+
+    DebugBDShort("INPUT x", in.x);
+    DebugBDShort("INPUT y", in.y);
+
+//    char ix[256], iy[256];
+//    in.x.ToString(ix, sizeof(ix), true);
+//    in.y.ToString(iy, sizeof(iy), true);
+//    OutputDebugStringA(("INPUT: x=" + std::string(ix) + " y=" + iy + "\n").c_str());
+
+    trig.CSin(&sout, in);
+    trig.CCos(&cout, in);
+
+    sref = in;
+    sref = sref.CSin();
+    cref = in;
+    cref = cref.CCos();
+
+    char ox[256], oy[256], rx[256], ry[256];
+    sout.x.ToString(ox, sizeof(ox), true);
+    sout.y.ToString(oy, sizeof(oy), true);
+    sref.x.ToString(rx, sizeof(rx), true);
+    sref.y.ToString(ry, sizeof(ry), true);
+
+    OutputDebugStringA(("sin OUT: x=" + std::string(ox) + " y=" + oy + "\n").c_str());
+    OutputDebugStringA(("sin REF: x=" + std::string(rx) + " y=" + ry + "\n").c_str());
+
+    cout.x.ToString(ox, sizeof(ox), true);
+    cout.y.ToString(oy, sizeof(oy), true);
+    cref.x.ToString(rx, sizeof(rx), true);
+    cref.y.ToString(ry, sizeof(ry), true);
+
+    OutputDebugStringA(("cos OUT: x=" + std::string(ox) + " y=" + oy + "\n").c_str());
+    OutputDebugStringA(("cos REF: x=" + std::string(rx) + " y=" + ry + "\n").c_str());
+
+    }
+
+#include <thread>
+#include <vector>
+
+void TestCSinWorker(int id, BigDouble pi)
+    {
+    CBigTrig trig;
+
+    BigComplex in, sout, cout, sref, cref;
+
+    // --- set precision ---
+    in.x.ChangePrecision(256);
+    in.y.ChangePrecision(256);
+    sout.x.ChangePrecision(256);
+    sout.y.ChangePrecision(256);
+    cout.x.ChangePrecision(256);
+    cout.y.ChangePrecision(256);
+    sref.x.ChangePrecision(256);
+    sref.y.ChangePrecision(256);
+    cref.x.ChangePrecision(256);
+    cref.y.ChangePrecision(256);
+
+    // --- vary input per thread (important!) ---
+    switch (id % 6)
+	{
+	case 0: in.x = 0.5;        in.y = 0.25; break;
+	case 1: in.x = 1.0;        in.y = 0.0;  break;
+	case 2: in.x = pi / 2;     in.y = 0.0;  break;
+	case 3: in.x = pi;         in.y = 0.0;  break;
+	case 4: in.x = pi * 2;     in.y = 0.0;  break;
+	case 5: in.x = -pi * 3;    in.y = 0.0;  break;
+	}
+
+    // --- compute ---
+    trig.CSin(&sout, in);
+    trig.CCos(&cout, in);
+
+    sref = in.CSin();
+    cref = in.CCos();
+
+    // --- compare ---
+    if (mpfr_cmp(sout.x.x, sref.x.x) != 0 ||
+	mpfr_cmp(sout.y.x, sref.y.x) != 0 ||
+	mpfr_cmp(cout.x.x, cref.x.x) != 0 ||
+	mpfr_cmp(cout.y.x, cref.y.x) != 0)
+	{
+	OutputDebugStringA(" MISMATCH DETECTED\n");
+	}
+    }
+
+void TestMultiCSin()
+    {
+    const int NUM_THREADS = 8;
+
+    BigDouble pi;
+    pi.ChangePrecision(256);
+    pi.SetPi();
+
+    std::vector<std::thread> threads;
+
+    for (int i = 0; i < NUM_THREADS; i++)
+	{
+	threads.emplace_back(TestCSinWorker, i, pi);
+	}
+
+    for (auto& t : threads)
+	t.join();
+
+    OutputDebugStringA(" Multi-thread test complete\n");
+    }
+
+
+void TestExpFractalSingle()
+    {
+    CBigTrig trig;
+
+    BigComplex z, c;
+
+    // precision
+    z.x.ChangePrecision(256);
+    z.y.ChangePrecision(256);
+    c.x.ChangePrecision(256);
+    c.y.ChangePrecision(256);
+
+    // initial values
+    z = 0.0;
+    c.x = 0.3;
+    c.y = 0.5;
+
+    for (int i = 0; i < 50; i++)
+	{
+	BigComplex tmp;
+
+	trig.CExp(&tmp, z);
+	z = tmp + c;
+
+	char zx[128], zy[128];
+	z.x.ToString(zx, sizeof(zx), true);
+	z.y.ToString(zy, sizeof(zy), true);
+
+	OutputDebugStringA(("Iter " + std::to_string(i) +
+	    ": z = " + zx + " , " + zy + "\n").c_str());
+	}
+    }
+
+void TestExpFractalMulti()
+    {
+    const int NUM_THREADS = 8;
+
+    std::vector<std::thread> threads;
+
+    OutputDebugStringA("TestExpFractalMulti: launching threads\n");
+
+    for (int t = 0; t < NUM_THREADS; t++)
+	{
+	threads.emplace_back([t]()
+	    {
+	    CBigTrig trig;
+
+	    BigComplex z, c;
+
+	    DWORD id = GetCurrentThreadId();
+
+	    char buf[128];
+	    sprintf_s(buf, "TestExp worker %d start\n", id);
+	    OutputDebugStringA(buf);
+
+	    z.x.ChangePrecision(256);
+	    z.y.ChangePrecision(256);
+	    c.x.ChangePrecision(256);
+	    c.y.ChangePrecision(256);
+
+	    z = 0.0;
+
+	    // vary input per thread
+	    c.x = 0.3 + t * 0.01;
+	    c.y = 0.5 + t * 0.01;
+
+	    for (int i = 0; i < 50; i++)
+		{
+		if (gStopRequested.load())
+		    break;
+
+		if (i % 10 == 0)
+		    {
+		    char buf[128];
+		    sprintf_s(buf, "worker %lu iteration %d\n", id, i);
+		    OutputDebugStringA(buf);
+		    }
+
+
+//		char buf2[128];
+//		sprintf_s(buf2, "worker %lu iter %d before CExp\n", id, i);
+//		OutputDebugStringA(buf2);
+
+		BigComplex tmp;
+		tmp.x.ChangePrecision(256);
+		tmp.y.ChangePrecision(256);
+
+		trig.CExp(&tmp, z);
+
+//		sprintf_s(buf2, "worker %lu iter %d after CExp\n", id, i);
+//		OutputDebugStringA(buf2);
+
+		z = tmp + c;
+
+//		sprintf_s(buf2, "worker %lu iter %d after add\n", id, i);
+//		OutputDebugStringA(buf2);
+		}
+	    sprintf_s(buf, "TestExp worker %d end\n", id);
+	    OutputDebugStringA(buf);
+	    });
+	}
+
+    OutputDebugStringA("TestExpFractalMulti: waiting for threads\n");
+
+    for (auto& th : threads)
+	th.join();
+
+    OutputDebugStringA("TestExpFractalMulti: threads finished waiting\n");
+    OutputDebugStringA(" exp fractal multi-thread test complete\n");
+    }
+
+
+
+#include "DDTrig.h"
+
+void TestDDTrig()
+    {
+    dd_real s[5], c[5], sh[5], ch[5], x[5], y[5], pi = dd_real::_pi;
+    CDDTrig trig;
+    dd_real s_ref[5], c_ref[5], sh_ref[5], ch_ref[5];
+    char buf[512], buf1[512];
+
+    x[0] = 0.0; y[0] = 0.0;
+    x[1] = 1.0; y[1] = 0.0;
+    x[2] = pi / 3; y[2] = 0.0;
+    x[3] = 0.0, y[3] = 1.0;
+    x[4] = 1.0, y[4] = 1.0;
+
+    for (int i = 0; i < 5; i++)
+	{
+	trig.sincos_dd(&s[i], &c[i], x[i]);       // or whatever order your function claims
+	trig.sinhcosh_dd(&sh[i], &ch[i], y[i]);
+
+	s_ref[i] = sin(x[i]);
+	c_ref[i] = cos(x[i]);
+	sh_ref[i] = sinh(y[i]);
+	ch_ref[i] = cosh(y[i]);
+
+	sprintf(buf, "x = %f, y = %f, s = %f, c = %f, sh = %f, ch = %f\n", x[i].x[0], y[i].x[0], s[i].x[0], c[i].x[0], sh[i].x[0], ch[i].x[0]);
+	sprintf(buf1, "Reference: s = %f, c = %f, sh = %f, ch = %f\n", s_ref[i].x[0], c_ref[i].x[0], sh_ref[i].x[0], ch_ref[i].x[0]);
+	OutputDebugStringA(buf);
+	OutputDebugStringA(buf1);
+	}
+    }
+#endif // TEST_TRIG
+
+
 /**************************************************************************
 	Analyse Keyboard activity
 **************************************************************************/
@@ -405,6 +814,13 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	case 'U':								// Toggle Update Timer between 1000 and 10 milliseconds  
 	    UpdateDelay = (UpdateDelay == 1000) ? 10 : 1000;
 	    break;
+
+#ifdef TEST_TRIG
+	case 'V':								// a test for various trig
+	    TestDDTrig();
+//	    TestMultiThreadCSin();
+	    break;
+#endif // TEST_TRIG
 
 	case 'W':  								// toggle between normal mandel deriviative and perturbation version 
 	    SendMessage(hwnd, WM_COMMAND, IDM_TOGGLEPERT, 0L);

@@ -205,7 +205,7 @@ int	AnimateResume(void)
 int	DoAnimation(void)
     {
     char	s[2400];
-    char	Name[2400];
+    char	Name[6400];
 
     if (ANIM.empty())
 	{

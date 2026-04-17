@@ -7,14 +7,16 @@
     (console drivers & serial I/O) is in separate machine libraries.
 */
 
-#include	<math.h>
-#include	"manp.h"
-#include	"fractype.h"
-#include	"Complex.h"
-#include	"big.h"
-#include	"BigDouble.h"
-#include	"BigComplex.h"
-#include	"pixel.h"
+#include <math.h>
+#include "manp.h"
+#include "fractype.h"
+#include "Complex.h"
+#include "big.h"
+#include "BigDouble.h"
+#include "BigComplex.h"
+#include "pixel.h"
+#include "FunctionTemplate.h"
+#include "BailoutTemplate.h"
 
 /**************************************************************************
 	Initialise functions for each pixel
@@ -28,112 +30,28 @@ int	CPixel::BigInitFunctions(WORD type, BigComplex *zBig, BigComplex *qBig)
 	case MANDEL:					// to handle fractint par files
 	case JULIA:					// to handle fractint par files
 	case BURNINGSHIP:				// Burning Ship
-	    if (!juliaflag)
-		{
-		zBig->x = qBig->x + param[0];
-		zBig->y = qBig->y + param[1];
-		}
-    	    break;
+	    Init_Basic<BigComplex>(zBig, qBig, param, juliaflag, sqrBig, realimagBig);
+	    break;
 
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	case POWER:					// Power
-	    *degree = (int)param[0];
-	    if (*degree < 1)
-		*degree = 1;
-	    if (!juliaflag)
-		{
-		zBig->x = qBig->x + param[1];
-		zBig->y = qBig->y + param[2];
-		}
+	    Init_Power<BigComplex>(type, zBig, qBig, param, juliaflag, degree);
 	    break;
 
 	case CUBIC:					// Art Matrix Cubic
-	    {
-	    BigComplex	tempBig;
-
-	    switch ((int)param[0])
-		{
-		case 0:
-		    subtype = 'B';
-		    break;
-		case 1:
-		    subtype = 'C';
-		    break;
-		case 2:
-		    subtype = 'F';
-		    break;
-		case 3:
-		    subtype = 'K';
-		    break;
-		default:
-		    subtype = 'B';
-		    break;
-		}
-	    if ((int)param[1] < 0)
-		special = 0;
-	    else
-		special = (int)param[1];
-
-	    period_level = FALSE;			// no periodicity checking
-	    if (subtype == 'B')				// CBIN 
-		{
-		t3Big = *qBig * 3.0;			// T3 = 3*T
-		t2Big = qBig->CSqr();			// T2 = T*T
-		aBig = (t2Big + 1.0) / t3Big;		// A  = (T2 + 1)/T3
-							// B  = 2*A*A*A + (T2 - 2)/T3    
-		tempBig = aBig.CCube();			// A*A*A
-		tempBig = tempBig.CDouble();		// 2*A*A*A
-		bBig = (t2Big - 2.0) / t3Big + tempBig;	// B  = 2*A*A*A + (T2 - 2)/T3
-		}
-	    else if (subtype == 'C' || subtype == 'F')	// CCIN or CFIN
-		{
-		aBig = *qBig;				// A = T
-							// find B = T + 2*T*T*T
-		tempBig = qBig->CCube();		// B = T*T*T
-		if (subtype == 'C')
-		    bBig = tempBig.CDouble() + *qBig;	// B = B * 2 + T
-		else
-		    {
-		    bBig = (tempBig - *qBig);		// B = B - T
-		    bBig = bBig.CDouble();		// B = B * 2 - 2 * T
-		    a2Big = aBig.CDouble();
-		    }
-		}
-	    else if (subtype == 'K')			// CKIN 
-		{
-		aBig = 0;
-		vBig = 0;
-		bBig = *qBig;				// B = T
-		}
-	    aa3Big = aBig.CSqr()*3.0;			// AA3 = A*A*3
-	    if (!juliaflag)
-		*zBig = -aBig;				// Z = -A
-	    }
+	    Init_Cubic<BigComplex>(zBig, qBig, param, juliaflag, subtype, special, aBig, bBig, a2Big, aa3Big, t2Big, t3Big, tempBig, vBig);
 	    break;
 
 	case SPECIALNEWT:				// Art Matrix Newton
-	    l2Big = qBig->CSqr();
-	    aBig = -l2Big + 0.25;
-	    bBig = -(l2Big + 0.75);
-	    lm5Big = *qBig - 0.5;
-	    lp5Big = *qBig + 0.5;
+	    Init_SPECIALNEWT<BigComplex>(zBig, qBig, aBig, bBig, lm5Big, lp5Big);
 	    break;
-
+	    
 	case MATEIN:					// Art Matriuc Matein fractal
 	    {
 	    period_level = FALSE;			// no periodicity checking
-	    double	one = 1.0;
-	    if ((absolute = qBig->CSumSqr()) > one)
-		return(-1);				// not inside set
-	    zBig->x = 1.0;
-	    zBig->y = 0.0;
-	    /* DO 300 I = 1,100 */
-	    /* 300  Z = L*(Z + 1/Z) */
-	    for (int i = 0; i < 100; ++i)
-		*zBig = (*zBig + zBig->CInvert()) * *qBig;
-
-	    distance = 1.0;				// D = 1 
-	    ozBig = zBig->CInvert();			// OZ = 1/Z
+	    int ret = Init_MATEIN<BigComplex, BigDouble>(zBig, qBig, param, juliaflag, ozBig, tempBig, distance, absolute);
+	    if (ret < 0)
+		return ret;   // propagate rejection
 	    break;
 	    }
 
@@ -141,47 +59,19 @@ int	CPixel::BigInitFunctions(WORD type, BigComplex *zBig, BigComplex *qBig)
 	    break;
 
 	case SINFRACTAL:				// Sine
-	    if (!juliaflag)
-		{
-		BigDouble BigPi;
-
-		mpfr_const_pi(BigPi.x, MPFR_RNDN);
-
-//		zBig.x = PI / 2.0;		// dz_real = HALF_PI;
-//		zBig->x = BigPi / 2.0;		// dz_real = HALF_PI;
-		zBig->x = param[3];
-		zBig->y = 0.0;
-		}
+	    Init_SINFRACTAL<BigComplex>(zBig, qBig, param, juliaflag);
 	    break;
 
 	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
-	    aBig.x = param[0];
-	    aBig.y = param[1];
-	    *degree = (WORD)param[2];
-	    if (!juliaflag)
-		{
-		zBig->x = qBig->x + param[3];
-		zBig->y = qBig->y + param[4];
-		}
+	    Init_REDSHIFTRIDER<BigComplex>(zBig, qBig, param, juliaflag, aBig, degree);
 	    break;
 
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
-	    *degree = (int)param[0];
-	    if (*degree < 1)
-		*degree = 1;
-	    if (!juliaflag)
-		{
-		zBig->x = qBig->x + param[2];
-		zBig->y = qBig->y + param[3];
-		}
+	    Init_TALIS<BigComplex>(zBig, qBig, param, juliaflag, degree);
 	    break;
 
 	case POLYNOMIAL:
-	    if (!juliaflag)
-		{
-		zBig->x = qBig->x + param[0];
-		zBig->y = qBig->y + param[1];
-		}
+	    Init_POLYNOMIAL<BigComplex>(zBig, qBig, param, juliaflag);
 	    for (int i = 0; i < MAXPOLYDEG; i++)			// find highest order of polynomial for use with fwd diff calcs
 		{
 		if (param[2 + i] != 0.0)
@@ -190,6 +80,56 @@ int	CPixel::BigInitFunctions(WORD type, BigComplex *zBig, BigComplex *qBig)
 		    break;
 		    }
 		}
+	    break;
+
+	case RATIONALMAP:				// Art Matrix Rational Map 
+	    {
+	    // -----------------------------------
+	    // 1. CONTROL LOGIC (CPixel responsibility)
+	    // -----------------------------------
+
+	    switch ((int)param[0])
+		{
+		case 0: subtype = 'A'; break;
+		case 1: subtype = 'B'; break;
+		default: subtype = 'A'; break;
+		}
+	    special = ((int)param[1] < 0) ? 0 : (int)param[1];
+
+	    // threshold / palette logic stays here
+	    if (threshold != OldThreshold)
+		{
+		OldThreshold = threshold;
+		int gap = threshold / 16;			// split the colour map into 16 equal parts
+		for (int i = 0; i < 4; i++)
+		    {
+		    penp[i] = penpref[i] * gap;
+		    penn[i] = pennref[i] * gap;
+		    }
+		}
+
+	    // -----------------------------------
+	    // 2. PURE MATH (TEMPLATE CALL)
+	    // -----------------------------------
+
+	    int ret = Init_RATIONALMAP<BigComplex, BigDouble>(zBig, qBig, param, juliaflag, subtype, aBig, bBig, alphaBig, tempBig, temp1Big, temp3Big);
+
+	    if (ret < 0)
+		return ret;
+
+	    // -----------------------------------
+	    // 3. POST-MATH STATE (CPixel responsibility)
+	    // -----------------------------------
+
+	    // escape + epsilon
+	    if (alphaBig.x != 0.0 || alphaBig.y != 0.0)
+		escape = 16.0 / alphaBig.CSumSqr();
+	    else
+		return(FALSE);				// no naughty division
+	    epsilonBig = 0.000001 / escapeBig;		// EPSILN = 0.000001/ESCAPE 
+
+	    derBig = 1.0;					// DER = 1.0 
+	    }
 	    break;
 
 	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
@@ -263,6 +203,7 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	case MANDELFP:					// Mandelbrot
 	case MANDEL:					// to handle fractint par files
 	case JULIA:					// to handle fractint par files
+	case JULIAFP:					// like he said
 	    {
 	    BigDouble	t, realimagBig;
 	    BigComplex	sqrBig;
@@ -275,215 +216,44 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	    mpfr_add(zBig->x.x, qBig->x.x, t.x, MPFR_RNDN);
 	    mpfr_add(t.x, realimagBig.x, qBig->y.x, MPFR_RNDN);
 	    mpfr_add(zBig->y.x, realimagBig.x, t.x, MPFR_RNDN);
-	    return BigBailoutTest(zBig, sqrBig);
+	    return BailoutCore(BailoutTestType, zBig, &sqrBig, rqlim);
 	    }
 
+	case POWER:					// Power
+	case JULIA4FP:
+	case JULIA4:
+	case MANDEL4FP:
+	case MANDEL4:
 	case BURNINGSHIP:				// Burning Ship
-	    {
-	    BigDouble	t, realimagBig;
-	    BigComplex	sqrBig;
-
-	    sqrBig.x = zBig->x.BigSqr();
-	    sqrBig.y = zBig->y.BigSqr();
-	    t = zBig->x * zBig->y;
-	    realimagBig = t.BigAbs();
-	    zBig->x = qBig->x + sqrBig.x - sqrBig.y;
-	    zBig->y = realimagBig + realimagBig - qBig->y;
-	    return BigBailoutTest(zBig, sqrBig);
-	    }
-
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
-	    zBig->x = zBig->x.BigAbs();
-	    zBig->y = -zBig->y.BigAbs();
-	    *zBig = *qBig + zBig->CPolynomial(*degree);
-	    return BigFractintBailoutTest(zBig);
-
-	case POWER:			// Power
-	    *zBig = *qBig + zBig->CPolynomial(*degree);
-	    return BigFractintBailoutTest(zBig);
-
 	case CUBIC:					// Art Matrix Cubic
-	    {
-	    BigComplex	tempBig;
-
-	    if (subtype == 'K')				// CKIN
-		*zBig = zBig->CCube() + bBig;		// Z = Z*Z*Z + B
-	    else					// Z = Z*Z*Z - AA3*Z + B
-		{
-		tempBig = zBig->CCube() + bBig;		// Z = Z*Z*Z + B
-		*zBig = tempBig - aa3Big * *zBig;	// Z = Z*Z*Z - AA3*Z + B
-		}
-	    if (zBig->CSumSqr() >= 100.0)
-		return (TRUE);
-	    else
-		{
-		if (subtype == 'F')
-		    {
-		    if (qBig->CSumSqr() <= 0.111111)
-			{
-			*iteration = special;
-			*SpecialFlag = TRUE;		// for decomp and biomorph
-			return (TRUE);
-			}
-		    vBig = *zBig + a2Big;
-		    }
-		else if (subtype == 'K')
-		    vBig = *zBig - vBig;
-		else
-		    vBig = *zBig - aBig;
-		if (vBig.CSumSqr() <= 0.000001)
-		    {
-		    *iteration = special;
-		    *SpecialFlag = TRUE;		// for decomp and biomorph
-		    return (TRUE);
-		    }
-		}
-	    return(FALSE);
-	    }
+	    return FunctionsDispatch<BigComplex, BigDouble, WORD>(this, type, zBig, qBig, degree, sqrBig, realimagBig,
+		aBig, a2Big, aa3Big, bBig, vBig, tempBig, param, SpecialFlag, iteration, special, subtype, BailoutTestType, rqlim);
 
 	case SPECIALNEWT:				// Art Matrix Newton
-	    {
-	    BigComplex	z2Big;
-
-	    if ((int)param[0] < 0)
-		special = 2;
-	    else
-		special = (int)param[0];
-	    z2Big = zBig->CSqr();
-	    temp1Big = z2Big * zBig->CDouble() + aBig;
-	    temp2Big = z2Big * 3.0 + bBig;
-	    *zBig = temp1Big / temp2Big;
-
-	    vBig = *zBig - 1.0;
-	    if (vBig.CSumSqr() <= 0.000001)
-		{
-		phaseflag = 0;				// first phase
-		return(TRUE);
-		}
-	    // v_real = dz_real - lm5_real;
-	    vBig = *zBig - lm5Big;			// v_imag = dz_imag - lm5_imag;
-	    if (vBig.CSumSqr() <= 0.000001)
-		{
-		phaseflag = 1;				// second phase
-		return(TRUE);
-		}
-	    // v_real = dz_real + lp5_real;
-	    vBig = *zBig + lp5Big;			// v_imag = dz_imag + lp5_imag;
-	    if (vBig.CSumSqr() <= 0.000001)
-		{
-		phaseflag = 2;				// third phase
-		return(TRUE);
-		}
-	    return(FALSE);
-	    }
+	    return Iter_SPECIALNEWT<BigComplex>(zBig, qBig, aBig, bBig, lm5Big, lp5Big, vBig, param, phaseflag, special);
 
 	case MATEIN:					// Art Matriuc Matein fractal
-	    {
-	    double	epsilon = 0.01;
-	    double	escape = 10.0E20;
-	    BigComplex	t;
-
-	    *zBig = *qBig * (*zBig + ozBig);		// Z = L*(Z + OZ)
-	    ozBig = zBig->CInvert();			// OZ = 1/Z
-	    t = -ozBig / *zBig;				// T = 1 - OZ/Z
-	    t.x = t.x + 1.0;
-	    // D = D*ABSL*(REAL(T)*REAL(T) + IMAG(T)*IMAG(T))
-	    distance = distance * absolute * t.CSumSqr();
-
-	    if (distance <= epsilon)
-		{
-		phaseflag = 0;				// first phase
-		return(TRUE);
-		}
-	    if (distance > escape)
-		{
-		phaseflag = 1;				// second phase
-		return(TRUE);
-		}
-	    return(FALSE);
-	    }
-
+	    return Iter_MATEIN<BigComplex>(zBig, qBig, ozBig, tempBig, distance, absolute, param, epsilon, escape, phaseflag);
+	
 	case SINFRACTAL:				// Sine
-	    {
-	    BigDouble	a, b;
-
-	    if (param[2] == 0.0)
-		*zBig = *qBig * zBig->CSin();
-	    else
-		*zBig = *qBig + zBig->CSin();
-	    a = 80.0;
-	    b = -80.0;
-
-	    if (zBig->x > a || zBig->x < b || zBig->y > a || zBig->y < b)
-		return(TRUE);
-	    return(FALSE);
-	    }
+	    return Iter_SINFRACTAL<BigComplex>(this, zBig, qBig, param, BailoutTestType, rqlim);
 
 	case EXPFRACTAL:				// Exponential
-	    {
-	    int		compare;
-	    BigDouble	a, b;
-
-	    *zBig = *qBig * zBig->CExp();			    // Z = L*EXP(Z)
-	    a = 10.0;
-	    b = -10.0;
-
-	    switch (subtype)
-		{
-		case 'R':
-		    compare = (zBig->x > a);
-		    break;
-		case 'I':
-		    compare = (zBig->y > a);
-		    break;
-		case 'M':
-		    compare = (zBig->x > a || zBig->x < b || zBig->y > a || zBig->y < b);
-		    break;
-		default:
-		    compare = (zBig->x > a);
-		    break;
-		}
-	    if (compare)
-		return(TRUE);
-	    return(FALSE);
-	    }
+	    return Iter_EXP_FRACTAL<BigComplex>(zBig, qBig, param, degree, subtype, rqlim);
 
 	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
-	    *zBig = aBig * *zBig * *zBig + zBig->CPolynomial(*degree) * ((param[5] == 1.0) ? 1.0 : -1.0);
-	    *zBig = *zBig + *qBig;
-	    return BigFractintBailoutTest(zBig);
+	    return Iter_REDSHIFTRIDER<BigComplex, BigDouble>(this, zBig, qBig, aBig, param, degree, BailoutTestType, rqlim);
 
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
-	    {
-	    double	m;
-	    BigComplex	z1;
-
-	    m = param[1];
-	    z1 = zBig->CPolynomial(*degree - 1);
-	    *zBig = (z1 * *zBig) / (z1 + m) + *qBig;
-	    return BigFractintBailoutTest(zBig);
-	}
+	    return Iter_TALIS<BigComplex>(this, zBig, qBig, aBig, param, degree, BailoutTestType, rqlim);
 
 	case POLYNOMIAL:				// Polynomial
-	    {
-	    BigComplex	InitialZ = *zBig;
-	    BigComplex	FinalZ = { 0.0, 0.0 };
+	    return Iter_POLYNOMIAL<BigComplex>(this, zBig, qBig, param, BailoutTestType, rqlim);
 
-	    for (int m = 0; m < MAXPOLYDEG; m++)
-		{
-		BigComplex BigComplexTemp = InitialZ;
-		if (param[2 + m] != 0.0)
-		    {
-		    for (int k = 0; k < MAXPOLYDEG - m - 1; k++)
-			BigComplexTemp *= InitialZ;
-		    FinalZ += (BigComplexTemp * param[2 + m]);
-		    }
-		}
-	    *zBig = FinalZ + *qBig;
-	    sqrBig.x = zBig->x.BigSqr();
-	    sqrBig.y = zBig->y.BigSqr();
-	    return BigFractintBailoutTest(zBig);
-	}
+	case RATIONALMAP:				// Art Matrix Rational Map
+	    return Iter_RATIONALMAP<BigComplex, BigDouble>(this, zBig, qBig, aBig, bBig, param, derBig, escapeBig, epsilonBig,
+		iteration, threshold, special, alphaBig, &color);
 
 	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
 	    return (BigRunManDerFunctions(subtype, zBig, qBig, SpecialFlag, iteration));
@@ -541,96 +311,4 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	}
     return 0;
     }
-
-/**************************************************************************
-    Bailout Test
-**************************************************************************/
-
-bool	CPixel::BigBailoutTest(BigComplex *z, BigComplex SqrZ)
-    {
-    BigDouble	magnitude;
-    BigDouble	manhmag;
-    BigDouble	manrmag;
-
-    switch (BailoutTestType)
-	{
-	case BAIL_MOD:
-	    magnitude = z->CSumSqr();
-	    return (magnitude > BigBailout);
-
-	case BAIL_REAL:
-	    return (SqrZ.x > BigBailout);
-	
-	case BAIL_IMAG:
-	    return (SqrZ.y > BigBailout);
-
-	case BAIL_OR:
-	    return (SqrZ.x > BigBailout || SqrZ.y > BigBailout);
-	
-	case BAIL_AND:
-	    return (SqrZ.x > BigBailout && SqrZ.y > BigBailout);
-
-	case MANH:
-	    manhmag = z->x.BigAbs() + z->y.BigAbs();
-	    return (manhmag.BigSqr() > BigBailout);
-
-	case MANR:
-	    manrmag = z->x + z->y;	    // don't need abs() since we square it next
-	    return (manrmag.BigSqr() > BigBailout);
-
-	default:
-	    magnitude = z->CSumSqr();
-	    return (magnitude > BigBailout);
-	}
-    }
-
-/**************************************************************************
-    Bailout Test
-**************************************************************************/
-
-bool	CPixel::BigFractintBailoutTest(BigComplex *z)
-    {
-    BigComplex TempSqr;
-    BigDouble  magnitude;
-    BigDouble  manhmag;
-    BigDouble  manrmag;
-
-    switch (BailoutTestType)
-	{
-	case BAIL_MOD:
-	    magnitude = z->CSumSqr();
-	    return (magnitude > BigBailout);
-
-	case BAIL_REAL:
-	    TempSqr.x = z->x.BigSqr();
-	    return (TempSqr.x > BigBailout);
-	
-	case BAIL_IMAG:
-	    TempSqr.y = z->y.BigSqr();
-	    return (TempSqr.y > BigBailout);
-
-	case BAIL_OR:
-	    TempSqr.x = z->x.BigSqr();
-	    TempSqr.y = z->y.BigSqr();
-	    return (TempSqr.x > BigBailout || TempSqr.y > BigBailout);
-	
-	case BAIL_AND:
-	    TempSqr.x = z->x.BigSqr();
-	    TempSqr.y = z->y.BigSqr();
-	    return (TempSqr.x > BigBailout && TempSqr.y > BigBailout);
-
-	case MANH:
-	    manhmag = z->x.BigAbs() + z->y.BigAbs();
-	    return (manhmag.BigSqr() > BigBailout);
-
-	case MANR:
-	    manrmag = z->x + z->y;	    // don't need abs() since we square it next
-	    return (manrmag.BigSqr() > BigBailout);
-
-	default:
-	    magnitude = z->CSumSqr();
-	    return (magnitude > BigBailout);
-	}
-    }
-
 

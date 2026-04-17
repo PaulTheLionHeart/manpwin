@@ -10,6 +10,9 @@ typedef double          LDBL;
 #define	PRECISION_FACTOR    10		// increase decimals
 #define SIZEOF_BF_VARS	    50000
 
+#define DDPRECISION	    27
+#define QDPRECISION	    55
+
 typedef unsigned char  U8;
 typedef signed char    S8;
 typedef unsigned short U16;

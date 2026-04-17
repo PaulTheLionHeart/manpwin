@@ -7,12 +7,15 @@
     (console drivers & serial I/O) is in separate machine libraries.
 */
 
-#include	<math.h>
-#include	"manp.h"
-#include	"fractype.h"
-#include	"Complex.h"
-#include	"pixel.h"
-#include	"bif.h"
+#include <math.h>
+#include "manp.h"
+#include "fractype.h"
+#include "Complex.h"
+#include "pixel.h"
+#include "bif.h"
+#include "FractintFnTemplate.h"
+#include "BailoutTemplate.h"
+#include "FractalMathsTemplate.h"
 
 /**************************************************************************
 	Initialise functions for each pixel
@@ -35,50 +38,13 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    //   set x1 = x2
 	    // ENDDO
 
-	    *degree = (int)param[0];			// so we have to get the degrees and subtype from the parameters
-	    if (*degree < 2)
-		*degree = 3;				// defaults to 3, but 2 is possible 
-	    switch ((int)param[1])
-		{
-		case 0:
-		    subtype = 'N';
-		    break;
-		case 1:
-		    subtype = 'S';
-		    break;
-		case 2:
-		    subtype = 'B';
-		    break;
-		default:
-		    subtype = 'N';
-		    break;
-		}
-
-	    root = 1;					// set up table of roots of 1 along unit circle
-
-							// precalculated values 
-	    thresh = 0.3 * PI / (double)*degree;	// less than half distance between roots
-
-	    if (subtype == 'S' || subtype == 'B')
-		{
-		if (*degree > MAXROOTS)
-		    *degree = MAXROOTS;
-
-		// list of roots to discover where we converged for newtbasin
-
-		for (int i = 0; i < *degree; i++)
-		    {
-		    roots[i].x = cos(i*PI*2.0 / (double)*degree);
-		    roots[i].y = sin(i*PI*2.0 / (double)*degree);
-		    }
-		}
-	    period_level = FALSE;			// no periodicity checking
-	    color = 0;
-	    if (!juliaflag)
-		*z = *q / 3;
+	    Init_Newton<Complex, double>(this, z, q, param, degree, subtype, roots, thresh, PI, period_level, color, juliaflag);
 	    break;
 
 	case COMPLEXMARKSMAND:					// Complex Mark's Mandelbrot
+	    Init_ComplexMarksMand<Complex, double>(this, z, q, param, juliaflag, &Coefficient);
+	    break;
+/*
 	    {
 	    Complex pwr;
 
@@ -94,16 +60,9 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    Coefficient = *q ^ pwr;
 	    break;
 	    }
-
+*/
 	case SPIDERFP:					// Spider(XAXIS) { c=z=pixel: z=z*z+c; c=c/2+z, |z|<=4 }
-	    if (!juliaflag)
-		{
-		z->x = q->x + param[0];
-		z->y = q->y + param[1];
-		}
-	    sqr = 0.0;
-	    real_imag = 0.0;
-	    temp = *q;
+	    Init_Spider<Complex, double>(this, z, q, param, juliaflag, temp);
 	    break;
 
 	case MANOWARFP:					// From Art Matrix via Lee Skinner
@@ -111,21 +70,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case MANOWARJ:					// to handle fractint par files
 	case MANOWAR:					// to handle fractint par files
 	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
-	    t = (invert) ? invertz2(c) : c;
-	    if (juliaflag)
-		{
-		*z = t;
-		temp.x = q->x;
-		temp.y = q->y;
-		}
-	    else
-		{
-		z->x = temp.x = t.x + param[0];
-		z->y = temp.y = t.y + param[1];
-		}
-	    sqr.x = sqr(z->x);
-	    sqr.y = sqr(z->y);
-	    temp1 = *z;
+	    Init_Manowar<Complex, double>(this, z, q, &c, param, juliaflag, invert, t, temp, temp1);
 	    break;
 
 	case BARNSLEYM1:
@@ -152,14 +97,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 
 	case COMPLEXNEWTON:
 	case COMPLEXBASIN:
-	    croot = 1;
-	    cdegree = 3;
-	    croot.x = param[2];
-	    croot.y = param[3];
-	    cdegree.x = param[0];
-	    cdegree.y = param[1];
-	    *z = *q;
-	    subtype = ((int)param[4] == 0.0) ? 'N' : 'B';
+	    Init_ComplexNewton<Complex, double>(this, z, q, param, croot, cdegree, subtype);
 	    break;
 
 	case ESCHER:					// Science of Fractal Images pp. 185, 187
@@ -171,6 +109,10 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case LAMBDAFP:
 	case LAMBDA:
 	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
+	    Init_Lambda<Complex, double>(this, z, q, param, juliaflag, temp);
+	    break;
+
+/*
 	    if (juliaflag)
 		{
 		temp.x = q->x;
@@ -187,7 +129,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    sqr.x = sqr(z->x);  // precalculated value for regular Mandelbrot
 	    sqr.y = sqr(z->y);
 	    break;
-
+*/
 	case PHOENIXFP:
 	case PHOENIX:
 	case MANDPHOENIXFP:
@@ -292,6 +234,9 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case FPMANZTOZPLUSZPWR:
 	case FPJULZTOZPLUSZPWR:
 	case TETRATEFP:					// Tetrate(XAXIS) { c=z=pixel: z=c^z, |z|<=(P1+3)
+	    Init_ZPowerGroup<Complex, double>(this, z, q, c, param, juliaflag, invert, t, temp, temp1, temp2);
+	    break;
+/*
 	    t = (invert) ? invertz2(c) : c;
 	    temp.x = param[0];
 	    temp.y = param[1];
@@ -312,11 +257,14 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    sqr.y = sqr(z->y);
 	    temp1 = *z;					// set temp3 to Y value
 	    break;
-
+*/
 	case MARKSMANDELFP:
 	case MARKSMANDEL:
 	case MARKSJULIAFP:
 	case MARKSJULIA:
+	    Init_Marks<Complex, double>(this, z, q, c, param, juliaflag, invert, t, Coefficient);
+	    break;
+/*
 	    {
 	    Complex pwr;
 
@@ -339,9 +287,12 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    Coefficient = *q ^ pwr;
 	    break;
 	    }
-
+*/
 	case QUATFP:
 	case QUATJULFP:
+	    Init_Quat<Complex, double>(this, z, q, c, param, juliaflag, invert, t, qc, qci, qcj, qck);
+	    break;
+/*
 	    t = (invert) ? invertz2(c) : c;
 	    temp = 0;
 	    if (juliaflag)
@@ -359,6 +310,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    qcj = param[2];
 	    qck = param[3];
 	    break;
+*/
 
 	case UNITYFP:					// Unity Fractal - brought to you by Mark Peterson - you won't find this in any fractal books unless they saw it here first - Mark invented it!
 	case SIERPINSKI:				// following code translated from basic - see "Fractals Everywhere" by Michael Barnsley, p. 251, Program 7.1.1
@@ -548,77 +500,19 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	case NEWTBASIN:
 	case MPNEWTBASIN:
 	case MPNEWTON:
-	{
-	    int		tmpcolor;
-	    int		i;
-
-	    color = *iteration;
-	    z2 = *z;
-	    z1 = z->CPolynomial(*degree - 1);
-	    *z = *z - (z1 * *z - *q - 1) / (z1 * *degree);
-	    zd = *z - z2;
-	    d = zd.CSumSqr();
-	    if (d < MINSIZE)
-		{
-		if (subtype == 'S' || subtype == 'B')
-		    {
-		    tmpcolor = -1;
-		    // this code determines which degree-th root of root the Newton formula converges to. 
-		    // The roots of a 1 are distributed on a circle of radius 1 about the origin.
-		    for (i = 0; i < *degree; i++)
-			{
-			// color in alternating shades with iteration according to which root of 1 it converged to
-			if (distance(roots[i], z2) < thresh)
-			    {
-			    if (subtype == 'S')
-				tmpcolor = 1 + (i & 7) + ((color & 1) << 3);
-			    else
-				tmpcolor = 1 + i;
-			    break;
-			    }
-			}
-		    if (tmpcolor == -1)
-			color = threshold;
-		    else
-			color = tmpcolor;
-		    }
-
-		return(TRUE);
-		}
-	    else
-		return(FALSE);
-	    }
+	    return Iter_Newton<Complex, double>(this, z, q, z1, z2, zd, iteration, degree, subtype, roots, thresh, color, threshold);
 
 	case COMPLEXMARKSMAND:					// Complex Mark's Mandelbrot
-	    sqr.x = sqr(z->x);
-	    sqr.y = sqr(z->y);
-	    real_imag = z->x * z->y;
-	    z->x = sqr.x - sqr.y;
-	    z->y = real_imag + real_imag;
-	    *z = Coefficient * *z + *q;
-	    return BailoutTest(z, sqr);
+	    return Iter_ComplexMarksMandelbrot<Complex, double>(this, z, q, sqr, real_imag, Coefficient, BailoutTestType, rqlim);
 
 	case SPIDERFP:						// Spider(XAXIS) { c=z=pixel: z=z*z+c; c=c/2+z, |z|<=4 }
-	    sqr.x = sqr(z->x);
-	    sqr.y = sqr(z->y);
-	    real_imag = z->x * z->y;
-	    z->x = sqr.x - sqr.y + temp.x;
-	    z->y = 2 * real_imag + temp.y;
-	    temp.x = temp.x / 2 + z->x;
-	    temp.y = temp.y / 2 + z->y;
-	    return BailoutTest(z, sqr);
+	    return Iter_Spider<Complex, double>(this, z, q, temp, BailoutTestType, rqlim);
 
 	case MANOWARFP:						// From Art Matrix via Lee Skinner
 	case MANOWARJFP:					// to handle fractint par files
 	case MANOWARJ:						// to handle fractint par files
 	case MANOWAR:						// to handle fractint par files
-	    sqr.x = sqr(z->x);
-	    sqr.y = sqr(z->y);
-	    temp3.x = sqr.x - sqr.y + temp.x + temp1.x + param[0];
-	    temp3.y = 2.0 * z->x * z->y + temp.y + temp1.y + param[1];
-	    temp1 = *z;
-	    *z = temp3;
-	    return BailoutTest(z, sqr);
+	    return Iter_ManOWar<Complex, double>(this, z, q, temp, temp1, temp3, param, BailoutTestType, rqlim);
 
 	case BARNSLEYM1:					// Barnsley's Mandelbrot type M1 from "Fractals Everywhere" by Michael Barnsley, p. 322
 	case BARNSLEYJ1:
@@ -646,7 +540,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		}
 	    *z = temp1;
 
-	    return FractintBailoutTest(z);
+	    return DoBailout(BailoutTestType, z, rqlim);
 
 	case BARNSLEYM2:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 331, example 4.2
 	case BARNSLEYJ2:
@@ -670,7 +564,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		temp1.y = foldyinitx + temp.y + foldxinity/* + param[1]*/;
 		}
 	    *z = temp1;
-	    return FractintBailoutTest(z);
+	    return DoBailout(BailoutTestType, z, rqlim);
 
 
 	case BARNSLEYM3:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 292, example 4.1 
@@ -697,59 +591,11 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		temp1.y += temp.y * z->x;
 		}
 	    *z = temp1;
-	    return FractintBailoutTest(z);
+	    return DoBailout(BailoutTestType, z, rqlim);
 
 	case COMPLEXNEWTON:
 	case COMPLEXBASIN:
-	    {
-	    double	mod;
-	    int		coloriter;
-	    Complex	tmp, temp, cd1, New;
-	    double	MPthreshold = 0.001;
-
-	    // New = ((cdegree-1) * old**cdegree) + croot
-	    //         ----------------------------------
-	    //              cdegree * old**(cdegree-1)         
-
-	    color = *iteration;
-	    cd1.x = cdegree.x - 1.0;
-	    cd1.y = cdegree.y;
-	    //    temp = CComplexPower(z, cd1);
-	    temp = *z ^ cd1;
-	    New = temp * *z;
-	    tmp = New - croot;
-	    if (tmp.CSumSqr() < MPthreshold)
-		{
-		if (subtype == 'N')
-		    return(1);
-		if (fabs(z->y) < .01)
-		    z->y = 0.0;
-
-		temp = z->CLog();
-		tmp = temp * cdegree;
-		mod = tmp.y / TWO_PI;
-		coloriter = (long)mod;
-		if (fabs(mod - coloriter) > 0.5)
-		    {
-		    if (mod < 0.0)
-			coloriter--;
-		    else
-			coloriter++;
-		    }
-		coloriter += 2;
-		if (coloriter < 0)
-		    coloriter += 128;
-		*iteration = coloriter;					// PHD 2009-10-13
-		return(1);
-		}
-	    tmp = New * cd1;
-	    tmp += croot;
-	    //    tmp.x += croot.x;
-	    //    tmp.y += croot.y;
-	    cd1 = temp * cdegree;
-	    *z = tmp / cd1;
-	    return(0);
-	    }
+	    return Iter_ComplexNewton<Complex, double>(this, z, q, croot, cdegree, iteration, subtype, color);
 
 	case ESCHER:							// Science of Fractal Images pp. 185, 187
 	    {
@@ -781,7 +627,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    if (testsize > rqlim)
 		{
 		*z = temp;
-		return FractintBailoutTest(z);
+		return DoBailout(BailoutTestType, z, rqlim);
 		}
 	    else							// make distinct level sets if point stayed in target set
 		{
@@ -795,15 +641,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	case MANDELLAMBDA:
 	case LAMBDAFP:
 	case LAMBDA:
-	    sqr.x = z->x - sqr.x + sqr.y;
-	    sqr.y = -(z->y * z->x);
-	    sqr.y += sqr.y + z->y;
-
-	    z->x = temp.x * sqr.x - temp.y * sqr.y;
-	    z->y = temp.x * sqr.y + temp.y * sqr.x;
-	    sqr.x = z->x * z->x;
-	    sqr.y = z->y * z->y;
-	    return BailoutTest(z, sqr);
+	    return Iter_Lambda<Complex, double>(this, z, q, temp, BailoutTestType, rqlim);
 
 	case PHOENIXFP:
 	case PHOENIX:
@@ -833,56 +671,22 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	case LJULIAZPOWER:
 	case LMANDELZPOWER:
 	case FPMANDELZPOWER:
-	    *z = *z ^ temp2;
-	    *z += *q;
-	    return FractintBailoutTest(z);
+	    return Iter_ZPower<Complex, double>(this, z, q, temp2, BailoutTestType, rqlim);
 
 	case FPMANZTOZPLUSZPWR:
 	case FPJULZTOZPLUSZPWR:
-	    temp = z->CPolynomial((int)param[2]);
-	    *z = *z ^ *z;
-	    *z = temp + *z + *q;
-	    return FractintBailoutTest(z);
+	    return Iter_ZtoZPlusZPower<Complex, double>(this, z, q, temp, param, BailoutTestType, rqlim);
 
 	case MARKSMANDELFP:				// Mark Peterson's variation of "lambda" function
 	case MARKSMANDEL:
 	case MARKSJULIAFP:
 	case MARKSJULIA:
 	    // Z1 = (C^(exp-1) * Z**2) + C
-	    sqr.x = z->x * z->x;
-	    sqr.y = z->y * z->y;
-	    temp.x = sqr.x - sqr.y;
-	    temp.y = z->x * z->y * 2;
-
-	    temp1.x = Coefficient.x * temp.x - Coefficient.y * temp.y + t.x;
-	    temp1.y = Coefficient.x * temp.y + Coefficient.y * temp.x + t.y;
-	    *z = temp1;
-	    return BailoutTest(z, sqr);
+	    return Iter_MarksMandel<Complex, double>(this, z, q, /*sqr, */temp, temp1, Coefficient, t, BailoutTestType, rqlim);
 
 	case QUATFP:
 	case QUATJULFP:
-	    {
-	    double a0, a1, a2, a3, n0, n1, n2, n3, magnitude;
-	    a0 = z->x;
-	    a1 = z->y;
-	    a2 = temp.x;
-	    a3 = temp.y;
-
-	    n0 = a0 * a0 - a1 * a1 - a2 * a2 - a3 * a3 + qc;
-	    n1 = 2 * a0*a1 + qci;
-	    n2 = 2 * a0*a2 + qcj;
-	    n3 = 2 * a0*a3 + qck;
-	    // Check bailout
-	    magnitude = a0 * a0 + a1 * a1 + a2 * a2 + a3 * a3;
-	    if (magnitude > rqlim) {
-		return 1;
-		}
-	    z->x = n0;
-	    z->y = n1;
-	    temp.x = n2;
-	    temp.y = n3;
-	    return(0);
-	    }
+	    return Iter_Quat<Complex, double>(this, z, temp, qc, qci, qcj, qck, rqlim);
 
 	case SIERPINSKI:				// following code translated from basic - see "Fractals Everywhere" by Michael Barnsley, p. 251, Program 7.1.1
 	case SIERPINSKIFP:
@@ -894,11 +698,13 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		temp.x = temp.x - 1;
 	    // end barnsley code
 	    *z = temp;
-	    return FractintBailoutTest(z);
+	    return DoBailout(BailoutTestType, z, rqlim);
 
 	case TETRATEFP:					// Tetrate(XAXIS) { c=z=pixel: z=c^z, |z|<=(P1+3)
+	    return Iter_Tetrate<Complex, double>(this, z, q, BailoutTestType, rqlim);
+
 	    *z = *q ^ *z;
-	    return FractintBailoutTest(z);
+	    return DoBailout(BailoutTestType, z, rqlim);
 
 	case UNITYFP:					// Unity Fractal - brought to you by Mark Peterson - you won't find this in any fractal books unless they saw it here first - Mark invented it!
 	    temp.x = sqr(z->x) + sqr(z->y);
@@ -924,7 +730,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    temp.x = z->x + half * (u + (a - ab));
 	    temp.y = z->y + half * (w + (-b + ab));
 	    *z = temp;
-	    return FractintBailoutTest(z);
+	    return DoBailout(BailoutTestType, z, rqlim);
 	}
 
 
@@ -996,8 +802,8 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    FPUsincos(&g_tmp_z.y, &siny, &cosy);
 	    z->x = z->x - siny * StepSize;
 	    z->y = z->y - g_sin_x * StepSize;
-	    return FractintBailoutTest(z);
-	    }
+	    return DoBailout(BailoutTestType, z, rqlim);
+	}
 
 
 
@@ -1200,7 +1006,7 @@ int	CPixel::PhoenixFractal(Complex *z, Complex *q)
     temp4.y = (temp1.x + temp1.x) + (temp.y * temp3.y);
     temp3 = *z;							// set temp3 to Y value
     *z = temp4;
-    return BailoutTest(z, sqr);
+    return DoBailout(BailoutTestType, z, rqlim);
     }
 
 int	CPixel::PhoenixPlusFractal(Complex *z, Complex *q)
@@ -1220,7 +1026,7 @@ int	CPixel::PhoenixPlusFractal(Complex *z, Complex *q)
     temp4.y = newminus.y + (temp.y * temp3.y);
     temp3 = *z;							// set temp3 to Y value
     *z = temp4;
-    return FractintBailoutTest(z);
+    return DoBailout(BailoutTestType, z, rqlim);
     }
 
 int	CPixel::PhoenixMinusFractal(Complex *z, Complex *q)
@@ -1239,7 +1045,7 @@ int	CPixel::PhoenixMinusFractal(Complex *z, Complex *q)
     temp4.y = newminus.y + (temp.y * temp3.y);
     temp3 = *z;							// set temp3 to Y value
     *z = temp4;
-    return FractintBailoutTest(z);
+    return DoBailout(BailoutTestType, z, rqlim);
     }
 
 int	CPixel::PhoenixFractalcplx(Complex *z, Complex *q)
@@ -1252,7 +1058,7 @@ int	CPixel::PhoenixFractalcplx(Complex *z, Complex *q)
     temp4.y = (temp1.x + temp1.x) + q->y + (temp2.x * temp3.y) + (temp2.y * temp3.x);
     temp3 = *z;							// set tmp3 to Y value
     *z = temp4;
-    return BailoutTest(z, sqr);
+    return DoBailout(BailoutTestType, z, rqlim);
     }
 
 int	CPixel::PhoenixCplxPlusFractal(Complex *z, Complex *q)
@@ -1273,7 +1079,7 @@ int	CPixel::PhoenixCplxPlusFractal(Complex *z, Complex *q)
     temp4.y = newminus.y + temp1.y;
     temp3 = *z;							// set temp3 to Y value
     *z = temp4;
-    return FractintBailoutTest(z);
+    return DoBailout(BailoutTestType, z, rqlim);
     }
 
 int	CPixel::PhoenixCplxMinusFractal(Complex *z, Complex *q)
@@ -1296,7 +1102,7 @@ int	CPixel::PhoenixCplxMinusFractal(Complex *z, Complex *q)
     temp4.y = newminus.y + temp1.y;
     temp3 = *z;							// set tmp2 to Y value
     *z = temp4;
-    return FractintBailoutTest(z);
+    return DoBailout(BailoutTestType, z, rqlim);
     }
 
 /**************************************************************************
@@ -1398,57 +1204,5 @@ void	CPixel::set_Froth_palette(HWND hwnd)
 	}
     }
 
-/**************************************************************************
-    Bailout Test
-**************************************************************************/
-
-bool	CPixel::FractintBailoutTest(Complex *z)
-    {
-    Complex TempSqr;
-    double  magnitude;
-    double  manhmag;
-    double  manrmag;
-
-    switch (BailoutTestType)
-	{
-	case BAIL_MOD:
-	    TempSqr.x = sqr(z->x);
-	    TempSqr.y = sqr(z->y);
-	    magnitude = TempSqr.x + TempSqr.y;
-	    return (magnitude >= rqlim);
-
-	case BAIL_REAL:
-	    TempSqr.x = sqr(z->x);
-	    return (TempSqr.x >= rqlim);
-	
-	case BAIL_IMAG:
-	    TempSqr.y = sqr(z->y);
-	    return (TempSqr.y >= rqlim);
-
-	case BAIL_OR:
-	    TempSqr.x = sqr(z->x);
-	    TempSqr.y = sqr(z->y);
-	    return (TempSqr.x >= rqlim || TempSqr.y >= rqlim);
-	
-	case BAIL_AND:
-	    TempSqr.x = sqr(z->x);
-	    TempSqr.y = sqr(z->y);
-	    return (TempSqr.x >= rqlim && TempSqr.y >= rqlim);
-
-	case MANH:
-	    manhmag = fabs(z->x) + fabs(z->y);
-	    return ((manhmag * manhmag) >= rqlim);
-
-	case MANR:
-	    manrmag = z->x + z->y;	    // don't need abs() since we square it next
-	    return ((manrmag * manrmag) >= rqlim);
-
-	default:
-	    TempSqr.x = sqr(z->x);
-	    TempSqr.y = sqr(z->y);
-	    magnitude = TempSqr.x + TempSqr.y;
-	    return (magnitude >= rqlim);
-	}
-    }
 
 

@@ -201,44 +201,126 @@ RGBTRIPLE CPixel::GetSmoothedColour(double fIter, double color_speed, CTrueCol &
 	Setup symmetry etc
 **************************************************************************/
 
+std::string DDToString(const dd_real& v)
+    {
+    char buf[128];
+    snprintf(buf, sizeof(buf), "%.17g", to_double(v)); // temporary
+    return std::string(buf);
+    }
+
+std::string QDToString(const qd_real& v)
+    {
+    char buf[128];
+    snprintf(buf, sizeof(buf), "%.17g", to_double(v)); // temporary
+    return std::string(buf);
+    }
+
+
 int	CPixel::InitArithmetic()
     {
-    double	temp_x, temp_y;
-
-    temp_x = ScreenRatio / (double) (xdots - 1);
-    temp_y = 1.0 / (double) (ydots - 1);
+/*
+    char	PositionString[SIZEOF_BF_VARS * 3];
+    char	*s1 = nullptr;
+    char	*s2 = nullptr;
+    char	*s3 = nullptr;
+*/
 
     if (BigNumFlag)
 	{
-	Big_xgap = BigWidth * temp_x;
-	Big_ygap = BigWidth * temp_y;
+	BigDouble BigScreenRatio(ScreenRatio);
+	BigDouble xdotsBig(xdots - 1);
+	BigDouble ydotsBig(ydots - 1);
+
+	BigDouble Bigtemp_x = BigScreenRatio / xdotsBig;
+	BigDouble Bigtemp_y = BigDouble(1.0) / ydotsBig;
+
+	Big_xgap = BigWidth * Bigtemp_x;
+	Big_ygap = BigWidth * Bigtemp_y;
 	BigCloseEnough = Big_ygap / 16.0;
-	if (precision <= 30)
+
+
+
+
+/*
+
+	s1 = new char[SIZEOF_BF_VARS];
+	s2 = new char[SIZEOF_BF_VARS];
+	s3 = new char[SIZEOF_BF_VARS];
+	BigHor.ToString(s1, SIZEOF_BF_VARS, false);
+	BigVert.ToString(s2, SIZEOF_BF_VARS, false);
+	BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
+	//	ConvertBignum2String(s1, Big_centrex.x);
+	//	ConvertBignum2String(s2, Big_centrey.x);
+	//	mpfr_sprintf(s3, "%.20Re", BigWidth.x);
+	//	ConvertBignum2String(s3, BigWidth.x);
+
+	_snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "Big: X = %s\r\nY = %s\r\nWidth = %s\n", s1, s2, s3);
+	OutputDebugStringA(PositionString);
+
+	Big_yymax.ToString(s1, SIZEOF_BF_VARS, false);
+	Big_xgap.ToString(s2, SIZEOF_BF_VARS, false);
+	Big_ygap.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
+	_snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "Big: yymax = %s\r\nxgap = %s\r\nygap = %s\n", s1, s2, s3);
+	OutputDebugStringA(PositionString);
+
+	if (s1) delete[] s1;
+	if (s2) delete[] s2;
+	if (s3) delete[] s3;
+*/
+
+
+
+
+
+
+	if (precision <= DDPRECISION)
 	    {
 	    *MathType = DOUBLEDOUBLE;
 	    if (BigWidth.BigDouble2DD(&DDWidth) < 0) return -1;
 	    if (BigHor.BigDouble2DD(&DDHor) < 0) return -1;
 	    if (Big_yymax.BigDouble2DD(&DDyymax) < 0) return -1;
-	    DDxgap = DDWidth * temp_x;
-	    DDygap = DDWidth * temp_y;
-	    DDCloseEnough = DDygap / 16.0;
+	    if (Big_xgap.BigDouble2DD(&DDxgap) < 0) return -1;
+	    if (Big_ygap.BigDouble2DD(&DDygap) < 0) return -1;
+	    if (BigCloseEnough.BigDouble2DD(&DDCloseEnough) < 0) return -1;
+
+/*
+
+	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "DD: X = %s\r\nYymax = %s\r\nWidth = %s\n", DDToString(DDHor).c_str(), DDToString(DDyymax).c_str(), DDToString(DDWidth).c_str());
+	    OutputDebugStringA(PositionString);
+	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "DD: xgap = %s\r\nygap = %s\n", DDToString(DDxgap).c_str(), DDToString(DDygap).c_str());
+	    OutputDebugStringA(PositionString);
+*/
 	    }
-	else if (precision <= 60 || fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
+	else if (precision <= QDPRECISION || fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
 	    {
 	    *MathType = QUADDOUBLE;
 	    if (BigWidth.BigDouble2QD(&QDWidth) < 0) return -1;
 	    if (BigHor.BigDouble2QD(&QDHor) < 0) return -1;
 	    if (Big_yymax.BigDouble2QD(&QDyymax) < 0) return -1;
-	    QDxgap = QDWidth * temp_x;
-	    QDygap = QDWidth * temp_y;
-	    QDCloseEnough = QDygap / 16.0;
+	    if (Big_xgap.BigDouble2QD(&QDxgap) < 0) return -1;
+	    if (Big_ygap.BigDouble2QD(&QDygap) < 0) return -1;
+	    if (BigCloseEnough.BigDouble2QD(&QDCloseEnough) < 0) return -1;
+
+/*
+	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "QD: X = %s\r\nYymax = %s\r\nWidth = %s\n", QDToString(QDHor).c_str(), QDToString(QDyymax).c_str(), QDToString(QDWidth).c_str());
+	    OutputDebugStringA(PositionString);
+	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "QD: xgap = %s\r\nygap = %s\n", QDToString(QDxgap).c_str(), QDToString(QDygap).c_str());
+	    OutputDebugStringA(PositionString);
+*/
 	    }
 	else
+	    {
 	    *MathType = ARBITRARYPREC;
+	    }
 	}
     else
 	{
 	*MathType = DOUBLEFLOAT;
+	double	temp_x, temp_y;
+
+	temp_x = ScreenRatio / (double)(xdots - 1);
+	temp_y = 1.0 / (double)(ydots - 1);
+
 	xgap = mandel_width * temp_x;
 	ygap = mandel_width * temp_y;
 	closenuff = ygap / 16.0;
@@ -282,6 +364,8 @@ void	CPixel::ManageBignumPrecision(int precision)
     BigOldZ.x.ChangePrecision(precision); BigOldZ.y.ChangePrecision(precision);
     BigOlderZ.x.ChangePrecision(precision); BigOlderZ.y.ChangePrecision(precision);
 
+    tBig.x.ChangePrecision(precision);  tBig.y.ChangePrecision(precision);
+
     zBig.x.ChangePrecision(precision); zBig.y.ChangePrecision(precision);
     qBig.x.ChangePrecision(precision); qBig.y.ChangePrecision(precision);
     cBig.x.ChangePrecision(precision); cBig.y.ChangePrecision(precision);
@@ -293,7 +377,6 @@ void	CPixel::ManageBignumPrecision(int precision)
 
     realimagBig.ChangePrecision(precision);
     RealImagSqrBig.ChangePrecision(precision);
-    tBig.ChangePrecision(precision);
     BigBailout.ChangePrecision(precision);
     Big_xgap.ChangePrecision(precision);
     Big_ygap.ChangePrecision(precision);
@@ -871,6 +954,71 @@ Complex	CPixel::invertz2(Complex  & Cmplx1)
     return  temp;
     }
 
+/**************************************************************************
+MPFR DIRECT ROUTING FOR SELECTED TIERAZON SUBTYPES
+
+Certain Tierazon/Flarium fractals (e.g. subtypes 3, 51, 126, 129)
+are numerically unstable or outright incorrect when evaluated using
+lower-precision arithmetic (double-double / quad-double).
+
+These formulas typically involve:
+    - iterative accumulation (e.g. Phoenix-style)
+    - higher-order terms
+    - or transcendental functions (sin/cos/exp)
+
+which cause precision loss or divergence in DD/QD long before the
+interesting structure is reached.
+
+To ensure correctness, we detect these subtypes early (here in calc_frac)
+and force execution through the MPFR (BigComplex) path.
+
+IMPORTANT:
+- This decision must be made here because arithmetic type selection
+  (DD/QD/Big) happens before fractal iteration begins.
+- Routing later (inside Tierazon functions) is too late.
+- We bypass DD/QD entirely to avoid incorrect intermediate states.
+
+PERFORMANCE NOTE:
+- MPFR is slower, but these subtypes are not reliable in DD/QD anyway.
+- This is a correctness-first decision.
+
+FUTURE WORK:
+- Investigate adaptive precision selection per pixel or per region
+- Optimise MPFR path (reuse temporaries, reduce allocations)
+- Possibly re-enable DD/QD for these subtypes if stability improves
+
+**************************************************************************/
+
+/*
+static bool IsDirectMPFRTierazonSubtype(int subtype)
+    {
+    switch (subtype)
+	{
+//	case 3:		// removed because we fixed DD/QD trig
+//	case 51:	// removed because it crashes mpfr
+	case 126:
+	case 129:
+	    return true;
+	default:
+	    return false;
+	}
+    }
+
+static bool ForceDirectMPFRForCurrentFractal(int subtype, WORD type)
+    {
+    // Pseudocode:
+    // 1. Is the current fractal a Tierazon/Flarium style fractal?
+    // 2. If not, return false.
+    // 3. Read the current Tierazon subtype from the existing settings/state.
+    // 4. Return IsDirectMPFRTierazonSubtype(subtype).
+
+    if (type != TIERAZON)   // replace with your real condition
+	return false;
+
+    return IsDirectMPFRTierazonSubtype(subtype);
+    }
+*/
+
 /************************************************************************
 	Calculate Fractal using a "standard" mode
 ************************************************************************/
@@ -879,6 +1027,11 @@ long	CPixel::calc_frac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
     {
     if (BigNumFlag)
 	{
+/*
+	// Force MPFR for known precision-sensitive Tierazon subtypes
+	// (DD/QD produce incorrect results for these)
+	if (ForceDirectMPFRForCurrentFractal(subtype, type))
+	    return BigCalcFrac(hwnd, row, col, user_data);
 	if (*MathType == DOUBLEDOUBLE)
 	    return (DDCalcFrac(hwnd, row, col, user_data));
 	else if (*MathType == QUADDOUBLE)
@@ -886,6 +1039,7 @@ long	CPixel::calc_frac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 	else if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
 	    return (QDCalcFrac(hwnd, row, col, user_data));		// Arbitrary precision isn't available yet so let's push quad double as far as we can
 	else
+*/
 	    return (BigCalcFrac(hwnd, row, col, user_data));
 	}
 

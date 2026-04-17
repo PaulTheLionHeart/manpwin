@@ -310,9 +310,9 @@ int	calcfracinit(void)
 	if (RotationAngle != NORMAL && RotationAngle != 90 && RotationAngle != 180 && RotationAngle != 270)
 	    {
 	    double  z_rot = (double)RotationAngle;
-	    if (precision <= 30)
+	    if (precision <= DDPRECISION)
 		DDMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
-	    else if (precision <= 60)
+	    else if (precision <= QDPRECISION)
 		QDMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
 	    else
 		BigMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);

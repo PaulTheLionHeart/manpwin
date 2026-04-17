@@ -123,7 +123,6 @@ extern	Complex	j;
 **************************************************************************/
 
 void	init_log(HWND hwnd)
-
     {
     long	lf, prev, limit, LocalThreshold;
     double	m;
@@ -166,7 +165,6 @@ void	init_log(HWND hwnd)
 **************************************************************************/
 
 void	init(HWND hwnd)
-
     {
 //    static	struct Arg argfirst,argsecond;
     int	i;
@@ -199,7 +197,6 @@ void	init(HWND hwnd)
 **************************************************************************/
 
 int	analyse_corner(char *s)
-
     {
     char	*t;
     char	*s1;
