@@ -1,0 +1,14 @@
+Installation of ManpWIN - CAUTION.
+
+The paths used by ManpWIN are stored in MANPWIN.INI. 
+
+Before opening or saving any data files, please set up the paths by 
+starting ManpWIN and running Menu -> Options -> Setup Folder Paths.
+
+If MAPWIN.INI already exists in the installation directory, it won't 
+be copied but is recreated when MANPWIN exits. If MANPWIN.INI does 
+not exist, the new MANPWIN.INI will be written to the destination directory.
+
+To ensure that the MANPWIN.INI files works correctly, delete any other 
+copy from your system.
+

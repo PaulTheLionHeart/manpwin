@@ -1,0 +1,27 @@
+:Base ManpHelp.hlp>Main
+:Title ManpWIN
+1 ManpWIN
+2 What is ManpWIN?=PG1000
+2 Contents=PG400
+2 Fractals Supported=PG420
+2 Disclaimer=PG5000@ManpHelp.hlp
+2 Known limitations=PG520@ManpHelp.hlp
+2 Acknowledgements=PG1200@ManpHelp.hlp
+1 Using ManpWIN
+2 Menus
+3 File Menu=PG480@ManpHelp.hlp
+3 Edit Menu=PG482@ManpHelp.hlp
+3 Fractals Menu=PG485@ManpHelp.hlp
+3 Options Menu=PG490@ManpHelp.hlp
+3 Colour Menu=PG492
+3 Help Menu=PG495
+2 Using ManpWIN
+3 Keyboard Commands=PG500@ManpHelp.hlp
+3 Fractals=PG50
+3 Fractal Types Supported=PG420
+3 Zooming=PG300
+3 Command Line Batch Processing=PG410
+3 Colour Cycling=PG350
+1 Release History
+2 Release History 2.8=PG1560
+2 Release History - Other Releases=PG1500

@@ -9,7 +9,7 @@ This repository contains a fully reproducible CMake-based build system supportin
 ## ✨ Features
 
 * Mandelbrot and related fractals
-* Deep zoom using perturbation theory + BLA acceleration
+* Deep zoom using perturbation theory + BLA acceleration (with improved stability)
 * BLA (approximation methods) for massive speed improvements
 * Multithreaded rendering engine
 * Multithreaded formula parser
@@ -17,7 +17,8 @@ This repository contains a fully reproducible CMake-based build system supportin
 * Fractint palette support
 * PNG export
 * Advanced plotting modes
-* High-precision arithmetic (MPFR)
+* High-precision arithmetic (MPFR, double-double, quad-double)
+* Emerging template-based framework for fractal calculations
 * Preservation of legacy algorithms with modern execution architecture
 * True colour rendering
 * Support for many fractal types including Mandelbrot, Julia, Burning Ship, and more
@@ -65,6 +66,17 @@ ManpWIN has reached a stable and reproducible build state with a fully functiona
 - ✔ Verified Debug and Release builds via CMake + Visual Studio 2022
 - ✔ Successful deep zoom exploration
 - ✔ Ongoing collaboration and interest from the mathematical community
+- ✔ Improved numerical stability across multiple arithmetic types (MPFR, DD, QD)
+
+---
+
+## 🆕 Recent Improvements
+
+- Fixed perturbation initialisation issue when reference generation occurs outside the perturbation engine
+- Improved rendering stability after toggling and recomputation
+- Stabilised trigonometric functions across multiple arithmetic types
+- Improved error handling in double-double (DD) and quad-double (QD) modes
+- Introduced template-based framework to support future extensibility of fractal calculations
 
 ---
 
@@ -180,6 +192,10 @@ A chronological record of major battles during the ManpWIN modernisation.
 - 🏷 Milestone tagged — historic stabilisation snapshot captured  
 - 🧭 Stability phase reached — deterministic behaviour restored  
 - 🔬 Research interest — project now attracting mathematical exploration  
+-   🐉 Perturbation dragon — fixed uninitialised power causing incorrect rendering after toggling  
+-   🧮 Arithmetic stabilisation — improved trig behaviour across DD/QD/MPFR  
+-   🧱 Template foundation — introduced templated framework for future fractal expansion  
+
 ---
 
 ## 🤝 Contributing Notes
