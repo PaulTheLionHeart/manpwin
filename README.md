@@ -4,6 +4,14 @@ ManpWIN is a Windows fractal exploration and rendering application featuring adv
 
 This repository contains a fully reproducible CMake-based build system supporting consistent Debug and Release builds with Visual Studio 2022.
 
+ManpWIN is evolving toward a unified mathematical experimentation platform supporting deep zoom perturbation, high precision arithmetic, symbolic formula evaluation, and future transcendental perturbation research.
+
+---
+
+## Version 4.03
+
+Major parser and arithmetic architecture modernisation release.
+
 ---
 
 ## ✨ Features
@@ -17,8 +25,9 @@ This repository contains a fully reproducible CMake-based build system supportin
 * Fractint palette support
 * PNG export
 * Advanced plotting modes
+* Hypercomplex fractal support
 * High-precision arithmetic (MPFR, double-double, quad-double)
-* Emerging template-based framework for fractal calculations
+* Template-based parser and arithmetic framework supporting unified fractal semantics
 * Preservation of legacy algorithms with modern execution architecture
 * True colour rendering
 * Support for many fractal types including Mandelbrot, Julia, Burning Ship, and more
@@ -77,6 +86,10 @@ ManpWIN has reached a stable and reproducible build state with a fully functiona
 - Stabilised trigonometric functions across multiple arithmetic types
 - Improved error handling in double-double (DD) and quad-double (QD) modes
 - Introduced template-based framework to support future extensibility of fractal calculations
+- Unified parser semantic architecture using templates
+- Reduced arithmetic-specific duplication across parser and trig systems
+- Introduced unified dispatch framework for DD/QD/MPFR arithmetic
+- Modernised hypercomplex trig implementation
 
 ---
 
@@ -87,8 +100,9 @@ ManpWIN has reached a stable and reproducible build state with a fully functiona
 - CMake ≥ 3.23  
 - vcpkg installed at:
 
+```text
 C:\vcpkg
-
+```
 ---
 
 ## ⚙️ Build Instructions
@@ -192,9 +206,12 @@ A chronological record of major battles during the ManpWIN modernisation.
 - 🏷 Milestone tagged — historic stabilisation snapshot captured  
 - 🧭 Stability phase reached — deterministic behaviour restored  
 - 🔬 Research interest — project now attracting mathematical exploration  
--   🐉 Perturbation dragon — fixed uninitialised power causing incorrect rendering after toggling  
--   🧮 Arithmetic stabilisation — improved trig behaviour across DD/QD/MPFR  
--   🧱 Template foundation — introduced templated framework for future fractal expansion  
+- 🐉 Perturbation dragon — fixed uninitialised power causing incorrect rendering after toggling  
+- 🧮 Arithmetic stabilisation — improved trig behaviour across DD/QD/MPFR  
+- 🧱 Template foundation — introduced templated framework for future fractal expansion  
+-  🧠 Semantic unification — parser/trig arithmetic consolidated via templates
+-  🐉 Layer discipline restored — VM, dispatch, and semantic layers separated cleanly
+-  🔮 Transcendental perturbation groundwork — infrastructure prepared for future symbolic perturbation research
 
 ---
 
