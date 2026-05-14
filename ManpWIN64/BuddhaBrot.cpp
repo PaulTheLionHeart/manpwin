@@ -24,8 +24,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////////
  
-#define SOURCE_COLUMNS (xdots * 10)			// These lines control the number of source values iterated.
-#define SOURCE_ROWS (ydots * 10)			// Try WIDTH and HEIGHT * 10
+#define SOURCE_COLUMNS (gManp->xdots * 10)			// These lines control the number of source values iterated.
+#define SOURCE_ROWS (gManp->ydots * 10)			// Try WIDTH and HEIGHT * 10
  
 #define RED_MULTIPLIER 0.09				// Multiply the number of hits in a pixel by these values
 #define GREEN_MULTIPLIER 0.11				// (needs to be lower the greater the number of source
@@ -42,22 +42,8 @@
 void	drawpath(double x, double y, double target_startx, double target_starty, double pixel_width);
 int	drawbmp (void);
  
-extern	long	threshold;
-extern	double	mandel_width;		// width of display 
-extern	double	hor;			// horizontal address 
-extern	double	vert;			// vertical address 
-extern	double	ScreenRatio;		// ratio of width / height for the screen
-extern	int	xdots, ydots, height, bits_per_pixel;
-
-extern	CPlot	Plot;		// image plotting routines 
-
-extern	int	curpass, totpasses;
-extern	CDib	Dib;			// Device Independent Bitmap
-extern	HWND	GlobalHwnd;		// This is the main windows handle
+//extern	HWND	GlobalHwnd;		// This is the main windows handle
 extern	Complex	z, q, j;
-extern	double	param[];
-extern	long	threshold;
-
 extern	int	user_data(HWND);
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -89,16 +75,16 @@ void	InitMultipliers(void)
 void	RGBPoint(WORD x, WORD y, BYTE r, BYTE g, BYTE b)
 
     {
-    long	i;
-    long	local_width;
+    size_t 	i;
+    size_t 	local_width;
 
-    if (x < 0 || x >= Dib.DibWidth || y < 0 || y >= Dib.DibHeight)
+    if (x < 0 || x >= gManp->Dib.DibWidth || y < 0 || y >= gManp->Dib.DibHeight)
 	return;
-    local_width = WIDTHBYTES((DWORD)Dib.DibWidth * (DWORD)bits_per_pixel);
-    i = ((long) (height - 1 - y) * (long) (local_width + 3 - ((local_width - 1) % 4)) + (long)(x * 3));
-    Dib.DibPixels[i + 0] = b;
-    Dib.DibPixels[i + 1] = g;
-    Dib.DibPixels[i + 2] = r;
+    local_width = ComputeWidthBytes((DWORD)gManp->Dib.DibWidth, (DWORD)gManp->Dib.BitsPerPixel);
+    i = ((long) (gManp->height - 1 - y) * (long) (local_width + 3 - ((local_width - 1) % 4)) + (long)(x * 3));
+    gManp->Dib.DibPixels[i + 0] = b;
+    gManp->Dib.DibPixels[i + 1] = g;
+    gManp->Dib.DibPixels[i + 2] = r;
     }
 
 /**************************************************************************
@@ -118,47 +104,56 @@ int DoBuddhaBrot (void)
     double  target_endx, target_endy;		// Bottom-right coordinates of drawn area
     double  pixel_width;			// Actual distance represented by a pixel in the drawn area
  
-    Brightness = param[0];
-    threshold = (long)param[1];
+    Brightness = gManp->param[0];
+    gManp->threshold = (long)gManp->param[1];
     red_multiplier *= Brightness;
     green_multiplier *= Brightness;
     blue_multiplier *= Brightness;
-    redcount = new long [xdots*ydots];
+    redcount = new long [gManp->xdots*gManp->ydots];
     if (redcount == NULL)
-	throw "Can't allocate array memory.";	// PHD 2014-11-10 C++ error handling
-    greencount = new long [xdots*ydots];
+	{
+	gManp->Dib.DibErrorCode = NODIBMEMORY;
+	return -1;
+	}
+    greencount = new long [gManp->xdots*gManp->ydots];
     if (greencount == NULL)
-	throw "Can't allocate array memory.";	// PHD 2014-11-10 C++ error handling
-    bluecount = new long [xdots*ydots];
+	{
+	gManp->Dib.DibErrorCode = NODIBMEMORY;
+	return -1;
+	}
+    bluecount = new long [gManp->xdots*gManp->ydots];
     if (bluecount == NULL)
-	throw "Can't allocate array memory.";	// PHD 2014-11-10 C++ error handling
+	{
+	gManp->Dib.DibErrorCode = NODIBMEMORY;
+	return -1;
+	}
 
-    memset(redcount, 0, xdots*ydots*sizeof(long));
-    memset(greencount, 0, xdots*ydots*sizeof(long));
-    memset(bluecount, 0, xdots*ydots*sizeof(long));
+    memset(redcount, 0, gManp->xdots*gManp->ydots*sizeof(long));
+    memset(greencount, 0, gManp->xdots*gManp->ydots*sizeof(long));
+    memset(bluecount, 0, gManp->xdots*gManp->ydots*sizeof(long));
  
-    totpasses = 10;
+    gManp->totpasses = 10;
 
-    target_startx = hor;
-    target_endx = hor + mandel_width * ScreenRatio;
+    target_startx = gManp->hor;
+    target_endx = gManp->hor + gManp->mandel_width * gManp->AspectRatio;
 
-    target_starty = vert;
-    target_endy = vert + mandel_width;
+    target_starty = gManp->vert;
+    target_endy = gManp->vert + gManp->mandel_width;
 
-    pixel_width = (target_endx - target_startx) / xdots;
+    pixel_width = (target_endx - target_startx) / gManp->xdots;
  
-    x_jump = (mandel_width * ScreenRatio) / SOURCE_COLUMNS;
-    y_jump = mandel_width / SOURCE_ROWS;
+    x_jump = (gManp->mandel_width * gManp->AspectRatio) / SOURCE_COLUMNS;
+    y_jump = gManp->mandel_width / SOURCE_ROWS;
 
 	// Main bit...
  
-    y = vert + mandel_width;
+    y = gManp->vert + gManp->mandel_width;
     for (source_row = SOURCE_ROWS - 1; source_row >= 0; source_row--, y -= y_jump)
 	{
-	curpass = totpasses - (source_row * totpasses / SOURCE_ROWS);
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	gManp->curpass = gManp->totpasses - (source_row * gManp->totpasses / SOURCE_ROWS);
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	x = hor;
+	x = gManp->hor;
 	for (source_column = 0; source_column < SOURCE_COLUMNS; source_column++, x += x_jump)
 	    {
 #ifdef OPTIMISE			// exclude the main body of the manelbrot
@@ -176,20 +171,20 @@ int DoBuddhaBrot (void)
 		) continue;
 #endif
 	    r = 0; s = 0;
-	    for (n = 0; n <= threshold; n++)
+	    for (n = 0; n <= gManp->threshold; n++)
 		{
 		nextr = ((r * r) - (s * s)) + x;
 		nexts = (2 * r * s) + y;
 		r = nextr;
 		s = nexts;
-		if (n == threshold)
+		if (n == gManp->threshold)
 		    {
 		    // drawpath(x, y, target_startx, target_starty, pixel_width);
 		    break;
 		    } 
 		else if ((r * r) + (s * s) > 4) 
 		    {
-		    Plot.PlotPoint((WORD)source_column/10, (WORD)(ydots - source_row/10 + 1), (DWORD)n);
+		    gManp->Plot.PlotPoint((WORD)source_column/10, (WORD)(gManp->ydots - source_row/10 + 1), (DWORD)n);
 		    drawpath(x, y, target_startx, target_starty, pixel_width);
 		    break;
 		    }
@@ -216,7 +211,7 @@ void drawpath (double x, double y, double target_startx, double target_starty, d
     int xpixel, ypixel;
 
     r = 0; s = 0;
-    for (n = 0; n <= threshold; n++)
+    for (n = 0; n <= gManp->threshold; n++)
 	{
 	nextr = ((r * r) - (s * s)) + x;
 	nexts = (2 * r * s) + y;
@@ -227,13 +222,13 @@ void drawpath (double x, double y, double target_startx, double target_starty, d
 
 	xpixel = (int)((r - target_startx) / pixel_width);
 	ypixel = (int)((s - target_starty) / pixel_width);
-	if (xpixel > 0 && xpixel < xdots && ypixel > 0 && ypixel < ydots)
+	if (xpixel > 0 && xpixel < gManp->xdots && ypixel > 0 && ypixel < gManp->ydots)
 	    {
-	    if (n <= threshold)
+	    if (n <= gManp->threshold)
 		{
-		redcount[ypixel*xdots+xpixel] += 1;
-		greencount[ypixel*xdots+xpixel] += 1;
-		bluecount[ypixel*xdots+xpixel] += 1;
+		redcount[ypixel*gManp->xdots+xpixel] += 1;
+		greencount[ypixel*gManp->xdots+xpixel] += 1;
+		bluecount[ypixel*gManp->xdots+xpixel] += 1;
 		}
 	    }
 	}
@@ -249,15 +244,15 @@ int drawbmp (void)
     int x, y;
     int red, green, blue;
  
-    for (y = 0; y < ydots; y++)
+    for (y = 0; y < gManp->ydots; y++)
 	{
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	for (x = 0; x < xdots; x++)
+	for (x = 0; x < gManp->xdots; x++)
 	    {
-	    red = (int)(reduce(redcount[(ydots - y - 1)*xdots+x] + COLOUR_OFFSET) * red_multiplier);
-	    green = (int)(reduce(greencount[(ydots - y - 1)*xdots+x] + COLOUR_OFFSET) * green_multiplier);
-	    blue = (int)(reduce(bluecount[(ydots - y - 1)*xdots+x] + COLOUR_OFFSET) * blue_multiplier);
+	    red = (int)(reduce(redcount[(gManp->ydots - y - 1)*gManp->xdots+x] + COLOUR_OFFSET) * red_multiplier);
+	    green = (int)(reduce(greencount[(gManp->ydots - y - 1)*gManp->xdots+x] + COLOUR_OFFSET) * green_multiplier);
+	    blue = (int)(reduce(bluecount[(gManp->ydots - y - 1)*gManp->xdots+x] + COLOUR_OFFSET) * blue_multiplier);
 
 	    if (red > 255) red = 255; if (red < 0) red = 0;
 	    if (green > 255) green = 255; if (green < 0) green = 0;

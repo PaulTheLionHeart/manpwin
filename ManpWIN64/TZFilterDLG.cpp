@@ -25,22 +25,6 @@
 static	int	ColourPtr = 1, ColourNum = 0;
 static	int	FilterPtr = 1, FilterNum = 0;
 
-int	FilterType = 1;				// data for Tierazon filters
-double	dStrands;
-BOOL	RGBFilter;				// If true, we use the plotting routine for RGB filters (no plotting of iteration)
-int	ColourMethod = 1;			// Tierazon colour methods
-BOOL	UseCurrentPalette = TRUE;		// do we use the ManpWIN palette? If false, generate internal filter palette
-
-	int	nFDOption = 4;			// Fractal Dimension option for Tierazon filters
-extern	int	OutsideMethod;			// outside filter methods
-//extern	double 	*wpixels;			// an array of doubles holding slope modified iteration counts
-extern	BYTE	calcmode;
-extern	BYTE	oldcalcmode;			// store values during 3D transformations, filters etc
-extern	CDib	Dib;
-extern	CTZfilter	TZfilter;		// Tierazon filters
-extern	int	PlotType;
-extern	int	height, xdots, ydots, width, bits_per_pixel;
-
 /**************************************************************************
 	Count the number of Tierazon Filters
 ***************************************************************************/
@@ -74,17 +58,16 @@ int	SetupTierazonColours(void)
 **************************************************************************/
 
     INT_PTR CALLBACK SelectColourDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-
     {
     static	int	i;
     static	int	index;
 //		HWND    hCtrl; 
 
-    ColourPtr = ColourMethod;
+    ColourPtr = gManp->ColourMethod;
 
     switch (message) 
 	{
-	RGBFilter = FALSE;
+	gManp->RGBFilter = FALSE;
 	case WM_INITDIALOG:
 	    SetupTierazonFilters();				// count number of filter entries
 	    SetupTierazonColours();				// count number of colour method entries
@@ -108,14 +91,14 @@ int	SetupTierazonColours(void)
                         break;
                         }
                     ColourPtr = index;
-		    ColourMethod = ColourPtr = index;
-		    OutsideMethod = ColourPtr + TIERAZONCOLOURS;
-		    oldcalcmode = calcmode;
+		    gManp->ColourMethod = ColourPtr = index;
+		    gManp->OutsideMethod = ColourPtr + TIERAZONCOLOURS;
+		    gManp->oldcalcmode = gManp->calcmode;
 		    							// these plotting modes get the iteration count lost in RGB filters
-		    if (calcmode == 'G' || calcmode == 'T' || calcmode == 'B' && TierazonColour[ColourMethod].calctype != ' ')
-			calcmode = TierazonColour[ColourMethod].calctype;		// use "simple" plotting modes for filters that change RGB values
-		    RGBFilter = (TierazonColour[ColourMethod].rgb) ? TRUE : FALSE;
-		    PlotType = (RGBFilter) ? FILTERPLOT : NOSYM;
+		    if (gManp->calcmode == 'G' || gManp->calcmode == 'T' || gManp->calcmode == 'B' && TierazonColour[gManp->ColourMethod].calctype != ' ')
+			gManp->calcmode = TierazonColour[gManp->ColourMethod].calctype;		// use "simple" plotting modes for filters that change RGB values
+		    gManp->RGBFilter = (TierazonColour[gManp->ColourMethod].rgb) ? TRUE : FALSE;
+		    gManp->PlotType = (gManp->RGBFilter) ? FILTERPLOT : NOSYM;
 		    EndDialog(hDlg, TRUE);
                     return TRUE;
                   
@@ -143,14 +126,14 @@ int	SetupTierazonColours(void)
 				    "Select From a List", MB_OK | MB_ICONEXCLAMATION);
 				break;
 				}
-			    ColourMethod = ColourPtr = index;
-			    OutsideMethod = ColourPtr + TIERAZONCOLOURS;
-			    oldcalcmode = calcmode;
+			    gManp->ColourMethod = ColourPtr = index;
+			    gManp->OutsideMethod = ColourPtr + TIERAZONCOLOURS;
+			    gManp->oldcalcmode = gManp->calcmode;
 		    							// these plotting modes get the iteration count lost in RGB filters
-			    if (calcmode == 'G' || calcmode == 'T' || calcmode == 'B' && TierazonColour[ColourMethod].calctype != ' ')
-				calcmode = TierazonColour[ColourMethod].calctype;		// use "simple" plotting modes for filters that change RGB values
-			    RGBFilter = (TierazonColour[ColourMethod].rgb) ? TRUE : FALSE;
-			    PlotType = (RGBFilter) ? FILTERPLOT : NOSYM;
+			    if (gManp->calcmode == 'G' || gManp->calcmode == 'T' || gManp->calcmode == 'B' && TierazonColour[gManp->ColourMethod].calctype != ' ')
+				gManp->calcmode = TierazonColour[gManp->ColourMethod].calctype;		// use "simple" plotting modes for filters that change RGB values
+			    gManp->RGBFilter = (TierazonColour[gManp->ColourMethod].rgb) ? TRUE : FALSE;
+			    gManp->PlotType = (gManp->RGBFilter) ? FILTERPLOT : NOSYM;
 			    EndDialog(hDlg, TRUE);
 			    return TRUE;
 			}
@@ -171,11 +154,11 @@ int	SetupTierazonColours(void)
 	static	int	index;
 	//		HWND    hCtrl; 
 
-	FilterPtr = FilterType;
+	FilterPtr = gManp->FilterType;
 	    
 	switch (message)
 	    {
-	    RGBFilter = FALSE;
+	    gManp->RGBFilter = FALSE;
 	    case WM_INITDIALOG:
 		SetupTierazonFilters();				// count number of filter entries
 		SetDlgItemText(hDlg, ID_LISTTITLE, "Tierazon Filter");
@@ -200,14 +183,14 @@ int	SetupTierazonColours(void)
 			FilterPtr = index;
 			//		    PreviousLsys_ptr = index;
 			//		    strcpy(lsys_type, lptr[lsys_ptr]);
-			FilterType = FilterPtr = index;
-			OutsideMethod = FilterPtr + TIERAZONFILTERS;
-			oldcalcmode = calcmode;
+			gManp->FilterType = FilterPtr = index;
+			gManp->OutsideMethod = FilterPtr + TIERAZONFILTERS;
+			gManp->oldcalcmode = gManp->calcmode;
 			// these plotting modes get the iteration count lost in RGB filters
-			if (calcmode == 'G' || calcmode == 'T' || calcmode == 'B' && TierazonFilter[FilterType].calctype != ' ')
-			    calcmode = TierazonFilter[FilterType].calctype;		// use "simple" plotting modes for filters that change RGB values
-			RGBFilter = (TierazonFilter[FilterType].rgb) ? TRUE : FALSE;
-			PlotType = (RGBFilter) ? FILTERPLOT : NOSYM;
+			if (gManp->calcmode == 'G' || gManp->calcmode == 'T' || gManp->calcmode == 'B' && TierazonFilter[gManp->FilterType].calctype != ' ')
+			    gManp->calcmode = TierazonFilter[gManp->FilterType].calctype;		// use "simple" plotting modes for filters that change RGB values
+			gManp->RGBFilter = (TierazonFilter[gManp->FilterType].rgb) ? TRUE : FALSE;
+			gManp->PlotType = (gManp->RGBFilter) ? FILTERPLOT : NOSYM;
 			EndDialog(hDlg, TRUE);
 			return TRUE;
 
@@ -235,14 +218,14 @@ int	SetupTierazonColours(void)
 					"Select From a List", MB_OK | MB_ICONEXCLAMATION);
 				    break;
 				    }
-				FilterType = FilterPtr = index;
-				OutsideMethod = FilterPtr + TIERAZONFILTERS;
-				oldcalcmode = calcmode;
+				gManp->FilterType = FilterPtr = index;
+				gManp->OutsideMethod = FilterPtr + TIERAZONFILTERS;
+				gManp->oldcalcmode = gManp->calcmode;
 				// these plotting modes get the iteration count lost in RGB filters
-				if (calcmode == 'G' || calcmode == 'T' || calcmode == 'B' && TierazonFilter[FilterType].calctype != ' ')
-				    calcmode = TierazonFilter[FilterType].calctype;		// use "simple" plotting modes for filters that change RGB values
-				RGBFilter = (TierazonFilter[FilterType].rgb) ? TRUE : FALSE;
-				PlotType = (RGBFilter) ? FILTERPLOT : NOSYM;
+				if (gManp->calcmode == 'G' || gManp->calcmode == 'T' || gManp->calcmode == 'B' && TierazonFilter[gManp->FilterType].calctype != ' ')
+				    gManp->calcmode = TierazonFilter[gManp->FilterType].calctype;		// use "simple" plotting modes for filters that change RGB values
+				gManp->RGBFilter = (TierazonFilter[gManp->FilterType].rgb) ? TRUE : FALSE;
+				gManp->PlotType = (gManp->RGBFilter) ? FILTERPLOT : NOSYM;
     				EndDialog(hDlg, TRUE);
 				return TRUE;
 
@@ -269,7 +252,7 @@ int	SetupTierazonColours(void)
 		SetDlgItemText(hDlg, ID_LISTTITLE, "Tierazon Filter FD-Options");
 		for (i = 0; i < MAXFDOPTIONS; i++)
 		    SendDlgItemMessage(hDlg, IDM_LSYSTEM, LB_ADDSTRING, (WPARAM)NULL, (LPARAM)(LPSTR)TierazonFDOptions[i]);
-		SendDlgItemMessage(hDlg, IDM_LSYSTEM, LB_SETCURSEL, (WPARAM)nFDOption - 1, 0L);
+		SendDlgItemMessage(hDlg, IDM_LSYSTEM, LB_SETCURSEL, (WPARAM)gManp->nFDOption - 1, 0L);
 		return TRUE;
 
 	    case WM_COMMAND:
@@ -285,8 +268,8 @@ int	SetupTierazonColours(void)
 				"Select From a List", MB_OK | MB_ICONEXCLAMATION);
 			    break;
 			    }
-			nFDOption = index + 1;
-			TZfilter.nFDOption = nFDOption;
+			gManp->nFDOption = index + 1;
+			gManp->TZfilter.nFDOption = gManp->nFDOption;
 			EndDialog(hDlg, TRUE);
 			return TRUE;
 
@@ -313,8 +296,8 @@ int	SetupTierazonColours(void)
 					"Select From a List", MB_OK | MB_ICONEXCLAMATION);
 				    break;
 				    }
-				nFDOption = index + 1;
-				TZfilter.nFDOption = nFDOption;
+				gManp->nFDOption = index + 1;
+				gManp->TZfilter.nFDOption = gManp->nFDOption;
 				EndDialog(hDlg, TRUE);
 				return TRUE;
 

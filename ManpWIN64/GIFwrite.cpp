@@ -1,6 +1,6 @@
 /*
 	GIF Library
-	Copyright (c) 1999 - 2011 Paul de Leeuw Computers
+	Copyright (c) 1999 - 2026 Paul de Leeuw Computers
 */
 
 //note: if the GIF reader returns BAD_FILE on a good file, you have the
@@ -12,12 +12,11 @@
 #include <stdlib.h>
 #include <vector>
 #include "manpwin.h"
+#include "manp.h"
 #include "Dib.h"
-#include "Anim.h"
+//#include "Anim.h"
 #include "SafeStrings.h"
 
-//#define	ALLOWGIFANIMSAVE
-#define MAXLINE		150		/* length of line */
 #define	WRITE_GIF89	TRUE
 
 #define	GIFCOMMENT	"This GIF file was created by ManpWIN\r"\
@@ -52,19 +51,14 @@
 
 static	WORD		ImageHeight, ImageWidth;
 
-extern	CDib		Dib;			// Device Independent Bitmap class instance
+//extern	CDib		Dib;			// Device Independent Bitmap class instance
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-extern	HWND	GlobalHwnd;			// This is the main windows handle
+//extern	HWND	gManp->GlobalHwnd;			// This is the main windows handle
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern	BYTE	DitherBitsPerPixel;		// for reducing bits per pixel
 extern	BYTE	masktable[8];
-extern	WORD	CurrentFrame;			// used to increment to the next frame when the timer ticks
-extern	int	file_type;
-extern	BYTE	Stepflag;			// single step animated GIFs?
 extern	HCURSOR	hStdCursor;
-extern	double	CurrentDelay;			// delay in milliseconds
-extern	BOOL	AnimationForward;		// order of file frames
 
 extern	void	CloseDitherPointers(BYTE);
 extern	int	GetDibPalette(LPBITMAPINFO,BYTE *);
@@ -111,11 +105,6 @@ static	int	byte_offset;
 static	int	bits_left;
 static	int	max_code;
 static	int	free_code;
-
-// Stuff needed to write an animated GIF
-
-extern	int	gTotalFrames;		// total number of animation framese
-extern	std::vector<AnimStruct> ANIM;		// holds all the date for each animation frame
 
 	BOOL		RunGIF = FALSE;	// are we in the middle of generating a GIF file?
 
@@ -177,7 +166,7 @@ int	write_gif_file(char *outfile, char *title)
     static	HCURSOR	hCursor;
     FILE	*fp;
     LPSTR	extrabuffer = NULL;			// to decode 1, 4 bits to bytes
-    WORD	linesize;
+    size_t 	linesize;
 
     hOldCursor = SetCursor(LoadCursor(NULL, IDC_WAIT));
     DitherBitsPerPixel = 8;				// just force 8 bits per pixels and be done with it
@@ -188,18 +177,18 @@ int	write_gif_file(char *outfile, char *title)
 	hCursor = LoadCursor((HINSTANCE)NULL, IDC_ARROW);		// Load pointer cursor.
 	SetCursor(hCursor);
 	_snprintf_s(s, MAXLINE, _TRUNCATE, "GIF can't open output file: %s", outfile);
-	MessageBox (GlobalHwnd, s, title, MB_ICONEXCLAMATION | MB_OK);
+	MessageBox (gManp->GlobalHwnd, s, title, MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
 
-    const AnimStruct& A = (AnimationForward) ? ANIM[0] : ANIM[gTotalFrames - 1];
+    const AnimStruct& A = (gManp->AnimationForward) ? gManp->ANIM[0] : gManp->ANIM[gManp->TotalFrames - 1];
 
-    if (!BuildDibFromAnimFrame(A, Dib))
+    if (!BuildDibFromAnimFrame(A, gManp->Dib))
 	return -1;
     //    Dib = (AnimationForward) ? ANIM[0].animDIB : ANIM[TotalFrames - 1].animDIB;
-    if (ANIM.empty() || ANIM[0].animFrameData.empty())
+    if (gManp->ANIM.empty() || gManp->ANIM[0].animFrameData.empty())
 	{
-	MessageBox(GlobalHwnd, "Can't write GIF file due to no image in first frame ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	MessageBox(gManp->GlobalHwnd, "Can't write GIF file due to no image in first frame ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	fclose (fp);
 	SetCursor(hStdCursor);
 	return -1;
@@ -207,21 +196,21 @@ int	write_gif_file(char *outfile, char *title)
 
     if ((lpbi = Dither(DitherBitsPerPixel)) == NULL)			// drop DIB to 8 bits per pixel 
 	{
-	MessageBox(GlobalHwnd, "Can't write GIF file due to dither fail ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	MessageBox(gManp->GlobalHwnd, "Can't write GIF file due to dither fail ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	fclose (fp);
 	SetCursor(hStdCursor);
 	return -1;
 	}
 
-    ImageWidth = Dib.DibWidth;
-    ImageHeight = Dib.DibHeight;
+    ImageWidth = gManp->Dib.DibWidth;
+    ImageHeight = gManp->Dib.DibHeight;
 
-    linesize = WIDTHBYTES(ImageWidth * 24);		// even if 8 bits/pixel, need to alloc enough for 24 bit output!!
+    linesize = ComputeWidthBytes(ImageWidth, 24);		// even if 8 bits/pixel, need to alloc enough for 24 bit output!!
 
     if ((extrabuffer = new char [linesize]) == NULL)
 	{
-	_snprintf_s(s, MAXLINE, _TRUNCATE, "Not enough memory: %d bytes for line buffer in JPEG file %s", linesize, "GIF write");
-	MessageBox(GlobalHwnd, s, "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "Not enough memory: %zu bytes for line buffer in JPEG file %s", linesize, "GIF write");
+	MessageBox(gManp->GlobalHwnd, s, "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	CleanupGIF(fp, bp, extrabuffer);
 	SetCursor(hStdCursor);
 	return -1;
@@ -232,7 +221,7 @@ int	write_gif_file(char *outfile, char *title)
 
     if ((bp = new char [size]) == NULL)
 	{
-	MessageBox(GlobalHwnd, "Can't get memory for GIF encode table in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	MessageBox(gManp->GlobalHwnd, "Can't get memory for GIF encode table in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	CleanupGIF(fp, bp, extrabuffer);
 	SetCursor(hStdCursor);
 	return -1;
@@ -248,7 +237,7 @@ int	write_gif_file(char *outfile, char *title)
 if (!GIFWriteScreenDesc(output_file,lpbi,GIFSIG87))
 #endif
 	{
-	MessageBox(GlobalHwnd, "Can't write screen descriptor in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	MessageBox(gManp->GlobalHwnd, "Can't write screen descriptor in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	CleanupGIF(fp, bp, extrabuffer);
 	SetCursor(hStdCursor);
 	return -1;
@@ -257,7 +246,7 @@ if (!GIFWriteScreenDesc(output_file,lpbi,GIFSIG87))
     GIFGraphicControlExtension(fp);
     if (!GIFWriteImageDesc(fp, 0, lpbi))	// just do the original way without writing delay etc
 	{
-	MessageBox(GlobalHwnd, "Can't write screen descriptor in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	MessageBox(gManp->GlobalHwnd, "Can't write screen descriptor in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	CleanupGIF(fp, bp, extrabuffer);
 	SetCursor(hStdCursor);
 	return -1;
@@ -265,54 +254,54 @@ if (!GIFWriteScreenDesc(output_file,lpbi,GIFSIG87))
 
     if (!GIFCompressImage(fp,lpbi))
 	{
-	MessageBox(GlobalHwnd, "Can't write GIFCompressImage in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	MessageBox(gManp->GlobalHwnd, "Can't write GIFCompressImage in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	CleanupGIF(fp, bp, extrabuffer);
 	SetCursor(hStdCursor);
 	return -1;
 	}
 
-    for (i = 1; i < gTotalFrames; i++)			// must be an animated GIF or animated cursor
+    for (i = 1; i < gManp->TotalFrames; i++)			// must be an animated GIF or animated cursor
 	{
 /*
 	if (ANIM[i] == NULL)
 	    {
-	    MessageBox(GlobalHwnd, "Can't write GIF file due to no image in memory ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	    MessageBox(gManp->GlobalHwnd, "Can't write GIF file due to no image in memory ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	    fclose (fp);
 	    SetCursor(hStdCursor);
 	    return -1;
 	    }
 */
-	const AnimStruct& A = (AnimationForward) ? ANIM[0] : ANIM[gTotalFrames - 1];
+	const AnimStruct& A = (gManp->AnimationForward) ? gManp->ANIM[0] : gManp->ANIM[gManp->TotalFrames - 1];
 
-	if (!BuildDibFromAnimFrame(A, Dib))
+	if (!BuildDibFromAnimFrame(A, gManp->Dib))
 	    return -1;
 	//	Dib = (AnimationForward) ? ANIM[i].animDIB : ANIM[TotalFrames - i - 1].animDIB;
 //	Dib = ANIM[i].animDIB;
 	if ((lpbi = Dither(DitherBitsPerPixel)) == NULL)
 	    {
-	    MessageBox(GlobalHwnd, "Can't write GIF file due to dither fail ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	    MessageBox(gManp->GlobalHwnd, "Can't write GIF file due to dither fail ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	    CleanupGIF(fp, bp, extrabuffer);
 	    return -1;
 	    }
 
-	_snprintf_s(s, MAXLINE, _TRUNCATE, "Writing GIF frame <%d>of<%d>: ", i + 1, gTotalFrames);
-	SetWindowText(GlobalHwnd, s);			// Show formatted text in the caption bar
+	_snprintf_s(s, MAXLINE, _TRUNCATE, "Writing GIF frame <%d>of<%d>: ", i + 1, gManp->TotalFrames);
+	SetWindowText(gManp->GlobalHwnd, s);			// Show formatted text in the caption bar
 	if (!GIFWriteImageDesc(fp, i, lpbi))
 	    {
-	    MessageBox(GlobalHwnd, "Can't write screen descriptor in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	    MessageBox(gManp->GlobalHwnd, "Can't write screen descriptor in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	    CleanupGIF(fp, bp, extrabuffer);
 	    return -1;
 	    }
 
 	if (!GIFCompressImage(fp,lpbi))
 	    {
-	    MessageBox(GlobalHwnd, "Can't write GIFCompressImage in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	    MessageBox(gManp->GlobalHwnd, "Can't write GIFCompressImage in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	    CleanupGIF(fp, bp, extrabuffer);
 	    return -1;
 	    }
 
 	CloseDitherPointers(TRUE);
-	user_data(GlobalHwnd);			// allow breaking of loop
+	user_data(gManp->GlobalHwnd);			// allow breaking of loop
 	if (!RunGIF)				// user hit the escape key
 	    {
 	    CleanupGIF(fp, bp, extrabuffer);
@@ -323,7 +312,7 @@ if (!GIFWriteScreenDesc(output_file,lpbi,GIFSIG87))
 #if WRITE_GIF89
     if (GIFWriteComment(fp, GIFCOMMENT) < 0)
 	{
-	MessageBox(GlobalHwnd, "Can't write comment in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	MessageBox(gManp->GlobalHwnd, "Can't write comment in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	CleanupGIF(fp, bp, extrabuffer);
 	SetCursor(hStdCursor);
 	return -1;
@@ -332,7 +321,7 @@ if (!GIFWriteScreenDesc(output_file,lpbi,GIFSIG87))
 
     if (putbyte(';',fp) == EOF)
 	{
-	MessageBox(GlobalHwnd, "Can't write image tag ';' in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
+	MessageBox(gManp->GlobalHwnd, "Can't write image tag ';' in file ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
 	CleanupGIF(fp, bp, extrabuffer);
 	SetCursor(hStdCursor);
 	return -1;
@@ -381,7 +370,7 @@ int	GIFWriteScreenDesc(FILE *fh, LPBITMAPINFOHEADER lpbi, LPSTR sig)
 int	GIFGraphicControlExtension (FILE *fh)
 
 {
-    if (gTotalFrames > 0)				// this is only needed if we write animation frames
+    if (gManp->TotalFrames > 0)				// this is only needed if we write animation frames
 	{
 	putbyte('!',fh);				// Extension introducer
 	putbyte(0xff,fh);				// Graphic control extension label
@@ -422,7 +411,7 @@ int	GIFWriteImageDesc(FILE *fh, int i, LPBITMAPINFOHEADER lpbi)
     putbyte(0x04,fh);				// block size (= 4)
     flags = 0;
     putbyte(flags,fh);
-    delay = (WORD)(CurrentDelay/10.0);		// CurrentDelay in milliseconds	GIF is in 100 ms
+    delay = (WORD)(gManp->CurrentDelay/10.0);		// CurrentDelay in milliseconds	GIF is in 100 ms
     if (fwrite((LPSTR)&delay, 1, sizeof(WORD), fh) != sizeof(WORD))
 	return(FALSE);
     transparent_colour = 0;
@@ -438,7 +427,7 @@ int	GIFWriteImageDesc(FILE *fh, int i, LPBITMAPINFOHEADER lpbi)
     ib.depth = (WORD)lpbi->biHeight;
 
     flags = (BYTE)(DitherBitsPerPixel - 1);
-    if (gTotalFrames > 0)
+    if (gManp->TotalFrames > 0)
 	flags |= 0x80;				// force local palette
 
     if (fwrite((LPSTR)&ib, 1, sizeof(GIFIMAGEBLOCK), fh) != sizeof(GIFIMAGEBLOCK))
@@ -514,7 +503,6 @@ void GIFWriteCode(FILE *fh, int code)
     }
 
 int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
-
     {
     BYTE	*linebuffer, *extrabuffer;
     int	prefix_code;
@@ -522,7 +510,7 @@ int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
     int	hx,d,min_code_size;
     int	bytes_left = 0, next_byte = 0, this_line = 0;
     int	i;
-    WORD	linewidth;
+    size_t 	linewidth;
     int	percent, display_count;
     char	s[120];
 
@@ -530,10 +518,10 @@ int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
     ImageHeight = (WORD)lpbi->biHeight;
 
     percent = 0;
-//    SetWindowText (GlobalHwnd, "Writing GIF File");	// Show formatted text in the caption bar
+//    SetWindowText (gManp->GlobalHwnd, "Writing GIF File");	// Show formatted text in the caption bar
 
 //linewidth = width;
-    linewidth = WIDTHBYTES(ImageWidth * Dib.BitsPerPixel);
+    linewidth = ComputeWidthBytes(ImageWidth, gManp->Dib.BitsPerPixel);
 
     if ((linebuffer = new BYTE [linewidth]) == NULL)
 	return(BAD_ALLOC);
@@ -563,7 +551,7 @@ int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
     GIFInitTable(min_code_size);
     GIFWriteCode(fh,clear_code);
 
-    memcpy(linebuffer,LPBimage(lpbi) + WIDTHBYTES((DWORD)ImageWidth * (DWORD)DitherBitsPerPixel)
+    memcpy(linebuffer,LPBimage(lpbi) + ComputeWidthBytes((DWORD)ImageWidth, (DWORD)DitherBitsPerPixel)
 				    * (DWORD)(ImageHeight - 1 - this_line++), (DWORD)LPBlinewidth(lpbi));
 
     if (DitherBitsPerPixel == 1)
@@ -599,7 +587,7 @@ int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
 	    {
 	    percent = display_count;
 	    SAFE_SPRINTF(s, "Writing File: %d%%", percent * 10);
-//	    SetWindowText(GlobalHwnd, s);
+//	    SetWindowText(gManp->GlobalHwnd, s);
 	    }
 
 	if (bytes_left > 0)					// we still have bytes left to compress in this line
@@ -612,7 +600,7 @@ int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
 	    if (this_line >= ImageHeight)			// we have compressed all the lines
 		break;
 
-	    memcpy(linebuffer,LPBimage(lpbi) + WIDTHBYTES((DWORD)ImageWidth * (DWORD)DitherBitsPerPixel)
+	    memcpy(linebuffer,LPBimage(lpbi) + ComputeWidthBytes((DWORD)ImageWidth, (DWORD)DitherBitsPerPixel)
 				    * (DWORD)(ImageHeight - 1 - this_line++), (DWORD)LPBlinewidth(lpbi));    // load next line
 	    if(DitherBitsPerPixel == 1)
 		{

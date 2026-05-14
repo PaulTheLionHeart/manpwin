@@ -16,6 +16,7 @@
 #include "FractintFnTemplate.h"
 #include "BailoutTemplate.h"
 #include "FractalMathsTemplate.h"
+#include "PixelTemplate.h"
 
 /**************************************************************************
 	Initialise functions for each pixel
@@ -134,7 +135,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case PHOENIX:
 	case MANDPHOENIXFP:
 	case MANDPHOENIX:
-	    t = (invert) ? invertz2(c) : c;
+	    t = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -176,7 +177,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case MANDPHOENIXCPLX:
 	case PHOENIXCPLX:
 	case PHOENIXFPCPLX:
-	    t = (invert) ? invertz2(c) : c;
+	    t = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -321,7 +322,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    break;
 
 	case VL:					// Beauty of Fractals pp. 125 - 127
-	    t = (invert) ? invertz2(c) : c;
+	    t = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -1167,7 +1168,7 @@ jumpout:
 	color = 0;
     else 
 	{
-	if (logval)
+	if (gManp->logval)
 	    lyap = -temp / ((double)lyaLength*i);
 	else
 	    lyap = 1 - exp(temp / ((double)lyaLength*i));

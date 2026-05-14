@@ -12,15 +12,16 @@
 #include	"big.h"
 #include	"BigDouble.h"
 #include	"BigComplex.h"
+#include	"Manp.h"
 
 /**************** Big Number Globals *********************/
-extern	BigDouble	Big_xxmax, Big_yymax, Big_xxmin, Big_yymin, Big_xgap, Big_ygap, BigBailout, BigHor, BigVert, BigWidth;
-extern	BigComplex	zBig, cBig, qBig;
+//extern	BigDouble	Big_xxmax, Big_yymax, Big_xxmin, Big_yymin, Big_xgap, Big_ygap, BigBailout/*, BigHor, BigVert, BigWidth*/;
+//extern	BigComplex	zBig, cBig, qBig;
 /*************************************************************************
    Change precision of all global Bignum variables
 *************************************************************************/
 
-int	ChangeBigPrecision(int dec)
+int	CManp::ChangeBigPrecision(int dec)
     {
     if (dec * 10 > MPFR_PREC_MAX)
 	return -1;
@@ -50,7 +51,7 @@ int	ChangeBigPrecision(int dec)
     MeN, where M = mantissa and N exponent
 *************************************************************************/
 
-void	ConvertString2Bignum(mpfr_t num, char *s)
+void	CManp::ConvertString2Bignum(mpfr_t num, char *s)
     {
     mpfr_set_str(num, s, 10, MPFR_RNDN);
 //    gmp_sscanf(s, "%Rf", num);

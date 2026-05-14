@@ -9,22 +9,13 @@
 #include <time.h>
 #include <vector>
 #include "manpwin.h"
+#include "manp.h"
 #include "Dib.h"
 #include "colour.h"
 #include "OtherFunctions.h"
 #include "Hailstone.h"
 
-extern	CDib		Dib;
-extern	CTrueCol	TrueCol;
-extern	int		xdots, ydots;
-extern	long		threshold;
-extern	double		hor, vert, mandel_width;
 extern	char		*FractData(void);
-extern	WORD		type;
-extern	int		subtype;
-extern	double		param[];
-extern	double		iterations;
-extern  COtherFunctions* g_pOtherFunctions;
 
 /**************************************************************************
 	Write SVG File with Metadata
@@ -32,30 +23,27 @@ extern  COtherFunctions* g_pOtherFunctions;
 **************************************************************************/
 
 int	write_svg_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
-{
+    {
     FILE	*fp = NULL;
     char	s[480];
     time_t	current_time;
     struct tm	*time_info;
     char	time_buffer[80];
     static HCURSOR	hCursor;
-//    BYTE	*pixels;
-//    int		x, y;
-//    RGBTRIPLE	rgb;
 
     hCursor = LoadCursor((HINSTANCE)NULL, IDC_WAIT);
     SetCursor(hCursor);
 
     // Open file for writing
     if ((fp = fopen(outfile, "w")) == NULL)
-    {
+	{
         hCursor = LoadCursor((HINSTANCE)NULL, IDC_ARROW);
         SetCursor(hCursor);
         wsprintf(s, "SVG can't open output file: %s", outfile);
         MessageBox(hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
         MessageBeep(0);
         return -1;
-    }
+	}
 
     // Get current time for metadata
     time(&current_time);
@@ -66,7 +54,7 @@ int	write_svg_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
     // Using viewBox with preserveAspectRatio for responsive scaling
     // The viewBox defines the coordinate system (pixels), while the SVG scales to fit
     fprintf(fp, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n");
-    fprintf(fp, "<svg viewBox=\"0 0 %d %d\"\n", xdots, ydots);
+    fprintf(fp, "<svg viewBox=\"0 0 %d %d\"\n", gManp->xdots, gManp->ydots);
     fprintf(fp, "     preserveAspectRatio=\"xMidYMid meet\"\n");
     fprintf(fp, "     style=\"max-width: 100%%; height: auto;\"\n");
     fprintf(fp, "     xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n");
@@ -99,43 +87,43 @@ int	write_svg_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
     fprintf(fp, "      Visualization Type: Hailstone Sequence\n");
     fprintf(fp, "      Software: ManpWIN64\n");
     fprintf(fp, "      Export Date: %s\n", time_buffer);
-    fprintf(fp, "      Resolution: %dx%d pixels\n", xdots, ydots);
+    fprintf(fp, "      Resolution: %dx%d pixels\n", gManp->xdots, gManp->ydots);
     fprintf(fp, "\n");
     fprintf(fp, "      Algorithm Parameters:\n");
-    fprintf(fp, "        MaxIterations: %ld\n", (long)iterations);
-    fprintf(fp, "        Type: %d\n", type);
-    fprintf(fp, "        Subtype: %d\n", subtype);
+    fprintf(fp, "        MaxIterations: %ld\n", (long)gManp->iterations);
+    fprintf(fp, "        Type: %d\n", gManp->type);
+    fprintf(fp, "        Subtype: %d\n", gManp->subtype);
     
     // Write parameters if available
     fprintf(fp, "        Parameters:\n");
     for (int i = 0; i < 10; i++)
     {
-        if (param[i] != 0.0)
-            fprintf(fp, "          param[%d]: %.10g\n", i, param[i]);
+        if (gManp->param[i] != 0.0)
+            fprintf(fp, "          param[%d]: %.10g\n", i, gManp->param[i]);
     }
     fprintf(fp, "\n");
     
     fprintf(fp, "      Color Mapping:\n");
-    fprintf(fp, "        Palette: %ld colors\n", threshold);
+    fprintf(fp, "        Palette: %ld colors\n", gManp->threshold);
     fprintf(fp, "        Method: Iteration-based coloring\n");
     fprintf(fp, "\n");
     
     fprintf(fp, "      Coordinate System:\n");
-    fprintf(fp, "        Center X: %.10g\n", hor);
-    fprintf(fp, "        Center Y: %.10g\n", vert);
-    fprintf(fp, "        Width: %.10g\n", mandel_width);
+    fprintf(fp, "        Center X: %.10g\n", gManp->hor);
+    fprintf(fp, "        Center Y: %.10g\n", gManp->vert);
+    fprintf(fp, "        Width: %.10g\n", gManp->mandel_width);
     fprintf(fp, "\n");
     fprintf(fp, "      ViewBox (pixel coordinates for SVG rendering):\n");
     fprintf(fp, "        minX: 0\n");
     fprintf(fp, "        minY: 0\n");
-    fprintf(fp, "        width: %d\n", xdots);
-    fprintf(fp, "        height: %d\n", ydots);
+    fprintf(fp, "        width: %d\n", gManp->xdots);
+    fprintf(fp, "        height: %d\n", gManp->ydots);
 
     // Add Hailstone-specific information if this is a Hailstone fractal
-    if (type == HAILSTONE)
-    {
+    if (gManp->type == HAILSTONE)
+	{
         if (g_pOtherFunctions && g_pOtherFunctions->pHailstone)
-        {
+	    {
             const HailstoneConfig& config = g_pOtherFunctions->pHailstone->GetConfig();
             const CycleInfo& cycleInfo = g_pOtherFunctions->pHailstone->GetCycleInfo();
             const std::vector<HailstonePoint>& points = g_pOtherFunctions->pHailstone->GetPoints();
@@ -147,24 +135,24 @@ int	write_svg_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
             fprintf(fp, "        Max Iterations: %d\n", config.maxIterations);
 
             if (cycleInfo.detected)
-            {
+		{
                 fprintf(fp, "        Cycle Detected: YES\n");
                 fprintf(fp, "          Cycle Point: (%d, %d)\n", cycleInfo.x, cycleInfo.y);
                 fprintf(fp, "          First Seen: Step %d\n", cycleInfo.startStep);
                 fprintf(fp, "          Repeated At: Step %d\n", cycleInfo.endStep);
                 fprintf(fp, "          Cycle Length: %d\n", cycleInfo.length);
-            }
+		}
             else
-            {
+		{
                 fprintf(fp, "        Cycle Detected: NO (stopped at max iterations)\n");
-            }
+		}
 
             fprintf(fp, "        Display Options:\n");
             fprintf(fp, "          Show Axes: %s\n", config.showAxes ? "Yes" : "No");
             fprintf(fp, "          Show Point Labels: %s\n", config.showPointLabels ? "Yes" : "No");
             fprintf(fp, "          Show Dots: %s\n", config.showDots ? "Yes" : "No");
-        }
-    }
+	    }
+	}
 
     fprintf(fp, "    </desc>\n");
     fprintf(fp, "  </g>\n");
@@ -207,7 +195,7 @@ int	write_svg_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
     */
 
     // --- Hailstone Vector Rendering ---
-    if (type == HAILSTONE && g_pOtherFunctions->pHailstone)
+    if (gManp->type == HAILSTONE && g_pOtherFunctions->pHailstone)
 	{
 	const auto& points = g_pOtherFunctions->pHailstone->GetPoints();
 	const auto& cycleInfo = g_pOtherFunctions->pHailstone->GetCycleInfo();
@@ -218,7 +206,7 @@ int	write_svg_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
 	    // --- Calculate bounds ---
 	    double minX = points[0].x, maxX = points[0].x;
 	    double minY = points[0].y, maxY = points[0].y;
-	    double dotRadius = config.dotSize * (xdots + ydots) * 0.25;
+	    double dotRadius = config.dotSize * (gManp->xdots + gManp->ydots) * 0.25;
 
 	    // Clamp ONCE
 	    if (dotRadius < 1.5) dotRadius = 1.5;
@@ -250,12 +238,12 @@ int	write_svg_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
 	    // --- Mapping lambdas ---
 	    auto mapX = [&](double x)
 		{
-		return (x - minX) * xdots / rangeX;
+		return (x - minX) * gManp->xdots / rangeX;
 		};
 
 	    auto mapY = [&](double y)
 		{
-		return ydots - ((y - minY) * ydots / rangeY); // flip Y
+		return gManp->ydots - ((y - minY) * gManp->ydots / rangeY); // flip Y
 		};
 
 	    fprintf(fp, "  <g id=\"hailstone\" fill=\"none\" stroke-linecap=\"round\">\n");
@@ -312,7 +300,7 @@ int	write_svg_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
 		    {
 		    fprintf(fp,
 			"<line x1=\"0\" y1=\"%.2f\" x2=\"%d\" y2=\"%.2f\" />\n",
-			zeroY, xdots, zeroY);
+			zeroY, gManp->xdots, zeroY);
 		    }
 
 		// Y axis
@@ -320,7 +308,7 @@ int	write_svg_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
 		    {
 		    fprintf(fp,
 			"<line x1=\"%.2f\" y1=\"0\" x2=\"%.2f\" y2=\"%d\" />\n",
-			zeroX, zeroX, ydots);
+			zeroX, zeroX, gManp->ydots);
 		    }
 
 		fprintf(fp, "  </g>\n");
@@ -370,7 +358,7 @@ int	write_svg_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
 	    // --- Draw FIRST point ---
 	    const auto& p0 = points[0];
 
-	    RGBTRIPLE rgb0 = TrueCol.PalettePtr[threshold / 2];
+	    RGBTRIPLE rgb0 = gManp->TrueCol.PalettePtr[gManp->threshold / 2];
 
 	    if (config.showDots)
 		{
@@ -401,10 +389,10 @@ int	write_svg_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
 		    (int)i >= cycleInfo.startStep &&
 		    (int)i < cycleInfo.endStep;
 
-		int colorIndex = isCycle ? (threshold * 3 / 4) : (threshold / 2);
+		int colorIndex = isCycle ? (gManp->threshold * 3 / 4) : (gManp->threshold / 2);
 		if (colorIndex >= MAXPALETTE) colorIndex = MAXPALETTE - 1;
 
-		RGBTRIPLE rgb = TrueCol.PalettePtr[colorIndex];
+		RGBTRIPLE rgb = gManp->TrueCol.PalettePtr[colorIndex];
 
 		double zeroX = mapX(0.0);
 		double zeroY = mapY(0.0);

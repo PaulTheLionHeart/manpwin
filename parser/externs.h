@@ -8,16 +8,10 @@
 #include    "..\ManpWIN64\Complex.h"
 
 extern int                   active_system;
-extern int                   adapter;
-extern int                   bitshift;
-extern int                   col;
-extern int                   debugflag;
-extern long		     threshold;
+//extern int                   adapter;
+//extern int                   debugflag;
 extern int                   overflow;
-extern double                param[];
-extern int                   row;
 extern int                   save_release;
-extern int                   symmetry;
 extern char                  s_abs[];
 extern char                  s_acos[];
 extern char                  s_acosh[];
@@ -67,13 +61,4 @@ extern char                  s_zero[];
 extern char                  s_zmag[];
 extern char                  s_z[];
 extern long                  total_formula_mem;
-extern BYTE                  used_extra;
-extern int                   xdots;
-extern double                xx3rd;
-extern double                xxmax;
-extern double                xxmin;
-extern int                   ydots;
-extern double                yy3rd;
-extern double                yymax;
-extern double                yymin;
 #endif

@@ -15,13 +15,8 @@
 #include "Fract.h"
 #include "BailoutTemplate.h"
 #include "FractintTrigTemplate.h"
+#include "PixelTemplate.h"
 #include "..\parser\TrigFn.h"
-
-// lotsa norty externs that will be resolved when we c++ise parser
-//extern	int	FormPerPixelFloat(Complex *z, Complex *q);
-//extern	int	FormulaFloat(Complex *z, Complex *q);
-// end norty externs that will be resolved when we c++ise parser
-
 
 /**************************************************************************
 	Initialise functions for each pixel
@@ -35,7 +30,7 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	{
 	case HYPERCMPLXFP:
 	case HYPERCMPLXJFP:
-	    t = (invert) ? invertz2(c) : c;
+	    t = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
 	    InitFunctions(MANDELFP, z, q);
 	    InitFractintTrigFunctionsT<Complex, double>(type, z, q, juliaflag, invert, c, qc, qci, qcj, qck, t, temp, temp1, temp2, temp4, sqr, Fn2Index, param);
 	    break;
@@ -125,7 +120,7 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	case FPLAMBDAFNFN:
 	case FPMANLAMFNFN:				// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
 	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
-	    t = (invert) ? invertz2(c) : c;
+	    t = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
 	    InitFractintTrigFunctionsT<Complex, double>(type, z, q, juliaflag, invert, c, qc, qci, qcj, qck, t, temp, temp1, temp2, temp4, sqr, Fn2Index, param);
 	    break;
 

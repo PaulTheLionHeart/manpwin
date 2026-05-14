@@ -22,140 +22,56 @@
 #include "colour.h"
 #include "Arithmetic.h"
 
-BYTE	orbit_flag;			// display orbits?
-double	closenuff;			// periodicity bailout
-long	closenuff_int;			// periodicity bailout
 int	period_level;			// 0 for no periodicity checking
 static	int	first_init = TRUE;	// first time once only init done
 
-extern	BYTE	orig_palette[];		// loaded palette
-
-extern  BYTE	*logtable;		// log value table for col comp
-
-extern	WORD	type;			// M=mand, J=Julia
-extern	char	floatflag;		// floating point maths
-extern	BYTE	juliaflag;		// Julia implementation of fractal
-extern	BYTE	screenflag;		// replay saved screen
-extern	int	logflag;		// log colour map required
-extern	int	logval;			// log colour map start
-extern	long	threshold;		// maximum iterations
-extern	int	window_depth;		// data window size
-extern	int	window_width;		// modify for Julia set
-extern	BYTE	pairflag;		// stereo pair
-extern	BYTE	save_flag;		// save screen after image
-extern	WORD	colours;
-
-extern	double	x_rot;			// angle display plane to x axis
-extern	double	y_rot;			// angle display plane to y axis
-extern	double	z_rot;			// angle display plane to z axis
-extern	double	sclx, scly, sclz;	// scale
-
-extern	int	RotationAngle;		// rotate image in degrees
-extern	Complex	RotationCentre;		// centre of rotation
-
-extern	double	hor;			// horizontal address
-extern	double	vert;			// vertical address
-extern	double	mandel_width;		// width of display
-extern	double	ScreenRatio;		// ratio of width / height for the screen
-extern	double	xgap;			// gap between pixels
-extern	double	ygap;			// gap between pixels
-
-extern	int	xdots, ydots, bits_per_pixel;
-
-extern	int	InsideMethod;		// inside filters
-extern	int	OutsideMethod;		// outside filters
-extern	double	dStrands;		// for Tierazon filters
-extern	int	nFDOption;		// Fractal Dimension option for Tierazon filters
-extern	BOOL	UseCurrentPalette;	// do we use the ManpWIN palette for Tierazon filters? If false, generate internal filter palette
-extern	double	potparam[];		// potential parameters
-extern	int	distest, distestwidth;	// distance estimation
-
-// Note that julia parameters are also used as starting values for Mandelbrot
-
-extern	double	param[];
-extern	double	rqlim;
-
-// number declarations **********************************************************
-extern	BYTE	BigNumFlag;		// True if bignum used
-extern	MATH_TYPE MathType;
-extern	int	decimals, precision;
-extern	BigDouble	BigBailout, BigCloseEnough, Big_xgap, Big_ygap, BigHor, BigVert, BigWidth;
-extern	dd_real	DDBailout, DDCloseEnough, DDxgap, DDygap, DDHor, DDVert, DDWidth;
-extern	qd_real	QDBailout, QDCloseEnough, QDxgap, QDygap, QDHor, QDVert, QDWidth;
-
-extern	int getprecbf_mag(void);
-// number declarations **********************************************************
-
-extern	struct	svga	*video_type;	/* card specific */
 
 void	get_julia_loc(char *);
 
-extern 	void	bell(int), NewtonSetup(void), setup_defaults(void), 
+extern 	void	bell(int), NewtonSetup(void), /*setup_defaults(void), */
 		InitTrueColourPalette(BYTE)/*, DisplayPalette(HWND, BOOL)*/;
 
 extern	int	mainview(HWND, BOOL);
-extern	int	init_big_2(HWND);
-extern	void	ConvertString2Bignum(mpfr_t num, char *s);
-extern	int	ChangeBigPrecision(int decimals);
-
-/*
-struct MP {
-   double val;
-};
-
-struct MPC {
-        struct MP x, y;
-};
-struct Arg {
-    Complex     d;
-   struct MPC m;
-//   _LCMPLX    l;
-};
-
-extern	struct	Arg *Arg1, *Arg2;
-*/
-extern	CTrueCol    TrueCol;		// palette info
-extern	CFract	Fractal;
-extern	Complex	j;
+//extern	int	init_big_2(HWND);
 
 /**************************************************************************
 	Setup log table
 **************************************************************************/
 
-void	init_log(HWND hwnd)
+void	CManp::init_log(HWND hwnd)
     {
     long	lf, prev, limit, LocalThreshold;
     double	m;
     int		i;
 
     LocalThreshold = (threshold >= MAXTHRESHOLD) ? MAXTHRESHOLD - 1 : threshold;
-    if (logflag == NULL)
+    if (gManp->logflag == NULL)
 	{
-	if ((logtable = new BYTE [MAXTHRESHOLD + 2]) == NULL)
+	if ((gManp->logtable = new BYTE [MAXTHRESHOLD + 2]) == NULL)
 	    {
 	    MessageBox (hwnd, "Can't allocate log palette memory. Using windows default", "Error", MB_ICONEXCLAMATION | MB_OK);
 	    MessageBeep (0);
-	    logflag = ERROR;				// don't use if no memory
+	    gManp->logflag = ERROR;				// don't use if no memory
 	    return;					// no point in setting up table
 	    }
-	logflag = TRUE;
+	gManp->logflag = TRUE;
 	}
     lf = logval;
     m = log((double) (LocalThreshold - lf)) / ((double) (colours - ((lf) ? 2 : 1)));
     for (prev = 1; prev <= lf; ++prev)
-	*(logtable + prev) = 1;
+	*(gManp->logtable + prev) = 1;
     for (i = ((lf) ? 2 : 1); i < colours; ++i)
 	{ 
 	limit = lf + (int) exp((double) i * m);
 	if (limit > LocalThreshold || i == colours - 1)
 	    limit = LocalThreshold;
 	while (prev <= limit)
-	    *(logtable + prev++) = i;
+	    *(gManp->logtable + prev++) = i;
 	}
-    *logtable = 0;
+    *gManp->logtable = 0;
     for (i = 1; i < LocalThreshold; ++i)		// spread top include unused colours
-	if (*(logtable + i) > *(logtable + i - 1))
-	    *(logtable + i) = *(logtable + i - 1) + 1;
+	if (*(gManp->logtable + i) > *(gManp->logtable + i - 1))
+	    *(gManp->logtable + i) = *(gManp->logtable + i - 1) + 1;
 //    for (i = threshold; i < MAXTHRESHOLD - 1; ++i)		// init the rest
 //	*(logtable + i) = colours - 1;
     }
@@ -164,7 +80,7 @@ void	init_log(HWND hwnd)
 	Initialise screen and files
 **************************************************************************/
 
-void	init(HWND hwnd)
+void	CManp::init(HWND hwnd)
     {
 //    static	struct Arg argfirst,argsecond;
     int	i;
@@ -175,7 +91,7 @@ void	init(HWND hwnd)
 	return;
 
     colours = 256;
-    bits_per_pixel = 24;
+//    bits_per_pixel = 24;
 
 //    Arg1 = &argfirst; Arg2 = &argsecond;		// needed by all the ?Stk* functions
     save_flag = FALSE;
@@ -196,7 +112,7 @@ void	init(HWND hwnd)
 	Get corner and width
 **************************************************************************/
 
-int	analyse_corner(char *s)
+int	CManp::analyse_corner(char *s)
     {
     char	*t;
     char	*s1;
@@ -300,8 +216,7 @@ char	*strtok1(char * s1, const char * s2)	// required to use different
     return s1;
     }
 
-void	AnalysePalette(char *s/*, HWND hwnd*/)
-
+void	CManp::AnalysePalette(char *s)
     {
     char	*t;      
     char	seps[]   = " \t\n";
@@ -346,8 +261,7 @@ void	AnalysePalette(char *s/*, HWND hwnd*/)
 	Get Distance Estimation Params
 **************************************************************************/
 
-void	AnalyseDistEst(char *s)
-
+void	CManp::AnalyseDistEst(char *s)
     {
     char	*t;
     int	r;
@@ -366,8 +280,7 @@ void	AnalyseDistEst(char *s)
 	Get 3D parameters
 **************************************************************************/
 
-void	analyse_3d(char *s)
-
+void	CManp::analyse_3d(char *s)
     {
     char	*t;
     int	r;
@@ -386,8 +299,7 @@ void	analyse_3d(char *s)
 	Get 3D parameters
 **************************************************************************/
 
-void	AnalyseRotation(char *s)
-
+void	CManp::AnalyseRotation(char *s)
     {
     char	*t;
     int		r;
@@ -407,8 +319,7 @@ void	AnalyseRotation(char *s)
 	Get filter parameters
 **************************************************************************/
 
-void	AnalyseMethod(char *s)
-
+void	CManp::AnalyseMethod(char *s)
     {
     char	*t;      
     int		r, method;
@@ -438,8 +349,7 @@ void	AnalyseMethod(char *s)
 	Get Inside Colour
 **************************************************************************/
 
-void	analyse_inside(char *s)
-
+void	CManp::analyse_inside(char *s)
     {
     char	*t;      
     char	seps[]   = " \t\n";
@@ -474,8 +384,7 @@ void	analyse_inside(char *s)
 	Get Julia location on Mandelbrot set
 **************************************************************************/
 
-void	get_julia_loc(char *s)
-
+void	CManp::get_julia_loc(char *s)
     {
     char	*t;
 
@@ -487,6 +396,29 @@ void	get_julia_loc(char *s)
 	s++;
 	}
     sscanf(t, "%lf %lf", &(j.x), &(j.y));
+    }
+
+/**************************************************************************
+	Process Invert paramemters
+**************************************************************************/
+
+int	CManp::ProcessInvert(char *s)
+    {
+    char	*t;
+    int		count;
+
+    t = s;
+    while (*s && *s != ' ')
+	{
+	if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-' && *s != 'e')
+	    *s = ' ';
+	s++;
+	}
+
+    count = sscanf(t, "%lf %lf %lf", &f_radius, &f_xcenter, &f_ycenter);    // inversion radius, center 
+    if (f_radius)
+	invert = TRUE;
+    return 0;
     }
 
 

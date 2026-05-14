@@ -16,6 +16,12 @@
 #define NODIBMEMORY  1
 #define NOPIXELMEMORY  2
 
+inline size_t ComputeWidthBytes(size_t width, size_t bitsPerPixel)
+    {
+    size_t bitsPerRow = width * bitsPerPixel;
+    return ((bitsPerRow + 31) / 32) * 4;
+    }
+
 class CDib
     {
     public:
@@ -41,24 +47,24 @@ class CDib
 //    void		CountColours(void);
 //    DWORD ColourCount(void (*Progress)(int, int, char *));
 //    DWORD ColourCount(void);
-    DWORD		Size()		{ return DibSize; };
-    WORD		Width()		{ return DibWidth; };
-    WORD		Height()	{ return DibHeight; };
+    size_t 		Size()		{ return DibSize; };
+    int			Width()		{ return DibWidth; };
+    int			Height()	{ return DibHeight; };
     WORD		Bits()		{ return BitsPerPixel; };
     DWORD		NumColours()	{ return DibNumColours; };
 
     int			DibErrorCode;
     LPBITMAPINFO	pDibInf;		// pointer to the DIB info
     std::vector<BYTE>	DibPixels;		// the device-independent bitmap  pixels
-    DWORD		SizeImage;		// Size, in bytes, of the image.
-    WORD		DibWidth;		// the size of the image in pixels
-    WORD		DibHeight;
+    size_t 		SizeImage;		// Size, in bytes, of the image.
+    int			DibWidth;		// the size of the image in pixels
+    int			DibHeight;
     WORD		BitsPerPixel;
     DWORD		DibNumColours;
-    WORD		WidthBytes;		// Width, in bytes, of 1 line.
+    size_t 		WidthBytes;		// Width, in bytes, of 1 line.
 
     private:
-    DWORD		DibSize;		// Size, in bytes, of the DIB
+    size_t 		DibSize;		// Size, in bytes, of the DIB
     };
 
 #endif // !defined(AFX_DIB_H__955DFDBD_51F6_419C_BE14_06287AE21568__INCLUDED_)

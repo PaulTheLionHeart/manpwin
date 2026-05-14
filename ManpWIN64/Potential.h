@@ -1,7 +1,7 @@
 #include	<windows.h>
 #include	<math.h>
 #include	<float.h>
-#include	"manp.h"
+//#include	"manp.h"
 //#include	"Fract1.h"
 //#include	"fractype.h"
 //#include	"fractalp.h"

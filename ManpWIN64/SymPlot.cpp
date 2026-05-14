@@ -11,6 +11,19 @@
 #include "SafeStrings.h"
 
 /**************************************************************************
+	Plot using flags that trap SpecialColour usage
+**************************************************************************/
+/*
+void CPixel::PlotPixelWithFlags(int x, int y, long colourIndex)
+    {
+    if (colourIndex == -2)
+	Plot.OutRGBpoint((WORD)x, (WORD)y, SpecialColour);
+    else
+	plot((WORD)x, (WORD)y, colourIndex);
+    }
+*/
+
+/**************************************************************************
 	Select appropriate symmetry plot 
 **************************************************************************/
 

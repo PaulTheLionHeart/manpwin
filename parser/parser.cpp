@@ -29,21 +29,21 @@
 #include <time.h>
 #include <cassert>
 
-  /* see Fractint.c for a description of the "include"  hierarchy */
 #include "parser.h"
 #include "prototyp.h"
 #include "ParserCtx.h"
+#include "ParserTemplate.h"
 #include "..\ManpWIN64\Complex.h"
 #include "..\ManpWIN64\fract.h"
 #include "..\ManpWIN64\BigDouble.h"
 #include "..\ManpWIN64\Arithmetic.h"
-//#include "..\ManpWIN64\Pixel.h"
+#include "..\ManpWIN64\Manp.h"
 
 #ifdef WATCH_MP
 double x1, y1, x2, y2;
 #endif
 
-extern	MATH_TYPE MathType;
+//extern	MATH_TYPE MathType;
 /* moved _LCMPLX and union ARg to mpmath.h -6-20-90 TIW */
 
 #define MAXLSYS		800		// Max LSystem in file (Make sure to change this value in lsys.cpp)
@@ -53,20 +53,11 @@ extern	MATH_TYPE MathType;
 #define	MAX_TOKEN_LEN	120
 #define MAX_FORMULA_LEN	4096
 
-#define rand15() (rand()&0x7FFF)
+//#define rand15() (rand()&0x7FFF)
 
 #define stopmsg pstopmsg
-HWND	GlobalHwnd;			// to allow passing of hwnd 
+//HWND	GlobalHwnd;			// to allow passing of hwnd 
 extern	char	lsys_type[];
-
-extern	int	precision;
-extern	BYTE	BigNumFlag;
-
-extern	double	hor;			// horizontal address
-extern	double	vert;			// vertical address 
-extern	double	mandel_width;		// width of display
-
-extern	CFract	Fractal;		// current fractal stuff
 
 void	insertFunctionNames(char *FormStr, CFract Fractal);		// insert function names in place of literal "fn1", "fn2"
 
@@ -202,9 +193,9 @@ struct token_st
 int 	 GetMathType()
     {
     int	  Arith;
-    if (BigNumFlag)
+    if (gManp->BigNumFlag)
 	{
-	if (precision <= DDPRECISION)
+	if (gManp->precision <= DDPRECISION)
 	    Arith = DOUBLEDOUBLE;
 	else
 	    Arith = QUADDOUBLE;
@@ -219,7 +210,7 @@ int pstopmsg(int x, const char *msg)
     char      s[360];
 
     _snprintf_s(s, 360, _TRUNCATE, "%s, ErrorType = %d", msg, x);
-    MessageBox (GlobalHwnd, s, "Formula Error", MB_ICONEXCLAMATION | MB_OK);
+    MessageBox (gManp->GlobalHwnd, s, "Formula Error", MB_ICONEXCLAMATION | MB_OK);
 
     return(x); // just to quiet warnings
     }
@@ -284,7 +275,7 @@ static	unsigned long RandNum;
 short	uses_p1, uses_p2, uses_p3, uses_p4, uses_p5, uses_jump;
 short	uses_ismand;
 unsigned int chars_in_formula;
-int     debugflag;
+//int     debugflag;
 
 #define PE_NO_ERRORS_FOUND                           -1
 #define PE_SHOULD_BE_ARGUMENT                         0
@@ -476,7 +467,7 @@ struct ConstArg far *isconst(char *Str, int Len)
 	else
 	    z.y = 0.0;
 	z.x = atof(Str);
-	switch(MathType) 
+	switch(gManp->MathType)
 	    {
 	    case DOUBLEFLOAT:
 		v[vsp].a.d = z;
@@ -493,18 +484,24 @@ struct ConstArg far *isconst(char *Str, int Len)
     return(&v[vsp++]);
     }
 
-
+/*
 struct FNCT_LIST 
     {
     char *s;              // TIW 03-31-91 added far
     void (**ptr)(void);
     };
+*/
 
 // TIW 03-30-91 START
-void (*StkTrig0)(void) = dStkSin;
-void (*StkTrig1)(void) = dStkSqr;
-void (*StkTrig2)(void) = dStkSinh;
-void (*StkTrig3)(void) = dStkCosh;
+void(*StkTrig0)(void) = ParserStkSin;
+void(*StkTrig1)(void) = ParserStkSqr;
+void(*StkTrig2)(void) = ParserStkSinh;
+void(*StkTrig3)(void) = ParserStkCosh;
+
+//void (*StkTrig0)(void) = dStkSin;
+//void (*StkTrig1)(void) = dStkSqr;
+//void (*StkTrig2)(void) = dStkSinh;
+//void (*StkTrig3)(void) = dStkCosh;
 
 char  * JumpList[] = 
     {
@@ -533,7 +530,6 @@ int isjump(char *Str, int Len)
     return 0;
     }
 
-
 char maxfn = 0;
 // TIW 03-30-91 STOP
 
@@ -550,7 +546,7 @@ struct FNCT_LIST FnctList[] =
     {s_conj,  &StkConj},
     {s_real,  &StkReal},
     {s_imag,  &StkImag},
-    {s_ident, &dStkIdent},
+//    {s_ident, &dStkIdent},
     {s_recip, &StkRecip},
     {s_fn1,   &StkTrig0},   // TIW 03-30-91
     {s_fn2,   &StkTrig1},   // TIW 03-30-91
@@ -708,7 +704,14 @@ SymStr[] =
     {"",              0}
     };
 
-extern	char	FormulaString[];	// used to hold the full formula
+//extern	char	FormulaString[];	// used to hold the full formula
+/*
+static void InitParserOps()
+    {
+    StkNeg = ParserStkNeg;
+    }
+
+    */
 
 static int ParseStr(char *Str, int pass) 
     {
@@ -719,7 +722,7 @@ static int ParseStr(char *Str, int pass)
     double Xctr, Yctr, Xmagfactor, Rotation, Skew;
     LDBL Magnification;
 
-    strcpy(FormulaString, Str);		// needed to save formula to par file
+    strcpy(gManp->FormulaString, Str);		// needed to save formula to par file
     SetRandom = Randomized = 0;
     jump_index = 0;
     uses_jump = 0;
@@ -728,8 +731,8 @@ static int ParseStr(char *Str, int pass)
 //    jump_index = 0;
     if(pass == 0)
 	o = (struct PEND_OP far *) ((char far *)typespecific_workarea + total_formula_mem-sizeof(struct PEND_OP) * Max_Ops);
-    else if(used_extra == 1)
-	o = (struct PEND_OP far *) ((char far *)typespecific_workarea + total_formula_mem-sizeof(struct PEND_OP) * Max_Ops);
+//    else if(used_extra == 1)
+//	o = (struct PEND_OP far *) ((char far *)typespecific_workarea + total_formula_mem-sizeof(struct PEND_OP) * Max_Ops);
     else
 	o = (struct PEND_OP far *)malloc(sizeof(struct PEND_OP) * (long)Max_Ops * 16L);
     if( !o || !typespecific_workarea) 
@@ -745,164 +748,9 @@ static int ParseStr(char *Str, int pass)
 	o[i].f = nullptr;
 	o[i].p = 0;
 	}
-    MathType = (MATH_TYPE)GetMathType();
-    switch(MathType)
-	{
-	case DOUBLEFLOAT:
-	    StkAdd = dStkAdd;
-	    StkSub = dStkSub;
-	    StkNeg = dStkNeg;
-	    StkMul = dStkMul;
-	    StkSin = dStkSin;
-	    StkSinh = dStkSinh;
-	    StkLT = dStkLT;
-	    StkLTE = dStkLTE;
-	    StkMod = dStkMod;
-	    StkSqr = dStkSqr;
-	    StkCos = dStkCos;
-	    StkCosh = dStkCosh;
-	    StkLog = dStkLog;
-	    StkExp = dStkExp;
-	    StkPwr = dStkPwr;
-	    StkDiv = dStkDiv;
-	    StkAbs = dStkAbs;
-	    StkReal = dStkReal;
-	    StkImag = dStkImag;
-	    StkConj = dStkConj;
 
-	    StkFlip = dStkFlip;
-	    StkTan = dStkTan;		// TIW 04-22-91
-	    StkTanh = dStkTanh;		// TIW 04-22-91
-	    StkCoTan = dStkCoTan;	// TIW 04-24-91
-	    StkCoTanh = dStkCoTanh;	// TIW 04-24-91
-	    StkCosXX = dStkCosXX;	// PB  04-28-91
-	    StkGT = dStkGT;		// MCP 11-3-91
-	    StkGTE = dStkGTE;		// MCP 11-3-91
-	    StkEQ = dStkEQ;		// MCP 11-3-91
-	    StkNE = dStkNE;		// MCP 11-3-91
-	    StkAND = dStkAND;		// MCP 11-3-91
-	    StkOR = dStkOR;		// MCP 11-3-91
-	    StkSRand = dStkSRand;	// MCP 11-21-91
-	    StkASin = dStkASin;		// TIW 11-25-94
-	    StkASinh = dStkASinh;	// TIW 11-25-94
-	    StkACos = dStkACos;		// TIW 11-25-94
-	    StkACosh = dStkACosh;	// TIW 11-25-94
-	    StkATan = dStkATan;		// TIW 11-25-94
-	    StkATanh = dStkATanh;	// TIW 11-25-94
-	    StkCAbs = dStkCAbs;		// TIW 11-25-94
-	    StkSqrt = dStkSqrt;		// TIW 11-25-94
-	    StkZero = dStkZero;		// JCO 12-31-94
-	    StkFloor = dStkFloor;	// TIW 06-30-96
-	    StkCeil = dStkCeil;		// TIW 06-30-96
-	    StkTrunc = dStkTrunc;	// TIW 06-30-96
-	    StkRound = dStkRound;	// TIW 06-30-96
-	    StkJumpOnTrue = dStkJumpOnTrue;	    // GGM 02-10-97
-	    StkJumpOnFalse = dStkJumpOnFalse;	    // GGM 02-10-97
-	    StkOne = dStkOne;		// GGM 10-08-97
-	    break;
-	case DOUBLEDOUBLE:
-	    StkAdd = ddStkAdd;
-	    StkSub = ddStkSub;
-	    StkNeg = ddStkNeg;
-	    StkMul = ddStkMul;
-	    StkSin = ddStkSin;
-	    StkSinh = ddStkSinh;
-	    StkLT = ddStkLT;
-	    StkLTE = ddStkLTE;
-	    StkMod = ddStkMod;
-	    StkSqr = ddStkSqr;
-	    StkCos = ddStkCos;
-	    StkCosh = ddStkCosh;
-	    StkLog = ddStkLog;
-	    StkExp = ddStkExp;
-	    StkPwr = ddStkPwr;
-	    StkDiv = ddStkDiv;
-	    StkAbs = ddStkAbs;
-	    StkReal = ddStkReal;
-	    StkImag = ddStkImag;
-	    StkConj = ddStkConj;
-	    StkFlip = ddStkFlip;
-	    StkTan = ddStkTan;		// TIW 04-22-91
-	    StkTanh = ddStkTanh;	// TIW 04-22-91
-	    StkCoTan = ddStkCoTan;	// TIW 04-24-91
-	    StkCoTanh = ddStkCoTanh;	// TIW 04-24-91
-	    StkCosXX = ddStkCosXX;	// PB  04-28-91
-	    StkGT = ddStkGT;		// MCP 11-3-91
-	    StkGTE = ddStkGTE;		// MCP 11-3-91
-	    StkEQ = ddStkEQ;		// MCP 11-3-91
-	    StkNE = ddStkNE;		// MCP 11-3-91
-	    StkAND = ddStkAND;		// MCP 11-3-91
-	    StkOR = ddStkOR;		// MCP 11-3-91
-	    StkSRand = ddStkSRand;	// MCP 11-21-91
-	    StkASin = ddStkASin;	// TIW 11-25-94
-	    StkASinh = ddStkASinh;	// TIW 11-25-94
-	    StkACos = ddStkACos;	// TIW 11-25-94
-	    StkACosh = ddStkACosh;	// TIW 11-25-94
-	    StkATan = ddStkATan;	// TIW 11-25-94
-	    StkATanh = ddStkATanh;	// TIW 11-25-94
-	    StkCAbs = ddStkCAbs;	// TIW 11-25-94
-	    StkSqrt = ddStkSqrt;	// TIW 11-25-94
-	    StkZero = ddStkZero;	// JCO 12-31-94
-	    StkFloor = ddStkFloor;	// TIW 06-30-96
-	    StkCeil = ddStkCeil;	// TIW 06-30-96
-	    StkTrunc = ddStkTrunc;	// TIW 06-30-96
-	    StkRound = ddStkRound;	// TIW 06-30-96
-	    StkJumpOnTrue = ddStkJumpOnTrue;	    // GGM 02-10-97
-	    StkJumpOnFalse = ddStkJumpOnFalse;	    // GGM 02-10-97
-	    StkOne = ddStkOne;		// GGM 10-08-97
-	    break;
-	case QUADDOUBLE:
-	    StkAdd = qdStkAdd;
-	    StkSub = qdStkSub;
-	    StkNeg = qdStkNeg;
-	    StkMul = qdStkMul;
-	    StkSin = qdStkSin;
-	    StkSinh = qdStkSinh;
-	    StkLT = qdStkLT;
-	    StkLTE = qdStkLTE;
-	    StkMod = qdStkMod;
-	    StkSqr = qdStkSqr;
-	    StkCos = qdStkCos;
-	    StkCosh = qdStkCosh;
-	    StkLog = qdStkLog;
-	    StkExp = qdStkExp;
-	    StkPwr = qdStkPwr;
-	    StkDiv = qdStkDiv;
-	    StkAbs = qdStkAbs;
-	    StkReal = qdStkReal;
-	    StkImag = qdStkImag;
-	    StkConj = qdStkConj;
-	    StkFlip = qdStkFlip;
-	    StkTan = qdStkTan;		// TIW 04-22-91
-	    StkTanh = qdStkTanh;	// TIW 04-22-91
-	    StkCoTan = qdStkCoTan;	// TIW 04-24-91
-	    StkCoTanh = qdStkCoTanh;	// TIW 04-24-91
-	    StkCosXX = qdStkCosXX;	// PB  04-28-91
-	    StkGT = qdStkGT;		// MCP 11-3-91
-	    StkGTE = qdStkGTE;		// MCP 11-3-91
-	    StkEQ = qdStkEQ;		// MCP 11-3-91
-	    StkNE = qdStkNE;		// MCP 11-3-91
-	    StkAND = qdStkAND;		// MCP 11-3-91
-	    StkOR = qdStkOR;		// MCP 11-3-91
-	    StkSRand = qdStkSRand;	// MCP 11-21-91
-	    StkASin = qdStkASin;	// TIW 11-25-94
-	    StkASinh = qdStkASinh;	// TIW 11-25-94
-	    StkACos = qdStkACos;	// TIW 11-25-94
-	    StkACosh = qdStkACosh;	// TIW 11-25-94
-	    StkATan = qdStkATan;	// TIW 11-25-94
-	    StkATanh = qdStkATanh;	// TIW 11-25-94
-	    StkCAbs = qdStkCAbs;	// TIW 11-25-94
-	    StkSqrt = qdStkSqrt;	// TIW 11-25-94
-	    StkZero = qdStkZero;	// JCO 12-31-94
-	    StkFloor = qdStkFloor;	// TIW 06-30-96
-	    StkCeil = qdStkCeil;	// TIW 06-30-96
-	    StkTrunc = qdStkTrunc;	// TIW 06-30-96
-	    StkRound = qdStkRound;	// TIW 06-30-96
-	    StkJumpOnTrue = qdStkJumpOnTrue;	    // GGM 02-10-97
-	    StkJumpOnFalse = qdStkJumpOnFalse;	    // GGM 02-10-97
-	    StkOne = qdStkOne;		// GGM 10-08-97
-	    break;
-	}
+    gManp->MathType = (MATH_TYPE)GetMathType();
+
     maxfn = 0;   // TIW 03-30-91
     for(vsp = 0; vsp < sizeof(Constants) / sizeof(char*); vsp++) 
 	{
@@ -914,69 +762,69 @@ static int ParseStr(char *Str, int pass)
     const_e  = exp(1.0);
 
     v[7].a.d.x = v[7].a.d.y = 0.0;
-    v[11].a.d.x = (double)xdots;
-    v[11].a.d.y = (double)ydots;
-    v[12].a.d.x = (double)threshold;
+    v[11].a.d.x = (double)gManp->xdots;
+    v[11].a.d.y = (double)gManp->ydots;
+    v[12].a.d.x = (double)gManp->threshold;
     v[12].a.d.y = 0;
     v[13].a.d.x = (double)ismand;
     v[13].a.d.y = 0;
     // do we need to copy these int DD and QD?
-    v[14].a.d.x = hor + (mandel_width * 1.777777777778) / 2.0;
-    v[14].a.d.y = vert + mandel_width / 2.0;
-    v[15].a.d.x = (double)1.0 / mandel_width;
-    v[15].a.d.y = vert / (hor * 1.777777777778);
+    v[14].a.d.x = gManp->hor + (gManp->mandel_width * 1.777777777778) / 2.0;
+    v[14].a.d.y = gManp->vert + gManp->mandel_width / 2.0;
+    v[15].a.d.x = (double)1.0 / gManp->mandel_width;
+    v[15].a.d.y = gManp->vert / (gManp->hor * 1.777777777778);
     v[16].a.d.x = 0.0;
     v[16].a.d.y = 0.0;
 
-    switch(MathType) 
+    switch(gManp->MathType)
 	{
 	case DOUBLEFLOAT:
-	    v[1].a.d.x = param[0];
-	    v[1].a.d.y = param[1];
-	    v[2].a.d.x = param[2];
-	    v[2].a.d.y = param[3];
+	    v[1].a.d.x = gManp->param[0];
+	    v[1].a.d.y = gManp->param[1];
+	    v[2].a.d.x = gManp->param[2];
+	    v[2].a.d.y = gManp->param[3];
 	    v[5].a.d.x = const_pi;
 	    v[5].a.d.y = 0.0;
 	    v[6].a.d.x = const_e;
 	    v[6].a.d.y = 0.0;
-	    v[8].a.d.x = param[4];
-	    v[8].a.d.y = param[5];
-	    v[17].a.d.x = param[6];
-	    v[17].a.d.y = param[7];
-	    v[18].a.d.x = param[8];
-	    v[18].a.d.y = param[9];
+	    v[8].a.d.x = gManp->param[4];
+	    v[8].a.d.y = gManp->param[5];
+	    v[17].a.d.x = gManp->param[6];
+	    v[17].a.d.y = gManp->param[7];
+	    v[18].a.d.x = gManp->param[8];
+	    v[18].a.d.y = gManp->param[9];
 	    break;
 	case DOUBLEDOUBLE:
-	    v[1].a.dd.x = param[0];
-	    v[1].a.dd.y = param[1];
-	    v[2].a.dd.x = param[2];
-	    v[2].a.dd.y = param[3];
+	    v[1].a.dd.x = gManp->param[0];
+	    v[1].a.dd.y = gManp->param[1];
+	    v[2].a.dd.x = gManp->param[2];
+	    v[2].a.dd.y = gManp->param[3];
 	    v[5].a.dd.x = const_pi;
 	    v[5].a.dd.y = 0.0;
 	    v[6].a.dd.x = const_e;
 	    v[6].a.dd.y = 0.0;
-	    v[8].a.dd.x = param[4];
-	    v[8].a.dd.y = param[5];
-	    v[17].a.dd.x = param[6];
-	    v[17].a.dd.y = param[7];
-	    v[18].a.dd.x = param[8];
-	    v[18].a.dd.y = param[9];
+	    v[8].a.dd.x = gManp->param[4];
+	    v[8].a.dd.y = gManp->param[5];
+	    v[17].a.dd.x = gManp->param[6];
+	    v[17].a.dd.y = gManp->param[7];
+	    v[18].a.dd.x = gManp->param[8];
+	    v[18].a.dd.y = gManp->param[9];
 	    break;
 	case QUADDOUBLE:
-	    v[1].a.qd.x = param[0];
-	    v[1].a.qd.y = param[1];
-	    v[2].a.qd.x = param[2];
-	    v[2].a.qd.y = param[3];
+	    v[1].a.qd.x = gManp->param[0];
+	    v[1].a.qd.y = gManp->param[1];
+	    v[2].a.qd.x = gManp->param[2];
+	    v[2].a.qd.y = gManp->param[3];
 	    v[5].a.qd.x = const_pi;
 	    v[5].a.qd.y = 0.0;
 	    v[6].a.qd.x = const_e;
 	    v[6].a.qd.y = 0.0;
-	    v[8].a.qd.x = param[4];
-	    v[8].a.qd.y = param[5];
-	    v[17].a.qd.x = param[6];
-	    v[17].a.qd.y = param[7];
-	    v[18].a.qd.x = param[8];
-	    v[18].a.qd.y = param[9];
+	    v[8].a.qd.x = gManp->param[4];
+	    v[8].a.qd.y = gManp->param[5];
+	    v[17].a.qd.x = gManp->param[6];
+	    v[17].a.qd.y = gManp->param[7];
+	    v[18].a.qd.x = gManp->param[8];
+	    v[18].a.qd.y = gManp->param[9];
 	    break;
 	}
 
@@ -1216,7 +1064,7 @@ static int ParseStr(char *Str, int pass)
 	    }
 	}
 
-    if (pass > 0 && used_extra == 0)
+    if (pass > 0)
 	free(o);
 
     return(0);
@@ -1226,7 +1074,7 @@ int	CParser::FormulaFloat(Complex *zIn, Complex *cIn)		// used for direct formul
     {
     int	    ret;
 
-    MathType = DOUBLEFLOAT;		// double-float
+    gManp->MathType = DOUBLEFLOAT;		// double-float
     c = *cIn;
     z = *zIn;
     ret = Formula();
@@ -1240,7 +1088,7 @@ int	CParser::DDFormula(DDComplex *zIn, DDComplex *cIn)	// used for direct formul
     {
     int	    ret;
 
-    MathType = DOUBLEDOUBLE;		// double-double
+    gManp->MathType = DOUBLEDOUBLE;		// double-double
     zDD = *zIn;
     cDD = *cIn;
     ret = Formula();
@@ -1254,7 +1102,7 @@ int	CParser::QDFormula(QDComplex *zIn, QDComplex *cIn)	// used for direct formul
     {
     int	    ret;
 
-    MathType = QUADDOUBLE;		// quad-double
+    gManp->MathType = QUADDOUBLE;		// quad-double
     zQD = *zIn;
     cQD = *cIn;
     ret = Formula();
@@ -1285,7 +1133,7 @@ int CParser::Formula(void)
 
     // Publish z (this is why z now changes!)
     ConstArg* vloc = m_ctx.v;  // or whatever type ::v is
-    switch (MathType)
+    switch (gManp->MathType)
 	{
 	case DOUBLEFLOAT:
 	    z = vloc[3].a.d;
@@ -1303,11 +1151,11 @@ int CParser::Formula(void)
     return 0;
     }
 
-extern	int	period_level;		// 0 for no periodicity checking
+//extern	int	period_level;		// 0 for no periodicity checking
 
 int	CParser::FormPerPixelFloat(Complex *zIn, Complex *cIn)		// used for direct formula parser so it can be used with real time Julia
     {
-    MathType = DOUBLEFLOAT;		// plain old double
+    gManp->MathType = DOUBLEFLOAT;		// plain old double
     z = *zIn;
     c = *cIn;
     FormPerPixel();
@@ -1317,7 +1165,7 @@ int	CParser::FormPerPixelFloat(Complex *zIn, Complex *cIn)		// used for direct f
 
 int CParser::DDFormPerPixel(DDComplex *zIn, DDComplex *qIn)
     {
-    MathType = DOUBLEDOUBLE;		// double-double
+    gManp->MathType = DOUBLEDOUBLE;		// double-double
     zDD = *zIn;
     cDD = *qIn;
     FormPerPixel();
@@ -1327,7 +1175,7 @@ int CParser::DDFormPerPixel(DDComplex *zIn, DDComplex *qIn)
 
 int CParser::QDFormPerPixel(QDComplex *zIn, QDComplex *qIn)
     {
-    MathType = QUADDOUBLE;		// quad-double
+    gManp->MathType = QUADDOUBLE;		// quad-double
     zQD = *zIn;
     cQD = *qIn;
     FormPerPixel();
@@ -1339,26 +1187,43 @@ int CParser::FormPerPixel(void)
     {
     if (FormName[0] == 0) return 1;
 
-    period_level = FALSE;
+    gManp->period_level = FALSE;
     m_ctx.overflow = 0;
 
     // Load row/col, params, etc. (UNCHANGED legacy code)
-    switch (MathType)
+    switch (gManp->MathType)
 	{
 	case DOUBLEFLOAT:
-	    m_ctx.v[10].a.d.x = (double)col;
-	    m_ctx.v[10].a.d.y = (double)row;
-	    m_ctx.v[1].a.d.x = param[0]; m_ctx.v[1].a.d.y = param[1];
-	    m_ctx.v[2].a.d.x = param[2]; m_ctx.v[2].a.d.y = param[3];
-	    m_ctx.v[3].a.d.x = param[4]; m_ctx.v[3].a.d.y = param[5];
-	    m_ctx.v[9].a.d.x = ((row + col) & 1) ? 1.0 : 0.0;
+	    m_ctx.v[10].a.d.x = (double)gManp->col;
+	    m_ctx.v[10].a.d.y = (double)gManp->row;
+	    m_ctx.v[1].a.d.x = gManp->param[0]; m_ctx.v[1].a.d.y = gManp->param[1];
+	    m_ctx.v[2].a.d.x = gManp->param[2]; m_ctx.v[2].a.d.y = gManp->param[3];
+	    m_ctx.v[3].a.d.x = gManp->param[4]; m_ctx.v[3].a.d.y = gManp->param[5];
+	    m_ctx.v[9].a.d.x = ((gManp->row + gManp->col) & 1) ? 1.0 : 0.0;
 	    m_ctx.v[9].a.d.y = 0.0;
 	    break;
-	    // DD / QD identical
+	case DOUBLEDOUBLE:
+	    m_ctx.v[10].a.dd.x = (double)gManp->col;
+	    m_ctx.v[10].a.dd.y = (double)gManp->row;
+	    m_ctx.v[1].a.dd.x = gManp->param[0]; m_ctx.v[1].a.dd.y = gManp->param[1];
+	    m_ctx.v[2].a.dd.x = gManp->param[2]; m_ctx.v[2].a.dd.y = gManp->param[3];
+	    m_ctx.v[3].a.dd.x = gManp->param[4]; m_ctx.v[3].a.dd.y = gManp->param[5];
+	    m_ctx.v[9].a.dd.x = ((gManp->row + gManp->col) & 1) ? 1.0 : 0.0;
+	    m_ctx.v[9].a.dd.y = 0.0;
+	    break;
+	case QUADDOUBLE:
+	    m_ctx.v[10].a.qd.x = (double)gManp->col;
+	    m_ctx.v[10].a.qd.y = (double)gManp->row;
+	    m_ctx.v[1].a.qd.x = gManp->param[0]; m_ctx.v[1].a.qd.y = gManp->param[1];
+	    m_ctx.v[2].a.qd.x = gManp->param[2]; m_ctx.v[2].a.qd.y = gManp->param[3];
+	    m_ctx.v[3].a.qd.x = gManp->param[4]; m_ctx.v[3].a.qd.y = gManp->param[5];
+	    m_ctx.v[9].a.qd.x = ((gManp->row + gManp->col) & 1) ? 1.0 : 0.0;
+	    m_ctx.v[9].a.qd.y = 0.0;
+	    break;
 	}
 
     // 3. Load c -> v[0]
-    switch (MathType)
+    switch (gManp->MathType)
 	{
 	case DOUBLEFLOAT:  m_ctx.v[0].a.d = c;   break;
 	case DOUBLEDOUBLE: m_ctx.v[0].a.dd = cDD; break;
@@ -1366,10 +1231,11 @@ int CParser::FormPerPixel(void)
 	}
 
 //    CParser* g_activeParser = &parser;   // however you store it (global or TLS)
+
     RunVmInit();
 
     // 5. Publish initial z
-    switch (MathType)
+    switch (gManp->MathType)
 	{
 	case DOUBLEFLOAT:  z = m_ctx.v[3].a.d;  break;
 	case DOUBLEDOUBLE: zDD = m_ctx.v[3].a.dd; break;
@@ -2067,7 +1933,7 @@ int frm_get_param_stuff (char * Name)
 	{
 	return 0;  // and don't reset the pointers
 	}
-    if (find_file_item(GlobalHwnd, FormFileName,Name,&entry_file)) 
+    if (find_file_item(gManp->GlobalHwnd, FormFileName,Name,&entry_file))
 	{
 	stopmsg(0, ParseErrs(PE_COULD_NOT_OPEN_FILE_WHERE_FORMULA_LOCATED));
 	return 0;
@@ -2179,7 +2045,7 @@ int frm_check_name_and_sym (FILE * open_file, int report_bad_sym)
 	return 0;
 	}
     // get symmetry 
-    symmetry = 0;
+    gManp->symmetry = 0;
     if (c == '(') 
 	{
 	char sym_buf[20];
@@ -2213,7 +2079,7 @@ int frm_check_name_and_sym (FILE * open_file, int report_bad_sym)
 	    {
 	    if(!_stricmp(SymStr[i].s, sym_buf)) 
 		{
-		symmetry = SymStr[i].n;
+		gManp->symmetry = SymStr[i].n;
 		break;
 		}
 	    }
@@ -2362,7 +2228,7 @@ int RunForm(char *Name, int from_prompts1c)   //  returns 1 if an error occurred
 	}
 
     // TW 5-31-94 add search for FRM files in directory
-    if (find_file_item(GlobalHwnd, Name,lsys_type,&entry_file)) 
+    if (find_file_item(gManp->GlobalHwnd, Name,lsys_type,&entry_file))
 	{
 	stopmsg(0, ParseErrs(PE_COULD_NOT_OPEN_FILE_WHERE_FORMULA_LOCATED));
 	return 1;
@@ -2375,7 +2241,7 @@ int RunForm(char *Name, int from_prompts1c)   //  returns 1 if an error occurred
 	{
 	parser_allocate();  //  ParseStr() will test if this alloc worked
 	if (str_find_ci(FormStr, "fn1") || str_find_ci(FormStr, "fn2"))
-	    insertFunctionNames(FormStr, Fractal);		// insert function names in place of literal "fn1", "fn2"
+	    insertFunctionNames(FormStr, gManp->Fractal);		// insert function names in place of literal "fn1", "fn2"
 	if (ParseStr(FormStr,1))
 	    return 1;   //  parse failed, don't change fn pointers
 	else
@@ -2398,13 +2264,12 @@ int fpFormulaSetup(char *FormFile)
     {
     int RunFormRes;              // CAE fp
     strcpy(FormName, FormFile);	// yeah yeah, it's hard to interface two independent systems
-    MathType = DOUBLEFLOAT;
+    gManp->MathType = DOUBLEFLOAT;
     RunFormRes = !RunForm(FormName, 0); // RunForm() returns 1 for failure
     return RunFormRes;
     }
 
 long total_formula_mem;
-BYTE used_extra = 0;
 static void parser_allocate(void)
     {
     // CAE fp changed below for v18
@@ -2433,11 +2298,9 @@ static void parser_allocate(void)
 	v_size = sizeof(struct ConstArg) * Max_Args;
 	p_size = sizeof(struct fls far *) * Max_Ops;
 	total_formula_mem = f_size+Load_size+Store_size+v_size+p_size + sizeof(struct PEND_OP) * Max_Ops;
-	used_extra = 0;
-        end_dx_array = 2L*(long)(xdots+ydots)*sizeof(double);
+        end_dx_array = 2L*(long)(gManp->xdots+ gManp->ydots)*sizeof(double);
       
 	typespecific_workarea = malloc((long)(f_size+Load_size+Store_size+v_size+p_size) * 16L);	// 16 is safety margin because of silly 16 bit pointers
-        used_extra = 0;
       
 	f = (void(far * far *)(void))typespecific_workarea;
 //	Store = (struct Arg far * far *)(f + Max_Ops);
@@ -2474,7 +2337,7 @@ static void parser_allocate(void)
 
 void free_workarea()
     {
-    if(typespecific_workarea && used_extra == 0) 
+    if(typespecific_workarea) 
 	{
 	free(typespecific_workarea);
 	}
@@ -3666,7 +3529,7 @@ void	insertFunctionNames(char *FormStr, CFract Fractal)		// insert function name
 
 int	InitParserArithmetic(void)
     {
-    MathType = (MATH_TYPE)GetMathType();
+    gManp->MathType = (MATH_TYPE)GetMathType();
     if (FormStr)				//  No errors while making string
 	{
 	parser_allocate();		//  ParseStr() will test if this alloc worked 
@@ -3747,7 +3610,7 @@ int	ProcessFormulaString(char *FormulaString)
 	return -1;	// Syntax error already reported by parser
 	}
     if (str_find_ci(FormStr, "fn1") || str_find_ci(FormStr, "fn2"))
-	insertFunctionNames(FormStr, Fractal);		// insert function names in place of literal "fn1", "fn2"
+	insertFunctionNames(FormStr, gManp->Fractal);		// insert function names in place of literal "fn1", "fn2"
     return 0;
     }
 

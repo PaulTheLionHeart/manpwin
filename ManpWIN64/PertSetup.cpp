@@ -8,26 +8,11 @@
 #include <vector>
 #include "PertEngine.h"
 #include "Timer.h"
+#include "Manp.h"
 
 #define min(a,b)    (((a) < (b)) ? (a) : (b))
 
-std::vector<ExpComplex>	ExpXSubN {0};		// references
-std::vector<Complex>	XSubN {0};
-int	ArithType = DOUBLE;
-int	MaxRefIteration = 0;
-BLAS    Bla;					// Bilinear Approximation
-int	SlopeDegree = 2;
-
-extern	int	subtype;
-extern	double	param[];
-extern	WORD	degree;				// power
-extern	bool	EnableApproximation;		// use BLA on perturbation
-extern	int	xdots, ydots;
-extern	char	PertStatus[];
-extern	int	precision;
-
 extern	std::atomic<bool> gStopRequested;	// force early exit
-extern	std::vector<CPerturbation> PertCalculator;
 
 ///////////////////////////////////////////////
 //  A small struct just for reference building.
@@ -78,20 +63,32 @@ void	PertSetupArithType(int &ArithType, int subtype, long MaxIteration, int prec
 	    ArithType = EXP_UNSUPPORTED;		// use Use BLA perturbation code but don't process via BLA table
 	}
  
+ /*
+    size_t newSize = MaxIteration + 1;
     if (ArithType == EXP_UNSUPPORTED || ArithType == FLOATEXP) 
 	{
 	// get memory for Z array
-	ExpXSubN.resize(MaxIteration + 1);
+	// shrink if we dropped a lot
+	if (ExpXSubN.capacity() > newSize * 2)
+	    {
+	    std::vector<decltype(ExpXSubN)::value_type>().swap(ExpXSubN);
+	    }
+	ExpXSubN.resize(newSize);
 	}
     else
 	{
 	// get memory for Z array
-	XSubN.resize(MaxIteration + 1);
+	if (XSubN.capacity() > newSize * 2)
+	    {
+	    std::vector<decltype(XSubN)::value_type>().swap(XSubN);
+	    }
+	XSubN.resize(newSize);
 	}
-    if (EnableApproximation)
+*/
+    if (gManp->EnableApproximation)
 	{
 	if (ArithType == EXP_UNSUPPORTED || ArithType == DBL_UNSUPPORTED)
-	    EnableApproximation = false;		// we don't support these fractals with BLA
+	    gManp->EnableApproximation = false;		// we don't support these fractals with BLA
 	}
 #ifdef _DEBUG
     char	buf[256];
@@ -629,11 +626,48 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->y += centre->y;
 	    Z->x += centre->x;
 	    break;
-
+/*
+	case 59:							// Fractional Power
+	    {
+	    BigDouble	BigPower = param[2];
+	    *Z = (*Z ^ BigPower) + *centre;
+	    break;
+	    }
+*/
 	default:
 	    SlopeDegree = 2;
 	    *Z = *Z * *Z + *centre;
 	    break;
+	}
+    }
+
+//////////////////////////////////////////////////////////////////////
+// Get memory for the reference table
+//////////////////////////////////////////////////////////////////////
+
+void EnsureReferenceBufferSize(int arithType, int maxIteration)
+    {
+    size_t newSize = maxIteration + 1;
+
+    if (arithType == EXP_UNSUPPORTED || arithType == FLOATEXP)
+	{
+	// switching TO ExpXSubN -> free XSubN
+	std::vector<decltype(gManp->XSubN)::value_type>().swap(gManp->XSubN);
+
+	if (gManp->ExpXSubN.capacity() > newSize * 2)
+	    std::vector<decltype(gManp->ExpXSubN)::value_type>().swap(gManp->ExpXSubN);
+
+	gManp->ExpXSubN.resize(newSize);
+	}
+    else
+	{
+	// switching TO XSubN -> free ExpXSubN  THIS IS THE KEY
+	std::vector<decltype(gManp->ExpXSubN)::value_type>().swap(gManp->ExpXSubN);
+
+	if (gManp->XSubN.capacity() > newSize * 2)
+	    std::vector<decltype(gManp->XSubN)::value_type>().swap(gManp->XSubN);
+
+	gManp->XSubN.resize(newSize);
 	}
     }
 
@@ -654,12 +688,25 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
     double	ZoomRadius = mpfr_get_d(BigWidth.x, MPFR_RNDN);
 //    char	buf[256];
 
+    if (!gManp->precision)				// not set up yet
+	gManp->calcfracinit();
     RefScratch scratch;
-    scratch.Init(precision * SAFETYMARGIN);	// setup temp variables for reference creation
+    scratch.Init(gManp->precision * SAFETYMARGIN);	// setup temp variables for reference creation
 
     SimpleTimer  tRef;
     tRef.start();
-   
+    EnsureReferenceBufferSize(ArithType, maxIteration);
+
+//#ifdef _DEBUG
+    char buf[256];
+    sprintf(buf, "ExpXSubN cap: %zu, size: %zu\n", gManp->ExpXSubN.capacity(), gManp->ExpXSubN.size());
+    OutputDebugStringA(buf);
+
+    sprintf(buf, "XSubN cap: %zu, size: %zu\n", gManp->XSubN.capacity(), gManp->XSubN.size());
+    OutputDebugStringA(buf);
+//#endif
+
+/*  
     if (ArithType == EXP_UNSUPPORTED || ArithType == FLOATEXP)
 	{
 	// get memory for Z array
@@ -670,6 +717,7 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 	// get memory for Z array
 	XSubN.resize(maxIteration + 1);
 	}
+*/
 
     zBig = 0.0;
     for (int i = 0; i <= maxIteration; i++)
@@ -678,11 +726,11 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 	    return -1;
 	if (ArithType == FLOATEXP || ArithType == EXP_UNSUPPORTED)
 	    {
-	    PertCalculator[0].BigComplex2ExpComplex(&ExpXSubN[i], zBig);
+	    gManp->PertCalculator[0]->BigComplex2ExpComplex(&gManp->ExpXSubN[i], zBig);
 	    }
 	else
 	    {
-	    XSubN[i] = zBig.CBig2Double();
+	    gManp->XSubN[i] = zBig.CBig2Double();
 	    }
 
 	DWORD now = GetTickCount();
@@ -698,18 +746,18 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 	    double progress = (double)i / maxIteration;
 	    int percent = (int)(progress * 100.0);
 
-	    _snprintf_s(PertStatus, MAXLINE, _TRUNCATE, "Ref=(%d%%)", percent);
+	    _snprintf_s(gManp->PertStatus, MAXLINE, _TRUNCATE, "Ref=(%d%%)", percent);
 //	    *pPertProgress = percent;
 	    }
 
 	// Calculate the set
-	RefFunctions(&centre, &zBig, SlopeDegree, subtype, power, param, scratch);
-	if (EnableApproximation && !WeHaveMaxRefIteration)			// only needed for BLA
+	RefFunctions(&centre, &zBig, SlopeDegree, subtype, power, gManp->param, scratch);
+	if (&gManp->EnableApproximation && !WeHaveMaxRefIteration)		// only needed for BLA
 	    {
 	    CoordinateMagnitudeSquared = zBig.CSumSqr();			// no point in further testing once we have MaxRefIteration
 	    if ((CoordinateMagnitudeSquared) > bailout && !WeHaveMaxRefIteration)
 		{
-		MaxRefIteration = i;						// needed for BLA
+		gManp->MaxRefIteration = i;						// needed for BLA
 		WeHaveMaxRefIteration = true;
 		break;								// the rest of the table isn't needed for BLA
 		}
@@ -717,7 +765,7 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 	}
 
     if (!WeHaveMaxRefIteration)
-	MaxRefIteration = maxIteration;	// MaxRefIteration not found in main reference loop
+	gManp->MaxRefIteration = maxIteration;	// MaxRefIteration not found in main reference loop
 
     double refSeconds = tRef.stop_ms();
     auto s = FormatElapsed(refSeconds);
@@ -725,7 +773,7 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 #ifdef _DEBUG
     {
     char    buf[256];
-    SAFE_SPRINTF(buf, "Reference build: %s, MaxIter = %d, MaxRefIter = %d\n", s.c_str(), maxIteration, MaxRefIteration);
+    SAFE_SPRINTF(buf, "Reference build: %s, MaxIter = %d, MaxRefIter = %d\n", s.c_str(), maxIteration, gManp->MaxRefIteration);
     OutputDebugStringA(buf);
     }
 #endif
@@ -734,23 +782,23 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
     SimpleTimer  tBla;
     tBla.start();
 
-    if (EnableApproximation)
+    if (&gManp->EnableApproximation)
 	{
-	Bla.clear();
-	int M = MaxRefIteration; // the period
-	int image_size = min(xdots, ydots);
+	gManp->Bla.clear();
+	int M = gManp->MaxRefIteration; // the period
+	int image_size = min(gManp->xdots, gManp->ydots);
 	if (ArithType == FLOATEXP)
 	    {
 	    // set up parameters for BLA table
 	    ExpComplex temp_size_image_size = ExpComplex(ZoomRadius / (double)image_size, ZoomRadius / (double)image_size);
-	    floatexp blaSize = blaSize.hypotExp(temp_size_image_size.x * xdots * 0.5, temp_size_image_size.y * ydots * 0.5);
-	    Bla.initExp(M, ExpXSubN, blaSize, power, subtype, maxIteration, param);
+	    floatexp blaSize = blaSize.hypotExp(temp_size_image_size.x * gManp->xdots * 0.5, temp_size_image_size.y * gManp->ydots * 0.5);
+	    gManp->Bla.initExp(M, gManp->ExpXSubN, blaSize, power, subtype, maxIteration, gManp->param);
 	    }
 	else if (ArithType == DOUBLE)
 	    {
 	    Complex temp_size_image_size = Complex(ZoomRadius / (double)image_size, ZoomRadius / (double)image_size);
-	    double blaSize = hypot(temp_size_image_size.x * xdots * 0.5, temp_size_image_size.y * ydots * 0.5);
-	    Bla.init(M, XSubN, blaSize, power, subtype, maxIteration, param);
+	    double blaSize = hypot(temp_size_image_size.x * gManp->xdots * 0.5, temp_size_image_size.y * gManp->ydots * 0.5);
+	    gManp->Bla.init(M, gManp->XSubN, blaSize, power, subtype, maxIteration, gManp->param);
 	    }
 	}
 

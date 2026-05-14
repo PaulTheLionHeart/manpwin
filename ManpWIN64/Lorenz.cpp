@@ -17,34 +17,24 @@
 #include "Matrix.h"
 #include "Complex.h"
 #include "Fract.h"
+#include "Manp.h"
 #include "SafeStrings.h"
 #include "..\parser\TrigFn.h"
 
 #define NUMIFS	  32	 /* number of ifs functions in ifs array */
 #define IFSPARM    7	 /* number of ifs parameters */
 #define IFS3DPARM 13	 /* number of ifs 3D parameters */
-#define XROT	  x_rot		/* rotate x-axis 60 degrees */
-#define YROT	  y_rot		/* rotate y-axis 90 degrees */
-#define ZROT	  z_rot		/* rotate x-axis  0 degrees */
+#define XROT	  gManp->x_rot		/* rotate x-axis 60 degrees */
+#define YROT	  gManp->y_rot		/* rotate y-axis 90 degrees */
+#define ZROT	  gManp->z_rot		/* rotate x-axis  0 degrees */
 
 #define COSB   dx
 #define SINABC dy
 
 #define	sign(x)		(((x)>0)?1:((x)<0)?-1:0)
 
-extern	double	x_rot;			/* angle display plane to x axis */
-extern	double	y_rot;			/* angle display plane to y axis */
-extern	double	z_rot;			/* angle display plane to z axis */
-
-extern	int	xdots, ydots;
-extern	CFract	Fractal;			// current fractal stuff
-
-extern	HWND	GlobalHwnd;		// to allow passing of hwnd 
+//extern	HWND	GlobalHwnd;		// to allow passing of hwnd 
 extern	char	*str_find_ci(char *, char *);
-extern	CPlot	Plot;		// image plotting routines 
-
-extern	CDib	Dib;			// Device Independent Bitmaps
-extern	CTrueCol    TrueCol;		// palette info
 
 #define	MaxIFSNameChoices   80
 extern	char	lptr[][100];
@@ -115,9 +105,9 @@ static void setupmatrix(MATRIX);
 //static int  long3dviewtransf(struct long3dvtinf *inf);
 static int  float3dviewtransf(struct float3dvtinf *inf);
 
-extern WORD type;
+//extern WORD type;
 //extern int init3d[15];
-extern char floatflag;
+//extern char floatflag;
 /*extern */VECTOR view;
 /*extern */int xxadjust = 0, yyadjust = 0;
 /*extern */int xxadjust1 = 0, yyadjust1 = 0;
@@ -125,14 +115,14 @@ extern char floatflag;
 /*extern */int xshift1 = 0,yshift1 = 0;
 //extern int	debugflag;			/* for debugging purposes */
 //extern int	xdots, ydots;		/* coordinates of dots on the screen  */
-extern long	threshold;				/* try this many iterations */
-extern double param[];
-extern double	xxmin,xxmax,yymin,yymax/*,xx3rd,yy3rd*/; /* selected screen corners  */
-double	xx3rd,yy3rd; /* selected screen corners  */
+//extern long	threshold;				/* try this many iterations */
+//extern double param[];
+//extern double	xxmin,xxmax,yymin,yymax/*,xx3rd,yy3rd*/; /* selected screen corners  */
+//double	xx3rd,yy3rd; /* selected screen corners  */
 //extern	int	diskvideo;			/* for disk-video klooges */
-/*extern */int	bitshift;			/* bit shift for fudge */
-/*extern */long	fudge;				/* fudge factor (2**n) */
-extern int	colors; 			/* maximum colors available */
+//extern int	bitshift;			/* bit shift for fudge */
+//extern long	fudge;				/* fudge factor (2**n) */
+//extern int	colors; 			/* maximum colors available */
 //extern int display3d;
 
 /*extern */float *ifs_defn;
@@ -145,8 +135,8 @@ extern char	lsys_Label[];			// for display in type selection
 int	IFS_ptr = 0;
 int	IFS_num;
 extern	int	lsys_num;
-extern	double	mandel_width;			// width of display
-extern	double	hor, vert, ScreenRatio;
+//extern	double	mandel_width;			// width of display
+//extern	double	/*hor, vert, */ScreenRatio;
 
 //extern	void   (_fastcall *standardplot)(int,int,int);
 extern	void	fastline(const WORD, const WORD, const WORD, const WORD, const DWORD);
@@ -163,7 +153,7 @@ static double initorbit[3];
 extern int  calc_status, resuming;
 //extern int  diskisactive;
 extern char savename[];
-extern	DWORD	BackgroundColour;	// set background colour for IFS and L-System fractals
+//extern	DWORD	BackgroundColour;	// set background colour for IFS and L-System fractals
 
 /* these are potential user parameters */
 int WFconnect = 1;    /* flag to connect points with a line */
@@ -232,32 +222,32 @@ int setup_convert_to_screen(struct affine *scrn_cnvt)
       a*xxmax+b*yymin+e == xdots-1  (lower right)
    */
 
-   xxmin = hor;								// these ones are needed for lorenz type fractals
-   xxmax = hor + mandel_width * ScreenRatio;
-   yymin = vert;
-   yymax = vert + mandel_width;
+   gManp->xxmin = gManp->hor;								// these ones are needed for lorenz type fractals
+   gManp->xxmax = gManp->hor + gManp->mandel_width * gManp->AspectRatio;
+   gManp->yymin = gManp->vert;
+   gManp->yymax = gManp->vert + gManp->mandel_width;
 
 
 
-   xx3rd = xxmin;
-   yy3rd = yymin;
+   gManp->xx3rd = gManp->xxmin;
+   gManp->yy3rd = gManp->yymin;
 
 
 
 
    
-   mat[0][0] = xxmin;
-   mat[0][1] = yymax;
+   mat[0][0] = gManp->xxmin;
+   mat[0][1] = gManp->yymax;
    mat[0][2] = 1.0;
-   mat[1][0] = xx3rd;
-   mat[1][1] = yy3rd;
+   mat[1][0] = gManp->xx3rd;
+   mat[1][1] = gManp->yy3rd;
    mat[1][2] = 1.0;
-   mat[2][0] = xxmax;
-   mat[2][1] = yymin;
+   mat[2][0] = gManp->xxmax;
+   mat[2][1] = gManp->yymin;
    mat[2][2] = 1.0;
    vec[0]    = 0.0;
    vec[1]    = 0.0;
-   vec[2]    = (double)(xdots-1);
+   vec[2]    = (double)(gManp->xdots-1);
 
    if(solve3x3(mat,vec, &(scrn_cnvt->a)))
       return(-1);
@@ -269,8 +259,8 @@ int setup_convert_to_screen(struct affine *scrn_cnvt)
       (mat[][] has not changed - only vec[])
    */
    vec[0]    = 0.0;
-   vec[1]    = (double)(ydots-1);
-   vec[2]    = (double)(ydots-1);
+   vec[1]    = (double)(gManp->ydots-1);
+   vec[2]    = (double)(gManp->ydots-1);
 
    if(solve3x3(mat,vec, &scrn_cnvt->c))
       return(-1);
@@ -316,22 +306,22 @@ int orbit3dfloatsetup()
    waste = 100;
    ProjectionPlane = 2;
 
-   if(type==FPHENON || type==FPPICKOVER || type==FPGINGERBREAD || type == LATOO || type == KAMFP || type == KAM3DFP || type == FPHOPALONG || type == INVERSEJULIAFP)
+   if(gManp->type==FPHENON || gManp->type==FPPICKOVER || gManp->type==FPGINGERBREAD || gManp->type == LATOO || gManp->type == KAMFP || gManp->type == KAM3DFP || gManp->type == FPHOPALONG || gManp->type == INVERSEJULIAFP)
       WFconnect=0;
-   if (type == FPLORENZ3D || type==FPLORENZ3D1 || type==FPLORENZ3D3 || type==FPLORENZ3D4)
+   if (gManp->type == FPLORENZ3D || gManp->type==FPLORENZ3D1 || gManp->type==FPLORENZ3D3 || gManp->type==FPLORENZ3D4)
       waste = 750;
-   if (type==FPROSSLER)
+   if (gManp->type==FPROSSLER)
       waste = 500;
-   if (type==FPLORENZ)
+   if (gManp->type==FPLORENZ)
       ProjectionPlane = 1; /* plot x and z */
 
    initorbit[0] = 1;  /* initial conditions */
    initorbit[1] = 1;
    initorbit[2] = 1;
-   if (type==FPGINGERBREAD)
+   if (gManp->type==FPGINGERBREAD)
    {
-      initorbit[0] = param[0];	/* initial conditions */
-      initorbit[1] = param[1];
+      initorbit[0] = gManp->param[0];	/* initial conditions */
+      initorbit[1] = gManp->param[1];
 //      initorbit[0] = -0.1;	/* initial conditions */
 //      initorbit[1] = 0.0;
    }
@@ -344,30 +334,30 @@ int orbit3dfloatsetup()
 //       waste = 2000;
        }
 */
-   if(type==FPHENON || type==FPPICKOVER)
+   if(gManp->type==FPHENON || gManp->type==FPPICKOVER)
    {
-      a =  param[0];
-      b =  param[1];
-      c =  param[2];
-      d =  param[3];
+      a = gManp->param[0];
+      b = gManp->param[1];
+      c = gManp->param[2];
+      d = gManp->param[3];
 //      a =  2.24;
 //      b =  0.43;
 //      c =  -0.65;
 //      d =  -2.43;
    }
-   else if (type == ICON || type == ICON3D)        // DMF
+   else if (gManp->type == ICON || gManp->type == ICON3D)        // DMF
        {
        initorbit[0] = 0.01;  // initial conditions
        initorbit[1] = 0.003;
        WFconnect = 0;
        waste = 2000;
 	// Initialize parameters
-       a = param[0];
-       b = param[1];
-       c = param[2];
-       d = param[3];
+       a = gManp->param[0];
+       b = gManp->param[1];
+       c = gManp->param[2];
+       d = gManp->param[3];
        }
-   else if(type==KAMFP || type==KAM3DFP)
+   else if(gManp->type==KAMFP || gManp->type==KAM3DFP)
    {
 //       a = HenonA;
 //       a = 1.3;
@@ -378,18 +368,18 @@ int orbit3dfloatsetup()
 //       t = l_d = (threshold > 3200) ? 32000 : threshold * 10;
 //       t = l_d = threshold;
 
-      a = param[0];	      // angle
-      if(param[1] <= 0.0)
-	 param[1] = .01;
-      b =  param[1];	// stepsize
-      c =  param[2];	// stop
-      t = l_d =  (long)param[3];     // points per orbit
+      a = gManp->param[0];	      // angle
+      if(gManp->param[1] <= 0.0)
+	  gManp->param[1] = .01;
+      b = gManp->param[1];	// stepsize
+      c = gManp->param[2];	// stop
+      t = l_d =  (long)gManp->param[3];     // points per orbit
 
       sinx = sin(a);
       cosx = cos(a);
       orbit = 0;
       initorbit[0] = initorbit[1] = initorbit[2] = 0;
-   } else if(type == FPHOPALONG || type == FPMARTIN || type == CHIP || type == QUADRUPTWO || type == THREEPLY)
+   } else if(gManp->type == FPHOPALONG || gManp->type == FPMARTIN || gManp->type == CHIP || gManp->type == QUADRUPTWO || gManp->type == THREEPLY)
 
    {
       initorbit[0] = 0;  /* initial conditions */
@@ -397,11 +387,11 @@ int orbit3dfloatsetup()
       initorbit[2] = 0;
       WFconnect = 0;
 
-      a =  param[0];
-      b =  param[1];
-      c =  param[2];
-      d =  param[3];
-      if (type == THREEPLY)
+      a = gManp->param[0];
+      b = gManp->param[1];
+      c = gManp->param[2];
+      d = gManp->param[3];
+      if (gManp->type == THREEPLY)
 	  {
 	  COSB = cos(b);
 	  SINABC = sin(a + b + c);
@@ -415,10 +405,10 @@ int orbit3dfloatsetup()
    } 
    else
    {
-      dt = param[0];
-      a =  param[1];
-      b =  param[2];
-      c =  param[3];
+      dt = gManp->param[0];
+      a = gManp->param[1];
+      b = gManp->param[2];
+      c = gManp->param[3];
    }
 
    /* precalculations for speed */
@@ -681,12 +671,12 @@ Complex	SelectTrig(Complex in, int TrigType)
 
 // dmf
 #undef  LAMBDA
-#define LAMBDA  param[0]
-#define ALPHA   param[1]
-#define BETA    param[2]
-#define GAMMA   param[3]
-#define OMEGA   param[4]
-#define DEGREE  param[5]
+#define LAMBDA  gManp->param[0]
+#define ALPHA   gManp->param[1]
+#define BETA    gManp->param[2]
+#define GAMMA   gManp->param[3]
+#define OMEGA   gManp->param[4]
+#define DEGREE  gManp->param[5]
 
 int iconfloatorbit(double *x, double *y, double *z)
     {
@@ -721,10 +711,10 @@ int iconfloatorbit(double *x, double *y, double *z)
 #undef GAMMA
 #endif
 
-#define PAR_A   param[0]
-#define PAR_B   param[1]
-#define PAR_C   param[2]
-#define PAR_D   param[3]
+#define PAR_A   gManp->param[0]
+#define PAR_B   gManp->param[1]
+#define PAR_C   gManp->param[2]
+#define PAR_D   gManp->param[3]
 
 Complex	NewZ, OldZ;
 
@@ -741,23 +731,23 @@ int latoofloatorbit(double *x, double *y, double *z)
     //    *x = sin(yold * PAR_B) + PAR_C * sin(xold * PAR_B);
     OldZ.x = yold * PAR_B;
     OldZ.y = 0;          // old = (y * B) + 0i (in the complex)
-    TrigFn.CMPLXtrig(&OldZ, &NewZ, Fractal.Fn1Index);	// how do we make this work? #include	".\parser\mpmath.h" of course... loads globals
+    TrigFn.CMPLXtrig(&OldZ, &NewZ, gManp->Fractal.Fn1Index);	// how do we make this work? #include	".\parser\mpmath.h" of course... loads globals
     tmp = (double)NewZ.x;
     OldZ.x = xold * PAR_B;
     OldZ.y = 0;          // old = (x * B) + 0i
-    TrigFn.CMPLXtrig(&OldZ, &NewZ, Fractal.Fn1Index);	// how do we make this work? #include	".\parser\mpmath.h" of course... loads globals
+    TrigFn.CMPLXtrig(&OldZ, &NewZ, gManp->Fractal.Fn1Index);	// how do we make this work? #include	".\parser\mpmath.h" of course... loads globals
     *x = PAR_C * NewZ.x + tmp;
 
     //    *y = sin(xold * PAR_A) + PAR_D * sin(yold * PAR_A);
     OldZ.x = xold * PAR_A;
     OldZ.y = 0;          /* old = (y * A) + 0i (in the complex)*/
 //    CMPLXtrig2(OldZ, NewZ);
-    NewZ = SelectTrig(OldZ, (int)param[4]);
+    NewZ = SelectTrig(OldZ, (int)gManp->param[4]);
     tmp = (double)NewZ.x;
     OldZ.x = yold * PAR_A;
     OldZ.y = 0;          /* old = (x * B) + 0i */
 //    CMPLXtrig3(OldZ, NewZ);
-    NewZ = SelectTrig(OldZ, (int)param[5]);
+    NewZ = SelectTrig(OldZ, (int)gManp->param[5]);
     *y = PAR_D * NewZ.x + tmp;
 
     return(0);
@@ -809,9 +799,9 @@ int orbit2dfloat(void)
    }
 
    count = 0;
-   if(TrueCol.inside_colour > 0)
-      color = TrueCol.inside_colour;
-   if(color >= colors)
+   if(gManp->TrueCol.inside_colour > 0)
+      color = gManp->TrueCol.inside_colour;
+   if(color >= gManp->colors)
       color = 1;
    oldcol = oldrow = -1;
    x = initorbit[0];
@@ -831,13 +821,13 @@ int orbit2dfloat(void)
    }
 */
 
-   maxct = threshold * 400L;
+   maxct = gManp->threshold * 400L;
    ct = 0L;
    ret = 0;
    while(ct++ < maxct) // loop until keypress or threshold
 //   while(1)
    {
-      if (user_data(GlobalHwnd) < 0)  // keypress bails out
+      if (user_data(gManp->GlobalHwnd) < 0)  // keypress bails out
 //      if(check_key())
       {
 /*
@@ -856,70 +846,70 @@ int orbit2dfloat(void)
       if (++count > 1000)
       {        /* time to switch colors? */
 	 count = 0;
-	 if (++color >= colors)   /* another color to switch to? */
+	 if (++color >= gManp->colors)   /* another color to switch to? */
 	      color = 1;	/* (don't use the background color) */
       }
 
       col = (int)(cvt.a*x + cvt.b*y + cvt.e);
       row = (int)(cvt.c*x + cvt.d*y + cvt.f);
-      if ( col >= 0 && col < xdots && row >= 0 && row < ydots )
+      if ( col >= 0 && col < gManp->xdots && row >= 0 && row < gManp->ydots )
       {
 
 	 if(oldcol != -1 && WFconnect)
-	    fastline((WORD)col,(WORD)row,(WORD)oldcol,(WORD)oldrow,color&(colors-1));
+	    fastline((WORD)col,(WORD)row,(WORD)oldcol,(WORD)oldrow,color&(gManp->colors-1));
 	 else
-	    Plot.PlotPoint((WORD)col,(WORD)row,(DWORD)(color&(colors-1)));
+	     gManp->Plot.PlotPoint((WORD)col,(WORD)row,(DWORD)(color&(gManp->colors-1)));
 	 oldcol = col;
 	 oldrow = row;
       }
       else
 	 oldrow = oldcol = -1;
-      if (type == FPLORENZ)
+      if (gManp->type == FPLORENZ)
 	{
 	if (lorenz3dfloatorbit(p0, p1, p2))
 	    break;
 	}
-      else if (type == FPMARTIN)
+      else if (gManp->type == FPMARTIN)
 	{
 	if (martin2dfloatorbit(p0, p1, p2))
 	    break;
 	}
-      else if (type == FPHOPALONG)
+      else if (gManp->type == FPHOPALONG)
 	{
 	if (hopalong2dfloatorbit(p0, p1, p2))
 	    break;
 	}
-      else if (type == FPGINGERBREAD)
+      else if (gManp->type == FPGINGERBREAD)
 	  {
 	  if (gingerbreadfloatorbit(p0, p1, p2))
 	      break;
 	  }
-      else if (type == KAMFP)
+      else if (gManp->type == KAMFP)
 	  {
 	  if (kamtorusfloatorbit(p0, p1, p2))
 	      break;
 	  }
-      else if (type == LATOO)
+      else if (gManp->type == LATOO)
 	  {
 	  if (latoofloatorbit(p0, p1, p2))
 	      break;
 	  }
-      else if (type == CHIP)
+      else if (gManp->type == CHIP)
 	  {
 	  if (chip2dfloatorbit(p0, p1, p2))
 	      break;
 	  }
-      else if (type == ICON)
+      else if (gManp->type == ICON)
 	  {
 	  if (iconfloatorbit(p0, p1, p2))
 	      break;
 	  }
-      else if (type == QUADRUPTWO)
+      else if (gManp->type == QUADRUPTWO)
 	  {
 	  if (quadruptwo2dfloatorbit(p0, p1, p2))
 	      break;
 	  }
-      else if (type == THREEPLY)
+      else if (gManp->type == THREEPLY)
 	  {
 	  if (threeply2dfloatorbit(p0, p1, p2))
 	      break;
@@ -953,7 +943,7 @@ int orbit3dfloatcalc(void)
    oldcol = oldrow = -1;
    oldcol1 = oldrow1 = -1;
    color = 2;
-   if(color >= colors)
+   if(color >= gManp->colors)
       color = 1;
    inf.orbit[0] = initorbit[0];
    inf.orbit[1] = initorbit[1];
@@ -968,7 +958,7 @@ int orbit3dfloatcalc(void)
 
    fp = open_orbitsave();
 */
-   maxct = threshold*40L;
+   maxct = gManp->threshold*40L;
    count = inf.ct = 0L;
    ret = 0;
    while(inf.ct++ < (long)maxct) /* loop until keypress or threshold */
@@ -977,11 +967,11 @@ int orbit3dfloatcalc(void)
       if (++count > 1000)
       {        /* time to switch colors? */
 	 count = 0;
-	 if (++color >= colors)   /* another color to switch to? */
+	 if (++color >= gManp->colors)   /* another color to switch to? */
 	    color = 1;	      /* (don't use the background color) */
       }
 
-      if (user_data(GlobalHwnd) < 0)  // keypress bails out
+      if (user_data(gManp->GlobalHwnd) < 0)  // keypress bails out
 //      if(check_key())
       {
 //	 nosnd();
@@ -989,22 +979,22 @@ int orbit3dfloatcalc(void)
 	 break;
       }
 
-      if (type == FPROSSLER)
+      if (gManp->type == FPROSSLER)
 	{
 	rosslerfloatorbit(&inf.orbit[0],&inf.orbit[1],&inf.orbit[2]);
 //	    break;
 	}
-      else if (type == FPPICKOVER)
+      else if (gManp->type == FPPICKOVER)
 	pickoverfloatorbit(&inf.orbit[0],&inf.orbit[1],&inf.orbit[2]);
-      else if (type == FPLORENZ3D)
+      else if (gManp->type == FPLORENZ3D)
 	lorenz3dfloatorbit(&inf.orbit[0],&inf.orbit[1],&inf.orbit[2]);
-      else if (type == FPLORENZ3D1)
+      else if (gManp->type == FPLORENZ3D1)
 	lorenz3d1floatorbit(&inf.orbit[0],&inf.orbit[1],&inf.orbit[2]);
-      else if (type == FPLORENZ3D3)
+      else if (gManp->type == FPLORENZ3D3)
 	lorenz3d3floatorbit(&inf.orbit[0],&inf.orbit[1],&inf.orbit[2]);
-      else if (type == FPLORENZ3D4)
+      else if (gManp->type == FPLORENZ3D4)
 	lorenz3d4floatorbit(&inf.orbit[0],&inf.orbit[1],&inf.orbit[2]);
-      else if (type == KAM3DFP)
+      else if (gManp->type == KAM3DFP)
 	kamtorusfloatorbit(&inf.orbit[0],&inf.orbit[1],&inf.orbit[2]);
 
       if (float3dviewtransf(&inf))
@@ -1015,9 +1005,9 @@ int orbit3dfloatcalc(void)
 //	    if(realtime)
 //	       whichimage=1;
 	    if(oldcol != -1 && WFconnect)
-	       fastline((WORD)inf.col,(WORD)inf.row,(WORD)oldcol,(WORD)oldrow,color&(colors-1));
+		fastline((WORD)inf.col,(WORD)inf.row,(WORD)oldcol,(WORD)oldrow,color&(gManp->colors-1));
 	    else
-		Plot.PlotPoint((WORD)inf.col,(WORD)inf.row,color&(colors-1));
+		gManp->Plot.PlotPoint((WORD)inf.col,(WORD)inf.row,color&(gManp->colors-1));
 	 }
 	 oldcol = inf.col;
 	 oldrow = inf.row;
@@ -1042,7 +1032,7 @@ int dynam2dfloatsetup()
 {
    WFconnect = 0;
    euler = 0;
-   d = param[0];		// number of intervals 
+   d = gManp->param[0];		// number of intervals 
 //   d = threshold;
    if (d<0) {
       d = -d;
@@ -1052,10 +1042,10 @@ int dynam2dfloatsetup()
       d = 1;
    }
 
-   if (type== DYNAMICFP) {
-       a = param[2];		// parameter
-       b = param[3];		// parameter
-       dt = param[1];		// step size
+   if (gManp->type== DYNAMICFP) {
+       a = gManp->param[2];		// parameter
+       b = gManp->param[3];		// parameter
+       dt = gManp->param[1];		// step size
        if (dt<0) {
 	  dt = -dt;
 	  euler = 1;
@@ -1076,7 +1066,7 @@ int dynamfloat(double *x, double *y, double * /*z*/)
     cp.x = b * *x;
     cp.y = 0;
 //    CMPLXtrig0(cp, tmp);
-    TrigFn.CMPLXtrig(&cp, &tmp, Fractal.Fn1Index);	// how do we make this work? #include	".\parser\mpmath.h" of course... loads globals
+    TrigFn.CMPLXtrig(&cp, &tmp, gManp->Fractal.Fn1Index);	// how do we make this work? #include	".\parser\mpmath.h" of course... loads globals
     newy = *y + dt * sin(*x + a * tmp.x);
     if (euler)
 	{
@@ -1086,7 +1076,7 @@ int dynamfloat(double *x, double *y, double * /*z*/)
     cp.x = b * *y;
     cp.y = 0;
 //    CMPLXtrig0(cp, tmp);
-    TrigFn.CMPLXtrig(&cp, &tmp, Fractal.Fn1Index);
+    TrigFn.CMPLXtrig(&cp, &tmp, gManp->Fractal.Fn1Index);
     newx = *x - dt * sin(*y + a * tmp.x);
     *x = newx;
     *y = newy;
@@ -1116,9 +1106,9 @@ int dynam2dfloat()
    p1 = &y;
 
    count = 0;
-   if(TrueCol.inside_colour > 0)
-      color = TrueCol.inside_colour;
-   if(color >= colors)
+   if(gManp->TrueCol.inside_colour > 0)
+      color = gManp->TrueCol.inside_colour;
+   if(color >= gManp->colors)
       color = 1;
    oldcol = oldrow = -1;
 
@@ -1128,7 +1118,7 @@ int dynam2dfloat()
     ret = 0;
     while(1)
 	{
-	if (user_data(GlobalHwnd) < 0)  // keypress bails out
+	if (user_data(gManp->GlobalHwnd) < 0)  // keypress bails out
 	    {
 	    ret = -1;
 	    break;
@@ -1145,33 +1135,34 @@ int dynam2dfloat()
 	  }
       }
 
-      delxx = (xxmax - xxmin) / (xdots-1);
-      delyy = (yymax - yymin) / (ydots-1);
+      delxx = (gManp->xxmax - gManp->xxmin) / (gManp->xdots-1);
+      delyy = (gManp->yymax - gManp->yymin) / (gManp->ydots-1);
       delxx2 = delyy2 = 0.0;
-      xpixel = (xdots - 1)*(xstep+0.5)/d;
-      ypixel = (ydots - 1)*(ystep+0.5)/d;
-      x = (xxmin+delxx*xpixel) + (delxx2*ypixel);
-      y = (yymax-delyy*ypixel) + (-delyy2*xpixel);
-      if (type==MANDELCLOUD) {
+      xpixel = (gManp->xdots - 1)*(xstep+0.5)/d;
+      ypixel = (gManp->ydots - 1)*(ystep+0.5)/d;
+      x = (gManp->xxmin+delxx*xpixel) + (delxx2*ypixel);
+      y = (gManp->yymax-delyy*ypixel) + (-delyy2*xpixel);
+      if (gManp->type==MANDELCLOUD)
+	  {
 	  a = x;
 	  b = y;
-      }
+	  }
       oldcol = -1;
 
-      if (++color >= colors)	// another color to switch to?
+      if (++color >= gManp->colors)	// another color to switch to?
 	  color = 1;		// (don't use the background color)
 
-      for (count=0;count<threshold;count++) {
+      for (count=0;count< gManp->threshold;count++) {
 
 	  col = (int)(cvt.a*x + cvt.b*y + cvt.e);
 	  row = (int)(cvt.c*x + cvt.d*y + cvt.f);
-	  if ( col >= 0 && col < xdots && row >= 0 && row < ydots )
+	  if ( col >= 0 && col < gManp->xdots && row >= 0 && row < gManp->ydots )
 	  {
 //	     if (count>=orbit_delay) {
-		 if(oldcol != -1 && WFconnect)
-		    fastline((WORD)col,(WORD)row,(WORD)oldcol,(WORD)oldrow,color&(colors-1));
-		 else if(count > 0 || type != MANDELCLOUD)
-		     Plot.PlotPoint((WORD)col,(WORD)row,color&(colors-1));
+		if(oldcol != -1 && WFconnect)
+		    fastline((WORD)col,(WORD)row,(WORD)oldcol,(WORD)oldrow,color&(gManp->colors-1));
+		else if(count > 0 || gManp->type != MANDELCLOUD)
+		    gManp->Plot.PlotPoint((WORD)col,(WORD)row,color&(gManp->colors-1));
 /*
 		    draw_line(col,row,oldcol,oldrow,color&(colors-1));
 		 else if(count > 0 || type != MANDELCLOUD)
@@ -1186,7 +1177,7 @@ int dynam2dfloat()
 	  else
 	     oldrow = oldcol = -1;
 
-          if (type == MANDELCLOUD)
+          if (gManp->type == MANDELCLOUD)
 		{
 		if (mandelcloudfloat(p0, p1, NULL))
 		    break;
@@ -1288,7 +1279,7 @@ static int ifs3dfloat(HWND hwnd)
 
 //   fp = open_orbitsave();
 
-   maxct = threshold*40L;
+   maxct = gManp->threshold*40L;
    inf.ct = 0L;
    ret = 0;
    while(inf.ct++ < (long)maxct) /* loop until keypress or threshold */
@@ -1338,9 +1329,9 @@ static int ifs3dfloat(HWND hwnd)
 	 {
 //	    if(realtime)
 //	       whichimage=1;
-	    color = Plot.GetColour((WORD)inf.col,(WORD)inf.row)+1;
-	    if( color < colors ) /* color sticks on last value */
-		Plot.PlotPoint((WORD)inf.col,(WORD)inf.row,color);
+	    color = gManp->Plot.GetColour((WORD)inf.col,(WORD)inf.row)+1;
+	    if( color < gManp->colors ) /* color sticks on last value */
+		gManp->Plot.PlotPoint((WORD)inf.col,(WORD)inf.row,color);
 	 }
       }
    } /* end while */
@@ -1357,7 +1348,7 @@ int ifs(HWND hwnd)			// front-end for ifs2d and ifs3d
 //      notdiskmsg();
 //      return(-1);
 //      }
-   Dib.ClearDib(BackgroundColour);			// set background colour
+    gManp->Dib.ClearDib(gManp->BackgroundColour);			// set background colour
    return((ifs_type == 0) ? ifs2d(hwnd) : ifs3d(hwnd));
 }
 
@@ -1394,7 +1385,7 @@ int ifs2d(HWND hwnd)	// IFS logic shamelessly converted to integer math
    // make maxct a function of screen size
    // 1k times threshold at EGA resolution seems about right
 //   maxct = (float)threshold*(1024.0*xdots*ydots)/(640.0*350.0);
-   maxct = threshold * 40L;
+   maxct = gManp->threshold * 40L;
    ct = 0L;
    x = y = (float)0.0;
    ret = 0;
@@ -1430,12 +1421,12 @@ int ifs2d(HWND hwnd)	// IFS logic shamelessly converted to integer math
       // plot if inside window
       col = (int)(cvt.a * x + cvt.b * y + cvt.e);
       row = (int)(cvt.c * x + cvt.d * y + cvt.f);
-      if (col >= 0 && col < xdots && row >= 0 && row < ydots)
+      if (col >= 0 && col < gManp->xdots && row >= 0 && row < gManp->ydots)
       {
 	 // color is count of hits on this pixel
-	 color = Plot.GetColour((WORD)col,(WORD)row) + 1;
-	 if (color < colors) // color sticks on last value
-	     Plot.PlotPoint((WORD)col,(WORD)row,color);
+	 color = gManp->Plot.GetColour((WORD)col,(WORD)row) + 1;
+	 if (color < gManp->colors) // color sticks on last value
+	     gManp->Plot.PlotPoint((WORD)col,(WORD)row,color);
       }
    }
    return(ret);
@@ -1501,8 +1492,8 @@ static int float3dviewtransf(struct float3dvtinf *inf)
 	    tmpy = (-inf->minvals[1]-inf->maxvals[1])/(2.0); /* center y */
 
 	 /* apply perspective shift */
-	    tmpx += ((double)xshift*(xxmax-xxmin))/(xdots);
-	    tmpy += ((double)yshift*(yymax-yymin))/(ydots);
+	    tmpx += ((double)xshift*(gManp->xxmax- gManp->xxmin))/(gManp->xdots);
+	    tmpy += ((double)yshift*(gManp->yymax- gManp->yymin))/(gManp->ydots);
 	    tmpz = -(inf->maxvals[2]);
 	    Mat.trans(tmpx,tmpy,tmpz,inf->doublemat);
 	    }
@@ -1513,7 +1504,7 @@ static int float3dviewtransf(struct float3dvtinf *inf)
    /* apply perspective if requested */
     inf->row = (int)(inf->cvt.c*inf->viewvect[0] + inf->cvt.d*inf->viewvect[1] + inf->cvt.f + yyadjust);
     inf->col = (int)(inf->cvt.a*inf->viewvect[0] + inf->cvt.b*inf->viewvect[1] + inf->cvt.e + xxadjust);
-    if (inf->col < 0 || inf->col >= xdots || inf->row < 0 || inf->row >= ydots)
+    if (inf->col < 0 || inf->col >= gManp->xdots || inf->row < 0 || inf->row >= gManp->ydots)
 	inf->col = inf->row = -1;
     return(1);
     }
@@ -1543,7 +1534,7 @@ int ifsload(HWND hwnd, char *filename)
 
     ifs_changed = ifs_type = 0;
     rowsize = IFSPARM;
-    type = IFS;
+    gManp->type = IFS;
     if (find_file_item(hwnd, filename,lsys_type,&ifsfile) < 0)
 	return(-1);
 

@@ -6,6 +6,7 @@
 */
 
 #include "OtherFunctions.h"
+#include "Manp.h"
 
 /**************************************************************************
 	Cross Roads Fractal Type Images
@@ -18,8 +19,8 @@ int	COtherFunctions::DoCrossRoads()
     double	x, y, xx, xold, yy, temp, exponent; 
     long	i, num;
 
-    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double) (ydots - 1) / mandel_width;
+    xscale = (double) (gManp->xdots - 1) / (mandel_width * ScreenRatio);
+    yscale = (double) (gManp->ydots - 1) / mandel_width;
 
     BYTE    subtype = 0;
 //    x = 0.365;
@@ -27,12 +28,12 @@ int	COtherFunctions::DoCrossRoads()
     x = 1;
     y = 1;
 
-    a = param[0];
-    b = param[1];
-    C = param[2];
-    exponent = param[3];
-    subtype = (int)param[4];
-    num = (int)param[5];
+    a = gManp->param[0];
+    b = gManp->param[1];
+    C = gManp->param[2];
+    exponent = gManp->param[3];
+    subtype = (int)gManp->param[4];
+    num = (int)gManp->param[5];
     *totpasses = 10;
     //DisplayFractal(hwnd);
 
@@ -150,8 +151,8 @@ int	COtherFunctions::DoCrossRoads()
 	OscProcess.ChangeCoordSystem(&x, &y, &temp, x, y, fabs(atan2(y, x)*180.0/PI), CoordSystem);
 	if (subtype == 9)			// Conflict
 	    {
-	    j = (int)((x - hor) * xscale * 1000) % xdots;
-	    k = (int)((vert + mandel_width - y) * yscale * 1000) % ydots;
+	    j = (int)((x - hor) * xscale * 1000) % gManp->xdots;
+	    k = (int)((vert + mandel_width - y) * yscale * 1000) % gManp->ydots;
 	    }
 	else
 	    {

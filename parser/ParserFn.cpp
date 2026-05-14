@@ -33,32 +33,14 @@
 
 #include "trigfn.h"
 #include "ParserCtx.h"
+#include "ParserTemplate.h"
+#include "ParserFnTemplate.h"
 #include "..\ManpWIN64\Complex.h"
 #include "..\ManpWIN64\DDComplex.h"
 #include "..\ManpWIN64\fract.h"
+#include "..\ManpWIN64\Manp.h"
 
-#define ChkFloatDenom(denom)\
-    if (fabs(denom) <= DBL_MIN) {\
-        if (save_release > 1920) Ctx().overflow = 1;\
-        return;\
-    }
-
-#define ChkDDDenom(denom)\
-    if (fabs(denom) <= DBL_MIN) {\
-        if (save_release > 1920) Ctx().overflow = 1;\
-        return;\
-    }
-
-#define ChkQDDenom(denom)\
-    if (fabs(denom) <= DBL_MIN) {\
-        if (save_release > 1920) Ctx().overflow = 1;\
-        return;\
-    }
-
-static CTrigFn	TrigFn;
-CParser* g_activeParser = nullptr;   // One pointer per thread later; single-thread for now
-
-//static	struct Arg LastSqr;
+//CParser* g_activeParser = nullptr;   // One pointer per thread later; single-thread for now
 
 extern	int Randomized;
 
@@ -70,45 +52,6 @@ static	unsigned long RandNum;
 unsigned long NewRandNum(void)
     {
     return(RandNum = ((RandNum << 15) + rand15()) ^ RandNum);
-    }
-
-void dRandom(void)
-    {
-    long x, y;
-
-    // Use the same algorithm as for fixed math so that they will generate the same fractals when the srand() function is used.
-
-    bitshift = 20;			// got to make up some silly value PHD 2009-10-17
-    x = NewRandNum() >> (32 - bitshift);
-    y = NewRandNum() >> (32 - bitshift);
-    Ctx().Arg2->d.x = ((double)x / (1L << bitshift));
-    Ctx().Arg2->d.y = ((double)y / (1L << bitshift));
-    }
-
-void ddRandom(void)
-    {
-    long x, y;
-
-    // Use the same algorithm as for fixed math so that they will generate the same fractals when the srand() function is used.
-
-    bitshift = 20;			// got to make up some silly value PHD 2009-10-17
-    x = NewRandNum() >> (32 - bitshift);
-    y = NewRandNum() >> (32 - bitshift);
-    Ctx().Arg2->dd.x = ((double)x / (1L << bitshift));
-    Ctx().Arg2->dd.y = ((double)y / (1L << bitshift));
-    }
-
-void qdRandom(void)
-    {
-    long x, y;
-
-    // Use the same algorithm as for fixed math so that they will generate the same fractals when the srand() function is used.
-
-    bitshift = 20;			// got to make up some silly value PHD 2009-10-17
-    x = NewRandNum() >> (32 - bitshift);
-    y = NewRandNum() >> (32 - bitshift);
-    Ctx().Arg2->qd.x = ((double)x / (1L << bitshift));
-    Ctx().Arg2->qd.y = ((double)y / (1L << bitshift));
     }
 
 void RandomSeed(void)
@@ -125,481 +68,149 @@ void RandomSeed(void)
     Randomized = 1;
     }
 
-void dStkSRand(void)
-    {
-    long x, y;
+/**************************************************************************
+SRand
+**************************************************************************/
 
-    x = rand15();
-    y = rand15();
-    Ctx().Arg1->d.x = (double)x / 12000.0;
-    Ctx().Arg1->d.y = (double)y / 12000.0;
+void ParserStkSRand(void)
+    {
+    DispatchUnary<&TStkSRand<Complex>, &TStkSRand<DDComplex>, &TStkSRand<QDComplex>>();
     }
 
-void ddStkSRand(void)
-    {
-    long x, y;
+void(*StkSRand)(void) = ParserStkSRand;
 
-    x = rand15();
-    y = rand15();
-    Ctx().Arg1->dd.x = (double)x / 12000.0;
-    Ctx().Arg1->dd.y = (double)y / 12000.0;
+void ParserStkAbs(void)
+    {
+    DispatchUnary<&TStkAbs<Complex>, &TStkAbs<DDComplex>, &TStkAbs<QDComplex>>();
     }
 
-void qdStkSRand(void)
-    {
-    long x, y;
+void(*StkAbs)(void) = ParserStkAbs;
 
-    x = rand15();
-    y = rand15();
-    Ctx().Arg1->qd.x = (double)x / 12000.0;
-    Ctx().Arg1->qd.y = (double)y / 12000.0;
+void ParserStkSqr(void)
+    {
+    DispatchUnary<&TStkSqr<Complex>, &TStkSqr<DDComplex>, &TStkSqr<QDComplex>>();
     }
 
-void (*StkSRand)(void) = dStkSRand;
+void(*StkSqr)(void) = ParserStkSqr;
 
-void dStkLodDup()
+/**************************************************************************
+    Temporary VM compatibility wrappers
+
+    These keep old parser references alive while we migrate tables
+    from dStkXXX(void) to ParserStkXXX(void).
+
+    Do not put semantic code here.
+**************************************************************************/
+
+void ParserStkAdd(void)
     {
-    auto& ctx = CParser::s_current->m_ctx;
-
-    Ctx().Arg1+=2;
-    Ctx().Arg2+=2;
-    *Ctx().Arg2 = *Ctx().Arg1 = *ctx.Load[ctx.LodPtr];;
-    ctx.LodPtr+=2;
+    DispatchBinaryPop<&TStkAdd<Complex>, &TStkAdd<DDComplex>, &TStkAdd<QDComplex>>();
     }
 
-void dStkLodSqr()
-    {
-    auto& ctx = CParser::s_current->m_ctx;
+void(*StkAdd)(void) = ParserStkAdd;
+void(*PtrStkAdd)(void) = ParserStkAdd;
 
-    Ctx().Arg1++;
-    Ctx().Arg2++;
-    Ctx().Arg1->d.y = Ctx().Load[Ctx().LodPtr]->d.x * Ctx().Load[Ctx().LodPtr]->d.y * 2.0;
-    Ctx().Arg1->d.x = (Ctx().Load[Ctx().LodPtr]->d.x * Ctx().Load[Ctx().LodPtr]->d.x) - (Ctx().Load[Ctx().LodPtr]->d.y * Ctx().Load[Ctx().LodPtr]->d.y);
-    Ctx().LodPtr++;
+void ParserStkSub(void)
+    {
+    DispatchBinaryPop<&TStkSub<Complex>, &TStkSub<DDComplex>, &TStkSub<QDComplex>>();
     }
 
-void dStkLodSqr2()
+void(*StkSub)(void) = ParserStkSub;
+void(*PtrStkSub)(void) = ParserStkSub;
+
+void ParserStkConj(void)
     {
-    struct Arg LastSqr;
-    Ctx().Arg1++;
-    Ctx().Arg2++;
-    LastSqr.d.x = Ctx().Load[Ctx().LodPtr]->d.x * Ctx().Load[Ctx().LodPtr]->d.x;
-    LastSqr.d.y = Ctx().Load[Ctx().LodPtr]->d.y * Ctx().Load[Ctx().LodPtr]->d.y;
-    Ctx().Arg1->d.y = Ctx().Load[Ctx().LodPtr]->d.x * Ctx().Load[Ctx().LodPtr]->d.y * 2.0;
-    Ctx().Arg1->d.x = LastSqr.d.x - LastSqr.d.y;
-    LastSqr.d.x += LastSqr.d.y;
-    LastSqr.d.y = 0;
-    Ctx().LodPtr++;
+    DispatchUnary<&TStkConj<Complex>, &TStkConj<DDComplex>, &TStkConj<QDComplex>>();
     }
 
-void dStkStoDup(){}
-void dStkStoSqr(){}
-void dStkStoSqr0(){}
+void(*StkConj)(void) = ParserStkConj;
 
-void dStkLodDbl()
+void ParserStkFloor(void)
     {
-    Ctx().Arg1++;
-    Ctx().Arg2++;
-    Ctx().Arg1->d.x = Ctx().Load[Ctx().LodPtr]->d.x * 2.0;
-    Ctx().Arg1->d.y = Ctx().Load[Ctx().LodPtr]->d.y * 2.0;
-    Ctx().LodPtr++;
+    DispatchUnary<&TStkFloor<Complex>, &TStkFloor<DDComplex>, &TStkFloor<QDComplex>>();
     }
 
-void dStkStoDbl(){}
-void dStkReal2(){}
+void(*StkFloor)(void) = ParserStkFloor;
 
-void dStkSqr0()
+void ParserStkCeil(void)
     {
-    struct Arg LastSqr;
-    LastSqr.d.y = Ctx().Arg1->d.y * Ctx().Arg1->d.y; /* use LastSqr as temp storage */
-    Ctx().Arg1->d.y = Ctx().Arg1->d.x * Ctx().Arg1->d.y * 2.0;
-    Ctx().Arg1->d.x = Ctx().Arg1->d.x * Ctx().Arg1->d.x - LastSqr.d.y;
+    DispatchUnary<&TStkCeil<Complex>, &TStkCeil<DDComplex>, &TStkCeil<QDComplex>>();
     }
 
-void dStkSqr3()
+void(*StkCeil)(void) = ParserStkCeil;
+
+void ParserStkRound(void)
     {
-    Ctx().Arg1->d.x = Ctx().Arg1->d.x * Ctx().Arg1->d.x;
+    DispatchUnary<&TStkRound<Complex>, &TStkRound<DDComplex>, &TStkRound<QDComplex>>();
     }
 
-void dStkAbs(void) 
+void(*StkRound)(void) = ParserStkRound;
+
+void ParserStkTrunc(void)
     {
-    Ctx().Arg1->d.x = fabs(Ctx().Arg1->d.x);
-    Ctx().Arg1->d.y = fabs(Ctx().Arg1->d.y);
+    DispatchUnary<&TStkTrunc<Complex>, &TStkTrunc<DDComplex>, &TStkTrunc<QDComplex>>();
     }
 
-void ddStkAbs(void) 
+void(*StkTrunc)(void) = ParserStkTrunc;
+
+void ParserStkZero(void)
     {
-    Ctx().Arg1->dd.x = abs(Ctx().Arg1->dd.x);
-    Ctx().Arg1->dd.y = abs(Ctx().Arg1->dd.y);
+    DispatchUnary<&TStkZero<Complex>, &TStkZero<DDComplex>, &TStkZero<QDComplex>>();
     }
 
-void qdStkAbs(void) 
+void(*StkZero)(void) = ParserStkZero;
+
+void ParserStkOne(void)
     {
-    Ctx().Arg1->qd.x = abs(Ctx().Arg1->qd.x);
-    Ctx().Arg1->qd.y = abs(Ctx().Arg1->qd.y);
+    DispatchUnary<&TStkOne<Complex>, &TStkOne<DDComplex>, &TStkOne<QDComplex>>();
     }
 
-void(*StkAbs)(void) = dStkAbs;
-void(*PtrStkAbs)(void) = dStkAbs;
+void(*StkOne)(void) = ParserStkOne;
 
-void dStkSqr(void) 
+void ParserStkReal(void)
     {
-    struct Arg LastSqr;
-    LastSqr.d.x = Ctx().Arg1->d.x * Ctx().Arg1->d.x;
-    LastSqr.d.y = Ctx().Arg1->d.y * Ctx().Arg1->d.y;
-    Ctx().Arg1->d.y = Ctx().Arg1->d.x * Ctx().Arg1->d.y * 2.0;
-    Ctx().Arg1->d.x = LastSqr.d.x - LastSqr.d.y;
-    LastSqr.d.x += LastSqr.d.y;
-    LastSqr.d.y = 0;
-/*
-    char b[128];
-    sprintf_s(b, "SQR input=(%g,%g) output=(%g,%g)\n",
-       Ctx().Load[LodPtr]->d.x,
-       Ctx().Load[LodPtr]->d.y,
-       Ctx().Arg1->d.x,
-       Ctx().Arg1->d.y);
-    OutputDebugStringA(b);
-*/
+    DispatchUnary<&TStkReal<Complex>, &TStkReal<DDComplex>, &TStkReal<QDComplex>>();
     }
 
-void ddStkSqr(void) 
+void(*StkReal)(void) = ParserStkReal;
+
+void ParserStkImag(void)
     {
-    struct Arg LastSqr;
-    LastSqr.dd.x = Ctx().Arg1->dd.x * Ctx().Arg1->dd.x;
-    LastSqr.dd.y = Ctx().Arg1->dd.y * Ctx().Arg1->dd.y;
-    Ctx().Arg1->dd.y = Ctx().Arg1->dd.x * Ctx().Arg1->dd.y * 2.0;
-    Ctx().Arg1->dd.x = LastSqr.dd.x - LastSqr.dd.y;
-    LastSqr.dd.x += LastSqr.dd.y;
-    LastSqr.dd.y = 0.0;
+    DispatchUnary<&TStkImag<Complex>, &TStkImag<DDComplex>, &TStkImag<QDComplex>>();
     }
 
-void qdStkSqr(void) 
+void(*StkImag)(void) = ParserStkImag;
+
+void ParserStkNeg(void)
     {
-    struct Arg LastSqr;
-    LastSqr.qd.x = Ctx().Arg1->qd.x * Ctx().Arg1->qd.x;
-    LastSqr.qd.y = Ctx().Arg1->qd.y * Ctx().Arg1->qd.y;
-    Ctx().Arg1->qd.y = Ctx().Arg1->qd.x * Ctx().Arg1->qd.y * 2.0;
-    Ctx().Arg1->qd.x = LastSqr.qd.x - LastSqr.qd.y;
-    LastSqr.qd.x += LastSqr.qd.y;
-    LastSqr.qd.y = 0.0;
+    DispatchUnary<&TStkNeg<Complex>, &TStkNeg<DDComplex>, &TStkNeg<QDComplex>>();
     }
 
-void (*StkSqr)(void) = dStkSqr;
+void(*StkNeg)(void) = ParserStkNeg;
 
-void dStkAdd(void) 
+void ParserStkMul(void)
     {
-    Ctx().Arg2->d.x += Ctx().Arg1->d.x;
-    Ctx().Arg2->d.y += Ctx().Arg1->d.y;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchBinaryPop<&TStkMul<Complex>, &TStkMul<DDComplex>, &TStkMul<QDComplex>>();
     }
 
-void ddStkAdd(void) 
+void(*StkMul)(void) = ParserStkMul;
+void(*PtrStkMul)(void) = ParserStkMul;
+
+void ParserStkDiv(void)
     {
-    Ctx().Arg2->dd.x += Ctx().Arg1->dd.x;
-    Ctx().Arg2->dd.y += Ctx().Arg1->dd.y;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchBinaryPop<&TStkDiv<Complex>, &TStkDiv<DDComplex>, &TStkDiv<QDComplex>>();
     }
 
-void qdStkAdd(void) 
+void(*StkDiv)(void) = ParserStkDiv;
+void(*PtrStkDiv)(void) = ParserStkDiv;
+
+void ParserStkMod(void)
     {
-    Ctx().Arg2->qd.x += Ctx().Arg1->qd.x;
-    Ctx().Arg2->qd.y += Ctx().Arg1->qd.y;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchUnary<&TStkMod<Complex>, &TStkMod<DDComplex>, &TStkMod<QDComplex>>();
     }
 
-void(*StkAdd)(void) = dStkAdd;
-void(*PtrStkAdd)(void) = dStkAdd;
-
-void dStkSub(void) 
-    {
-    Ctx().Arg2->d.x -= Ctx().Arg1->d.x;
-    Ctx().Arg2->d.y -= Ctx().Arg1->d.y;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void ddStkSub(void) 
-    {
-    Ctx().Arg2->dd.x -= Ctx().Arg1->dd.x;
-    Ctx().Arg2->dd.y -= Ctx().Arg1->dd.y;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void qdStkSub(void) 
-    {
-    Ctx().Arg2->qd.x -= Ctx().Arg1->qd.x;
-    Ctx().Arg2->qd.y -= Ctx().Arg1->qd.y;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void(*StkSub)(void) = dStkSub;
-void(*PtrStkSub)(void) = dStkSub;
-
-void dStkConj(void) 
-    {
-    Ctx().Arg1->d.y = -Ctx().Arg1->d.y;
-    }
-
-void ddStkConj(void) 
-    {
-    Ctx().Arg1->dd.y = -Ctx().Arg1->dd.y;
-    }
-
-void qdStkConj(void) 
-    {
-    Ctx().Arg1->qd.y = -Ctx().Arg1->qd.y;
-    }
-
-void (*StkConj)(void) = dStkConj;
-
-void dStkFloor(void) 
-    {
-    Ctx().Arg1->d.x = floor(Ctx().Arg1->d.x);
-    Ctx().Arg1->d.y = floor(Ctx().Arg1->d.y);
-    }
-
-void ddStkFloor(void) 
-    {
-    Ctx().Arg1->dd.x = floor(Ctx().Arg1->dd.x);
-    Ctx().Arg1->dd.y = floor(Ctx().Arg1->dd.y);
-    }
-
-void qdStkFloor(void) 
-    {
-    Ctx().Arg1->qd.x = floor(Ctx().Arg1->qd.x);
-    Ctx().Arg1->qd.y = floor(Ctx().Arg1->qd.y);
-    }
-
-void (*StkFloor)(void) = dStkFloor;
-
-void dStkCeil(void) 
-    {
-    Ctx().Arg1->d.x = ceil(Ctx().Arg1->d.x);
-    Ctx().Arg1->d.y = ceil(Ctx().Arg1->d.y);
-    }
-
-void ddStkCeil(void) 
-    {
-    Ctx().Arg1->dd.x = ceil(Ctx().Arg1->dd.x);
-    Ctx().Arg1->dd.y = ceil(Ctx().Arg1->dd.y);
-    }
-
-void qdStkCeil(void) 
-    {
-    Ctx().Arg1->qd.x = ceil(Ctx().Arg1->qd.x);
-    Ctx().Arg1->qd.y = ceil(Ctx().Arg1->qd.y);
-    }
-
-void (*StkCeil)(void) = dStkCeil;
-
-void dStkTrunc(void) 
-    {
-    Ctx().Arg1->d.x = (int)(Ctx().Arg1->d.x);
-    Ctx().Arg1->d.y = (int)(Ctx().Arg1->d.y);
-    }
-
-void ddStkTrunc(void) 
-    {
-    Ctx().Arg1->dd.x = (int)(to_double(Ctx().Arg1->dd.x));
-    Ctx().Arg1->dd.y = (int)(to_double(Ctx().Arg1->dd.y));
-    }
-
-void qdStkTrunc(void) 
-    {
-    Ctx().Arg1->qd.x = (int)(to_double(Ctx().Arg1->qd.x));
-    Ctx().Arg1->qd.y = (int)(to_double(Ctx().Arg1->qd.y));
-    }
-
-void (*StkTrunc)(void) = dStkTrunc;
-
-void dStkRound(void) 
-    {
-    Ctx().Arg1->d.x = floor(Ctx().Arg1->d.x+.5);
-    Ctx().Arg1->d.y = floor(Ctx().Arg1->d.y+.5);
-    }
-
-void ddStkRound(void) 
-    {
-    Ctx().Arg1->dd.x = floor(Ctx().Arg1->dd.x + 0.5);
-    Ctx().Arg1->dd.y = floor(Ctx().Arg1->dd.y + 0.5);
-    }
-
-void qdStkRound(void) 
-    {
-    Ctx().Arg1->qd.x = floor(Ctx().Arg1->qd.x + 0.5);
-    Ctx().Arg1->qd.y = floor(Ctx().Arg1->qd.y + 0.5);
-    }
-
-void (*StkRound)(void) = dStkRound;
-
-void dStkZero(void) 
-    {
-    Ctx().Arg1->d.y = Ctx().Arg1->d.x = 0.0;
-    }
-
-void ddStkZero(void) 
-    {
-    Ctx().Arg1->dd.y = Ctx().Arg1->dd.x = 0.0;
-    }
-
-void qdStkZero(void) 
-    {
-    Ctx().Arg1->qd.y = Ctx().Arg1->qd.x = 0.0;
-    }
-
-void (*StkZero)(void) = dStkZero;
-
-void dStkOne(void) 
-    {
-    Ctx().Arg1->d.x = 1.0;
-    Ctx().Arg1->d.y = 0.0;
-    }
-
-void ddStkOne(void) 
-    {
-    Ctx().Arg1->dd.x = 1.0;
-    Ctx().Arg1->dd.y = 0.0;
-    }
-
-void qdStkOne(void) 
-    {
-    Ctx().Arg1->qd.x = 1.0;
-    Ctx().Arg1->qd.y = 0.0;
-    }
-
-void (*StkOne)(void) = dStkOne;
-
-void dStkReal(void) 
-    {
-    Ctx().Arg1->d.y = 0.0;
-    }
-
-void ddStkReal(void) 
-    {
-    Ctx().Arg1->dd.y = 0.0;
-    }
-
-void qdStkReal(void) 
-    {
-    Ctx().Arg1->qd.y = 0.0;
-    }
-
-void (*StkReal)(void) = dStkReal;
-
-void dStkImag(void) 
-    {
-    Ctx().Arg1->d.x = Ctx().Arg1->d.y;
-    Ctx().Arg1->d.y = 0.0;
-    }
-
-void ddStkImag(void) 
-    {
-    Ctx().Arg1->dd.x = Ctx().Arg1->dd.y;
-    Ctx().Arg1->dd.y = 0.0;
-    }
-
-void qdStkImag(void) 
-    {
-    Ctx().Arg1->qd.x = Ctx().Arg1->qd.y;
-    Ctx().Arg1->qd.y = 0.0;
-    }
-
-void (*StkImag)(void) = dStkImag;
-
-void dStkNeg(void) 
-    {
-    Ctx().Arg1->d.x = -Ctx().Arg1->d.x;
-    Ctx().Arg1->d.y = -Ctx().Arg1->d.y;
-    }
-
-void ddStkNeg(void) 
-    {
-    Ctx().Arg1->dd.x = -Ctx().Arg1->dd.x;
-    Ctx().Arg1->dd.y = -Ctx().Arg1->dd.y;
-    }
-
-void qdStkNeg(void) 
-    {
-    Ctx().Arg1->qd.x = -Ctx().Arg1->qd.x;
-    Ctx().Arg1->qd.y = -Ctx().Arg1->qd.y;
-    }
-
-void(*StkNeg)(void) = dStkNeg;
-void(*PtrStkNeg)(void) = dStkNeg;
-
-void dStkMul(void) 
-    {
-    FPUcplxmul(&Ctx().Arg2->d, &Ctx().Arg1->d, &Ctx().Arg2->d);
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void ddStkMul(void) 
-    {
-    Ctx().Arg2->dd = Ctx().Arg2->dd * Ctx().Arg1->dd;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void qdStkMul(void) 
-    {
-    Ctx().Arg2->qd = Ctx().Arg2->qd * Ctx().Arg1->qd;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void(*StkMul)(void) = dStkMul;
-void(*PtrStkMul)(void) = dStkMul;
-
-void dStkDiv(void) 
-    {
-    FPUcplxdiv(&Ctx().Arg2->d, &Ctx().Arg1->d, &Ctx().Arg2->d);
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void ddStkDiv(void) 
-    {
-    Ctx().Arg2->dd = Ctx().Arg2->dd / Ctx().Arg1->dd;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void qdStkDiv(void) 
-    {
-    Ctx().Arg2->qd = Ctx().Arg2->qd / Ctx().Arg1->qd;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void(*StkDiv)(void) = dStkDiv;
-void(*PtrStkDiv)(void) = dStkDiv;
-
-void dStkMod(void) 
-    {
-    Ctx().Arg1->d.x = (Ctx().Arg1->d.x * Ctx().Arg1->d.x) + (Ctx().Arg1->d.y * Ctx().Arg1->d.y);
-    Ctx().Arg1->d.y = 0.0;
-    }
-
-void ddStkMod(void) 
-    {
-    Ctx().Arg1->dd.x = (Ctx().Arg1->dd.x * Ctx().Arg1->dd.x) + (Ctx().Arg1->dd.y * Ctx().Arg1->dd.y);
-    Ctx().Arg1->dd.y = 0.0;
-    }
-
-void qdStkMod(void) 
-    {
-    Ctx().Arg1->qd.x = (Ctx().Arg1->qd.x * Ctx().Arg1->qd.x) + (Ctx().Arg1->qd.y * Ctx().Arg1->qd.y);
-    Ctx().Arg1->qd.y = 0.0;
-    }
-
-void(*StkMod)(void) = dStkMod;
-void(*PtrStkMod)(void) = dStkMod;
+void(*StkMod)(void) = ParserStkMod;
+void(*PtrStkMod)(void) = ParserStkMod;
 
 inline void SyncStackRegs(ParserExecContext& ctx)
     {
@@ -666,234 +277,50 @@ void StkClr(void)
 
 void(*PtrStkClr)(void) = StkClr;
 
-/* MCP 4-9-91, Added Flip() */
-
-void dStkFlip(void) 
+// MCP 4-9-91, Added Flip()
+void ParserStkFlip(void)
     {
-    double t;
-
-    t = Ctx().Arg1->d.x;
-    Ctx().Arg1->d.x = Ctx().Arg1->d.y;
-    Ctx().Arg1->d.y = t;
+    DispatchUnary<&TStkFlip<Complex>, &TStkFlip<DDComplex>, &TStkFlip<QDComplex>>();
     }
 
-void ddStkFlip(void) 
-    {
-    dd_real t;
+void(*StkFlip)(void) = ParserStkFlip;
 
-    t = Ctx().Arg1->dd.x;
-    Ctx().Arg1->dd.x = Ctx().Arg1->dd.y;
-    Ctx().Arg1->dd.y = t;
+void ParserStkSin(void)
+    {
+    DispatchUnary<&TStkSin<Complex>, &TStkSin<DDComplex>, &TStkSin<QDComplex>>();
     }
 
-void qdStkFlip(void) 
-    {
-    qd_real t;
-
-    t = Ctx().Arg1->qd.x;
-    Ctx().Arg1->qd.x = Ctx().Arg1->qd.y;
-    Ctx().Arg1->qd.y = t;
-    }
-
-void (*StkFlip)(void) = dStkFlip;
-
-void dStkSin(void) 
-    {
-    double sinx, cosx, sinhy, coshy;
-
-    FPUsincos(&Ctx().Arg1->d.x, &sinx, &cosx);
-    FPUsinhcosh(&Ctx().Arg1->d.y, &sinhy, &coshy);
-    Ctx().Arg1->d.x = sinx*coshy;
-    Ctx().Arg1->d.y = cosx*sinhy;
-    }
-
-void ddStkSin(void) 
-    {
-    dd_real sinx, cosx, sinhy, coshy;
-
-    sincos(Ctx().Arg1->dd.x, sinx, cosx);
-    sincosh(Ctx().Arg1->dd.y, sinhy, coshy);
-    Ctx().Arg1->dd.x = sinx * coshy;
-    Ctx().Arg1->dd.y = cosx * sinhy;
-    }
-
-void qdStkSin(void) 
-    {
-    qd_real sinx, cosx, sinhy, coshy;
-
-    sincos(Ctx().Arg1->qd.x, sinx, cosx);
-    sincosh(Ctx().Arg1->qd.y, sinhy, coshy);
-    Ctx().Arg1->qd.x = sinx * coshy;
-    Ctx().Arg1->qd.y = cosx * sinhy;
-    }
-
-void (*StkSin)(void) = dStkSin;
+void(*StkSin)(void) = ParserStkSin;
 
 // The following functions are supported by both the parser and for fn variable replacement. TIW 04-22-91
 
-void dStkTan(void) 
+void ParserStkTan(void)
     {
-    double sinx, cosx, sinhy, coshy, denom;
-    Ctx().Arg1->d.x *= 2;
-    Ctx().Arg1->d.y *= 2;
-    FPUsincos(&Ctx().Arg1->d.x, &sinx, &cosx);
-    FPUsinhcosh(&Ctx().Arg1->d.y, &sinhy, &coshy);
-    denom = cosx + coshy;
-    ChkFloatDenom(denom);
-    Ctx().Arg1->d.x = sinx/denom;
-    Ctx().Arg1->d.y = sinhy/denom;
+    DispatchUnary<&TStkTan<Complex>, &TStkTan<DDComplex>, &TStkTan<QDComplex>>();
     }
 
-void ddStkTan(void) 
+void(*StkTan)(void) = ParserStkTan;
+
+void ParserStkTanh(void)
     {
-    dd_real sinx, cosx, sinhy, coshy, denom;
-    Ctx().Arg1->dd.x *= 2;
-    Ctx().Arg1->dd.y *= 2;
-    sincos(Ctx().Arg1->dd.x, sinx, cosx);
-    sincosh(Ctx().Arg1->dd.y, sinhy, coshy);
-    denom = cosx + coshy;
-    ChkDDDenom(denom);
-    Ctx().Arg1->dd.x = sinx / denom;
-    Ctx().Arg1->dd.y = sinhy / denom;
+    DispatchUnary<&TStkTanh<Complex>, &TStkTanh<DDComplex>, &TStkTanh<QDComplex>>();
     }
 
-void qdStkTan(void) 
+void(*StkTanh)(void) = ParserStkTanh;
+
+void ParserStkCoTan(void)
     {
-    qd_real sinx, cosx, sinhy, coshy, denom;
-    Ctx().Arg1->qd.x *= 2;
-    Ctx().Arg1->qd.y *= 2;
-    sincos(Ctx().Arg1->qd.x, sinx, cosx);
-    sincosh(Ctx().Arg1->qd.y, sinhy, coshy);
-    denom = cosx + coshy;
-    ChkQDDenom(denom);
-    Ctx().Arg1->qd.x = sinx / denom;
-    Ctx().Arg1->qd.y = sinhy / denom;
+    DispatchUnary<&TStkCoTan<Complex>, &TStkCoTan<DDComplex>, &TStkCoTan<QDComplex>>();
     }
 
-void (*StkTan)(void) = dStkTan;
+void(*StkCoTan)(void) = ParserStkCoTan;
 
-void dStkTanh(void) 
+void ParserStkCoTanh(void)
     {
-    double siny, cosy, sinhx, coshx, denom;
-    Ctx().Arg1->d.x *= 2;
-    Ctx().Arg1->d.y *= 2;
-    FPUsincos(&Ctx().Arg1->d.y, &siny, &cosy);
-    FPUsinhcosh(&Ctx().Arg1->d.x, &sinhx, &coshx);
-    denom = coshx + cosy;
-    ChkFloatDenom(denom);
-    Ctx().Arg1->d.x = sinhx/denom;
-    Ctx().Arg1->d.y = siny/denom;
+    DispatchUnary<&TStkCoTanh<Complex>, &TStkCoTanh<DDComplex>, &TStkCoTanh<QDComplex>>();
     }
 
-void ddStkTanh(void) 
-    {
-    dd_real siny, cosy, sinhx, coshx, denom;
-    Ctx().Arg1->dd.x *= 2;
-    Ctx().Arg1->dd.y *= 2;
-    sincos(Ctx().Arg1->dd.y, siny, cosy);
-    sincosh(Ctx().Arg1->dd.x, sinhx, coshx);
-    denom = coshx + cosy;
-    ChkDDDenom(denom);
-    Ctx().Arg1->dd.x = sinhx / denom;
-    Ctx().Arg1->dd.y = siny / denom;
-    }
-
-void qdStkTanh(void) 
-    {
-    qd_real siny, cosy, sinhx, coshx, denom;
-    Ctx().Arg1->qd.x *= 2;
-    Ctx().Arg1->qd.y *= 2;
-    sincos(Ctx().Arg1->qd.y, siny, cosy);
-    sincosh(Ctx().Arg1->qd.x, sinhx, coshx);
-    denom = coshx + cosy;
-    ChkQDDenom(denom);
-    Ctx().Arg1->qd.x = sinhx / denom;
-    Ctx().Arg1->qd.y = siny / denom;
-    }
-
-void (*StkTanh)(void) = dStkTanh;
-
-void dStkCoTan(void) 
-    {
-    double sinx, cosx, sinhy, coshy, denom;
-    Ctx().Arg1->d.x *= 2;
-    Ctx().Arg1->d.y *= 2;
-    FPUsincos(&Ctx().Arg1->d.x, &sinx, &cosx);
-    FPUsinhcosh(&Ctx().Arg1->d.y, &sinhy, &coshy);
-    denom = coshy - cosx;
-    ChkFloatDenom(denom);
-    Ctx().Arg1->d.x = sinx/denom;
-    Ctx().Arg1->d.y = -sinhy/denom;
-    }
-
-void ddStkCoTan(void) 
-    {
-    dd_real sinx, cosx, sinhy, coshy, denom;
-    Ctx().Arg1->dd.x *= 2;
-    Ctx().Arg1->dd.y *= 2;
-    sincos(Ctx().Arg1->dd.x, sinx, cosx);
-    sincosh(Ctx().Arg1->dd.y, sinhy, coshy);
-    denom = coshy - cosx;
-    ChkDDDenom(denom);
-    Ctx().Arg1->dd.x = sinx / denom;
-    Ctx().Arg1->dd.y = -sinhy / denom;
-    }
-
-void qdStkCoTan(void) 
-    {
-    qd_real sinx, cosx, sinhy, coshy, denom;
-    Ctx().Arg1->qd.x *= 2;
-    Ctx().Arg1->qd.y *= 2;
-    sincos(Ctx().Arg1->qd.x, sinx, cosx);
-    sincosh(Ctx().Arg1->qd.y, sinhy, coshy);
-    denom = coshy - cosx;
-    ChkQDDenom(denom);
-    Ctx().Arg1->qd.x = sinx / denom;
-    Ctx().Arg1->qd.y = -sinhy / denom;
-    }
-
-void (*StkCoTan)(void) = dStkCoTan;
-
-void dStkCoTanh(void) 
-    {
-    double siny, cosy, sinhx, coshx, denom;
-    Ctx().Arg1->d.x *= 2;
-    Ctx().Arg1->d.y *= 2;
-    FPUsincos(&Ctx().Arg1->d.y, &siny, &cosy);
-    FPUsinhcosh(&Ctx().Arg1->d.x, &sinhx, &coshx);
-    denom = coshx - cosy;
-    ChkFloatDenom(denom);
-    Ctx().Arg1->d.x = sinhx/denom;
-    Ctx().Arg1->d.y = -siny/denom;
-    }
-
-void ddStkCoTanh(void) 
-    {
-    dd_real siny, cosy, sinhx, coshx, denom;
-    Ctx().Arg1->dd.x *= 2;
-    Ctx().Arg1->dd.y *= 2;
-    sincos(Ctx().Arg1->dd.y, siny, cosy);
-    sincosh(Ctx().Arg1->dd.x, sinhx, coshx);
-    denom = coshx - cosy;
-    ChkDDDenom(denom);
-    Ctx().Arg1->dd.x = sinhx / denom;
-    Ctx().Arg1->dd.y = -siny / denom;
-    }
-
-void qdStkCoTanh(void) 
-    {
-    qd_real siny, cosy, sinhx, coshx, denom;
-    Ctx().Arg1->qd.x *= 2;
-    Ctx().Arg1->qd.y *= 2;
-    sincos(Ctx().Arg1->qd.y, siny, cosy);
-    sincosh(Ctx().Arg1->qd.x, sinhx, coshx);
-    denom = coshx - cosy;
-    ChkQDDenom(denom);
-    Ctx().Arg1->qd.x = sinhx / denom;
-    Ctx().Arg1->qd.y = -siny / denom;
-    }
-
-void (*StkCoTanh)(void) = dStkCoTanh;
+void(*StkCoTanh)(void) = ParserStkCoTanh;
 
 // The following functions are not directly used by the parser - support
 // for the parser was not provided because the existing parser language
@@ -901,584 +328,197 @@ void (*StkCoTanh)(void) = dStkCoTanh;
 // in miscres.c but are placed here because they follow the pattern of
 // the other parser functions. TIW 04-22-91
 
-void dStkRecip(void) 
+/**************************************************************************
+    Reciprocal
+**************************************************************************/
+
+void ParserStkRecip(void)
     {
-    double mod;
-    mod =Ctx().Arg1->d.x * Ctx().Arg1->d.x + Ctx().Arg1->d.y * Ctx().Arg1->d.y;
-    ChkFloatDenom(mod);
-    Ctx().Arg1->d.x =  Ctx().Arg1->d.x/mod;
-    Ctx().Arg1->d.y = -Ctx().Arg1->d.y/mod;
+    DispatchUnary<&TStkRecip<Complex>, &TStkRecip<DDComplex>, &TStkRecip<QDComplex>>();
     }
 
-void (*StkRecip)(void) = dStkRecip;
+void(*StkRecip)(void) = ParserStkRecip;
 
-void StkIdent(void) 
-    { // do nothing - the function Z
+void ParserStkIdent(void)
+    {
+    DispatchUnary<&TStkIdent<Complex>, &TStkIdent<DDComplex>, &TStkIdent<QDComplex>>();
     }
 
-void (*dStkIdent)(void) = StkIdent;
+void(*pStkIdent)(void) = ParserStkIdent;
 
 // End TIW 04-22-91
 
-void dStkSinh(void) 
+void ParserStkSinh(void)
     {
-    double siny, cosy, sinhx, coshx;
-
-    FPUsincos(&Ctx().Arg1->d.y, &siny, &cosy);
-    FPUsinhcosh(&Ctx().Arg1->d.x, &sinhx, &coshx);
-    Ctx().Arg1->d.x = sinhx*cosy;
-    Ctx().Arg1->d.y = coshx*siny;
+    DispatchUnary<&TStkSinh<Complex>, &TStkSinh<DDComplex>, &TStkSinh<QDComplex>>();
     }
 
-void ddStkSinh(void) 
-    {
-    dd_real siny, cosy, sinhx, coshx;
+void(*StkSinh)(void) = ParserStkSinh;
 
-    sincos(Ctx().Arg1->dd.y, siny, cosy);
-    sincosh(Ctx().Arg1->dd.x, sinhx, coshx);
-    Ctx().Arg1->dd.x = sinhx * cosy;
-    Ctx().Arg1->dd.y = coshx * siny;
+void ParserStkCos(void)
+    {
+    DispatchUnary<&TStkCos<Complex>, &TStkCos<DDComplex>, &TStkCos<QDComplex>>();
     }
 
-void qdStkSinh(void) 
-    {
-    qd_real siny, cosy, sinhx, coshx;
+void(*StkCos)(void) = ParserStkCos;
 
-    sincos(Ctx().Arg1->dd.y, siny, cosy);
-    sincosh(Ctx().Arg1->dd.x, sinhx, coshx);
-    Ctx().Arg1->qd.x = sinhx * cosy;
-    Ctx().Arg1->qd.y = coshx * siny;
+void ParserStkCosXX(void)
+    {
+    DispatchUnary< &TStkCosXX<Complex>, &TStkCosXX<DDComplex>, &TStkCosXX<QDComplex>>();
     }
 
-void (*StkSinh)(void) = dStkSinh;
+void(*StkCosXX)(void) = ParserStkCosXX;
 
-void dStkCos(void) 
+void ParserStkCosh(void)
     {
-    double sinx, cosx, sinhy, coshy;
-
-    FPUsincos(&Ctx().Arg1->d.x, &sinx, &cosx);
-    FPUsinhcosh(&Ctx().Arg1->d.y, &sinhy, &coshy);
-    Ctx().Arg1->d.x = cosx*coshy;
-    Ctx().Arg1->d.y = -sinx*sinhy; // TIW 04-25-91 sign
+    DispatchUnary<&TStkCosh<Complex>, &TStkCosh<DDComplex>, &TStkCosh<QDComplex>>();
     }
 
-void ddStkCos(void) 
-    {
-    dd_real sinx, cosx, sinhy, coshy;
+void(*StkCosh)(void) = ParserStkCosh;
 
-    sincos(Ctx().Arg1->dd.x, sinx, cosx);
-    sincosh(Ctx().Arg1->dd.y, sinhy, coshy);
-    Ctx().Arg1->dd.x = cosx * coshy;
-    Ctx().Arg1->dd.y = -sinx * sinhy; // TIW 04-25-91 sign
+void ParserStkASinh(void)
+    {
+    DispatchUnary<&TStkASinh<Complex>, &TStkASinh<DDComplex>, &TStkASinh<QDComplex>>();
     }
 
-void qdStkCos(void) 
-    {
-    qd_real sinx, cosx, sinhy, coshy;
+void(*StkASinh)(void) = ParserStkASinh;
 
-    sincos(Ctx().Arg1->qd.x, sinx, cosx);
-    sincosh(Ctx().Arg1->qd.y, sinhy, coshy);
-    Ctx().Arg1->qd.x = cosx * coshy;
-    Ctx().Arg1->qd.y = -sinx * sinhy; /* TIW 04-25-91 sign */
+void ParserStkASin(void)
+    {
+    DispatchUnary<&TStkASin<Complex>, &TStkASin<DDComplex>, &TStkASin<QDComplex>>();
     }
 
-void (*StkCos)(void) = dStkCos;
+void(*StkASin)(void) = ParserStkASin;
 
-// Bogus version of cos, to replicate bug which was in regular cos till v16:
-
-void dStkCosXX(void) 
+void ParserStkACos(void)
     {
-    dStkCos();
-    Ctx().Arg1->d.y = -Ctx().Arg1->d.y;
+    DispatchUnary<&TStkACos<Complex>, &TStkACos<DDComplex>, &TStkACos<QDComplex>>();
     }
 
-void ddStkCosXX(void) 
+void(*StkACos)(void) = ParserStkACos;
+
+void ParserStkACosh(void)
     {
-    ddStkCos();
-    Ctx().Arg1->dd.y = -Ctx().Arg1->dd.y;
+    DispatchUnary<&TStkACosh<Complex>, &TStkACosh<DDComplex>, &TStkACosh<QDComplex>>();
     }
 
-void qdStkCosXX(void) 
+void(*StkACosh)(void) = ParserStkACosh;
+
+void ParserStkATan(void)
     {
-    qdStkCos();
-    Ctx().Arg1->qd.y = -Ctx().Arg1->qd.y;
+    DispatchUnary<&TStkATan<Complex>, &TStkATan<DDComplex>, &TStkATan<QDComplex>>();
     }
 
-void (*StkCosXX)(void) = dStkCosXX;
+void(*StkATan)(void) = ParserStkATan;
 
-void dStkCosh(void) 
+void ParserStkATanh(void)
     {
-    double siny, cosy, sinhx, coshx;
-
-    FPUsincos(&Ctx().Arg1->d.y, &siny, &cosy);
-    FPUsinhcosh(&Ctx().Arg1->d.x, &sinhx, &coshx);
-    Ctx().Arg1->d.x = coshx*cosy;
-    Ctx().Arg1->d.y = sinhx*siny;
+    DispatchUnary<&TStkATanh<Complex>, &TStkATanh<DDComplex>, &TStkATanh<QDComplex>>();
     }
 
-void ddStkCosh(void) 
-    {
-    dd_real siny, cosy, sinhx, coshx;
+void(*StkATanh)(void) = ParserStkATanh;
 
-    sincos(Ctx().Arg1->dd.y, siny, cosy);
-    sincosh(Ctx().Arg1->dd.x, sinhx, coshx);
-    Ctx().Arg1->dd.x = coshx * cosy;
-    Ctx().Arg1->dd.y = sinhx * siny;
+void ParserStkSqrt(void)
+    {
+    DispatchUnary<&TStkSqrt<Complex>, &TStkSqrt<DDComplex>, &TStkSqrt<QDComplex>>();
     }
 
-void qdStkCosh(void) 
-    {
-    qd_real siny, cosy, sinhx, coshx;
+void(*StkSqrt)(void) = ParserStkSqrt;
 
-    sincos(Ctx().Arg1->qd.y, siny, cosy);
-    sincosh(Ctx().Arg1->qd.x, sinhx, coshx);
-    Ctx().Arg1->qd.x = coshx * cosy;
-    Ctx().Arg1->qd.y = sinhx * siny;
+void ParserStkCAbs(void)
+    {
+    DispatchUnary<&TStkCAbs<Complex>, &TStkCAbs<DDComplex>, &TStkCAbs<QDComplex>>();
     }
 
-void (*StkCosh)(void) = dStkCosh;
-
-// TIW added arc functions here 11-25-94
-
-void dStkASin(void) 
-    {
-    TrigFn.Arcsinz(Ctx().Arg1->d, &(Ctx().Arg1->d));
-    }
-
-void ddStkASin(void) 
-    {
-    TrigFn.DDArcsinz(Ctx().Arg1->dd, &(Ctx().Arg1->dd));
-    }
-
-void qdStkASin(void) 
-    {
-    TrigFn.QDArcsinz(Ctx().Arg1->qd, &(Ctx().Arg1->qd));
-    }
-
-void (*StkASin)(void) = dStkASin;
-
-void dStkASinh(void)	
-    {
-    TrigFn.Arcsinhz(Ctx().Arg1->d, &(Ctx().Arg1->d));
-    }
-
-void ddStkASinh(void) 
-    {
-    TrigFn.DDArcsinhz(Ctx().Arg1->dd, &(Ctx().Arg1->dd));
-    }
-
-void qdStkASinh(void) 
-    {
-    TrigFn.QDArcsinhz(Ctx().Arg1->qd, &(Ctx().Arg1->qd));
-    }
-
-void (*StkASinh)(void) = dStkASinh;
-
-void dStkACos(void) 
-    {
-    TrigFn.Arccosz(Ctx().Arg1->d, &(Ctx().Arg1->d));
-    }
-
-void ddStkACos(void) 
-    {
-    TrigFn.DDArccosz(Ctx().Arg1->dd, &(Ctx().Arg1->dd));
-    }
-
-void qdStkACos(void) 
-    {
-    TrigFn.QDArccosz(Ctx().Arg1->qd, &(Ctx().Arg1->qd));
-    }
-
-void (*StkACos)(void) = dStkACos;
-
-void dStkACosh(void) 
-    {
-    TrigFn.Arccoshz(Ctx().Arg1->d, &(Ctx().Arg1->d));
-    }
-
-void ddStkACosh(void) 
-    {
-    TrigFn.DDArccoshz(Ctx().Arg1->dd, &(Ctx().Arg1->dd));
-    }
-
-void qdStkACosh(void) 
-    {
-    TrigFn.QDArccoshz(Ctx().Arg1->qd, &(Ctx().Arg1->qd));
-    }
-
-void (*StkACosh)(void) = dStkACosh;
-
-void dStkATan(void) 
-    {
-    TrigFn.Arctanz(Ctx().Arg1->d, &(Ctx().Arg1->d));
-    }
-
-void ddStkATan(void) 
-    {
-    TrigFn.DDArctanz(Ctx().Arg1->dd, &(Ctx().Arg1->dd));
-    }
-
-void qdStkATan(void) 
-    {
-    TrigFn.QDArctanz(Ctx().Arg1->qd, &(Ctx().Arg1->qd));
-    }
-
-void (*StkATan)(void) = dStkATan;
-
-void dStkATanh(void) 
-    {
-    TrigFn.Arctanhz(Ctx().Arg1->d, &(Ctx().Arg1->d));
-    }
-
-void ddStkATanh(void) 
-    {
-    TrigFn.DDArctanhz(Ctx().Arg1->dd, &(Ctx().Arg1->dd));
-    }
-
-void qdStkATanh(void) 
-    {
-    TrigFn.QDArctanhz(Ctx().Arg1->qd, &(Ctx().Arg1->qd));
-    }
-
-void (*StkATanh)(void) = dStkATanh;
-
-void dStkSqrt(void) 
-    {
-    Ctx().Arg1->d = TrigFn.ComplexSqrtFloat(Ctx().Arg1->d.x, Ctx().Arg1->d.y);
-    }
-
-void ddStkSqrt(void) 
-    {
-    Ctx().Arg1->dd = Ctx().Arg1->dd.CSqrt();
-    }
-
-void qdStkSqrt(void) 
-    {
-    Ctx().Arg1->qd = Ctx().Arg1->qd.CSqrt();
-    }
-
-void (*StkSqrt)(void) = dStkSqrt;
-
-void dStkCAbs(void) 
-    {
-    Ctx().Arg1->d.x = sqrt(sqr(Ctx().Arg1->d.x)+sqr(Ctx().Arg1->d.y));
-    Ctx().Arg1->d.y = 0.0;
-    }
-
-void ddStkCAbs(void) 
-    {
-    Ctx().Arg1->dd.x = sqrt(sqr(Ctx().Arg1->dd.x) + sqr(Ctx().Arg1->dd.y));
-    Ctx().Arg1->dd.y = 0.0;
-    }
-
-void qdStkCAbs(void) 
-    {
-    Ctx().Arg1->qd.x = sqrt(sqr(Ctx().Arg1->qd.x) + sqr(Ctx().Arg1->qd.y));
-    Ctx().Arg1->qd.y = 0.0;
-    }
-
-void (*StkCAbs)(void) = dStkCAbs;
+void(*StkCAbs)(void) = ParserStkCAbs;
 
 // TIW end arc functions 11-25-94
 
-void dStkLT(void) 
+void ParserStkLT(void)
     {
-    Ctx().Arg2->d.x = (double)(Ctx().Arg2->d.x < Ctx().Arg1->d.x);
-    Ctx().Arg2->d.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchBinaryPop<&TStkLT<Complex>, &TStkLT<DDComplex>, &TStkLT<QDComplex>>();  
     }
 
-void ddStkLT(void) 
+void(*StkLT)(void) = ParserStkLT;
+void(*PtrStkLT)(void) = ParserStkLT;
+
+void ParserStkGT(void)
     {
-    Ctx().Arg2->dd.x = (dd_real)(Ctx().Arg2->dd.x < Ctx().Arg1->dd.x);
-    Ctx().Arg2->dd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchBinaryPop<&TStkGT<Complex>, &TStkGT<DDComplex>, &TStkGT<QDComplex>>();
     }
 
-void qdStkLT(void) 
+void(*StkGT)(void) = ParserStkGT;
+void(*PtrStkGT)(void) = ParserStkGT;
+
+void ParserStkLTE(void)
     {
-    Ctx().Arg2->qd.x = (qd_real)(Ctx().Arg2->qd.x < Ctx().Arg1->qd.x);
-    Ctx().Arg2->qd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchBinaryPop<&TStkLTE<Complex>, &TStkLTE<DDComplex>, &TStkLTE<QDComplex>>();
     }
 
-void(*StkLT)(void) = dStkLT;
-void(*PtrStkLT)(void) = dStkLT;
+void(*StkLTE)(void) = ParserStkLTE;
+void(*PtrStkLTE)(void) = ParserStkLTE;
 
-void dStkGT(void) 
+void ParserStkGTE(void)
     {
-    Ctx().Arg2->d.x = (double)(Ctx().Arg2->d.x > Ctx().Arg1->d.x);
-    Ctx().Arg2->d.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchBinaryPop<&TStkGTE<Complex>, &TStkGTE<DDComplex>, &TStkGTE<QDComplex>>();
     }
 
-void ddStkGT(void) 
+void(*StkGTE)(void) = ParserStkGTE;
+void(*PtrStkGTE)(void) = ParserStkGTE;
+
+void ParserStkEQ(void)
     {
-    Ctx().Arg2->dd.x = (dd_real)(Ctx().Arg2->dd.x > Ctx().Arg1->dd.x);
-    Ctx().Arg2->dd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchBinaryPop<&TStkEQ<Complex>, &TStkEQ<DDComplex>, &TStkEQ<QDComplex>>();
     }
 
-void qdStkGT(void) 
+void(*StkEQ)(void) = ParserStkEQ;
+void(*PtrStkEQ)(void) = ParserStkEQ;
+
+void ParserStkNE(void)
     {
-    Ctx().Arg2->qd.x = (qd_real)(Ctx().Arg2->qd.x > Ctx().Arg1->qd.x);
-    Ctx().Arg2->qd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchBinaryPop<&TStkNE<Complex>, &TStkNE<DDComplex>, &TStkNE<QDComplex>>();
     }
 
-void(*StkGT)(void) = dStkGT;
-void(*PtrStkGT)(void) = dStkGT;
+void(*StkNE)(void) = ParserStkNE;
+void(*PtrStkNE)(void) = ParserStkNE;
 
-void dStkLTE(void) 
+void ParserStkOR(void)
     {
-    Ctx().Arg2->d.x = (double)(Ctx().Arg2->d.x <= Ctx().Arg1->d.x);
-    Ctx().Arg2->d.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchBinaryPop<&TStkOR<Complex>, &TStkOR<DDComplex>, &TStkOR<QDComplex>>();
     }
 
-void ddStkLTE(void) 
+void(*StkOR)(void) = ParserStkOR;
+void(*PtrStkOR)(void) = ParserStkOR;
+
+void ParserStkAND(void)
     {
-    Ctx().Arg2->dd.x = (dd_real)(Ctx().Arg2->dd.x <= Ctx().Arg1->dd.x);
-    Ctx().Arg2->dd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchBinaryPop<&TStkAND<Complex>, &TStkAND<DDComplex>, &TStkAND<QDComplex>>();
     }
 
-void qdStkLTE(void) 
+void(*StkAND)(void) = ParserStkAND;
+void(*PtrStkAND)(void) = ParserStkAND;
+
+void ParserStkLog(void)
     {
-    Ctx().Arg2->qd.x = (qd_real)(Ctx().Arg2->qd.x <= Ctx().Arg1->qd.x);
-    Ctx().Arg2->qd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchUnary<&TStkLog<Complex>, &TStkLog<DDComplex>, &TStkLog<QDComplex>>();
     }
 
-void(*StkLTE)(void) = dStkLTE;
-void(*PtrStkLTE)(void) = dStkLTE;
+void(*StkLog)(void) = ParserStkLog;
 
-void dStkGTE(void) 
+void ParserStkExp(void)
     {
-    Ctx().Arg2->d.x = (double)(Ctx().Arg2->d.x >= Ctx().Arg1->d.x);
-    Ctx().Arg2->d.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchUnary<&TStkExp<Complex>, &TStkExp<DDComplex>, &TStkExp<QDComplex>>();
     }
 
-void ddStkGTE(void) 
+void(*StkExp)(void) = ParserStkExp;
+
+void ParserStkPwr(void)
     {
-    Ctx().Arg2->dd.x = (dd_real)(Ctx().Arg2->dd.x >= Ctx().Arg1->dd.x);
-    Ctx().Arg2->dd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
+    DispatchBinaryPop<&TStkPwr<Complex>, &TStkPwr<DDComplex>, &TStkPwr<QDComplex>>();
     }
 
-void qdStkGTE(void) 
-    {
-    Ctx().Arg2->qd.x = (qd_real)(Ctx().Arg2->qd.x >= Ctx().Arg1->qd.x);
-    Ctx().Arg2->qd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void(*StkGTE)(void) = dStkGTE;
-void(*PtrStkGTE)(void) = dStkGTE;
-
-void dStkEQ(void) 
-    {
-    Ctx().Arg2->d.x = (double)(Ctx().Arg2->d.x == Ctx().Arg1->d.x);
-    Ctx().Arg2->d.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void ddStkEQ(void) 
-    {
-    Ctx().Arg2->dd.x = (dd_real)(Ctx().Arg2->dd.x == Ctx().Arg1->dd.x);
-    Ctx().Arg2->dd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void qdStkEQ(void) 
-    {
-    Ctx().Arg2->qd.x = (qd_real)(Ctx().Arg2->qd.x == Ctx().Arg1->qd.x);
-    Ctx().Arg2->qd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void(*StkEQ)(void) = dStkEQ;
-void(*PtrStkEQ)(void) = dStkEQ;
-
-void dStkNE(void) 
-    {
-    Ctx().Arg2->d.x = (double)(Ctx().Arg2->d.x != Ctx().Arg1->d.x);
-    Ctx().Arg2->d.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void ddStkNE(void) 
-    {
-    Ctx().Arg2->dd.x = (dd_real)(Ctx().Arg2->dd.x != Ctx().Arg1->dd.x);
-    Ctx().Arg2->dd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void qdStkNE(void) 
-    {
-    Ctx().Arg2->qd.x = (qd_real)(Ctx().Arg2->qd.x != Ctx().Arg1->qd.x);
-    Ctx().Arg2->qd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void (*StkNE)(void) = dStkNE;
-void(*PtrStkNE)(void) = dStkNE;
-
-void dStkOR(void) 
-    {
-    Ctx().Arg2->d.x = (double)(Ctx().Arg2->d.x || Ctx().Arg1->d.x);
-    Ctx().Arg2->d.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void ddStkOR(void) 
-    {
-    double  a, b;
-    a = to_double(Ctx().Arg2->dd.x);
-    b = to_double(Ctx().Arg1->dd.x);
-    Ctx().Arg2->dd.x = (dd_real)(a || b);
-//    Ctx().Arg2->dd.x = (dd_real)(Ctx().Arg2->dd.x || Ctx().Arg1->dd.x);
-    Ctx().Arg2->dd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void qdStkOR(void) 
-    {
-    double  a, b;
-    a = to_double(Ctx().Arg2->qd.x);
-    b = to_double(Ctx().Arg1->qd.x);
-    Ctx().Arg2->qd.x = (qd_real)(a || b);
-    Ctx().Arg2->qd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void(*StkOR)(void) = dStkOR;
-void(*PtrStkOR)(void) = dStkOR;
-
-void dStkAND(void) 
-    {
-    Ctx().Arg2->d.x = (double)(Ctx().Arg2->d.x && Ctx().Arg1->d.x);
-    Ctx().Arg2->d.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void ddStkAND(void) 
-    {
-    double  a, b;
-    a = to_double(Ctx().Arg2->dd.x);
-    b = to_double(Ctx().Arg1->dd.x);
-    Ctx().Arg2->dd.x = (dd_real)(a && b);
-//    Ctx().Arg2->dd.x = (dd_real)(Ctx().Arg2->dd.x && Ctx().Arg1->dd.x);
-    Ctx().Arg2->dd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void qdStkAND(void) 
-    {
-    double  a, b;
-    a = to_double(Ctx().Arg2->qd.x);
-    b = to_double(Ctx().Arg1->qd.x);
-    Ctx().Arg2->qd.x = (qd_real)(a && b);
-    //    Ctx().Arg2->dd.x = (dd_real)(Ctx().Arg2->dd.x && Ctx().Arg1->dd.x);
-    Ctx().Arg2->qd.y = 0.0;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void(*StkAND)(void) = dStkAND;
-void(*PtrStkAND)(void) = dStkAND;
-
-void dStkLog(void) 
-    {
-    FPUcplxlog(&Ctx().Arg1->d, &Ctx().Arg1->d);
-    }
-
-void ddStkLog(void) 
-    {
-    Ctx().Arg1->dd = Ctx().Arg1->dd.CLog();
-    }
-
-void qdStkLog(void) 
-    {
-    Ctx().Arg1->qd = Ctx().Arg1->qd.CLog();
-    }
-
-void (*StkLog)(void) = dStkLog;
-
-void FPUcplxexp(Complex *x, Complex *z) 
-    {
-    double e2x, siny, cosy;
-
-    e2x = exp(x->x);
-    FPUsincos(&x->y, &siny, &cosy);
-    z->x = e2x * cosy;
-    z->y = e2x * siny;
-    }
-
-void dStkExp(void) 
-    {
-    FPUcplxexp(&Ctx().Arg1->d, &Ctx().Arg1->d);
-    }
-
-void ddStkExp(void) 
-    {
-    Ctx().Arg1->dd = Ctx().Arg1->dd.CExp();
-    }
-
-void qdStkExp(void) 
-    {
-    Ctx().Arg1->qd = Ctx().Arg1->qd.CExp();
-    }
-
-void (*StkExp)(void) = dStkExp;
-
-void dStkPwr(void) 
-    {
-    Ctx().Arg2->d = ComplexPower(Ctx().Arg2->d, Ctx().Arg1->d);
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void ddStkPwr(void) 
-    {
-    Ctx().Arg2->dd = Ctx().Arg2->dd ^ Ctx().Arg1->dd;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void qdStkPwr(void) 
-    {
-    Ctx().Arg2->qd = Ctx().Arg2->qd ^ Ctx().Arg1->qd;
-    Ctx().Arg1--;
-    Ctx().Arg2--;
-    }
-
-void(*StkPwr)(void) = dStkPwr;
-void(*PtrStkPwr)(void) = dStkPwr;
+void(*StkPwr)(void) = ParserStkPwr;
+void(*PtrStkPwr)(void) = ParserStkPwr;
 
 void EndInit(void)
     {
@@ -1502,59 +542,21 @@ void StkJump(void)
 
 void(*PtrStkJump)(void) = StkJump;
 
-void dStkJumpOnFalse(void)
+void ParserStkJumpOnTrue(void)
     {
-    if (Ctx().Arg1->d.x == 0)
-	StkJump();
-    else
-	Ctx().jump_cursor++;
+    DispatchUnary<&TStkJumpOnTrue<Complex>, &TStkJumpOnTrue<DDComplex>, &TStkJumpOnTrue<QDComplex>>();
     }
 
-void ddStkJumpOnFalse(void)
+void(*StkJumpOnTrue)(void) = ParserStkJumpOnTrue;
+void(*PtrStkJumpOnTrue)(void) = ParserStkJumpOnTrue;
+
+void ParserStkJumpOnFalse(void)
     {
-    if (Ctx().Arg1->dd.x == 0)
-	StkJump();
-    else
-	Ctx().jump_cursor++;
+    DispatchUnary<&TStkJumpOnFalse<Complex>, &TStkJumpOnFalse<DDComplex>, &TStkJumpOnFalse<QDComplex>>();
     }
 
-void qdStkJumpOnFalse(void)
-    {
-    if (Ctx().Arg1->qd.x == 0)
-	StkJump();
-    else
-	Ctx().jump_cursor++;
-    }
-
-void(*StkJumpOnFalse)(void) = dStkJumpOnFalse;
-void(*PtrStkJumpOnFalse)(void) = dStkJumpOnFalse;
-
-void dStkJumpOnTrue(void)
-    {
-    if (Ctx().Arg1->d.x)
-	StkJump();
-    else
-	Ctx().jump_cursor++;
-    }
-
-void ddStkJumpOnTrue(void)
-    {
-    if (Ctx().Arg1->dd.x != 0.0)
-	StkJump();
-    else
-	Ctx().jump_cursor++;
-    }
-
-void qdStkJumpOnTrue(void)
-    {
-    if (Ctx().Arg1->qd.x != 0.0)
-	StkJump();
-    else
-	Ctx().jump_cursor++;
-    }
-
-void(*StkJumpOnTrue)(void) = dStkJumpOnTrue;
-void(*PtrStkJumpOnTrue)(void) = dStkJumpOnTrue;
+void(*StkJumpOnFalse)(void) = ParserStkJumpOnFalse;
+void(*PtrStkJumpOnFalse)(void) = ParserStkJumpOnFalse;
 
 void StkJumpLabel(void)
     {

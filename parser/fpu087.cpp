@@ -42,11 +42,6 @@ void FPUcplxdiv(Complex *x, Complex *y, Complex *z)
 	z->y = ty;
 	}
     }
-void FPUsinhcosh(double *Angle, double *Sinh, double *Cosh)
-{
-    *Sinh = sinh(*Angle);
-    *Cosh = cosh(*Angle);
-}
 
 void FPUcplxlog(Complex *x, Complex *z)
     {

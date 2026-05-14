@@ -53,18 +53,9 @@ extern	char	*GenerateMPEGFileName (char *, char *);
 extern	char	*GenerateAnimFileName (char *, char *);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
 
-extern	long	threshold;
-extern	int	subtype;		// see below
-extern	WORD	type;			// M=mand, J=Julia 1,2,4-> etc
-extern	int	row, col;
-extern	PAINTSTRUCT 	ps;
-extern	HDC	hdcMem;			// load picture into memory
-extern	std::vector<float> wpixels;	// an array of doubles holding slope modified iteration counts
-extern	RECT 	r;
-extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
-extern	POINT	ptSize;			// Stores DIB dimensions
-extern	BYTE	cycleflag;		// do colour cycling
-extern	int	xdots, ydots, width, height, bits_per_pixel;;
+//extern	HDC	hdcMem;			// load picture into memory
+//extern	std::vector<float> wpixels;	// an array of doubles holding slope modified iteration counts
+//extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
 
 extern	char	PNGName[];		// base name for PNG file sequence
 extern	char	ScriptFileName[];	// base name for script file 
@@ -73,13 +64,6 @@ extern	char	MPGFile[];		// MPEG file
 extern	char	ANIMPNGPath[];		// path for animated PNG files and LST files
 extern	char	PNGFile[];		// PNG file
 
-extern	BOOL	StartImmediately;	// immediate start of animation generation
-extern	BOOL	DisplayAnimation;	// allow system to know that we are currently displaying an animation
-
-extern	int	time_to_break;		// time to break out of animation?
-extern	int	time_to_quit;		// time to quit?
-extern	int	time_to_reinit;		// time to reinitialize?
-extern	BOOL	AutoSaveFlag;
 extern	bool	gStopAnimation;		// tell fourier to stop animating
 
 extern	BOOL	WritePNGFrames;		// write frames to PNG files
@@ -99,10 +83,10 @@ static	BOOL	PlotCircles = FALSE;
 static	BOOL	first = TRUE;
 
 extern	int	FibDelay(HWND, WORD);
-extern	void	ConvertRGB2ASCII(RGBTRIPLE, char *);
+//extern	void	ConvertRGB2ASCII(RGBTRIPLE, char *);
 extern	char	*AnimData(void);
-extern	CDib	Dib;			// Device Independent Bitmaps
-extern	CTrueCol    TrueCol;		// palette info
+//extern	CDib	Dib;			// Device Independent Bitmaps
+//extern	CTrueCol    TrueCol;		// palette info
 //extern	CPlot	Plot;		// image plotting routines 
 
 static	CPreview	FourierPreview;
@@ -112,14 +96,13 @@ static	CPreview	FourierPreview;
 ***************************************************************************/
 
 char	*WriteSliders(void)
-
     {
     static	char	buffer[LEVELS * 5 + 1];		// 3 digits + sign + ',' per slider and a null at the end
     int	i;
     char	t[6];
 
     *buffer = '\0';
-    if (subtype == USER)
+    if (gManp->subtype == USER)
 	{
 	for (i = 0; i < LEVELS; i++)
 	    {
@@ -145,7 +128,7 @@ int	ReadSliders(char *buffer)
     char	*token;
     int	i;
 
-    if (*buffer == '\0' || subtype != USER)			// nothing to do
+    if (*buffer == '\0' || gManp->subtype != USER)			// nothing to do
 	return FALSE;
     i = 0;
     token = strtok1(buffer, seps);
@@ -164,7 +147,6 @@ int	ReadSliders(char *buffer)
 ***************************************************************************/
 
 int	Harmonics(BOOL clear, int TotalFrames, CPlot Plot)
-
     {
     WORD	i, x1, y1, x2, y2, centrex, centrey;
     double	xold, yold;
@@ -172,8 +154,8 @@ int	Harmonics(BOOL clear, int TotalFrames, CPlot Plot)
     int		test, radius;
 
     xnew = ynew = xold = yold = 0.0;
-    centrey = ydots / 2;
-    centrex = xdots / 4;
+    centrey = gManp->ydots / 2;
+    centrex = gManp->xdots / 4;
 
     for (i = 0; i < NumHarmonics; ++i)
 	{
@@ -189,27 +171,27 @@ int	Harmonics(BOOL clear, int TotalFrames, CPlot Plot)
 	x2 = (test < 0) ? 0 : (WORD)test;
 	test = ((int)(MagY * ynew) + centrey);
 	y2 = (test < 0) ? 0 : (WORD)test;
-	if (x1 > xdots / 2 - 10)					// make sure we don't write a harmonic into the history area
-	    x1 = xdots / 2 - 10;
-	if (x2 > xdots / 2 - 10)
-	    x2 = xdots / 2 - 10;
+	if (x1 > gManp->xdots / 2 - 10)					// make sure we don't write a harmonic into the history area
+	    x1 = gManp->xdots / 2 - 10;
+	if (x2 > gManp->xdots / 2 - 10)
+	    x2 = gManp->xdots / 2 - 10;
 	if (x1 < 0)	
 	    x1 = 0;
 	if (x2 < 0)
 	    x2 = 0;
-	if (y1 > ydots - 1)						// check boundaries
-	    y1 = ydots - 1;
-	if (y2 > ydots - 1)
-	    y2 = ydots - 1;
+	if (y1 > gManp->ydots - 1)						// check boundaries
+	    y1 = gManp->ydots - 1;
+	if (y2 > gManp->ydots - 1)
+	    y2 = gManp->ydots - 1;
 	if (y1 < 0)	
 	    y1 = 0;
 	if (y2 < 0)
 	    y2 = 0;
-	Plot.genline(x1, (WORD)(ydots - y1), x2, (WORD)(ydots - y2), clear ? 0 : FourierArray[i].c);
+	Plot.genline(x1, (WORD)(gManp->ydots - y1), x2, (WORD)(gManp->ydots - y2), clear ? 0 : FourierArray[i].c);
 	if (PlotCircles)
 	    {
 	    radius = (int)sqrt(((double)sqr(x2 - x1) + (double)sqr(y2 - y1)));
-	    Plot.DisplayCircle(x1, (WORD)(ydots - y1), radius, clear ? 0 : FourierArray[i].c);
+	    Plot.DisplayCircle(x1, (WORD)(gManp->ydots - y1), radius, clear ? 0 : FourierArray[i].c);
 	    }
 	xold = xnew;
 	yold = ynew;
@@ -229,7 +211,6 @@ int	Harmonics(BOOL clear, int TotalFrames, CPlot Plot)
 ***************************************************************************/
 
 void	CalculateFourier(double angle)
-
     {
     int	i;
 
@@ -239,7 +220,7 @@ void	CalculateFourier(double angle)
 	    continue;
 	FourierArray[i].x = -sin(HALF_PI + i * angle) * FourierArray[i].magsin + sin(i * angle) * FourierArray[i].magcos;
 	FourierArray[i].y = -cos(HALF_PI + i * angle) * FourierArray[i].magsin + cos(i * angle) * FourierArray[i].magcos;
-	FourierArray[i].c = i * (int)threshold / NumHarmonics + 1;
+	FourierArray[i].c = i * (int)gManp->threshold / NumHarmonics + 1;
 	}
     }
 
@@ -248,14 +229,13 @@ void	CalculateFourier(double angle)
 ***************************************************************************/
 
 void	InitFourier(char WaveType)
-
     {
     int	i;
     double	sign;
 
     WavePtr = 0;							// point to the currently updated location
-    MagX = (double)xdots / 16.0;
-    MagY = (double)ydots / 8.0;
+    MagX = (double)gManp->xdots / 16.0;
+    MagY = (double)gManp->ydots / 8.0;
     if (WaveType != USER)						// we don't want to do this if we are using sliders
 	{
 	for (i = 0; i < FOURIERMAX; i++)
@@ -325,35 +305,34 @@ void	InitFourier(char WaveType)
 ***************************************************************************/
 
 int	FourierStep(HWND hwnd, char *FileName, int TotalFrames, int ThisStep, CPlot Plot)
-
     {
     static	double	angle;
     int		k, index1, index2;
     static	int	HorPos, OldHorPos;
     BYTE	buffer[MAXHORIZONTAL * 3];
-    long	address;
+    size_t 	address;
     static	int	colour = 0;
 
     DWORD	tick;
                      
     user_data(hwnd);
-    if (time_to_reinit)			// Stop Fourier animation, but do not abort the script / program.
+    if (gManp->time_to_reinit)			// Stop Fourier animation, but do not abort the script / program.
 	{
-	time_to_quit = FALSE;		// consume ESC
+	gManp->time_to_quit = FALSE;		// consume ESC
 	gStopAnimation = true;		// signal animation stop
-	AutoSaveFlag = FALSE;
+	gManp->AutoSaveFlag = FALSE;
 	return -1;			// NOT fatal
 	}
     tick = GetTickCount();
     while (GetTickCount() < tick + delay);
 
     OldHorPos = HorPos;
-    HorPos = (DWORD)xdots * (DWORD) ThisStep / (DWORD) (TotalFrames * 2) + xdots / 2;
+    HorPos = (DWORD)gManp->xdots * (DWORD) ThisStep / (DWORD) (TotalFrames * 2) + gManp->xdots / 2;
     Harmonics(TRUE, TotalFrames, Plot);		// clear previous vectors
     angle = (TWO_PI / (double)TotalFrames) * (double) ThisStep;
     CalculateFourier(angle);
     Harmonics(FALSE, TotalFrames, Plot);		// write new vectors
-    InvalidateRect(hwnd, &r, FALSE);
+    InvalidateRect(hwnd, &gManp->r, FALSE);
 
     index1 = WavePtr - 1;
     index2 = WavePtr - 2;
@@ -368,27 +347,27 @@ int	FourierStep(HWND hwnd, char *FileName, int TotalFrames, int ThisStep, CPlot 
 	{
 	if (MovingWave)
 	    {
-	    for (k = 0; k < ydots; k++)
+	    for (k = 0; k < gManp->ydots; k++)
 		{
 		if (AbortRequested())
 		    return -1;
-		address = WIDTHBYTES((DWORD)width * (DWORD)bits_per_pixel) * k + (xdots / 2 - 3) * 3;
-		memcpy(buffer, Dib.DibPixels.data() + address, (xdots / 2) * 3);
-		memcpy(Dib.DibPixels.data() + address + 3, buffer, (xdots / 2 - 1) * 3);
+		address = ComputeWidthBytes((DWORD)gManp->width, (DWORD)gManp->Dib.BitsPerPixel) * k + (gManp->xdots / 2 - 3) * 3;
+		memcpy(buffer, gManp->Dib.DibPixels.data() + address, (gManp->xdots / 2) * 3);
+		memcpy(gManp->Dib.DibPixels.data() + address + 3, buffer, (gManp->xdots / 2 - 1) * 3);
 		}
-	    Plot.genline((WORD)(xdots / 2), (WORD)(ydots - WaveformArray[index2]), 
-					    (WORD)(xdots / 2 + 1), (WORD)(ydots - WaveformArray[index1]), colour);
+	    Plot.genline((WORD)(gManp->xdots / 2), (WORD)(gManp->ydots - WaveformArray[index2]),
+					    (WORD)(gManp->xdots / 2 + 1), (WORD)(gManp->ydots - WaveformArray[index1]), colour);
 	    }
 	else 
 	    {
 	    if (AbortRequested())
 		return -1;
-	    Plot.genline((WORD)(OldHorPos - 2), (WORD)(ydots - WaveformArray[index2]),
+	    Plot.genline((WORD)(OldHorPos - 2), (WORD)(gManp->ydots - WaveformArray[index2]),
 		(WORD)((HorPos > OldHorPos) ? (HorPos - 2) : OldHorPos),	// remove retrace
-		(WORD)(ydots - WaveformArray[index1]), colour);
+		(WORD)(gManp->ydots - WaveformArray[index1]), colour);
 	    }
 	}
-    if (colour++ >= threshold)
+    if (colour++ >= gManp->threshold)
 	colour = 1;
     return 0;
     }                                                 
@@ -398,26 +377,25 @@ int	FourierStep(HWND hwnd, char *FileName, int TotalFrames, int ThisStep, CPlot 
 ***************************************************************************/
 
 int	Fourier(void)
-
     {
     int	j;
     CPlot	Plot;
 
     gStopRequested = false; // reset flag before starting threads
-    Plot.InitPlot(threshold, &TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib.BitsPerPixel, &Dib, USEPALETTE);
-    DisplayAnimation = TRUE;
-    time_to_break = FALSE;
-    InitFourier(subtype);
+    Plot.InitPlot(gManp->threshold, &gManp->TrueCol, &gManp->wpixels, gManp->xdots, gManp->ydots, gManp->xdots, gManp->ydots, gManp->Dib.BitsPerPixel, &gManp->Dib, USEPALETTE);
+    gManp->DisplayAnimation = TRUE;
+    gManp->time_to_break = FALSE;
+    InitFourier(gManp->subtype);
 
-    while (time_to_break == FALSE)
+    while (gManp->time_to_break == FALSE)
 	{
 	for (j = 0; j < steps; ++j)
 	    {
-	    if (time_to_break)
+	    if (gManp->time_to_break)
 		break;
 	    if (AbortRequested())
 		return -1;
-	    if (FourierStep(PixelHwnd, "", steps, j, Plot) < 0)
+	    if (FourierStep(gManp->GlobalHwnd, "", steps, j, Plot) < 0)
 		return 0;
 	    }
 	}
@@ -430,7 +408,6 @@ int	Fourier(void)
 ***************************************************************************/
 
 int	WavePreview(HWND hwnd, CPlot Plot)
-
     {
     int	i, j, index;
     double	xnew, ynew;
@@ -490,14 +467,14 @@ INT_PTR CALLBACK FourierTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
      FourierPreview.PreviewHeight = PREVIEW_HEIGHT;
      FourierPreview.PreviewWidth = PREVIEW_WIDTH;
 
-     Plot.InitPlot(threshold, &TrueCol, wpixels, xdots, ydots, FourierPreview.PreviewWidth, FourierPreview.PreviewHeight, FourierPreview.PreviewDib.BitsPerPixel, &FourierPreview.PreviewDib, 0);
+     Plot.InitPlot(gManp->threshold, &gManp->TrueCol, &gManp->wpixels, gManp->xdots, gManp->ydots, FourierPreview.PreviewWidth, FourierPreview.PreviewHeight, FourierPreview.PreviewDib.BitsPerPixel, &FourierPreview.PreviewDib, 0);
 
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-		cycleflag = FALSE;
-	        temp = subtype;
-	        switch (subtype)
+		gManp->cycleflag = FALSE;
+	        temp = gManp->subtype;
+	        switch (gManp->subtype)
 		    { 
 		    case SQUARE:
 			tempParam = IDC_SQUAREWAVE;
@@ -526,7 +503,7 @@ INT_PTR CALLBACK FourierTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		    default:				// uninitialised
 			tempParam = IDC_SQUAREWAVE;
 			temp = SQUARE;
-			subtype = SQUARE;
+			gManp->subtype = SQUARE;
 			break;
 		    }
 
@@ -614,10 +591,10 @@ INT_PTR CALLBACK FourierTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 	        return TRUE ;
 
 	  case WM_PAINT:
-		BeginPaint(hDlg, &ps);
+		BeginPaint(hDlg, &gManp->ps);
 		WavePreview(hDlg, Plot);
 		FourierPreview.Preview(hDlg);
-		EndPaint(hDlg, &ps);
+		EndPaint(hDlg, &gManp->ps);
 	        return TRUE ;
 
 	  case WM_COMMAND:
@@ -691,7 +668,7 @@ INT_PTR CALLBACK FourierTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 		        return TRUE ;
 
 		    case IDOK:
-			subtype = temp;
+			gManp->subtype = temp;
 			if (temp_delay >= 0 && temp_delay < 2000)
 			    delay = temp_delay;
 			else
@@ -735,8 +712,7 @@ INT_PTR CALLBACK FourierTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 	Fourier script generator
 **************************************************************************/
 
-int	GenFourierScript(HWND hwnd, char *filename) 
-
+int	CManp::GenFourierScript(HWND hwnd, char *filename) 
     {
     char	s[120];
     FILE	*out;
@@ -784,9 +760,9 @@ INT_PTR CALLBACK FourierAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-		cycleflag = FALSE;
+	        gManp->cycleflag = FALSE;
 		hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
-		SendMessage(hCtrl, BM_SETCHECK, StartImmediately, 0L);
+		SendMessage(hCtrl, BM_SETCHECK, gManp->StartImmediately, 0L);
 		SetUpFilename(ScriptFileName, "sci", "Fourier");
 		SetUpFilename(PNGName, "animpng", "Fourier");
 		SetDlgItemText(hDlg, IDC_SCRIPT_FILENAME, ScriptFileName);
@@ -858,7 +834,7 @@ INT_PTR CALLBACK FourierAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			    *fileptr = '\0';
 			strcat_s(ScriptFileName, MAX_PATH, ".sci");
 			hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
-			StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGDIRECT);
 			WritePNGFrames = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_WRITEMEMDIRECT);
@@ -867,8 +843,8 @@ INT_PTR CALLBACK FourierAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			WriteMPEGFrames = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGFILELIST);
 			WritePNGList = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
-			type = FOURIER;
-			GenFourierScript(hDlg, ScriptFileName);
+			gManp->type = FOURIER;
+			gManp->GenFourierScript(hDlg, ScriptFileName);
 			EndDialog (hDlg, TRUE);
 			return TRUE;
 

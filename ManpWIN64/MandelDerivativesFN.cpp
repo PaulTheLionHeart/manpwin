@@ -21,13 +21,7 @@
 
 int	CPixel::InitManDerFunctions(int subtype, Complex *z, Complex *q)
     {
-    MandelDerivInit<Complex, double>(
-	subtype, juliaflag,
-	z, q,
-	sqr, real_imag,
-	degree, param
-	);
-
+    MandelDerivInit<Complex, double>(subtype, juliaflag, z, q, sqr, real_imag, degree, param);
     return 0;
     }
 

@@ -11,24 +11,6 @@
 #include "manp.h"
 #include "pixel.h"
 
-/*
-static	float	xshift;
-static	float	EyeSeparation, ViewingDist;
-static	short	Left_ofLeftPic, Left_ofRightPic;
-static	short	PicWidth, PicHeight, sep;
-static	long	depth, maxc, ystart;
-static	long	colour_array[MAXHORIZONTAL / 2];	// for right hand image
-static	long	colour_position[MAXHORIZONTAL / 2];	// for right hand image
-
-extern	int	stereo_sign;
-extern	BYTE	pairflag;		// stereo pair
-extern	int	ground;			// set limits on separation
-extern	int	AutoStereo_value;	// AutoStereo depth value
-
-extern	long	threshold;		// maximum iterations
-//extern	int	user_data(HWND);
-*/
-
 /**************************************************************************
 	Do stereo pairs
 	

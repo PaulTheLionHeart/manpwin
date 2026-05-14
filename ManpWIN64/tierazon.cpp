@@ -11,11 +11,6 @@
 // Note that CSqr(z) is used in place of z*z and CCube(z) in place of z*z*z for speed
 /////////////////////////////////////////////////////
 
-
-
-//Restore once we get rid of functions
-
-
 #include	<math.h>
 #include	"manp.h"
 #include	"resource.h"
@@ -23,15 +18,6 @@
 #include	"fractalp.h"
 
 static	int	TierazonPtr = 1, TierazonNum = 0;
-
-extern	long	iteration;		// globals for speed for now at least
-
-extern	int	subtype;
-extern	double	param[];
-extern	double	rqlim;			// bailout level
-extern	int	period_level;		// 0 for no periodicity checking
-
-extern	CFract	Fractal;		// current fractal stuff
 
 /**************************************************************************
 	General Tierazon Fractal
@@ -52,7 +38,7 @@ void	LoadTierazonParams(void)
     // here is where we can do some specific updates to individual Tierazon fractals
     int	i;
 
-    switch (subtype)
+    switch (gManp->subtype)
 	{
 	case 10:					// z=z*z*z+c
 	case 11:					// z=z*z*z*z+c
@@ -85,28 +71,28 @@ void	LoadTierazonParams(void)
 	case 165:					// Flarium 67-69, Newton Variations: z = ((z-(((z^n)-1)/(n*(z^(n-1)))))^2)*c
 	case 172:					// Flarium 112-116, Polynomials: z=z^n*c+z*c; Dragon curve variations
 //	case 177:					// Flarium 145, Polynomial: z=z^2+c [Jaenisch method]
-	    Fractal.NumParam = 3;
-	    Fractal.ParamName[0] = "Polynomial Degree (>= 2)";
-	    Fractal.ParamName[1] = "Real Perturbation of Z(0)";
-	    Fractal.ParamName[2] = "Imaginary Perturbation of Z(0)";
+	    gManp->Fractal.NumParam = 3;
+	    gManp->Fractal.ParamName[0] = "Polynomial Degree (>= 2)";
+	    gManp->Fractal.ParamName[1] = "Real Perturbation of Z(0)";
+	    gManp->Fractal.ParamName[2] = "Imaginary Perturbation of Z(0)";
 	    break;
 	}
-    if (subtype == 133 || subtype == 177)	// Flarium 28 and 245 don't work well with periodicy checking
-	period_level = FALSE;			// no periodicity checking for Tierazon fractals
+    if (gManp->subtype == 133 || gManp->subtype == 177)	// Flarium 28 and 245 don't work well with periodicy checking
+	gManp->period_level = FALSE;			// no periodicity checking for Tierazon fractals
     for (i = 0; i < 4; i++)
-	param[i] = TierazonSpecific[subtype].paramvalue[i];
-    rqlim = TierazonSpecific[subtype].rqlim;
+	gManp->param[i] = TierazonSpecific[gManp->subtype].paramvalue[i];
+    gManp->rqlim = TierazonSpecific[gManp->subtype].rqlim;
     }
 
 int	init_Tierazon(void) 
     {
-    return (TierazonSpecific[subtype].per_pixel());
+    return (TierazonSpecific[gManp->subtype].per_pixel());
     }
 
 int	do_Tierazon(void) 
 
     {
-    return (TierazonSpecific[subtype].calctype());
+    return (TierazonSpecific[gManp->subtype].calctype());
     }
 
 /**************************************************************************
@@ -165,7 +151,7 @@ INT_PTR CALLBACK SelectTierazonDlg(HWND hDlg, UINT message, WPARAM wParam, LPARA
                     TierazonPtr = index;
 //		    PreviousLsys_ptr = index;
 //		    strcpy(lsys_type, lptr[lsys_ptr]);
-		    subtype = TierazonPtr;
+		    gManp->subtype = TierazonPtr;
                     EndDialog(hDlg, TRUE);
                     return (TRUE);
                   
@@ -193,7 +179,7 @@ INT_PTR CALLBACK SelectTierazonDlg(HWND hDlg, UINT message, WPARAM wParam, LPARA
 				    "Select From a List", MB_OK | MB_ICONEXCLAMATION);
 				break;
 				}
-			    subtype = TierazonPtr = index;
+			    gManp->subtype = TierazonPtr = index;
 //			    lsys_ptr = index;
 //			    strcpy(lsys_type, lptr[lsys_ptr]);
 			    EndDialog(hDlg, TRUE);

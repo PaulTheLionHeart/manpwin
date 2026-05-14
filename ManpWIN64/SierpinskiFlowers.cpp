@@ -6,9 +6,8 @@
 */
 
 #include "OtherFunctions.h"
+#include "Manp.h"
 
-#define MIN(a,b)    (a <= b ? a : b)
-#define MAX(a,b)    (a >= b ? a : b)
 #define MAXPOINTS   16
 #define	MAXARRAY    64
 
@@ -17,7 +16,6 @@
 ***************************************************************************/
 
 int	COtherFunctions::DoSierpinskiFlower()
-
     {
     int	    cor, k, l, m, n, n1;
     double  d, g, k3; 
@@ -28,13 +26,13 @@ int	COtherFunctions::DoSierpinskiFlower()
     DWORD   colour;
     BOOL    flag = FALSE;				// break early
 
-    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double) (ydots - 1) / mandel_width;
+    xscale = (double) (gManp->xdots - 1) / (mandel_width * ScreenRatio);
+    yscale = (double) (gManp->ydots - 1) / mandel_width;
 
-    Passes = (int)param[0];
-    Sides = (int)param[1];
+    Passes = (int)gManp->param[0];
+    Sides = (int)gManp->param[1];
 //    Animate = (param[2] != 0.0);
-    ExpandPalette = (param[2] != 0.0);
+    ExpandPalette = (gManp->param[2] != 0.0);
 
 //    if (Animate)
 //	return DoAnimatedSierpinskiFlower();
@@ -53,7 +51,7 @@ int	COtherFunctions::DoSierpinskiFlower()
 	if (flag)
 	    break;
 	*curpass = m;
-	colour = (ExpandPalette) ? threshold * (DWORD)m / Passes : (DWORD)m;
+	colour = (ExpandPalette) ? gManp->threshold * (DWORD)m / Passes : (DWORD)m;
 	exp1 = IntPower(Sides, m);
 	for (n = 0; n < exp1; n++)
 	    {

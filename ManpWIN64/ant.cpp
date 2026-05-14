@@ -22,14 +22,13 @@
 #include "plot.h"
 #include "resource.h"
 #include "SafeStrings.h"
+#include "manp.h"
 
 // possible value of idir e relative movement in the 4 directions
 // for x 0, 1, 0, -1
 // for y 1, 0, -1, 0
 
 extern	int	user_data(HWND);
-extern	void	DisplayStatusBarInfo(int, char *);
-extern	char	*ShowTime(double time);
 
 /**************************************************************************
 	turkmite from scientific american july 1994 pag 91 Tweaked by Luciano Genero & Fulvio Cappelli
@@ -46,7 +45,7 @@ void	COtherFunctions::TurkMite1(int maxtur, size_t rule_len, char *ru, long maxp
     double  ElapsedTime;
     __time64_t     AntTime = FrameStart.time;
 
-    antwrap = ((param[3] == 0) ? 0 : 1);
+    antwrap = ((gManp->param[3] == 0) ? 0 : 1);
     step = (int) wait;
     if (step == 1)
 	wait = 0;
@@ -89,8 +88,8 @@ void	COtherFunctions::TurkMite1(int maxtur, size_t rule_len, char *ru, long maxp
 	else
 	    {
 	    dir[color] = RANDOMANT(DIRS);
-	    x[color] = RANDOMANT(xdots);
-	    y[color] = RANDOMANT(ydots);
+	    x[color] = RANDOMANT(gManp->xdots);
+	    y[color] = RANDOMANT(gManp->ydots);
 	    }
 	}
     maxpts = maxpts / (long) INNER_LOOP;
@@ -102,9 +101,9 @@ void	COtherFunctions::TurkMite1(int maxtur, size_t rule_len, char *ru, long maxp
 	    lastChecked = int(progress * 100);
 	    _ftime64(&FrameEnd);					// initialise time counter
 	    ElapsedTime = (double)(FrameEnd.time) + (double)(FrameEnd.millitm) / 1000.0 - (double)(FrameStart.time) - (double)(FrameStart.millitm) / 1000.0;
-	    _snprintf_s(AntStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), ShowTime(ElapsedTime));
+	    _snprintf_s(AntStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), gManp->ShowTime(ElapsedTime));
 	    if (AntTime < FrameEnd.time)
-		DisplayStatusBarInfo(INCOMPLETE, "");
+		gManp->DisplayStatusBarInfo(INCOMPLETE, "");
 	    }
 
 	InvalidateRect(hwnd, NULL, FALSE);
@@ -129,8 +128,8 @@ void	COtherFunctions::TurkMite1(int maxtur, size_t rule_len, char *ru, long maxp
 		    idir += rule[pixel];
 		    idir &= 3;
 		    if (antwrap == 0)
-			if ((idir == 0 && iy == ydots - 1) ||
-			    (idir == 1 && ix == xdots - 1) ||
+			if ((idir == 0 && iy == gManp->ydots - 1) ||
+			    (idir == 1 && ix == gManp->xdots - 1) ||
 			    (idir == 2 && iy == 0) ||
 			    (idir == 3 && ix == 0))
 				return;
@@ -152,8 +151,8 @@ void	COtherFunctions::TurkMite1(int maxtur, size_t rule_len, char *ru, long maxp
 		    idir += rule[pixel];
 		    idir &= 3;
 		    if (antwrap == 0)
-			if ((idir == 0 && iy == ydots - 1) ||
-			    (idir == 1 && ix == xdots - 1) ||
+			if ((idir == 0 && iy == gManp->ydots - 1) ||
+			    (idir == 1 && ix == gManp->xdots - 1) ||
 			    (idir == 2 && iy == 0) ||
 			    (idir == 3 && ix == 0))
 				return;
@@ -180,46 +179,46 @@ int	COtherFunctions::ant(void)
     char rule[MAX_ANTS];
     char *extra;
 
-    extra = new char [(xdots + 2) * sizeof(int) * DIRS + (ydots + 2) * sizeof(int) * MAX_ANTS];
+    extra = new char [(gManp->xdots + 2) * sizeof(int) * DIRS + (gManp->ydots + 2) * sizeof(int) * MAX_ANTS];
 
     for (i = 0; i < DIRS; i++)
 	{
-	incx[i] = (int *) (extra + (xdots + 2) * sizeof(int) * i);
-	incy[i] = (int *) (extra + (xdots + 2) * sizeof(int) * DIRS + (ydots + 2) *sizeof(int) * i);
+	incx[i] = (int *) (extra + (gManp->xdots + 2) * sizeof(int) * i);
+	incy[i] = (int *) (extra + (gManp->xdots + 2) * sizeof(int) * DIRS + (gManp->ydots + 2) *sizeof(int) * i);
 	}
 
 // In this vectors put all the possible point that the ants can visit. Wrap them from a side to the other instead of simply end calculation
-    for (i = 0; i < xdots; i++)
+    for (i = 0; i < gManp->xdots; i++)
 	{
 	incx[0][i] = i;
 	incx[2][i] = i;
 	}
 
-    for(i = 0; i < xdots; i++)
+    for(i = 0; i < gManp->xdots; i++)
 	incx[3][i] = i + 1;
-    incx[3][xdots-1] = 0; // wrap from right of the screen to left 
+    incx[3][gManp->xdots-1] = 0; // wrap from right of the screen to left 
 
-    for(i = 1; i < xdots; i++)
+    for(i = 1; i < gManp->xdots; i++)
 	incx[1][i] = i - 1;
-    incx[1][0] = xdots-1; // wrap from left of the screen to right 
+    incx[1][0] = gManp->xdots-1; // wrap from left of the screen to right 
 
-    for (i = 0; i < ydots; i++)
+    for (i = 0; i < gManp->ydots; i++)
 	{
 	incy[1][i] = i;
 	incy[3][i] = i;
 	}
-    for (i = 0; i < ydots; i++)
+    for (i = 0; i < gManp->ydots; i++)
 	incy[0][i] = i + 1;
-    incy[0][ydots - 1] = 0;      // wrap from the top of the screen to the bottom 
-    for (i = 1; i < ydots; i++)
+    incy[0][gManp->ydots - 1] = 0;      // wrap from the top of the screen to the bottom 
+    for (i = 1; i < gManp->ydots; i++)
 	incy[2][i] = i - 1;
-    incy[2][0] = ydots - 1;      // wrap from the bottom of the screen to the top 
+    incy[2][0] = gManp->ydots - 1;      // wrap from the bottom of the screen to the top 
    //oldhelpmode = helpmode;
    //helpmode = ANTCOMMANDS;
-    maxpts = (long) param[1];
+    maxpts = (long)gManp->param[1];
     maxpts = labs(maxpts);
    //wait = abs(orbit_delay);
-    SAFE_SPRINTF(rule, "%.17g", param[0]);
+    SAFE_SPRINTF(rule, "%.17g", gManp->param[0]);
     rule_len = strlen(rule);
     if (rule_len > 1)
 	{                            // if rule_len == 0 random rule
@@ -235,23 +234,23 @@ int	COtherFunctions::ant(void)
 	rule_len = 0;
 
    // set random seed for reproducibility
-    if ((!rflag) && param[4] == 1)
+    if ((!rflag) && gManp->param[4] == 1)
 	--AntRseed;
-    if (param[5] != 0 && param[4] != 1)
-	AntRseed = (int)param[4];
+    if (gManp->param[5] != 0 && gManp->param[4] != 1)
+	AntRseed = (int)gManp->param[4];
 
     srand(AntRseed);
     if (!rflag) ++AntRseed;
 
-    maxants = (int) param[2];
+    maxants = (int)gManp->param[2];
     if (maxants < 1)             // if maxants == 0 maxants random
 	maxants = 2 + RANDOMANT(MAX_ANTS - 2);
     else if (maxants > MAX_ANTS)
-	param[2] = maxants = MAX_ANTS;
+	gManp->param[2] = maxants = MAX_ANTS;
 
     wait = 0;
     TurkMite1(maxants, rule_len, rule, maxpts, wait);
-    DisplayStatusBarInfo(COMPLETE, "");
+    gManp->DisplayStatusBarInfo(COMPLETE, "");
     if (extra) { delete[] extra; extra = NULL; }
     return 0;
     }
@@ -273,10 +272,10 @@ int	COtherFunctions::tower(void)
     int	    lastChecked = -1;
     double  ElapsedTime;
     __time64_t     AntTime = FrameStart.time;
-    int	    AntSize = (int)param[3];
+    int	    AntSize = (int)gManp->param[3];
     if (AntSize < 1) AntSize = 1;
-    double  HeightScale = fabs(param[4]);
-    a = xdots / 2; b = ydots / 2;
+    double  HeightScale = fabs(gManp->param[4]);
+    a = gManp->xdots / 2; b = gManp->ydots / 2;
 //    srand((unsigned)time(NULL));
 //    int RandomDigit = rand() % 10 - 5;
     c = a + 1;
@@ -287,7 +286,7 @@ int	COtherFunctions::tower(void)
     p.resize(MAXIMUM_TOWER);
 
     DWORD	BackGround;
-    int		BGColPtr = (int)param[2];
+    int		BGColPtr = (int)gManp->param[2];
     if (BGColPtr < 0) 
 	BGColPtr = 0; 
     if (BGColPtr > 255) 
@@ -309,9 +308,9 @@ int	COtherFunctions::tower(void)
 	    lastChecked = int(progress * 100);
 	    _ftime64(&FrameEnd);					// initialise time counter
 	    ElapsedTime = (double)(FrameEnd.time) + (double)(FrameEnd.millitm) / 1000.0 - (double)(FrameStart.time) - (double)(FrameStart.millitm) / 1000.0;
-	    _snprintf_s(AntStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), ShowTime(ElapsedTime));
+	    _snprintf_s(AntStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), gManp->ShowTime(ElapsedTime));
 	    if (AntTime < FrameEnd.time)
-		DisplayStatusBarInfo(INCOMPLETE, "");
+		gManp->DisplayStatusBarInfo(INCOMPLETE, "");
 	    }
 	if (a != c)			// option: if segment (a,b)-(c,d) is horizontal, goto 1 else if segment (a,b)-(c,d) is vertical, goto 5
 	    {
@@ -378,12 +377,12 @@ int	COtherFunctions::tower(void)
 	    cor = 15;
 	if (d < 0)
 	    d = 50;
-	else if (d > ydots)
-	    d = ydots - 50;		// making the ant rebound at the limit of the wall in the horizontal direction
+	else if (d > gManp->ydots)
+	    d = gManp->ydots - 50;		// making the ant rebound at the limit of the wall in the horizontal direction
 	if (c < 0)
 	    c = 50;
-	else if (c > xdots)
-	    c = xdots - 50;		// making the ant rebound at the limit of the wall in the vertical direction
+	else if (c > gManp->xdots)
+	    c = gManp->xdots - 50;		// making the ant rebound at the limit of the wall in the vertical direction
 
 	Plot.DisplayFilledCircle(c, d, AntSize, cor);	// here we materialize the drawing of the new (c,d) with its inverse color
 	// z(c, d) = z(c, d) + 1: here we count, cell by cell, the number of the visits of the single 'ant' - this idea was Johnathan's
@@ -394,7 +393,7 @@ int	COtherFunctions::tower(void)
 	m[j] = z[index];				// here we mount the 3 linear matrix, the co-ordinate, the abscissa and the vertical variables.
 	if (m[j] > mmax)				// this will divide the colors of the mountain : till 1.5 / 7, green; from 1.5 / 7 to 4.5 / 7 gray and from 5 / 7 to 7 / 7 white
 	    mmax = m[j];				// that proportion I saw in a voyage to the Andes mountain in Chile and Argentina - the trees did not climbe above the 600 meters altitude.
-	if (j % (int)param[0] == 0)
+	if (j % (int)gManp->param[0] == 0)
 	    Sleep(1);					// slowing the movement of the ant. In C++ there is a command to slow the processing here
 	}
 
@@ -403,8 +402,8 @@ int	COtherFunctions::tower(void)
 	// here is the end of the first draw of the ants in the plane.
     Dib->ClearDib(0L);
     int x, y;						// store starinbg point for each line
-    x = xdots / 2;
-    y = ydots - 50;
+    x = gManp->xdots / 2;
+    y = gManp->ydots - 50;
     for (int i = 2; i < MAXIMUM_TOWER - 5; i++)
 	{
 	if (user_data(hwnd) == -1)			// user pressed a key?
@@ -415,9 +414,9 @@ int	COtherFunctions::tower(void)
 	    lastChecked = int(progress * 100);
 	    _ftime64(&FrameEnd);					// initialise time counter
 	    ElapsedTime = (double)(FrameEnd.time) + (double)(FrameEnd.millitm) / 1000.0 - (double)(FrameStart.time) - (double)(FrameStart.millitm) / 1000.0;
-	    _snprintf_s(AntStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), ShowTime(ElapsedTime));
+	    _snprintf_s(AntStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), gManp->ShowTime(ElapsedTime));
 	    if (AntTime < FrameEnd.time)
-		DisplayStatusBarInfo(INCOMPLETE, "");
+		gManp->DisplayStatusBarInfo(INCOMPLETE, "");
 	    }
 	if (m[i] < 1.5 / 7 * mmax)
 	    cor = 2;					// here I define the colors : the forest(DOS color 3), the nude rock, now gray(DOS color 8) and the snow color = 15
@@ -425,22 +424,22 @@ int	COtherFunctions::tower(void)
 	    cor = 8;
 	else
 	    cor = 15;
-	if (i % (int)param[1] == 0)
+	if (i % (int)gManp->param[1] == 0)
 	    Sleep(1);					// Here we slow the construction of the tower otherwise it would be instaneous. ANT do that construction by vagarose steps !!!!
 	
 	int xIn, xOut, yIn, yOut;			// use these to check boundary conditions of the screen
 	xIn = x; yIn = y;
 	xOut = (int)(l[i] + 10); 
-	yOut = (int)(ydots - 50 - m[i] * 10 * HeightScale);
-	if (xIn < 0) xIn = 0;  if (xIn >= xdots) xIn = xdots - 1;
-	if (yIn < 0) yIn = 0;  if (yIn >= xdots) yIn = ydots - 1;
-	if (xOut < 0) xOut = 0;  if (xOut >= xdots) xOut = xdots - 1;
-	if (yOut < 0) yOut = 0;  if (yOut >= xdots) yOut = ydots - 1;
+	yOut = (int)(gManp->ydots - 50 - m[i] * 10 * HeightScale);
+	if (xIn < 0) xIn = 0;  if (xIn >= gManp->xdots) xIn = gManp->xdots - 1;
+	if (yIn < 0) yIn = 0;  if (yIn >= gManp->xdots) yIn = gManp->ydots - 1;
+	if (xOut < 0) xOut = 0;  if (xOut >= gManp->xdots) xOut = gManp->xdots - 1;
+	if (yOut < 0) yOut = 0;  if (yOut >= gManp->xdots) yOut = gManp->ydots - 1;
 
 	if (xIn > 10 && xOut > 10 && yIn > 10 && yOut > 10)	// no silly lines at startup
 	    Plot.genline(xIn, yIn, xOut, yOut, cor);
 	x = (int)(l[i] + 10);
-	y = (int)(ydots - 50 - m[i] * 10 * HeightScale);
+	y = (int)(gManp->ydots - 50 - m[i] * 10 * HeightScale);
 	}
     return 0;
     }

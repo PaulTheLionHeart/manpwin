@@ -11,9 +11,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include "manpwin.h"
+#include "manp.h"
 #include "quanterr.h"
 #include "Dib.h"
-#include "anim.h"
+//#include "anim.h"
 #include "colour.h"
 
 #define	WRGB_RED		2
@@ -26,29 +27,14 @@
 #define	LPBcolourmap(lpbi)	(LPRGBQUAD)((LPSTR)lpbi+lpbi->biSize)
 #define DIBPAL(pDib)		LPBcolourmap(((LPBITMAPINFOHEADER)pDib))
 
-
-//extern	int	Force24Bit(void);
-//extern	void	ChangeView(int, int, int, int, int, int, int, int, char);
-//extern	void	SetupView(void);
-//extern	int	GeneratePalette(char *, char *, char *);
-//extern	int	dl1quant(BYTE *, BYTE *, int, int, int, int, BYTE *);
 extern	int	dl3quant(BYTE *, BYTE *, int, int, int, int, BYTE *);
-//extern	int	SetupUndo(void);
 extern	void	UpdateTitleBar(HWND);
-//extern	void	CreateTitleBar(char *, char *, int, int, int);
-//extern	void	ShowMessage(char *);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-extern	HWND	GlobalHwnd;				// This is the main windows handle
+//extern	HWND	GlobalHwnd;				// This is the main windows handle
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 	HCURSOR	hStdCursor;
-//extern	BYTE	*PalettePtr;				// points to true colour palette
-
-// Global Variables:
-extern	CDib			Dib;			// Device Independent Bitmap class instance
-static	CDib			DitherDib;		// Device Independent Bitmap class instance
-extern	CTrueCol		TrueCol;		// palette info
-
+static		CDib			DitherDib;		// Device Independent Bitmap class instance
 BYTE		DitherBitsPerPixel = 24;		// for reducing bits per pixel
 
 #define GetChunkyPixel(pxx,nxx) (!((nxx) & 1)) ? (((pxx)[(nxx)>>1] >> 4) & 0x0f) : ((pxx)[(nxx)>>1] & 0x0f)
@@ -215,11 +201,11 @@ LPBITMAPINFOHEADER  Floyd_Steinberg(WORD NewBitsPerPixel)
 
     // make a copy of our display DIB so we don't splatter it during dither
 
-    CDib	TempDib(Dib);
+    CDib	TempDib(gManp->Dib);
     CDib	InterDib;
 
-    width = Dib.DibWidth;
-    height = Dib.DibHeight;
+    width = gManp->Dib.DibWidth;
+    height = gManp->Dib.DibHeight;
 
     InterDib.InitDib(width, height, 8);
 
@@ -229,7 +215,7 @@ LPBITMAPINFOHEADER  Floyd_Steinberg(WORD NewBitsPerPixel)
     // IB 2009-06-02 Floyd_Steinberg requires a packed pixel array.
     // The following packs the pixel array within TempDib
 	{
-	DWORD	SourceWidthBytes = WIDTHBYTES((DWORD)width * 24L);
+	size_t 	SourceWidthBytes = ComputeWidthBytes((DWORD)width, 24L);
 	RGBTRIPLE *	Dest = (RGBTRIPLE *)((BYTE *)source);
 	RGBTRIPLE *	Source;
 	for(i = 0; i < height; ++i)
@@ -297,7 +283,7 @@ LPBITMAPINFOHEADER  Floyd_Steinberg(WORD NewBitsPerPixel)
 		pr = ps;
 		pl = pd;
 		ps += width;
-		pd += WIDTHBYTES((DWORD)width * 1L);
+		pd += ComputeWidthBytes((DWORD)width, 1L);
 		for(j = 0, prj8 = pr; j <= width >> 3; ++j, prj8+=8)
 		    {
 		    *(pl + j) =	  (*(prj8 + 0)) << 7 | (*(prj8 + 1)) << 6
@@ -314,7 +300,7 @@ LPBITMAPINFOHEADER  Floyd_Steinberg(WORD NewBitsPerPixel)
 		pr = ps;
 		pl = pd;
 		ps += width;
-		pd += WIDTHBYTES((DWORD)width * 4L);
+		pd += ComputeWidthBytes((DWORD)width, 4L);
 	// IB 2009-06-06 The following looks sus to me - what if there an odd number of pixels
 		for(j = 0; j <= width >> 1;++j)
 		    *(pl + j) = *(pr + j + j + 1) | (*(pr + j + j)) << 4;
@@ -324,7 +310,7 @@ LPBITMAPINFOHEADER  Floyd_Steinberg(WORD NewBitsPerPixel)
 	    for(i = 0; i < height; ++i)
 		{
 		// this convoluted copy required because source has word boundaries and destination requires RGB triplets only
-		memcpy(pd + WIDTHBYTES((DWORD)width * (DWORD)NewBitsPerPixel) * i, ps + i * width, width);
+		memcpy(pd + ComputeWidthBytes((DWORD)width, (DWORD)NewBitsPerPixel) * i, ps + i * width, width);
 		}
 	    break;
 	}
@@ -582,7 +568,7 @@ LPBITMAPINFOHEADER  Dither(WORD NewBitsPerPixel)
     char	s[300];
     LPBITMAPINFOHEADER BitMapPtr;
 
-    Dib.DibTo24();			// Dither assumes we have a 24 bit image. PGV crashes if we don't.
+    gManp->Dib.DibTo24();			// Dither assumes we have a 24 bit image. PGV crashes if we don't.
     ReturnCode = NO_ERR;
     BitMapPtr = Floyd_Steinberg(NewBitsPerPixel);
 
@@ -618,8 +604,8 @@ LPBITMAPINFOHEADER  Dither(WORD NewBitsPerPixel)
 		_snprintf_s(s, 300, _TRUNCATE, "Illegal Dithering Requested");
 	    	break;
 	    }
-	MessageBox (GlobalHwnd, s, "Quantisation", MB_ICONEXCLAMATION | MB_OK);
-	SetWindowText(GlobalHwnd, s);
+	MessageBox (gManp->GlobalHwnd, s, "Quantisation", MB_ICONEXCLAMATION | MB_OK);
+	SetWindowText(gManp->GlobalHwnd, s);
 	return NULL;
 	}
 

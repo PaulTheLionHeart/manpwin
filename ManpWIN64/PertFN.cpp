@@ -720,6 +720,31 @@ void	CPerturbation::PertFunctions(Complex *XRef, Complex *DeltaSubN, Complex *De
 	    DeltaSubN->x = Dnr;
 	    break;
 
+/*
+	case 59:    // Fractional Power
+	    {
+	    double p = param[2];
+
+	    Complex Z = *XRef;
+	    Complex dz = *DeltaSubN;
+
+	    if (Z.x == 0.0 && Z.y == 0.0)
+		{
+		*DeltaSubN = (dz ^ p) + *DeltaSub0;
+		}
+	    else
+		{
+		Complex ratio = dz / Z;
+		Complex one_plus = Complex(1.0, 0.0) + ratio;
+
+		Complex Zp = Z ^ p;
+
+		*DeltaSubN = Zp * ((one_plus ^ p) - Complex(1.0, 0.0))
+		    + *DeltaSub0;
+		}
+	    break;
+	    }
+*/
 	default:
 	    Dnr = (2 * r + a) * a - (2 * i + b) * b + a0;
 	    Dni = 2 * ((r + a) * b + i * a) + b0;

@@ -29,96 +29,39 @@
 #define	OUTSIDE	FALSE
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-extern	HWND	GlobalHwnd;				// This is the main windows handle
+//extern	HWND	GlobalHwnd;				// This is the main windows handle
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-extern	double	hor;			// horizontal address
-extern	double	vert;			// vertical address
-extern	double	mandel_width;		// width of display
-extern	double	ScreenRatio;		// ratio of width / height for the screen
-//extern	int	inside_colour;		// normal 'lake' colour
-extern	long	threshold;		// maximum iterations
-//extern	short	InsideRed;		// values for r, g, b channels for inside colour
-//extern	short	InsideGreen;			
-//extern	short	InsideBlue;			
-extern	WORD	type;			// M=mand, N=Newton etc
-extern	CTrueCol    TrueCol;		// palette info
-//extern	BYTE	*PalettePtr;		// points to true colour palette
-//extern	CTrueCol    TrueCol;		// palette info
 extern	char	MAPFile[];		// colour map file
-
-extern	double	f_radius,f_xcenter,f_ycenter;    // inversion radius, center 
-extern	BYTE	juliaflag;		// Julia implementation of fractal
 extern	short int ismand;		// parser version of the inverse of juliaflag
-
-extern	int	decomp;			// number of decomposition colours
-extern	WORD	degree;			// special colour, phase etc
-extern	WORD	special;		// special colour, phase etc
-extern	int	subtype;		// B=basin, S=stripe, N=normal
 extern	double	HenonA, HenonXStart, HenonYStart, HenonStep;
 extern	char	lsys_type[];
-extern	double	rqlim;			// bailout level
-extern	int	BailoutTestType;	// type of bailout test
 Complex	RotationCentre;		// centre of rotation
-extern	int	RotationAngle;
 extern	double	z_rot;			// angle display plane to z axis 
 
 extern	struct	FractintFilterStuff	FractintFilter[];	// default values for each 
-
-// Big num declarations **********************************************************
-extern	BYTE	BigNumFlag;		// True if bignum used
-extern	int	decimals, precision;
-//extern	bf_t	BigTemp, BigTemp1;
-extern	BigDouble	BigBailout, BigHor, BigVert, BigWidth;
-// Big num declarations **********************************************************
 
 extern	char	lptr[][100];
 char	par_type[80];			// for display
 extern	char	lsys_Label[];		// for display in type selection
 extern	int	lsys_ptr;
-//int	Previouslsys_ptr = 0;		// remember last time
 extern	int	lsys_num;
-//int	level = 2;
-//DWORD	colour = 15;
-
-extern	BOOL	invert;			// invert fractal
-
 static	char	loaded = 0;
 static	int	endloop;		// ensure a clean exit
 static	double	param1, param2, param3, param4, param5, param6;
-extern	double	param[];		// note that param[0] = param1
-extern	double	potparam[];
-extern	int	InsideMethod;		// inside filters
-extern	int	OutsideMethod;		// outside filters
-extern	int	biomorph;		// biomorph colour
-//extern	void	FinalisePalette(int);
-extern	char	FormulaString[];	// used to hold the full formula
-extern	char	LyapSequence[];		// hold the AB sequence for Lyapunov fractals
 
 int	par(HWND, char *);
 int	ParLoad(HWND, char *);
 
-//extern	char	*str_find(char *, char *);
 extern	char	*str_find_ci(char *, char *);
-extern	void	InitFract(int);
-extern	int	getprecbf_mag(void);
 extern	short	FilePalette(HWND, char *, char *);
-//extern	void	SetPalettePointer(BYTE *);
-//extern	void	cvtcorners(double, double, LDBL, double, double, double);
 extern	int	ifsload(HWND, char *);
 extern	int	load_lsystems(HWND, char *);
 extern	int	fpFormulaSetup(char *);
 extern	int	FindFunct(char *);
-//extern	void	FillPalette(int, BYTE *);	// if threshold larger than palette, fill or stretch
-extern	void	ConvertString2Bignum(mpfr_t, char *);
-//extern	void	ConvertBignum2String(char *s, mpfr_t num);
-extern	int	ChangeBigPrecision(int decimals);
 extern	int	ProcessFormulaString(char *);
 extern	void	cvtcentermag(double *, double *, LDBL *, double *, double *, double *);
-//extern	char	*GetFractalName(void);
-//extern	CMatrix	Mat;			// transformation and rotation matrix
 
-//static	int	ReadParFile(HWND, char *);
 extern	char	FRMPath[];		// path for formula files
 extern	char	IFSPath[];		// path for formula files
 
@@ -128,8 +71,6 @@ struct FractintFilterStuff		// database of Fractint Outside filters
     char    method;			// only allow '1', '2', blinds or spiral 
     };
 
-//extern	CPixel	Pixel;		// routines for escape fractals
-extern	CFract	Fractal;
 extern	Complex	j;
 
 /**************************************************************************
@@ -305,8 +246,8 @@ int	AnalyseLSystem(HWND hwnd, char *lsysdata)
     else
 	lsys_ptr = k;
     strcpy(lsys_type, LsysName);
-    param[0] = param1;
-    degree = (int)param[0];
+    gManp->param[0] = param1;
+    gManp->degree = (int)gManp->param[0];
     return 0;
     }
 
@@ -315,7 +256,7 @@ int	AnalyseLSystem(HWND hwnd, char *lsysdata)
 	Analyse the function type
 **************************************************************************/
 
-int	AnalyseFunction(char *Trigdata)
+int	CManp::AnalyseFunction(char *Trigdata)
     {
     char	*s, *t;
     static  char	fn1[16], fn2[16]/*, s[1024]*/;
@@ -365,8 +306,7 @@ int	AnalyseFunction(char *Trigdata)
 	Find the fractal type
 **************************************************************************/
 
-int	FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double TempRqlim)
-
+int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double TempRqlim)
     {
     char	*tok, *tmpstr;
     int		k;
@@ -413,27 +353,27 @@ int	FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double Te
 	{
 	subtype = (int)param2;
 	special = (int)param3;
-	param[0] = subtype;
+	gManp->param[0] = subtype;
 	switch ((int)param1)
 	    {
 	    case 0:
 		type = CUBIC;
-		param[1] = special;
+		gManp->param[1] = special;
 		break;
 	    case 1:
 		type = SPECIALNEWT;
-		param[0] = special;
+		gManp->param[0] = special;
 		break;
 	    case 2:
 		type = MATEIN;
 		break;
 	    case 3:
 		type = RATIONALMAP;
-		param[1] = special;
+		gManp->param[1] = special;
 		break;
 	    default:
 		type = CUBIC;
-		param[1] = special;
+		gManp->param[1] = special;
 		break;
 	    }
 	delete[] tmpstr;
@@ -449,7 +389,7 @@ int	FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double Te
 	}
     if (!_strnicmp(FractType, "lyapunov", 8))
 	{
-	long	i = (long)param1;		// used to decode lyapunov sequence from param[0]
+	long	i = (long)param1;		// used to decode lyapunov sequence from gManp->param[0]
 	int	t, r;
 	int	lyaRxy[34];
 	int	lyaLength = 1;
@@ -482,12 +422,12 @@ int	FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double Te
 	int	result;
 
 	type = FORMULA;
-	param[0] = param1;				// this stuff is still experimental
-	param[1] = param2;
-	param[2] = param3;
-	param[3] = param4;
-	param[4] = param5;
-	param[5] = param6;
+	gManp->param[0] = param1;				// this stuff is still experimental
+	gManp->param[1] = param2;
+	gManp->param[2] = param3;
+	gManp->param[3] = param4;
+	gManp->param[4] = param5;
+	gManp->param[5] = param6;
 	if (tok = str_find_ci(FractType, "formulafile="))
 	    {
 	    result = AnalyseFormula(tok);
@@ -520,12 +460,12 @@ int	FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double Te
 	if (TempRqlim > 0.0)
 	    rqlim = TempRqlim;				// prevent it being splattered by the default in InitFract()
 	type = k;
-	param[0] = param1;				// this stuff is still experimental
-	param[1] = param2;
-	param[2] = param3;
-	param[3] = param4;
-	param[4] = param5;
-	param[5] = param6;
+	gManp->param[0] = param1;				// this stuff is still experimental
+	gManp->param[1] = param2;
+	gManp->param[2] = param3;
+	gManp->param[3] = param4;
+	gManp->param[4] = param5;
+	gManp->param[5] = param6;
 	switch (type)
 	    {
 	    // start with Julia fractals
@@ -542,27 +482,27 @@ int	FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double Te
 	    case MANOWARJFP:
 	    case LJULIAZPOWER:
 		juliaflag = TRUE;
-		j.x = param[0];
-		j.y = param[1];
+		j.x = gManp->param[0];
+		j.y = gManp->param[1];
 		break;
 	    case COMPLEXNEWTON:
-		param[4] = 0.0;				// subtype = 'N' or normal
+		gManp->param[4] = 0.0;				// subtype = 'N' or normal
 		break;
 	    case COMPLEXBASIN:
-		param[4] = 1.0;				// subtype = 'B' or basin
+		gManp->param[4] = 1.0;				// subtype = 'B' or basin
 		break;
 	    case NEWTON:
-		param[1] = 0.0;				// subtype = 'N' or normal
+		gManp->param[1] = 0.0;				// subtype = 'N' or normal
 		break;
 	    case NEWTBASIN:
-		param[1] = (param[1] == 0.0) ? 2.0 : 1.0;	// don't blame me, I didn't invent Fractint
+		gManp->param[1] = (gManp->param[1] == 0.0) ? 2.0 : 1.0;	// don't blame me, I didn't invent Fractint
 		break;
 
 	    }
 
 	if (tok = str_find_ci(tmpstr, "function="))
 	    {
-	    if (AnalyseFunction(tok) < 0)
+	    if (gManp->AnalyseFunction(tok) < 0)
 		{
 		delete[] tmpstr;
 		return -1;
@@ -592,8 +532,8 @@ int	FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double Te
 	if (fractalspecific[k].juliaflag == JULIAFP)
 	    {
 	    juliaflag = TRUE;
-	    j.x = param[0];
-	    j.y = param[1];
+	    j.x = gManp->param[0];
+	    j.y = gManp->param[1];
 	    }
 	else
 	    juliaflag = FALSE;
@@ -607,8 +547,7 @@ int	FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double Te
 	Load Palette Map
 **************************************************************************/
 
-static int  ProcessBailoutTest(char *value)
-
+int	CManp::ProcessBailoutTest(char *value)
     {
     int	test;
     if (strncmp(value, "mod", 3) == 0)
@@ -634,7 +573,7 @@ static int  ProcessBailoutTest(char *value)
 	Load Palette Map
 **************************************************************************/
 
-static bool DecodeFractintColourChar(char c, BYTE& out)
+bool	CManp::DecodeFractintColourChar(char c, BYTE& out)
     {
     int k;
 
@@ -651,7 +590,7 @@ static bool DecodeFractintColourChar(char c, BYTE& out)
     return true;
     }
 
-static int ParseColours(char *value)
+int	CManp::ParseColours(char *value)
 
     {
     int		i, j;
@@ -758,62 +697,11 @@ static int ParseColours(char *value)
 			}
 		    }
 
-/*
-		for (j = 0; j < 3; ++j) 
-		    {
-		    if ((k = *(value++)) < '0')  
-//		    *(VGA_PALETTE + 3 * i + j) = 0;
-			goto badcolor;
-		    else if (k <= '9')
-			k -= '0';
-		    else if (k < 'A')            
-//		    *(VGA_PALETTE + 3 * i + j) = 0;
-			goto badcolor;
-		    else if (k <= 'Z')       
-			k -= ('A'-10);
-		    else if (k < '_' || k > 'z') 
-//		    *(VGA_PALETTE + 3 * i + j) = 0;
-			goto badcolor;
-		    else                     
-			k -= ('_'-36);
-		    *(TrueCol.PalettePtr + 3 * i + j) = (BYTE)k;
-		    if (smooth) 
-			{
-			int start, spread, cnum;
-                      
-			start = i - (spread = smooth + 1);
-			cnum = 0;
-			if ((k - (int)*(TrueCol.PalettePtr + 3 * start + j)) == 0) 
-			    {
-			    while (++cnum < spread)
-				*(TrueCol.PalettePtr + 3 * (start+cnum) + j) = (BYTE)k;
-			    }
-			else 
-			    {
-			    while (++cnum < spread)
-				*(TrueCol.PalettePtr + 3 * (start+cnum) + j) 
-				    = (BYTE)((cnum * (short)(*(TrueCol.PalettePtr + 3 * i + j))
-				    + (i-(start+cnum)) * (short)(*(TrueCol.PalettePtr + 3 * start + j))
-						+ spread / 2) / (BYTE) spread);
-			    }
-			}
-		    }
-*/
 		smooth = 0;
 		++i;
 		}
 	    PalSize = i;
 	    }
-//    if (smooth) 
-//	goto badcolor;
-//    while (i < 256)  
-//	{ // zap unset entries
-//	dacbox[i][0] = dacbox[i][1] = dacbox[i][2] = 40;
-//	*(PalettePtr + 3 * i + 0) = 40;
-//	*(PalettePtr + 3 * i + 1) = 40;
-//	*(PalettePtr + 3 * i + 2) = 40;
-//	++i;
-//	}
 	}
     badcolor:
     for (i = 0; i < PalSize; i++)
@@ -845,8 +733,7 @@ static int ParseColours(char *value)
 	Process Corners
 **************************************************************************/
 
-int	ProcessParams(char *s)
-
+int	CManp::ProcessParams(char *s)
     {
     char	*t;
 
@@ -865,8 +752,7 @@ int	ProcessParams(char *s)
 	Process Corners
 **************************************************************************/
 
-int	ProcessCorners(char *s, BOOL CentreFlag)
-
+int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
     {
     char	*t;
     char	*s1 = nullptr;
@@ -912,7 +798,7 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 */
 	RotationCentre.x = hor;
 	RotationCentre.y = vert;
-	hor -= (ScreenRatio / Magnification);
+	hor -= (AspectRatio / Magnification);
 	vert -= (1.0 / Magnification);
 	mandel_width = 2.0 / Magnification;
 	}
@@ -938,10 +824,10 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 	    yy3rd = floatval[5];
 	    cvtcentermag(&centre.x, &centre.y, &mag, &Xmagfactor, &Rotation, &Skew);
 	    Magnification = mag;
-	    hor = centre.x - (ScreenRatio / Magnification);
+	    hor = centre.x - (AspectRatio / Magnification);
 	    vert = centre.y - (1.0 / Magnification);
 	    mandel_width = 2.0 / Magnification;
-	    RotationCentre.x = hor + (ScreenRatio / Magnification);
+	    RotationCentre.x = hor + (AspectRatio / Magnification);
 	    RotationCentre.y = vert + (1.0 / Magnification);
 	    }
 
@@ -958,8 +844,8 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 	Mat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, Rotation);
 	}
 
-    if (mandel_width < 0.0)
-	mandel_width = - mandel_width;
+    if (gManp->mandel_width < 0.0)
+	gManp->mandel_width = -gManp->mandel_width;
 
     s1 = new char[SIZEOF_BF_VARS];
     s2 = new char[SIZEOF_BF_VARS];
@@ -977,7 +863,7 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 	BigNumFlag = TRUE;
 	}
 */
-    precision = getprecbf_mag();
+    precision = gManp->getprecbf_mag();
     if (precision < 0)			// exceeded allowable precision
 	{
 	if (s1) delete[] s1;
@@ -996,7 +882,7 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 //	    if (init_big_dec(decimals) < 0)
 //		return -1;
 //	mpfr_set_default_prec(decimals);
-	if (ChangeBigPrecision(decimals) < 0)				// increase precision of Big numbers	
+	if (gManp->ChangeBigPrecision(decimals) < 0)				// increase precision of Big numbers	
 	    {
 	    if (s1) delete[] s1;
 	    if (s2) delete[] s2;
@@ -1031,7 +917,7 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
 //	    ConvertBignum2String(s5, BigVert.x);
 //	    ConvertBignum2String(s6, BigMag.x);
 
-	    BigHor = BigHor - OneOverMag * ScreenRatio;
+	    BigHor = BigHor - OneOverMag * AspectRatio;
 	    BigVert = BigVert - OneOverMag;
 	    BigWidth = OneOverMag + OneOverMag;
 	    // for debugging
@@ -1073,34 +959,10 @@ int	ProcessCorners(char *s, BOOL CentreFlag)
     }
 
 /**************************************************************************
-	Process Invert paramemters
-**************************************************************************/
-
-int	ProcessInvert(char *s)
-
-    {
-    char	*t;
-    int		count;
-
-    t = s;
-    while (*s && *s != ' ')
-	{
-	if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-' && *s != 'e')
-	    *s = ' ';
-	s++;
-	}
-
-    count = sscanf(t, "%lf %lf %lf", &f_radius, &f_xcenter, &f_ycenter);    // inversion radius, center 
-    if (f_radius)
-	invert = TRUE;
-    return 0;
-    }
-
-/**************************************************************************
 	Process Outside Filters
 **************************************************************************/
 
-int	Processfilters(char *s, BOOL IsInside)
+int	CManp::Processfilters(char *s, BOOL IsInside)
     {
     char	FilterName[24];
     int		k, method;
@@ -1129,8 +991,7 @@ int	Processfilters(char *s, BOOL IsInside)
 	Process Potential parameters
 **************************************************************************/
 
-int	ProcessPotential(char *s)
-
+int	CManp::ProcessPotential(char *s)
     {
     char	*t;
 
@@ -1143,7 +1004,7 @@ int	ProcessPotential(char *s)
 	s++;
 	}
 
-    sscanf(t, "%lf %lf %lf", &potparam[0], &potparam[1], &potparam[2]);
+    sscanf(t, "%lf %lf %lf", &gManp->potparam[0], &gManp->potparam[1], &gManp->potparam[2]);
 
     return 0;
     }
@@ -1183,7 +1044,6 @@ char	*StripStuff(char *instr) // strips backslash and newlines
     }
 
 static	int	ReadParFile(HWND hwnd, char *filename)
-
     {
     int		i;
     char	*tok, *q;
@@ -1198,13 +1058,13 @@ static	int	ReadParFile(HWND hwnd, char *filename)
     char	tmp[164];
     double	TempRqlim = -1.0;
 
-    param[0] = param1 = 0.0;
-    param[1] = param2 = 0.0;
-    param[2] = param3 = 0.0;
-    param[3] = param4 = 0.0;
-    param[4] = param5 = 0.0;
-    param[5] = param6 = 0.0;
-    invert = FALSE;
+    gManp->param[0] = param1 = 0.0;
+    gManp->param[1] = param2 = 0.0;
+    gManp->param[2] = param3 = 0.0;
+    gManp->param[3] = param4 = 0.0;
+    gManp->param[4] = param5 = 0.0;
+    gManp->param[5] = param6 = 0.0;
+    gManp->invert = FALSE;
     if ((fp = fopen(filename, "r")) == NULL)
 	{
 	_snprintf_s(s, 200, _TRUNCATE, "Can't Open par File: <%s>", filename);
@@ -1260,45 +1120,45 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	}    
 
     if (tok = str_find_ci(buffer, "params="))		// must be first
-	ProcessParams(tok);
+	gManp->ProcessParams(tok);
     if (tok = str_find_ci(buffer, "maxiter="))
 	{
-	threshold = atol(tok);
-	if (threshold < 0L)
-	    threshold = MAXTHRESHOLD;
+	gManp->threshold = atol(tok);
+	if (gManp->threshold < 0L)
+	    gManp->threshold = MAXTHRESHOLD;
 	}
     if (tok = str_find_ci(buffer, "inside="))
-	Processfilters(tok, INSIDE);
+	gManp->Processfilters(tok, INSIDE);
     if (tok = str_find_ci(buffer, "bailout="))
 	TempRqlim = (double)atoi(tok);
     if (tok = str_find_ci(buffer, "decomp="))
-	decomp = atoi(tok);
+	gManp->decomp = atoi(tok);
     if (tok = str_find_ci(buffer, "potential="))
 	{
-	ProcessPotential(tok);
-	OutsideMethod = POTENTIAL;
+	gManp->ProcessPotential(tok);
+	gManp->OutsideMethod = POTENTIAL;
 	}
     if (tok = str_find_ci(buffer, "corners="))
-	ProcessCorners(tok, FALSE);
+	gManp->ProcessCorners(tok, FALSE);
     if (tok = str_find_ci(buffer, "center-mag="))
-	ProcessCorners(tok, TRUE);
+	gManp->ProcessCorners(tok, TRUE);
     if (tok = str_find_ci(buffer, "biomorph="))
-	biomorph = atoi(tok);
+	gManp->biomorph = atoi(tok);
     if (tok = str_find_ci(buffer, "function="))
-	AnalyseFunction(tok);
+	gManp->AnalyseFunction(tok);
     if (tok = str_find_ci(buffer, "colors="))
-	ParseColours(tok);
+	gManp->ParseColours(tok);
     if (tok = str_find_ci(buffer, "invert="))
-	ProcessInvert(tok);
+	gManp->ProcessInvert(tok);
     if (tok = str_find_ci(buffer, "outside="))
-	Processfilters(tok, OUTSIDE);
+	gManp->Processfilters(tok, OUTSIDE);
     if (tok = str_find_ci(buffer, "bailoutest="))
-	BailoutTestType = ProcessBailoutTest(tok);
+	gManp->BailoutTestType = gManp->ProcessBailoutTest(tok);
     if (tok = str_find_ci(buffer, "type="))		// must be the only one which is after strlwr
 	{
-	if (FindType(hwnd, tok, buffer, &IsFrm, TempRqlim) < 0)
+	if (gManp->FindType(hwnd, tok, buffer, &IsFrm, TempRqlim) < 0)
 	    {
-	    switch (type)
+	    switch (gManp->type)
 		{
 		case LSYSTEM:
 		    _snprintf_s(s, 200, _TRUNCATE, "Error in L-system file");
@@ -1370,7 +1230,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 		}
 	    }
 	p = temp;
-	q = FormulaString;
+	q = gManp->FormulaString;
 
 	bool	WasBackslash = false;
 	while (*p)
@@ -1417,12 +1277,12 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	    }
 	*q = '\0';
 
-	ProcessFormulaString(FormulaString);
+	ProcessFormulaString(gManp->FormulaString);
 	if (temp) { delete[] temp; temp = NULL; }
 	}
-    if (type == FRACTPAR)				// if we haven't found a fractal, then we still have fractal type FRACTPAR
+    if (gManp->type == FRACTPAR)				// if we haven't found a fractal, then we still have fractal type FRACTPAR
 	{
-	type = MANDELFP;
+	gManp->type = MANDELFP;
 	_snprintf_s(s, 200, _TRUNCATE, "No fractal type was found <%s>. Assume Mandelbrot", temp);
 	MessageBox (hwnd, s, "Reading Fractint Par File", MB_ICONEXCLAMATION | MB_OK);
 	}

@@ -8,7 +8,7 @@
 #include "manpwin.h"
 #include "manp.h"
 #include "Dib.h"
-#include "Anim.h"
+//#include "Anim.h"
 #include "Colour.h"
 #include "SafeStrings.h"
 
@@ -19,14 +19,6 @@ extern	void		CloseMPEGPtrs(void);	// give the MPEG memory back
 extern	int		read_png_file(HWND, char *);
 extern	char		*trailing(char *);
 extern	BOOL		SaveMPGOpenDlg (HWND, LPSTR, LPSTR);
-extern	int		InitScript(HWND, char *, int *);
-extern	int		GenerateFractal(HWND, char *, char *, int, int, double &delay);
-extern	void		StatusBarAnimInfo (int, int);
-extern	void		CloseScript(void);
-extern	void		EndScript(int);
-extern	void		InitAnimParamValues(void);
-extern	void		UpdateAnimParamValues(void);
-extern	void		MovePalette(CTrueCol *TrueCol, int PaletteShift, int threshold);
 
 static	char		*Filenames[MAXANIM];	// animation frame PNG filenames
 
@@ -37,28 +29,19 @@ extern	char		LSTFile[];		// list file for PNG animation frames
 extern	char		ScriptFileName[];	// filename for the script file
 extern	char		ANIMPNGPath[];		// path for PNG files and LST files
 
-extern	std::vector<AnimStruct> ANIM;		// holds all the date for each animation frame
-extern	int		gTotalFrames;		// total number of animation frames
+//extern	std::vector<AnimStruct> ANIM;		// holds all the date for each animation frame
+//extern	int		gTotalFrames;		// total number of animation frames
 extern	FILE		*outfile, *statfile;	// file descriptors
-extern	BOOL		AnimationForward;	// order of file frames
+//extern	BOOL		AnimationForward;	// order of file frames
 extern	int		file_type;		// if FILE_LST then we are processing a file list of PNG filenames 
-	BOOL		RunMPEG = FALSE;	// are we in the middle of generating an MPEG file?
 extern	char		MPGPath[];		// path for MPEG files
 extern	BOOL		WriteMPEGFrames;	// write frames directly to an MPEG file
-//extern	int		time_to_restart;	// time to restart?
-extern	int		time_to_break;		// time to break out of animation?
-extern	BOOL		AutoSaveFlag;
-extern	int		PaletteShift;		// fractional palette addressing
-extern	long		threshold;
 
 static	int		SetupAnimationFrameList(char *, char *, int *width, int *height, int *TotalFrames);
 static	void		ClosePNGLstPtrs(void);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-extern	HWND	GlobalHwnd;			// This is the main windows handle
-extern	CDib	Dib;
-extern	RECT 	r;
-extern	CTrueCol	TrueCol;		// palette info
+//extern	HWND	GlobalHwnd;			// This is the main windows handle
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**************************************************************************
@@ -71,53 +54,53 @@ int	MPEGWrite(char *MPEGFile)
 
     if (WriteMPEGFrames)			// we write the MPEG Frame after calculating the fractal
 	{
-	if (InitScript(GlobalHwnd, ScriptFileName, &gTotalFrames) < 0)
+	if (gManp->InitScript(gManp->GlobalHwnd, ScriptFileName, &gManp->TotalFrames) < 0)
 	    {
-	    RunMPEG = FALSE;
+	    gManp->RunMPEG = FALSE;
 	    return -1;
 	    }
-	width = Dib.DibWidth;
-	height = Dib.DibHeight;
+	width = gManp->Dib.DibWidth;
+	height = gManp->Dib.DibHeight;
 	}
     else if (file_type == FILE_LST)		// we are processing a file list of PNG filenames 
 	{
-	if (SetupAnimationFrameList(LSTFile, MPEGFile, &width, &height, &gTotalFrames) < 0)
+	if (SetupAnimationFrameList(LSTFile, MPEGFile, &width, &height, &gManp->TotalFrames) < 0)
 	    {
-	    RunMPEG = FALSE;
+	    gManp->RunMPEG = FALSE;
 	    return -1;
 	    }
 	}
     else
 	{
-	width = ANIM[0].width;
-	height = ANIM[0].height;
+	width = gManp->ANIM[0].width;
+	height = gManp->ANIM[0].height;
 	}
 
-    RunMPEG = TRUE;
-    InitAnimParamValues();			// We need to change param values for each frame
+    gManp->RunMPEG = TRUE;
+    gManp->InitAnimParamValues();			// We need to change param values for each frame
     if (setjmp(mark))				// MPEG error handling
 	{
-	MessageBox (GlobalHwnd, ErrorMessage, "Write MPEG", MB_ICONEXCLAMATION | MB_OK);
+	MessageBox (gManp->GlobalHwnd, ErrorMessage, "Write MPEG", MB_ICONEXCLAMATION | MB_OK);
 	if (outfile)
 	    fclose(outfile);
 	if (statfile)
 	    fclose(statfile);
 	if (WriteMPEGFrames)			// we write the MPEG Frame after calculating the fractal
-	    CloseScript();
+	    gManp->CloseScript();
 	else if (file_type == FILE_LST)		// we are processing a file list of PNG filenames 
 	    ClosePNGLstPtrs();
 	else
 	    CloseMPEGPtrs();
-	RunMPEG = FALSE;
+	gManp->RunMPEG = FALSE;
 	return -1;
 	}
-    DoMPEG(MPEGFile, gTotalFrames, width, height);
+    DoMPEG(MPEGFile, gManp->TotalFrames, width, height);
     if (WriteMPEGFrames)			// we write the MPEG Frame after calculating the fractal
-	CloseScript();
+	gManp->CloseScript();
     else if (file_type == FILE_LST)		// we are processing a file list of PNG filenames 
 	ClosePNGLstPtrs();
-    RunMPEG = FALSE;
-    EndScript(gTotalFrames);
+    gManp->RunMPEG = FALSE;
+    gManp->EndScript(gManp->TotalFrames);
     file_type = FILE_PNG;			// restore back to default
     return 0;
     }
@@ -127,51 +110,50 @@ int	MPEGWrite(char *MPEGFile)
 **************************************************************************/
 
 BYTE *LoadFrameDib(int FrameNumber)
-
     {
     char	    s[240];
     static  BYTE    *ptr;
     int		    status = 0;
-    long	    EndIter = TrueCol.FinalThreshold;
+    long	    EndIter = gManp->TrueCol.FinalThreshold;
     double	    delay = 0.0;
     if (WriteMPEGFrames)			// we write the MPEG Frame after calculating the fractal
 	{
-	UpdateAnimParamValues();		// We need to change param values for each frame
-	status = GenerateFractal(GlobalHwnd, " ", ScriptFileName, gTotalFrames, FrameNumber, delay);
-	if (abs(PaletteShift))
-	    MovePalette(&TrueCol, PaletteShift, EndIter);			// move palette for animations
+	gManp->UpdateAnimParamValues();		// We need to change param values for each frame
+	status = gManp->GenerateFractal(gManp->GlobalHwnd, " ", ScriptFileName, gManp->TotalFrames, FrameNumber, delay);
+	if (abs(gManp->PaletteShift))
+	    gManp->TrueCol.MovePalette(&gManp->TrueCol, gManp->PaletteShift, EndIter);			// move palette for animations
 	if (status < 0)
 	    {
-	    CloseScript();
+	    gManp->CloseScript();
 	    return NULL;
 	    }
 	else if (status != ENDOFSCRIPT)
-	    ptr = Dib.DibPixels.data();
+	    ptr = gManp->Dib.DibPixels.data();
 	}
     else if (file_type == FILE_LST)		// we write the MPEG Frame from a file list of PNG filenames 
 	{
-	if (read_png_file(GlobalHwnd, Filenames[(AnimationForward) ? FrameNumber : gTotalFrames - FrameNumber - 1]) > 0)
-	    ptr = Dib.DibPixels.data();
+	if (read_png_file(gManp->GlobalHwnd, Filenames[(gManp->AnimationForward) ? FrameNumber : gManp->TotalFrames - FrameNumber - 1]) > 0)
+	    ptr = gManp->Dib.DibPixels.data();
 	else
 	    return NULL;			// oops, no DIB available
 	}
     else
 	{
-	const AnimStruct& A = (AnimationForward) ? ANIM[FrameNumber] : ANIM[gTotalFrames - FrameNumber - 1];
+	const AnimStruct& A = (gManp->AnimationForward) ? gManp->ANIM[FrameNumber] : gManp->ANIM[gManp->TotalFrames - FrameNumber - 1];
 
 	// Rebuild Dib from animation frame
-	if (!BuildDibFromAnimFrame(A, Dib))
+	if (!BuildDibFromAnimFrame(A, gManp->Dib))
 	    return NULL;
 
-	ptr = Dib.DibPixels.data();
+	ptr = gManp->Dib.DibPixels.data();
 	}
 //	ptr = (AnimationForward) ? ANIM[FrameNumber].animDIB.DibPixels : ANIM[TotalFrames - FrameNumber - 1].animDIB.DibPixels;
-    SAFE_SPRINTF(s, "Writing MPEG Frame %d of %d", FrameNumber + 1, gTotalFrames);
+    SAFE_SPRINTF(s, "Writing MPEG Frame %d of %d", FrameNumber + 1, gManp->TotalFrames);
 //    RefreshScreen();
-    InvalidateRect(GlobalHwnd, &r, FALSE);
+    InvalidateRect(gManp->GlobalHwnd, &gManp->r, FALSE);
 
-    SetWindowText(GlobalHwnd, s);			// Show formatted text in the caption bar
-    StatusBarAnimInfo (FrameNumber, gTotalFrames);
+    SetWindowText(gManp->GlobalHwnd, s);			// Show formatted text in the caption bar
+    gManp->StatusBarAnimInfo (FrameNumber, gManp->TotalFrames);
     return ptr;
     }
 
@@ -182,7 +164,7 @@ BYTE *LoadFrameDib(int FrameNumber)
 void	WarningMPEG(char *text)
 
     {
-    MessageBox (GlobalHwnd, text, "MPEG Warning", MB_ICONEXCLAMATION | MB_OK);
+    MessageBox (gManp->GlobalHwnd, text, "MPEG Warning", MB_ICONEXCLAMATION | MB_OK);
     }
 
 /**************************************************************************
@@ -208,7 +190,7 @@ int	SetupAnimationFrameList(char *LSTFile, char *MPEGFile, int *width, int *heig
     if ((fp = fopen(ListFilename, "r")) == NULL)
 	{
 	_snprintf_s(s, MAXLINE, _TRUNCATE, "Can't open PNG list file: %s for read", LSTFile);
-	MessageBox (GlobalHwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
+	MessageBox (gManp->GlobalHwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
 
@@ -236,7 +218,7 @@ int	SetupAnimationFrameList(char *LSTFile, char *MPEGFile, int *width, int *heig
 		    strcpy(MPEGFile, trailing(buf + 10));
 		else
 		    {
-		    if (SaveMPGOpenDlg (GlobalHwnd, MPEGFile, "ManpWIN") < 0)
+		    if (SaveMPGOpenDlg (gManp->GlobalHwnd, MPEGFile, "ManpWIN") < 0)
 			break;
 		    }
 		continue;
@@ -247,7 +229,7 @@ int	SetupAnimationFrameList(char *LSTFile, char *MPEGFile, int *width, int *heig
 	    if ((Filenames[FileCount] = new char[MAX_PATH]) == NULL)
 		{
 		_snprintf_s(s, MAXLINE, _TRUNCATE, "Can't get memory for PNG list file");
-		MessageBox (GlobalHwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
+		MessageBox (gManp->GlobalHwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 		return -1;
 		}
 
@@ -260,7 +242,7 @@ int	SetupAnimationFrameList(char *LSTFile, char *MPEGFile, int *width, int *heig
     if (*width == 0 || *height == 0)
 	{
 	SAFE_SPRINTF(s, "Can't read parameters in PNG list file: %s", LSTFile);
-	MessageBox (GlobalHwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
+	MessageBox (gManp->GlobalHwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
 
@@ -276,7 +258,7 @@ void	ClosePNGLstPtrs(void)
     {
     int	i;
 
-    for (i = 0; i < gTotalFrames; ++i)	// release all frames
+    for (i = 0; i < gManp->TotalFrames; ++i)	// release all frames
 	{
 	if (Filenames[i])
 	    delete Filenames[i];

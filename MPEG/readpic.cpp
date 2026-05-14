@@ -36,17 +36,19 @@
 #include <windows.h>
 #include "config.h"
 #include "global.h"
+#include "..\ManpWIN64\Dib.h"
 #include "..\ManpWIN64\manpwin.h"
+#include "..\ManpWIN64\manp.h"
 #include "..\ManpWIN64\SafeStrings.h"
 
 ////////////////////////////////////////// PHD 2012/04/24
 //#define BYTE	unsigned char
 //#define DWORD	unsigned long
-#define	MAXANIM		100000		// maximum animation frames  (beware, duplicated in ../anim.h)
-#define WIDTHBYTES(i)   ((i+31)/32*4)
+//#define	MAXANIM		100000		// maximum animation frames  (beware, duplicated in ../anim.h)
+//#define WIDTHBYTES(i)   ((i+31)/32*4)	    Replaced by ComputeWidthBytes() in Dib.h
 
-extern	HWND	GlobalHwnd;		// to allow passing of hwnd to user_data()
-extern	BOOL	RunMPEG;		// are we in the middle of generating an MPEG file?
+//extern	HWND	GlobalHwnd;		// to allow passing of hwnd to user_data()
+//extern	BOOL	RunMPEG;		// are we in the middle of generating an MPEG file?
 
 extern	int	user_data(HWND);
 extern	void	WarningMPEG(char *);
@@ -66,7 +68,6 @@ static void conv422to420 _ANSI_ARGS_((unsigned char *src, unsigned char *dst));
 int pbm_getint(FILE*);			// PHD 2012/04/23
 
 int readframe(char *fname,unsigned char *frame[], int FrameNumber)
-
 {
   switch (inputtype)
   {
@@ -88,7 +89,6 @@ int readframe(char *fname,unsigned char *frame[], int FrameNumber)
 }
 
 static void read_y_u_v(char *fname,unsigned char *frame[])
-
   {
   int i;
   int chrom_hsize, chrom_vsize;
@@ -174,7 +174,6 @@ static void read_yuv(char *fname,unsigned char *frame[])
 }
 
 static int read_ppm(char *fname,unsigned char *frame[], int FrameNumber)
-
 {
   int i, j;
   int r, g, b;
@@ -194,14 +193,13 @@ static int read_ppm(char *fname,unsigned char *frame[], int FrameNumber)
     {0.299, 0.587, 0.114},  /* SMPTE 170M */
     {0.212, 0.701, 0.087}}; /* SMPTE 240M (1987) */
 
-    user_data(GlobalHwnd);			// allow breaking of loop
-    if (!RunMPEG)				// user hit the escape key
+    user_data(gManp->GlobalHwnd);			// allow breaking of loop
+    if (!gManp->RunMPEG)				// user hit the escape key
 	return -1;
 
     DibPtr = LoadFrameDib(FrameNumber);		// load a pointer to the current frame DIB
     if (DibPtr == NULL)
 	error("No more PNG frames available");
-
 
   i = matrix_coefficients;
   if (i>8)
@@ -326,7 +324,7 @@ static int read_ppm(char *fname,unsigned char *frame[], int FrameNumber)
 	yp = frame[0] + i*FrameWidth;
 	up = u444 + i*FrameWidth;
 	vp = v444 + i*FrameWidth;
-	ptr = DibPtr + WIDTHBYTES((DWORD)horizontal_size * 24) * (vertical_size - i - 1);	// assume frame bits per pixel = 24
+	ptr = DibPtr + ComputeWidthBytes((DWORD)horizontal_size, 24), (vertical_size - i - 1);	// assume frame bits per pixel = 24
 //	ptr = DibFrames[FrameNumber] + WIDTHBYTES((DWORD)horizontal_size * 24) * (vertical_size - i - 1);	// assume frame bits per pixel = 24
 
 	for (j=0; j<horizontal_size; j++)

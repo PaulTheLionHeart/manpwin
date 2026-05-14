@@ -33,6 +33,9 @@ Double is a 64-bit IEEE 754 double precision Floating Point Number:
 
 */
 #define _ALIGN_(val,exp) exp += ((*((__int64*)&val) & 0x7FF0000000000000)>>52) - 1023; *((__int64*)&val) = (*((__int64*)&val) & 0x800FFFFFFFFFFFFF) | 0x3FF0000000000000;
+
+typedef unsigned char boolean;
+
 //#endif
 class floatexp
 {

@@ -7,6 +7,7 @@
 ////////////////////////////////////////////////////////
 
 #include "OtherFunctions.h"
+#include "Manp.h"
 
 /**************************************************************************
 	Transformation variations
@@ -70,31 +71,31 @@ int COtherFunctions::DoPopcorn()
     double	h = 0.05;
     double	xgap, ygap;
 
-    xgap = mandel_width * ScreenRatio / (double)xdots;
-    ygap = mandel_width / (double)ydots;
+    xgap = mandel_width * ScreenRatio / (double)gManp->xdots;
+    ygap = mandel_width / (double)gManp->ydots;
 
-    threshold = (long)param[0];
-    variation = (int)(fabs(param[1]));
-    h = param[2];
-    a.x = param[3];
-    a.y = param[4];
+    gManp->threshold = (long)gManp->param[0];
+    variation = (int)(fabs(gManp->param[1]));
+    h = gManp->param[2];
+    a.x = gManp->param[3];
+    a.y = gManp->param[4];
 
     xmax = hor + mandel_width * ScreenRatio;
     xmin = hor;
     ymax = vert + mandel_width;
     ymin = vert;
     *totpasses = 10;
-    while(col<xdots)
+    while(col< gManp->xdots)
 	{ 
 	col++;
-	*curpass = (int)col * *totpasses / xdots;
-	for(row=0;row<ydots;row++)
+	*curpass = (int)col * *totpasses / gManp->xdots;
+	for(row=0;row<gManp->ydots;row++)
 	    {
 	    if (UserData(hwnd) == -1)				// user pressed a key?
 		return -1;
 	    z=c=Complex(xmin+col*xgap,ymax-row*ygap);
 	    color=0;
-	    while((color < threshold)&&(z.CSumSqr()<max_size))
+	    while((color < gManp->threshold)&&(z.CSumSqr()<max_size))
 		{
 		Complex	s, t;
 		Complex r;

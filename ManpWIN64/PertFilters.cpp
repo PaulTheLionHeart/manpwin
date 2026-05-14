@@ -10,6 +10,7 @@
 #include <atomic>
 #include "PertEngine.h"
 #include "Potential.h"
+#include "Manp.h"
 
 extern	std::atomic<bool> gStopRequested;	// force early exit
 
@@ -56,7 +57,7 @@ RGBTRIPLE CPerturbation::GetSmoothedColour(double fIter, double color_speed, CTr
     Double colour processing
 **************************************************************************/
 
-int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTrueCol &TrueCol, CTZfilter &TZfilter, double bailout)
+int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTrueCol &TrueCol, /*CTZfilter &TZfilter, */double bailout)
     {
     int		index;
     double	magnitude = 0.0;
@@ -67,7 +68,7 @@ int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTr
     CPlot	Plot;
     CPotential	Pot;
 
-    Plot.InitPlot(MaxIteration, &TrueCol, wpixels, xdots, height, xdots, height, Dib->BitsPerPixel, Dib, USEPALETTE);
+    Plot.InitPlot(MaxIteration, &TrueCol, &gManp->wpixels, xdots, height, xdots, height, Dib->BitsPerPixel, Dib, USEPALETTE);
 
     if (PertColourMethod != 0 && iteration < MaxIteration)		// Kalles colour method
 	{
@@ -84,7 +85,7 @@ int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTr
 	iteration = (int)((double)iteration / IterDiv);
     if (PalOffset && iteration < MaxIteration)
 	iteration = (iteration + PalOffset) % TrueCol.ColoursInPALFile;
-    if (wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)	// it's not Null, so we must have initialsed it for fwd diff slope
+    if (gManp->wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)	// it's not Null, so we must have initialsed it for fwd diff slope
 	{
 	float value = 0.0;
 
@@ -110,10 +111,10 @@ int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTr
 		FloatIteration = 0;
 	    value = static_cast<float>(FloatIteration);
 	    }
-	SlopeIndex = (((DWORD)height - 1 - y) * (DWORD)Dib->DibWidth) + (DWORD)x/* + xStart*/;
+	SlopeIndex = (((DWORD)Dib->DibHeight - 1 - y) * (DWORD)Dib->DibWidth) + (DWORD)x/* + xStart*/;
 //	if (x >= 0 && x < Dib->DibWidth - 1 && y >= 0 && y < Dib->DibHeight - 1 && wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)
 	if (x < Dib->DibWidth && y < Dib->DibHeight && !gStopRequested)
-	    wpixels[SlopeIndex] = value;
+	    gManp->wpixels[SlopeIndex] = value;
 	}
 
     if (biomorph >= 0)						// biomorph
@@ -267,7 +268,7 @@ int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTr
     Floatexp colour processing
 **************************************************************************/
 
-int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, int y, CTrueCol &TrueCol, CTZfilter &TZfilter, double bailout)
+int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, int y, CTrueCol &TrueCol, /*CTZfilter &TZfilter, */double bailout)
     {
     int		index;
     double	magnitude = 0.0;
@@ -278,8 +279,8 @@ int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, i
     CPlot	Plot;
     CPotential	Pot;
 
-    Plot.InitPlot(MaxIteration, &TrueCol, wpixels, xdots, height, xdots, height, Dib->BitsPerPixel, Dib, USEPALETTE);
-    if (wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)	// it's not Null, so we must have initialsed it for fwd diff slope
+    Plot.InitPlot(MaxIteration, &TrueCol, &gManp->wpixels, xdots, height, xdots, height, Dib->BitsPerPixel, Dib, USEPALETTE);
+    if (gManp->wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)	// it's not Null, so we must have initialsed it for fwd diff slope
 	{
 	if (iteration < MaxIteration)
 	    {
@@ -292,11 +293,11 @@ int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, i
 	    }
 	else
 	    FloatIteration = MaxIteration;
-	SlopeIndex = (((DWORD)height - 1 - y) * (DWORD)xdots) + (DWORD)x/* + xStart*/;
+	SlopeIndex = (((DWORD)Dib->DibHeight - 1 - y) * (DWORD)xdots) + (DWORD)x/* + xStart*/;
 	if (AbortRequested())
 	    return -1;
-	if (x >= 0 && x < Dib->DibWidth - 1 && y >= 0 && y < Dib->DibHeight - 1 && wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)
-	    wpixels[SlopeIndex] = (float)FloatIteration;
+	if (x >= 0 && x < Dib->DibWidth - 1 && y >= 0 && y < Dib->DibHeight - 1 && gManp->wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)
+	    gManp->wpixels[SlopeIndex] = (float)FloatIteration;
 	}
 
     if (biomorph >= 0)						// biomorph

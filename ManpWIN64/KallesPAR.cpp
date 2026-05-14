@@ -26,38 +26,8 @@
 #define	INSIDE	TRUE
 #define	OUTSIDE	FALSE
 
-extern	double	hor;			// horizontal address 
-extern	double	vert;			// vertical address 
-extern	double	mandel_width;		// width of display 
-extern	double	ScreenRatio;		// ratio of width / height for the screen
-extern	double	rqlim;			// bailout level
-extern	long	threshold;		// maximum iterations 
-extern	WORD	type;			// M=mand, N=Newton etc 
-extern	CTrueCol    TrueCol;		// palette info
 extern	char	MAPFile[];		// colour map file
-extern	BYTE	juliaflag;		// Julia implementation of fractal 
-
-extern	WORD	degree;			// special colour, phase etc 
-extern	int	subtype;		// B=basin, S=stripe, N=normal 
 extern	struct	FractintFilterStuff	FractintFilter[];	// default values for each 
-extern	double	IterDiv;		// divide ieration by this amount
-extern	int	RotationAngle;		// rotate image in degrees
-extern	int	SlopeType;
-extern	double	lightDirectionDegrees;
-extern	double	bumpMappingDepth;
-extern	double	bumpMappingStrength;
-extern	int	PalOffset;		// begin palette here
-extern	int	PertColourMethod;	// some ideas from Kalles
-
-// Big num declarations **********************************************************
-extern	BYTE	BigNumFlag;		// True if bignum used
-extern	int	decimals, precision;
-extern	BigDouble	BigBailout, BigHor, BigVert, BigWidth;
-// Big num declarations **********************************************************
-
-extern	void	InitFract(int);
-extern	int	getprecbf_mag(void);
-extern	void	ConvertString2Bignum(mpfr_t, char *);
 extern	char	*trailing(char *instr);
 extern	int	Strlicmp(const char *, const char *);
 extern	char	*strtok1(char *, const char *);	// required to use different
@@ -73,8 +43,7 @@ struct FractintFilterStuff				// database of Fractint Outside filters
 	Find the fractal type and convert from Kalles format to ManpWIN format
 **************************************************************************/
 
-int	FindKallesType(int power, int FractType)
-
+int	CManp::FindKallesType(int power, int FractType)
     {
     juliaflag = FALSE;
     type = PERTURBATION;
@@ -335,7 +304,7 @@ int	FindKallesType(int power, int FractType)
 	Convert ManpWIN format to Kalles format
 **************************************************************************/
 
-int	ConvertToKallesType(int subtype, WORD degree, int *power, int *FractalType)
+int	CManp::ConvertToKallesType(int subtype, WORD degree, int *power, int *FractalType)
 
     {
     juliaflag = FALSE;
@@ -553,7 +522,7 @@ int	ConvertToKallesType(int subtype, WORD degree, int *power, int *FractalType)
 	Load Palette Map
 **************************************************************************/
 
-static int ProcessColours(char *value)
+int	CManp::ProcessColours(char *value)
     {
     int		i;
     char	*tok;
@@ -582,7 +551,7 @@ static int ProcessColours(char *value)
 	Process Corners
 **************************************************************************/
 
-int	ProcessLocation(char *real, char *imag, char *zoom)
+int	CManp::ProcessLocation(char *real, char *imag, char *zoom)
     {
     double	Magnification;
     BigDouble   BigMag, OneOverMag;
@@ -606,7 +575,7 @@ int	ProcessLocation(char *real, char *imag, char *zoom)
 	{
 	mandel_width = 4.0 / Magnification;
 	vert = -(vert + mandel_width / 2.0);
-	hor -= mandel_width * ScreenRatio / 2.0;
+	hor -= mandel_width * AspectRatio / 2.0;
 	}
 
     precision = getprecbf_mag();
@@ -628,7 +597,7 @@ int	ProcessLocation(char *real, char *imag, char *zoom)
 	OneOverMag = BigMag.BigInvert();
 	BigWidth = OneOverMag * 4.0;
 	BigVert = -BigVert - BigWidth.BigHalf();
-	BigHor = BigHor - BigWidth * ScreenRatio / 2.0;
+	BigHor = BigHor - BigWidth * AspectRatio / 2.0;
 	}
     else
 	{
@@ -653,26 +622,26 @@ int	WriteKallesFile(HWND hwnd, char *filename)
     char	s[200];
     char	*s1 = nullptr, *s2 = nullptr, *s3 = nullptr;
 
-    if (type == MANDELFP)
+    if (gManp->type == MANDELFP)
 	{
 	FractalType = 0;
 	power = 2;
 	}
-    else if (type == POWER)
+    else if (gManp->type == POWER)
 	{
 	FractalType = 0;
-	power = degree;
+	power = gManp->degree;
 	}
-    else if (type == PERTURBATION)
-	ConvertToKallesType(subtype, degree, &power, &FractalType);
+    else if (gManp->type == PERTURBATION)
+	gManp->ConvertToKallesType(gManp->subtype, gManp->degree, &power, &FractalType);
     else
 	{
-	_snprintf_s(s, 200, _TRUNCATE, "Can only write Kalles File if type = Perturbation. Type = <%d>", type);
+	_snprintf_s(s, 200, _TRUNCATE, "Can only write Kalles File if type = Perturbation. Type = <%d>", gManp->type);
 	MessageBox(hwnd, s, "MANPWIN", MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
 
-    Slopes = (SlopeType == NOSLOPE) ? 0 : 1;
+    Slopes = (gManp->SlopeType == NOSLOPE) ? 0 : 1;
 
     if ((fp = fopen(filename, "w")) == NULL)
 	{
@@ -681,15 +650,15 @@ int	WriteKallesFile(HWND hwnd, char *filename)
 	return -1;
 	}
 
-    if (BigNumFlag)
+    if (gManp->BigNumFlag)
 	{
 	s1 = new char[SIZEOF_BF_VARS];
 	s2 = new char[SIZEOF_BF_VARS];
 	s3 = new char[SIZEOF_BF_VARS];
 
-	BigZreal = BigHor + (BigWidth * ScreenRatio) / 2;
-	BigZimag = -BigVert - BigWidth / 2.0;
-	OneOverMag = BigWidth.BigInvert();
+	BigZreal = gManp->BigHor + (gManp->BigWidth * gManp->AspectRatio) / 2;
+	BigZimag = -gManp->BigVert - gManp->BigWidth / 2.0;
+	OneOverMag = gManp->BigWidth.BigInvert();
 	BigMag = OneOverMag * 4.0;
 	BigZreal.ToString(s1, SIZEOF_BF_VARS, false);
 	BigZimag.ToString(s2, SIZEOF_BF_VARS, false);
@@ -706,24 +675,24 @@ int	WriteKallesFile(HWND hwnd, char *filename)
 	}
     else
 	{
-	Zreal = hor + (mandel_width * ScreenRatio) / 2;
-	Zimag = -vert - mandel_width / 2.0;
-	zoom = 4.0 / mandel_width;
+	Zreal = gManp->hor + (gManp->mandel_width * gManp->AspectRatio) / 2;
+	Zimag = -gManp->vert - gManp->mandel_width / 2.0;
+	zoom = 4.0 / gManp->mandel_width;
 	fprintf(fp, "Re: %lf\nIm: %lf\nZoom: %lf\n", Zreal, Zimag, zoom);
 	}
 
-    fprintf(fp, "Iterations: %ld\nFractalType: %d\nPower: %d\n", threshold, FractalType, power);
+    fprintf(fp, "Iterations: %ld\nFractalType: %d\nPower: %d\n", gManp->threshold, FractalType, power);
     fprintf(fp, "Colors: ");
-    for (int i = 0; i < TrueCol.ColoursInPALFile; i++)
-	fprintf(fp, "%d, %d, %d, ", TrueCol.PalettePtr[i].rgbtBlue, TrueCol.PalettePtr[i].rgbtGreen, TrueCol.PalettePtr[i].rgbtRed);
+    for (int i = 0; i < gManp->TrueCol.ColoursInPALFile; i++)
+	fprintf(fp, "%d, %d, %d, ", gManp->TrueCol.PalettePtr[i].rgbtBlue, gManp->TrueCol.PalettePtr[i].rgbtGreen, gManp->TrueCol.PalettePtr[i].rgbtRed);
     fprintf(fp, "\n");
     if (Slopes)
 	fprintf(fp, "Slopes: %d\n", Slopes);
-    fprintf(fp, "Smooth: %d\n", (PertColourMethod == 4) ? 1 : 0);
-    if (PalOffset)
-	fprintf(fp, "ColorOffset: %d\n", PalOffset);
-    if (IterDiv != 1.0)
-	fprintf(fp, "IterDiv: %lf\n", IterDiv);
+    fprintf(fp, "Smooth: %d\n", (gManp->PertColourMethod == 4) ? 1 : 0);
+    if (gManp->PalOffset)
+	fprintf(fp, "ColorOffset: %d\n", gManp->PalOffset);
+    if (gManp->IterDiv != 1.0)
+	fprintf(fp, "IterDiv: %lf\n", gManp->IterDiv);
 
     fclose(fp);
     return 0;
@@ -747,9 +716,9 @@ int	ReadKallesFile(HWND hwnd, char *filename)
     FILE	*fp;
     char	s[200];
     
-    SlopeType = 0;
-    IterDiv = 1.0;
-    RotationAngle = 0;
+    gManp->SlopeType = 0;
+    gManp->IterDiv = 1.0;
+    gManp->RotationAngle = 0;
     if ((fp = fopen(filename, "r")) == NULL)
 	{
 	_snprintf_s(s, 200, _TRUNCATE, "Can't Open Kalles File: <%s>", filename);
@@ -781,35 +750,35 @@ int	ReadKallesFile(HWND hwnd, char *filename)
 	    }
 	if (length = Strlicmp(buffer, "Iterations: "))
 	    {
-	    threshold = atol(buffer + length);
-	    if (threshold < 0L)
-		threshold = MAXTHRESHOLD;
+	    gManp->threshold = atol(buffer + length);
+	    if (gManp->threshold < 0L)
+		gManp->threshold = MAXTHRESHOLD;
 	    }
 	if (length = Strlicmp(buffer, "IterDiv: "))
 	    {
 	    strcpy(s, buffer + length);
-	    sscanf(s, "%lf", &IterDiv);
-	    if (IterDiv <= 0.0)
-		IterDiv = 1.0;
+	    sscanf(s, "%lf", &gManp->IterDiv);
+	    if (gManp->IterDiv <= 0.0)
+		gManp->IterDiv = 1.0;
 	    }
 	if (length = Strlicmp(buffer, "Rotate: "))
 	    {
 	    strcpy(s, buffer + length);
-	    sscanf(s, "%d", &RotationAngle);
+	    sscanf(s, "%d", &gManp->RotationAngle);
 	    }
 	if (length = Strlicmp(buffer, "MultiColors: "))
 	    {
 	    }
 	if (length = Strlicmp(buffer, "Colors: "))
-	    ProcessColours(buffer + length);
+	    gManp->ProcessColours(buffer + length);
 	if (length = Strlicmp(buffer, "Slopes: "))
-	    SlopeType = atoi(buffer + length);			// slope = 0 no slope, slope = 1 FWDGIFF
+	    gManp->SlopeType = atoi(buffer + length);			// slope = 0 no slope, slope = 1 FWDGIFF
 	if (length = Strlicmp(buffer, "SlopePower: "))
-	    bumpMappingDepth = atoi(buffer + length);
+	    gManp->bumpMappingDepth = atoi(buffer + length);
 	if (length = Strlicmp(buffer, "SlopeRatio: "))
-	    bumpMappingStrength = atoi(buffer + length);
+	    gManp->bumpMappingStrength = atoi(buffer + length);
 	if (length = Strlicmp(buffer, "SlopeAngle: "))
-	    lightDirectionDegrees = atoi(buffer + length);
+	    gManp->lightDirectionDegrees = atoi(buffer + length);
 
 	if (length = Strlicmp(buffer, "SeedR: "))
 	    {
@@ -824,19 +793,19 @@ int	ReadKallesFile(HWND hwnd, char *filename)
 	if (length = Strlicmp(buffer, "Power: "))
 	    Power = atoi(buffer + length);
 	if (length = Strlicmp(buffer, "ColorOffset: "))
-	    PalOffset = atoi(buffer + length);
+	    gManp->PalOffset = atoi(buffer + length);
 //	if (length = Strlicmp(buffer, "IterDiv: "))
 //	    IterDiv = atoi(buffer + length);
 	if (length = Strlicmp(buffer, "Smooth: "))
 	    {
 	    int i = atoi(buffer + length);
-	    PertColourMethod = (i == 0) ? 0 : 4;
+	    gManp->PertColourMethod = (i == 0) ? 0 : 4;
 	    }
 	if (length = Strlicmp(buffer, "FractalType: "))		// must be the only one which is after strlwr
 	    TempType = atoi(buffer + length);
 	}
-    ProcessLocation(RealStr, ImagStr, ZoomStr);
-    FindKallesType(Power, TempType);
+    gManp->ProcessLocation(RealStr, ImagStr, ZoomStr);
+    gManp->FindKallesType(Power, TempType);
 //    if (TempType == 0)						// mandelbrot (refer fractalp.cpp)
 //	{
 //	param[2] = SeedR;

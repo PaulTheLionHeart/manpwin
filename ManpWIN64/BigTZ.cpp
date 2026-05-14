@@ -12,13 +12,13 @@
 /////////////////////////////////////////////////////
 
 #include <math.h>
-#include  "manp.h"
+//#include  "manp.h"
 #include "Complex.h"
 #include "big.h"
-#include "fractype.h"
+//#include "fractype.h"
 #include "BigDouble.h"
 #include "BigComplex.h"
-#include "resource.h"
+//#include "resource.h"
 #include "pixel.h"
 #include "TierazonTemplate.h"
 #include "BailoutTemplate.h"
@@ -41,7 +41,7 @@ int	CPixel::BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *
 
 int	CPixel::BigRunTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *qBig, BYTE *SpecialFlag, long *iteration)
     {
-    return TierazonIter<BigComplex, BigDouble>(subtype, zBig, qBig, &z2Big, &z4Big, sqrBig, realimagBig, SpecialFlag, iteration, caa3Big, cbBig, c1Big, c2Big, bBig, rqlim, degree, BailoutTestType);
+    return TierazonIter<BigComplex, BigDouble>(subtype, zBig, qBig, &z2Big, &z4Big, sqrBig, realimagBig, SpecialFlag, iteration, caa3Big, cbBig, c1Big, c2Big, bBig, rqlim, degree, threshold, BailoutTestType);
     }
 
 

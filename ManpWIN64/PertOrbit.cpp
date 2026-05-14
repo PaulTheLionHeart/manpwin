@@ -17,7 +17,7 @@ extern	std::atomic<bool> gStopRequested;	// force early exit
 // Individual point calculation
 //////////////////////////////////////////////////////////////////////
 
-int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> *XSubN, int MaxIteration, double bailout, Complex& DeltaSub0, const BLAS *Bla, CTZfilter &TZfilter, Complex &z, Complex &dc, int user_data(HWND hwnd))
+int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> *XSubN, int MaxIteration, double bailout, Complex& DeltaSub0, const BLAS *Bla, /*CTZfilter &TZfilter, */Complex &z, Complex &dc, int user_data(HWND hwnd))
     {
     int iterations = 0;
     int RefIteration = iterations;
@@ -155,7 +155,7 @@ int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> 
 //////////////////////////////////////////////////////////////////////
 // Individual point calculation - with BLA - Exp
 //////////////////////////////////////////////////////////////////////
-int	CPerturbation::iterateFractalWithPerturbationBLAExp(const std::vector<ExpComplex> *XSubN, int MaxIteration, double bailout, ExpComplex& DeltaSub0, const BLAS *Bla, CTZfilter &TZfilter, ExpComplex &z, ExpComplex &dc, int user_data(HWND hwnd))
+int	CPerturbation::iterateFractalWithPerturbationBLAExp(const std::vector<ExpComplex> *XSubN, int MaxIteration, double bailout, ExpComplex& DeltaSub0, const BLAS *Bla, /*CTZfilter &TZfilter, */ExpComplex &z, ExpComplex &dc, int user_data(HWND hwnd))
     {
     const int frameMaxIter = MaxIteration;			// <<<
     const size_t refSize = XSubN->size();			// <<<

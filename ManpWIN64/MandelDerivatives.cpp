@@ -15,13 +15,7 @@
 
 static	int	MandelDerivPtr = 1, MandelDerivNum = 0;
 
-extern	long	iteration;			// globals for speed for now at least
-
-extern	int	subtype;
-extern	double	param[];
-extern	double	rqlim;			// bailout level
-
-extern	CFract	Fractal;		// current fractal stuff
+//extern	long	iteration;			// globals for speed for now at least
 
 /**************************************************************************
     Some simple processing
@@ -42,29 +36,29 @@ void	LoadMandelDerivParams(void)
     // here is where we can do some specific updates to individual Mandelbrot Derivative fractals
     int	i;
 
-    switch (subtype)
+    switch (gManp->subtype)
 	{
 	case 2:
 	case 4:
 	case 7:
-	    Fractal.NumParam = 3;
-	    Fractal.ParamName[0] = "Polynomial Degree (>= 2)";
-	    Fractal.ParamName[1] = "Real Perturbation of Z(0)";
-	    Fractal.ParamName[2] = "Imaginary Perturbation of Z(0)";
+	    gManp->Fractal.NumParam = 3;
+	    gManp->Fractal.ParamName[0] = "Polynomial Degree (>= 2)";
+	    gManp->Fractal.ParamName[1] = "Real Perturbation of Z(0)";
+	    gManp->Fractal.ParamName[2] = "Imaginary Perturbation of Z(0)";
 	    break;
 	case 6:
-	    Fractal.NumParam = 4;
-	    Fractal.ParamName[0] = "Polynomial Degree (>= 2)";
-	    Fractal.ParamName[1] = "Real Perturbation of Z(0)";
-	    Fractal.ParamName[2] = "Imaginary Perturbation of Z(0)";
-	    Fractal.ParamName[3] = "Rotated? (Only for degree > 2, 1=yes 0=no)";
+	    gManp->Fractal.NumParam = 4;
+	    gManp->Fractal.ParamName[0] = "Polynomial Degree (>= 2)";
+	    gManp->Fractal.ParamName[1] = "Real Perturbation of Z(0)";
+	    gManp->Fractal.ParamName[2] = "Imaginary Perturbation of Z(0)";
+	    gManp->Fractal.ParamName[3] = "Rotated? (Only for degree > 2, 1=yes 0=no)";
 	    break;
 	case 55:
 	case 56:
-	    Fractal.NumParam = 3;
-	    Fractal.ParamName[0] = (subtype == 55) ? "SimonBrot Order (>= 2)" : "SimonBrot2 Order (>= 2)";
-	    Fractal.ParamName[1] = "Real Perturbation of Z(0)";
-	    Fractal.ParamName[2] = "Imaginary Perturbation of Z(0)";
+	    gManp->Fractal.NumParam = 3;
+	    gManp->Fractal.ParamName[0] = (gManp->subtype == 55) ? "SimonBrot Order (>= 2)" : "SimonBrot2 Order (>= 2)";
+	    gManp->Fractal.ParamName[1] = "Real Perturbation of Z(0)";
+	    gManp->Fractal.ParamName[2] = "Imaginary Perturbation of Z(0)";
 	    break;
 	}
 
@@ -72,8 +66,8 @@ void	LoadMandelDerivParams(void)
 //	period_level = FALSE;			// no periodicity checking for Tierazon fractals
 
     for (i = 0; i < 4; i++)
-	param[i] = MandelDerivSpecific[subtype].paramvalue[i];
-    rqlim = MandelDerivSpecific[subtype].rqlim;
+	gManp->param[i] = MandelDerivSpecific[gManp->subtype].paramvalue[i];
+    gManp->rqlim = MandelDerivSpecific[gManp->subtype].rqlim;
     }
 
 /**************************************************************************
@@ -112,7 +106,7 @@ static	int	index;
                     MandelDerivPtr = index;
 //		    PreviousLsys_ptr = index;
 //		    strcpy(lsys_type, lptr[lsys_ptr]);
-		    subtype = MandelDerivPtr;
+		    gManp->subtype = MandelDerivPtr;
                     EndDialog(hDlg, TRUE);
                     return TRUE;
                   
@@ -140,7 +134,7 @@ static	int	index;
 				    "Select From a List", MB_OK | MB_ICONEXCLAMATION);
 				break;
 				}
-			    subtype = MandelDerivPtr = index;
+			    gManp->subtype = MandelDerivPtr = index;
 //			    lsys_ptr = index;
 //			    strcpy(lsys_type, lptr[lsys_ptr]);
 			    EndDialog(hDlg, TRUE);

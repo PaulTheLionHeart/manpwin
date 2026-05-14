@@ -10,9 +10,6 @@
 #include "manp.h"
 #include "SafeStrings.h"
 
-//extern	    TCHAR	*FullHelpFile;			// points to full path for help file
-
-
 /**************************************************************************
 	Get Pathname of MANPWIN.EXE file
 **************************************************************************/
@@ -28,7 +25,6 @@ int	GetManpWINFilePath(char *buffer)
     }
 
 HWND	DoHtmlHelp(HWND hwnd, char *HelpFile, UINT uCommand)
-
     {
     HWND	hwndHelp;
     char	Path[MAX_PATH];

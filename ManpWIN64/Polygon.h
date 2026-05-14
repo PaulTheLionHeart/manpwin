@@ -4,6 +4,9 @@
 
 #include	"Plot.h"
 
+#ifndef POLYGON_H
+#define POLYGON_H
+
 #define	DWORD	unsigned long
 #define	MAXPOINT    20
 
@@ -32,3 +35,4 @@ class CPoly
     void sort(int);
     void sort(int, int, CPlot Plot);
     };
+#endif

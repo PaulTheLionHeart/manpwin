@@ -142,10 +142,12 @@ typedef struct alternatemathstuff ALTERNATE;
 #define dot_product(v1,v2)  ((v1)[0]*(v2)[0]+(v1)[1]*(v2)[1]+(v1)[2]*(v2)[2])  /* TW 7-09-89 */
 #endif
 
+/*
 #ifdef PI
 #undef PI
 #endif
 #define PI 3.14159265358979323846
+*/
 #define SPHERE    init3d[0]             // sphere? 1 = yes, 0 = no
 #define ILLUMINE  (FILLTYPE>4)		// illumination model    
 

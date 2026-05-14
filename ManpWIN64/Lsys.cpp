@@ -27,16 +27,10 @@ char	lptr[MAXLSYS][100];
 char	lsys_type[MAXLSYS];		// for display
 char	lsys_Label[MAXLSYS];		// for display in type selection
 int	lsys_ptr = 0;
-//int	PreviousLsys_ptr = 0;		// remember last time
 int	lsys_num;
-//int	level = 2;
 DWORD	colour = 15;
-DWORD	BackgroundColour = 0L;		// set background colour for IFS and L-System fractals
-extern	int	xdots, ydots;
 
 extern	char	LSYSFile[];
-extern	BYTE	cycleflag;		// do colour cycling
-extern	CDib	Dib;			// Device Independent Bitmaps
 
 void	thinking(HWND, int);
 
@@ -54,11 +48,11 @@ static	int	endloop;			// ensure a clean exit
 int	Lsystem(HWND, char *);
 int	LLoad(HWND, char *);
 
-extern	CPlot	Plot;		// image plotting routines 
+//extern	CPlot	Plot;		// image plotting routines 
 
 extern	char	*str_find_ci(char *, char *);
 extern	int	user_data(HWND);
-extern	void	DisplayFractal(HWND);
+//extern	void	DisplayFractal(HWND);
 
 void	fastline(const WORD, const WORD, const WORD, const WORD, const DWORD);
 static	double	getnumber(char  **str);
@@ -281,12 +275,11 @@ printf("Processing level: %d", depth);
 **************************************************************************/
 
 static	void	findscale(HWND hwnd, char *command, char **rules, char depth)
-
     {
     double	horiz, vert;
     int	i;
 
-    aspect = SCREENASPECT * xdots / ydots;
+    aspect = SCREENASPECT * gManp->AspectRatio;
     for (i = 0; i < maxangle; i++)
 	{
 	sins[i] = sin(2.0 * (double) i * PI / maxangle);
@@ -302,20 +295,20 @@ static	void	findscale(HWND hwnd, char *command, char **rules, char depth)
     if (Xmax == Xmin)
 	horiz = 1E35;
     else
-	horiz = (xdots - 10) / (Xmax - Xmin);
+	horiz = (gManp->xdots - 10) / (Xmax - Xmin);
     if (Ymax == Ymin)
 	  vert = 1E35;
     else
-	  vert = (double) (ydots - 6) / (Ymax - Ymin);
+	  vert = (double) (gManp->ydots - 6) / (Ymax - Ymin);
     size = (vert < horiz) ? vert : horiz;
     if (horiz == 1E35)
-	xpos = (double) xdots / 2.0;
+	xpos = (double)gManp->xdots / 2.0;
     else
-	xpos = -Xmin * size + 5.0 + ((double) (xdots - 10) - size * (Xmax - Xmin)) / 2.0;
+	xpos = -Xmin * size + 5.0 + ((double) (gManp->xdots - 10) - size * (Xmax - Xmin)) / 2.0;
     if (vert == 1E35)
-	ypos = (double) ydots / 2.0;
+	ypos = (double)gManp->ydots / 2.0;
     else
-	ypos = -Ymin * size + 3.0 + ((double) (ydots - 6) - size * (Ymax - Ymin)) / 2.0;
+	ypos = -Ymin * size + 3.0 + ((double) (gManp->ydots - 6) - size * (Ymax - Ymin)) / 2.0;
     }
 
 /**************************************************************************
@@ -635,7 +628,7 @@ int	Lsystem(HWND hwnd, char *filename)
     findscale(hwnd, ruleptrs[0], &ruleptrs[1], order);
 
     hCursor = LoadCursor(NULL, IDC_WAIT);		// Load hour-glass cursor.
-    Dib.ClearDib(BackgroundColour);			// set background colour
+    gManp->Dib.ClearDib(gManp->BackgroundColour);			// set background colour
     if (!endloop)
 	{
 	realangle = angle = reverse = 0;
@@ -649,7 +642,7 @@ int	Lsystem(HWND hwnd, char *filename)
     free_rules_mem();
 //    closepl(!endloop);
     loaded = 0;
-    DisplayFractal(hwnd);
+    gManp->DisplayFractal(hwnd);
     return 0;
     }
 
@@ -728,8 +721,8 @@ void	thinking(HWND hwnd, int count)
 	}
     }
        	 
-extern	int	xdots, ydots;
-#define dopoint(x,y,c) { if(x < xdots && y < ydots) Plot.PlotPoint(x,y,c); }
+//extern	int	xdots, ydots;
+#define dopoint(x,y,c) { if(x < gManp->xdots && y < gManp->ydots) gManp->Plot.PlotPoint(x,y,c); }
 
 /**************************************************************************
 	Draw a line from raw x0,y0 to x1,y1
@@ -759,7 +752,6 @@ long	divide(long a, long b, int offset)
     }
 
 void	fastline(const WORD x0, const WORD y0, const WORD x1, const WORD y1, const DWORD col)
-
     {
     WORD x, y;
     long	xstep, ystep, xcum = 0L, ycum = 0L;
@@ -893,7 +885,7 @@ INT_PTR CALLBACK SelectFractal(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
     switch (message) 
 	{
         case WM_INITDIALOG:
-	    cycleflag = FALSE;
+	    gManp->cycleflag = FALSE;
             SetDlgItemText(hDlg, ID_LISTTITLE, 	lsys_Label);
             for (i = 0; i < lsys_num; i++) 
                 SendDlgItemMessage(hDlg, IDM_LSYSTEM, LB_ADDSTRING, (WPARAM)NULL, (LPARAM) (LPSTR) lptr[i]);

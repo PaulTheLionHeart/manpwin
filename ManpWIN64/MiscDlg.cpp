@@ -8,20 +8,12 @@
 #include "resource.h"
 #include "SafeStrings.h"
 #include "Hailstone.h"
-
-extern	char	LyapSequence[];		// hold the AB sequence for Lyapunov fractals
-extern	CFract	Fractal;
-extern	double	rqlim;
-extern	WORD	type;			// M=mand, N=Newton etc
-extern	int	subtype;
+#include "Manp.h"
 
 extern	char	*InitCond[];		// initial conditions for direct formula parsing 
 extern	char	*DirectFormula[];	// formulae for direct formula parsing 
 extern	int	FindInitCond(char *Str);
 extern	int	FindFormula(char *Str);
-
-extern	PAINTSTRUCT 	ps;
-extern	COtherFunctions	OthFn;
 
 /**************************************************************************
 	Dialog Control for Plasma Type
@@ -40,7 +32,7 @@ INT_PTR CALLBACK PlasmaDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	      SAFE_SPRINTF(s, "%2.2f", param[0]);
+	      SAFE_SPRINTF(s, "%2.2f", gManp->param[0]);
 		SetDlgItemText(hDlg, IDC_PLASMA_GRAIN, s);
 	        return TRUE ;
 
@@ -53,9 +45,9 @@ INT_PTR CALLBACK PlasmaDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPara
 		        return TRUE ;
 
 		    case IDOK:
-			sscanf(temp, "%lf", &param[0]);
-			if (param[0] < 0.1 || param[0] > 50.0)
-			    param[0] = 2.0;
+			sscanf(temp, "%lf", &gManp->param[0]);
+			if (gManp->param[0] < 0.1 || gManp->param[0] > 50.0)
+			    gManp->param[0] = 2.0;
 			EndDialog (hDlg, TRUE);
 			return TRUE;
 
@@ -85,8 +77,8 @@ INT_PTR CALLBACK FrothDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-		SetDlgItemInt(hDlg, IDC_3_OR_6, (int)param[0], TRUE);
-		SetDlgItemInt(hDlg, IDC_SHADING, (int)param[1], TRUE);
+		SetDlgItemInt(hDlg, IDC_3_OR_6, (int)gManp->param[0], TRUE);
+		SetDlgItemInt(hDlg, IDC_SHADING, (int)gManp->param[1], TRUE);
 	        return TRUE ;
 
 	  case WM_COMMAND:
@@ -102,10 +94,10 @@ INT_PTR CALLBACK FrothDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 		        return TRUE ;
 
 		    case IDOK:
-			param[0] = (double)tempAttractors;
-			if (param[0] != 6.0)		// only 3 or 6 allowed
-			    param[0] = 3.0;
-			param[1] = (double)tempShading;
+			gManp->param[0] = (double)tempAttractors;
+			if (gManp->param[0] != 6.0)		// only 3 or 6 allowed
+			    gManp->param[0] = 3.0;
+			gManp->param[1] = (double)tempShading;
 			EndDialog (hDlg, TRUE);
 			return TRUE;
 
@@ -138,11 +130,11 @@ INT_PTR CALLBACK CellularDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-		SAFE_SPRINTF(s, "%2.0f", param[1]);
+		SAFE_SPRINTF(s, "%2.0f", gManp->param[1]);
 		SetDlgItemText(hDlg, IDC_CELL_RULE, s);
-		SetDlgItemInt(hDlg, IDC_INIT_STRING, (int)param[0], TRUE);
-		SetDlgItemInt(hDlg, IDC_CELL_TYPE, (int)param[2], TRUE);
-		SetDlgItemInt(hDlg, IDC_START_ROW, (int)param[3], TRUE);
+		SetDlgItemInt(hDlg, IDC_INIT_STRING, (int)gManp->param[0], TRUE);
+		SetDlgItemInt(hDlg, IDC_CELL_TYPE, (int)gManp->param[2], TRUE);
+		SetDlgItemInt(hDlg, IDC_START_ROW, (int)gManp->param[3], TRUE);
 	        return TRUE ;
 
 	  case WM_COMMAND:
@@ -166,10 +158,10 @@ INT_PTR CALLBACK CellularDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		        return TRUE ;
 
 		    case IDOK:
-			sscanf(temp, "%lf", &param[1]);
-			param[0] = (double)tempInit;
-			param[2] = (double)tempType;
-			param[3] = (double)tempStart;
+			sscanf(temp, "%lf", &gManp->param[1]);
+			gManp->param[0] = (double)tempInit;
+			gManp->param[2] = (double)tempType;
+			gManp->param[3] = (double)tempStart;
 			EndDialog (hDlg, TRUE);
 			return TRUE;
 
@@ -199,7 +191,7 @@ INT_PTR CALLBACK WalkDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    SAFE_SPRINTF(s, "%3.2f", param[0]);
+	    SAFE_SPRINTF(s, "%3.2f", gManp->param[0]);
 	    SetDlgItemText(hDlg, IDC_WALK_STEPSIZE, s);
 	    return TRUE;
 
@@ -212,10 +204,10 @@ INT_PTR CALLBACK WalkDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		    return TRUE;
 
 		case IDOK:
-		    sscanf(temp, "%lf", &param[0]);
-		    if (param[0] != 999.0)
-			if (param[0] < 0.1 || param[0] > 100.0)
-			    param[0] = 1.0;
+		    sscanf(temp, "%lf", &gManp->param[0]);
+		    if (gManp->param[0] != 999.0)
+			if (gManp->param[0] < 0.1 || gManp->param[0] > 100.0)
+			    gManp->param[0] = 1.0;
 		    EndDialog(hDlg, TRUE);
 		    return TRUE;
 
@@ -245,18 +237,18 @@ INT_PTR CALLBACK LyapDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message) 
 	{
         case WM_INITDIALOG:
-	    SAFE_SPRINTF(Bailout, "%14.14lf", rqlim);
+	    SAFE_SPRINTF(Bailout, "%14.14lf", gManp->rqlim);
 	    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
 //            SetDlgItemText(hDlg, ID_FRACNAME, 	fractalspecific[type].name);
-            for (j = 0; j < Fractal.NumParam; j++) 
+            for (j = 0; j < gManp->Fractal.NumParam; j++)
 		{
-		SAFE_SPRINTF(s[j], "%f", *Fractal.ParamValue[j]);
-		SetDlgItemText(hDlg, ID_FRACPARTX1 + j, Fractal.ParamName[j]);
+		SAFE_SPRINTF(s[j], "%f", *gManp->Fractal.ParamValue[j]);
+		SetDlgItemText(hDlg, ID_FRACPARTX1 + j, gManp->Fractal.ParamName[j]);
 		SetDlgItemText(hDlg, ID_FRACPARAM1 + j, s[j]);
 		}
-            for (i = Fractal.NumFunct + Fractal.NumParam; i < 10; i++) 
+            for (i = gManp->Fractal.NumFunct + gManp->Fractal.NumParam; i < 10; i++)
 		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
-	    SetDlgItemText(hDlg, IDC_LYAPSEQ, LyapSequence);	// we cheat and use Fractal.Fn1 to store the Lyapunov sequence
+	    SetDlgItemText(hDlg, IDC_LYAPSEQ, gManp->LyapSequence);	// we cheat and use Fractal.Fn1 to store the Lyapunov sequence
 	    return ( TRUE);
 
         case WM_COMMAND:
@@ -265,13 +257,13 @@ INT_PTR CALLBACK LyapDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		{
                 case IDOK:
 		    GetDlgItemText(hDlg, IDC_BAILOUT, Bailout, 100);
-		    rqlim = atof(Bailout);
-		    for (j = 0; j < Fractal.NumParam; j++) 
+		    gManp->rqlim = atof(Bailout);
+		    for (j = 0; j < gManp->Fractal.NumParam; j++)
 			{
 			GetDlgItemText(hDlg, ID_FRACPARAM1 + j, s[j], 100);
-			*Fractal.ParamValue[j] = atof(s[j]);
+			*gManp->Fractal.ParamValue[j] = atof(s[j]);
 			}
-		    GetDlgItemText(hDlg, IDC_LYAPSEQ, LyapSequence, 100);	// we cheat and use Fractal.Fn1 to store the Lyapunov sequence
+		    GetDlgItemText(hDlg, IDC_LYAPSEQ, gManp->LyapSequence, 100);	// we cheat and use Fractal.Fn1 to store the Lyapunov sequence
 		    EndDialog(hDlg, TRUE);
                     return ( TRUE);
                   
@@ -290,8 +282,6 @@ INT_PTR CALLBACK LyapDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	Dialog Box for screen formulae
 **************************************************************************/
 
-
-char	FormulaString[MAXFORMULASTRINGLENGTH] = "\0";		// used to hold the full formula
 extern	char	*str_find_ci(char *, char *);
 
 void	AnalyseFormulaString(char *Startup, char *OrigStartup, char *Formula, char *Bailout, char *FormulaString)
@@ -362,6 +352,42 @@ void	CreateFormulaString(char *Startup, char *Formula, char *Bailout, char *Form
     *q = '\0';
     }
 
+/**************************************************************************
+    Get Initial conditions
+**************************************************************************/
+
+int FindInitCond(char *Str)
+    {
+    int		n;
+    size_t	size;
+
+    size = strlen(Str);
+    for (n = 0; InitCond[n]; n++)
+	{
+	if (!strnicmp(InitCond[n], Str, size))
+	    return n;
+	}
+    return -1;			// not found
+    }
+
+/**************************************************************************
+    Get Screen Parser Formulae
+**************************************************************************/
+
+int FindFormula(char *Str)
+    {
+    int		n;
+    size_t	size;
+
+    size = strlen(Str);
+    for (n = 0; DirectFormula[n]; n++)
+	{
+	if (!strnicmp(DirectFormula[n], Str, size))
+	    return n;
+	}
+    return -1;			// not found
+    }
+
 INT_PTR CALLBACK ScrnFormDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
     {
@@ -385,11 +411,11 @@ INT_PTR CALLBACK ScrnFormDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 	    if (index1 == -1 || *Formula != '\0')		// index not loaded, but have a default
 		if (OldIndex1 != index1)			// it won't be found if the formula has been edited
 		    index1 = FindFormula(Formula);
-	    if (*FormulaString == '\0')				// allow the user to choose one of the formulae from the list
+	    if (*gManp->FormulaString == '\0')				// allow the user to choose one of the formulae from the list
 		OldIndex1 = index1;
 	    else						// if we already hgave a formula loaded, then we present this to the user
 		{
-		AnalyseFormulaString(Startup, "", Formula, Bailout, FormulaString);
+		AnalyseFormulaString(Startup, "", Formula, Bailout, gManp->FormulaString);
 		OldIndex1 = index1 = -1;
 		}
 	    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
@@ -405,7 +431,7 @@ INT_PTR CALLBACK ScrnFormDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    GetDlgItemText(hDlg, IDC_FORMULAVALUE, Formula, 1200);
 		    GetDlgItemText(hDlg, IDC_BAILOUT, Bailout, 100);
 		    GetDlgItemText(hDlg, IDC_INITIALVALUE, Startup, 1200);
-		    CreateFormulaString(Startup, Formula, Bailout, FormulaString);
+		    CreateFormulaString(Startup, Formula, Bailout, gManp->FormulaString);
 		    EndDialog(hDlg, TRUE);
                     return ( TRUE);
                   
@@ -460,8 +486,8 @@ INT_PTR CALLBACK NumTriangleDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    temp = subtype;
-	    switch (subtype)
+	    temp = gManp->subtype;
+	    switch (gManp->subtype)
 		{
 		case 'A':
 		    tempParam = IDC_A;
@@ -559,12 +585,12 @@ INT_PTR CALLBACK NumTriangleDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		    return TRUE;
 
 		case IDOK:
-		    OthFn.GetNumberIterations(GetDlgItemInt(hDlg, IDC_PARAM1, &bTrans, TRUE));
-		    OthFn.Getmoda(GetDlgItemInt(hDlg, IDC_PARAM2, &bTrans, TRUE));
-		    OthFn.Getlo(GetDlgItemInt(hDlg, IDC_PARAM3, &bTrans, TRUE));
-		    OthFn.Gethi(GetDlgItemInt(hDlg, IDC_PARAM4, &bTrans, TRUE));
-		    OthFn.GetCircleSize(GetDlgItemInt(hDlg, IDC_PARAM5, &bTrans, TRUE));
-		    subtype = temp;
+		    gManp->OthFn.GetNumberIterations(GetDlgItemInt(hDlg, IDC_PARAM1, &bTrans, TRUE));
+		    gManp->OthFn.Getmoda(GetDlgItemInt(hDlg, IDC_PARAM2, &bTrans, TRUE));
+		    gManp->OthFn.Getlo(GetDlgItemInt(hDlg, IDC_PARAM3, &bTrans, TRUE));
+		    gManp->OthFn.Gethi(GetDlgItemInt(hDlg, IDC_PARAM4, &bTrans, TRUE));
+		    gManp->OthFn.GetCircleSize(GetDlgItemInt(hDlg, IDC_PARAM5, &bTrans, TRUE));
+		    gManp->subtype = temp;
 		    EndDialog(hDlg, TRUE);
 		    return TRUE;
 
@@ -588,14 +614,14 @@ INT_PTR CALLBACK CircleDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
     static     WORD	temp_special;
     HWND		hCtrl;
     BOOL		bTrans;
-    int		FilledCircle;
+    int			FilledCircle;
     //     char		s[24];
 
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    temp = subtype;
-	    switch (subtype)
+	    temp = gManp->subtype;
+	    switch (gManp->subtype)
 		{
 		case 'A':
 		    tempParam = IDC_A;
@@ -682,7 +708,7 @@ INT_PTR CALLBACK CircleDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 				    break;
 				}
 	    */
-	    OthFn.GetFilledCircle(3);
+	    gManp->OthFn.GetFilledCircle(3);
 	    tempParam1 = IDC_3D;
 	    CheckRadioButton(hDlg, IDC_FILLED, IDC_3D, tempParam1);
 	    //		SetFocus(GetDlgItem(hDlg, tempParam));
@@ -796,38 +822,38 @@ INT_PTR CALLBACK CircleDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 			    break;
 			}
 		    CheckRadioButton(hDlg, IDC_FILLED, IDC_3D, (int)LOWORD(wParam));
-		    OthFn.GetFilledCircle(FilledCircle);
+		    gManp->OthFn.GetFilledCircle(FilledCircle);
 		    //			InvalidateRect(hDlg, NULL, FALSE);
 		    return TRUE;
 
 		case IDOK:
-		    OthFn.GetPasses(GetDlgItemInt(hDlg, IDC_PARAM1, &bTrans, TRUE));
-		    subtype = temp;
-		    switch (subtype)
+		    gManp->OthFn.GetPasses(GetDlgItemInt(hDlg, IDC_PARAM1, &bTrans, TRUE));
+		    gManp->subtype = temp;
+		    switch (gManp->subtype)
 			{
 			case 'K':
-			    fractalspecific[type].hor = -0.1;
-			    fractalspecific[type].vert = -0.2;
-			    fractalspecific[type].width = 0.65;
+			    fractalspecific[gManp->type].hor = -0.1;
+			    fractalspecific[gManp->type].vert = -0.2;
+			    fractalspecific[gManp->type].width = 0.65;
 			    break;
 			case 'L':
-			    fractalspecific[type].hor = -1.4;
-			    fractalspecific[type].vert = -0.96;
-			    fractalspecific[type].width = 2.2;
+			    fractalspecific[gManp->type].hor = -1.4;
+			    fractalspecific[gManp->type].vert = -0.96;
+			    fractalspecific[gManp->type].width = 2.2;
 			    break;
 			case 'M':
-			    fractalspecific[type].hor = -3.0;
-			    fractalspecific[type].vert = -1.5;
-			    fractalspecific[type].width = 3.0;
+			    fractalspecific[gManp->type].hor = -3.0;
+			    fractalspecific[gManp->type].vert = -1.5;
+			    fractalspecific[gManp->type].width = 3.0;
 			    break;
 			default:
-			    fractalspecific[type].hor = -0.25;
-			    fractalspecific[type].vert = -0.2;
-			    fractalspecific[type].width = 2.5;
+			    fractalspecific[gManp->type].hor = -0.25;
+			    fractalspecific[gManp->type].vert = -0.2;
+			    fractalspecific[gManp->type].width = 2.5;
 			    break;
 			}
 		    hCtrl = GetDlgItem(hDlg, IDC_DEFAULTPALETTE);
-		    OthFn.GetUseDefaultPalette((BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L));
+		    gManp->OthFn.GetUseDefaultPalette((BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L));
 		    EndDialog(hDlg, TRUE);
 		    return TRUE;
 
@@ -856,8 +882,8 @@ INT_PTR CALLBACK TriangleDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    temp = subtype;
-	    switch (subtype)
+	    temp = gManp->subtype;
+	    switch (gManp->subtype)
 		{
 		case 'A':
 		    tempParam = IDC_A;
@@ -1049,23 +1075,23 @@ INT_PTR CALLBACK TriangleDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    return TRUE;
 
 		case IDOK:
-		    OthFn.GetPasses(GetDlgItemInt(hDlg, IDC_PARAM1, &bTrans, TRUE));
-		    OthFn.GetRemainder(GetDlgItemInt(hDlg, IDC_PARAM2, &bTrans, TRUE));
-		    OthFn.GetDivisor(GetDlgItemInt(hDlg, IDC_PARAM3, &bTrans, TRUE));
-		    OthFn.GetjAngle(GetDlgItemInt(hDlg, IDC_PARAM4, &bTrans, TRUE));
-		    OthFn.GetwAngle(GetDlgItemInt(hDlg, IDC_PARAM5, &bTrans, TRUE));
-		    OthFn.GetSides(GetDlgItemInt(hDlg, IDC_PARAM6, &bTrans, TRUE));
+		    gManp->OthFn.GetPasses(GetDlgItemInt(hDlg, IDC_PARAM1, &bTrans, TRUE));
+		    gManp->OthFn.GetRemainder(GetDlgItemInt(hDlg, IDC_PARAM2, &bTrans, TRUE));
+		    gManp->OthFn.GetDivisor(GetDlgItemInt(hDlg, IDC_PARAM3, &bTrans, TRUE));
+		    gManp->OthFn.GetjAngle(GetDlgItemInt(hDlg, IDC_PARAM4, &bTrans, TRUE));
+		    gManp->OthFn.GetwAngle(GetDlgItemInt(hDlg, IDC_PARAM5, &bTrans, TRUE));
+		    gManp->OthFn.GetSides(GetDlgItemInt(hDlg, IDC_PARAM6, &bTrans, TRUE));
 		    double	Exponent;
 		    GetDlgItemText(hDlg, IDC_PARAM7, s, 20);
 		    sscanf(s, "%lf", &Exponent);
-		    OthFn.GetExponent(Exponent);
-		    subtype = temp;
+		    gManp->OthFn.GetExponent(Exponent);
+		    gManp->subtype = temp;
 		    hCtrl = GetDlgItem(hDlg, IDC_EXPANDPALETTE);
-		    OthFn.GetExpandPalette((BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L));
+		    gManp->OthFn.GetExpandPalette((BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L));
 		    hCtrl = GetDlgItem(hDlg, IDC_STAR);
-		    OthFn.GetPlotStars((BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L));
+		    gManp->OthFn.GetPlotStars((BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L));
 		    hCtrl = GetDlgItem(hDlg, IDC_FILLPOLYGON);
-		    OthFn.GetFillPolygon((BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L));
+		    gManp->OthFn.GetFillPolygon((BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L));
 		    EndDialog(hDlg, TRUE);
 		    return TRUE;
 
@@ -1095,7 +1121,7 @@ INT_PTR CALLBACK GeometryDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	        temp = subtype;
+	        temp = gManp->subtype;
 /*
 	        switch (subtype)
 		    {
@@ -1155,15 +1181,15 @@ INT_PTR CALLBACK GeometryDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		        return TRUE ;
 
 		    case IDOK:
-			OthFn.GetCount(GetDlgItemInt(hDlg, IDC_PARAM2, &bTrans, TRUE));
+			gManp->OthFn.GetCount(GetDlgItemInt(hDlg, IDC_PARAM2, &bTrans, TRUE));
 			sides = GetDlgItemInt(hDlg, IDC_PARAM1, &bTrans, TRUE);
 			if (sides > MAXPOINTS)
 			    sides = MAXPOINTS;
 			if (sides < 2)
 			    sides = 2;
-			OthFn.GetSides(sides);
-			subtype = temp;
-			OthFn.GetSubtype(subtype);
+			gManp->OthFn.GetSides(sides);
+			gManp->subtype = temp;
+			gManp->OthFn.GetSubtype(gManp->subtype);
 			EndDialog (hDlg, TRUE);
 			return TRUE;
 
@@ -1190,22 +1216,22 @@ INT_PTR CALLBACK MalthusDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	        temp = subtype;
-		if (subtype == 0)
+	        temp = gManp->subtype;
+		if (gManp->subtype == 0)
 		    {
 		    tempParam = IDC_A;
 		    temp = 'A';
 		    }
 		else
-		    tempParam = IDC_A + subtype - 'A';	    // ' ' (space) is uninitilised subtype
+		    tempParam = IDC_A + gManp->subtype - 'A';	    // ' ' (space) is uninitilised subtype
 		CheckRadioButton(hDlg, IDC_A, IDC_Z, tempParam);
-		SAFE_SPRINTF(s, "%f", param[0]);
+		SAFE_SPRINTF(s, "%f", gManp->param[0]);
 		SetDlgItemText(hDlg, IDC_PARAM1, s);
-		SAFE_SPRINTF(s, "%f", param[1]);
+		SAFE_SPRINTF(s, "%f", gManp->param[1]);
 		SetDlgItemText(hDlg, IDC_PARAM2, s);
-		SAFE_SPRINTF(s, "%f", param[2]);
+		SAFE_SPRINTF(s, "%f", gManp->param[2]);
 		SetDlgItemText(hDlg, IDC_PARAM3, s);
-		SAFE_SPRINTF(s, "%f", param[3]);
+		SAFE_SPRINTF(s, "%f", gManp->param[3]);
 		SetDlgItemText(hDlg, IDC_PARAM4, s);
 		SetFocus(GetDlgItem(hDlg, tempParam));
 	        return FALSE ;
@@ -1221,14 +1247,14 @@ INT_PTR CALLBACK MalthusDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    {
 		    case IDOK:
 			GetDlgItemText(hDlg, IDC_PARAM1, s, 100);
-			param[0] = atof(s);
+			gManp->param[0] = atof(s);
 			GetDlgItemText(hDlg, IDC_PARAM2, s, 100);
-			param[1] = atof(s);
+			gManp->param[1] = atof(s);
 			GetDlgItemText(hDlg, IDC_PARAM3, s, 100);
-			param[2] = atof(s);
+			gManp->param[2] = atof(s);
 			GetDlgItemText(hDlg, IDC_PARAM4, s, 100);
-			param[3] = atof(s);
-			subtype = temp;
+			gManp->param[3] = atof(s);
+			gManp->subtype = temp;
 			EndDialog (hDlg, TRUE);
 			return TRUE;
 
@@ -1254,9 +1280,9 @@ INT_PTR CALLBACK HailstoneDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	{
 	case WM_INITDIALOG:
 	    // Initialize from current OthFn settings
-	    config.showAxes = OthFn.GetShowAxesValue();
-	    config.showPointLabels = OthFn.GetShowPointLabelsValue();
-	    config.showDots = OthFn.GetShowDotsValue();
+	    config.showAxes = gManp->OthFn.GetShowAxesValue();
+	    config.showPointLabels = gManp->OthFn.GetShowPointLabelsValue();
+	    config.showDots = gManp->OthFn.GetShowDotsValue();
 	    config.preset = HailstonePreset::CURRENT_2D;  // Default preset
 	    config.startX = -10;
 	    config.startY = 6;
@@ -1322,24 +1348,24 @@ INT_PTR CALLBACK HailstoneDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		config.showDots = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 
 		// Update OthFn with the new settings
-		OthFn.GetShowAxes(config.showAxes);
-		OthFn.GetShowPointLabels(config.showPointLabels);
-		OthFn.GetShowDots(config.showDots);
+		gManp->OthFn.GetShowAxes(config.showAxes);
+		gManp->OthFn.GetShowPointLabels(config.showPointLabels);
+		gManp->OthFn.GetShowDots(config.showDots);
 
 		// Store starting point and max iterations in param array
-		param[0] = (double)config.startX;
-		param[1] = (double)config.startY;
-		param[2] = (double)config.maxIterations;
-		param[3] = (double)presetIndex;  // Store preset selection
+		gManp->param[0] = (double)config.startX;
+		gManp->param[1] = (double)config.startY;
+		gManp->param[2] = (double)config.maxIterations;
+		gManp->param[3] = (double)presetIndex;  // Store preset selection
 
-		 // --- Pack flags into param[4] ---
+		 // --- Pack flags into gManp->param[4] ---
 		int flags = 0;
 		if (config.showAxes)        flags |= HS_SHOW_AXES;
 		if (config.showPointLabels) flags |= HS_SHOW_LABELS;
 		if (config.showDots)        flags |= HS_SHOW_DOTS;
 		if (config.detectCycles)    flags |= HS_DETECT_CYCLES;
 
-		param[4] = (double)flags;
+		gManp->param[4] = (double)flags;
 		EndDialog(hDlg, TRUE);
 		return TRUE;
 		}

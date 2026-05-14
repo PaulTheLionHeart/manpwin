@@ -157,7 +157,6 @@
     <ClCompile Include="BigFunctions.cpp" />
     <ClCompile Include="BigMandelDerivatives.cpp" />
     <ClCompile Include="BigMatrix.cpp" />
-    <ClCompile Include="BigPixel.cpp" />
     <ClCompile Include="BigTrig.cpp" />
     <ClCompile Include="BigTZ.cpp" />
     <ClCompile Include="Bt.cpp" />
@@ -178,10 +177,8 @@
     <ClCompile Include="DDFunctions.cpp" />
     <ClCompile Include="DDMandelDerivativesFN.cpp" />
     <ClCompile Include="DDMatrix.cpp" />
-    <ClCompile Include="DDPixel.cpp" />
     <ClCompile Include="DDTrig.cpp" />
     <ClCompile Include="DDTZFunctions.cpp" />
-    <ClCompile Include="Decomp.cpp" />
     <ClCompile Include="Default.cpp" />
     <ClCompile Include="DerivSlope.cpp" />
     <ClCompile Include="Dib.cpp" />
@@ -207,7 +204,6 @@
     <ClCompile Include="FrantPAR.cpp" />
     <ClCompile Include="Functions.cpp" />
     <ClCompile Include="FwdDiff.cpp" />
-    <ClCompile Include="FwdDiffFn.cpp" />
     <ClCompile Include="Genline.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="GIFwrite.cpp" />
@@ -233,6 +229,7 @@
     <ClCompile Include="Manpfile.cpp" />
     <ClCompile Include="Manpmain.cpp" />
     <ClCompile Include="ManpMT.cpp" />
+    <ClCompile Include="ManpPAR.cpp" />
     <ClCompile Include="Manpwin.cpp" />
     <ClCompile Include="Maths.cpp" />
     <ClCompile Include="Matrix.cpp" />
@@ -256,6 +253,7 @@
     <ClCompile Include="PertSetup.cpp" />
     <ClCompile Include="Perturbation.cpp" />
     <ClCompile Include="Pixel.cpp" />
+    <ClCompile Include="PixelUtilities.cpp" />
     <ClCompile Include="Plot.cpp" />
     <ClCompile Include="Plotmode.cpp" />
     <ClCompile Include="png.cpp" />
@@ -269,7 +267,6 @@
     <ClCompile Include="QDFunctions.cpp" />
     <ClCompile Include="QDMandelDerivativesFN.cpp" />
     <ClCompile Include="QDMatrix.cpp" />
-    <ClCompile Include="QDPixel.cpp" />
     <ClCompile Include="QDTrig.cpp" />
     <ClCompile Include="QDTZFunctions.cpp" />
     <ClCompile Include="Rotate.cpp" />
@@ -292,13 +289,11 @@
     <ClCompile Include="Tetration.cpp" />
     <ClCompile Include="tierazon.cpp" />
     <ClCompile Include="TierazonFunctions.cpp" />
-    <ClCompile Include="TierazonTemplate.cpp" />
     <ClCompile Include="Triangles.cpp" />
     <ClCompile Include="trig.cpp" />
     <ClCompile Include="TZFilterDLG.cpp" />
     <ClCompile Include="undo.cpp" />
     <ClCompile Include="Update.cpp" />
-    <ClCompile Include="User.cpp" />
     <ClCompile Include="Zigzag.cpp" />
     <ClCompile Include="Zoom.cpp" />
   </ItemGroup>
@@ -318,6 +313,8 @@
     <ClInclude Include="DDComplex.h" />
     <ClInclude Include="DDMatrix.h" />
     <ClInclude Include="DDTrig.h" />
+    <ClInclude Include="DecompTemplate.h" />
+    <ClInclude Include="DerivSlopeTemplate.h" />
     <ClInclude Include="Dib.h" />
     <ClInclude Include="Dl3quant.h" />
     <ClInclude Include="EditPal.h" />
@@ -331,9 +328,9 @@
     <ClInclude Include="FractintTrigTemplate.h" />
     <ClInclude Include="Fractype.h" />
     <ClInclude Include="FunctionTemplate.h" />
+    <ClInclude Include="FwdDiffSlopeTemplate.h" />
     <ClInclude Include="gmp.h" />
     <ClInclude Include="Hailstone.h" />
-    <ClInclude Include="Line3d.h" />
     <ClInclude Include="MandelDerivTemplate.h" />
     <ClInclude Include="Manp.h" />
     <ClInclude Include="Manpwin.h" />
@@ -344,9 +341,9 @@
     <ClInclude Include="OtherFunctions.h" />
     <ClInclude Include="PertEngine.h" />
     <ClInclude Include="Pixel.h" />
+    <ClInclude Include="PixelTemplate.h" />
     <ClInclude Include="Plot.h" />
     <ClInclude Include="Plotmode.h" />
-    <ClInclude Include="Point.h" />
     <ClInclude Include="Polygon.h" />
     <ClInclude Include="Potential.h" />
     <ClInclude Include="Preview.h" />

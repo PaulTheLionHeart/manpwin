@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <functional>
 #include <cmath>
+#include "Manp.h"
 
 #pragma once
 
@@ -208,8 +209,8 @@ inline int MandelDerivDispatch(
 	    else
 		{
 		*z = z->CPolynomial(*degree);
-		z->x = (param[3] == 1.0 ? -z->x : z->x) + q->x;
-		z->y = (param[3] == 1.0 ? z->y : -z->y) + q->y;
+		z->x = (gManp->param[3] == 1.0 ? -z->x : z->x) + q->x;
+		z->y = (gManp->param[3] == 1.0 ? z->y : -z->y) + q->y;
 		}
 
 	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));

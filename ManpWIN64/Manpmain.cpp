@@ -18,76 +18,53 @@
 #include "resource.h"
 #include "Dib.h"
 #include "Plot.h"
+#include "manp.h"
 
 						// routines in this module
 void	putline(WORD, BYTE *);
 
-void	ClearScreen(void);
+//void	ClearScreen(void);
 
 void	GetRealClientRect (HWND, PRECT);
 void	SetScrollRanges(HWND);
-void	WaitForThreadsToFinish(std::vector<BYTE>& threadComplete, int numberThreads);
 
 HPALETTE 	 	hpal = NULL;
-std::vector<float> wpixels;			// an array of doubles holding slope modified iteration counts
+//std::vector<float> wpixels;			// an array of doubles holding slope modified iteration counts
 
-RECT 	WARect;					// this is the usable screen taking taskbar into account
-extern	int	mandel(HWND);
+//RECT 	WARect;					// this is the usable screen taking taskbar into account
+//extern	int	mandel(HWND);
 extern	void	SetupView(HWND);
 extern	void	ClosePtrs(void);
 extern	int	CopyPictureToClipboard(HWND);
 extern	void	HardStopNow(HWND hwnd, const char* reason);
 
 extern	int     file_type;
-extern	DWORD	dwStyle;			// style of current window
-extern	POINT	ptSize;				// Stores DIB dimensions
-extern	BYTE	cycleflag;			// do colour cycling
 
-extern	long	threshold;			// maximum iterations
-extern	int	logval;				// log colour map starting value
-extern	WORD	type;				// M=mand, N=Newton etc
-extern	CPlot	Plot;
-extern	CTrueCol    TrueCol;			// palette info
-
-extern	WORD	special;			// special colour, phase etc
-//extern	BYTE	degree;				// power
 extern	HWND	CallingWindowHandle;		// Is ManpWIN called by an external window via WM_COPYDATA message?
 extern	int	ReplyUsingDIB;			// 2 for Device Context, 1 for DIB/WM_COPYDATA and 0 for clipboard
 
 extern	int	ThreadCompletionDelay;
 extern	int	ThreadEndingDelay;
-extern	int	NumberThreads;			// number of threads for multi-threading
-extern	int	CurrentRenderMode;		// to decide how to exit threads cleanly
-
 extern	std::vector<BYTE>   SlopeThreadComplete;
-extern	std::vector<BYTE>   PixelThreadComplete;// keep BYTE (you’re right)
-extern	std::vector<BYTE>   PertThreadComplete;
 
 extern	std::atomic<bool> gStopRequested;	// force early exit
 
 int		fdin;				// FILE descripter
-int		height, xdots, ydots, width, bits_per_pixel, planes;
 int		display_width, display_height;
-int		screenx, screeny;
-int		caption;			// size of windows caption and scroll bars
-int		scroll_width;			// size of horizontal scroll bars
 int		max_vscroll, max_hscroll;
 int		mapentrysize = 0;		// 0 indicates no colormap
 WORD		colours;			// colours in the file
 DWORD		screen_colours;			// colours in the graphics card
 WORD     	iNumColors;    			// Number of colors supported by device
 long		eofpos;				// position of end of file   
-double		ScreenRatio;			// ratio of width / height for the screen
-PAINTSTRUCT 	ps;
-RECT 		r;
-HDC		hdcMem;				// load picture into memory
+//HDC		hdcMem;				// load picture into memory
 DWORD		biCompression;			// BMP type compression
 BYTE		line_buf[MAXHORIZONTAL * 3];    // true colour = 3 bytes per pixel
 
 BOOL		NonStandardImage;		// has user changed image size?
 WORD		NewXdots = 800, NewYdots = 450;	// for non standard image sizes
 
-CDib		Dib;				// Device Independent Bitmap
+//CDib		Dib;				// Device Independent Bitmap
 
 /**************************************************************************
 	Main entry decoder
@@ -100,68 +77,57 @@ int	mainview(HWND hwnd, BOOL FileFlag)
     BYTE	 huge	*filedata = NULL;				// handle to the file data
 //    BOOL		FullScreen = FALSE;
 
-    screen_colours = 1L << (GetDeviceCaps(ps.hdc, BITSPIXEL) * GetDeviceCaps(ps.hdc, PLANES));
+    screen_colours = 1L << (GetDeviceCaps(gManp->ps.hdc, BITSPIXEL) * GetDeviceCaps(gManp->ps.hdc, PLANES));
     iNumColors = (WORD) screen_colours;
 
 // get screen metrics
-    SystemParametersInfo(SPI_GETWORKAREA, 0, &WARect, 0);	// let's get usable area including task bar
+    SystemParametersInfo(SPI_GETWORKAREA, 0, &gManp->WARect, 0);	// let's get usable area including task bar
 
-    screenx = WARect.right - WARect.left;
-    screeny = WARect.bottom - WARect.top;
+    gManp->screenx = gManp->WARect.right - gManp->WARect.left;
+    gManp->screeny = gManp->WARect.bottom - gManp->WARect.top;
 
 			// Some initial parameters
     if (!FileFlag)					// image from PNG file, so don't splatter height and width
 	{
 	if (NonStandardImage/* && !IsZoomed(hwnd) == FALSE*/)
 	    {
-	    height = NewYdots;                  
-	    width = NewXdots;
+	    gManp->height = NewYdots;
+	    gManp->width = NewXdots;
 	    }
 	else
 	    {
-	    height = screeny - GetSystemMetrics(SM_CYCAPTION) - GetSystemMetrics(SM_CYMENU) - GetSystemMetrics(SM_CYHSCROLL);                  
-	    width = screenx - GetSystemMetrics(SM_CXHSCROLL);
-	    height -= GetSystemMetrics(SM_CYMENU);				    // remember status bar
+	    gManp->height = gManp->screeny - GetSystemMetrics(SM_CYCAPTION) - GetSystemMetrics(SM_CYMENU) - GetSystemMetrics(SM_CYHSCROLL);
+	    gManp->width = gManp->screenx - GetSystemMetrics(SM_CXHSCROLL);
+	    gManp->height -= GetSystemMetrics(SM_CYMENU);				    // remember status bar
 	    }
 	}
-    ScreenRatio = (double)width / (double)height;
+//    gManp->AspectRatio = (double)gManp->width / (double)gManp->height;
     
         // Compute the size of the window rectangle based on the given
         // client rectangle size and the window style, then size the window.
          
-    GetClientRect(hwnd, &r);
-    ptSize.x = width;
-    ptSize.y = height;
+    GetClientRect(hwnd, &gManp->r);
+    gManp->ptSize.x = gManp->width;
+    gManp->ptSize.y = gManp->height;
 
     if (IsZoomed (hwnd))
 	SetScrollRanges (hwnd);
-    xdots = width;
-    ydots = height;
+    gManp->xdots = gManp->width;
+    gManp->ydots = gManp->height;
+    gManp->AspectRatio = (double)gManp->xdots / (double)gManp->ydots;
 
     HardStopNow(hwnd, "image size change");
 
-    switch (CurrentRenderMode)
-	{
-	case RENDER_PIXEL:
-	    WaitForThreadsToFinish(PixelThreadComplete, NumberThreads);
-	    break;
-
-	case RENDER_PERT:
-	    WaitForThreadsToFinish(PertThreadComplete, NumberThreads);
-	    break;
-
-	case RENDER_SLOPE:
-	    WaitForThreadsToFinish(SlopeThreadComplete, NumberThreads);
-	    break;
-	}
-
+    if (gManp != nullptr)
+	gManp->WaitForAllThreadsToFinish();
     SetupView(hwnd);
 
     ClosePtrs();							    // ready for next screen
 
-    if (Dib.InitDib(width, height, bits_per_pixel) == NULL)
+//    gManp->WaitForPixelThreadsToFinish();   // MUST be first
+    if (gManp->Dib.InitDib(gManp->width, gManp->height, BITSPERPIXEL) == NULL)
 	{
-	switch(Dib.DibErrorCode)
+	switch(gManp->Dib.DibErrorCode)
 	    {
 	    case NODIBMEMORY:
 		MessageBox (hwnd, "Can't allocate DIB memory. Using windows default palette", szAppName, MB_ICONEXCLAMATION | MB_OK);
@@ -174,50 +140,23 @@ int	mainview(HWND hwnd, BOOL FileFlag)
 	}
     else
 	{
-	wpixels.assign(width * height, 0.0);
-	ClearScreen();
+	gManp->wpixels.clear();
+	gManp->wpixels.resize((size_t)gManp->xdots * (size_t)gManp->ydots, 0.0f);
+//	gManp->wpixels.assign(gManp->width * gManp->height, 0.0);
+	gManp->ClearScreen();
 	}
     // reset all the image parameters for the pixel plotting routines
-    Plot.InitPlot(threshold, &TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib.BitsPerPixel, &Dib, USEPALETTE + USEWPIXELS);
+    gManp->Plot.InitPlot(gManp->threshold, &gManp->TrueCol, &gManp->wpixels, gManp->xdots, gManp->ydots, gManp->xdots, gManp->ydots, gManp->Dib.BitsPerPixel, &gManp->Dib, USEPALETTE + USEWPIXELS);
     gStopRequested.store(false, std::memory_order_relaxed);
 
     return (TRUE);
     }
 
 /**************************************************************************
-	Wait for all threads to be complete
-**************************************************************************/
-
-void	WaitForThreadsToFinish(std::vector<BYTE>& threadComplete, int numberThreads)
-    {
-    bool allDone = false;
-
-    while (!allDone)
-	{
-	allDone = true;
-
-	for (int i = 0; i < numberThreads; ++i)
-	    {
-	    if (threadComplete[i] == 0)
-		{
-		allDone = false;
-		break;
-		}
-	    }
-
-	if (!allDone)
-	    Sleep(ThreadCompletionDelay);
-	}
-
-    Sleep(ThreadEndingDelay);
-    }
-
-/**************************************************************************
 	Clear Screen 
 **************************************************************************/
 
-void	ClearScreen(void)
-
+void	CManp::ClearScreen(void)
     {
     if (Dib.DibPixels.empty())
 	{
@@ -225,7 +164,7 @@ void	ClearScreen(void)
 	return;
 	}
     std::fill(wpixels.begin(), wpixels.end(), static_cast<float>(0.0));
-    memset(Dib.DibPixels.data(), 0, WIDTHBYTES((DWORD)width * (DWORD)bits_per_pixel) * (DWORD)height);
+    memset(Dib.DibPixels.data(), 0, ComputeWidthBytes((DWORD)width, (DWORD)Dib.BitsPerPixel) * (DWORD)height);
     } 
 
 /**************************************************************************
@@ -233,7 +172,6 @@ void	ClearScreen(void)
 **************************************************************************/
 
 int	SendCopydataMessage(HWND hwnd, char *szAppName)
-
     {
     static	COPYDATASTRUCT	FracData;		// structure for sending data back to calling application
     static	BYTE		*MessageArray = NULL;
@@ -251,8 +189,8 @@ int	SendCopydataMessage(HWND hwnd, char *szAppName)
 	case 1:				// WM_COPYDATA version
 	    if (MessageArray)			// memory from last message
 		GlobalFree(MessageArray);
-	    FracData.cbData = Dib.pDibInf->bmiHeader.biSize + Dib.pDibInf->bmiHeader.biSizeImage;
-	    if ((MessageArray = (BYTE *)GlobalAlloc(GMEM_FIXED, Dib.pDibInf->bmiHeader.biSize + Dib.pDibInf->bmiHeader.biSizeImage + 4096L)) == NULL)
+	    FracData.cbData = gManp->Dib.pDibInf->bmiHeader.biSize + gManp->Dib.pDibInf->bmiHeader.biSizeImage;
+	    if ((MessageArray = (BYTE *)GlobalAlloc(GMEM_FIXED, gManp->Dib.pDibInf->bmiHeader.biSize + gManp->Dib.pDibInf->bmiHeader.biSizeImage + 4096L)) == NULL)
 		{
 		_snprintf_s(t, 640, _TRUNCATE, "Can't allocate memory for DIB Message");
 		MessageBox (hwnd, t, szAppName, MB_ICONEXCLAMATION | MB_OK);
@@ -260,8 +198,8 @@ int	SendCopydataMessage(HWND hwnd, char *szAppName)
 		MessageBeep (0);
 		return -1;
 		}
-	    memcpy(MessageArray, Dib.pDibInf, Dib.pDibInf->bmiHeader.biSize);
-	    memcpy(MessageArray + Dib.pDibInf->bmiHeader.biSize, Dib.DibPixels.data(),  Dib.pDibInf->bmiHeader.biSizeImage);
+	    memcpy(MessageArray, gManp->Dib.pDibInf, gManp->Dib.pDibInf->bmiHeader.biSize);
+	    memcpy(MessageArray + gManp->Dib.pDibInf->bmiHeader.biSize, gManp->Dib.DibPixels.data(), gManp->Dib.pDibInf->bmiHeader.biSizeImage);
 
 	    FracData.lpData = MessageArray;
 
@@ -313,28 +251,28 @@ void putline(WORD row, BYTE *buf)
     WORD	j;
     BYTE	c;
 
-    if (bits_per_pixel == 24)			// swap red and blue
-	for (j = 0; j < width; ++j)                 // the order is reversed to prevent silly colours????
+    if (gManp->Dib.BitsPerPixel == 24)			// swap red and blue
+	for (j = 0; j < gManp->width; ++j)                 // the order is reversed to prevent silly colours????
 	    {
 	    c = *(buf + j * 3);
 	    *(buf + j * 3) = *(buf + j * 3 + 2);
 	    *(buf + j * 3 + 2) = c;
 	    }
 
-    if (width > MAXHORIZONTAL)
+    if (gManp->width > MAXHORIZONTAL)
 	return;
-    local_width = (WORD)(((DWORD) width * (DWORD)bits_per_pixel) / 8);
-    if (row < height && row >= 0)
+    local_width = (WORD)(((DWORD)gManp->width * (DWORD)gManp->Dib.BitsPerPixel) / 8);
+    if (row < gManp->height && row >= 0)
 	{
-	i = ((long) (height - 1 - row) * (long) (local_width + 3 - ((local_width - 1) % 4)));
+	i = ((long) (gManp->height - 1 - row) * (long) (local_width + 3 - ((local_width - 1) % 4)));
 	if ((i + local_width) >> 16 != i >> 16)			// 64K boundary
 	    {
 	    diff = (i + local_width) & 0x0000ffff;
-	    memcpy(Dib.DibPixels.data() + i, buf, (size_t)(local_width - diff));
-	    memcpy(Dib.DibPixels.data() + i + local_width - diff, buf + local_width - diff, (size_t)diff);
+	    memcpy(gManp->Dib.DibPixels.data() + i, buf, (size_t)(local_width - diff));
+	    memcpy(gManp->Dib.DibPixels.data() + i + local_width - diff, buf + local_width - diff, (size_t)diff);
 	    }
 	else
-  	    memcpy(Dib.DibPixels.data() + i, buf, (size_t)local_width);
+  	    memcpy(gManp->Dib.DibPixels.data() + i, buf, (size_t)local_width);
 	}
     }
 
@@ -382,8 +320,8 @@ void SetScrollRanges(HWND hwnd)
 
 	for (i = 0; i < 2; i++)
 	    {
-	    iRangeV = ptSize.y - rc.bottom;
-	    iRangeH = ptSize.x - rc.right;
+	    iRangeV = gManp->ptSize.y - rc.bottom;
+	    iRangeH = gManp->ptSize.x - rc.right;
 
 	    if (iRangeH < 0) 
 		iRangeH = 0;
@@ -393,7 +331,7 @@ void SetScrollRanges(HWND hwnd)
 	    if (GetScrollPos(hwnd, SB_VERT) > iRangeV || GetScrollPos(hwnd, SB_HORZ) > iRangeH)
 		InvalidateRect (hwnd, NULL, FALSE);
 #ifdef _WIN64
-	    if (width > screenx)
+	    if (gManp->width > gManp->screenx)
 		{
 		SetScrollRange(hwnd, SB_VERT, 0, iRangeV, TRUE);
 		SetScrollRange(hwnd, SB_HORZ, 0, iRangeH, TRUE);
@@ -415,11 +353,10 @@ void SetScrollRanges(HWND hwnd)
   -----------------------------------------*/
 
 void	ClosePtrs(void)
-
     {
-    Dib.CloseDibPtrs();
+    gManp->Dib.CloseDibPtrs();
 //  BigNumFree();		// No not here. We only close these if we are leaving ManpWin.
-    wpixels.clear();
+    gManp->wpixels.clear();
     }
 
 /**************************************************************************
@@ -439,10 +376,10 @@ INT_PTR CALLBACK ImageSizeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-		cycleflag = FALSE;
+	        gManp->cycleflag = FALSE;
 		
-		SetDlgItemInt(hDlg, IDC_WIDTH, Dib.DibWidth, TRUE);
-		SetDlgItemInt(hDlg, IDC_HEIGHT, Dib.DibHeight, TRUE);
+		SetDlgItemInt(hDlg, IDC_WIDTH, gManp->Dib.DibWidth, TRUE);
+		SetDlgItemInt(hDlg, IDC_HEIGHT, gManp->Dib.DibHeight, TRUE);
 		SetDlgItemInt(hDlg, IDC_X_SIZE, NewXdots, TRUE);
 		SetDlgItemInt(hDlg, IDC_Y_SIZE, NewYdots, TRUE);
 		hCtrl = GetDlgItem (hDlg, IDC_MAINTASPECT);
@@ -486,7 +423,7 @@ INT_PTR CALLBACK ImageSizeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			if (NewYdots >= MAXVERTICAL)
 			    NewYdots = MAXVERTICAL;
 
-			ScreenRatio = 4.0 / 3.0;			// force reasonable aspect ratio
+			gManp->AspectRatio = 16.0 / 9.0;			// force reasonable aspect ratio
 			NonStandardImage = TRUE;
 			EndDialog (hDlg, TRUE);
 			return TRUE;

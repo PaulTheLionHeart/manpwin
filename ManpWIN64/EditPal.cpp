@@ -170,9 +170,9 @@ int	CEditPal::CopyPalPreview(HWND hwnd, std::vector<RGBTRIPLE> &TempPal, long th
 
     {
     WORD	i, j;
-    DWORD	address;
+    size_t 	address;
     double	MaxPal;
-    DWORD	size;
+    size_t 	size;
     long	LocalThreshold;
 
     LocalThreshold = (threshold >= MAXPALETTE) ? MAXPALETTE - 1 : threshold;
@@ -181,7 +181,7 @@ int	CEditPal::CopyPalPreview(HWND hwnd, std::vector<RGBTRIPLE> &TempPal, long th
 
     for (i = 0; i < PalPreview->PreviewHeight; ++i)
 	{
-	address = (WIDTHBYTES((DWORD)PalPreview->PreviewWidth * (DWORD)PalPreview->PreviewDib.BitsPerPixel) * (DWORD)i);
+	address = (ComputeWidthBytes((DWORD)PalPreview->PreviewWidth, (DWORD)PalPreview->PreviewDib.BitsPerPixel) * (DWORD)i);
 	for (j = 0; j < PalPreview->PreviewWidth; ++j)
 	    {
 	    size = (DWORD)(MaxPal * (double)j);

@@ -76,7 +76,10 @@ int	CPixel::QDInitFunctions(WORD type, QDComplex *z, QDComplex *q)
 	    break;
 
 	case CUBIC:					// Art Matrix Cubic
-	    Init_Cubic<QDComplex>(z, q, param, juliaflag, subtype, special, aQD, bQD, a2QD, aa3QD, t2QD, t3QD, tempQD, vQD);
+	    SpecialColour.rgbtRed = (BYTE)param[1];
+	    SpecialColour.rgbtGreen = (BYTE)param[2];
+	    SpecialColour.rgbtBlue = (BYTE)param[3];
+	    Init_Cubic<QDComplex>(z, q, param, juliaflag, subtype, aQD, bQD, a2QD, aa3QD, t2QD, t3QD, tempQD, vQD);
 	    break;
 	    
 	case SPECIALNEWT:				// Art Matrix Newton
@@ -301,7 +304,7 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	case CUBIC:					// Art Matrix Cubic
 	    return FunctionsDispatch<QDComplex, qd_real, WORD>(this, type, z, q, degree, sqrQD, realimagQD,
-		aQD, a2QD, aa3QD, bQD, vQD, tempQD, param, SpecialFlag, iteration, special, subtype, BailoutTestType, rqlim);
+		aQD, a2QD, aa3QD, bQD, vQD, tempQD, param, SpecialFlag, iteration, SPECIALINDEX, subtype, BailoutTestType, rqlim);
 
 	case SPECIALNEWT:				// Art Matrix Newton
 	    return Iter_SPECIALNEWT<QDComplex>(z, q, aQD, bQD, lm5QD, lp5QD, vQD, param, phaseflag, special);

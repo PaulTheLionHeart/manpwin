@@ -8,9 +8,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "..\parser\fractint.h"
-//#include ".\parser\mpmath.h"
-//#include "helpdefs.h"
 #include "fractype.h"
 #include "fractalp.h"
 

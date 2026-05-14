@@ -34,7 +34,7 @@ int	CPixel::InitTierazonFunctions(int subtype, Complex *z, Complex *q)
 
 int	CPixel::RunTierazonFunctions(int subtype, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration)
     {
-    return TierazonIter<Complex, double>(subtype, z, q, &z2, &z4, sqr, real_imag, SpecialFlag, iteration, caa3, cb, c1, c2, b, rqlim, degree, BailoutTestType);
+    return TierazonIter<Complex, double>(subtype, z, q, &z2, &z4, sqr, real_imag, SpecialFlag, iteration, caa3, cb, c1, c2, b, rqlim, degree, threshold, BailoutTestType);
     }
 
 

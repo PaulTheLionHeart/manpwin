@@ -11,19 +11,10 @@
 #include	"resource.h"
 #include	"fractype.h"
 #include	"fractalp.h"
-#include	"anim.h"
 #include	"OscProcess.h"
 #include	"SafeStrings.h"
 
-extern	long	threshold;
-extern	double	mandel_width;			// width of display
-extern	double	hor;				// horizontal address
-extern	double	vert;				// vertical address 
-extern	WORD	type;				// fractal type
-extern	int	subtype;
-
 extern	BOOL	DisplayLines;
-extern	BOOL	StartImmediately;
 
 extern	BOOL	WritePNGFrames;			// write frames to PNG files
 extern	BOOL	WriteMemFrames;			// write frames to memory
@@ -47,17 +38,13 @@ static	int	PlotWidth = 5;			// width of plot for curve or knot
 static	int	CurrentFrame, frames = 100;
 static	struct	OscillatorSpecificStuff	*DatabasePtr;
 
-//BOOL		DisplayAxisImages;			// show all possible images for axis pairs
 BOOL		DisplayAxisLabels;			// show labels for axis pairs
-
-extern	CTrueCol    TrueCol;			// palette info
-extern	COscProcess	OscProcess;
 
 /**************************************************************************
 	Oscillator and Fractal Map script generator
 **************************************************************************/
 
-int	GenOscMorphScript(HWND hwnd, char *filename) 
+int	CManp::GenOscMorphScript(HWND hwnd, char *filename) 
     {
     int		i, k;
     char	s[120];
@@ -73,7 +60,7 @@ int	GenOscMorphScript(HWND hwnd, char *filename)
 	}
 
     fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimData());	// add quotes to filename to trap spaces in path
-    fprintf(out, " -c%24.24f,%24.24f,%24.24f\n", hor, vert, mandel_width);
+    fprintf(out, " -c%24.24f,%24.24f,%24.24f\n", gManp->hor, gManp->vert, gManp->mandel_width);
     fprintf(out, "Oscillator Morphing: %d %d %d\n", threshold, threshold, frames);
     fprintf(out, "Palette=\n");
     for (i = 0, k = 0; i < threshold; i++, k++)
@@ -112,25 +99,25 @@ INT_PTR CALLBACK OscMorphAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	        DatabasePtr = OscProcess.LoadDatabasePointer(type, subtype);
-	        PlotWidth = (type == KNOTS) ? 10 : 3;
+	        DatabasePtr = gManp->OscProcess.LoadDatabasePointer(gManp->type, gManp->subtype);
+	        PlotWidth = (gManp->type == KNOTS) ? 10 : 3;
 		hCtrl = GetDlgItem (hDlg, IDC_PLOTWIDTH);
 		SetDlgItemInt(hDlg, IDC_PLOTWIDTH, PlotWidth, TRUE);
-		EnableWindow (hCtrl, (type == KNOTS || type == CURVES));
+		EnableWindow (hCtrl, (gManp->type == KNOTS || gManp->type == CURVES));
 
 		hCtrl = GetDlgItem (hDlg, IDC_SHOWPALETTE);
-		SendMessage(hCtrl, BM_SETCHECK, TrueCol.ScriptPaletteFlag, 0L);
+		SendMessage(hCtrl, BM_SETCHECK, gManp->TrueCol.ScriptPaletteFlag, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
-		SendMessage(hCtrl, BM_SETCHECK, StartImmediately, 0L);
-		if (type == OSCILLATORS)
+		SendMessage(hCtrl, BM_SETCHECK, gManp->StartImmediately, 0L);
+		if (gManp->type == OSCILLATORS)
 		    SAFE_SPRINTF(AnimType, "Osc");
-		else if (type == FRACTALMAPS || type == SPROTTMAPS)
+		else if (gManp->type == FRACTALMAPS || gManp->type == SPROTTMAPS)
 		    SAFE_SPRINTF(AnimType, "Map");
-		else if (type == SURFACES)
+		else if (gManp->type == SURFACES)
 		    SAFE_SPRINTF(AnimType, "Surface");
-		else if (type == KNOTS)
+		else if (gManp->type == KNOTS)
 		    SAFE_SPRINTF(AnimType, "Knot");
-		else if (type == CURVES)
+		else if (gManp->type == CURVES)
 		    SAFE_SPRINTF(AnimType, "Curve");
 		SetUpFilename(ScriptFileName, "sci", AnimType);
 		SetUpFilename(PNGName, "animpng", AnimType);
@@ -149,7 +136,7 @@ INT_PTR CALLBACK OscMorphAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		hCtrl = GetDlgItem(hDlg, IDC_LINES);
 		SendMessage(hCtrl, BM_SETCHECK, (DatabasePtr->flags) & 1, 0L);
 		hCtrl = GetDlgItem(hDlg, IDC_DISPLAYALLAXES);
-		SendMessage(hCtrl, BM_SETCHECK, OscProcess.DisplayAxisImages, 0L);
+		SendMessage(hCtrl, BM_SETCHECK, gManp->OscProcess.DisplayAxisImages, 0L);
 //		hCtrl = GetDlgItem(hDlg, IDC_DISPLAYAXISLABELS);
 //		SendMessage(hCtrl, BM_SETCHECK, DisplayAxisLabels, 0L);
 		return TRUE ;
@@ -200,7 +187,7 @@ INT_PTR CALLBACK OscMorphAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			    *fileptr = '\0';
 			
 			GetDlgItemText(hDlg, IDC_MORPHDELAY, TempStr, 20);
-			OscProcess.MorphDelay = atof(TempStr);
+			gManp->OscProcess.MorphDelay = atof(TempStr);
 
 			if (WriteMPEGFrames)						// generate MPEG filename
 			    {
@@ -216,9 +203,9 @@ INT_PTR CALLBACK OscMorphAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			    *fileptr = '\0';
 			strcat_s(ScriptFileName, MAX_PATH, ".sci");
 			hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
-			StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_SHOWPALETTE);
-			TrueCol.ScriptPaletteFlag = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->TrueCol.ScriptPaletteFlag = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_LINES);
 			DisplayLines = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGDIRECT);
@@ -232,7 +219,7 @@ INT_PTR CALLBACK OscMorphAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			hCtrl = GetDlgItem(hDlg, IDC_DISPLAYALLAXES);
 			WritePNGList = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem(hDlg, IDC_DISPLAYALLAXES);
-			OscProcess.DisplayAxisImages = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->OscProcess.DisplayAxisImages = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 //			hCtrl = GetDlgItem(hDlg, IDC_DISPLAYAXISLABELS);
 //			DisplayAxisLabels = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			frames = GetDlgItemInt(hDlg, IDC_FRAMES, &bTrans, TRUE);
@@ -240,7 +227,7 @@ INT_PTR CALLBACK OscMorphAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			    frames = 20;
 			if (frames > MAXANIM)
 			    frames = MAXANIM;
-			GenOscMorphScript(hDlg, ScriptFileName);
+			gManp->GenOscMorphScript(hDlg, ScriptFileName);
 			EndDialog (hDlg, TRUE);
 			return TRUE;
 

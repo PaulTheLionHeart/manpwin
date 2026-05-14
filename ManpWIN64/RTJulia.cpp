@@ -18,6 +18,7 @@
 #include "pixel.h"
 #include "plot.h"
 #include "SafeStrings.h"
+#include "PixelTemplate.h"
 
 #define	JULIA_SIZE	4.0
 #define	THUMB_SIZE	6
@@ -28,47 +29,15 @@ static	double	Jxgap;					// gap between pixels
 static	double	Jygap;					// gap between pixels
 static	BYTE	SpeedFactor = 1;			// multiplier to reduce calculations
 static	RECT 	rect;
-	BOOL	RTJuliaActive = FALSE;			// block any more requests until calcs complete
 static	BOOL	ShowRTOrbits = TRUE;			// show julia orbits for each image
 
-extern	PAINTSTRUCT 	ps;
-extern	WORD		type;				// M=mand, J=Julia 1,2,4->
-extern	BYTE		juliaflag;
-extern	int		RotationAngle;			// in degrees
-extern	double		param[];
-extern	BOOL		invert;				// invert fractal
-extern	RGBTRIPLE	OrbitColour;			// Indexed colour for the orbit displays in Julia sets
-extern	long		threshold;
-extern	BYTE		phaseflag;			// 3 phases for type SPECIALNEWT fractals
-extern	WORD		special;			// special colour for CBIN fractals
-
-extern	double		hor;				// horizontal address
-extern	double		vert;				// vertical address
-extern	double		mandel_width;			// width of display
-extern	int	height, xdots, ydots, width, bits_per_pixel;
-extern	double		ScreenRatio;			// ratio of width / height for the screen
-
-extern	long		iteration;			// globals for speed
-//extern	BYTE		SpecialFlag;			// tell graphing routine of special conditions
-
-extern	char		FormulaString[];		// used to hold the full formula
-
 extern	int		ProcessFormulaString(char *);
-extern	void		BuildJuliaFormulaString(void);
-
-extern	BYTE		cycleflag;			// do colour cycling
-
-//extern	Complex	z, q, c;
-extern	std::vector<std::unique_ptr<CPixel>> Pixel;	// routines for escape fractals
-//extern	CPixel	Pixel[];				// routines for escape fractals
-extern	CPlot	Plot;					// image plotting routines 
 
 /**************************************************************************
 	Initialise
 ***************************************************************************/
 
-int	InitRTJulia(HWND hwnd)
-
+int	CManp::InitRTJulia(HWND hwnd)
     {
     double	temp_x, temp_y;
 
@@ -78,18 +47,15 @@ int	InitRTJulia(HWND hwnd)
     rect.bottom = (height / ThumbSize);
     Jwidth = width / ThumbSize;
     Jheight = height / ThumbSize;
-    temp_x = ScreenRatio / (double) (Jwidth);
+    temp_x = AspectRatio / (double) (Jwidth);
     temp_y = 1.0 / (double) (Jheight);
     Jxgap = JULIA_SIZE * temp_x;
     Jygap = JULIA_SIZE * temp_y;
     if (type == SCREENFORMULA)			// force julia version using startup of "z = pixel:" (I can't think of a better way)
 	{
 	BuildJuliaFormulaString();
-//	_snprintf_s(FormulaString, MAXFORMULASTRINGLENGTH, _TRUNCATE, "z = pixel:%s,|z| <= %f", FormulaStringPointer, rqlim);			// Julia
-//	_snprintf_s(FormulaString, MAXFORMULASTRINGLENGTH, _TRUNCATE, "c = z = 1 / pixel:%s + p1,|z| <= %f", FormulaStringPointer, rqlim);	// Invert
 	if (ProcessFormulaString(FormulaString) == -1)
 	    return -1;
-//	ProcessFormulaString("z = pixel:z = z*z + c + p1,|z| <= 4");
 	}
     return 0;
     }
@@ -98,8 +64,7 @@ int	InitRTJulia(HWND hwnd)
 	Plot orbits
 ***************************************************************************/
 
-void	RTJuliaOrbits(RGBTRIPLE colour, int count)
-
+void	CManp::RTJuliaOrbits(RGBTRIPLE colour, int count)
     {
     int	    i, row, col;
     Complex	z, q;
@@ -109,14 +74,13 @@ void	RTJuliaOrbits(RGBTRIPLE colour, int count)
     z = 0;
     for (i = 0; i < count; i++)
 	{
-	Pixel[0]->RunFractal(&z, &q);
-	row = Jheight - (int)((Pixel[0]->z.y + 2.0) / Jygap);
+	gManp->Pixel[0]->RunFractal(&z, &q);
+	row = Jheight - (int)((gManp->Pixel[0]->z.y + 2.0) / Jygap);
 	col = (int)(z.x / Jxgap + (double)Jwidth / 2.0);
 	if (col > rect.left && col < rect.right && row > rect.top && row < rect.bottom)
 	    Plot.OutRGBpoint(col, row, colour);
 	}
     }
-
 
 /**************************************************************************
 	Draw small Julia set
@@ -125,8 +89,7 @@ void	RTJuliaOrbits(RGBTRIPLE colour, int count)
 	category: DrawJuliaPixel() and DrawJuliaOther()
 ***************************************************************************/
 
-int	DrawJulia(HWND hwnd, POINTS ptCurrent)
-
+int	CManp::DrawJulia(HWND hwnd, POINTS ptCurrent)
     {
     char	s[120];
     WORD	i, j, offset = 0;
@@ -144,69 +107,70 @@ int	DrawJulia(HWND hwnd, POINTS ptCurrent)
 	}
 
     RTJuliaActive = TRUE;			// block any moire requests until calcs complete
-    TempJuliaFlag = Pixel[0]->juliaflag;			// force julia calc
-    Pixel[0]->juliaflag = TRUE;
+    TempJuliaFlag = gManp->Pixel[0]->juliaflag;			// force julia calc
+    gManp->Pixel[0]->juliaflag = TRUE;
     switch (RotationAngle)
 	{
 	case 0:							// normal
-	    Pixel[0]->q.x = Pixel[0]->mandel_width * (double)ptCurrent.x / (double)ydots + Pixel[0]->hor;
-	    Pixel[0]->q.y = Pixel[0]->mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + Pixel[0]->vert;
+	    gManp->Pixel[0]->q.x = gManp->Pixel[0]->mandel_width * (double)ptCurrent.x / (double)ydots + gManp->Pixel[0]->hor;
+	    gManp->Pixel[0]->q.y = gManp->Pixel[0]->mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + gManp->Pixel[0]->vert;
 	    break;
 	case 90:						// 90 degrees
-	    Pixel[0]->q.y = -(Pixel[0]->mandel_width * (double)ptCurrent.x / (double)ydots + Pixel[0]->hor);
-	    Pixel[0]->q.x = -(Pixel[0]->mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + Pixel[0]->vert);
+	    gManp->Pixel[0]->q.y = -(gManp->Pixel[0]->mandel_width * (double)ptCurrent.x / (double)ydots + gManp->Pixel[0]->hor);
+	    gManp->Pixel[0]->q.x = -(gManp->Pixel[0]->mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + gManp->Pixel[0]->vert);
 	    break;
 	case 180:						// 180 degrees
-	    Pixel[0]->q.x = -(Pixel[0]->mandel_width * (double)ptCurrent.x / (double)ydots + Pixel[0]->hor);
-	    Pixel[0]->q.y = -(Pixel[0]->mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + Pixel[0]->vert);
+	    gManp->Pixel[0]->q.x = -(gManp->Pixel[0]->mandel_width * (double)ptCurrent.x / (double)ydots + gManp->Pixel[0]->hor);
+	    gManp->Pixel[0]->q.y = -(gManp->Pixel[0]->mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + gManp->Pixel[0]->vert);
 	    break;
 	case 270:						// 270 degrees
-	    Pixel[0]->q.y = Pixel[0]->mandel_width * (double)ptCurrent.x / (double)ydots + Pixel[0]->hor;
-	    Pixel[0]->q.x = Pixel[0]->mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + Pixel[0]->vert;
+	    gManp->Pixel[0]->q.y = gManp->Pixel[0]->mandel_width * (double)ptCurrent.x / (double)ydots + gManp->Pixel[0]->hor;
+	    gManp->Pixel[0]->q.x = gManp->Pixel[0]->mandel_width * (double)(ydots - ptCurrent.y) / (double)ydots + gManp->Pixel[0]->vert;
 	    break;
 	}
 
     if (type == SCREENFORMULA)
 	{
-	param[0] = Pixel[0]->q.x;
-	param[1] = Pixel[0]->q.y;
+	param[0] = gManp->Pixel[0]->q.x;
+	param[1] = gManp->Pixel[0]->q.y;
 	}
-    Pixel[0]->c.x = -Jwidth * Jxgap / 2.0;
-
-    percent = 0;
+    gManp->Pixel[0]->c.x = -Jwidth * Jxgap / 2.0;
+    // update "global" q (stored in manp.h) so we can print the value through IDM_FRACTLOC message if required.
+    gManp->q = gManp->Pixel[0]->q;
+        percent = 0;
     for (i = 0; i < Jwidth; i++)
 	{
-	Pixel[0]->c.x += Jxgap;
-	Pixel[0]->c.y = -2.0;
+	gManp->Pixel[0]->c.x += Jxgap;
+	gManp->Pixel[0]->c.y = -2.0;
 	display_count = (10 * i) / Jwidth;
 	if (display_count > percent)
 	    {
 	    percent = display_count;
-	    SAFE_SPRINTF(s, "%14.14f, %14.14f, %d, %d %d%%", Pixel[0]->q.x, Pixel[0]->q.y, ptCurrent.x, ptCurrent.y, percent * 10);
+	    SAFE_SPRINTF(s, "%14.14f, %14.14f, %d, %d %d%%", gManp->Pixel[0]->q.x, gManp->Pixel[0]->q.y, ptCurrent.x, ptCurrent.y, percent * 10);
 	    SetWindowText(hwnd, s);			// Show formatted text in the caption bar
 	    }
 	for (j = 0; j < Jheight >> ((type == MANDELFP && !invert) ? 1 : 0); j++)
 	    {
-	    Pixel[0]->c.y += Jygap;
-	    Pixel[0]->z = (invert) ? Pixel[0]->invertz2(Pixel[0]->c) : Pixel[0]->c;
+	    gManp->Pixel[0]->c.y += Jygap;
+	    gManp->Pixel[0]->z = (invert) ? Invertz2T<Complex, double>(gManp->Pixel[0]->c, f_radius, f_xcenter, f_ycenter) : gManp->Pixel[0]->c;
 	    iteration = 0;
-	    Pixel[0]->InitFractal(&(Pixel[0]->z), &(Pixel[0]->q));
+	    gManp->Pixel[0]->InitFractal(&(gManp->Pixel[0]->z), &(gManp->Pixel[0]->q));
 	    for EVER
 		{
 		if (iteration >= threshold)
 		    break;
 		iteration += SpeedFactor;
-		result = Pixel[0]->RunFractal(&(Pixel[0]->z), &(Pixel[0]->q));
+		result = gManp->Pixel[0]->RunFractal(&(gManp->Pixel[0]->z), &(gManp->Pixel[0]->q));
 		if (result)				// escape time
 		    break;
 		}
 	    colour = (iteration/* << SpeedFactor*/);
 	    if ((type == SPECIALNEWT || type == MATEIN) && special != 0)  // split colours
 		{
-		if (Pixel[0]->phaseflag == 1)				// second phase
-		    colour += Pixel[0]->special;
-		else if (Pixel[0]->phaseflag == 2)			// third phase
-		    colour += (Pixel[0]->special << 1);
+		if (gManp->Pixel[0]->phaseflag == 1)				// second phase
+		    colour += gManp->Pixel[0]->special;
+		else if (gManp->Pixel[0]->phaseflag == 2)			// third phase
+		    colour += (gManp->Pixel[0]->special << 1);
 		}						// default first phase
 	    Plot.PlotPoint(i, (WORD)(Jheight - j - 2), colour);
 	    if (type == MANDELFP && !invert)
@@ -217,9 +181,9 @@ int	DrawJulia(HWND hwnd, POINTS ptCurrent)
     if (ShowRTOrbits)
 	RTJuliaOrbits(OrbitColour, NUM_ORBITS);
     InvalidateRect(hwnd, &rect, FALSE);
-    SAFE_SPRINTF(s, "%14.14f, %14.14f, %d, %d", Pixel[0]->q.x, Pixel[0]->q.y, ptCurrent.x, ptCurrent.y);
+    SAFE_SPRINTF(s, "%14.14f, %14.14f, %d, %d", gManp->Pixel[0]->q.x, gManp->Pixel[0]->q.y, ptCurrent.x, ptCurrent.y);
     SetWindowText(hwnd, s);				// Show formatted text in the caption bar
-    Pixel[0]->juliaflag = TempJuliaFlag;			// restore julia to original type
+    gManp->Pixel[0]->juliaflag = TempJuliaFlag;			// restore julia to original type
     RTJuliaActive = FALSE;
     return 0;
     }
@@ -240,7 +204,7 @@ INT_PTR CALLBACK JuliaDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-		cycleflag = FALSE;
+		gManp->cycleflag = FALSE;
 		SetDlgItemInt(hDlg, IDC_SPEED, (int)SpeedFactor, TRUE);
 		SetFocus(GetDlgItem(hDlg, IDC_SPEED));
 	        temp = ThumbSize;
@@ -316,7 +280,7 @@ INT_PTR CALLBACK JuliaDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 			    SpeedFactor = 1;
 			if (SpeedFactor > 100)
 			    SpeedFactor = 100;
-			InitRTJulia(hDlg);
+			gManp->InitRTJulia(hDlg);
 			EndDialog (hDlg, TRUE);
 			return TRUE;
 

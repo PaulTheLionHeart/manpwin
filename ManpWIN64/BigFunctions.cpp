@@ -39,7 +39,11 @@ int	CPixel::BigInitFunctions(WORD type, BigComplex *zBig, BigComplex *qBig)
 	    break;
 
 	case CUBIC:					// Art Matrix Cubic
-	    Init_Cubic<BigComplex>(zBig, qBig, param, juliaflag, subtype, special, aBig, bBig, a2Big, aa3Big, t2Big, t3Big, tempBig, vBig);
+	    // --- special ---
+	    SpecialColour.rgbtRed = (BYTE)param[1];
+	    SpecialColour.rgbtGreen = (BYTE)param[2];
+	    SpecialColour.rgbtBlue = (BYTE)param[3];
+	    Init_Cubic<BigComplex>(zBig, qBig, param, juliaflag, subtype, aBig, bBig, a2Big, aa3Big, t2Big, t3Big, tempBig, vBig);
 	    break;
 
 	case SPECIALNEWT:				// Art Matrix Newton
@@ -228,7 +232,7 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	case CUBIC:					// Art Matrix Cubic
 	    return FunctionsDispatch<BigComplex, BigDouble, WORD>(this, type, zBig, qBig, degree, sqrBig, realimagBig,
-		aBig, a2Big, aa3Big, bBig, vBig, tempBig, param, SpecialFlag, iteration, special, subtype, BailoutTestType, rqlim);
+		aBig, a2Big, aa3Big, bBig, vBig, tempBig, param, SpecialFlag, iteration, SPECIALINDEX, subtype, BailoutTestType, rqlim);
 
 	case SPECIALNEWT:				// Art Matrix Newton
 	    return Iter_SPECIALNEWT<BigComplex>(zBig, qBig, aBig, bBig, lm5Big, lp5Big, vBig, param, phaseflag, special);

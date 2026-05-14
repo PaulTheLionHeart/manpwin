@@ -95,7 +95,6 @@ int	CPixel::BifurcStewartTrig(double Rate, double *Population, CTrigFn *TrigFn)
 ***********************************************************************************/
 
 int	CPixel::bifurcation(int user_data(HWND hwnd))
-
     {
     double	iz;
     int		j, result;
@@ -110,18 +109,8 @@ int	CPixel::bifurcation(int user_data(HWND hwnd))
     PlotType = NOSYM;
     result = FALSE;
 
-    Plot.InitPlot(threshold, TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE + USEWPIXELS);
+    Plot.InitPlot(threshold, TrueCol, &gManp->wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE + USEWPIXELS);
     xgap = mandel_width * ScreenRatio / (double)xdots;
-//    ygap = mandel_width / (double)ydots;
-
-
-
-
-//    DebugDump("BIF entry");
-
-
-
-
 
     cpuz = (double)ydots / mandel_width;
 

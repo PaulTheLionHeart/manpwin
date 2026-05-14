@@ -6,9 +6,8 @@
 */
 
 #include "OtherFunctions.h"
+#include "Manp.h"
 
-#define MIN(a,b) (a <= b ? a : b)
-#define MAX(a,b) (a >= b ? a : b)
 #define MAXPOINTS 16
 
 /**************************************************************************
@@ -69,7 +68,6 @@ void	COtherFunctions::DrawBox(int x0, int y0, int x1, int y1, DWORD colour, BOOL
 ***************************************************************************/
 
 int	COtherFunctions::DoTriangle()
-
     {
     double  u1, u2, v1, v2, size, ForthRoot;
     int	    i, k, l, m, n, n1;
@@ -83,8 +81,8 @@ int	COtherFunctions::DoTriangle()
     int	    offset;
     BOOL    flag = FALSE;
 
-    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double) (ydots - 1) / mandel_width;
+    xscale = (double) (gManp->xdots - 1) / (mandel_width * ScreenRatio);
+    yscale = (double) (gManp->ydots - 1) / mandel_width;
 
     if (Sides > MAXPOINTS)
 	Sides = MAXPOINTS;
@@ -101,7 +99,7 @@ int	COtherFunctions::DoTriangle()
     for (m = 0; m < Passes; m++)
 	{
 	*curpass = m;
-	colour = (ExpandPalette) ? threshold * (DWORD)m / Passes : (DWORD)m;
+	colour = (ExpandPalette) ? gManp->threshold * (DWORD)m / Passes : (DWORD)m;
 	switch (subtype)
 	    {
 	    case 'A':					

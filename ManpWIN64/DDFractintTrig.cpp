@@ -14,6 +14,7 @@
 #include "pixel.h"
 #include "Fract.h"
 #include "BailoutTemplate.h"
+#include "PixelTemplate.h"
 #include "FractintTrigTemplate.h"
 #include "..\parser\TrigFn.h"
 
@@ -34,7 +35,7 @@ int	CPixel::DDInitFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q)
 	{
 	case HYPERCMPLXFP:
 	case HYPERCMPLXJFP:
-	    tDD = (invert) ? DDInvertz2(cDD) : cDD;
+	    tDD = (invert) ? Invertz2T<DDComplex, dd_real>(cDD, f_radius, f_xcenter, f_ycenter) : cDD;
 	    DDInitFunctions(MANDELFP, z, q);
 	    InitFractintTrigFunctionsT<DDComplex, dd_real>(type, z, q, juliaflag, invert, cDD, qcDD, qciDD, qcjDD, qckDD, tDD, tempDD, temp1DD, temp2DD, temp4DD, sqrDD, Fn2Index, param);
 	    break;
@@ -74,7 +75,7 @@ int	CPixel::DDInitFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q)
 	case FPLAMBDAFNFN:
 	case FPMANLAMFNFN:				// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
 	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
-	    tDD = (invert) ? DDInvertz2(cDD) : cDD;
+	    tDD = (invert) ? Invertz2T<DDComplex, dd_real>(cDD, f_radius, f_xcenter, f_ycenter) : cDD;
 	    InitFractintTrigFunctionsT<DDComplex, dd_real>(type, z, q, juliaflag, invert, cDD, qcDD, qciDD, qcjDD, qckDD, tDD, tempDD, temp1DD, temp2DD, temp4DD, sqrDD, Fn2Index, param);
 	    break;
 

@@ -22,8 +22,7 @@
 #include "SafeStrings.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-extern	HWND	GlobalHwnd;		// This is the main windows handle
-extern	CDib	Dib;			// Device Independent Bitmaps
+//extern	HWND	GlobalHwnd;		// This is the main windows handle
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define	PREVIEW_HEIGHT	177
@@ -31,42 +30,18 @@ extern	CDib	Dib;			// Device Independent Bitmaps
 #define	HOR_OFFSET	116
 #define	VERT_OFFSET	9
 
-//extern	short	InsideRed;			// values for r, g, b channels for inside colour
-//extern	short	InsideGreen;			
-//extern	short	InsideBlue;
-
-extern	DWORD	BackgroundColour;		// set background colour for IFS and L-System fractals
-extern	long	threshold;			// maximum iterations ... called maxiter in FRACTINT
 extern	int	StartColourCycling;		// we can start the colour cycling from any point..good for cycling animations
-extern	int	height, width, bits_per_pixel;
-
-extern	PAINTSTRUCT 	ps;
-extern	RECT 	r;
-extern	BOOL	bTrack;				// TRUE if user is selecting a region
-extern	int	logval;				// log colour map required 
-extern	BOOL	UseFractintPalette;		// standard EGA palette
 extern	BYTE	default_palette[];		// default VGA colour palette
-extern	std::vector<float> wpixels;		// an array of doubles holding slope modified iteration counts
-extern	WORD	type;				// M=mand, J=Julia 1,2,4->
-extern	int	time_to_reinit;			// time to reinitialize?
-extern	int	OutsideMethod;			// outside filters
-
+//extern	std::vector<float> wpixels;		// an array of doubles holding slope modified iteration counts
 INT_PTR CALLBACK DisplayRGBDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
-
-extern	void	AnalysePalette(char *);
-
-static	CPreview	PreviewColour;
-extern	CTrueCol	TrueCol;		// palette info
-extern	CPlot		Plot;			// image plotting routines
 
 //////////////////////////////////////////////////////////////////////
 //	Initialise True Colour Palette
 //////////////////////////////////////////////////////////////////////
 
 void	InitTrueColourPalette(BYTE RandFlag)
-
     {
-    TrueCol.InitTrueColPal(RandFlag, threshold, StartColourCycling, logval, bits_per_pixel, UseFractintPalette, default_palette);
+    gManp->TrueCol.InitTrueColPal(RandFlag, gManp->threshold, StartColourCycling, gManp->logval, gManp->Dib.BitsPerPixel, gManp->UseFractintPalette, default_palette);
     }
 
 /**************************************************************************
@@ -74,40 +49,42 @@ void	InitTrueColourPalette(BYTE RandFlag)
 **************************************************************************/
 
 void	DisplayPalette(HWND hwnd, BOOL DisplayFlag)
-
     {
     WORD	i, j;
     DWORD	size;
     double	MaxPal;
     long	LocalThreshold;
-    int		tempflags = Plot.flags;
+    int		tempflags = gManp->Plot.flags;
 
-    if (OutsideMethod >= TIERAZONFILTERS)
+    if (gManp->OutsideMethod >= TIERAZONFILTERS)
 	return;					// many Tierazon filters and colours don't use the palette, so why display it?
 
-    Plot.flags -= USEWPIXELS;			// we don't want to write to wpixels
-    LocalThreshold = (threshold >= MAXPALETTE) ? MAXPALETTE - 1 : threshold;
+    gManp->Plot.flags -= USEWPIXELS;			// we don't want to write to wpixels
+    LocalThreshold = (gManp->threshold >= MAXPALETTE) ? MAXPALETTE - 1 : gManp->threshold;
 
-    MaxPal = (double)LocalThreshold / (double) height;
+    MaxPal = (double)LocalThreshold / (double)gManp->height;
 
-    for (i = 0; i < height; ++i)
+    for (i = 0; i < gManp->height; ++i)
 	{
 	if (DisplayFlag)			// display the palette
 	    size = (DWORD)(MaxPal * (double) i);
-	else if (type == PERTURBATION || type == SLOPEFORWARDDIFF || type == SLOPEDERIVATIVE)
+	else if (gManp->type == PERTURBATION || gManp->type == SLOPEFORWARDDIFF || gManp->type == SLOPEDERIVATIVE)
 	    return;
-	for (j = width - 15; j < width; ++j)
+	for (j = gManp->width - 15; j < gManp->width; ++j)
 	    {
 	    if (!DisplayFlag)			// retrieve value from wpixels so we can toggle palette display
-		size = (DWORD)(wpixels[i * width + j]);
-	    Plot.PlotPoint(j, i, size);
+		{
+		float value = gManp->wpixels[i * gManp->width + j];
+		size = (DWORD)value;
+		}
+	    gManp->Plot.PlotPoint(j, i, size);
 	    }
 	}
-    if (!bTrack)				// don't splatter scan
+    if (!gManp->bTrack)				// don't splatter scan
 	{
-	InvalidateRect(hwnd, &r, FALSE);
+	InvalidateRect(hwnd, &gManp->r, FALSE);
 	}
-    Plot.flags = tempflags;			// restore flags 
+    gManp->Plot.flags = tempflags;			// restore flags 
     }
 
 /*---------------------------------------------------------------------
@@ -115,9 +92,8 @@ void	DisplayPalette(HWND hwnd, BOOL DisplayFlag)
   -------------------------------------------------------------------*/
 
 void	RGBAddress(int x, int y, RGBTRIPLE *colour)
-
     {
-    RGBTRIPLE * Source = (RGBTRIPLE *)(Dib.DibPixels.data() + (DWORD) (Dib.DibHeight - y) * Dib.WidthBytes + x * Dib.BitsPerPixel / 8);
+    RGBTRIPLE * Source = (RGBTRIPLE *)(gManp->Dib.DibPixels.data() + (DWORD) (gManp->Dib.DibHeight - y) * gManp->Dib.WidthBytes + x * gManp->Dib.BitsPerPixel / 8);
 
     *colour = *Source;
     }
@@ -127,13 +103,12 @@ void	RGBAddress(int x, int y, RGBTRIPLE *colour)
   -------------------------------------------------------------------*/
 
 int	EditRGB(HINSTANCE hInst, POINTS ptCurrent)
-
     {
     RGBTRIPLE   colour;
 
     RGBAddress(ptCurrent.x, ptCurrent.y, &colour);
-    BackgroundColour = (DWORD)(colour.rgbtBlue) + (DWORD)(colour.rgbtGreen * 256) + (DWORD)(colour.rgbtRed * 65536);
-    DialogBox (hInst, "DisplayRGBDlg", GlobalHwnd, DisplayRGBDlg);
+    gManp->BackgroundColour = (DWORD)(colour.rgbtBlue) + (DWORD)(colour.rgbtGreen * 256) + (DWORD)(colour.rgbtRed * 65536);
+    DialogBox (hInst, "DisplayRGBDlg", gManp->GlobalHwnd, DisplayRGBDlg);
 
     return 0;
     }
@@ -143,14 +118,13 @@ int	EditRGB(HINSTANCE hInst, POINTS ptCurrent)
   -------------------------------------------------------------------*/
 
 int	DisplayRGB(POINTS ptCurrent)
-
     {
     RGBTRIPLE   colour;
     char	s[80];
 
     RGBAddress(ptCurrent.x, ptCurrent.y, &colour);
     _snprintf_s(s, 80, _TRUNCATE, "Colour <%02X,%02X,%02X> at %d, %d", colour.rgbtRed, colour.rgbtGreen, colour.rgbtBlue, ptCurrent.x, ptCurrent.y);
-    SetWindowText (GlobalHwnd, s);
+    SetWindowText (gManp->GlobalHwnd, s);
 
     return 0;
     }
@@ -162,26 +136,24 @@ int	DisplayRGB(POINTS ptCurrent)
 #define DARKGREY	40
 
 void	SaveTriplets(FILE *fop)
-
     {
     int	i;
-    long LocalThreshold = (threshold >= MAXPALETTE) ? MAXPALETTE - 1 : threshold;
+    long LocalThreshold = (gManp->threshold >= MAXPALETTE) ? MAXPALETTE - 1 : gManp->threshold;
 
     for (i = 0; i < ((LocalThreshold < 256) ? 256 : LocalThreshold); ++i)
 	{
 	fprintf(fop, "%d %d %d\n",
-	    TrueCol.PalettePtr[i].rgbtRed,
-	    TrueCol.PalettePtr[i].rgbtGreen,
-	    TrueCol.PalettePtr[i].rgbtBlue);
+	    gManp->TrueCol.PalettePtr[i].rgbtRed,
+	    gManp->TrueCol.PalettePtr[i].rgbtGreen,
+	    gManp->TrueCol.PalettePtr[i].rgbtBlue);
 	}
     }
 
 short	save_palette(HWND hwnd, char *outfile, char *szAppName)
-
     {
     FILE	*fop;
     //int	i;
-    long LocalThreshold = (threshold >= MAXPALETTE) ? MAXPALETTE - 1 : threshold;
+    long LocalThreshold = (gManp->threshold >= MAXPALETTE) ? MAXPALETTE - 1 : gManp->threshold;
 
     if (!(fop = fopen(outfile, "w")))
 	{
@@ -194,7 +166,7 @@ short	save_palette(HWND hwnd, char *outfile, char *szAppName)
 	{
 	RGBTRIPLE   DarkGrey = { DARKGREY, DARKGREY, DARKGREY };
 	for (int i = LocalThreshold; i < 256; i++)
-	    TrueCol.PalettePtr[i] = DarkGrey;
+	    gManp->TrueCol.PalettePtr[i] = DarkGrey;
 	}
     SaveTriplets(fop);
     fclose(fop);
@@ -206,7 +178,6 @@ short	save_palette(HWND hwnd, char *outfile, char *szAppName)
 **************************************************************************/
 
 short	FileReadColours(HWND hwnd, char *infile, char *szAppName)
-
     {
     char	s[150];
     FILE	*fip;
@@ -219,7 +190,7 @@ short	FileReadColours(HWND hwnd, char *infile, char *szAppName)
 	}
     if (fgets(s, 150, fip))
 	{
-	AnalysePalette(s);
+	gManp->AnalysePalette(s);
 	//    TrueColourFlag = TRUE;
 	}
     //while (fgets(s, 150, fip))
@@ -245,7 +216,6 @@ PalettePtr = TrueCol.TRUE_PALETTE;
 **************************************************************************/
 
 short	save_colour(HWND hwnd, char *outfile, char *szAppName)
-
     {
     FILE	*fop;
 
@@ -256,8 +226,8 @@ short	save_colour(HWND hwnd, char *outfile, char *szAppName)
 	return 0;
 	}
     fprintf(fop, "%d %d %d %d %d %d\n",
-	TrueCol.RedStartInt, TrueCol.GreenStartInt, TrueCol.BlueStartInt,
-	TrueCol.RedIncInt, TrueCol.GreenIncInt, TrueCol.BlueIncInt);
+	gManp->TrueCol.RedStartInt, gManp->TrueCol.GreenStartInt, gManp->TrueCol.BlueStartInt,
+	gManp->TrueCol.RedIncInt, gManp->TrueCol.GreenIncInt, gManp->TrueCol.BlueIncInt);
     //OutputPalFile(fop);
     fclose(fop);
     return 0;
@@ -269,10 +239,11 @@ short	save_colour(HWND hwnd, char *outfile, char *szAppName)
 
 INT_PTR CALLBACK InsideDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     {
-    static short color[3];
-    HWND	  hwndParent, hCtrl;
-    short	  nCtrlID, nIndex;
-    char	  s[480];
+    static	    short    color[3];
+    HWND	    hwndParent, hCtrl;
+    short	    nCtrlID, nIndex;
+    char	    s[480];
+    static	    CPreview	PreviewColour;
 
     PreviewColour.HorOffset = HOR_OFFSET;						// dimensions of preview window
     PreviewColour.VertOffset = VERT_OFFSET;
@@ -281,9 +252,9 @@ INT_PTR CALLBACK InsideDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    color[0] = TrueCol.InsideRed;
-	    color[1] = TrueCol.InsideGreen;
-	    color[2] = TrueCol.InsideBlue;
+	    color[0] = gManp->TrueCol.InsideRed;
+	    color[1] = gManp->TrueCol.InsideGreen;
+	    color[2] = gManp->TrueCol.InsideBlue;
 	    for (nCtrlID = 10; nCtrlID < 13; nCtrlID++)
 		{
 		//		    color[nCtrlID - 10] = 0;
@@ -356,10 +327,10 @@ INT_PTR CALLBACK InsideDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 	    return TRUE;
 
 	case WM_PAINT:
-	    BeginPaint(hDlg, &ps);
+	    BeginPaint(hDlg, &gManp->ps);
 	    PreviewColour.PreviewDib.ClearDib(color[0], color[1], color[2]);
 	    PreviewColour.Preview(hDlg);
-	    EndPaint(hDlg, &ps);
+	    EndPaint(hDlg, &gManp->ps);
 	    return TRUE;
 
 	case WM_COMMAND:
@@ -367,13 +338,13 @@ INT_PTR CALLBACK InsideDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 		//	       switch (wParam)
 		{
 		case IDOK:
-		    TrueCol.InsideRed = color[0];
-		    TrueCol.InsideGreen = color[1];
-		    TrueCol.InsideBlue = color[2];
-		    TrueCol.SetTrueColourPixel(TrueCol.InsideBlue, TrueCol.InsideGreen, TrueCol.InsideRed, threshold);
-		    Plot.RefreshScreen();			// reload screen values
+		    gManp->TrueCol.InsideRed = color[0];
+		    gManp->TrueCol.InsideGreen = color[1];
+		    gManp->TrueCol.InsideBlue = color[2];
+		    gManp->TrueCol.SetTrueColourPixel(gManp->TrueCol.InsideBlue, gManp->TrueCol.InsideGreen, gManp->TrueCol.InsideRed, gManp->threshold);
+		    gManp->Plot.RefreshScreen();			// reload screen values
 		    hwndParent = GetParent(hDlg);
-		    InvalidateRect(hwndParent, &r, FALSE);	// force repaint
+		    InvalidateRect(hwndParent, &gManp->r, FALSE);	// force repaint
 		    PreviewColour.PreviewDib.CloseDibPtrs();
 		    EndDialog(hDlg, 0);
 		    return TRUE;
@@ -395,9 +366,9 @@ INT_PTR CALLBACK DisplayRGBDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    b = (WORD)(BackgroundColour & 0xff);
-	    g = (WORD)((BackgroundColour >> 8) & 0xff);
-	    r = (WORD)((BackgroundColour >> 16) & 0xff);
+	    b = (WORD)(gManp->BackgroundColour & 0xff);
+	    g = (WORD)((gManp->BackgroundColour >> 8) & 0xff);
+	    r = (WORD)((gManp->BackgroundColour >> 16) & 0xff);
 	    SAFE_SPRINTF(s, "%02X%02X%02X", r, g, b);
 	    SetDlgItemText(hDlg, IDC_RGB, s);
 	    SetDlgItemInt(hDlg, IDC_RGBRED, r, TRUE);
@@ -441,23 +412,23 @@ INT_PTR CALLBACK ColourDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    SetDlgItemInt(hDlg, IDC_START_RED, TrueCol.RedStartInt, TRUE);
-	    SetDlgItemInt(hDlg, IDC_START_BLUE, TrueCol.BlueStartInt, TRUE);
-	    SetDlgItemInt(hDlg, IDC_START_GREEN, TrueCol.GreenStartInt, TRUE);
-	    SetDlgItemInt(hDlg, IDC_INC_GREEN, TrueCol.GreenIncInt, TRUE);
-	    SetDlgItemInt(hDlg, IDC_INC_RED, TrueCol.RedIncInt, TRUE);
-	    SetDlgItemInt(hDlg, IDC_INC_BLUE, TrueCol.BlueIncInt, TRUE);
-	    SetDlgItemInt(hDlg, IDC_RAND_DIV, TrueCol.RandomDivisor, TRUE);
+	    SetDlgItemInt(hDlg, IDC_START_RED, gManp->TrueCol.RedStartInt, TRUE);
+	    SetDlgItemInt(hDlg, IDC_START_BLUE, gManp->TrueCol.BlueStartInt, TRUE);
+	    SetDlgItemInt(hDlg, IDC_START_GREEN, gManp->TrueCol.GreenStartInt, TRUE);
+	    SetDlgItemInt(hDlg, IDC_INC_GREEN, gManp->TrueCol.GreenIncInt, TRUE);
+	    SetDlgItemInt(hDlg, IDC_INC_RED, gManp->TrueCol.RedIncInt, TRUE);
+	    SetDlgItemInt(hDlg, IDC_INC_BLUE, gManp->TrueCol.BlueIncInt, TRUE);
+	    SetDlgItemInt(hDlg, IDC_RAND_DIV, gManp->TrueCol.RandomDivisor, TRUE);
 	    //		hCtrl = GetDlgItem (hDlg, IDC_GENPAL);
 	    //		SendMessage(hCtrl, BM_SETCHECK, TrueColourFlag, 0L);
 //	    hCtrl = GetDlgItem(hDlg, IDC_DISPLAYPAL);
 //	    SendMessage(hCtrl, BM_SETCHECK, TrueCol.DisplayPaletteFlag, 0L);
 	    hCtrl = GetDlgItem(hDlg, IDC_RANDPAL);
-	    SendMessage(hCtrl, BM_SETCHECK, TrueCol.RandomColourFlag, 0L);
-	    color[0] = TrueCol.RedStartInt;
-	    color[1] = TrueCol.GreenStartInt;
-	    color[2] = TrueCol.BlueStartInt;
-	    color[3] = TrueCol.RandomDivisor;
+	    SendMessage(hCtrl, BM_SETCHECK, gManp->TrueCol.RandomColourFlag, 0L);
+	    color[0] = gManp->TrueCol.RedStartInt;
+	    color[1] = gManp->TrueCol.GreenStartInt;
+	    color[2] = gManp->TrueCol.BlueStartInt;
+	    color[3] = gManp->TrueCol.RandomDivisor;
 	    for (nCtrlID = IDC_REDSCROLL; nCtrlID <= IDC_RANDSCROLL; nCtrlID++)
 		{
 		hCtrl = GetDlgItem(hDlg, nCtrlID);
@@ -553,29 +524,29 @@ INT_PTR CALLBACK ColourDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 		case IDC_INVERT:
 		    if (LOWORD(wParam) == IDM_DEFAULTCOL)
 			{
-			TrueCol.RedStartInt = 60;
-			TrueCol.GreenStartInt = 120;
-			TrueCol.BlueStartInt = 30;
-			TrueCol.RedIncInt = 100;
-			TrueCol.GreenIncInt = 255;
-			TrueCol.BlueIncInt = 200;
+			gManp->TrueCol.RedStartInt = 60;
+			gManp->TrueCol.GreenStartInt = 120;
+			gManp->TrueCol.BlueStartInt = 30;
+			gManp->TrueCol.RedIncInt = 100;
+			gManp->TrueCol.GreenIncInt = 255;
+			gManp->TrueCol.BlueIncInt = 200;
 			}
 		    else
 			{
-			TrueCol.RedStartInt = (~TrueCol.RedStartInt & 0x00ff);
-			TrueCol.GreenStartInt = (~TrueCol.GreenStartInt & 0x00ff);
-			TrueCol.BlueStartInt = (~TrueCol.BlueStartInt & 0x00ff);
+			gManp->TrueCol.RedStartInt = (~gManp->TrueCol.RedStartInt & 0x00ff);
+			gManp->TrueCol.GreenStartInt = (~gManp->TrueCol.GreenStartInt & 0x00ff);
+			gManp->TrueCol.BlueStartInt = (~gManp->TrueCol.BlueStartInt & 0x00ff);
 			}
-		    SetDlgItemInt(hDlg, IDC_START_RED, TrueCol.RedStartInt, TRUE);
-		    SetDlgItemInt(hDlg, IDC_START_BLUE, TrueCol.BlueStartInt, TRUE);
-		    SetDlgItemInt(hDlg, IDC_START_GREEN, TrueCol.GreenStartInt, TRUE);
-		    SetDlgItemInt(hDlg, IDC_INC_GREEN, TrueCol.GreenIncInt, TRUE);
-		    SetDlgItemInt(hDlg, IDC_INC_RED, TrueCol.RedIncInt, TRUE);
-		    SetDlgItemInt(hDlg, IDC_INC_BLUE, TrueCol.BlueIncInt, TRUE);
-		    color[0] = TrueCol.RedStartInt;
-		    color[1] = TrueCol.GreenStartInt;
-		    color[2] = TrueCol.BlueStartInt;
-		    color[3] = TrueCol.RandomDivisor;
+		    SetDlgItemInt(hDlg, IDC_START_RED, gManp->TrueCol.RedStartInt, TRUE);
+		    SetDlgItemInt(hDlg, IDC_START_BLUE, gManp->TrueCol.BlueStartInt, TRUE);
+		    SetDlgItemInt(hDlg, IDC_START_GREEN, gManp->TrueCol.GreenStartInt, TRUE);
+		    SetDlgItemInt(hDlg, IDC_INC_GREEN, gManp->TrueCol.GreenIncInt, TRUE);
+		    SetDlgItemInt(hDlg, IDC_INC_RED, gManp->TrueCol.RedIncInt, TRUE);
+		    SetDlgItemInt(hDlg, IDC_INC_BLUE, gManp->TrueCol.BlueIncInt, TRUE);
+		    color[0] = gManp->TrueCol.RedStartInt;
+		    color[1] = gManp->TrueCol.GreenStartInt;
+		    color[2] = gManp->TrueCol.BlueStartInt;
+		    color[3] = gManp->TrueCol.RandomDivisor;
 		    for (nCtrlID = IDC_REDSCROLL; nCtrlID <= IDC_BLUSCROLL; nCtrlID++)
 			{
 			hCtrl = GetDlgItem(hDlg, nCtrlID);
@@ -584,26 +555,26 @@ INT_PTR CALLBACK ColourDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 		    return TRUE;
 
 		case IDOK:
-		    TrueCol.RedIncInt = tempRedInc;
-		    TrueCol.GreenIncInt = tempGreenInc;
-		    TrueCol.BlueIncInt = tempBlueInc;
-		    TrueCol.RedStartInt = tempRedStart;
-		    TrueCol.GreenStartInt = tempGreenStart;
-		    TrueCol.BlueStartInt = tempBlueStart;
-		    TrueCol.RandomDivisor = tempRandDiv;
-		    if (TrueCol.RandomDivisor < 1)			// no division by 0
-			TrueCol.RandomDivisor = 1;
+		    gManp->TrueCol.RedIncInt = tempRedInc;
+		    gManp->TrueCol.GreenIncInt = tempGreenInc;
+		    gManp->TrueCol.BlueIncInt = tempBlueInc;
+		    gManp->TrueCol.RedStartInt = tempRedStart;
+		    gManp->TrueCol.GreenStartInt = tempGreenStart;
+		    gManp->TrueCol.BlueStartInt = tempBlueStart;
+		    gManp->TrueCol.RandomDivisor = tempRandDiv;
+		    if (gManp->TrueCol.RandomDivisor < 1)			// no division by 0
+			gManp->TrueCol.RandomDivisor = 1;
 		    hCtrl = GetDlgItem(hDlg, IDC_RANDPAL);
-		    TrueCol.RandomColourFlag = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+		    gManp->TrueCol.RandomColourFlag = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 //		    hCtrl = GetDlgItem(hDlg, IDC_DISPLAYPAL);
 //		    TrueCol.DisplayPaletteFlag = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 		    StartColourCycling = GetDlgItemInt(hDlg, IDC_CYCLE_START, &bTrans, TRUE);
 //		    long LocalThreshold = (threshold >= MAXTHRESHOLD) ? MAXTHRESHOLD - 1 : threshold;
 		    while (StartColourCycling < 0)
-			StartColourCycling += TrueCol.LocalThreshold;
+			StartColourCycling += gManp->TrueCol.LocalThreshold;
 		    //			if (TrueColourFlag)
 		    {
-		    TrueCol.PalEditFlag = FALSE;
+		    gManp->TrueCol.PalEditFlag = FALSE;
 		    }
 
 		    EndDialog(hDlg, TRUE);

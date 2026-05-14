@@ -21,7 +21,7 @@
 #define	RGB_SIZE		3
 
 /* Macro to determine to round off the given value to the closest byte */
-#define WIDTHBYTES(i)   ((i+31)/32*4)
+//#define WIDTHBYTES(i)   ((i+31)/32*4) 	    Replaced by ComputeWidthBytes() in Dib.h
 #define PIXELS2BYTES(n)	((n+7)/8)
 #define	GREYVALUE(r,g,b) ((((r*30)/100) + ((g*59)/100) + ((b*11)/100)))
 #define	ORTHOMATCH(r,g,b)  (((r) & 0x00e0) | (((g) >> 3) & 0x001c)  | (((b) >> 6) & 0x0003))
@@ -31,7 +31,7 @@
 #define	LPBdepth(lpbi)	(lpbi->biHeight)
 #define	LPBbits(lpbi)   (lpbi->biBitCount)
 #define	LPBcolours(lpbi) (lpbi->biClrUsed)
-#define	LPBlinewidth(lpbi) (WIDTHBYTES((WORD)lpbi->biWidth*lpbi->biBitCount))
+#define	LPBlinewidth(lpbi) (ComputeWidthBytes((WORD)lpbi->biWidth,lpbi->biBitCount))
 
 #define	LPBcolourmap(lpbi) (LPRGBQUAD)((LPSTR)lpbi+lpbi->biSize)
 // Macro to return pointer to DIB pixels
@@ -58,6 +58,7 @@ CDib::CDib(const CDib & Dib1)	// Copy Constructor
     DibWidth = Dib1.DibWidth;
     DibSize = Dib1.DibSize;
     BitsPerPixel = Dib1.BitsPerPixel;
+    WidthBytes = ComputeWidthBytes(DibWidth, BitsPerPixel);
     DibErrorCode = 0;
     pDibInf = (LPBITMAPINFO)new BYTE[DibSize];
     if(pDibInf == NULL)
@@ -84,6 +85,7 @@ CDib& CDib::operator=(const CDib & Dib1)	// Assignment Operator
     DibWidth = Dib1.DibWidth;
     DibSize = Dib1.DibSize;
     BitsPerPixel = Dib1.BitsPerPixel;
+    WidthBytes = ComputeWidthBytes(DibWidth, BitsPerPixel);
     DibErrorCode = 0;
     pDibInf = (LPBITMAPINFO)new BYTE[DibSize];
     if(pDibInf == NULL)
@@ -113,8 +115,8 @@ void	CDib::DibTo24(LPBITMAPINFO pDib, BYTE *	SourcePixels)
     RGBTRIPLE *	Dest;
 //    BYTE *	SourcePixels = DIBPEL(pDib);
 
-    DWORD	SourceWidthBytes = WIDTHBYTES((DWORD)width * bits);
-    DWORD	DestWidthBytes   = WIDTHBYTES((DWORD)width * 24L);
+    size_t	SourceWidthBytes = ComputeWidthBytes((DWORD)width, bits);
+    size_t	DestWidthBytes   = ComputeWidthBytes((DWORD)width, 24L);
     DWORD 	i, j, k, wbytes, wpart;
 
     InitDib(width, height, 24);		// Create an empty 24 bit DIB
@@ -406,9 +408,9 @@ LPBITMAPINFO	CreateEmptyDib(int Width, int Height, WORD bits)
     LPBITMAPINFO	pDib;		// pointer to the DIB info
     bits = AdjustDIBits(bits);
     DWORD	colours_used = bits > 8 ? 0L : (DWORD)((1<<bits) & 0xffff);
-    DWORD	SizeImage = WIDTHBYTES(Width * bits) * Height;	// Size, in bytes, of the image made of RGB triplets.
-    DWORD	SizeCount = Width * Height;			// Size, in WORDS, of the count array.
-    DWORD	DibSize = sizeof(BITMAPINFOHEADER) + colours_used*sizeof(RGBQUAD) + SizeImage + SizeCount;
+    size_t	SizeImage = ComputeWidthBytes(Width, bits) * Height;	// Size, in bytes, of the image made of RGB triplets.
+    size_t	SizeCount = Width * Height;			// Size, in WORDS, of the count array.
+    size_t	DibSize = sizeof(BITMAPINFOHEADER) + colours_used*sizeof(RGBQUAD) + SizeImage + SizeCount;
 
     // allocate a device-independent bitmap header + palette + pixel array
     if(pDib = (LPBITMAPINFO)new BYTE[DibSize] )
@@ -420,7 +422,7 @@ LPBITMAPINFO	CreateEmptyDib(int Width, int Height, WORD bits)
 	pDib->bmiHeader.biPlanes 	= 1;
 	pDib->bmiHeader.biBitCount 	= bits;
 	pDib->bmiHeader.biCompression 	= BI_RGB;
-	pDib->bmiHeader.biSizeImage	= SizeImage;	// Size, in bytes, of the image. May be set to zero for BI_RGB bitmaps.
+	pDib->bmiHeader.biSizeImage	= (DWORD)SizeImage;	// Size, in bytes, of the image. May be set to zero for BI_RGB bitmaps.
 	pDib->bmiHeader.biXPelsPerMeter = 0L;
 	pDib->bmiHeader.biYPelsPerMeter = 0L;
 	pDib->bmiHeader.biClrUsed 	= colours_used;
@@ -454,27 +456,36 @@ LPBITMAPINFO	CreateEmptyDib(int Width, int Height, BYTE *palette, WORD bits)
 
 BYTE   *CDib::InitDib(int Width, int Height, WORD bits)
     {
-    CloseDibPtrs();			// give back memory for new DIB
+    CloseDibPtrs();				// give back memory for new DIB
 
     // allocate a device-independent bitmap header + palette + pixel array
     pDibInf = CreateEmptyDib(Width, Height, bits);
     if(pDibInf == NULL )
 	{
 	DibErrorCode = NODIBMEMORY;
-	throw "Can't allocate DIB memory.";	// IB 2009-05-18 C++ error handling
-	DibPixels.resize(0);
-	return DibPixels.empty() ? nullptr : DibPixels.data();
+	std::vector<unsigned char>().swap(DibPixels);
+	return nullptr;
 	}
 
     // Initialise CDib members
-    SizeImage = pDibInf->bmiHeader.biSizeImage;	// Size, in bytes, of the image made of RGB triplets.
-    DibHeight = Height;			// dimensions in pixels, useful in undo() and redo()
-    DibWidth = Width;			// may be useful to replace these as globals in the future
+    DibHeight = Height;				// dimensions in pixels, useful in undo() and redo()
+    DibWidth = Width;				// may be useful to replace these as globals in the future
     BitsPerPixel = pDibInf->bmiHeader.biBitCount ;
-    DibSize = sizeof(BITMAPINFOHEADER) + pDibInf->bmiHeader.biClrUsed*sizeof(RGBQUAD) + SizeImage;
-    WidthBytes = WIDTHBYTES(Width * bits);
+    WidthBytes = ComputeWidthBytes(Width, bits);
+    size_t bufferSize = WidthBytes * (size_t)Height;
+    SizeImage = bufferSize;			// Size, in bytes, of the image made of RGB triplets.
+
+    DibSize = sizeof(BITMAPINFOHEADER) + pDibInf->bmiHeader.biClrUsed * sizeof(RGBQUAD) + SizeImage;
+
     DibNumColours = 0L;
-    DibPixels.resize(WidthBytes * DibHeight);
+    
+    // critical fix: ensure memory is actually released if large
+    if (DibPixels.capacity() > bufferSize * 2)
+	{
+	std::vector<unsigned char>().swap(DibPixels);
+	}
+
+    DibPixels.resize(bufferSize);
     memset(DibPixels.data(), 0x55, SizeImage);
     return DibPixels.empty() ? nullptr : DibPixels.data();
     }
@@ -482,7 +493,9 @@ BYTE   *CDib::InitDib(int Width, int Height, WORD bits)
 //	Initialise Windows Device Independent Bitmap and Palette
 BYTE	*CDib::InitDib(int Width, int Height, BYTE *palette, WORD bits)
     {
-    InitDib(Width, Height, bits);
+    BYTE* ptr = InitDib(Width, Height, bits);
+    if (!ptr)
+	return nullptr;
     SetDibPalette(pDibInf, palette);
     return DibPixels.empty() ? nullptr : DibPixels.data();
     }
@@ -493,13 +506,15 @@ BYTE	*CDib::InitDib(LPBITMAPINFO pDib)
     CloseDibPtrs();			// give back memory for new DIB
     if(pDib->bmiHeader.biCompression != BI_RGB)
 	{
-	throw "DIB Not supported";
-	DibPixels.clear();
+	std::vector<unsigned char>().swap(DibPixels);
 	pDibInf = NULL;
+	return nullptr;
 	}
 
     // allocate a device-independent bitmap header + palette + pixel array
-    InitDib(pDib->bmiHeader.biWidth, pDib->bmiHeader.biHeight, pDib->bmiHeader.biBitCount);
+    BYTE* ptr = InitDib(pDib->bmiHeader.biWidth, pDib->bmiHeader.biHeight, pDib->bmiHeader.biBitCount);
+    if (!ptr)
+	return nullptr;
     // Copy palette + pixel array
     memcpy(DIBPAL(pDibInf), DIBPAL(pDib), pDib->bmiHeader.biClrUsed*sizeof(RGBQUAD));	// palette
     DibPixels.resize(SizeImage);
@@ -540,7 +555,7 @@ BYTE	*CDib::InitDib(int Width, int Height)
 
 void	CDib::CloseDibPtrs(void)
     {
-    DibPixels.clear();
+    std::vector<unsigned char>().swap(DibPixels);  // releases memory
 
     if (pDibInf)
 	{
@@ -548,6 +563,7 @@ void	CDib::CloseDibPtrs(void)
 	pDibInf = NULL;
 	}
     }
+
 // IB 2009-09-05 The code from here on ISN'T part of CDib and shouldn't be here
 // This is not good OOP.
 // You just don't seem to understand. An object (Class CDib) should be independent.
@@ -563,10 +579,10 @@ extern	HWND	hwnd;					// This is the main windows handle
 
 void CDib::ClearDib(int Red, int Green, int Blue)
     {
-    DWORD		i, j;
+    int		i, j;
 
     RGBTRIPLE *	Dest;
-    DWORD	DestWidthBytes   = WIDTHBYTES((DWORD)DibWidth * 24L);
+    size_t	DestWidthBytes = ComputeWidthBytes((DWORD)DibWidth, 24L);
 
     switch(BitsPerPixel)
 	{

@@ -45,7 +45,7 @@ int	CPreview::PreviewGrid(HWND hwnd, int type)
 
     {
     WORD	i, k, l, bytes_per_pixel;
-    long	address, j, m;
+    size_t 	address, j, m;
 
     bytes_per_pixel = PreviewDib.BitsPerPixel / 8;
     if (type == VERTLINE || type == BOTHLINE)

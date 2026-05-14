@@ -10,6 +10,7 @@
 **************************************************************************/
 
 #include "OtherFunctions.h"
+#include "Manp.h"
 
 #define		PASCALSIZE	240
 #define		TRIANGLESIZE	80
@@ -23,10 +24,10 @@ int	COtherFunctions::DoPascal()
     unsigned	__int64	b[PASCALSIZE];
 		__int64	c[TRIANGLESIZE][TRIANGLESIZE];
 
-    if (lo > threshold)
-	lo = threshold - 1;
-    if (hi > threshold)
-	hi = threshold - 1;
+    if (lo > gManp->threshold)
+	lo = gManp->threshold - 1;
+    if (hi > gManp->threshold)
+	hi = gManp->threshold - 1;
 
     if (subtype == 'A')
 	{
@@ -57,7 +58,7 @@ int	COtherFunctions::DoPascal()
 		    {
 		    b[j] = a[j - 1] + a[j];
 		    if (b[j])
-			Plot.DisplayFilledCircle(j * CircleSize + xdots / 2 - i * CircleSize / 2, ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (b[j] % moda == 0) ? lo : hi);
+			Plot.DisplayFilledCircle(j * CircleSize + gManp->xdots / 2 - i * CircleSize / 2, gManp->ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (b[j] % moda == 0) ? lo : hi);
 		    }
 		memcpy(&a,&b, sizeof(__int64)*(NumberIterations +1));	// swap a and b arrays
 		}
@@ -73,7 +74,7 @@ int	COtherFunctions::DoPascal()
 		for (j = 2; j <= i; j++)
 		    {
 		    c[i][j] = c[i][j - 1] + c[i - 1][j - 1];
-		    Plot.DisplayFilledCircle(xdots / 2 + i * CircleSize / 2 - j * CircleSize, ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
+		    Plot.DisplayFilledCircle(gManp->xdots / 2 + i * CircleSize / 2 - j * CircleSize, gManp->ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
 		    }
 		}
 	    break;
@@ -88,12 +89,12 @@ int	COtherFunctions::DoPascal()
 		for (j = 2; j <= i; j++)
 		    {
 		    c[i][j] = c[i][j - 1] + c[i - 1][j];
-		    Plot.DisplayFilledCircle(xdots / 2 + i * CircleSize / 2 - j * CircleSize, ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
+		    Plot.DisplayFilledCircle(gManp->xdots / 2 + i * CircleSize / 2 - j * CircleSize, gManp->ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
 		    }
 		}
 	    break;
 	case 'D':   					// Dudley	http://en.wikipedia.org/wiki/Dudley_triangle
-	    Plot.DisplayFilledCircle(xdots / 2 + CircleSize / 2 - CircleSize, ydots / 2 - CircleSize * NumberIterations / 2 * CircleSize, CircleSize / 2, hi);
+	    Plot.DisplayFilledCircle(gManp->xdots / 2 + CircleSize / 2 - CircleSize, gManp->ydots / 2 - CircleSize * NumberIterations / 2 * CircleSize, CircleSize / 2, hi);
 	    c[1][1] = 2;
 	    c[2][1] = 2;
 	    c[2][2] = 2;
@@ -104,12 +105,12 @@ int	COtherFunctions::DoPascal()
 		for (j = 1; j <= i; j++)
 		    {
 		    c[i][j] = j * (j + 1) % (i + 2);
-		    Plot.DisplayFilledCircle(xdots / 2 + i * CircleSize / 2 - j * CircleSize, ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
+		    Plot.DisplayFilledCircle(gManp->xdots / 2 + i * CircleSize / 2 - j * CircleSize, gManp->ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
 		    }
 		}
 	    break;
 	case 'E':   					// Floyd	
-	    Plot.DisplayFilledCircle(xdots / 2 + CircleSize / 2 - CircleSize, ydots / 2 - CircleSize * NumberIterations / 2 * CircleSize, CircleSize / 2, hi);
+	    Plot.DisplayFilledCircle(gManp->xdots / 2 + CircleSize / 2 - CircleSize, gManp->ydots / 2 - CircleSize * NumberIterations / 2 * CircleSize, CircleSize / 2, hi);
 	    c[1][1] = 2;
 	    c[2][1] = 2;
 	    c[2][2] = 2;
@@ -120,7 +121,7 @@ int	COtherFunctions::DoPascal()
 		for (j = 1; j <= i; j++)
 		    {
 		    c[i][j] = c[i][j - 1] + 1;
-		    Plot.DisplayFilledCircle(xdots / 2 + i * CircleSize / 2 - j * CircleSize, ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
+		    Plot.DisplayFilledCircle(gManp->xdots / 2 + i * CircleSize / 2 - j * CircleSize, gManp->ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
 		    }
 		}
 	    break;
@@ -141,7 +142,7 @@ int	COtherFunctions::DoPascal()
     		    if (c[i][j] == 0)
 			c[i][j] = c[i - 1][j - 1] + c[i - 2][j - 2];
 
-		    Plot.DisplayFilledCircle(xdots / 2 + i * CircleSize / 2 - j * CircleSize, ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
+		    Plot.DisplayFilledCircle(gManp->xdots / 2 + i * CircleSize / 2 - j * CircleSize, gManp->ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
 		    }
 		}
 	    break;
@@ -164,7 +165,7 @@ int	COtherFunctions::DoPascal()
 		    d[i][j] = fabs(d[i - 1][j - 1] - d[i][j - 1]);
 		    c[i][j] = (__int64)(1 / d[i][j] + 0.5);
 //		    DisplayFilledCircle(xdots / 2 + i * CircleSize / 2 - j * CircleSize, ydots / 2 - CircleSize * n / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
-		    Plot.DisplayFilledCircle(xdots / 2 - i * CircleSize / 2 + j * CircleSize, ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
+		    Plot.DisplayFilledCircle(gManp->xdots / 2 - i * CircleSize / 2 + j * CircleSize, gManp->ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
 		    }
 		}
 	    break;
@@ -202,7 +203,7 @@ int	COtherFunctions::DoPascal()
 			c[i][j] -= (__int64)(pronum / prodem1 / prodem2);
 			}
 //		    else
-		    Plot.DisplayFilledCircle(xdots / 2 + i * CircleSize / 2 - j * CircleSize, ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
+		    Plot.DisplayFilledCircle(gManp->xdots / 2 + i * CircleSize / 2 - j * CircleSize, gManp->ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (c[i][j] % moda == 0) ? lo : hi);
 		    }
 		}
 	    break;
@@ -224,7 +225,7 @@ int	COtherFunctions::DoPascal()
 		    c[i][j] = -(i - 1) * c[i - 1][j] + c[i - 1][j - 1];
     		    if (i == j)
 			c[i][j] = 1;
-		    Plot.DisplayFilledCircle(xdots / 2 + i * CircleSize / 2 - j * CircleSize, ydots / 2 - CircleSize * NumberIterations / NumberIterations + i * CircleSize, CircleSize / 2, (ABS(c[i][j]) % moda == 0) ? lo : hi);
+		    Plot.DisplayFilledCircle(gManp->xdots / 2 + i * CircleSize / 2 - j * CircleSize, gManp->ydots / 2 - CircleSize * NumberIterations / NumberIterations + i * CircleSize, CircleSize / 2, (ABS(c[i][j]) % moda == 0) ? lo : hi);
 		    }
 		}
 	    break;
@@ -246,7 +247,7 @@ int	COtherFunctions::DoPascal()
 		    c[i][j] = j * c[i - 1][j] + c[i - 1][j - 1];
     		    if (i == j)
 			c[i][j] = 1;
-		    Plot.DisplayFilledCircle(xdots / 2 + i * CircleSize / 2 - j * CircleSize, ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (ABS(c[i][j]) % moda == 0) ? lo : hi);
+		    Plot.DisplayFilledCircle(gManp->xdots / 2 + i * CircleSize / 2 - j * CircleSize, gManp->ydots / 2 - CircleSize * NumberIterations / 2 + i * CircleSize, CircleSize / 2, (ABS(c[i][j]) % moda == 0) ? lo : hi);
 		    }
 		}
 	    break;

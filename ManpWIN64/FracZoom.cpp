@@ -14,7 +14,6 @@
 #include <math.h>
 #include "manpwin.h"
 #include "manp.h"
-#include "anim.h"
 #include "fractype.h"
 #include "resource.h"
 #include "BigDouble.h"
@@ -22,54 +21,22 @@
 #include "colour.h"
 #include "SafeStrings.h"
 
-extern	double	hor;			// horizontal address
-extern	double	vert;			// vertical address
-extern	double	mandel_width;		// final width
-extern	double	ScreenRatio;		// ratio of width / height for the screen
-extern	BYTE	BigNumFlag;		// True if bignum used
-extern	long	threshold;
-extern	int	time_to_restart;	// time to restart?
-
-extern	WORD	special;		// special colour, phase etc
-extern	int	period_level;		/* 0 for no periodicity checking */
-extern	BYTE	screenflag;		/* replay saved screen */
-extern	int	biomorph;		/* biomorph colour */
-extern	BYTE	cycleflag;		/* do colour cycling */
-extern	int	decomp;			/* number of decomposition colours */
-extern	BYTE	orbit_flag;		/* display orbits? */
-extern	BYTE	exitflag;		/* exit on completion */
-extern	BYTE	juliaflag;		/* Julia implementation of fractal */
-extern	char	floatflag;		/* floating point maths */
-extern	BYTE	grayflag;		/* use grey value not colour number */
-extern	BYTE	pairflag;		/* stereo pair flag and window size */
-extern	BYTE	orig_palette[];		/* loaded palette */
-extern	CTrueCol    TrueCol;		// palette info
-extern	WORD	type;			/* M=mand, N=Newton etc */
-extern	int	xdots, ydots;
 extern	char	SCIPath[];		// path for SCI files
-extern	double	param[];
 
 // Big num declarations **********************************************************
-extern	int	decimals, precision;
-extern	BYTE	BigNumFlag;		// True if bignum used
-extern	BigDouble   BigHor, BigVert, BigWidth;
-extern	int getprecbf_mag(void);
+extern	int	decimals/*, precision*/;
 // Big num declarations **********************************************************
 
-extern	int	analyse_corner(char *);
-//extern	void	calcfracinit(void);
 extern	void	BasicFractData(StringBuilder& sb, BOOL);
 extern	void	ConvertRGB2ASCII(RGBTRIPLE, char *);
 extern	char	*GenerateMPEGFileName (char *, char *);
 extern	char	*GenerateAnimFileName (char *, char *);
-//extern	void	ConvertBignum2String(char *s, mpfr_t num);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
 
 char	*AnimData(void);
 
 double		StartWidth = 4.0;		// starting width
 static	int	PaletteShift = 0;
-BOOL		StartImmediately = TRUE;
 static	int	StartIter = 250;
 static	int	EndIter = 250;
 static	int	frames = 100;
@@ -88,8 +55,7 @@ extern	char	PNGFile[];			// PNG file
 	Main script generator
 **************************************************************************/
 
-int	GenZoomScript(HWND hwnd, char *filename) 
-
+int	CManp::GenZoomScript(HWND hwnd, char *filename) 
     {
     int		steps, i, k;
     char	ascii[6];
@@ -115,7 +81,7 @@ int	GenZoomScript(HWND hwnd, char *filename)
     wo = mandel_width;
 
     steps = frames;
-    centrex = x + (wo * (ScreenRatio / 2.0));
+    centrex = x + (wo * (AspectRatio / 2.0));
     centrey = y + (wo / 2.0);
     temp = (log(wi / wo)) / steps;
     divisor = exp(temp);
@@ -124,7 +90,7 @@ int	GenZoomScript(HWND hwnd, char *filename)
     if (BigNumFlag)
 	{
 	Big_StartWidth = StartWidth;			// get StartWidth
-	Big_Scale = ScreenRatio/2.0;			// get centrex
+	Big_Scale = AspectRatio /2.0;			// get centrex
 	Big_centrex = BigWidth * Big_Scale + BigHor;
 	Big_centrey = BigWidth /2.0 + BigVert;		// get centrey
 	BigTemp = Big_StartWidth / BigWidth;
@@ -187,9 +153,6 @@ int	GenZoomScript(HWND hwnd, char *filename)
 	    Big_x1.ToString(s1, SIZEOF_BF_VARS, false);
 	    Big_y1.ToString(s2, SIZEOF_BF_VARS, false);
 	    Big_CurrentWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
-	    //	    ConvertBignum2String(s1, Big_x1.x);
-//	    ConvertBignum2String(s2, Big_y1.x);
-//	    ConvertBignum2String(s3, Big_CurrentWidth.x);
 	    *(s1 + decimals + 5) = '\0';					// no need to print too many decimals
 	    *(s2 + decimals + 5) = '\0';
 	    *(s3 + decimals + 5) = '\0';
@@ -201,7 +164,7 @@ int	GenZoomScript(HWND hwnd, char *filename)
 	    }
 	else
 	    {
-	    x1 = centrex - (current_width * (ScreenRatio / 2.0));
+	    x1 = centrex - (current_width * (AspectRatio / 2.0));
 	    y1 = centrey - (current_width / 2.0);
 	    fprintf(out, "-c%24.24f,%24.24f,%1.24e\n", x1, y1, current_width);
 	    current_width /= divisor;
@@ -216,7 +179,6 @@ int	GenZoomScript(HWND hwnd, char *filename)
 **************************************************************************/
 
 char	*AnimData(void)
-
     {
 //char	s[400];
     static	char	info[MAXDATALINE];
@@ -247,20 +209,24 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
      BOOL		TempCheck;
      char		*fileptr;
      HWND		hCtrl;
+     int		RequestedSize;
+     int		MinimumSize;
 
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	        VariableSize = max(decimals + PRECISION_FACTOR, DBL_MANT_DIG);	// dec = 0 if not BigNum
-		cycleflag = FALSE;
+		RequestedSize = decimals + PRECISION_FACTOR;
+		MinimumSize = DBL_MANT_DIG;
+		VariableSize = (UINT)((RequestedSize > MinimumSize) ? RequestedSize : MinimumSize);
+		gManp->cycleflag = FALSE;
 		s = new char[SIZEOF_BF_VARS];
 		s1 = new char[SIZEOF_BF_VARS];
 		s2 = new char[SIZEOF_BF_VARS];
 		s3 = new char[SIZEOF_BF_VARS];
 		hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
-		SendMessage(hCtrl, BM_SETCHECK, StartImmediately, 0L);
+		SendMessage(hCtrl, BM_SETCHECK, gManp->StartImmediately, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_SHOWPALETTE);
-		SendMessage(hCtrl, BM_SETCHECK, TrueCol.ScriptPaletteFlag, 0L);
+		SendMessage(hCtrl, BM_SETCHECK, gManp->TrueCol.ScriptPaletteFlag, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGDIRECT);
 		SendMessage(hCtrl, BM_SETCHECK, WritePNGFrames, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_WRITEMPEGDIRECT);
@@ -275,20 +241,20 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		SetDlgItemText(hDlg, IDC_SCRIPT_FILENAME, ScriptFileName);
 //		_snprintf_s(PNGName, MAX_PATH, _TRUNCATE, "%s%s\\Manp", ManpPath, ANIMPNGPath);
 		SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGName);
-		if (BigNumFlag)
+		if (gManp->BigNumFlag)
 		    {
-		    BigHor.ToString(s1, SIZEOF_BF_VARS, false);
-		    BigVert.ToString(s2, SIZEOF_BF_VARS, false);
-		    BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.12Re");
+		    gManp->BigHor.ToString(s1, SIZEOF_BF_VARS, false);
+		    gManp->BigVert.ToString(s2, SIZEOF_BF_VARS, false);
+		    gManp->BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.12Re");
 //		    ConvertBignum2String(s1, BigHor.x);
 //		    ConvertBignum2String(s2, BigVert.x);
 //		    mpfr_sprintf(s3, "%.12Re", BigWidth.x);
 		    }
 		else
 		    {
-		    _snprintf_s(s1, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", hor);
-		    _snprintf_s(s2, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", vert);
-		    _snprintf_s(s3, SIZEOF_BF_VARS, _TRUNCATE, "%1.12e", mandel_width);
+		    _snprintf_s(s1, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", gManp->hor);
+		    _snprintf_s(s2, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", gManp->vert);
+		    _snprintf_s(s3, SIZEOF_BF_VARS, _TRUNCATE, "%1.12e", gManp->mandel_width);
 		    }
 		SetDlgItemText(hDlg, IDC_HOR, s1);
 		SetDlgItemText(hDlg, IDC_VERT, s2);
@@ -296,7 +262,7 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		_snprintf_s(s, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", StartWidth);
 		SetDlgItemText(hDlg, IDC_WIDTH_START, s);
 		SetDlgItemInt(hDlg, IDC_THRESHOLD_START, StartIter, TRUE);
-		SetDlgItemInt(hDlg, IDC_THRESHOLD_END, threshold, TRUE);
+		SetDlgItemInt(hDlg, IDC_THRESHOLD_END, gManp->threshold, TRUE);
 		PaletteShift = 0;
 		SetDlgItemInt(hDlg, IDC_PALETTESHIFT, PaletteShift, TRUE);
 //		SetDlgItemInt(hDlg, IDC_THRESHOLD_END, EndIter, TRUE);
@@ -358,9 +324,9 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			EndIter = GetDlgItemInt(hDlg, IDC_THRESHOLD_END, &bTrans, TRUE);
 			PaletteShift = GetDlgItemInt(hDlg, IDC_PALETTESHIFT, &bTrans, TRUE);
 			hCtrl = GetDlgItem (hDlg, IDC_SHOWPALETTE);
-			TrueCol.ScriptPaletteFlag = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->TrueCol.ScriptPaletteFlag = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
-			StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGDIRECT);
 			WritePNGFrames = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_WRITEMEMDIRECT);
@@ -371,8 +337,8 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			WritePNGList = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			if (StartIter <= 0 || EndIter <= 0)
 			    {
-			    StartIter =  threshold;
-			    EndIter =  threshold;
+			    StartIter = gManp->threshold;
+			    EndIter = gManp->threshold;
 			    }
 
 			if (WriteMPEGFrames)						// generate MPEG filename
@@ -392,29 +358,28 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			sscanf(s, "%lf", &StartWidth);
 			GetDlgItemText(hDlg, IDC_WIDTH_END, s3, VariableSize);
 			buf = new char[SIZEOF_BF_VARS * 3];
-			_snprintf_s(buf, SIZEOF_BF_VARS * 3, _TRUNCATE, "%s,%s,%s, %f, %f", s1, s2, s3, param[0], param[1]);	// ensure that real and imag perturbation is unchanged
-			if (analyse_corner(buf) < 0)
+			_snprintf_s(buf, SIZEOF_BF_VARS * 3, _TRUNCATE, "%s,%s,%s, %f, %f", s1, s2, s3, gManp->param[0], gManp->param[1]);	// ensure that real and imag perturbation is unchanged
+			if (gManp->analyse_corner(buf) < 0)
 			    {
-			    double  AspectRatio = (double)xdots / (double)ydots;
-			    BigNumFlag = FALSE;
-			    if (AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
+			    gManp->BigNumFlag = FALSE;
+			    if (gManp->AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
 				{
-				mandel_width = 4.0;
-				vert = -2.0;
-				hor = vert * AspectRatio;
+				gManp->mandel_width = 4.0;
+				gManp->vert = -2.0;
+				gManp->hor = gManp->vert * gManp->AspectRatio;
 				}
 			    else
 				{
-				mandel_width = 4.0 / AspectRatio;
-				hor = -2.0;
-				vert = hor / AspectRatio;
+				gManp->mandel_width = 4.0 / gManp->AspectRatio;
+				gManp->hor = -2.0;
+				gManp->vert = gManp->hor / gManp->AspectRatio;
 				}
 			    SAFE_SPRINTF(s, "Deep Zooming Limit (%d decimals) exceeded", SIZEOF_BF_VARS);
 			    MessageBox (hDlg, s, "ManpWin", MB_ICONEXCLAMATION | MB_OK);
 			    MessageBeep (0);
 			    }
 			else
-			    GenZoomScript(hDlg, ScriptFileName);
+			    gManp->GenZoomScript(hDlg, ScriptFileName);
 			if (s1) delete [] s1;
 			if (s2) delete [] s2;
 			if (s3) delete [] s3;
@@ -429,7 +394,7 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			if (s3) delete [] s3;
 			if (s) delete [] s;
 			EndDialog (hDlg, FALSE);
-			time_to_restart = FALSE;
+			gManp->time_to_restart = FALSE;
 			return FALSE;
 		   }
 		   break;

@@ -1,4 +1,5 @@
 #include "PertEngine.h"
+#include "Manp.h"
 
 void	CPerturbation::BigProcessDerivativeSlope(ExpComplex ExpDC, ExpComplex ExpTemp, HANDLE ghMutex, long MaxIteration, long iteration, CTrueCol &TrueCol, int x, int y)
     {
@@ -63,7 +64,7 @@ void	CPerturbation::ProcessDerivativeSlopeMain(Complex z, double reflection, HAN
     RGBTRIPLE	colour;
 
     CPlot plot;  // binds to global wpixels by default
-    plot.InitPlot(MaxIteration, &TrueCol, wpixels, Dib->DibWidth, Dib->DibHeight, Dib->DibWidth, Dib->DibHeight, Dib->BitsPerPixel, Dib, USEPALETTE | USEWPIXELS);
+    plot.InitPlot(MaxIteration, &TrueCol, &gManp->wpixels, Dib->DibWidth, Dib->DibHeight, Dib->DibWidth, Dib->DibHeight, Dib->BitsPerPixel, Dib, USEPALETTE | USEWPIXELS);
 
     reflection = reflection / (1.0 + LightHeight);			// rescale so that t does not get bigger than 1
     if (reflection < 0.0) reflection = 0.0;

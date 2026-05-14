@@ -6,9 +6,10 @@
 #include <atomic>
 #include "qd_real.h"
 #include "FractalAbort.h"
+#include "..\ManpWIN64\Manp.h"
 
-extern	HWND	GlobalHwnd;			// This is the main windows handle
-extern	int	time_to_quit;			// time to quit?
+//extern	HWND	GlobalHwnd;			// This is the main windows handle
+//extern	int	time_to_quit;			// time to quit?
 extern	std::atomic<bool> gStopRequested;	// force early exit
 
 using namespace qd;
@@ -26,7 +27,7 @@ void qd_real::error(const char *msg)
 	return;
 
     gStopRequested.store(true);
-    MessageBox(GlobalHwnd, msg, "QD Fatal Error, I'm outta here", MB_ICONEXCLAMATION | MB_OK);
+    MessageBox(gManp->GlobalHwnd, msg, "QD Fatal Error, I'm outta here", MB_ICONEXCLAMATION | MB_OK);
     throw FractalAbort();
     }
 

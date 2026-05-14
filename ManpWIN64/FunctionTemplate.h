@@ -57,7 +57,7 @@ void Init_Cubic(
     double* param,
     BYTE juliaflag,
     int& subtype,
-    WORD& special,
+ //   RGBTRIPLE& special,
     TComplex& a,
     TComplex& b,
     TComplex& a2,
@@ -76,9 +76,6 @@ void Init_Cubic(
 	case 3: subtype = 'K'; break;
 	default: subtype = 'B'; break;
 	}
-
-    // --- special ---
-    special = ((int)param[1] < 0) ? 0 : (int)param[1];
 
     // --- calculations ---
     if (subtype == 'B')
@@ -337,7 +334,7 @@ inline int FunctionsDispatch(
     double* param,
     BYTE* SpecialFlag,
     long* iteration,
-    WORD special,
+    int &SPECIALINDEX,
     char subtype,
     int bailout_type,
     TReal rqlim)
@@ -413,15 +410,15 @@ inline int FunctionsDispatch(
 	    if (subtype == 'K')				// CKIN
 		{
 		*z = z->CCube() + b;
-		z->x += param[2];
-		z->y += param[3];
+		z->x += param[4];
+		z->y += param[5];
 		}
 	    else
 		{
 		temp = z->CCube() + b;
 		*z = temp - aa3 * *z;
-		z->x += param[2];
-		z->y += param[3];
+		z->x += param[4];
+		z->y += param[5];
 		}
 
 	    if (z->CSumSqr() > 100.0)
@@ -432,7 +429,7 @@ inline int FunctionsDispatch(
 		    {
 		    if (q->CSumSqr() < 0.111111)
 			{
-			*iteration = special;
+			*iteration = SPECIALINDEX;
 			*SpecialFlag = TRUE;
 			return TRUE;
 			}
@@ -445,7 +442,7 @@ inline int FunctionsDispatch(
 
 		if (v.CSumSqr() <= 0.000001)
 		    {
-		    *iteration = special;
+		    *iteration = SPECIALINDEX;
 		    *SpecialFlag = TRUE;
 		    return TRUE;
 		    }

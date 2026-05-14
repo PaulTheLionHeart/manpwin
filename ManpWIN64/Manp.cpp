@@ -21,7 +21,7 @@
 #include "complex.h"
 #include "BigDouble.h"
 #include "BigComplex.h"
-#include "colour.h"
+#include "BigTrig.h"
 #include "mpfr.h"
 #include "slope.h"
 #include "pixel.h"
@@ -29,392 +29,86 @@
 #include "OtherFunctions.h"
 #include "SafeStrings.h"
 
-//struct	workliststuff	worklist[MAXCALCWORK];
-int	/*workpass, */totpasses, curpass;	// for 1/2 pass type tracing 
-int	PlotType;
+CManp *gManp = nullptr;			// this is a global pointer to the manp object that will slowly absorb most of the code. For now, we make it a pointer that can be used elsewhere
 
-double	dem_toobig;
-int	distest = 0, distestwidth = 71;
-double	delxx, delxx2, delyy, delyy2;
+extern	std::atomic<bool> gFatalErrorOccurred;		// abort from DD/QD failure
 
-int	finished = FALSE;		// all passes complete 
-BYTE	orig_palette[768];		// loaded palette 
-
-BYTE	*logtable = NULL;		// log value table for col comp 
-
-long	iteration;			// globals for speed for now at least
-WORD	type;				// M=mand, N=Newton etc 
-int	subtype = 0;		
-					// Sub types:
-					// Newton	B=basin, S=stripe, N=normal
-					// Bifurcation	Q = quad mand, B = bifurcation
-					// Cubic	B = CBIN, C = CCIN, F = CFIN, K = CKIN
-					// Rational Map	3 = RAT34, 4 = RAT44
-
-RGBTRIPLE OrbitColour = {255,255,255};	// Indexed colour for the orbit displays in Julia sets
-WORD	special = 2;			// special colour, phase etc
-WORD	degree;				// power
-BYTE	pairflag;			// stereo pair 
-int	biomorph;			// biomorph colour 
-int	decomp;				// number of decomposition colours
-BYTE	screenflag;			// replay saved screen 
-BYTE	save_flag = 0;			// save screen after image 
-BYTE	_3dflag;			// replay saved file. 3 = 3D 
-BOOL	ZoomEdge;			// Zooming process
-BOOL	UseFractintPalette = FALSE;	// standard EGA palette
-BYTE	exitflag;			// exit on completion
-BYTE	juliaflag;			// Julia implementation of fractal
-BYTE	RealTimeJuliaFlag;		// Display Julia set in real time
-BYTE	calcmode;			// 'B' boundary, 'G' guess, etc
-BYTE	phaseflag;			// 3 phases for type SPECIALNEWT fractals
-BYTE	cycleflag;			// do colour cycling
-BYTE	addflag;			// add spirals
-int	logflag;			// log colour map required or in error
-int	logval;				// log colour map starting value
-int	AutoStereo_value;		// AutoStereo depth value
-long	threshold;			// maximum iterations
-int	Offset3D = 0;			// offset to threshold for 3D display
-int	start, end;			// y pixel count range
-BYTE	symmflag;			// symmetry ?
-int	reset_period;			// periodicity checking
-int	window_depth;			// data window size
-int	window_width;			// modify for Julia set
-
-double	x_rot;				// angle display plane to x axis
-double	y_rot;				// angle display plane to y axis
-double	z_rot;				// angle display plane to z axis
-double	sclx, scly, sclz;		// scale 
-
-double	hor;				// horizontal address
-double	vert;				// vertical address
-double	mandel_width;			// width of display
-//double	xgap;				// gap between pixels
-//double	ygap;				// gap between pixels
-/*
-BYTE	ch;				// used for compression
-int	number;				// used for compression
-*/
-char	AntStatus[200];			// display the progress of ant()
-char	LyapSequence[120];		// hold the AB sequence for Lyapunov fractals
-
-double	potparam[3] = { 255.0, 820.0, 20.0 };		// potential parameters
-double	param[20];			// parameters
-double	f_radius, f_xcenter, f_ycenter;	// inversion radius, center
-double	magnitude;
-double	rqlim;				// bailout level
-int	BailoutTestType = BAIL_MOD;	// type of bailout test
-int	InsideMethod;			// the number of the inside filter
-int	OutsideMethod;			// the number of the outside filter
-
-int	colors = 256; 			// maximum colors available
-
-int	oldrow = -1;
-int	oldcol = -1;
-
-jmp_buf	jump;				// jump to start next screen, jump in zoom 
-
-extern	CTrueCol    TrueCol;		// palette info
-//extern	CSlope	Slope[];
-extern	CDib	Dib; 
-extern	WORD	delaycount;
-extern	RECT 	r;
-extern	int	FilterType;		// data for Tierazon filters
-extern	int	ColourMethod;		// Tierazon colour methods
-extern	int	nFDOption;		// Fractal Dimension option for Tierazon filters
-extern	double	xx3rd, yy3rd;		// selected screen corners 
-
-extern	BOOL	invert;			// invert fractal
-extern	BOOL	ShowOrbits;		// show julia orbits for each image
-extern	long    fillcolor;		// tesseral fillcolor: -1=normal 0 means don't fill     
-	int	currow, curcol;
-
-extern	BOOL	BatchFlag;
-extern	BOOL	AutoExitFlag;
-extern	BOOL	AutoSaveFlag;
-extern	BOOL	AutoStartFlag;
-extern	BOOL	CommandLineFile;	// does the command line contain a par filename?
-extern	char	FormulaString[];	// used to hold the full formula
 extern	char	AxesText[];		// used to convert axes and display them
-extern	BYTE	PerspectiveFlag;	// display using perspective
-extern	WORD	colours;
-
-	int	symmetry;		// symmetry flag 
-extern	POINT	ptSize;			// Stores DIB dimensions
-extern	int	RotationAngle;		// in degrees
 extern	char	LSYSFile[];
 extern	char	PARFile[];
 extern	char	KFRFile[];
-extern	int	PaletteShift;		// fractional palette addressing
-extern	double	ColourSpeed;		// used for colour smoothing
-
-extern	int	height, xdots, ydots, width, bits_per_pixel;
-
-// stuff for DwdDiff algorithm
-extern	double	bump_transfer_factor;
-extern	int	PaletteStart;
-extern	double	lightDirectionDegrees;
-extern	double	bumpMappingDepth;
-extern	double	bumpMappingStrength;
-extern	bool	EnableApproximation;	// use BLA on perturbation
-
-extern	int	DrawJulia(HWND, POINTS);
-extern	int	InitRTJulia(HWND);
 extern	void	FindCursorRealPos(POINTS *);
 extern	int	SendCopydataMessage(HWND, char *);
 
 extern	char	*FractData(void);
 extern	char	*str_find_ci(char *, char *);
-extern	int	InitPixelFractal();
-extern	int	DoPixelFractal(HWND hwnd, int distestwidth);
-
-extern	BOOL	bTrack;			// TRUE if user is selecting a region
-extern	HWND	GlobalHwnd;		// to allow passing of hwnd
-//extern	BYTE	default_palette[];	// default VGA colour palette
-
-extern	BOOL	RunAnimation;		// are we in the middle of an animation run?
-extern	BOOL	IsPAR;			// are we currently running a PAR file?
-extern	BOOL	IsKFR;			// are we currently running a KFR file?
-extern	int	CoordSystem;
-extern	int	MaxDimensions;
-
-extern	long	color;			// used for Newton root locations 
-extern	int	colors; 		// maximum colors available
-extern	int	file_type;
-	int	blockindex;		// for solid guessing blocksize 
 
 extern	char	lsys_type[];
-extern	char	PertStatus[];
-extern	char	SlopeStatus[];
 
 extern	struct __timeb64 	FrameEnd;
 extern	struct __timeb64 	FrameStart;
-	char	szStatus[STATUSSIZE] = { 0 };	// status bar text
-extern	DWORD	StatusColour;		// colour of status bar
-extern	double	ScreenRatio;		// ratio of width / height for the screen
-extern	DOUBLE	yymax;			// max value of vert
-extern	Complex	RotationCentre;		// centre of rotation
 extern	HWND	CallingWindowHandle;	// Is ManpWIN called by an external window via WM_COPYDATA message?
-extern	int	DataFromPNGFile;	// loaded PNG file?
-extern	int	NumberThreads;		// number of threads for multi-threading
-extern	std::vector<float> wpixels;	// an array of doubles holding slope modified iteration counts
-extern	std::vector<int>            PixelProgress;
-extern	std::vector<BYTE>           PixelThreadComplete;   // keep BYTE (you’re right)
-extern	std::vector<HANDLE>         hPixelThread;
-extern	std::vector<PMYPIXELDATA>   pPixelDataArray;
+//extern	int	DataFromPNGFile;	// loaded PNG file?
 
-// number declarations **********************************************************
-extern	BYTE		BigNumFlag;		// True if bignum used
-extern	MATH_TYPE	MathType;
 
-extern	int		decimals, precision;
-extern	BigDouble	BigHor, BigVert, BigWidth;//, Big_xgap, Big_ygap;
-/*
-extern	BigComplex	zBig, cBig, qBig;
-extern	BigDouble	Big_xxmax, Big_xxmin, Big_yymax, Big_yymin;
-*/
-extern	BigDouble	BigBailout;
-extern	dd_real		DDBailout;//, DDCloseEnough, DDxgap, DDygap, DDHor, DDVert, DDWidth, DDyymax;
-extern	qd_real		QDBailout;//, QDCloseEnough, QDxgap, QDygap, QDHor, QDVert, QDWidth, QDyymax;
-
-// number declarations **********************************************************
-
-int	time_to_zoom = 0;		// time to zoom in or out?
-int	time_to_restart = 0;		// time to restart?
-int	time_to_reinit = 0;		// time to reinitialize?
-int	time_to_quit = 0;		// time to quit?
-int	time_to_load = 0;		// time to load file?
-int	time_to_break = 0;		// time to break out of animation?
-int	NonStandardFractal = FALSE;	// does fractal use standard plotting mode?
-
-extern	int	find_count_fp(DOUBLE, DOUBLE), DoHenon(void), user_data(HWND), 
+extern	int	find_count_fp(double, double), DoHenon(void), user_data(HWND),
 		Lsystem(HWND, char *), dynam2dfloatsetup(void), dynam2dfloat(void),
 		orbit3dfloatsetup(void), orbit3dfloatcalc(void), ifs(HWND), cellular(void), plasma(void), 
 		demowalk(void), orbit2dfloat(void), FractintPar(HWND, char *), 
 		Fibonacci(void), Fourier(void), RunForm(char *, int), bifurcation(void);
 extern	int	NullSetup(void);				// sometimes we just don't want to do anything 
 extern	int	rotate(int);
-extern	int	ChangeBigPrecision(int);
 
-extern	void	init_log(HWND), set_palette(void), 
+extern	void	set_palette(void), 
 		setsymmetry(int, int), DisplayPalette(HWND, BOOL);
 
 extern	int	write_png_file(HWND, char *, char *, char *); 
 extern	void	ChangeView(HWND, int, int, int, int, int, int, int, int, char);
 extern	void	initFibonacci(void);
-extern	void	UpdateInit(void);
-extern	int	UpdateClose(void);
-//extern	void	ConvertBignum2String(char *s, mpfr_t num);
 extern	int	InitParserArithmetic(void);
 
-	void	DisplayFractal(HWND);
-
-int	perform_worklist(HWND), SecondaryWndProc(void);
-void	ClearScreen(void);
-void	DisplayStatusBarInfo(int, char *);
-void    InitBailout();			// set up defaults - can be overwritten by parameter animation
-
-extern	ProcessType	OscAnimProc;
-	CFract		Fractal;
-	CTZfilter	TZfilter;	// Tierazon filters
-	COtherFunctions	OthFn;
-
-	//	Complex		z, q, c, j;
-	Complex		j;
-
-	CPlot		Plot;		// image plotting routines 
-//	CPixel		Pix;		// routines for escape fractals
-extern	std::vector<std::unique_ptr<CPixel>> Pixel;
-//extern	CPixel		Pixel[];
-//	CMatrix		Mat;		// matrix applications for rotation and translation
-//	CDDMatrix	DDMat;
-//	CQDMatrix	QDMat;
-//	CBigMatrix	BigMat;
-
-// stuff for Pixel initialisation
-	BYTE		SpecialFlag;			// tell graphing routine of special conditions
-extern	double		closenuff;			// periodicity bailout
-extern	COscProcess	OscProcess;
-extern	int		period_level;			// 0 for no periodicity checking
-extern	BOOL		UseCurrentPalette;		// do we use the ManpWIN palette? If false, generate internal filter palette
-extern	double		dStrands;			// for Tierazon filters
-	long		andcolor;
-extern	BOOL		ExpandStarTrailColours;		// use the first 16 colours if false, else expand across the whole iteration range
-extern	int		xAxis, yAxis, zAxis;		// numerical values for axes for chaotic oscillators
-
-	double		xxmin, xxmax, yymin, yymax;	// corners
-
 /**************************************************************************
-	Main Fractal Loop
+	CManp class constructor and destructor
 **************************************************************************/
 
-void	pfract_main(HWND hwnd, char *szSaveFileName)
-
+CManp::CManp()
     {
-    HCURSOR  hCursor;
-    char	s[360];
-    int	flag;
-    POINTS	CursorLocShort;
-#ifdef DEBUG
-    int	i;
-    _snprintf_s(s, 360, _TRUNCATE, "time_to_restart = %d, time_to_reinit = %d", time_to_restart, time_to_reinit);
-    MessageBox (hwnd, s, "Entering user_data()", MB_ICONEXCLAMATION | MB_OK);
-#endif
+    // Safe now because YOU control when CManp is created (before CreateWindow)
+    RefData = new StoreReferenceData();
+    pOtherFunctions = &OthFn;
+    }
 
-    logflag = FALSE;						// don't use if no memory
-    if (!RunAnimation)
-	_ftime64(&FrameStart);					// initialise time counter
+CManp::~CManp()
+    {
+    delete RefData;
+    RefData = nullptr;
+    }
 
-    time_to_zoom = FALSE;
-    time_to_quit = FALSE;
-    time_to_reinit = TRUE;
-    time_to_restart = FALSE;
-    for (;;) 
+/**************************************************************************
+	Main Fractal Loop - called from WinMain()
+**************************************************************************/
+
+void pfract_main(CManp* manp, HWND hwnd, char* szSaveFileName)
+    {
+    try
 	{
-	Sleep(1);						// reduce idle processor load
-	user_data(hwnd);
-	if (time_to_quit)
-	     return;
-	if (time_to_load)
-	    {
-	    time_to_load = FALSE;
-	    time_to_reinit = FALSE;
-	    time_to_restart = FALSE;
-	    SecondaryWndProc();
-	    }
-	if (time_to_reinit || time_to_zoom)
-	    {
-	    time_to_reinit = FALSE;
-	    flag = SecondaryWndProc();
-	    if (flag == 0 || AutoStartFlag)
-		{
-		hCursor = LoadCursor(NULL, IDC_WAIT);	// Load hour-glass cursor.
-		SetCursor(hCursor);
-/*
-		if (logval)
-		    init_log(hwnd);				// log colour distribution
-		if (_3dflag)
-		    Pixel[0]->init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
-*/
-		if (!addflag && !DataFromPNGFile/* || type != FIBONACCI*/)
-		    ClearScreen();
-		hCursor = LoadCursor(NULL, IDC_ARROW);		// Load normal cursor.
-		SetCursor(hCursor);			        // Reload arrow cursor.
-		DisplayFractal(hwnd);
-		if (DataFromPNGFile)			// if we reload a PNG file before we finish a calc, we don't want to restart a new calc.
-		    DataFromPNGFile = FALSE;
-		else
-		    time_to_restart = TRUE;
-		}
-	    }
-	if (time_to_restart)
-	    {
-
-#ifdef DEBUG
-	    for (i = 0; i < 32; i++)
-		{
-		_snprintf_s(s, 360, _TRUNCATE, "Col[%d]: %d %d %d", i, *(PalettePtr + 3 * i),
-					    *(PalettePtr + 3 * i + 1), *(PalettePtr + 3 * i + 2));
-		MessageBox (hwnd, s, "File colours", MB_ICONEXCLAMATION | MB_OK);
-		}
-#endif   
-
-	    _ftime64(&FrameStart);				// initialise time counter
-	    time_to_restart = FALSE;
-//	    number = 0;					// char count for screen
-	    finished = FALSE;
-	    UpdateInit();
-	    InitBailout();
-	    if (!DataFromPNGFile)
-		perform_worklist(hwnd);
-	    if (time_to_quit)
-		 return;
-	    DisplayPalette(hwnd, TrueCol.DisplayPaletteFlag);
-	    finished = TRUE;
-	    DisplayFractal(hwnd);
-	    if (RealTimeJuliaFlag && !juliaflag)
-		{
-		InitRTJulia(hwnd);
-		FindCursorRealPos(&CursorLocShort);
-		DrawJulia(hwnd, CursorLocShort);
-		}
-	    if (!bTrack)			// don't splatter scan
-		{
-		ChangeView(hwnd, (short)-GetScrollPos (hwnd, SB_HORZ), (short)-GetScrollPos (hwnd, SB_VERT),
-						    (short)ptSize.x, (short)ptSize.y, 0, 0, (short)width, (short)height, TRUE);
-		InvalidateRect(hwnd, &r, FALSE);
-		}
-	    if (AutoExitFlag)
-		time_to_quit = TRUE;
-	    if (AutoSaveFlag)
-		{
-		if (write_png_file(hwnd, szSaveFileName, "ManpWIN", FractData()) < 0)
-		    {
-		    _snprintf_s(s, 360, _TRUNCATE, "Error: Could not write file: <%s>", szSaveFileName);
-		    MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
-		    MessageBeep (0);
-		    AutoSaveFlag = false;
-		    continue;
-		    }
-		}
-	    if (CallingWindowHandle)				// image started by WM_COPYDATA message... return message 
-	    							// to advise that the work is done.
-		SendCopydataMessage(hwnd, "Send CopyData");
-	    UpdateClose();
-	    DisplayStatusBarInfo(COMPLETE, ((IsPAR) ? PARFile : (IsKFR) ? KFRFile : ""));			// display status bar
-	    }
+	gManp->RunMainLoop(hwnd, szSaveFileName);
 	}
-#ifdef DEBUG
-    _snprintf_s(s, 200, _TRUNCATE, "NonStandardFractal = %d", NonStandardFractal);
-    MessageBox (hwnd, s, "Entering user_data()", MB_ICONEXCLAMATION | MB_OK);
-#endif
+    catch (const char* msg)
+	{
+	MessageBoxA(hwnd, msg, "ManpWIN Error", MB_OK | MB_ICONERROR);
+	}
+    catch (...)
+	{
+	MessageBoxA(hwnd, "Unknown error", "ManpWIN Error", MB_OK | MB_ICONERROR);
+	}
     }
 
 /**************************************************************************
     Get Fractal Name
 **************************************************************************/
 
-    char	*GetFractalName(void)
-
+char	*CManp::GetFractalName(void)
     {
     if (type == TIERAZON)
 	return (TierazonSpecific[subtype].name+5);
@@ -431,138 +125,57 @@ void	pfract_main(HWND hwnd, char *szSaveFileName)
     }
 
 /**************************************************************************
-	Get Arith Type
+	Generate  status info
 **************************************************************************/
 
-int 	 GetArithType()
-    {
-    int	flags = fractalspecific[type].flags;
-    if (BigNumFlag)
+char	*CManp::ShowTime (double time)
+    {   
+    static	char	TimeString[120];
+    int		TimeInt, tenths, sec, min, hr;
+
+    tenths = (long)(time * 10.0) % 10;
+    TimeInt = (int)time;
+    sec = TimeInt % 60;
+    TimeInt /= 60;
+    min = TimeInt % 60;
+    hr = TimeInt / 60;
+    if (hr == 0)
 	{
-	if (precision <= DDPRECISION)
-	    MathType = DOUBLEDOUBLE;
-	else if (precision <= QDPRECISION || fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
-	    MathType = QUADDOUBLE;
+	if (min == 0)
+	    SAFE_SPRINTF(TimeString, "%d.%1d sec", sec, tenths);
 	else
-	    MathType = ARBITRARYPREC;
+	    SAFE_SPRINTF(TimeString, "%d min, %d sec", min, sec);
 	}
     else
-	MathType = DOUBLEFLOAT;
-    return MathType;
+	SAFE_SPRINTF(TimeString, "%d hr, %d min", hr, min);
+    return (TimeString);
     }
-
+  
 /**************************************************************************
-	Create Fractal Name
+	Track Progress
 **************************************************************************/
 
-void	CreateFractalName(BOOL UseszAppName, char *Name)
-
+void	CManp::UpdateProgress(std::atomic<int>* workIndex, int totalPixels, char* StatusBarInfo, int NumThreads)
     {
-    char		*szAppName = "Paul's Fractals";
-    char		SubData[1200];
-    char		PrecisionData[20];
-    char		FilterString[20];
-    char		ArithString[20];
-    int			Arith = GetArithType();
-    switch (Arith)
-	{
-	case DOUBLEFLOAT:
-	    strcpy(ArithString, "Arith=Float");
-	    break;
-	case DOUBLEDOUBLE:
-	    strcpy(ArithString, "Arith=DD");
-	    break;
-	case QUADDOUBLE:
-	    strcpy(ArithString, "Arith=QD");
-	    break;
-	default:
-	    strcpy(ArithString, "Arith=Bignum");
-	    break;
-	}
+    static int lastPercent = -1;
 
-    if (Fractal.NumFunct == 1)
-	SAFE_SPRINTF(SubData, "Fn=%s", Fractal.Fn1);
-    else if (Fractal.NumFunct == 2 && type != OSCILLATORS)			// we use NumFunct to display dimensions
-	SAFE_SPRINTF(SubData, "Fn1=%s,Fn2=%s", Fractal.Fn1, Fractal.Fn2);
-    else if (type == FORMULA || type == LSYSTEM || type == FRACTPAR || type == IFS)
-	SAFE_SPRINTF(SubData, "Sub=%s", lsys_type);
-    else if (type == TIERAZON || type == CROSSROADS || type == ZIGZAG || type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
-	SAFE_SPRINTF(SubData, "Sub=%d", subtype);
-    else if (type == CUBIC)
-	{
-	char	ch;
-	if (param[0] == 0.0)   ch = 'B';
-	if (param[0] == 1.0)   ch = 'C';
-	if (param[0] == 2.0)   ch = 'F';
-	if (param[0] == 3.0)   ch = 'K';
-	SAFE_SPRINTF(SubData, "Sub=C%cIN", ch);
-	}
-    else if (type == MALTHUS || type == TRIANGLES || type == GEOMETRY || type == CIRCLES || type == PASCALTRIANGLE)
-	SAFE_SPRINTF(SubData, "Sub=%c", subtype);
-    else if (type == SCREENFORMULA)
-	SAFE_SPRINTF(SubData, "Frm=<%s>", FormulaString);
-    else 
-	SAFE_SPRINTF(SubData, "Sub=%d", subtype);
-    if (BigNumFlag)
-	SAFE_SPRINTF(PrecisionData, "Precision=%d", precision);
-    else
-	SAFE_SPRINTF(PrecisionData, "");
+    int done = workIndex->load();
+    double progress = (double)done / (double)totalPixels;
 
-    if (InsideMethod > NONE || OutsideMethod > NONE)
-	{
-	if (OutsideMethod > TIERAZONCOLOURS)
-	    SAFE_SPRINTF(FilterString, "TZColour=%d, ", ColourMethod);
-	else if (OutsideMethod > TIERAZONFILTERS)
-	    SAFE_SPRINTF(FilterString, "TZFilter=%d, ", FilterType);
-	else if (InsideMethod > NONE)
-	    SAFE_SPRINTF(FilterString, "Filter=%d, ", InsideMethod);
-	else
-	    SAFE_SPRINTF(FilterString, "Filter=%d, ", OutsideMethod);
-	}
-    else
-	SAFE_SPRINTF(FilterString, "");
-	              
-    if (type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
-	{
-	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, Plot=%c, Log=%d, Fract=%s, %s, Max Dim=%d, Co-ordSys=%s, Axes=%s",
-	    (UseszAppName) ? (LPSTR)szAppName : "", threshold, calcmode, logval, GetFractalName(), SubData, MaxDimensions, CoordSysInfo.CoordSys[CoordSystem], AxesText);
-	}
-    else if (type == PERTURBATION)
-	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, %sFract=%s-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
-	(UseszAppName) ? (LPSTR)szAppName : "", threshold, FilterString, (EnableApproximation) ? "(Pert-BLA)" : "(Pert)", GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
-    else if (type == SLOPEDERIVATIVE)
-	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, Fract=(Slope Der)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
-	(UseszAppName) ? (LPSTR)szAppName : "", threshold, GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
-    else if (type == SLOPEFORWARDDIFF)
-	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, Fract=(Slope Fwd)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
-	(UseszAppName) ? (LPSTR)szAppName : "", threshold, GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
-    else
-	{
-	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, Plot=%c, NumThreads=%d, %sLog=%d, Fract=%s, %s, Jul=%c, %s, Deg=%d, Spec=%d, 3D=%c, %s",
-	    (UseszAppName) ? (LPSTR)szAppName : "", threshold, calcmode, NumberThreads, FilterString, logval, GetFractalName(), SubData,
-	    ((juliaflag) ? 'T' : 'F'), ArithString, degree, special, ((_3dflag) ? 'T' : 'F'), PrecisionData);
-	}
-    }
+    int percent = (int)(progress * 100.0 + 0.5);
 
-/**************************************************************************
-	Display Parameters
-**************************************************************************/
-
-void	DisplayFractal(HWND hwnd)
-    {
-    char    Name[6400];
-
-    CreateFractalName(TRUE, Name);
-    SetWindowText(hwnd, Name);
+    if (percent != lastPercent)
+	{
+	lastPercent = percent;
+	_snprintf_s(StatusBarInfo, MAXLINE, _TRUNCATE, "Progress (%d%%), %d Threads", percent, NumThreads);
+	}
     }
 
 /**************************************************************************
 	Run special plotting mode fractals 
 **************************************************************************/
 
-#include"BigTrig.h"
-
-int	SpecialFractals(HWND hwnd, CPixel *Pix)
+int	CManp::SpecialFractals(HWND hwnd/*, CPixel *Pix*/)
     {
     if (type < 0 || type >= FRACTPAR)
 	{
@@ -640,7 +253,7 @@ int	SpecialFractals(HWND hwnd, CPixel *Pix)
 	case HAILSTONE:
 	    if (fractalspecific[type].flags & OTHERFNINPIXEL)
 		{
-		OthFn.InitOtherFunctions(type, subtype, hwnd, &TrueCol, &Dib, AntStatus, FrameEnd, FrameStart, mandel_width, hor, vert, ScreenRatio, &curpass, &totpasses, user_data, wpixels, CoordSystem, xAxis, yAxis, zAxis);
+		OthFn.InitOtherFunctions(type, subtype, hwnd, &TrueCol, &Dib, AntStatus, FrameEnd, FrameStart, mandel_width, hor, vert, AspectRatio, &curpass, &totpasses, user_data, CoordSystem, xAxis, yAxis, zAxis);
 		OthFn.RunOtherFunctions(type, &SpecialFlag, &iteration, xdots, ydots, param, threshold, rotate);
 		}
 	    else
@@ -686,114 +299,11 @@ int	SpecialFractals(HWND hwnd, CPixel *Pix)
 	}
     }
 
-/**************************************************************************
-	Setup bailout values to default
+/*************************************************************************
+	Generate  status info
 **************************************************************************/
 
-void    InitBailout()
-    {
-    DDBailout = rqlim;
-    QDBailout = rqlim;
-    BigBailout = rqlim;
-    }
-
- /*-----------------------------------------
-	Generate  status info
-  -----------------------------------------*/
-
-char	*ShowTime (double time)
-
-    {   
-    static	char	TimeString[120];
-    int		TimeInt, tenths, sec, min, hr;
-
-    tenths = (long)(time * 10.0) % 10;
-    TimeInt = (int)time;
-    sec = TimeInt % 60;
-    TimeInt /= 60;
-    min = TimeInt % 60;
-    hr = TimeInt / 60;
-    if (hr == 0)
-	{
-	if (min == 0)
-	    SAFE_SPRINTF(TimeString, "%d.%1d sec", sec, tenths);
-	else
-	    SAFE_SPRINTF(TimeString, "%d min, %d sec", min, sec);
-	}
-    else
-	SAFE_SPRINTF(TimeString, "%d hr, %d min", hr, min);
-    return (TimeString);
-    }
-  
-/*-----------------------------------------
-	Generate  status info
------------------------------------------*/
-
-void	GenPositionStr (char *PositionStr)
-
-    {     
-    double	centrex, centrey;
-//    BigDouble	Big_centrex, Big_centrey;
-
-    if (!PositionStr) return;
-    PositionStr[0] = '\0';   // <-- CRITICAL: always initialize
-
-    if (type == FOURIER)					// there's no fractal dimensions here
-	return;
-//	_snprintf_s(s, MAXLINE, _TRUNCATE, "Hor = %f, Vert = %f, Width = %f", hor, vert, mandel_width); 
-    if (BigNumFlag)
-	{
-	BigDouble Big_centrex(BigHor);
-	BigDouble Big_centrey(BigVert);
-
-	BigDouble temp;
-	BigDouble factor;
-	BigDouble denom;
-
-	factor = BigDouble((double)width);
-	denom = BigDouble((double)(2 * height));
-	factor = factor / denom;
-
-	// Big_centrex = BigHor + BigWidth * factor
-	temp = BigWidth;
-	temp *= factor;
-	Big_centrex += temp;
-
-	// Big_centrey = BigVert + BigWidth / 2
-	temp = BigWidth;
-	temp = temp.BigHalf();
-	Big_centrey += temp;
-
-
-	char buf1[256], buf2[256], buf3[256];
-
-	mpfr_snprintf(buf1, sizeof(buf1), "%.36Rf", Big_centrex.x);
-	mpfr_snprintf(buf2, sizeof(buf2), "%.36Rf", Big_centrey.x);
-	mpfr_snprintf(buf3, sizeof(buf3), "%.12Re", BigWidth.x);
-	_snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X = %s,Y = %s,Width = %s", buf1, buf2, buf3);
-	}
-    else 
-	{
-	if (type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)		// don't show centre, show corner
-	    _snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X=%14.14f,Y=%14.14f,Width=%14.14f", hor, vert, mandel_width);
-	else
-	    {
-	    centrex = hor + (mandel_width * ((double) width / (double) (2 * height)));
-	    centrey = vert + (mandel_width / 2.0);
-	    if (mandel_width > 0.000001)
-		_snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X=%14.14f,Y=%14.14f,Width=%14.14f", centrex, centrey, mandel_width);
-	    else
-		_snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X=%14.14f,Y=%14.14f,BigWidth=%14e", centrex, centrey, mandel_width);
-	    }
-	}
-    }
-    
-/*-----------------------------------------
-	Generate  status info
------------------------------------------*/
-
-void	DisplayStatusBarInfo (int complete, char *text)
-
+void	CManp::DisplayStatusBarInfo (int complete, char *text)
     {     
     char	PassStr[MAXLINE];
     char	PositionStr[POSITIONSIZE];				// times 3 because of x, y, width
@@ -902,7 +412,7 @@ void	DisplayStatusBarInfo (int complete, char *text)
     else if (complete == CLOSINGTHREADS)			// so the user knows what's happening
 	{
 	SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime(ElapsedTime));
-	_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Closing Threads, %s", FinishedStr);
+	_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Waiting For Render Threads To Close..., %s", FinishedStr);
 	StatusColour = 0x80FFFF80;
 	}
     else							// initialising
@@ -912,41 +422,386 @@ void	DisplayStatusBarInfo (int complete, char *text)
 	}
     }
 
-/**************************************************************************
-	General escape-time engine 
+/*************************************************************************
+	Generate  status info
 **************************************************************************/
 
-//#define PASSWIDTH	20
+void	CManp::GenPositionStr (char *PositionStr)
+    {     
+    double	centrex, centrey;
+//    BigDouble	Big_centrex, Big_centrey;
 
-int	perform_worklist(HWND hwnd)
+    if (!PositionStr) return;
+    PositionStr[0] = '\0';   // <-- CRITICAL: always initialize
+
+    if (type == FOURIER)					// there's no fractal dimensions here
+	return;
+//	_snprintf_s(s, MAXLINE, _TRUNCATE, "Hor = %f, Vert = %f, Width = %f", hor, vert, mandel_width); 
+    if (BigNumFlag)
+	{
+	BigDouble Big_centrex(BigHor);
+	BigDouble Big_centrey(BigVert);
+
+	BigDouble temp;
+	BigDouble factor;
+	BigDouble denom;
+
+	factor = BigDouble((double)width);
+	denom = BigDouble((double)(2 * height));
+	factor = factor / denom;
+
+	// Big_centrex = BigHor + BigWidth * factor
+	temp = BigWidth;
+	temp *= factor;
+	Big_centrex += temp;
+
+	// Big_centrey = BigVert + BigWidth / 2
+	temp = BigWidth;
+	temp = temp.BigHalf();
+	Big_centrey += temp;
+
+
+	char buf1[256], buf2[256], buf3[256];
+
+	mpfr_snprintf(buf1, sizeof(buf1), "%.36Rf", Big_centrex.x);
+	mpfr_snprintf(buf2, sizeof(buf2), "%.36Rf", Big_centrey.x);
+	mpfr_snprintf(buf3, sizeof(buf3), "%.12Re", BigWidth.x);
+	_snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X = %s,Y = %s,Width = %s", buf1, buf2, buf3);
+	}
+    else 
+	{
+	if (type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)		// don't show centre, show corner
+	    _snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X=%14.14f,Y=%14.14f,Width=%14.14f", hor, vert, mandel_width);
+	else
+	    {
+	    centrex = hor + (mandel_width * ((double) width / (double) (2 * height)));
+	    centrey = vert + (mandel_width / 2.0);
+	    if (mandel_width > 1e-13)
+		_snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X=%14.14f,Y=%14.14f,Width=%14.14f", centrex, centrey, mandel_width);
+	    else
+		_snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X=%14.14f,Y=%14.14f,BigWidth=%14e", centrex, centrey, mandel_width);
+	    }
+	}
+    }
+    
+/**************************************************************************
+	Create Fractal Name
+**************************************************************************/
+
+void	CManp::CreateFractalName(BOOL UseszAppName, char *Name)
     {
-    int		/*StripWidth, */SpecialFunctionsFlag;
-    HANDLE	ghMutex = NULL;							// manage access to shared resources such as Dib and wpixels
+    char		*szAppName = "Paul's Fractals";
+    char		SubData[1200];
+    char		PrecisionData[20];
+    char		FilterString[20];
+    char		ArithString[20];
+    int			Arith = GetArithType();
+    switch (Arith)
+	{
+	case DOUBLEFLOAT:
+	    strcpy(ArithString, "Arith=Float");
+	    break;
+	case DOUBLEDOUBLE:
+	    strcpy(ArithString, "Arith=DD");
+	    break;
+	case QUADDOUBLE:
+	    strcpy(ArithString, "Arith=QD");
+	    break;
+	default:
+	    strcpy(ArithString, "Arith=Bignum");
+	    break;
+	}
 
-    int		ActualNumThreads = NumberThreads;				// make sure formula parser only uses one thread as it isn't set up for multi-thread yet
-    if ((_3dflag && type != PERTURBATION))
-	NumberThreads = 1;
+    if (Fractal.NumFunct == 1)
+	SAFE_SPRINTF(SubData, "Fn=%s", Fractal.Fn1);
+    else if (Fractal.NumFunct == 2 && type != OSCILLATORS)			// we use NumFunct to display dimensions
+	SAFE_SPRINTF(SubData, "Fn1=%s,Fn2=%s", Fractal.Fn1, Fractal.Fn2);
+    else if (type == FORMULA || type == LSYSTEM || type == FRACTPAR || type == IFS)
+	SAFE_SPRINTF(SubData, "Sub=%s", lsys_type);
+    else if (type == TIERAZON || type == CROSSROADS || type == ZIGZAG || type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
+	SAFE_SPRINTF(SubData, "Sub=%d", subtype);
+    else if (type == CUBIC)
+	{
+	char	ch;
+	if (param[0] == 0.0)   ch = 'B';
+	if (param[0] == 1.0)   ch = 'C';
+	if (param[0] == 2.0)   ch = 'F';
+	if (param[0] == 3.0)   ch = 'K';
+	SAFE_SPRINTF(SubData, "Sub=C%cIN", ch);
+	}
+    else if (type == MALTHUS || type == TRIANGLES || type == GEOMETRY || type == CIRCLES || type == PASCALTRIANGLE)
+	SAFE_SPRINTF(SubData, "Sub=%c", subtype);
+    else if (type == SCREENFORMULA)
+	SAFE_SPRINTF(SubData, "Frm=<%s>", FormulaString);
+    else 
+	SAFE_SPRINTF(SubData, "Sub=%d", subtype);
+    if (BigNumFlag)
+	SAFE_SPRINTF(PrecisionData, "Precision=%d", precision);
+    else
+	SAFE_SPRINTF(PrecisionData, "");
 
-    int activeThreads = NumberThreads;
+    if (InsideMethod > NONE || OutsideMethod > NONE)
+	{
+	if (OutsideMethod > TIERAZONCOLOURS)
+	    SAFE_SPRINTF(FilterString, "TZColour=%d, ", ColourMethod);
+	else if (OutsideMethod > TIERAZONFILTERS)
+	    SAFE_SPRINTF(FilterString, "TZFilter=%d, ", FilterType);
+	else if (InsideMethod > NONE)
+	    SAFE_SPRINTF(FilterString, "Filter=%d, ", InsideMethod);
+	else
+	    SAFE_SPRINTF(FilterString, "Filter=%d, ", OutsideMethod);
+	}
+    else
+	SAFE_SPRINTF(FilterString, "");
+	              
+    if (type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
+	{
+	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, Plot=%c, Log=%d, Fract=%s, %s, Max Dim=%d, Co-ordSys=%s, Axes=%s",
+	    (UseszAppName) ? (LPSTR)szAppName : "", threshold, calcmode, logval, GetFractalName(), SubData, MaxDimensions, CoordSysInfo.CoordSys[CoordSystem], AxesText);
+	}
+    else if (type == PERTURBATION)
+	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, %sFract=%s-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
+	(UseszAppName) ? (LPSTR)szAppName : "", threshold, FilterString, (EnableApproximation) ? "(Pert-BLA)" : "(Pert)", GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
+    else if (type == SLOPEDERIVATIVE)
+	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, Fract=(Slope Der)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
+	(UseszAppName) ? (LPSTR)szAppName : "", threshold, GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
+    else if (type == SLOPEFORWARDDIFF)
+	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, Fract=(Slope Fwd)-%s, %s, NumThreads=%d, %s, Deg=%d, %s",
+	(UseszAppName) ? (LPSTR)szAppName : "", threshold, GetFractalName(), SubData, NumberThreads, ArithString, degree, PrecisionData);
+    else
+	{
+	_snprintf_s(Name, 6400, _TRUNCATE, "%s: Thresh=%d, Plot=%c, NumThreads=%d, %sLog=%d, Fract=%s, %s, Jul=%c, %s, Deg=%d, Spec=%d, 3D=%c, %s",
+	    (UseszAppName) ? (LPSTR)szAppName : "", threshold, calcmode, NumberThreads, FilterString, logval, GetFractalName(), SubData,
+	    ((juliaflag) ? 'T' : 'F'), ArithString, degree, special, ((_3dflag) ? 'T' : 'F'), PrecisionData);
+	}
+    }
 
-    if (activeThreads < 1)
-	activeThreads = 1;
-    if (activeThreads > MAXTHREADS)
-	activeThreads = MAXTHREADS;
+/**************************************************************************
+	Get Arith Type
+**************************************************************************/
 
+int 	 CManp::GetArithType()
+    {
+    int	flags = fractalspecific[type].flags;
+    if (BigNumFlag)
+	{
+	if (precision <= DDPRECISION)
+	    MathType = DOUBLEDOUBLE;
+	else if (precision <= QDPRECISION || fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
+	    MathType = QUADDOUBLE;
+	else
+	    MathType = ARBITRARYPREC;
+	}
+    else
+	MathType = DOUBLEFLOAT;
+    return MathType;
+    }
+
+/**************************************************************************
+	Initialise Special Colour for Art Matrix Cubic
+**************************************************************************/
+
+void CManp::SetupSpecialColourIndex(CTrueCol &TrueCol, long threshold, RGBTRIPLE SpecialColour, RGBTRIPLE &oldColour, int &SPECIALINDEX)
+    {
+    int paletteSize = (int)TrueCol.PalettePtr.size();
+
+    if (threshold - 1 < paletteSize)
+	SPECIALINDEX = threshold - 1;
+    else
+	SPECIALINDEX = paletteSize - 1;  // fallback
+    oldColour = TrueCol.PalettePtr[SPECIALINDEX];  // save
+    if (SPECIALINDEX >= 0 && SPECIALINDEX < MAXPALETTE)
+	TrueCol.PalettePtr[SPECIALINDEX] = SpecialColour;
+    }
+
+/**************************************************************************
+	Initialise Manp engine
+**************************************************************************/
+
+int	CManp::InitPixelFractal()
+    {
+    int		i;
+    static	bool	FirstTime = true;
+
+    if (NumberThreads > MAXTHREADS)
+	NumberThreads = MAXTHREADS;
+
+    if (FirstTime)
+	{
+	for (i = 0; i < NumberThreads; i++)
+	    pPixelDataArray[i] = nullptr;			// Ensure address is not reset before being allocated.
+	FirstTime = false;
+	}
+
+    for (i = 0; i < NumberThreads; i++)
+	Pixel[i]->EndPixel = false;				// We're not exiting yet
+
+    gFatalErrorOccurred.store(false);
+    gStopRequested.store(false, std::memory_order_relaxed);	// NEW: reset flag before starting threads
+    CurrentRenderMode = RENDER_PIXEL;
+    RGBTRIPLE   SpecialColour;
+    SpecialColour.rgbtRed = (BYTE)param[1];
+    SpecialColour.rgbtGreen = (BYTE)param[2];
+    SpecialColour.rgbtBlue = (BYTE)param[3];
+
+    if (type == CUBIC)
+	SetupSpecialColourIndex(TrueCol, threshold, SpecialColour, oldColour, SPECIALINDEX);
+    return 0;
+    }
+
+/**************************************************************************
+	Setup bailout values to default
+**************************************************************************/
+
+void    CManp::SetupBailoutDefaults()
+    {
+    DDBailout = rqlim;
+    QDBailout = rqlim;
+    BigBailout = rqlim;
+    }
+
+/**************************************************************************
+	Display Parameters
+**************************************************************************/
+
+void	CManp::DisplayFractal(HWND hwnd)
+    {
+    char    Name[6400];
+
+    CreateFractalName(TRUE, Name);
+    SetWindowText(hwnd, Name);
+    }
+
+/**************************************************************************
+	How about the rest of them
+**************************************************************************/
+
+void CManp::WaitForAllThreadsToFinish()
+    {
+    if (!RunAnimation && !DisplayAnimation)
+	{
+	DisplayStatusBarInfo(CLOSINGTHREADS, "");
+	OutputStatusBar(GlobalHwnd);
+	}
+
+    auto WaitAndClose = [](std::vector<HANDLE>& threads)
+	{
+	for (size_t i = 0; i < threads.size(); i++)
+	    {
+	    if (threads[i] != NULL)
+		{
+		WaitForSingleObject(threads[i], INFINITE);
+		CloseHandle(threads[i]);
+		threads[i] = NULL;
+		}
+	    }
+	};
+
+    switch (CurrentRenderMode)
+	{
+	case RENDER_PIXEL:
+	    WaitAndClose(hPixelThread);
+	    break;
+
+	case RENDER_PERT:
+	    WaitAndClose(hThread);
+	    break;
+
+	case RENDER_SLOPE:
+	    WaitAndClose(hSlopeThread);
+	    break;
+
+	case NOMULTITHREAD:
+	default:
+	    break;
+	}
+
+    CurrentRenderMode = NOMULTITHREAD;
+    }
+
+/**************************************************************************
+	Get all the variables into the pixel objects
+**************************************************************************/
+
+void CManp::InitPixelObjects(int threadCount, HWND hwnd)
+    {
+    for (int i = 0; i < threadCount; i++)
+	{
+	if (BigNumFlag)
+	    Pixel[i]->ManageBignumPrecision(decimals);
+
+	Pixel[i]->InitFractalDefinition(type, subtype, &degree, rqlim, threshold, BailoutTestType, param, potparam, &Fractal);
+
+	Pixel[i]->InitControlFlags(calcmode, juliaflag, invert, phaseflag, pairflag, _3dflag,
+	    period_level, /*reset_period, */distest, InsideMethod, OutsideMethod,
+	    biomorph, nFDOption, SpecialFlag);
+
+	Pixel[i]->InitViewport(hor, vert, mandel_width, BigHor, BigVert, BigWidth,
+	    AspectRatio, xdots, ydots, RotationAngle, RotationCentre, j);
+
+	Pixel[i]->InitArithmetic(BigNumFlag, precision);
+
+	Pixel[i]->InitRendering(/*wpixels, */&Dib, width, PlotType, &TrueCol,
+	    colors, UseCurrentPalette, &AutoStereo_value, &symmetry);
+
+	Pixel[i]->GeneralInit();
+	Pixel[i]->InitBailout();
+
+	Pixel[i]->InitRuntimeControl(&time_to_zoom, &time_to_restart,
+	    &time_to_reinit, &time_to_quit,
+	    &blockindex, &totpasses, &curpass);
+
+	Pixel[i]->InitColourProcessing(special, colours, decomp, logval,
+	    logtable, LyapSequence, ColourSpeed,
+	    PaletteStart, PaletteShift);
+
+	Pixel[i]->InitVisualEffects(ExpandStarTrailColours, ShowOrbits, OrbitColour);
+
+	Pixel[i]->InitOutput(hwnd, fillcolor);
+	Pixel[i]->InitFilters(dStrands);
+
+	Pixel[i]->InitTransformations(CoordSystem, f_radius, f_xcenter, f_ycenter, distestwidth);
+
+	Pixel[i]->InitLightingAndBumpMapping(bump_transfer_factor,
+	    lightDirectionDegrees,
+	    bumpMappingDepth,
+	    bumpMappingStrength);
+	}
+    }
+
+void	CManp::CreatePixelObjects(int threadCount)
+    {
     Pixel.clear();
-    Pixel.reserve(activeThreads);
-    int n = (NumberThreads <= 0 ? 1 : NumberThreads);
-
-    PixelProgress.assign(n, 0);
-    PixelThreadComplete.assign(n, 0);
-    hPixelThread.assign(n, nullptr);
-    pPixelDataArray.assign(n, nullptr);
-
-    for (int i = 0; i < activeThreads; ++i)
+    Pixel.reserve(threadCount);
+    for (int i = 0; i < threadCount; ++i)
 	{
 	Pixel.emplace_back(std::make_unique<CPixel>());
 	}
+    }
+
+/**************************************************************************
+	General escape-time engine - sets everything up
+**************************************************************************/
+
+int	CManp::RunEscapeTimeEngine(HWND hwnd)
+    {
+    int		SpecialFunctionsFlag;
+    int		ActualNumThreads = NumberThreads;				// make sure formula parser only uses one thread as it isn't set up for multi-thread yet
+
+    int threadCount = NumberThreads;
+
+    if (_3dflag && type != PERTURBATION)
+	threadCount = 1;
+
+    if (threadCount < 1)
+	threadCount = 1;
+    if (threadCount > MAXTHREADS)
+	threadCount = MAXTHREADS;
+
+    WaitForAllThreadsToFinish();
+    CreatePixelObjects(threadCount);
+    InitThreadArrays(threadCount);
+    InitPixelObjects(threadCount, hwnd);					// okay, we have to get the globals into the Pixel object somehow
 
     //#define debug   1
     #ifdef debug
@@ -958,48 +813,35 @@ int	perform_worklist(HWND hwnd)
     Others = sizeof(COtherFunctions);
     #endif
 
-    // okay, we have to get the globals into the Pixel object somehow
-    for (int i = 0; i < activeThreads; i++)
-	{
-	if (BigNumFlag)
-	    Pixel[i]->ManageBignumPrecision(decimals);
-	Pixel[i]->InitPixel0(type, special, subtype, &degree, rqlim, DDBailout, QDBailout, ExpandStarTrailColours, SpecialFlag, precision, biomorph, InsideMethod, OutsideMethod, RotationAngle, xdots, ydots, nFDOption);
-	Pixel[i]->InitPixel1(&TrueCol, period_level, distest, invert, phaseflag, wpixels, juliaflag, calcmode);
-	Pixel[i]->InitPixel2(CoordSystem, UseCurrentPalette, reset_period, colors, hor, vert, mandel_width, BigHor, BigVert, BigWidth);
-	Pixel[i]->InitPixel3(dStrands, j, pairflag, _3dflag, ScreenRatio, colours, &Fractal, BailoutTestType);
-	Pixel[i]->InitPixel4(threshold, BigNumFlag, logval, f_radius, f_xcenter, LyapSequence, ColourSpeed);
-	Pixel[i]->InitPixel5(f_ycenter, &symmetry, param, potparam, decomp, logtable, &AutoStereo_value, width, hwnd);
-	Pixel[i]->InitPixel6(&Dib, PlotType, &time_to_zoom, &time_to_restart, &time_to_reinit, &time_to_quit, fillcolor);
-	Pixel[i]->InitPixel7(&blockindex, &totpasses, &curpass, &MathType, RotationCentre, distestwidth, &Fractal);
-	Pixel[i]->InitPixel8(bump_transfer_factor, PaletteStart, PaletteShift, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, ShowOrbits, OrbitColour);
-	}
-    
+
     if (Pixel.size() > 0 && Pixel[0] != nullptr)
 	{
 	if (logval)
-	    init_log(hwnd);				// log colour distribution
+	    init_log(hwnd);							// log colour distribution
 	if (_3dflag)
 	    Pixel[0]->init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
-	InitPixelFractal();		// Initialise Manp engine
+	InitPixelFractal();							// Initialise Manp engine
 	}
     else
 	{
 	OutputDebugStringA("Pixel objects not initialised\n");
+	NumberThreads = ActualNumThreads;
 	return -1;
 	}
 
-       if (type < 0 || type >= FRACTPAR)
+   if (type < 0 || type >= FRACTPAR)
 	{
 #if defined(_DEBUG)
 	char    buf[128];
-	SAFE_SPRINTF(buf, "Invalid type [%d] in perform_worklist before SpecialFractals()\n", type);
+	SAFE_SPRINTF(buf, "Invalid type [%d] in RunEscapeTimeEngine before SpecialFractals()\n", type);
 	OutputDebugStringA(buf);
 #endif
+	NumberThreads = ActualNumThreads;
 	return -1;
 	}
 
     NonStandardFractal = FALSE;
-    SpecialFunctionsFlag = SpecialFractals(hwnd, Pixel[0].get());		// non-"standard" fractals - no multi-threading
+    SpecialFunctionsFlag = SpecialFractals(hwnd/*, Pixel[0].get()*/);		// non-"standard" fractals - no multi-threading
     if (SpecialFunctionsFlag == -1)
 	{
 	NumberThreads = ActualNumThreads;					// for types other than formula
@@ -1008,6 +850,7 @@ int	perform_worklist(HWND hwnd)
     else if (SpecialFunctionsFlag == 1)
 	{
 	NonStandardFractal = TRUE;
+	gManp->CurrentRenderMode = NOMULTITHREAD;				// no threads so make sure we don't wait for them to finish
 	NumberThreads = ActualNumThreads;					// for types other than formula
 	return 1;								// finished processing non-standard plotted fractal
 	}
@@ -1020,11 +863,191 @@ int	perform_worklist(HWND hwnd)
 	    return -1;
 	    }
 	// CRITICAL STEP
-	for (int i = 0; i < activeThreads; ++i)
+	for (int i = 0; i < threadCount; ++i)
 	    Pixel[i]->m_parser.InitContextFromGlobals();
 	}
-    DoPixelFractal(hwnd, distestwidth);
+    DoPixelFractal(hwnd, distestwidth, threadCount);
     NumberThreads = ActualNumThreads;						// for types other than formula
     return 0;
     }
+
+/**************************************************************************
+	Handles loading a new fractal setup and schedules reinitialisation
+**************************************************************************/
+
+void CManp::HandleLoadPhase(HWND hwnd)
+    {
+    time_to_load = FALSE;
+    time_to_reinit = TRUE;
+    time_to_restart = FALSE;
+    }
+
+/**************************************************************************
+	Handles the restart phase of the fractal lifecycle:
+	runs the worklist, updates display, handles autosave and completion
+**************************************************************************/
+
+void CManp::HandleRestartPhase(HWND hwnd, char* szSaveFileName)
+    {
+    _ftime64(&FrameStart);
+    time_to_restart = FALSE;
+    finished = FALSE;
+
+    UpdateInit();
+    SetupBailoutDefaults();
+
+    if (!DataFromPNGFile)
+	RunEscapeTimeEngine(hwnd);
+
+    if (time_to_quit)
+        return;
+
+    DisplayPalette(hwnd, TrueCol.DisplayPaletteFlag);
+
+    finished = TRUE;
+    DisplayFractal(hwnd);
+
+    if (RealTimeJuliaFlag && !juliaflag)
+	{
+        POINTS CursorLocShort;
+        InitRTJulia(hwnd);
+        FindCursorRealPos(&CursorLocShort);
+        DrawJulia(hwnd, CursorLocShort);
+	}
+
+    if (!bTrack)
+	{
+        ChangeView(hwnd,
+            (short)-GetScrollPos(hwnd, SB_HORZ),
+            (short)-GetScrollPos(hwnd, SB_VERT),
+            (short)ptSize.x, (short)ptSize.y,
+            0, 0,
+            (short)width, (short)height,
+            TRUE);
+
+        InvalidateRect(hwnd, &r, FALSE);
+	}
+
+    if (AutoExitFlag)
+        time_to_quit = TRUE;
+
+    if (AutoSaveFlag)
+	{
+        char s[360];
+        if (write_png_file(hwnd, szSaveFileName, "ManpWIN", FractData()) < 0)
+	    {
+            _snprintf_s(s, 360, _TRUNCATE,
+                "Error: Could not write file: <%s>", szSaveFileName);
+            MessageBox(hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
+            MessageBeep(0);
+            AutoSaveFlag = false;
+	    }
+	}
+
+    if (CallingWindowHandle)
+        SendCopydataMessage(hwnd, "Send CopyData");
+
+    UpdateClose();
+
+    DisplayStatusBarInfo(COMPLETE,
+        ((IsPAR) ? PARFile : (IsKFR) ? KFRFile : ""));
+    }
+
+/**************************************************************************
+	State machine that drives the fractal lifecycle (load, init, render, restart)
+**************************************************************************/
+
+void CManp::HandleReinitPhase(HWND hwnd, char* szSaveFileName)
+    {
+    time_to_reinit = FALSE;
+
+    HCURSOR hCursor = LoadCursor(NULL, IDC_WAIT);
+    SetCursor(hCursor);
+
+    if (!gManp->addflag && !DataFromPNGFile)
+	ClearScreen();
+
+    hCursor = LoadCursor(NULL, IDC_ARROW);
+    SetCursor(hCursor);
+
+    DisplayFractal(hwnd);
+
+    if (DataFromPNGFile)
+	DataFromPNGFile = FALSE;
+    else
+	time_to_restart = TRUE;
+    }
+
+/**************************************************************************
+	State machine that drives the fractal lifecycle
+	init -> render -> display -> restart -> animation -> exit
+**************************************************************************/
+
+void CManp::HandleFractalStateMachine(HWND hwnd, char* szSaveFileName)
+    {
+    if (time_to_quit)
+        return;
+
+    if (time_to_load)
+	{
+	HandleLoadPhase(hwnd);
+	}
+
+    if (time_to_reinit || time_to_zoom)
+	{
+	time_to_zoom = false;
+	HandleReinitPhase(hwnd, szSaveFileName);
+	}
+
+    if (time_to_restart)
+	{
+	HandleRestartPhase(hwnd, szSaveFileName);
+	}
+    }
+
+/**************************************************************************
+    Initialise thread arrays
+**************************************************************************/
+
+void CManp::InitThreadArrays(int threadCount)
+    {
+    if (threadCount < 1)
+	threadCount = 1;
+
+    hPixelThread.assign(threadCount, nullptr);
+    pPixelDataArray.assign(threadCount, nullptr);
+    PixelThreadComplete.assign(threadCount, 0);
+    PixelProgress.assign(threadCount, 0);
+    }
+
+/**************************************************************************
+    Main engine loop : processes input and drives the fractal state machine
+**************************************************************************/
+
+void CManp::RunMainLoop(HWND hwnd, char* saveFile)
+    {
+    time_to_load = false;
+    time_to_reinit = true;
+    time_to_restart = true;   // force first render
+    time_to_zoom = false;
+    time_to_quit = false;
+
+    // Bridge application state -> math layer.
+    // Copy formatting precision from CManp into BigDouble so low-level
+    // math code (BigDouble/BigComplex) does not depend on gManp.
+//    BigDouble::decimals = decimals;
+    for (;;)
+	{
+	Sleep(1);
+	user_data(hwnd);
+
+	if (time_to_quit)
+	    return;
+
+	HandleFractalStateMachine(hwnd, saveFile);
+	}
+    }
+
+
+
 

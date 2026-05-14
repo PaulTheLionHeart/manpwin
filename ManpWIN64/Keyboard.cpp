@@ -11,33 +11,9 @@
 #include "manp.h"
 #include "OtherFunctions.h"
 
-//extern	void	ToggleRandomColour(void);
-extern	int	AnimateClose(void);
-extern	void	IncreaseAnimSpeed(void);
-extern	void	DecreaseAnimSpeed(void);
-extern	void	ReverseAnimDirection(void);
-extern	void	StepFrame(void);
 extern	BOOL	SaveGIFOpenDlg (HWND, LPSTR, LPSTR);
 extern	BOOL	SaveMPGOpenDlg (HWND, LPSTR, LPSTR);
 extern	void	SaveFile(HWND, LPSTR, LPSTR);
-extern	int	SaveIndividualFrames(void);
-extern	int	AnimateSuspend(void);
-extern	int	AnimateResume(void);
-extern	void	DisplayStatusBarInfo(int, char *);
-
-extern	BOOL	RunAnimation;			// are we in the middle of an animation generation run?
-extern	BOOL	SuspendAnimation;		// pause animation run?
-extern	BOOL	RunMPEG;			// are we in the middle of generating an MPEG file?
-extern	BOOL	RunGIF;				// are we in the middle of generating an GIF file?
-extern	BOOL	DisplayAnimation;		// allow system to know that we are currently displaying an animation
-extern	int	time_to_break;			// time to break out of animation?
-extern	int	time_to_quit;			// time to quit?
-extern	int	time_to_restart;		// time to restart?
-extern	WORD	type;				// M=mand, N=Newton etc
-extern	WORD	UpdateDelay;			// delay in milliseconds
-
-extern	ProcessType	OscAnimProc;		// trap certain keyboatd activity when animating
-extern	CTrueCol    TrueCol;			// palette info
 
 #undef	TEST_TRIG 
 
@@ -452,17 +428,16 @@ void TestDDTrig()
 	Analyse Keyboard activity
 **************************************************************************/
 
-void	ProcessKeys(HWND hwnd, WPARAM wParam)
-
+void	ProcessKeys(HWND hwnd, WPARAM wParam) 
     {
     char	szTitleName[] = "ManpWIN";
     char	szSaveFileName[MAX_PATH];
 
     // key functions for writing MPEG files
-    if (RunMPEG)									// we are currently writing MPEG file
+    if (gManp->RunMPEG)									// we are currently writing MPEG file
 	{
 	if (wParam == VK_ESCAPE)
-	    RunMPEG = FALSE;
+	    gManp->RunMPEG = FALSE;
 	return;										// all other keys rejected at this stage
 	}
     // key functions for writing GIF files
@@ -475,25 +450,25 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	}
 */
     // key functions for animations
-    if (DisplayAnimation)								// we are currently displaying an animation
+    if (gManp->DisplayAnimation)							// we are currently displaying an animation
 	{
 	switch (wParam)									// process any messages for animation
 	    {
 	    case ' ':									// single step
-		if (!SuspendAnimation)
-		    AnimateSuspend();
-		StepFrame();
+		if (!gManp->SuspendAnimation)
+		    gManp->AnimateSuspend();
+		gManp->StepFrame();
 		return;
 	    case 187: 									// + key cycle in
 	    case 107: 									// + key cycle in
-		IncreaseAnimSpeed();
+		gManp->IncreaseAnimSpeed();
 		return;
 	    case 189: 									// - key cycle out
 	    case 109: 									// - key cycle out 
-		DecreaseAnimSpeed();
+		gManp->DecreaseAnimSpeed();
 		return;
 	    case 'A':  									// write individual PNG files for each frame
-		SaveIndividualFrames();                    
+		gManp->SaveIndividualFrames();
 		return;
 	    case 'G':  									// write animated GIF file
 		if (SaveGIFOpenDlg (hwnd, szSaveFileName, szTitleName) >= 0)
@@ -504,31 +479,31 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 		    SaveFile (hwnd, szSaveFileName, szTitleName);                    
 		return;
 	    case 'R':  									// reverse direction 
-		ReverseAnimDirection();
+		gManp->ReverseAnimDirection();
 		return;
 	    case 'S':  									// suspend/resume
-		SuspendAnimation = !SuspendAnimation;
-		if (SuspendAnimation)
-		    AnimateSuspend();
+		gManp->SuspendAnimation = !gManp->SuspendAnimation;
+		if (gManp->SuspendAnimation)
+		    gManp->AnimateSuspend();
 		else
-		    AnimateResume();
+		    gManp->AnimateResume();
 		return;
 	    case 'T':  									// new fractal
-		time_to_break = TRUE;
-		RunAnimation = FALSE;
-		AnimateClose();
+		gManp->time_to_break = TRUE;
+		gManp->RunAnimation = FALSE;
+		gManp->AnimateClose();
 		SendMessage (hwnd, WM_COMMAND, IDC_FRACTYPE, 0L);
 		return;
 	    case VK_RETURN:								// Let's get out of here
 	    case VK_ESCAPE:  								// stop animation run
 //	    case VK_SHIFT:
-		time_to_break = TRUE;
-		RunAnimation = FALSE;
-		AnimateClose();
+		gManp->time_to_break = TRUE;
+		gManp->RunAnimation = FALSE;
+		gManp->AnimateClose();
 		return;
 	    }
-	time_to_break = TRUE;
-	AnimateClose();
+	gManp->time_to_break = TRUE;
+	gManp->AnimateClose();
 	}
     switch (wParam) 
 	{
@@ -537,7 +512,7 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	    break;
 
 	case VK_F5:									// Refresh    
-	    DisplayStatusBarInfo(INCOMPLETE, "");
+	    gManp->DisplayStatusBarInfo(INCOMPLETE, "");
 	    InvalidateRect(hwnd, NULL, FALSE);
 	    break;
 
@@ -604,14 +579,14 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 
 	    if (GetKeyState(VK_SHIFT) >= 0)
 		{
-		if (RunAnimation)
-		    time_to_break = TRUE;
+		if (gManp->RunAnimation)
+		    gManp->time_to_break = TRUE;
 		else
 		    {
 		    if (MessageBox (hwnd, "Do you want to Quit?", "ManpWin", MB_ICONEXCLAMATION | MB_DEFBUTTON2 | MB_YESNO) == IDYES)
 			{
 //			hWndCopy = hwnd;
-			time_to_quit = TRUE;
+			gManp->time_to_quit = TRUE;
 			SendMessage (hwnd, WM_DESTROY, 0, 0L);
 			}
 		    }
@@ -619,11 +594,11 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	    else
 		{
 //		hWndCopy = hwnd;
-		if (RunAnimation)
-		    time_to_break = TRUE;
+		if (gManp->RunAnimation)
+		    gManp->time_to_break = TRUE;
 		else
 		    {
-		    time_to_quit = TRUE;
+		    gManp->time_to_quit = TRUE;
 		    SendMessage (hwnd, WM_DESTROY, 0, 0L);
 		    }
 		}
@@ -633,7 +608,7 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	    break;
     	
 	case '1':								// Toggle Random Colour Generation
-	    TrueCol.ToggleRandomColour();
+	    gManp->TrueCol.ToggleRandomColour();
 	    SendMessage (hwnd, WM_COMMAND, IDM_COLOUR_PAL, 0L);
 	    break;
 	
@@ -646,7 +621,7 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 //		SendMessage(hwnd, WM_COMMAND, IDM_SHOWOSCALLAXES, 0L);		// Show oscillators for all axes
 	    if (GetKeyState(VK_CONTROL) < 0)
 		{
-		time_to_restart = TRUE;
+		gManp->time_to_restart = TRUE;
 		SendMessage (hwnd, WM_COMMAND, IDM_SETUPANIMATION, 0L);
 		}
 	    else 
@@ -692,7 +667,7 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	case 'G':					
 	    if (GetKeyState(VK_CONTROL) < 0)					// Hailstone Dots toggle
 		{
-		extern COtherFunctions* g_pOtherFunctions;
+//		extern COtherFunctions* g_pOtherFunctions;
 		if (g_pOtherFunctions)
 		    g_pOtherFunctions->ToggleShowDots();
 		}
@@ -703,7 +678,7 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	case 'H':								// Hailstone Axes toggle 
 	    if (GetKeyState(VK_CONTROL) < 0)
 		{
-		extern COtherFunctions* g_pOtherFunctions;
+//		extern COtherFunctions* g_pOtherFunctions;
 		if (g_pOtherFunctions)
 		    g_pOtherFunctions->ToggleShowAxes();
 		}
@@ -730,7 +705,7 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	case 'L':
 	    if (GetKeyState(VK_CONTROL) < 0)					// Hailstone Labels toggle
 		{
-		extern COtherFunctions* g_pOtherFunctions;
+//		extern COtherFunctions* g_pOtherFunctions;
 		if (g_pOtherFunctions)
 		    g_pOtherFunctions->ToggleShowPointLabels();
 		}
@@ -796,12 +771,12 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	    break;
     	
 	case 'T':								// Fractal Type  
-	    time_to_break = (type == FOURIER);					// make sure that the fourier loop ends
-	    if (OscAnimProc != STANDARD)
+	    gManp->time_to_break = (gManp->type == FOURIER);					// make sure that the fourier loop ends
+	    if (gManp->OscAnimProc != STANDARD)
 		{
-		time_to_break = TRUE;
-		RunAnimation = FALSE;
-		AnimateClose();
+		gManp->time_to_break = TRUE;
+		gManp->RunAnimation = FALSE;
+		gManp->AnimateClose();
 		}
 	    if (GetKeyState(VK_SHIFT) < 0)
 		SendMessage(hwnd, WM_COMMAND, IDM_TOGGLE_DISPLAY_PALETTE, 0L);
@@ -812,7 +787,7 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	    break;
 
 	case 'U':								// Toggle Update Timer between 1000 and 10 milliseconds  
-	    UpdateDelay = (UpdateDelay == 1000) ? 10 : 1000;
+	    gManp->UpdateDelay = (gManp->UpdateDelay == 1000) ? 10 : 1000;
 	    break;
 
 #ifdef TEST_TRIG

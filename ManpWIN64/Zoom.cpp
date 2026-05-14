@@ -16,22 +16,12 @@
 #include "windows.h"
 #include "zoom.h"
 #include "manpwin.h"
+#include "manp.h"
 #include "BigDouble.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "big.h"
 #include "Arithmetic.h"
-
-extern	double	hor;				// horizontal address
-extern	double	vert;				// vertical address
-extern	double	mandel_width;			// width of display
-extern	double	yymax;				// vert + width
-extern	BOOL	bTrack;				// TRUE if user is selecting a region
-extern	BOOL	ZoomEdge;			// Zooming process
-extern	int	xdots, ydots;
-//extern	double	RotationAngle;
-extern	double	ScreenRatio;
-//extern	double	z_rot;				// angle display plane to z axis 
 
 extern	BOOL	NonStandardImage;
 
@@ -39,14 +29,7 @@ POINT	ZoomClick, ZoomCenter;
 static	RECT	oldRect;
 
 int	ClearSelection(HWND, LPRECT, int);
-extern	int	calcfracinit(void);
 extern	void	SaveUndo(BOOL);
-
-// Big num declarations **********************************************************
-extern	int dec;
-extern	BYTE	BigNumFlag;		// True if bignum used
-extern	BigDouble   BigHor, BigVert, BigWidth;
-// Big num declarations **********************************************************
 
 
 /****************************************************************************
@@ -58,7 +41,6 @@ extern	BigDouble   BigHor, BigVert, BigWidth;
 ****************************************************************************/
 
 int	StartSelection(HWND hWnd, POINTS ptCurrent, LPRECT lpSelectRect, int fFlags)
-
     {
     if (lpSelectRect->left != lpSelectRect->right || lpSelectRect->top != lpSelectRect->bottom)
 	ClearSelection(hWnd, lpSelectRect, fFlags);
@@ -79,7 +61,7 @@ int	StartSelection(HWND hWnd, POINTS ptCurrent, LPRECT lpSelectRect, int fFlags)
 	lpSelectRect->top = ptCurrent.y;
 	}
 
-    if (!ZoomEdge)
+    if (!gManp->ZoomEdge)
 	{
 	ZoomCenter.x = ptCurrent.x;
 	ZoomCenter.y = ptCurrent.y;
@@ -102,7 +84,6 @@ int	StartSelection(HWND hWnd, POINTS ptCurrent, LPRECT lpSelectRect, int fFlags)
 ****************************************************************************/
 
 int	UpdateSelection(HWND hWnd, POINTS ptCurrent, LPRECT lpSelectRect, int fFlags)
-
     {
     HDC hDC;
     short OldROP;
@@ -111,9 +92,9 @@ int	UpdateSelection(HWND hWnd, POINTS ptCurrent, LPRECT lpSelectRect, int fFlags
 
 		// maintain aspect ratio by only using ptCurrent.y and calculating ptCurrent.x
     ptCurrent.x = (short)(lpSelectRect->left 
-		    + (int)((float)(ptCurrent.y - lpSelectRect->top) * (float)xdots / (float)ydots));
+		    + (int)((float)(ptCurrent.y - lpSelectRect->top) * (float)gManp->xdots / (float)gManp->ydots));
 
-    if (ZoomEdge)
+    if (gManp->ZoomEdge)
 	{
 	switch (fFlags & SL_TYPE) 
 	    {
@@ -150,7 +131,7 @@ int	UpdateSelection(HWND hWnd, POINTS ptCurrent, LPRECT lpSelectRect, int fFlags
 	}
     else
 	{
-	temp = (int)(((float)ptCurrent.y - (float)ZoomCenter.y) / ((float)ydots / (float)xdots));
+	temp = (int)(((float)ptCurrent.y - (float)ZoomCenter.y) / ((float)gManp->ydots / (float)gManp->xdots));
 //	lpSelectRect->left = ptCurrent.x - (ptCurrent.x - ZoomCenter.x) * 2;
 //	lpSelectRect->top = ptCurrent.y - (ptCurrent.y - ZoomCenter.y) * 2;
 	lpSelectRect->left = ZoomCenter.x - temp;
@@ -210,11 +191,10 @@ int	UpdateSelection(HWND hWnd, POINTS ptCurrent, LPRECT lpSelectRect, int fFlags
 ****************************************************************************/
 
 int	EndSelection(POINTS ptCurrent, LPRECT lpSelectRect)
-
     {
 		// maintain aspect ratio by only using ptCurrent.y and calculating ptCurrent.x
     ptCurrent.x = (short)(lpSelectRect->left 
-		    + (int)((float)(ptCurrent.y - lpSelectRect->top) * (float)xdots / (float)ydots));
+		    + (int)((float)(ptCurrent.y - lpSelectRect->top) * (float)gManp->xdots / (float)gManp->ydots));
 
     lpSelectRect->right = ptCurrent.x;
     lpSelectRect->bottom = ptCurrent.y;
@@ -231,7 +211,6 @@ int	EndSelection(POINTS ptCurrent, LPRECT lpSelectRect)
 ****************************************************************************/
 
 int	ClearSelection(HWND hWnd, LPRECT lpSelectRect, int fFlags)
-
     {
     HDC hDC;
     short OldROP;
@@ -295,7 +274,7 @@ void WINAPI NormalizeRect(RECT *prc)
 extern	void	ShowBignum(BigDouble, char *);
 #endif
 
-int	ZoomIn(HWND hwnd, RECT *Rect)
+int	CManp::ZoomIn(HWND hwnd, RECT *Rect)
     {
     double	hor_factor, vert_factor, width_factor;
     int		ytop, ybottom, xleft, xright;
@@ -367,7 +346,7 @@ int	ZoomIn(HWND hwnd, RECT *Rect)
 
 ****************************************************************************/
 
-int	ZoomOut(HWND hwnd, RECT *Rect)
+int	CManp::ZoomOut(HWND hwnd, RECT *Rect)
     {
     double	half_win_aspect, width_factor;
     double	centrex, centrey;				// centre of window
@@ -386,7 +365,7 @@ int	ZoomOut(HWND hwnd, RECT *Rect)
     xleft   = Rect->left;
     xright  = Rect->right;
 						    // adjust the zoom-box for aspect ratio
-    half_win_aspect = (double)xdots/(double)ydots * 0.5;
+    half_win_aspect = AspectRatio * 0.5;
     width_factor = 1.0 / (double) (abs(ybottom - ytop)) * (double) ydots;
 
     if (BigNumFlag)

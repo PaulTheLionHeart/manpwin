@@ -37,7 +37,6 @@ int	CPixel::QDInitManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 
 int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
     {
-
     QDComplex	sqr, sqrsqr;
     qd_real	real_imag, RealImagSqr, rqlimQD = rqlim;
 

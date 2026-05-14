@@ -12,54 +12,30 @@
 #include	"fractype.h"
 #include	"fractalp.h"
 #include	"menu.h"
-#include	"anim.h"
+//#include	"anim.h"
 #include	"OscProcess.h"
 
-extern	HWND	GlobalHwnd;			// This is the main windows handle
+//extern	HWND	gManp->GlobalHwnd;			// This is the main windows handle
 
 extern	int	user_data(HWND);
 extern	void	PlotExtras(void);
 extern	double	sech(double x);
-extern	void	PrintOsc(int);			// used for listing oscillator names in d:\temp\OscDump.txt
-
-extern	double	x_rot;				// angle display plane to x axis 
-extern	double	y_rot;				// angle display plane to y axis 
-extern	double	z_rot;				// angle display plane to z axis 
-extern	BYTE	PerspectiveFlag;		// display using perspective
-extern	int	CoordSystem;
-extern	double	param[];
-extern	int	curpass, totpasses;
-extern	long	threshold;
-extern	double	ScreenRatio;			// ratio of width / height for the screen
-extern	double	mandel_width;			// width of display 
-extern	double	hor;				// horizontal address 
-extern	double	vert;				// vertical address 
-extern	WORD	type;				// fractal type
-extern	int	subtype;
 extern	int	OscillatorNum;
-extern	double	iterations;
 extern	double	dt;				// delta time
 extern	double	VertBias;			// allow vertical stretching of the image
 extern	double	zBias;				// allow stretching of the image in the z direction
-extern	int	xAxis, yAxis, zAxis;		// numerical values for axes for chaotic oscillators
+//extern	int	xAxis, yAxis, zAxis;		// numerical values for axes for chaotic oscillators
 extern	BOOL	RemoveHiddenPixels;
-extern	int	xdots, ydots;
 
 extern	int	OscPtrArray[];			// array of pointers to specific oscillators or fractal maps
 
-extern	std::vector <float> wpixels;		// an array of doubles holding slope modified iteration counts
+//extern	std::vector <float> wpixels;		// an array of doubles holding slope modified iteration counts
 
-extern	CTrueCol	TrueCol;		// palette info
-extern	RGBTRIPLE	OscBackGround;
-extern	ProcessType	OscAnimProc;
-extern	COscProcess	OscProcess;
-
-extern	CDib	Dib;				// Device Independent Bitmap
+//extern	RGBTRIPLE	OscBackGround;
 
 void	InitCurve(double c1[], int dimensions);
 int	DisplayCurve(double c1[], DWORD colour, int CurveWidth, double i, int dimensions);
 void	CloseZvaluesCurves(void);
-
 
 /**************************************************************************
 	Abdank-Abakanowicz Quadratrix
@@ -67,39 +43,38 @@ void	CloseZvaluesCurves(void);
 ***************************************************************************/
 
 int	DoAbdankAbakanowiczQuadratrix(void)
-
     {
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * sin(t);
 	c1[1] = a * a / 2 * (t + sin(t) * cos(t));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -119,24 +94,24 @@ int	DoAmpersandCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, c, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	a = 2 * cos(2 * t) + cos(4 * t) + 9;
 	b = -37 * cos(t) - 5 * cos(3 * t);
 	c = 22 * cos(2 * t) + 16;
@@ -149,9 +124,9 @@ int	DoAmpersandCurve(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -171,35 +146,35 @@ int	DoAnguinea(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, d, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    d = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    d = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = d * tan(t / 2);
 	c1[1] = a / 2 * sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -219,33 +194,33 @@ int	DoArchimedeanSpiralCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = t * cos(t);
 	c1[1] = t * sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -265,34 +240,34 @@ int	DoAstroid(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * pow(cos(t), 3);
 	c1[1] = a * pow(sin(t), 3);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -312,24 +287,24 @@ int	DoBeanCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, s, c, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	s = sin(t);
 	c = cos(t);
 	r = s * s * s + c * c * c;
@@ -340,9 +315,9 @@ int	DoBeanCurve(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -362,35 +337,35 @@ int	DoBesace(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * cos(t) - b * sin(t);
 	c1[1] = -sin(t) * c1[0];
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -410,33 +385,33 @@ int	DoBicornCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = sin(t);
 	c1[1] = COSSQR(t) * (2 + cos(t))/(3 + SINSQR(t));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -456,25 +431,25 @@ int	DoBifoliate(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, a, r, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * 8 * cos(t) * sin(t) * sin(t) / (3 + cos(4 * t));
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -482,9 +457,9 @@ int	DoBifoliate(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -504,34 +479,34 @@ int	DoBiquarticCarlosSacre(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, n, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    n = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    n = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = sin(3 * t) * cos(t);
 	c1[1] = pow(sin(3 * t) * sin(t), n);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -551,27 +526,27 @@ int	DoBoothsCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, a, b, e, r, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    e = param[4];
-    CurveWidth = param[5];
-    ColourFactor = param[6];
-    amplitude = param[7];
-    frequency = param[8];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    e = gManp->param[4];
+    CurveWidth = gManp->param[5];
+    ColourFactor = gManp->param[6];
+    amplitude = gManp->param[7];
+    frequency = gManp->param[8];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = sqrt(a * a * cos(t) * cos(t) + fabs(e * b * b * sin(t) * sin(t)));
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -579,9 +554,9 @@ int	DoBoothsCurve(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -601,34 +576,34 @@ int	DoBrachistochroneCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, a, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * (t - sin(t));
 	c1[1] = a * (cos(t) - 1);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -648,24 +623,24 @@ int	DoButterflyCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, r, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = exp(cos(t)) - 2 * cos(4 * t) + pow(sin(t / 24), 5);
 	c1[0] = r * sin(t);
 	c1[1] = r * cos(t);
@@ -673,9 +648,9 @@ int	DoButterflyCurve(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -695,26 +670,26 @@ int	DoCassinianOval(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, M, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	M = 2 * a*a * cos(2*t) + 2 * sqrt((-a*a*a*a + b*b*b*b) + a*a*a*a * COSSQR(2*t));
 	c1[0] = sqrt(M/2) * cos(t);
 	c1[1] = sqrt(M/2) * sin(t);
@@ -722,9 +697,9 @@ int	DoCassinianOval(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -744,34 +719,34 @@ int	DoCatenary(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = t;
 	c1[1] = a * cosh(t / a);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -791,25 +766,25 @@ int	DoCayleysSextic(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = 4 * a * pow(cos(t / 3), 3);
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -817,9 +792,9 @@ int	DoCayleysSextic(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -840,19 +815,19 @@ int	DoChrysanthemumCurve(void)
     int		i, j;
     double	c1[6], CurveWidth, ColourFactor, u, r, p4, p8;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    CurveWidth = param[0];
-    ColourFactor = param[1];
-    totpasses = 10;
+    CurveWidth = gManp->param[0];
+    ColourFactor = gManp->param[1];
+    gManp->totpasses = 10;
 
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
-	u = i * 21.0 * PI / iterations;
+	gManp->curpass = (int)(i * gManp->totpasses);
+	u = i * 21.0 * PI / gManp->iterations;
 	p4 = sin(17 * u / 3);
 	p8 = sin(2 * cos(3 * u) - 28 * u);
 	r = 5*(1 + sin(11*u/5)) - 4*p4*p4*p4*p4 * p8*p8*p8*p8*p8*p8*p8*p8;
@@ -862,9 +837,9 @@ int	DoChrysanthemumCurve(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	}
     PlotExtras();
@@ -883,34 +858,34 @@ int	DoCissoid(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * t*t*t / (t*t + 1);
 	c1[1] = a * t*t / (t*t + 1);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -930,33 +905,33 @@ int	DoClelieCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, m;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    m = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    m = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * sin(m * t) * cos(t);
 	c1[1] = a * sin(m * t) * sin(t);
 	c1[2] = a * cos(m * t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -976,25 +951,25 @@ int	DoCochleoid(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t) / t;
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -1002,9 +977,9 @@ int	DoCochleoid(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1028,36 +1003,36 @@ int	DoConchoidDeSluze(void)
     c1[1] = c1[4] = 0.0;	// y
     c1[2] = c1[5] = 0.0;	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k1 = param[3];
-    k2 = param[4];
-    k3 = param[5];
-    k4 = param[6];
-    k5 = param[7];
-    k6 = param[8];
-    CurveWidth = param[9];
-    ColourFactor = param[10];
-    amplitude = param[11];
-    frequency = param[12];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k1 = gManp->param[3];
+    k2 = gManp->param[4];
+    k3 = gManp->param[5];
+    k4 = gManp->param[6];
+    k5 = gManp->param[7];
+    k6 = gManp->param[8];
+    CurveWidth = gManp->param[9];
+    ColourFactor = gManp->param[10];
+    amplitude = gManp->param[11];
+    frequency = gManp->param[12];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = (1 / cos(t*k1) + a * cos(t*k2)) * cos(t*k3);
 	c1[1] = (1 / cos(t*k4) + a * cos(t*k5)) * sin(t*k6);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1077,35 +1052,35 @@ int	DoConvictsCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, k, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * (t - k * tanh(t));
 	c1[1] = a * k / cosh(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1126,34 +1101,34 @@ int	DoCornoid(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * cos(t) * (1 - 2 * SINSQR(t));
 	c1[1] = a * sin(t) * (1 + 2 * COSSQR(t));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1174,35 +1149,35 @@ int	DoCornoidFamily(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, k, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * cos(t) * cos(2*t);
 	c1[1] = a * sin(t) * (2 + cos(2*t*k));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1217,45 +1192,44 @@ int	DoCornoidFamily(void)
 ***************************************************************************/
 
 int	DoCruciform(void)
-
     {
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, PlaneLimit, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
     b = 0.5 * a;
-    PlaneLimit = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    PlaneLimit = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a / cos(t);
 	c1[1] = a / sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
-	if (c1[0] < -PlaneLimit * ScreenRatio) c1[0] = -PlaneLimit * ScreenRatio; 
-	if (c1[0] > PlaneLimit * ScreenRatio) c1[0] = PlaneLimit * ScreenRatio; 
+	if (c1[0] < -PlaneLimit * gManp->AspectRatio) c1[0] = -PlaneLimit * gManp->AspectRatio;
+	if (c1[0] > PlaneLimit * gManp->AspectRatio) c1[0] = PlaneLimit * gManp->AspectRatio;
 	if (c1[1] < -PlaneLimit) c1[1] = -PlaneLimit; 
 	if (c1[1] > PlaneLimit) c1[1] = PlaneLimit; 
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1275,24 +1249,24 @@ int	DoCycloidOfCeva(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = 1 + 2 * cos(2 * t);
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -1300,9 +1274,9 @@ int	DoCycloidOfCeva(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1322,34 +1296,34 @@ int	DoCycloids(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    r = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    r = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = r * (t - sin(t));
 	c1[1] = r * (1.0 - cos(t));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1369,26 +1343,26 @@ int	DoDevilsCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = sqrt((a*a*SINSQR(t) - b*b*COSSQR(t)) / (SINSQR(t) - COSSQR(t)));
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -1396,9 +1370,9 @@ int	DoDevilsCurve(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1418,33 +1392,33 @@ int	DoDoubleHeartCurveKerner(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = sin(t) * log(sin(t) * sin(t));
 	c1[1] = -cos(4 * t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1464,39 +1438,39 @@ int	DoDumbbellCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * t;
 	c1[1] = a * t * t * sqrt(1 - t * t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	c1[1] = -c1[1];
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
 	t += gap;
 	}
@@ -1516,34 +1490,34 @@ int	DoEightCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * sin(t);
 	c1[1] = a * sin(t) * cos(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1563,35 +1537,35 @@ int	DoEllipse(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * cos(t);
 	c1[1] = b * sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1611,34 +1585,34 @@ int	DoEpicycloids(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, index, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    index = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    index = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = index * cos(t) - cos(index * t);
 	c1[1] = index * sin(t) - sin(index * t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1658,37 +1632,37 @@ int	DoEpitrochoid(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, c, k, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    c = param[4];
-    k = param[5];
-    CurveWidth = param[6];
-    ColourFactor = param[7];
-    amplitude = param[8];
-    frequency = param[9];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    c = gManp->param[4];
+    k = gManp->param[5];
+    CurveWidth = gManp->param[6];
+    ColourFactor = gManp->param[7];
+    amplitude = gManp->param[8];
+    frequency = gManp->param[9];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = (a + b) * cos(k*t) - c * cos((k * a / b + 1) * t);
 	c1[1] = (a + b) * sin(k*t) - c * sin((k * a / b + 1) * t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1708,27 +1682,27 @@ int	DoEquangularSpiral(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, angle, alpha, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    angle = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    angle = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
     alpha = angle / 180.0 * PI;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = exp(t / tan(alpha));
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -1736,9 +1710,9 @@ int	DoEquangularSpiral(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1758,35 +1732,35 @@ int	DoEvoluteEllipse(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * cos(t) * cos(t) * cos(t);
 	c1[1] = b * sin(t) * sin(t) * sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1806,24 +1780,24 @@ int	DoFermatSpiralCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	if (t > 0)
 	    c1[0] = sqrt(fabs(t)) * cos(t);
 	else
@@ -1833,9 +1807,9 @@ int	DoFermatSpiralCurve(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1855,34 +1829,34 @@ int	DoFishCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * cos(t) - a * sin(t) * sin(t) / sqrt(2.0);
 	c1[1] = a * sin(t) * cos(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1902,38 +1876,38 @@ int	DoFoliumDescartes(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, PlaneLimit, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    PlaneLimit = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    PlaneLimit = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = 3*t / (1 + t*t*t);
 	c1[1] = 3*t*t / (1 + t*t*t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
-	if (c1[0] < -PlaneLimit * ScreenRatio) c1[0] = -PlaneLimit * ScreenRatio; 
-	if (c1[0] > PlaneLimit * ScreenRatio) c1[0] = PlaneLimit * ScreenRatio; 
+	if (c1[0] < -PlaneLimit * gManp->AspectRatio) c1[0] = -PlaneLimit * gManp->AspectRatio;
+	if (c1[0] > PlaneLimit * gManp->AspectRatio) c1[0] = PlaneLimit * gManp->AspectRatio;
 	if (c1[1] < -PlaneLimit) c1[1] = -PlaneLimit; 
 	if (c1[1] > PlaneLimit) c1[1] = PlaneLimit; 
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -1953,34 +1927,34 @@ int	DoFreethsNephroid(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * (1 + 2 * sin(t / 2));
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
 	t += gap;
 	}
@@ -2000,35 +1974,35 @@ int	DoFreethsNephroidIrrational(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, r, k, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * (1 + 2 * sin(t * k / 2));
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
 	t += gap;
 	}
@@ -2048,35 +2022,35 @@ int	DoGaussCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = t;
 	c1[1] = b * exp( -(a*a*t*t));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2096,27 +2070,27 @@ int	DoGears(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, n, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    n = param[4];
-    CurveWidth = param[5];
-    ColourFactor = param[6];
-    amplitude = param[7];
-    frequency = param[8];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    n = gManp->param[4];
+    CurveWidth = gManp->param[5];
+    ColourFactor = gManp->param[6];
+    amplitude = gManp->param[7];
+    frequency = gManp->param[8];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a + tanh(b * sin(n*t))/b;
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -2124,9 +2098,9 @@ int	DoGears(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2146,26 +2120,26 @@ int	DoHippopede(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = sqrt(4 * b * (a - b * sin(t) * sin(t)));
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -2173,9 +2147,9 @@ int	DoHippopede(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2195,40 +2169,40 @@ int	DoHyperbola(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, PlaneLimit, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    PlaneLimit = param[4];
-    CurveWidth = param[5];
-    ColourFactor = param[6];
-    amplitude = param[7];
-    frequency = param[8];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    PlaneLimit = gManp->param[4];
+    CurveWidth = gManp->param[5];
+    ColourFactor = gManp->param[6];
+    amplitude = gManp->param[7];
+    frequency = gManp->param[8];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * SEC(t);
 	c1[1] = b * tan(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
-	if (c1[0] < -PlaneLimit * ScreenRatio) c1[0] = -PlaneLimit * ScreenRatio; 
-	if (c1[0] > PlaneLimit * ScreenRatio) c1[0] = PlaneLimit * ScreenRatio; 
+	if (c1[0] < -PlaneLimit * gManp->AspectRatio) c1[0] = -PlaneLimit * gManp->AspectRatio;
+	if (c1[0] > PlaneLimit * gManp->AspectRatio) c1[0] = PlaneLimit * gManp->AspectRatio;
 	if (c1[1] < -PlaneLimit) c1[1] = -PlaneLimit; 
 	if (c1[1] > PlaneLimit) c1[1] = PlaneLimit; 
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2248,33 +2222,33 @@ int	DoHyperbolicSpiralCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = cos(t)/t;
 	c1[1] = sin(t)/t;
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2294,37 +2268,37 @@ int	DoHypocycloids(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, R, r, h, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    R = param[2];
-    r = param[3];
-    h = param[4];
-    CurveWidth = param[5];
-    ColourFactor = param[6];
-    amplitude = param[7];
-    frequency = param[8];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    R = gManp->param[2];
+    r = gManp->param[3];
+    h = gManp->param[4];
+    CurveWidth = gManp->param[5];
+    ColourFactor = gManp->param[6];
+    amplitude = gManp->param[7];
+    frequency = gManp->param[8];
+    gManp->totpasses = 10;
 
 //    End = 2.0 * PI * (double)lcm((int)R, (int)r);
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = (R - r) * cos(t) + h * cos(((R - r)/r) * t);
 	c1[1] = (R - r) * sin(t) - h * sin(((R - r)/r) * t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2344,37 +2318,37 @@ int	DoHypotrochoid(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, R, r, d, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    R = param[2];
-    r = param[3];
-    d = param[4];
-    CurveWidth = param[5];
-    ColourFactor = param[6];
-    amplitude = param[7];
-    frequency = param[8];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    R = gManp->param[2];
+    r = gManp->param[3];
+    d = gManp->param[4];
+    CurveWidth = gManp->param[5];
+    ColourFactor = gManp->param[6];
+    amplitude = gManp->param[7];
+    frequency = gManp->param[8];
+    gManp->totpasses = 10;
 
 //    End = 2.0 * PI * (double)lcm((int)R, (int)r);
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = (R - r) * cos(t) - d * cos((R - r) * t / r);
 	c1[1] = (R - r) * sin(t) - d * sin((R - r) * t / r);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2394,35 +2368,35 @@ int	DoIlluminationCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, a, b, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    b = param[2];
-    a = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    b = gManp->param[2];
+    a = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = t;
 	c1[1] = sqrt(1 / pow(t * t + 1, 3));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2442,34 +2416,34 @@ int	DoInvoluteCircle(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * (cos(t) + t * sin(t));
 	c1[1] = a * (sin(t) - t * cos(t));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2489,26 +2463,26 @@ int	DoKampyleOfEudoxus(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a / COSSQR(t);
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -2516,9 +2490,9 @@ int	DoKampyleOfEudoxus(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2538,25 +2512,25 @@ int	DoLHospitalQuintic(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t) / (1 + cos(t) * cos(2 * t));
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -2564,9 +2538,9 @@ int	DoLHospitalQuintic(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2586,34 +2560,34 @@ int	DoLemniskate(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * cos(t)/(1 + sin(t) * sin(t));
 	c1[1] = a * sin(t) * cos(t)/(1 + sin(t) * sin(t));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2633,25 +2607,25 @@ int	DoLilliputBrobdingnag(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t * t) / t;
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -2659,9 +2633,9 @@ int	DoLilliputBrobdingnag(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2681,26 +2655,26 @@ int	DoLimaconPascal(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
     b = 1.3 * a;
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = b + 2 * a * cos(t);
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -2708,9 +2682,9 @@ int	DoLimaconPascal(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2730,37 +2704,37 @@ int	DoLissajousCurves(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, c, n, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    c = param[4];
-    n = param[5];
-    CurveWidth = param[6];
-    ColourFactor = param[7];
-    amplitude = param[8];
-    frequency = param[9];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    c = gManp->param[4];
+    n = gManp->param[5];
+    CurveWidth = gManp->param[6];
+    ColourFactor = gManp->param[7];
+    amplitude = gManp->param[8];
+    frequency = gManp->param[9];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * sin(n*t + c);
 	c1[1] = b * sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2780,24 +2754,24 @@ int	DoLituus(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = (t == 0.0) ? 10000.0 : (1 / sqrt(fabs(t)));
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -2805,9 +2779,9 @@ int	DoLituus(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2827,34 +2801,34 @@ int	DoLogarithmicSpiralCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = exp(a*t) * cos(t);
 	c1[1] = exp(a*t) * sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2874,40 +2848,40 @@ int	DoMalteseCross(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, PlaneLimit, ColourFactor, a, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    PlaneLimit = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    PlaneLimit = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = 2 / sqrt(fabs(sin(a * t)));    
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
-	if (c1[0] < -PlaneLimit * ScreenRatio) c1[0] = -PlaneLimit * ScreenRatio; 
-	if (c1[0] > PlaneLimit * ScreenRatio) c1[0] = PlaneLimit * ScreenRatio; 
+	if (c1[0] < -PlaneLimit * gManp->AspectRatio) c1[0] = -PlaneLimit * gManp->AspectRatio;
+	if (c1[0] > PlaneLimit * gManp->AspectRatio) c1[0] = PlaneLimit * gManp->AspectRatio;
 	if (c1[1] < -PlaneLimit) c1[1] = -PlaneLimit; 
 	if (c1[1] > PlaneLimit) c1[1] = PlaneLimit; 
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2927,25 +2901,25 @@ int	DoMarcusButterfly1(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t) * cos(t);
 	c1[0] = r * sin(t);
 	c1[1] = r * r / 2 * (t + sin(t) * cos(t));
@@ -2953,9 +2927,9 @@ int	DoMarcusButterfly1(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -2975,25 +2949,25 @@ int	DoMarcusButterfly2(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t) - cos(t);
 	c1[0] = r * sin(t);
 	c1[1] = r * r / 2 * (t + sin(t) * cos(t));
@@ -3001,9 +2975,9 @@ int	DoMarcusButterfly2(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -3023,25 +2997,25 @@ int	DoMarcusButterfly3(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * -cos(t);
 	c1[0] = r * sin(t);
 	c1[1] = r * r / 2 * (t + sin(t) * cos(t));
@@ -3049,9 +3023,9 @@ int	DoMarcusButterfly3(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -3071,27 +3045,27 @@ int	DoMarcusButterfly4(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, m, n, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    m = param[3];
-    n = param[4];
-    CurveWidth = param[5];
-    ColourFactor = param[6];
-    amplitude = param[7];
-    frequency = param[8];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    m = gManp->param[3];
+    n = gManp->param[4];
+    CurveWidth = gManp->param[5];
+    ColourFactor = gManp->param[6];
+    amplitude = gManp->param[7];
+    frequency = gManp->param[8];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(m * t) - cos(n * t);
 	c1[0] = r * sin(t);
 	c1[1] = r * r / 2 * (t + sin(t) * cos(t));
@@ -3099,9 +3073,9 @@ int	DoMarcusButterfly4(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -3122,41 +3096,41 @@ int	DoMarcusCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, m, n, PlaneLimit, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    m = param[3];
-    n = param[4];
-    PlaneLimit = param[5];
-    CurveWidth = param[6];
-    ColourFactor = param[7];
-    amplitude = param[8];
-    frequency = param[9];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    m = gManp->param[3];
+    n = gManp->param[4];
+    PlaneLimit = gManp->param[5];
+    CurveWidth = gManp->param[6];
+    ColourFactor = gManp->param[7];
+    amplitude = gManp->param[8];
+    frequency = gManp->param[9];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * cos(t) / (1 + cosh(t / sqrt(n)) * cosh(t / sqrt(n)));
 	c1[1] = a * sin(t) / (1 - sinh(t / sqrt(m)) * sinh(t / sqrt(m)));
 	c1[2] = amplitude * sin(frequency*t) + amplitude * sin(frequency*t);
-	if (c1[0] < -PlaneLimit * ScreenRatio) c1[0] = -PlaneLimit * ScreenRatio;
-	if (c1[0] > PlaneLimit * ScreenRatio) c1[0] = PlaneLimit * ScreenRatio;
+	if (c1[0] < -PlaneLimit * gManp->AspectRatio) c1[0] = -PlaneLimit * gManp->AspectRatio;
+	if (c1[0] > PlaneLimit * gManp->AspectRatio) c1[0] = PlaneLimit * gManp->AspectRatio;
 	if (c1[1] < -PlaneLimit) c1[1] = -PlaneLimit;
 	if (c1[1] > PlaneLimit) c1[1] = PlaneLimit;
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -3176,26 +3150,26 @@ int	DoMordellCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, limit, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
     limit = pow(a, 1.0/3.0);
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	if (t > -limit)
 	    {
 	    c1[0] = t;
@@ -3203,17 +3177,17 @@ int	DoMordellCurve(void)
 	    c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	    for (j = 0; j < 3; j++)
 		c1[j + 3] += c1[j] * dt;
-	    if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	    if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 		break;
 	    c1[0] = t;
 	    c1[1] = -sqrt(t*t*t + a);
 	    c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	    for (j = 0; j < 3; j++)
 		c1[j + 3] += c1[j] * dt;
-	    if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	    if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 		break;
 	    }
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
 	t += gap;
 	}
@@ -3233,28 +3207,28 @@ int	DoNodalCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
     Start *= b;
     End *= b;
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a / tan(b * t);
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -3262,9 +3236,9 @@ int	DoNodalCurve(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -3284,35 +3258,35 @@ int	DoOphiuride(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = (b * sin(t) - a * cos(t)) * tan(t);
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
 	t += gap;
 	}
@@ -3332,28 +3306,28 @@ int	DoParametricCurves(int version)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, c, d, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    c = param[4];
-    d = param[5];
-    CurveWidth = param[6];
-    ColourFactor = param[7];
-    amplitude = param[8];
-    frequency = param[9];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    c = gManp->param[4];
+    d = gManp->param[5];
+    CurveWidth = gManp->param[6];
+    ColourFactor = gManp->param[7];
+    amplitude = gManp->param[8];
+    frequency = gManp->param[9];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = cos(a * t) - pow((cos(b * t)), 3);
 	switch (version)
 	    {
@@ -3370,9 +3344,9 @@ int	DoParametricCurves(int version)
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
 	t += gap;
 	}
@@ -3409,27 +3383,27 @@ int	DoParametricCurvesQ2T(int variety)
     c1[1] = c1[4] = 0.0;	// y
     c1[2] = c1[5] = 0.0;	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    c = param[4];
-    d = param[5];
-    e = param[6];
-    f = param[7];		// i in Marcus code
-    g = param[8];		// j in Marcus code
-    CurveWidth = param[9];
-    ColourFactor = param[10];
-    amplitude = param[11];
-    frequency = param[12];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    c = gManp->param[4];
+    d = gManp->param[5];
+    e = gManp->param[6];
+    f = gManp->param[7];		// i in Marcus code
+    g = gManp->param[8];		// j in Marcus code
+    CurveWidth = gManp->param[9];
+    ColourFactor = gManp->param[10];
+    amplitude = gManp->param[11];
+    frequency = gManp->param[12];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	switch(variety)
 	    {
 	    case 0:
@@ -3448,9 +3422,9 @@ int	DoParametricCurvesQ2T(int variety)
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
 	t += gap;
 	}
@@ -3487,37 +3461,37 @@ int	DoParametricCurvesGeneral(void)
     c1[1] = c1[4] = 0.0;	// y
     c1[2] = c1[5] = 0.0;	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    c = param[4];
-    d = param[5];
-    f = param[6];		// i in Marcus code
-    g = param[7];		// j in Marcus code
-    j = param[8];
-    k = param[9];
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    c = gManp->param[4];
+    d = gManp->param[5];
+    f = gManp->param[6];		// i in Marcus code
+    g = gManp->param[7];		// j in Marcus code
+    j = gManp->param[8];
+    k = gManp->param[9];
 
-    CurveWidth = param[10];
-    ColourFactor = param[11];
-    amplitude = param[12];
-    frequency = param[13];
-    totpasses = 10;
+    CurveWidth = gManp->param[10];
+    ColourFactor = gManp->param[11];
+    amplitude = gManp->param[12];
+    frequency = gManp->param[13];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (n = 0; n < iterations; n++)
+    for (n = 0; n < gManp->iterations; n++)
 	{
-	curpass = (int)(n * totpasses);
+	gManp->curpass = (int)(n * gManp->totpasses);
 	c1[0] = f * cos(a * t) - pow(cos(b * t), j);
 	c1[1] = g * sin(c * t) - pow(sin(d * t), k);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (m = 0; m < 3; m++)
 	    c1[m + 3] += c1[m] * dt;
-	if (DisplayCurve(c1, ((DWORD)(n / ColourFactor) % threshold), (int)CurveWidth, n, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(n / ColourFactor)% gManp->threshold), (int)CurveWidth, n, 6) < 0)
 	    break;
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
 	t += gap;
 	}
@@ -3536,39 +3510,39 @@ int	DoPearShapedCurve(void)
     {
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, frequency, amplitude;
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = t;
 	c1[1] = sqrt(t * t * t * (a - t) / (b * b));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	c1[1] = -c1[1];
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
 	t += gap;
 	}
@@ -3588,34 +3562,34 @@ int	DoPedaloftheParabola(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, alpha, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    alpha = param[2];
-    a = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    alpha = gManp->param[2];
+    a = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = (alpha - a) * t * t / (1 + t * t);
 	c1[1] = t * (alpha + a * t * t) / (1 + t * t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
 	t += gap;
 	}
@@ -3635,33 +3609,33 @@ int	DoPiriform(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = 1 + sin(t);
 	c1[1] = cos(t) * (1 + sin(t));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -3681,36 +3655,36 @@ int	DoPlateauCurves(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, m, n, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    m = param[3];
-    n = param[4];
-    CurveWidth = param[5];
-    ColourFactor = param[6];
-    amplitude = param[7];
-    frequency = param[8];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    m = gManp->param[3];
+    n = gManp->param[4];
+    CurveWidth = gManp->param[5];
+    ColourFactor = gManp->param[6];
+    amplitude = gManp->param[7];
+    frequency = gManp->param[8];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * sin((m + n) * t) / sin((m - n) * t);
 	c1[1] = 2 * a * sin(m*t) * sin(n*t) / sin((m - n) * t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -3730,24 +3704,24 @@ int	DoPoinsotsSpirals(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, frequency, r, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = sech(t/3);
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -3755,9 +3729,9 @@ int	DoPoinsotsSpirals(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -3777,27 +3751,27 @@ int	DoPolygasteroid(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, r, n, e, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    n = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    n = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
     e = exp(1.0);
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a / (1 + e * cos(n * t));
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -3805,9 +3779,9 @@ int	DoPolygasteroid(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -3827,25 +3801,25 @@ int	DoPowerCurves(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, n, index, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    n = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    n = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	index = (t < 0.0) ? (int)n : n;					// no sqrt() of negative numbers
 	c1[0] = t;
 	c1[1] = pow(t, index);
@@ -3853,9 +3827,9 @@ int	DoPowerCurves(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -3875,37 +3849,37 @@ int	DoQuadratrixHippias(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, PlaneLimit, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    PlaneLimit = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    PlaneLimit = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * t * COT(t);
 	c1[1] = a * t;
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
-	if (c1[0] < -PlaneLimit * ScreenRatio) c1[0] = -PlaneLimit * ScreenRatio; 
-	if (c1[0] > PlaneLimit * ScreenRatio) c1[0] = PlaneLimit * ScreenRatio; 
+	if (c1[0] < -PlaneLimit * gManp->AspectRatio) c1[0] = -PlaneLimit * gManp->AspectRatio;
+	if (c1[0] > PlaneLimit * gManp->AspectRatio) c1[0] = PlaneLimit * gManp->AspectRatio;
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -3925,34 +3899,34 @@ int	DoRanunculoid(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * (6 * cos(t) - cos(6 * t));
 	c1[1] = a * (6 * sin(t) - sin(6 * t));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -3972,26 +3946,26 @@ int	DoRhodoneaCurves(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, k, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t * k);
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -3999,9 +3973,9 @@ int	DoRhodoneaCurves(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4021,37 +3995,37 @@ int	DoRoseCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, m, n, k, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    m = param[2];
-    n = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    m = gManp->param[2];
+    n = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
     k = m / n;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = cos(k*t) * cos(t);
 	c1[1] = cos(k*t) * sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4071,35 +4045,35 @@ int	DoScarabaeus(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = b * cos(2 * t) - a * cos(t);
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
 	t += gap;
 	}
@@ -4119,34 +4093,34 @@ int	DoSemiCubicParabola(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, a, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = t*t;
 	c1[1] = a*t*t*t;
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4166,35 +4140,35 @@ int	DoSerpentine(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, a, b, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
     b = 2 * a;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = t;
 	c1[1] = a * b * t / (t * t + a * a);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4214,35 +4188,35 @@ int	DoSquircle(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, a, r, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    r = param[2];
-    a = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    r = gManp->param[2];
+    a = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = sqrt(fabs(cos(t))) * r * fabs(cos(t)) / cos(t);
 	c1[1] = sqrt(fabs(sin(t))) * r * fabs(sin(t)) / sin(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4262,34 +4236,34 @@ int	DoStrophoid(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * t * (t*t - 1)/(t*t + 1);
 	c1[1] = a * (t*t - 1)/(t*t + 1);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4309,24 +4283,24 @@ int	DoSwastikaCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = sqrt(sin(t) * cos(t) / (pow(sin(t), 4) - pow(cos(t), 4)));
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -4334,9 +4308,9 @@ int	DoSwastikaCurve(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4356,36 +4330,36 @@ int	DoTalbotsCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, f, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    f = param[4];
-    CurveWidth = param[5];
-    ColourFactor = param[6];
-    amplitude = param[7];
-    frequency = param[8];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    f = gManp->param[4];
+    CurveWidth = gManp->param[5];
+    ColourFactor = gManp->param[6];
+    amplitude = gManp->param[7];
+    frequency = gManp->param[8];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = (a*a + f*f * SINSQR(t)) * cos(t)/a;
 	c1[1] = (a*a - 2*f*f + f*f * SINSQR(t)) * sin(t)/b;
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4405,34 +4379,34 @@ int	DoTanhSpiralCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = sinh(2*t)/(cos(2*a*t) + cosh(2*t));
 	c1[1] = sin(2*a*t)/(cos(2*a*t) + cosh(2*t));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4452,35 +4426,35 @@ int	DoTearDropCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, n, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    n = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    n = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * cos(t);
 	c1[1] = a * sin(t) * pow(sin(t / 2), n);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4500,25 +4474,25 @@ int	DoTorpedoCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(4 * t) / 4 / sin(t);
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -4526,9 +4500,9 @@ int	DoTorpedoCurve(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4548,33 +4522,33 @@ int	DoTractrix(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    CurveWidth = param[2];
-    ColourFactor = param[3];
-    amplitude = param[4];
-    frequency = param[5];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    CurveWidth = gManp->param[2];
+    ColourFactor = gManp->param[3];
+    amplitude = gManp->param[4];
+    frequency = gManp->param[5];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = 3 / cosh(t);
 	c1[1] = t - tanh(t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4594,34 +4568,34 @@ int	DoTricuspoid(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * (2 * cos(t) + cos(2*t));
 	c1[1] = a * (2 * sin(t) - sin(2*t));
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4641,26 +4615,26 @@ int	DoTrifolium(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, b, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    b = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    b = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = 1 + cos(b * t) + sin(b * t) * sin(b * t);
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -4668,9 +4642,9 @@ int	DoTrifolium(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4690,26 +4664,26 @@ int	DoTrigonometricCurveII(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, k, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t * k);
 	c1[0] = r * cos(t) + sin(t);
 	c1[1] = r * sin(t) * cos(t);
@@ -4717,9 +4691,9 @@ int	DoTrigonometricCurveII(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4739,26 +4713,26 @@ int	DoTrigonometricCurveIII(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, k, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t * k);
 	c1[0] = r * cos(t) - sin(t);
 	c1[1] = r * sin(t) - cos(t);
@@ -4766,9 +4740,9 @@ int	DoTrigonometricCurveIII(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4788,26 +4762,26 @@ int	DoTrigonometricCurveIV(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, k, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t * k);
 	c1[0] = r * cos(t) - sin(t);
 	c1[1] = r * sin(t) + cos(t);
@@ -4815,9 +4789,9 @@ int	DoTrigonometricCurveIV(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4837,26 +4811,26 @@ int	DoTrigonometricCurveV(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, k, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t * k);
 	c1[0] = r * cos(t) * sin(t);
 	c1[1] = r * sin(t) / cos(t);
@@ -4864,9 +4838,9 @@ int	DoTrigonometricCurveV(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4886,26 +4860,26 @@ int	DoTrigonometricCurveVI(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, k, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t * k);
 	c1[0] = r * cos(t) / sin(t);
 	c1[1] = r * sin(t) - cos(t);
@@ -4913,9 +4887,9 @@ int	DoTrigonometricCurveVI(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4935,26 +4909,26 @@ int	DoTrigonometricCurveVII(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, k, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t * k);
 	c1[0] = r * cos(t) / sin(t);
 	c1[1] = r * sin(t) / cos(t);
@@ -4962,9 +4936,9 @@ int	DoTrigonometricCurveVII(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -4984,26 +4958,26 @@ int	DoTrigonometricCurveVIII(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, k, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t * k);
 	c1[0] = r * cos(t) - sin(t);
 	c1[1] = r * sin(t) - cos(t);
@@ -5011,9 +4985,9 @@ int	DoTrigonometricCurveVIII(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -5033,26 +5007,26 @@ int	DoTrigonometricCurveIX(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, k, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t * k);
 	c1[0] = r * cos(t) - sin(t);
 	c1[1] = r * cos(t) + cos(t);
@@ -5060,9 +5034,9 @@ int	DoTrigonometricCurveIX(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -5082,26 +5056,26 @@ int	DoTrigonometricCurveX(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, k, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    k = param[3];
-    CurveWidth = param[4];
-    ColourFactor = param[5];
-    amplitude = param[6];
-    frequency = param[7];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    k = gManp->param[3];
+    CurveWidth = gManp->param[4];
+    ColourFactor = gManp->param[5];
+    amplitude = gManp->param[6];
+    frequency = gManp->param[7];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a * sin(t * k);
 	c1[0] = r * cos(t) / sin(t);
 	c1[1] = r * cos(t) + cos(t);
@@ -5109,9 +5083,9 @@ int	DoTrigonometricCurveX(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -5131,25 +5105,25 @@ int	DoTrisectrix(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, r, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	r = a / cos(t/3);    
 	c1[0] = r * cos(t);
 	c1[1] = r * sin(t);
@@ -5157,9 +5131,9 @@ int	DoTrisectrix(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -5179,34 +5153,34 @@ int	DoTschirnhausenCubic(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	c1[0] = a * (1 - 3 * t * t);
 	c1[1] = a * t * (3 - t * t);
 	c1[2] = amplitude*sin(frequency*t) + amplitude*sin(frequency*t);
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -5226,25 +5200,25 @@ int	DoVivianiCurve(void)
     int		i, j;
     double	c1[6], t, gap, Start, End, CurveWidth, ColourFactor, a, f, frequency, amplitude;
 
-    c1[0] = c1[3] = param[10];	// x
-    c1[1] = c1[4] = param[11];	// y
-    c1[2] = c1[5] = param[12];	// z
+    c1[0] = c1[3] = gManp->param[10];	// x
+    c1[1] = c1[4] = gManp->param[11];	// y
+    c1[2] = c1[5] = gManp->param[12];	// z
 
-    Start = param[0];
-    End = param[1];
-    a = param[2];
-    CurveWidth = param[3];
-    ColourFactor = param[4];
-    amplitude = param[5];
-    frequency = param[6];
-    totpasses = 10;
+    Start = gManp->param[0];
+    End = gManp->param[1];
+    a = gManp->param[2];
+    CurveWidth = gManp->param[3];
+    ColourFactor = gManp->param[4];
+    amplitude = gManp->param[5];
+    frequency = gManp->param[6];
+    gManp->totpasses = 10;
 
-    gap = (End - Start) / iterations;
+    gap = (End - Start) / gManp->iterations;
     t = Start;
     InitCurve(c1, 3);							// pass in number of dimensions
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
-	curpass = (int)(i * totpasses);
+	gManp->curpass = (int)(i * gManp->totpasses);
 	f = sqrt(3 + cos(t));
 	c1[0] = -a * sin(t) / f;
 	c1[1] = a * cos(t) / f;
@@ -5252,9 +5226,9 @@ int	DoVivianiCurve(void)
 	for (j = 0; j < 3; j++)
 	    c1[j + 3] += c1[j] * dt;
 
-	if (user_data(GlobalHwnd) == -1)				// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)				// user pressed a key?
 	    return -1;
-	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor) % threshold), (int)CurveWidth, i, 6) < 0)
+	if (DisplayCurve(c1, ((DWORD)(i / ColourFactor)% gManp->threshold), (int)CurveWidth, i, 6) < 0)
 	    break;
 	t += gap;
 	}
@@ -5269,7 +5243,7 @@ int	DoVivianiCurve(void)
 
 void	CloseZvaluesCurves(void)
     {
-    return OscProcess.CloseZvalues();
+    return gManp->OscProcess.CloseZvalues();
     }
 
 /**************************************************************************
@@ -5278,8 +5252,8 @@ void	CloseZvaluesCurves(void)
 
 void	InitCurve(double c1[], int dimensions)
     {
-    OscProcess.InitOscProc(dimensions, mandel_width, ScreenRatio, xdots, ydots, type, subtype, OscAnimProc, &xAxis, &yAxis, &zAxis, BOUNDARY, &Dib, c1, PerspectiveFlag, iterations, OscBackGround, &x_rot, &y_rot, &z_rot, 
-    &RemoveHiddenPixels, GlobalHwnd, wpixels, &TrueCol);
+    gManp->OscProcess.InitOscProc(dimensions, gManp->mandel_width, gManp->AspectRatio, gManp->xdots, gManp->ydots, gManp->type, gManp->subtype, gManp->OscAnimProc, &gManp->xAxis, &gManp->yAxis, &gManp->zAxis, BOUNDARY, &gManp->Dib, c1,
+		gManp->PerspectiveFlag, gManp->iterations, gManp->OscBackGround, &gManp->x_rot, &gManp->y_rot, &gManp->z_rot, &RemoveHiddenPixels, gManp->GlobalHwnd, &gManp->TrueCol);
     }
 
 /**************************************************************************
@@ -5288,7 +5262,7 @@ void	InitCurve(double c1[], int dimensions)
 
 int	DisplayCurve(double c1[], DWORD colour, int CurveWidth, double i, int dimensions)
     {
-    return OscProcess.DisplayOscillator(c1, c1, 0.0, colour, i, dimensions, FALSE, 1, 1, hor, vert, VertBias, zBias, OscAnimProc, CoordSystem, threshold, 0.0, CurveWidth);
+    return gManp->OscProcess.DisplayOscillator(c1, c1, 0.0, colour, i, dimensions, FALSE, 1, 1, gManp->hor, gManp->vert, VertBias, zBias, gManp->OscAnimProc, gManp->CoordSystem, gManp->threshold, 0.0, CurveWidth);
     }
 
 /**************************************************************************
@@ -5332,7 +5306,7 @@ int	setup_Curve(void)
 
 int	DoCurves(void) 
     {
-    return (CurveSpecific[subtype].calctype());
+    return (CurveSpecific[gManp->subtype].calctype());
     }
 
 

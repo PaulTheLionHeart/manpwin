@@ -29,7 +29,7 @@ int	orig_mode, eyes, ground;
 int	eye_dots = FALSE;		/* eye dots for AutoStereo */
 BOOL	AutoStereoActive = FALSE;	// is autostereo currently running?
 
-BYTE	grayflag = 0;			/* flag to use grey value rather than color number */
+//BYTE	grayflag = 0;			/* flag to use grey value rather than color number */
 
 static	long	depth, maxc;
 	int	stereo_sign;
@@ -37,15 +37,6 @@ static	BOOL	ShowSpots = FALSE;
 static	RGBTRIPLE   SpotBackground[SPOT_SIZE+2][SPOT_SIZE+2];		// hold background pixels for restoration
 
 void	DrawSpots(void);
-
-extern	int	logval;			/* log colour map */
-extern	long	threshold;		/* maximum iterations */
-extern	int	AutoStereo_value;	/* AutoStereo depth value */
-extern	CTrueCol    TrueCol;		// palette info
-extern	int	height, xdots, ydots, width, bits_per_pixel;
-extern	WORD	colours;
-extern	CPlot	Plot;		// image plotting routines 
-extern	CDib	Dib;				// Device Independent Bitmap
 
 extern	int	user_data(HWND);
 
@@ -59,18 +50,17 @@ extern	int	user_data(HWND);
 **************************************************************************/
 
 static int getdepth(short x, short y)
-
     {
     short	pal, temp;
 
-    pal = (BYTE)(Plot.GetColour(x, y));
+    pal = (BYTE)(gManp->Plot.GetColour(x, y));
 
-    if (grayflag)  
+    if (gManp->grayflag)
 	{		// effectively (30*R + 59*G + 11*B)/100 scaled 0 to 255
 	pal *= 3;
-	temp = ((short) (TrueCol.PalettePtr[pal].rgbtRed >> 2) * 77 
-	    +  (short)  (TrueCol.PalettePtr[pal].rgbtGreen >> 2) * 151 
-	    +  (short)  (TrueCol.PalettePtr[pal].rgbtBlue >> 2) * 28);
+	temp = ((short) (gManp->TrueCol.PalettePtr[pal].rgbtRed >> 2) * 77
+	    +  (short)  (gManp->TrueCol.PalettePtr[pal].rgbtGreen >> 2) * 151
+	    +  (short)  (gManp->TrueCol.PalettePtr[pal].rgbtBlue >> 2) * 28);
 	pal = temp >> 6;
 	}
     return(pal);
@@ -81,7 +71,6 @@ static int getdepth(short x, short y)
 **************************************************************************/
 
 void	draw3D(HWND hwnd)
-
     {
     short	x, y, same[MAXHORIZONTAL], colour[MAXHORIZONTAL], sep, i, j, s;
 
@@ -90,26 +79,26 @@ void	draw3D(HWND hwnd)
 	    return;
 
     ShowSpots = FALSE;
-    eyes = ydots / REPEATS;				// eye separation
+    eyes = gManp->ydots / REPEATS;			// eye separation
     ground = eyes / 2;					// a dot separation for distant objects
-    if (AutoStereo_value < 0)
+    if (gManp->AutoStereo_value < 0)
 	{
-	AutoStereo_value = -AutoStereo_value;
+	gManp->AutoStereo_value = -gManp->AutoStereo_value;
 	stereo_sign = -1;
 	}
     else
 	stereo_sign = 1;
-    if (AutoStereo_value < 10)
-	AutoStereo_value = 10;				// low values blow up calcs
+    if (gManp->AutoStereo_value < 10)
+	gManp->AutoStereo_value = 10;				// low values blow up calcs
         
-    depth = xdots / AutoStereo_value;
-    maxc = (threshold > colours) ? colours : threshold;
-    for (y = 0; y < (short)ydots; ++y)
+    depth = gManp->xdots / gManp->AutoStereo_value;
+    maxc = (gManp->threshold > gManp->colours) ? gManp->colours : gManp->threshold;
+    for (y = 0; y < (short)gManp->ydots; ++y)
 	{
 	user_data(hwnd);				// user pressed a key?
-	for (x = 0; x < (short)xdots; ++x)
+	for (x = 0; x < (short)gManp->xdots; ++x)
 	    same[x] = x;
-	for (x = 0; x < (short)xdots; ++x)
+	for (x = 0; x < (short)gManp->xdots; ++x)
 	    {
 	    if (stereo_sign == 1)
     		sep = ground - (short) (depth * (maxc - getdepth(x, y)) / maxc);
@@ -117,7 +106,7 @@ void	draw3D(HWND hwnd)
 		sep = ground - (short) (depth * (getdepth(x, y)) / maxc);
 	    i = x - (sep + (sep & y & 1)) / 2;
 	    j = i + sep;
-	    if (0 <= i && j < (short)xdots)
+	    if (0 <= i && j < (short)gManp->xdots)
 		{
 		for (s = same[i]; s != i && s != j; s = same[i])
 		    {
@@ -133,13 +122,13 @@ void	draw3D(HWND hwnd)
 		same[i] = j;
 		}
 	    }
-	for (x = xdots - 1; x >= 0; x--)
+	for (x = gManp->xdots - 1; x >= 0; x--)
 	    {
 	    if (same[x] == x)
 		colour[x] = RANDOM(255);
 	    else
 		colour[x] = colour[same[x]];
-	    Plot.PlotPoint(x, y, colour[x]);
+	    gManp->Plot.PlotPoint(x, y, colour[x]);
 	    }
 	}
 //    if (ShowSpots)
@@ -152,28 +141,27 @@ void	draw3D(HWND hwnd)
 **************************************************************************/
 
 void	GuideSpot(short x, short y)
-
     {
     int	    i, j, k;
-    long    t;
+    size_t  t;
 
     for (i = x - SPOT_SIZE / 2; i <= x + SPOT_SIZE / 2; ++i)
 	for (j = y - SPOT_SIZE / 2; j <= y + SPOT_SIZE / 2; ++j)
 	    {
-	    t = ((long) (ydots - 1 - j) * Dib.WidthBytes + (long)(i * 3));
+	    t = ((long) (gManp->ydots - 1 - j) * gManp->Dib.WidthBytes + (long)(i * 3));
 	    if (!ShowSpots)
 		{
-		SpotBackground[i][j].rgbtRed	= Dib.DibPixels[t + 0];	// backup colours for restoration if removing spots
-		SpotBackground[i][j].rgbtGreen	= Dib.DibPixels[t + 1];
-		SpotBackground[i][j].rgbtBlue	= Dib.DibPixels[t + 2];
+		SpotBackground[i][j].rgbtRed	= gManp->Dib.DibPixels[t + 0];	// backup colours for restoration if removing spots
+		SpotBackground[i][j].rgbtGreen	= gManp->Dib.DibPixels[t + 1];
+		SpotBackground[i][j].rgbtBlue	= gManp->Dib.DibPixels[t + 2];
 		for (k = 0; k < 3; ++k)
-		    *(Dib.DibPixels.data() + t + k) = 0xff;				// set to white
+		    *(gManp->Dib.DibPixels.data() + t + k) = 0xff;				// set to white
 		}
 	    else
 		{
-		Dib.DibPixels[t + 0] = SpotBackground[i][j].rgbtRed;	// restore colours from buffer
-		Dib.DibPixels[t + 1] = SpotBackground[i][j].rgbtGreen;
-		Dib.DibPixels[t + 2] = SpotBackground[i][j].rgbtBlue;
+		gManp->Dib.DibPixels[t + 0] = SpotBackground[i][j].rgbtRed;	// restore colours from buffer
+		gManp->Dib.DibPixels[t + 1] = SpotBackground[i][j].rgbtGreen;
+		gManp->Dib.DibPixels[t + 2] = SpotBackground[i][j].rgbtBlue;
 		}
 	    }
 //	    point((WORD)i, (WORD)j, SPOT_COL);
@@ -184,9 +172,8 @@ void	GuideSpot(short x, short y)
 **************************************************************************/
 
 void	DrawSpots(void)
-
     {
-    GuideSpot((short)(xdots / 2 - eyes / 4), ydots / 2);
-    GuideSpot((short)(xdots / 2 + eyes / 4), ydots / 2);
+    GuideSpot((short)(gManp->xdots / 2 - eyes / 4), gManp->ydots / 2);
+    GuideSpot((short)(gManp->xdots / 2 + eyes / 4), gManp->ydots / 2);
     ShowSpots = !ShowSpots;
     }

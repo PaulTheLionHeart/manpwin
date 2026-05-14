@@ -40,15 +40,15 @@
 static	int	WaterRed = 0, WaterGreen = 0, WaterBlue = 255;
 static	int	MountainRed = 98, MountainGreen = 100, MountainBlue = 0;
 
-static	WORD	degree = 8;
-extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
-extern	double	param[];
-extern	PAINTSTRUCT 	ps;
-extern	RECT 	r;
+//static	WORD	degree = 8;
+//extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
+//extern	double	param[];
+//extern	PAINTSTRUCT 	ps;
+//extern	RECT 	r;
 extern	BOOL	ShowUnderwaterTerrain = FALSE;
-extern	int	xdots, ydots;
+//extern	int	xdots, ydots;
 
-extern	CPlot	Plot;		// image plotting routines 
+//extern	CPlot	Plot;		// image plotting routines 
 extern	int	user_data(HWND);
 
 //char	test;
@@ -73,22 +73,21 @@ void	move(DWORD *), tilt_down(), rotate(), water(int, int, DWORD *);
 **************************************************************************/
 
 int	mountain()
-
     {
     int	n;
     DWORD	water_col, land_col, colour;
 
-    Plot.flags = 0;
+    gManp->Plot.flags = 0;
     water_col = ((WaterRed & 0x00ff) << 16) + ((WaterGreen & 0x00ff) << 8) + (WaterBlue & 0x00ff);
     land_col = ((MountainRed & 0x00ff) << 16) + ((MountainGreen & 0x00ff) << 8) + (MountainBlue & 0x00ff);
 
-    if (degree <= 0)
-	degree = 1;
-    if (degree > MAXLEVEL)
-	degree = MAXLEVEL;
+    if (gManp->degree <= 0)
+	gManp->degree = 1;
+    if (gManp->degree > MAXLEVEL)
+	gManp->degree = MAXLEVEL;
 
     ds = 2;
-    for (n = 0; n < degree; ++n)
+    for (n = 0; n < gManp->degree; ++n)
 	ds += 1 << n;
 
     mx = ds - 1;
@@ -97,7 +96,7 @@ int	mountain()
     vt = rh * 1.2;
 
     srand((unsigned)time(NULL));			// randomize things
-    for (n = 0; n < degree; ++n)
+    for (n = 0; n < gManp->degree; ++n)
 	{
 	l = 10000.0 / pow(1.8, n); 
 	ib = mx / (1 << (n + 1));
@@ -107,25 +106,25 @@ int	mountain()
 	zheights();
 	}
 
-    colour = land_col;				/* initialise to land */
+    colour = land_col;					// initialise to land 
 
 // note that SCALEFACTOR was defined for 1024 * 768 pixel screen. Let's adjust for any screen
-    xs = SCALEFACTOR * (double)xdots / 1024.0;	/* scale factors init */
-    ys = SCALEFACTOR * (double)xdots / 1024.0;
-    zs = SCALEFACTOR * (double)xdots / 1024.0;
+    xs = SCALEFACTOR * (double)gManp->xdots / 1024.0;	// scale factors init
+    ys = SCALEFACTOR * (double)gManp->xdots / 1024.0;
+    zs = SCALEFACTOR * (double)gManp->xdots / 1024.0;
 
     for (ax = 0; ax <= mx; ++ax)
 	{
 	xo = -999.0;
 	for (ay = 0; ay <= ax; ++ay)
 	    {
-	    if (user_data(PixelHwnd) == -1)		/* user pressed a key? */
+	    if (user_data(gManp->GlobalHwnd) == -1)	// user pressed a key?
 		return(-1);
 	    zz = get_array_data();
 	    yy = (float)ay / (float)mx * 10000.0;
 	    xx = (float)ax / (float)mx * 10000.0 - yy / 2.0;
-	    water(water_col, land_col, &colour);	/* plot water */
-	    move(&colour);				/* move or plot */
+	    water(water_col, land_col, &colour);	// plot water 
+	    move(&colour);				// move or plot
 	    }
 	}
       
@@ -134,13 +133,13 @@ int	mountain()
 	xo = -999.0;
 	for (ax = ay; ax <= mx; ++ax)
 	    {
-	    if (user_data(PixelHwnd) == -1)		/* user pressed a key? */
+	    if (user_data(gManp->GlobalHwnd) == -1)	// user pressed a key?
 		return(-1);
 	    zz = get_array_data();
 	    yy = (float)ay / (float)mx * 10000.0;
 	    xx = (float)ax / (float)mx * 10000.0 - yy / 2.0;
-	    water(water_col, land_col, &colour);	/* plot water */
-	    move(&colour);				/* move or plot */
+	    water(water_col, land_col, &colour);	// plot water
+	    move(&colour);				// move or plot
 	    }
 	}
       
@@ -149,15 +148,15 @@ int	mountain()
 	xo = -999.0;
 	for (ey = 0; ey <= (mx - ex); ++ey)
 	    {
-	    if (user_data(PixelHwnd) == -1)		/* user pressed a key? */
+	    if (user_data(gManp->GlobalHwnd) == -1)	// user pressed a key?
 		return(-1);
 	    ax = ex + ey;
 	    ay = ey;
 	    zz = get_array_data();
 	    yy = (float)ay / (float)mx * 10000.0;
 	    xx = (float)ax / (float)mx * 10000.0 - yy / 2.0;
-	    water(water_col, land_col, &colour);	/* plot water */
-	    move(&colour);				/* move or plot */
+	    water(water_col, land_col, &colour);	// plot water
+	    move(&colour);				// move or plot
 	    }
 	}
     return 0;
@@ -168,7 +167,6 @@ int	mountain()
 **************************************************************************/
 
 void	water(int water_col, int land_col, DWORD *colour)
-
     {
     if (xo == -999.0)
 	{
@@ -206,12 +204,12 @@ void	water(int water_col, int land_col, DWORD *colour)
 		zt = zz;
 		yt = yy;
 		xt = xx;
-		if (zz > 0.0)			/* coming out of water */
+		if (zz > 0.0)					// coming out of water
 		    {
 		    zz = z3;
 		    yy = y3;
 		    xx = x3;
-		    move(colour);				/* move or plot */
+		    move(colour);				// move or plot
 //		    colour = (zz > 3.0) ? 4 : land_col;
 		    *colour = land_col;
 		    zz = zt;
@@ -219,12 +217,12 @@ void	water(int water_col, int land_col, DWORD *colour)
 		    xx = xt;
 		    z2 = zz;
 		    }
-		else				/* going into water */
+		else						// going into water
 		    {
 		    zz = z3;
 		    yy = y3;
 		    xx = x3;
-		    move(colour);				/* move or plot */
+		    move(colour);				// move or plot
 		    *colour = water_col;
 		    zz = 0.0;
 		    yy = yt;
@@ -243,7 +241,6 @@ void	water(int water_col, int land_col, DWORD *colour)
 **************************************************************************/
 
 void	rotate()
-
     {
     double	ra, r1, rd;
 
@@ -268,7 +265,6 @@ void	rotate()
 **************************************************************************/
 
 void	tilt_down()
-
     {
     double	ra, r1, rd;
 
@@ -291,7 +287,6 @@ void	tilt_down()
 **************************************************************************/
 
 void	move(DWORD *colour)
-
     {
     char	test;
 
@@ -312,14 +307,14 @@ void	move(DWORD *colour)
 	}
 
     if (xb < 0) xb = 0;
-    if (xb >= xdots) xb = xdots - 1;
+    if (xb >= gManp->xdots) xb = gManp->xdots - 1;
     if (yb < 0) yb = 0;
-    if (yb >= ydots) yb = ydots - 1;
+    if (yb >= gManp->ydots) yb = gManp->ydots - 1;
     if (xp < 0) xp = 0;
-    if (xp >= xdots) xp = xdots - 1;
+    if (xp >= gManp->xdots) xp = gManp->xdots - 1;
     if (yp < 0) yp = 0;
-    if (yp >= ydots) yp = ydots - 1;
-    Plot.genline((int)xb, ydots - (int)yb - 1, (int)xp, ydots - (int)yp - 1, *colour);
+    if (yp >= gManp->ydots) yp = gManp->ydots - 1;
+    gManp->Plot.genline((int)xb, gManp->ydots - (int)yb - 1, (int)xp, gManp->ydots - (int)yp - 1, *colour);
 
     xb = xp;
     yb = yp;
@@ -330,7 +325,6 @@ void	move(DWORD *colour)
 **************************************************************************/
 	
 void	xheights()
-
     {
     int	ye, xe = 0;
 
@@ -354,7 +348,6 @@ void	xheights()
 **************************************************************************/
 	
 void	yheights()
-
     {
     int	ye, xe = 0;
 
@@ -378,7 +371,6 @@ void	yheights()
 **************************************************************************/
 	
 void	zheights()
-
     {
     int	ye, xe = 0;
 
@@ -403,7 +395,6 @@ void	zheights()
 **************************************************************************/
 
 double	get_array_data()
-
     {
     if (ay > my)
 	{
@@ -424,7 +415,6 @@ double	get_array_data()
 **************************************************************************/
 
 void put_array_data()
-
     {
     if (ay > my)
 	{
@@ -477,7 +467,7 @@ INT_PTR CALLBACK MountainDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		    SetScrollPos   (hCtrl, SB_CTL, 255 - color[nIndex], FALSE) ;
 		    SetDlgItemInt (hDlg,  nIndex + IDC_LABEL1, color [nIndex], TRUE) ;
 		    }
-		SetDlgItemInt(hDlg, IDC_MOUNTAINLEVEL, degree, TRUE);
+		SetDlgItemInt(hDlg, IDC_MOUNTAINLEVEL, gManp->degree, TRUE);
 		
 		hCtrl = GetDlgItem (hDlg, IDC_SHOWTERRAIN);
 		SendMessage(hCtrl, BM_SETCHECK, ShowUnderwaterTerrain, 0L);
@@ -537,12 +527,12 @@ INT_PTR CALLBACK MountainDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 	        return TRUE ;
 
 	  case WM_PAINT :
-		BeginPaint(hDlg, &ps);
+		BeginPaint(hDlg, &gManp->ps);
 		WaterPreview.PreviewDib.ClearDib(color [0], color [1], color [2]);
 		WaterPreview.Preview(hDlg);
 		MountainPreview.PreviewDib.ClearDib(color [3], color [4], color [5]);
 		MountainPreview.Preview(hDlg);
-		EndPaint(hDlg, &ps);
+		EndPaint(hDlg, &gManp->ps);
 	        return TRUE ;
 
 	  case WM_COMMAND:
@@ -556,9 +546,9 @@ INT_PTR CALLBACK MountainDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 			MountainRed = color [3];
 			MountainGreen = color [4];
 			MountainBlue = color [5];
-			degree = GetDlgItemInt(hDlg, IDC_MOUNTAINLEVEL, &bTrans, TRUE);
+			gManp->degree = GetDlgItemInt(hDlg, IDC_MOUNTAINLEVEL, &bTrans, TRUE);
 			hwndParent = GetParent (hDlg) ;
-    			InvalidateRect(hwndParent, &r, FALSE);	// force repaint
+    			InvalidateRect(hwndParent, &gManp->r, FALSE);	// force repaint
 			WaterPreview.PreviewDib.CloseDibPtrs();
 			MountainPreview.PreviewDib.CloseDibPtrs();
 			hCtrl = GetDlgItem (hDlg, IDC_SHOWTERRAIN) ;

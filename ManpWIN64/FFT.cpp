@@ -29,9 +29,6 @@
 
 extern	int	user_data(HWND);
 
-extern	int	subtype;			// see below
-extern	PAINTSTRUCT 	ps;
-
 int	steps;
 
 #define	LEVELS		32		// number of harmonic sliders
@@ -54,17 +51,11 @@ int	steps;
 BYTE	OutputType = REALIMAG;
 
 static	short	level[LEVELS];
-//static	double	real[MAX_N], imag[MAX_N];
 static	double	real[LEVELS], imag[LEVELS];
-//double	*real, *imag;
-extern	int	bits_per_pixel, xdots, ydots;
 
 extern	double ctable[];
 extern	double stable[];
-extern	std::vector<float> wpixels;		// an array of doubles holding slope modified iteration counts
-
-extern	CTrueCol    TrueCol;			// palette info
-extern	CPlot	Plot;				// image plotting routines 
+//extern	std::vector<float> wpixels;		// an array of doubles holding slope modified iteration counts
 
 static	CPreview	TimeScreen, FreqScreen;
 
@@ -251,8 +242,8 @@ int	TimePreview(HWND hwnd, CPlot Plot)
     int	j, jump = TimeScreen.PreviewWidth/LEVELS;
     int	start = jump/2, end = 0;
 
-    memset(TimeScreen.PreviewDib.DibPixels.data(), 0, (WIDTHBYTES((DWORD)TimeScreen.PreviewWidth * (DWORD)bits_per_pixel)) * TimeScreen.PreviewHeight);	// set background to black
-    Plot.InitPlot(1000000L, &TrueCol, wpixels, xdots, ydots, TimeScreen.PreviewWidth, TimeScreen.PreviewHeight, TimeScreen.PreviewDib.BitsPerPixel, &TimeScreen.PreviewDib, 0);
+    memset(TimeScreen.PreviewDib.DibPixels.data(), 0, (ComputeWidthBytes((DWORD)TimeScreen.PreviewWidth, (DWORD)TimeScreen.PreviewDib.BitsPerPixel)) * TimeScreen.PreviewHeight);	// set background to black
+    Plot.InitPlot(1000000L, &gManp->TrueCol, &gManp->wpixels, gManp->xdots, gManp->ydots, TimeScreen.PreviewWidth, TimeScreen.PreviewHeight, TimeScreen.PreviewDib.BitsPerPixel, &TimeScreen.PreviewDib, 0);
     for (j = 1; j < LEVELS; ++j)
 	{
 	end = start + jump; 
@@ -276,7 +267,7 @@ int	FreqPreview(HWND hwnd, CPlot Plot)
     int	start = jump/2, end = 0;
     double	rms;
 
-    Plot.InitPlot(1000000L, &TrueCol, wpixels, xdots, ydots, FreqScreen.PreviewWidth, FreqScreen.PreviewHeight, FreqScreen.PreviewDib.BitsPerPixel, &FreqScreen.PreviewDib, 0);
+    Plot.InitPlot(1000000L, &gManp->TrueCol, &gManp->wpixels, gManp->xdots, gManp->ydots, FreqScreen.PreviewWidth, FreqScreen.PreviewHeight, FreqScreen.PreviewDib.BitsPerPixel, &FreqScreen.PreviewDib, 0);
     FreqScreen.PreviewDib.ClearDib(0L);
 //memset(FreqScreen.PreviewDib.DibPixels, 127, (WIDTHBYTES((DWORD)PreviewWidth * (DWORD)bits_per_pixel)) * PreviewHeight);	// set background to black
     for (j = 0; j < LEVELS; ++j)
@@ -331,8 +322,8 @@ INT_PTR CALLBACK FastFourierDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	        temp = subtype;
-	        switch (subtype)
+	        temp = gManp->subtype;
+	        switch (gManp->subtype)
 		    { 
 		    case SQUARE:
 			tempParam = IDC_SQUAREWAVE;
@@ -466,14 +457,14 @@ INT_PTR CALLBACK FastFourierDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 	        return TRUE ;
 
 	  case WM_PAINT:
-		BeginPaint(hDlg, &ps);
+		BeginPaint(hDlg, &gManp->ps);
 		InitFFT(temp);
-		TimePreview(hDlg, Plot);
+		TimePreview(hDlg, gManp->Plot);
 		TimeScreen.Preview(hDlg);
 		fft(32, 5);
-	        FreqPreview(hDlg, Plot);
+	        FreqPreview(hDlg, gManp->Plot);
 		FreqScreen.Preview(hDlg);
-		EndPaint(hDlg, &ps);
+		EndPaint(hDlg, &gManp->ps);
 	        return TRUE ;
 
 	  case WM_COMMAND:
@@ -520,7 +511,7 @@ INT_PTR CALLBACK FastFourierDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM 
 			    }
 
 			CheckRadioButton(hDlg, IDC_SQUAREWAVE, IDC_USER, (int) LOWORD(wParam));
-			subtype = temp;
+			gManp->subtype = temp;
 			InitFFT(temp);
 			for (nCtrlID = IDC_SCROLLBAR1 ; nCtrlID < IDC_SCROLLBAR1 + LEVELS ; nCtrlID++)
 			    {

@@ -16,25 +16,11 @@
 
 #define SQRT3    1.732050807568877193
 
-extern	HWND	GlobalHwnd;				// This is the main windows handle
+//extern	HWND	GlobalHwnd;				// This is the main windows handle
 
 extern	int	user_data(HWND);
 
-extern	long	threshold;
-extern	double	mandel_width;			// width of display 
-extern	double	hor;				// horizontal address
-extern	double	vert;				// vertical address 
-extern	double	ScreenRatio;			// ratio of width / height for the screen
-extern	int	subtype;			// A - E
-extern	int	curpass, totpasses;
-extern	WORD	type;				// M=mand, J=Julia 1,2,4-> etc
-extern	double	param[];
-extern	int	xdots, ydots, bits_per_pixel;
-extern	std::vector<float> wpixels;		// an array of doubles holding slope modified iteration counts
-
-extern	CTrueCol    TrueCol;			// palette info
-extern	CDib    Dib;				// Device Independent Bitmap
-extern	CPlot	Plot;				// image plotting routines 
+//extern	std::vector<float> wpixels;		// an array of doubles holding slope modified iteration counts
 
 static	double	xscale, yscale;
 static	double	shape[2];
@@ -47,7 +33,6 @@ static	long    count = 10000000;
 
 /*
 int	DoApolloniusIFS(void)
-
     {
     long    n;
     int	    ix,iy;
@@ -143,8 +128,8 @@ static	int	QueuePtr = 0;
 static	short	level[2];
 static	CPreview	CircleScreen;
  
-extern	PAINTSTRUCT 	ps;
-extern	CDib		Dib;				// Device Independent Bitmap
+//extern	PAINTSTRUCT 	ps;
+//extern	CDib		Dib;				// Device Independent Bitmap
 
 // compute the 4th circle touching 3 circles, each of which touch the other two
 CIRCLE	*Kiss(CIRCLE a, CIRCLE b, CIRCLE c, CIRCLE *out, BOOL initial) 
@@ -220,17 +205,17 @@ int	DoApollonius(void)
 
     if (IsPreview)
 	{
-	Plot.InitPlot(threshold, &TrueCol, wpixels, xdots, ydots, CircleScreen.PreviewWidth, CircleScreen.PreviewHeight, CircleScreen.PreviewDib.BitsPerPixel, &CircleScreen.PreviewDib, USEPALETTE);
+	gManp->Plot.InitPlot(gManp->threshold, &gManp->TrueCol, &gManp->wpixels, gManp->xdots, gManp->ydots, CircleScreen.PreviewWidth, CircleScreen.PreviewHeight, CircleScreen.PreviewDib.BitsPerPixel, &CircleScreen.PreviewDib, USEPALETTE);
 	xscale = (double) (CircleScreen.PreviewWidth) / 2.2;
 	yscale = (double) (CircleScreen.PreviewHeight) / 2.2;
-	hor = -0.1;
-	vert = -1.9;
+	gManp->hor = -0.1;
+	gManp->vert = -1.9;
 	}
     else
 	{
-	Plot.InitPlot(threshold, &TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib.BitsPerPixel, &Dib, USEPALETTE);
-	xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-	yscale = (double) (ydots - 1) / mandel_width;
+	gManp->Plot.InitPlot(gManp->threshold, &gManp->TrueCol, &gManp->wpixels, gManp->xdots, gManp->ydots, gManp->xdots, gManp->ydots, gManp->Dib.BitsPerPixel, &gManp->Dib, USEPALETTE);
+	xscale = (double) (gManp->xdots - 1) / (gManp->mandel_width * gManp->AspectRatio);
+	yscale = (double) (gManp->ydots - 1) / gManp->mandel_width;
 	}
 
     if (shape[0] < -1.0)
@@ -242,7 +227,7 @@ int	DoApollonius(void)
     if (shape[1] > 1.99)
 	shape[1] = 1.99;
 
-    totpasses = 10;
+    gManp->totpasses = 10;
     CircleColour = 1;
     QueuePtr = 0;
     srand((unsigned)time(NULL));
@@ -274,19 +259,19 @@ int	DoApollonius(void)
  
   // add 10000 more circles to the draw queue
   // adding new triples to the compute queue
-    draw(b.x, b.y, b.r, CircleColour++, Plot);
-    draw(p.x, p.y, p.r, CircleColour++, Plot);
-    draw(q.x, q.y, q.r, CircleColour++, Plot);
-    draw(cs[0].x, cs[0].y, cs[0].r, CircleColour++, Plot);
-    draw(cs[1].x, cs[1].y, cs[1].r, CircleColour++, Plot);
+    draw(b.x, b.y, b.r, CircleColour++, gManp->Plot);
+    draw(p.x, p.y, p.r, CircleColour++, gManp->Plot);
+    draw(q.x, q.y, q.r, CircleColour++, gManp->Plot);
+    draw(cs[0].x, cs[0].y, cs[0].r, CircleColour++, gManp->Plot);
+    draw(cs[1].x, cs[1].y, cs[1].r, CircleColour++, gManp->Plot);
 
     for (i = 0; i < ((IsPreview) ? 1000 : MAXCIRCLES); i++) 
 	{
 	CIRCLE	c0, c1, c2;
 
-	if (user_data(GlobalHwnd) == -1)		// user pressed a key?
+	if (user_data(gManp->GlobalHwnd) == -1)		// user pressed a key?
 	    return -1;
-	curpass = i * 10 / MAXCIRCLES;
+	gManp->curpass = i * 10 / MAXCIRCLES;
 	memcpy(&c0, &queue[i][0], sizeof(CIRCLE));
 	memcpy(&c1, &queue[i][1], sizeof(CIRCLE));
 	memcpy(&c2, &queue[i][2], sizeof(CIRCLE));
@@ -296,7 +281,7 @@ int	DoApollonius(void)
 	    LoadQueue(nc, c1, c2);
 	    LoadQueue(c0, nc, c2);
 	    LoadQueue(c0, c1, nc);
-	    draw(nc.x, nc.y, nc.r, CircleColour++, Plot);
+	    draw(nc.x, nc.y, nc.r, CircleColour++, gManp->Plot);
 	    }
 	}
     return 0;
@@ -322,21 +307,21 @@ void	draw(double x, double y, double r, int colour, CPlot Plot)
     int		i, j, radius;
     BYTE	rgb[3];
 
-    i = (int)(((x - hor) + 1) * yscale);
-    j = (int)((y + vert + mandel_width - 1) * yscale);
+    i = (int)(((x - gManp->hor) + 1) * yscale);
+    j = (int)((y + gManp->vert + gManp->mandel_width - 1) * yscale);
     radius = (int)(fabs(r) * yscale);
 
     switch (FilledCircle)
 	{
 	case 1: 
-	    Plot.DisplayFilledCircle(i, j, radius, colour%threshold);
+	    Plot.DisplayFilledCircle(i, j, radius, colour%gManp->threshold);
 	    break;
 	case 2: 
-	    Plot.DisplayCircle(i, j, radius, colour%threshold);
+	    Plot.DisplayCircle(i, j, radius, colour%gManp->threshold);
 	    break;
 	case 3: 
-	    Plot.GetRGB(colour%threshold, rgb);
-	    Plot.Display3DCircle((IsPreview) ? &CircleScreen.PreviewDib : &Dib, i, j, radius, rgb);
+	    Plot.GetRGB(colour%gManp->threshold, rgb);
+	    Plot.Display3DCircle((IsPreview) ? &CircleScreen.PreviewDib : &gManp->Dib, i, j, radius, rgb);
 	    break;
 	}
     } 
@@ -346,9 +331,8 @@ void	draw(double x, double y, double r, int colour, CPlot Plot)
 ***************************************************************************/
 
 int	CirclePreview(HWND hwnd)
-
     {
-    memset(CircleScreen.PreviewDib.DibPixels.data(), 0, (WIDTHBYTES((DWORD)CircleScreen.PreviewWidth * (DWORD)bits_per_pixel)) * CircleScreen.PreviewHeight);	// set background to black
+    memset(CircleScreen.PreviewDib.DibPixels.data(), 0, (ComputeWidthBytes((DWORD)CircleScreen.PreviewWidth, (DWORD)gManp->Dib.BitsPerPixel)) * CircleScreen.PreviewHeight);	// set background to black
     shape[0] = (double)level[0]/150.0;
     shape[1] = (double)level[1]/100.0;
     IsPreview = TRUE;
@@ -450,10 +434,10 @@ INT_PTR CALLBACK ApolloniusDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	        return TRUE ;
 
 	  case WM_PAINT:
-		BeginPaint(hDlg, &ps);
+		BeginPaint(hDlg, &gManp->ps);
 		CirclePreview(hDlg);
 		CircleScreen.Preview(hDlg);
-		EndPaint(hDlg, &ps);
+		EndPaint(hDlg, &gManp->ps);
 	        return TRUE ;
 
 	  case WM_COMMAND:

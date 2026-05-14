@@ -16,6 +16,7 @@
 #include "Dib.h"
 #include "resource.h"
 #include "menu.h"
+#include "manp.h"
 #include "fractalp.h"
 #include "big.h"
 #include "Undo.h"
@@ -28,10 +29,6 @@
 #include "SafeStrings.h"
 #include "OtherFunctions.h"
 
-extern	CDib	Dib;				// Device Independent Bitmap
-extern	CFract	Fractal;			// Fractal specific stuff
-extern	COscProcess	OscProcess;
-extern	CPlot	Plot;				// image plotting routines 
 extern	std::atomic<bool> gStopRequested;
 extern	void	HardStopNow(HWND hwnd, const char* reason);
 
@@ -41,8 +38,8 @@ INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK PASCAL	MenuCommand(HWND, UINT, WPARAM, LPARAM);
 BOOL	InitNewFractal(HWND hwnd);
 BOOL	UpdateFractal(HWND hwnd);
-void	pfract_main(HWND, char *);
-void	init(HWND);
+void	pfract_main(CManp *, HWND, char *);
+//void	init(HWND);
 void	DisplayLocation(HWND, POINTS);
 
 void	ChangeView(HWND, int, int, int, int, int, int, int, int, char);
@@ -51,8 +48,8 @@ void	FindCursorRealPos(POINTS *);
 
 extern	BOOL	wintext_initialize(HANDLE, HWND, LPSTR);
 extern	void	output_batch(double, double, double, HWND, LPSTR);
-extern	int	ZoomIn(HWND, RECT *);			// zoom functions in Zoom.c
-extern	int	ZoomOut(HWND, RECT *);
+//extern	int	ZoomIn(HWND, RECT *);			// zoom functions in Zoom.c
+//extern	int	ZoomOut(HWND, RECT *);
 extern	short	FilePalette(HWND, char *, char *);
 extern	short	FileReadColours(HWND, char *, char *);
 extern	int	read_png_file(HWND, char *);
@@ -61,42 +58,34 @@ extern	void	draw3D(HWND);
 extern	void	initFibonacci(void);
 extern	int	load_par(HWND, char *);
 extern	void	DisplayPalette(HWND, BOOL);
-extern	void	DisplayFractal(HWND);
+//extern	void	DisplayFractal(HWND);
 extern	int	rotate(int);
 extern	int	CopyPictureToClipboard(HWND);
 extern	int	mainview(HWND, BOOL);
 extern	void	ClosePtrs(void);
 extern	int	FractintPar(HWND, char *);
-extern	int	DrawJulia(HWND, POINTS);
-extern	int	InitRTJulia(HWND);
-extern	void	LoadUndo(BOOL);
-extern	void	InitUndo(void);
-extern	void	Undo(struct UNDO *);
-extern	void	Redo(struct UNDO *);
 extern	int	ReadConfig(HWND);
-extern	void	OutputStatusBar(HWND);
+//extern	void	OutputStatusBar(HWND);
 extern	int	SaveConfig(HWND);
 extern	void	rotate_vga_palette(int, int);
 extern	int	fpFormulaSetup(char *);
 extern	void	ProcessKeys(HWND, WPARAM);
 extern	char	*trailing(char *instr);
 extern	HWND	DoHtmlHelp(HWND, char *, UINT);
-extern	int	DoAnimation(void);
-extern	int	AnimateClose(void);
+//extern	int	DoAnimation(void);
+//extern	int	AnimateClose(void);
 extern	int	ProcessFormulaString(char *);
 extern	int	MPEGWrite(char *);
 extern	int	DisplayRGB(POINTS);
 extern	int	EditRGB(HINSTANCE, POINTS);
 extern	void	DrawSpots(void);
-//extern	void	ConvertBignum2String(char *s, mpfr_t num);
 extern	int	TogglePerturbation(WORD *type, int *subtype);
 extern	void	InitMultipliers(void);
 extern	int	ReadKallesFile(HWND hwnd, char *filename);
-extern	char	*GetFractalName(void);
 
-extern	int	xdots, ydots, width, height;
+//extern	int	xdots, ydots, width, height;
 
-extern	BOOL	DisplayAnimation;		// allow system to know that we are currently displaying an animation
+//extern	BOOL	DisplayAnimation;		// allow system to know that we are currently displaying an animation
 
 static	char    argumentFileName[MAX_PATH+MAXDATALINE];
 static	HINSTANCE  hInst;
@@ -106,51 +95,33 @@ static	char	szFileName[MAX_PATH];
 static	char    szTitleName[MAXDATALINE] = "ManpWIN";
 static	char	szSaveFileName[MAX_PATH];
 
-extern	int	PaletteStart;
-extern	double	lightDirectionDegrees;
-extern	double	bumpMappingDepth;
-extern	double	bumpMappingStrength;
-extern	int	SlopeType;
-extern	double	LightHeight;
-extern	bool	EnableApproximation;		// use BLA on perturbation
-extern	int	PalOffset;			// begin palette here
-extern	double	IterDiv;			// divide ieration by this amount
-extern	double	ColourSpeed;			// used for colour smoothing
-extern	int	PertColourMethod;		// some ideas from Kalles
-extern	int	RotationAngle;			// in degrees
-extern	Complex	RotationCentre;			// centre of rotation
-extern	char	LyapSequence[];			// hold the AB sequence for Lyapunov fractals
+//extern	int	SlopeType;
+//extern	bool	EnableApproximation;		// use BLA on perturbation
+//extern	int	PalOffset;			// begin palette here
+//extern	double	IterDiv;			// divide ieration by this amount
+//extern	double	ColourSpeed;			// used for colour smoothing
+//extern	int	PertColourMethod;		// some ideas from Kalles
+//extern	int	RotationAngle;			// in degrees
+//extern	Complex	RotationCentre;			// centre of rotation
+//extern	char	LyapSequence[];			// hold the AB sequence for Lyapunov fractals
 
 static	int	HorOffset, VertOffset;
 
 static	BOOL	WasFractPar = FALSE;		// did we run a FRACTINT PAR file last time?
-	BOOL	IsPAR = FALSE;			// are we currently running a PAR file?
-	BOOL	IsKFR = FALSE;			// are we currently running a KFR file?
-
-static	double	oldhor = 0.0;			// store values during julia transformations
-static	double	oldvert = 0.0;			// init to 0 to restore reasonable Mandel values
-static	double	oldwidth = 0.0;			// calculated from current Julia values
-static	double	temp_1 = 0.0;
-static	double	temp_2 = 0.0;
+//	BOOL	IsPAR = FALSE;			// are we currently running a PAR file?
+//	BOOL	IsKFR = FALSE;			// are we currently running a KFR file?
 
 static	BOOL	DisplayLoc = FALSE;		// display the current cursor location in the caption bar
-	BYTE	oldcalcmode;			// store values during 3D transformations
+//	BYTE	oldcalcmode;			// store values during 3D transformations
 
-BOOL	bTrack = FALSE;				// TRUE if user is selecting a region
+//BOOL	bTrack = FALSE;				// TRUE if user is selecting a region
 RECT	Rect;
 int	Shape = SL_BLOCK;			// Shape to use for the selection rectangle
 
-BOOL		BatchFlag;
-BOOL		AutoExitFlag = FALSE;
-BOOL		AutoSaveFlag;
-BOOL		AutoStartFlag = FALSE;
-BOOL		CommandLineFile = FALSE;	// does the command line contain a par filename?
-//static	char	Directory[160];
 HWND		CallingWindowHandle = 0L;	// Is ManpWIN called by an external window via WM_COPYDATA message?
 int		ReplyUsingDIB;			// TRUE for DIB/WM_COPYDATA and FALSE for clipboard
-
 //void	SetupView(HWND, BOOL);
-void	InitFract(int);
+//void	InitFract(int);
 
 	  // Functions in VIEWFILE.C
 extern	void	ViewFileInitialize(HWND);
@@ -179,7 +150,7 @@ extern	INT_PTR CALLBACK 	MAPFileOpenDlg(HWND, LPSTR, LPSTR);
 extern	INT_PTR CALLBACK 	KFRFileOpenDlg(HWND, LPSTR, LPSTR);
 
 extern	void	SetScrollRanges(HWND);
-extern	void	setup_defaults(void);
+//extern	void	setup_defaults(void);
 extern	void	InitTrueColourPalette(BYTE);
 extern	int	StartSelection(HWND, POINTS, LPRECT, int);
 extern	int	UpdateSelection(HWND, POINTS, LPRECT, int);
@@ -187,10 +158,10 @@ extern	int	EndSelection(POINTS, LPRECT);
 extern	int	ClearSelection(HWND, LPRECT, int);
 extern	int	load_lsystems(HWND, char *);
 extern	int	Lsystem(HWND, char *);
-extern	int	calcfracinit(void);
+//extern	int	calcfracinit(void);
 extern	int	get_IFS_names(HWND, char *);		// get the IFS fractal names
 extern	int	ifsload(HWND, char *);
-extern	int	RunScript(HWND, char *);
+//extern	int	RunScript(HWND, char *);
 extern	int	GetPNGSeqFromScript(HWND hwnd, char *FileName);
 
 extern	int	get_formula_names(HWND, char *);	// get the fractal formula names
@@ -213,7 +184,7 @@ extern	int	EndSlope(void);				// end slope threads before exiting
 
 extern	void	LoadPerturbationParams(void);		// get params from Perturbation database
 extern	void	LoadParams(void);			// get params from  database
-extern	int	DoUpdate(void);
+//extern	int	DoUpdate(void);
 
 extern	INT_PTR CALLBACK ImageSizeDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK RTJuliaLocDlg(HWND, UINT, WPARAM, LPARAM);
@@ -274,20 +245,15 @@ extern	INT_PTR CALLBACK StatusInfoDlg(HWND, UINT, WPARAM, LPARAM);
 
 extern	short	save_colour(HWND, char *, char *);
 extern	short	save_palette(HWND, char *, char *);
-extern	void	DisplayStatusBarInfo(int, char *);
 
 extern	BOOL	AutoStereoActive;		// is autostereo currently running?
-extern  int	screenx;
-extern  int	screeny;
-extern  int	caption;			// size of windows caption and scroll bars
-extern  int	scroll_width;			// size of horizontal scroll bars
 extern  int	max_vscroll, max_hscroll;
 extern  int	display_width, display_height;
-extern	int	row, col, curpass, totpasses;
+//extern	int	/*row, col, */curpass, totpasses;
 extern	double	HenonA, HenonXStart, HenonYStart;
 extern	int	HenonPoints;
-extern	double	param[];
-extern	char	FormulaString[];		// used to hold the full formula
+//extern	double	param[];
+//extern	char	FormulaString[];		// used to hold the full formula
 extern	char	statname[];			// MPEG stat file. If statname[] == '-', stats sent to stdout.
 extern	BOOL	WriteMPEGFrames;		// write frames directly to an MPEG file
 
@@ -295,54 +261,23 @@ extern	char	lptr[][100];
 extern	int	lsys_ptr;
 extern	char	lsys_type[];
 
-extern	BYTE	_3dflag;			// replay saved file. 3 = 3D
-extern	BOOL	ZoomEdge;			// Zooming process
-extern	BOOL	UseFractintPalette;		// standard EGA palette
-extern	CTrueCol    TrueCol;			// palette info
-extern	int	InsideMethod;			// inside filters
-extern	int	OutsideMethod;			// outside filters
-//extern	int	biomorph;			// biomorph colour
-//extern	int	PlotType;
-extern	int	FilterType;			// data for Tierazon filters
-extern	int	ColourMethod;			// Tierazon colour methods
-extern	int	nFDOption;			// Fractal Dimension option for Tierazon filters
-extern	BYTE	cycleflag;			// do colour cycling
-extern	int	finished;			// all passes complete
-extern	WORD	type;				// M=mand, N=Newton etc
-extern	int	subtype;
-extern	double	hor;				// horizontal address
-extern	double	vert;				// vertical address
-extern	double	mandel_width;			// width of display
-extern	long	threshold;			// maximum iterations
-extern	BYTE	juliaflag;			// Julia implementation of fractal
-extern	BYTE	RealTimeJuliaFlag;		// Display Julia set in real time
 extern	int	ifs_type;
-extern	BYTE	calcmode;			// trace type B, G, 1, 2
-extern	WORD	special;			// special colour, phase etc
-extern	BYTE	pairflag;			// stereo pair
-extern	BYTE	addflag;			// add to spirals?
-extern	int	MaxDimensions;			// Oscillator etc
 extern	BOOL	DisplayAxisLabels;		// show labels for axis pairs
 
 	BOOL	GetPixelColourFlag;		// get the colour of the pixel when mouse button pressed
-extern	BOOL	StartImmediately;		// immediate start of animation generation
-extern	BOOL	RunAnimation;			// are we in the middle of an animation run?
+//extern	BOOL	StartImmediately;		// immediate start of animation generation
+//extern	BOOL	RunAnimation;			// are we in the middle of an animation run?
 extern	char	ScriptFileName[];		// base name for PNG file animation sequence
 
-extern	HWND	GlobalHwnd;			// to allow passing of hwnd to find_file_item()
+//extern	HWND	GlobalHwnd;			// to allow passing of hwnd to find_file_item()
 
-extern	PAINTSTRUCT 	ps;
-extern	HDC		hdcMem;			// load picture into memory
-extern	RECT 		r;
+//extern	PAINTSTRUCT 	ps;
+//extern	HDC		hdcMem;			// load picture into memory
+//extern	RECT 		r;
 extern	HPALETTE 	hpal;
 extern	HANDLE  	hLogPal;       		// Temporary Handle
-//extern	BYTE	default_palette[];		// default VGA colour palette
 
-extern	double	x_rot;				// angle display plane to x axis
-extern	double	y_rot;				// angle display plane to y axis
-extern	double	z_rot;				// angle display plane to z axis
-
-extern	int	xAxis, yAxis, zAxis;		// numerical values for axes for chaotic oscillators
+//extern	int	xAxis, yAxis, zAxis;		// numerical values for axes for chaotic oscillators
 
 extern	char	PNGPath[];			// path for PNG files
 extern	char	COLPath[];			// path for COL files
@@ -363,56 +298,43 @@ extern	char	SCIFile[];			// SCI file
 extern	char	MPGFile[];			// MPG file
 extern	char	LSTFile[];			// list file for PNG animation frames
 
-extern	int	time_to_zoom;			// time to zoom in or out?
-extern	int	time_to_restart;		// time to restart?
-extern	int	time_to_reinit;			// time to reinitialize?
-extern	int	time_to_quit;			// time to quit?
-extern	int	time_to_load;			// time to load file?
-extern	int	time_to_break;			// time to break out of animation?
-extern	int	DataFromPNGFile;		// loaded PNG file?
-extern	BOOL	bTrack;				// TRUE if user is selecting a region
-extern	double	ScreenRatio;			// ratio of width / height for the screen
+//extern	int	time_to_zoom;			// time to zoom in or out?
+//extern	int	time_to_restart;		// time to restart?
+//extern	int	time_to_reinit;			// time to reinitialize?
+//extern	int	time_to_quit;			// time to quit?
+//extern	int	time_to_load;			// time to load file?
+//extern	int	time_to_break;			// time to break out of animation?
+//extern	int	DataFromPNGFile;		// loaded PNG file?
+//extern	BOOL	bTrack;				// TRUE if user is selecting a region
+//extern	double	ScreenRatio;			// ratio of width / height for the screen
 extern	char	MAPFile[];			// colour map file
-extern	double	rqlim, rqlim2;
+//extern	double	rqlim, rqlim2;
 
-extern	BOOL	RTJuliaActive;			// block any moire requests until calcs complete
+//extern	BOOL	RTJuliaActive;			// block any moire requests until calcs complete
 
-extern	int	AnimateSuspend(void);
-extern	int	AnimateResume(void);
-extern	BOOL	SuspendAnimation;		// pause animation run?
+//extern	int	AnimateSuspend(void);
+//extern	int	AnimateResume(void);
+//extern	BOOL	SuspendAnimation;		// pause animation run?
 
 extern	BOOL	DisplayAxes;			// display axes for oscillator etc
 extern	BOOL	PlotCentre;			// display circle at the centre of the oscillator
 
-// Big num declarations **********************************************************
-extern	BYTE	BigNumFlag;		// True if bignum used
-extern	int	decimals, precision;
-	BigDouble   Big_oldhor, Big_oldvert, Big_oldwidth;
-extern	BigDouble   BigHor, BigVert, BigWidth;
-// Big num declarations **********************************************************
-
 short	vscroll_count = 0;			// vertical scroll count
 short	hscroll_count = 0;			// horizontal scroll count 
-BOOL	Reopen_flag = FALSE;			// re-open file
-BOOL	StartPicture = TRUE;			// starting picture
+//BOOL	Reopen_flag = FALSE;			// re-open file
+//BOOL	StartPicture = TRUE;			// starting picture
 HANDLE	hAccTable;				// handle to accelerator table
 char	AccTableAddr[120];			// name of accelerator table       
-HWND	PixelHwnd;				// pointer to handle for pixel updating
+//HWND	PixelHwnd;				// pointer to handle for pixel updating
 HWND	hWndCopy;				// Copy of hwnd
 int     file_type = FILE_PNG;			// got to start somewhere
-
-HWND	Secondaryhwnd;
-UINT	Secondarymessage;
-WPARAM	SecondarywParam;
-LPARAM	SecondarylParam;
 
 // Styles of app. window
 DWORD	dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | 
                   WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
 
-POINT	ptSize;					// Stores DIB dimensions
-extern	Complex	j;
-static	Complex q = 0.0;
+//POINT	ptSize;					// Stores DIB dimensions
+//static	Complex q = 0.0;
 
 /*-----------------------------------------
 	Main Windows Entry Point
@@ -420,7 +342,6 @@ static	Complex q = 0.0;
 
 //#pragma argsused
 int PASCAL WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nCmdShow)
-
     {
     HWND	hwnd;
     WNDCLASS	wndclass;
@@ -442,30 +363,34 @@ int PASCAL WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 	    return FALSE;
 	}
 
+    gManp = new CManp();
+    gManp->setup_defaults();   // THIS is now the source of truth
+
     hwnd = CreateWindow ("ManpWin", "Paul's Fractals",
      			  dwStyle, 
 			  160, 120, 				// nice initial location
 			  500, 300, 				// nice initial size
 			  NULL, NULL, hInstance, NULL);
-    GlobalHwnd = hwnd;
 
     _snprintf_s(argumentFileName, MAX_PATH + MAXDATALINE, _TRUNCATE, lpszCmdLine, hwnd);	// in case we want to analyse arguments
 
     UpdateWindow (hwnd);
-    type = MANDELFP;
-    setup_defaults();				// all MANP specific setups
-    PixelHwnd = hwnd;				// Used in putcolor. Saves a lot of param passing.
-    init(hwnd);					// init the main Fractint and screen code 
+    gManp->type = MANDELFP;
+    gManp->GlobalHwnd = hwnd;				// Used in putcolor. Saves a lot of param passing.
+//    PixelHwnd = hwnd;
+    gManp->init(hwnd);				// init the main Fractint and screen code 
     initFibonacci();				// just the starting values
 #ifdef	DEBUG
     strcpy(szFileName, "Test Filename");
 #endif
     strcpy(szTitleName, "ManpWin");
-    if (*argumentFileName != '\0')			// command line filename
+    if (*argumentFileName != '\0')		// command line filename
 	CopyArgument(hwnd, szFileName, argumentFileName);	// ensure correct filename copied
     ShowWindow (hwnd, SW_MAXIMIZE);
-    pfract_main(hwnd, szSaveFileName);		// fire up the main Fractint code
+    pfract_main(gManp, hwnd, szSaveFileName);	// fire up the main Fractint code
     DestroyWindow(hWndCopy);			// stop everything when it returns
+    delete gManp;
+    gManp = nullptr;
     return(FALSE);				// we done when 'pfract_main' returns
     }
 
@@ -473,7 +398,7 @@ int PASCAL WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 	Just a quicky
   -----------------------------------------*/
 
-void	DoCaption (HWND hwnd, char *szTitleName)
+void	CManp::DoCaption (HWND hwnd, char *szTitleName)
      {
      char szCaption [184];
 
@@ -499,8 +424,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	  case WM_CREATE:
 		hInst = ((LPCREATESTRUCT)(_int64)lParam)->hInstance;
 		lpfnAboutDlgProc = MakeProcInstance ((DLGPROC *)AboutDlgProc, hInst);
-		ZoomEdge = TRUE;
-		UseFractintPalette = FALSE;
+		gManp->ZoomEdge = TRUE;
+		gManp->UseFractintPalette = FALSE;
 		ReadConfig(hwnd);				// sticky info
 		ViewFileInitialize (hwnd);			// Initialise file reading routines
 		SaveFileInitialize (hwnd, hInst);		// Initialise file writing routines
@@ -518,7 +443,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	       if (*argumentFileName != '\0')				// command line filename
 		   {
 		   _snprintf_s(TempString, 480, _TRUNCATE, "View File %s", szFileName);
-		   DoCaption(hwnd, TempString);
+		   gManp->DoCaption(hwnd, TempString);
 		   CopyArgument(hwnd, szFileName, argumentFileName);	// ensure correct filename copied
 
 #ifdef DEBUG
@@ -543,7 +468,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_SAVEIMAGE, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_SAVE_PAR_AND_IMAGE, MF_ENABLED);
 			 // SVG export only available for Hailstone (sequence visualization, not pixel-based fractals)
-			 EnableMenuItem((HMENU)(_int64)wParam, IDM_SAVE_SVG, (type == HAILSTONE) ? MF_ENABLED : MF_GRAYED);
+			 EnableMenuItem((HMENU)(_int64)wParam, IDM_SAVE_SVG, (gManp->type == HAILSTONE) ? MF_ENABLED : MF_GRAYED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_EXIT, MF_ENABLED);
 			 break;
 		    case 1:	   // Edit Dialogs menu
@@ -571,9 +496,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_START, MF_ENABLED);
 			 EnableMenuItem((HMENU)(_int64)wParam, IDM_STEREOPAIRSETUP, MF_ENABLED);
 			 // Hailstone toggle menu items - only enabled when viewing Hailstone fractal
-			 EnableMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_AXES, (type == HAILSTONE) ? MF_ENABLED : MF_GRAYED);
-			 EnableMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_LABELS, (type == HAILSTONE) ? MF_ENABLED : MF_GRAYED);
-			 EnableMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_DOTS, (type == HAILSTONE) ? MF_ENABLED : MF_GRAYED);
+			 EnableMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_AXES, (gManp->type == HAILSTONE) ? MF_ENABLED : MF_GRAYED);
+			 EnableMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_LABELS, (gManp->type == HAILSTONE) ? MF_ENABLED : MF_GRAYED);
+			 EnableMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_DOTS, (gManp->type == HAILSTONE) ? MF_ENABLED : MF_GRAYED);
 			 break;
 		    case 4:	   // Animation Dialogs menu
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_SETUPANIMATION, MF_ENABLED);
@@ -600,20 +525,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	  case WM_INITMENU:
             // check/uncheck menu items depending on state  of related flags
 
-	        CheckMenuItem((HMENU)(_int64)wParam, IDC_ADDSPIRAL, (addflag ? MF_CHECKED : MF_UNCHECKED));
-		CheckMenuItem((HMENU)(_int64)wParam, IDM_3D, (_3dflag ? MF_CHECKED : MF_UNCHECKED));
-		CheckMenuItem((HMENU)(_int64)wParam, IDM_JULIA, (juliaflag ? MF_CHECKED : MF_UNCHECKED));
-		CheckMenuItem((HMENU)(_int64)wParam, IDM_REALTIMEJULIA, (RealTimeJuliaFlag ? MF_CHECKED : MF_UNCHECKED));
-		CheckMenuItem((HMENU)(_int64)wParam, IDM_CYCLE, (cycleflag ? MF_CHECKED : MF_UNCHECKED));
-		CheckMenuItem((HMENU)(_int64)wParam, IDM_STEREO, (pairflag ? MF_CHECKED : MF_UNCHECKED));
+	        CheckMenuItem((HMENU)(_int64)wParam, IDC_ADDSPIRAL, (gManp->addflag ? MF_CHECKED : MF_UNCHECKED));
+		CheckMenuItem((HMENU)(_int64)wParam, IDM_3D, (gManp->_3dflag ? MF_CHECKED : MF_UNCHECKED));
+		CheckMenuItem((HMENU)(_int64)wParam, IDM_JULIA, (gManp->juliaflag ? MF_CHECKED : MF_UNCHECKED));
+		CheckMenuItem((HMENU)(_int64)wParam, IDM_REALTIMEJULIA, (gManp->RealTimeJuliaFlag ? MF_CHECKED : MF_UNCHECKED));
+		CheckMenuItem((HMENU)(_int64)wParam, IDM_CYCLE, (gManp->cycleflag ? MF_CHECKED : MF_UNCHECKED));
+		CheckMenuItem((HMENU)(_int64)wParam, IDM_STEREO, (gManp->pairflag ? MF_CHECKED : MF_UNCHECKED));
 		CheckMenuItem((HMENU)(_int64)wParam, IDM_GENMPEGSTATS, ((statname[0] != '-') ? MF_CHECKED : MF_UNCHECKED));
-		CheckMenuItem((HMENU)(_int64)wParam, IDM_EDGE, (ZoomEdge ? MF_CHECKED : MF_UNCHECKED));
-		CheckMenuItem((HMENU)(_int64)wParam, IDM_USEDEFAULTPALETTE, (UseFractintPalette ? MF_CHECKED : MF_UNCHECKED));
+		CheckMenuItem((HMENU)(_int64)wParam, IDM_EDGE, (gManp->ZoomEdge ? MF_CHECKED : MF_UNCHECKED));
+		CheckMenuItem((HMENU)(_int64)wParam, IDM_USEDEFAULTPALETTE, (gManp->UseFractintPalette ? MF_CHECKED : MF_UNCHECKED));
 		CheckMenuItem((HMENU)(_int64)wParam, IDM_DISPLAYLOC, (DisplayLoc ? MF_CHECKED : MF_UNCHECKED));
 //		CheckMenuItem((HMENU)wParam, IDM_SHOWSTATUSBAR, (ShowStatusBar ? MF_CHECKED : MF_UNCHECKED));
 		// Hailstone toggle menu checkmarks
-		extern COtherFunctions* g_pOtherFunctions;
-		if (g_pOtherFunctions && type == HAILSTONE)
+//		extern COtherFunctions* g_pOtherFunctions;
+		if (g_pOtherFunctions && gManp->type == HAILSTONE)
 		    {
 		    CheckMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_AXES, (g_pOtherFunctions->ShowAxes ? MF_CHECKED : MF_UNCHECKED));
 		    CheckMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_LABELS, (g_pOtherFunctions->ShowPointLabels ? MF_CHECKED : MF_UNCHECKED));
@@ -629,9 +554,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 	  case WM_TIMER:
 	       if (wParam == ANIMTIMER)
-		    DoAnimation();
+		   gManp->DoAnimation();
 	       else if (wParam == UPDATETIMER)
-		    DoUpdate();
+		   gManp->DoUpdate();
 	       return 0;
 
 	  case WM_MOVE:
@@ -639,55 +564,56 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	  case WM_SIZE:
-		InvalidateRect(hwnd, &r, FALSE);
+		InvalidateRect(hwnd, &gManp->r, FALSE);
 		SetScrollRanges(hwnd);
-		GetClientRect(hwnd, &r);
-		xdots = width;
-		ydots = height;
+		GetClientRect(hwnd, &gManp->r);
+		gManp->xdots = gManp->width;
+		gManp->ydots = gManp->height;
+		gManp->AspectRatio = (double)gManp->xdots / (double)gManp->ydots;
 		return 0;
 
 	  case WM_LBUTTONDOWN:				// message: left mouse button pressed
 	  case WM_RBUTTONDOWN:				// message: right mouse button pressed
-		cycleflag = FALSE;
-		if (OscProcess.DisplayAxisImages)
+	      gManp->cycleflag = FALSE;
+		if (gManp->OscProcess.DisplayAxisImages)
 		    {
-		    OscProcess.ChooseOsc(MAKEPOINTS(lParam).x, MAKEPOINTS(lParam).y);
+		    gManp->OscProcess.ChooseOsc(MAKEPOINTS(lParam).x, MAKEPOINTS(lParam).y);
 		    break;
 		    }
 		if (GetPixelColourFlag)
 		    {
 		    EditRGB(hInst, MAKEPOINTS(lParam));
 		    GetPixelColourFlag = FALSE;
-		    DisplayFractal(hwnd);
+		    gManp->DisplayFractal(hwnd);
 		    break;
 		    }
 		if (GetKeyState(VK_SHIFT) < 0)	// find julia from this point
 		    {
-		    bTrack = FALSE;
-		    if (juliaflag)
+		    gManp->bTrack = FALSE;
+		    if (gManp->juliaflag)
 			{
-			hor = oldhor;		// restore values after julia transformations
-			vert = oldvert;
-			mandel_width = oldwidth;
-			juliaflag = FALSE;
+			gManp->hor = gManp->oldhor;		// restore values after julia transformations
+			gManp->vert = gManp->oldvert;
+			gManp->mandel_width = gManp->oldwidth;
+			gManp->juliaflag = FALSE;
 			}
 		    else
 			{
-			j.x = hor + mandel_width * (double)(MAKEPOINTS(lParam).x) / (double)ydots;    
-			j.y = vert + mandel_width * (double)(MAKEPOINTS(lParam).y) / (double)ydots;    
-			oldhor = hor;		// store values during julia transformations
-			oldvert = vert;
-			oldwidth = mandel_width;
-			hor = -3.555555555555556;
-			vert = -2.0;
-			mandel_width = 4.0;
-			juliaflag = TRUE;
+			gManp->j.x = gManp->hor + gManp->mandel_width * (double)(MAKEPOINTS(lParam).x) / (double)gManp->ydots;
+			gManp->j.y = gManp->vert + gManp->mandel_width * (double)(MAKEPOINTS(lParam).y) / (double)gManp->ydots;
+			gManp->oldhor = gManp->hor;		// store values during julia transformations
+			gManp->oldvert = gManp->vert;
+			gManp->oldwidth = gManp->mandel_width;
+			gManp->hor = -3.555555555555556;
+			gManp->vert = -2.0;
+			gManp->mandel_width = 4.0;
+			gManp->juliaflag = TRUE;
 			}
-		    time_to_zoom = TRUE;
+		    gManp->time_to_zoom = TRUE;
 		    }
 		else
 		    {					// Start selection of region
-		    bTrack = TRUE;
+		    gManp->bTrack = TRUE;
 		    SetRectEmpty(&Rect);
 		    StartSelection(hwnd, MAKEPOINTS(lParam), &Rect, 
 					(wParam & MK_SHIFT) ? (SL_EXTEND | Shape) : Shape);
@@ -704,42 +630,42 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		if (DisplayLoc)
 		    DisplayLocation(hwnd, MAKEPOINTS(lParam));
 							// update the selection region
-		if (bTrack)
+		if (gManp->bTrack)
 		    UpdateSelection(hwnd, MAKEPOINTS(lParam), &Rect, Shape);
-		else if (RealTimeJuliaFlag && !juliaflag)
+		else if (gManp->RealTimeJuliaFlag && !gManp->juliaflag)
 		    {
-		    if (!RTJuliaActive)					// give last request time to complete
+		    if (!gManp->RTJuliaActive)					// give last request time to complete
 			{
-			if (DrawJulia(hwnd, MAKEPOINTS(lParam)) < 0)
-			    RealTimeJuliaFlag = FALSE;
+			if (gManp->DrawJulia(hwnd, MAKEPOINTS(lParam)) < 0)
+			    gManp->RealTimeJuliaFlag = FALSE;
 			}
 		    }
 		break;
 
 	  case WM_LBUTTONUP:				// message: left mouse button released
 
-		if (bTrack) 
+		if (gManp->bTrack)
 		    {
 		    EndSelection(MAKEPOINTS(lParam), &Rect);
 		    ClearSelection(hwnd, &Rect, Shape);
-		    if (ZoomIn(hwnd, &Rect))
+		    if (gManp->ZoomIn(hwnd, &Rect))
 			{
 			HardStopNow(hwnd, "zoom-in");
-			time_to_zoom = TRUE;
+			gManp->time_to_zoom = TRUE;
 			}
 		    }
 		return 0;
 
 	  case WM_RBUTTONUP:				// message: left mouse button released
 
-		if (bTrack) 
+		if (gManp->bTrack)
 		    {
 		    EndSelection(MAKEPOINTS(lParam), &Rect);
 		    ClearSelection(hwnd, &Rect, Shape);
-		    if (ZoomOut(hwnd, &Rect))
+		    if (gManp->ZoomOut(hwnd, &Rect))
 			{
 			HardStopNow(hwnd, "zoom-out");
-			time_to_zoom = TRUE;
+			gManp->time_to_zoom = TRUE;
 			}
 		    }
 		return 0;
@@ -750,35 +676,37 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		  ((PCOPYDATASTRUCT)lParam) -> lpData);
 		MessageBox (hwnd, TempString, "Received Copydata message", MB_ICONEXCLAMATION | MB_OK);
 #endif
-		setup_defaults();
+		gManp->setup_defaults();
 		GetParamData(hwnd, "null", (char *)((PCOPYDATASTRUCT)(_int64)lParam) -> lpData, szSaveFileName, FALSE);
 			// 2 for Device Context, 1 for DIB/WM_COPYDATA and 0 for clipboard
 		ReplyUsingDIB = (int)(((PCOPYDATASTRUCT)(_int64)lParam) -> dwData);
 		CallingWindowHandle = (HWND)(_int64)wParam;
 		InitTrueColourPalette(FALSE);
 
-		time_to_reinit = TRUE;
+		gManp->time_to_reinit = TRUE;
+/*
 		Secondaryhwnd = hwnd;
 		Secondarymessage = message;
 		SecondarywParam = wParam;
 		SecondarylParam = lParam;
+*/
 		break;
 
 	  case WM_CLOSE:
 		if (MessageBox (hwnd, "Do you want to Quit?", "ManpWin", MB_ICONEXCLAMATION | MB_DEFBUTTON2 | MB_YESNO) == IDYES)
 		    {
-		    time_to_quit = TRUE;
+		    gManp->time_to_quit = TRUE;
 		    SendMessage (hwnd, WM_DESTROY, 0, 0L);
 		    }
 		else
 		    return 0;
 
-		time_to_quit = TRUE;
+		gManp->time_to_quit = TRUE;
 		hWndCopy = hwnd;
 		return 0;
 
 	  case WM_PAINT:
-		ChangeView(hwnd, -GetScrollPos (hwnd, SB_HORZ), -GetScrollPos (hwnd, SB_VERT), ptSize.x, ptSize.y, 0, 0, width, height, TRUE);
+		ChangeView(hwnd, -GetScrollPos (hwnd, SB_HORZ), -GetScrollPos (hwnd, SB_VERT), gManp->ptSize.x, gManp->ptSize.y, 0, 0, gManp->width, gManp->height, TRUE);
 		return 0;
         
 
@@ -786,25 +714,25 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             						// Calculate new vertical scroll position 
             	GetScrollRange (hwnd, SB_VERT, &iMin, &iMax);
             	iPos = GetScrollPos (hwnd, SB_VERT);
-            	GetClientRect (hwnd, &r);
+            	GetClientRect (hwnd, &gManp->r);
 
 	        switch ((int) LOWORD(wParam))
 //	        switch (wParam)
             	    {
                     case SB_LINEDOWN:
-                        dn =  r.bottom / 16 + 1;
+                        dn = gManp->r.bottom / 16 + 1;
                         break;
 
                     case SB_LINEUP:
-                        dn = -r.bottom / 16 + 1;
+                        dn = -gManp->r.bottom / 16 + 1;
                         break;
 
                     case SB_PAGEDOWN:
-                        dn =  r.bottom / 2  + 1;
+                        dn = gManp->r.bottom / 2  + 1;
                         break;
                         
                     case SB_PAGEUP:
-                        dn = -r.bottom / 2  + 1;
+                        dn = -gManp->r.bottom / 2  + 1;
                         break;
 
                     case SB_THUMBTRACK:
@@ -824,31 +752,31 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                     ScrollWindow (hwnd, 0, -dn, NULL, NULL);
                     SetScrollPos (hwnd, SB_VERT, iPos + dn, TRUE);
                     }
-		InvalidateRect(hwnd, &r, FALSE);
+		InvalidateRect(hwnd, &gManp->r, FALSE);
                 break;
 
           case WM_HSCROLL:
             						// Calculate new horizontal scroll position
                 GetScrollRange (hwnd, SB_HORZ, &iMin, &iMax);
                 iPos = GetScrollPos (hwnd, SB_HORZ);
-                GetClientRect (hwnd, &r);
+                GetClientRect (hwnd, &gManp->r);
 
 	        switch ((int) LOWORD(wParam))
                     {
                     case SB_LINEDOWN:
-                        dn =  r.right / 16 + 1;
+                        dn = gManp->r.right / 16 + 1;
                         break;
 
                     case SB_LINEUP:
-                        dn = -r.right / 16 + 1;
+                        dn = -gManp->r.right / 16 + 1;
                         break;
 
                     case SB_PAGEDOWN:
-                        dn =  r.right / 2  + 1;
+                        dn = gManp->r.right / 2  + 1;
                         break;
 
                     case SB_PAGEUP:
-                        dn = -r.right / 2  + 1;
+                        dn = -gManp->r.right / 2  + 1;
                         break;
 
                     case SB_THUMBTRACK:
@@ -869,7 +797,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                     ScrollWindow (hwnd, -dn, 0, NULL, NULL);
                     SetScrollPos (hwnd, SB_HORZ, iPos + dn, TRUE);
                     }
-		InvalidateRect(hwnd, &r, TRUE);
+		InvalidateRect(hwnd, &gManp->r, TRUE);
                 break;
 
         case WM_KEYDOWN:					// Handle any keyboard messages
@@ -877,13 +805,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	    break;
 
 	case WM_DESTROY :
-		if (RunAnimation)
+		if (gManp->RunAnimation)
 		    {
-		    time_to_break = TRUE;
-		    RunAnimation = FALSE;
-		    AnimateClose();
+		    gManp->time_to_break = TRUE;
+		    gManp->RunAnimation = FALSE;
+		    gManp->AnimateClose();
 		    }
-		if (type == SLOPEDERIVATIVE || SLOPEFORWARDDIFF)
+		if (gManp->type == SLOPEDERIVATIVE || gManp->type == SLOPEFORWARDDIFF)
 		    {
 		    EndSlope();					// advise the threads to close
 		    Sleep(250);					// give them a quarter second to do so
@@ -910,16 +838,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
  ****************************************************************************/
 
 LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-
     {
     int		status;
     char	TempStr[MAX_PATH];
     POINTS	CursorLocShort;
 
-    if (DisplayAnimation)			// we are currently displaying an animation
+    if (gManp->DisplayAnimation)			// we are currently displaying an animation
 	{
-	time_to_break = TRUE;
-	AnimateClose();
+	gManp->time_to_break = TRUE;
+	gManp->AnimateClose();
 	}
 
     switch (wParam)
@@ -949,20 +876,20 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 
 	case IDM_SETINSIDE:
 	    if (DialogBox (hInst, "InsideDlg", hwnd, InsideDlg))
-		DisplayFractal(hwnd);
+		gManp->DisplayFractal(hwnd);
 	    return 0;
 
  				  // Messages from Fractals menu
 	case IDM_FRACTLOC:                
-	    if (RealTimeJuliaFlag)
+	    if (gManp->RealTimeJuliaFlag)
 		DialogBox (hInst, "RTJuliaLocDlg", hwnd, RTJuliaLocDlg);
 	    else
 		DialogBox(hInst, "StatusInfoDlg", hwnd, StatusInfoDlg);
 	    break;
 
 	case IDM_CYCLE:
-	    cycleflag = !cycleflag;       
-	    if (cycleflag)
+	    gManp->cycleflag = !gManp->cycleflag;
+	    if (gManp->cycleflag)
 		rotate((int)lParam);
 	    break;
 
@@ -972,13 +899,13 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 
 	case IDM_RDS:
 	    draw3D(hwnd);
-	    InvalidateRect(hwnd, &r, FALSE);
+	    InvalidateRect(hwnd, &gManp->r, FALSE);
 	    return 0;
 
 	case IDM_RDS_SPOTS:
 	    if (AutoStereoActive)
 		DrawSpots();
-	    InvalidateRect(hwnd, &r, FALSE);
+	    InvalidateRect(hwnd, &gManp->r, FALSE);
 	    return 0;
 
 	case IDM_SETUPANIMATION:
@@ -988,7 +915,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	case IDM_PARAM_ANIM:
 	case IDM_OSCILLATOR_ANIMATION:
 	case IDM_MORPHOSC:
-	    if (TrueCol.PalEditFlag)						// palette has changed
+	    if (gManp->TrueCol.PalEditFlag)						// palette has changed
 		{
 		if (MessageBox (hwnd, "Palette has changed! Do you wish to save first?", "ManpWIN", MB_ICONEXCLAMATION | MB_YESNO) == IDYES)
 		    {
@@ -998,7 +925,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 			strcpy(MAPFile, szSaveFileName);				// palette file to reflect the current map
 			}
 		    }
-		TrueCol.PalEditFlag = FALSE;
+		gManp->TrueCol.PalEditFlag = FALSE;
 		}
 	    status = 0;
 	    switch (wParam)
@@ -1007,15 +934,15 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		    status = (int)DialogBox (hInst, "AnimationDlg", hwnd, AnimationDlg);
 		    break;
 		case IDM_PARAM_ANIM:
-		    if (type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
+		    if (gManp->type == OSCILLATORS || gManp->type == FRACTALMAPS || gManp->type == SPROTTMAPS || gManp->type == SURFACES || gManp->type == KNOTS || gManp->type == CURVES)
 			status = (int)DialogBox (hInst, "OscParamAnimDlg", hwnd, ParamAnimDlg);
-		    else if (type == PERTURBATION)
+		    else if (gManp->type == PERTURBATION)
 			status = (int)DialogBox(hInst, "PertParamAnimDlg", hwnd, ParamAnimDlg);
 		    else
 			status = (int)DialogBox(hInst, "ParamAnimDlg", hwnd, ParamAnimDlg);
 		    break;
 		case IDM_MORPHOSC:
-		    if (type != OSCILLATORS && type != FRACTALMAPS && type != SPROTTMAPS/*&& type != SURFACES*/ && type != KNOTS && type != CURVES)
+		    if (gManp->type != OSCILLATORS && gManp->type != FRACTALMAPS && gManp->type != SPROTTMAPS/*&& type != SURFACES*/ && gManp->type != KNOTS && gManp->type != CURVES)
 			{
 			MessageBox(hwnd, "This Fractal is not an Oscillator, Fractal Map, Curve or Knot", "ManpWin", MB_ICONEXCLAMATION | MB_OK);
 			break;
@@ -1023,7 +950,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		    status = (int)DialogBox(hInst, "OscMorphAnimDlg", hwnd, OscMorphAnimDlg);
 		    break;
 		case IDM_OSCILLATOR_ANIMATION:
-		    switch (type)
+		    switch (gManp->type)
 			{
 			case OSCILLATORS:
 			case FRACTALMAPS:
@@ -1048,16 +975,17 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 				break;
 				}	// else fall through
 			default:
-			    _snprintf_s(TempStr, MAX_PATH, _TRUNCATE, "Fractal type %d (%s) cannot be configured for animation!\nChange the fractal type first", type, fractalspecific[type].name);
+			    _snprintf_s(TempStr, MAX_PATH, _TRUNCATE, "Fractal type %d (%s) cannot be configured for animation!\nChange the fractal type first", gManp->type, fractalspecific[gManp->type].name);
 			    MessageBox (hwnd, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 			    status = 0;
 			    break;
 			}
 		    break;
 		case IDM_JULIA_ANIM:
-		    if (type == PERTURBATION || type == OSCILLATORS || type == FRACTALMAPS || type == CURVES || type == KNOTS || type == SPROTTMAPS || type == SURFACES || type == BUDDHABROT || type == CURLICUES || type == MANDELCLOUD || type == DYNAMICFP)
+		    if (gManp->type == PERTURBATION || gManp->type == OSCILLATORS || gManp->type == FRACTALMAPS || gManp->type == CURVES || gManp->type == KNOTS || gManp->type == SPROTTMAPS || 
+				gManp->type == SURFACES || gManp->type == BUDDHABROT || gManp->type == CURLICUES || gManp->type == MANDELCLOUD || gManp->type == DYNAMICFP)
 			{
-			_snprintf_s(TempStr, MAX_PATH, _TRUNCATE, "Fractal type %d (%s) cannot be configured for Julia animation!\nChange the fractal type first", type, fractalspecific[type].name);
+			_snprintf_s(TempStr, MAX_PATH, _TRUNCATE, "Fractal type %d (%s) cannot be configured for Julia animation!\nChange the fractal type first", gManp->type, fractalspecific[gManp->type].name);
 			MessageBox(hwnd, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 			}
 		    else
@@ -1072,7 +1000,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		    break;
 		}
 	    if (status > 0)
-		if (StartImmediately)
+		if (gManp->StartImmediately)
 		    {
 		    if (WriteMPEGFrames)
 			{
@@ -1081,7 +1009,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 			}
 		    else
 			{
-			if (RunScript(hwnd, ScriptFileName) == -1)
+			if (gManp->RunScript(hwnd, ScriptFileName) == -1)
 			    return (-1);
 			}
 		    }
@@ -1089,25 +1017,25 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    return (1);
 
 	case IDM_STOPANIM:
-	    AnimateClose();
-	    time_to_break = TRUE;
+	    gManp->AnimateClose();
+	    gManp->time_to_break = TRUE;
 	    return 0;
 
 	case IDM_PAUSEANIM:
-	    SuspendAnimation = !SuspendAnimation;
-	    if (SuspendAnimation)
-		AnimateSuspend();
+	    gManp->SuspendAnimation = !gManp->SuspendAnimation;
+	    if (gManp->SuspendAnimation)
+		gManp->AnimateSuspend();
 	    else
-		AnimateResume();
+		gManp->AnimateResume();
 	    return 0;
 
 
 	case IDM_SETUPTHREADS:
 	    if (DialogBox(hInst, "ThreadingDlg", hwnd, ThreadingDlg) == TRUE)
 		{
-		DisplayStatusBarInfo(INITIALISING, "");		// display status bar
+		gManp->DisplayStatusBarInfo(INITIALISING, "");		// display status bar
 		HardStopNow(hwnd, "Setup Num Threads");
-		time_to_reinit = TRUE;
+		gManp->time_to_reinit = TRUE;
 		}
 	    else
 		return 0;
@@ -1116,33 +1044,33 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	case IDM_COLOUR_PAL:
 	    if (DialogBox (hInst, "ColourDlg", hwnd, ColourDlg) == TRUE)
 		{
-		InvalidateRect(hwnd, &r, FALSE);
+		InvalidateRect(hwnd, &gManp->r, FALSE);
 		InitTrueColourPalette(TRUE);
-		Plot.RefreshScreen();
-		DisplayPalette(hwnd, TrueCol.DisplayPaletteFlag);
-		DisplayFractal(hwnd);
+		gManp->Plot.RefreshScreen();
+		DisplayPalette(hwnd, gManp->TrueCol.DisplayPaletteFlag);
+		gManp->DisplayFractal(hwnd);
 		}
 	    return 0;
 
 	case IDM_EDITPAL:
 	    if (DialogBox (hInst, "EditPalDlg", hwnd, EditPalDlg) == TRUE)
 		{
-		InvalidateRect(hwnd, &r, FALSE);
+		InvalidateRect(hwnd, &gManp->r, FALSE);
 		InitTrueColourPalette(TRUE);
-		Plot.RefreshScreen();
-		DisplayPalette(hwnd, TrueCol.DisplayPaletteFlag);
-		DisplayFractal(hwnd);
+		gManp->Plot.RefreshScreen();
+		DisplayPalette(hwnd, gManp->TrueCol.DisplayPaletteFlag);
+		gManp->DisplayFractal(hwnd);
 		}
 	    return 0;
 
 	case IDM_EDGE:
-	    ZoomEdge = !ZoomEdge;
+	    gManp->ZoomEdge = !gManp->ZoomEdge;
 	    return 0;
 
 	case IDM_USEDEFAULTPALETTE:
-	    UseFractintPalette = !UseFractintPalette;
+	    gManp->UseFractintPalette = !gManp->UseFractintPalette;
 	    InitTrueColourPalette(FALSE);
-	    time_to_reinit = TRUE;
+	    gManp->time_to_reinit = TRUE;
 	    return 0;
 
 	case IDM_GENMPEGSTATS:
@@ -1152,7 +1080,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	case IDM_DISPLAYLOC:
 	    DisplayLoc = !DisplayLoc;
 	    if (!DisplayLoc)
-		DisplayFractal(hwnd);		// restore status
+		gManp->DisplayFractal(hwnd);		// restore status
 	    return 0;
 
 	case IDM_COPY: 
@@ -1169,36 +1097,36 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		SaveFile(hwnd, szSaveFileName, szTitleName);			// par file saved in dialogue box, we save image here
 	    return 0;
 
-	case IDM_SAVEPAR:						// par file
-	    if (TrueCol.PalEditFlag)					// palette has changed
+	case IDM_SAVEPAR:							// par file
+	    if (gManp->TrueCol.PalEditFlag)					// palette has changed
 		{
 		if (MessageBox (hwnd, "Palette has changed! Do you wish to save first?", "ManpWIN", MB_ICONEXCLAMATION | MB_YESNO) == IDYES)
 		    {
 		    if (SaveMAPFileOpenDlg (hwnd, szSaveFileName, szTitleName) == 0)
 			{
 			save_palette(hwnd, szSaveFileName, "Save Colour Parameters");
-			strcpy(MAPFile, szSaveFileName);				// palette file to reflect the current map
+			strcpy(MAPFile, szSaveFileName);			// palette file to reflect the current map
 			}
 		    }
-		TrueCol.PalEditFlag = FALSE;
+		gManp->TrueCol.PalEditFlag = FALSE;
 		}
 
 	    if (SaveParOpenDlg (hwnd, szSaveFileName, szTitleName) == 0)
 		SaveFile (hwnd, szSaveFileName, szTitleName);                    
 	    return 0;
 
-	case IDM_SAVE_KALLES:						// kfr file
-	    if (TrueCol.PalEditFlag)					// palette has changed
+	case IDM_SAVE_KALLES:							// kfr file
+	    if (gManp->TrueCol.PalEditFlag)					// palette has changed
 		{
 		if (MessageBox(hwnd, "Palette has changed! Do you wish to save first?", "ManpWIN", MB_ICONEXCLAMATION | MB_YESNO) == IDYES)
 		    {
 		    if (SaveMAPFileOpenDlg(hwnd, szSaveFileName, szTitleName) == 0)
 			{
 			save_palette(hwnd, szSaveFileName, "Save Colour Parameters");
-			strcpy(MAPFile, szSaveFileName);				// palette file to reflect the current map
+			strcpy(MAPFile, szSaveFileName);			// palette file to reflect the current map
 			}
 		    }
-		TrueCol.PalEditFlag = FALSE;
+		gManp->TrueCol.PalEditFlag = FALSE;
 		}
 
 	    if (SaveKfrOpenDlg(hwnd, szSaveFileName, szTitleName) == 0)
@@ -1231,12 +1159,12 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	case IDM_OPEN_PAR:
 	    if (PARFileOpenDlg(hwnd, PARFile, szTitleName) == 0)
 		{
-		DisplayStatusBarInfo(INITIALISING, "");				// display status bar
-		setup_defaults();
+		gManp->DisplayStatusBarInfo(INITIALISING, "");				// display status bar
+		gManp->setup_defaults();
 		GetParam(hwnd, PARFile, szSaveFileName);
-		TrueCol.IsMAPFile = false;
+		gManp->TrueCol.IsMAPFile = false;
 		HardStopNow(hwnd, "open .PAR");
-		time_to_reinit = TRUE;
+		gManp->time_to_reinit = TRUE;
 		}
 	    else
 		return 0;
@@ -1245,11 +1173,11 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	case IDM_OPEN_KALLES:
 	    if (KFRFileOpenDlg(hwnd, KFRFile, szTitleName) == 0)
 		{
-		DisplayStatusBarInfo(INITIALISING, "");				// display status bar
-		setup_defaults();
+		gManp->DisplayStatusBarInfo(INITIALISING, "");				// display status bar
+		gManp->setup_defaults();
 		ReadKallesFile(hwnd, KFRFile);
 		HardStopNow(hwnd, "open .KFR");
-		time_to_reinit = TRUE;
+		gManp->time_to_reinit = TRUE;
 		}
 	    else
 		return 0;
@@ -1258,15 +1186,15 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	case IDM_OPEN_PNG:
 	    if (PNGFileOpenDlg(hwnd, PNGFile, szTitleName) == 0)
 		{
-		setup_defaults();
+		gManp->setup_defaults();
 		if (read_png_file(hwnd, PNGFile) >= 0)
-		    DataFromPNGFile = TRUE;
+		    gManp->DataFromPNGFile = TRUE;
 		}
 	    else
 		return 0;
-	    TrueCol.IsMAPFile = false;
+	    gManp->TrueCol.IsMAPFile = false;
 	    HardStopNow(hwnd, "open .PNG");
-	    time_to_reinit = TRUE;
+	    gManp->time_to_reinit = TRUE;
 	    break;
 
 	case IDM_OPEN_SCI: 
@@ -1279,15 +1207,15 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 			{
 			if (MPEGWrite(MPGFile) == -1)
 			    {
-			    time_to_reinit = FALSE;
+			    gManp->time_to_reinit = FALSE;
 			    return (-1);
 			    }
 			}
 		    else
 			{
-			if (RunScript(hwnd, ScriptFileName) == -1)
+			if (gManp->RunScript(hwnd, ScriptFileName) == -1)
 			    {
-			    time_to_reinit = FALSE;
+			    gManp->time_to_reinit = FALSE;
 			    return (-1);
 			    }
 			}
@@ -1295,7 +1223,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		}
 	    else
 		return 0;
-	    time_to_reinit = TRUE;
+	    gManp->time_to_reinit = TRUE;
 	    break;
 
 	case IDM_OPEN_LST: 
@@ -1306,17 +1234,17 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		}
 	    else
 		return 0;
-	    time_to_reinit = TRUE;
+	    gManp->time_to_reinit = TRUE;
 	    break;
 
 	case IDM_OPEN_TRUE_MAP: 
 	    if (ColFileOpenDlg (hwnd, COLFile, szTitleName) == 0)
 		{
 		FileReadColours(hwnd, COLFile, "Paul's Fractals: Get Colour Parameters");
-		InvalidateRect(hwnd, &r, FALSE);
+		InvalidateRect(hwnd, &gManp->r, FALSE);
 		InitTrueColourPalette(FALSE);
-		Plot.RefreshScreen();
-		time_to_reinit = TRUE;
+		gManp->Plot.RefreshScreen();
+		gManp->time_to_reinit = TRUE;
 		}
 	    else
 		return 0;
@@ -1327,19 +1255,19 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		FilePalette(hwnd, MAPFile, "Paul's Fractals: Get Colour Map");
 	    else
 		return 0;
-	    TrueCol.IsMAPFile = true;
+	    gManp->TrueCol.IsMAPFile = true;
 	    HardStopNow(hwnd, "MAP");
 //	    time_to_reinit = (type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF);
-	    time_to_reinit = true;
+	    gManp->time_to_reinit = true;
 	    break;
 
 	case IDM_EXIT:
 	    if (MessageBox (hwnd, "Do you want to Quit?", "ManpWin", MB_ICONEXCLAMATION | MB_DEFBUTTON2 | MB_YESNO) == IDYES)
 		{
-		time_to_quit = TRUE;
+		gManp->time_to_quit = TRUE;
 		SendMessage (hwnd, WM_DESTROY, 0, 0L);
-		if (DisplayAnimation)
-		    AnimateClose();
+		if (gManp->DisplayAnimation)
+		    gManp->AnimateClose();
 		}
 	    hWndCopy = hwnd;
 	    // the main routine will actually call 'DestroyWindow()'
@@ -1377,19 +1305,19 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		    if (DialogBox (hInst, "Param3D", hwnd, Param3D) == FALSE)
 			return 0;
 		    else
-			time_to_reinit = TRUE;
+			gManp->time_to_reinit = TRUE;
 		    break;
 
 		case IDM_3D:
-		    _3dflag = !_3dflag;
-		    if (_3dflag)
+		    gManp->_3dflag = !gManp->_3dflag;
+		    if (gManp->_3dflag)
 			{
-			oldcalcmode = calcmode;
-			pairflag = FALSE;
+			gManp->oldcalcmode = gManp->calcmode;
+			gManp->pairflag = FALSE;
 			}
 		    else
-			calcmode = oldcalcmode;		// restore after 3D
-		    time_to_reinit = TRUE;
+			gManp->calcmode = gManp->oldcalcmode;		// restore after 3D
+		    gManp->time_to_reinit = TRUE;
 		    break;
 
 	    case IDM_SET_JULIA_SIZE:
@@ -1397,125 +1325,45 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		break;
 
 	    case IDM_JULIA:
-		juliaflag = !juliaflag;
-		if (juliaflag)
-		    {
-		    double  AspectRatio = (double)xdots / (double)ydots;
-		    if (BigNumFlag)
-			{
-			temp_1 = (double)mpfr_get_d(BigHor.x, MPFR_RNDN);
-			temp_2 = (double)mpfr_get_d(BigWidth.x, MPFR_RNDN);
-			j.x = temp_1 + (temp_2 * (double)xdots / (double)ydots) / 2.0;
-			temp_1 = (double)mpfr_get_d(BigVert.x, MPFR_RNDN);
-			j.y = temp_1 + temp_2 / 2.0;
-			Big_oldhor = BigHor;
-			Big_oldvert = BigVert;
-			Big_oldwidth = BigWidth;
-			if (AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
-			    {
-			    BigWidth = 4.0;
-			    BigVert = -2.0;
-			    BigHor = BigVert * AspectRatio;
-			    }
-			else
-			    {
-			    BigWidth = 4.0 / AspectRatio;
-			    BigHor = -2.0;
-			    BigVert = BigHor / AspectRatio;
-			    }
-			}
-		    else
-			{
-			if (RealTimeJuliaFlag)
-			    j = q;
-			else
-			    {
-			    j.x = hor + (mandel_width * (double) xdots / (double) ydots) / 2.0;
-			    j.y = vert + mandel_width / 2.0;    
-			    }
-			oldhor = hor;		// store values during julia transformations
-			oldvert = vert;
-			oldwidth = mandel_width;
-			if (AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
-			    {
-			    mandel_width = 4.0;
-			    vert = -2.0;
-			    hor = vert * AspectRatio;
-			    }
-			else
-			    {
-			    mandel_width = 4.0 / AspectRatio;
-			    hor = -2.0;
-			    vert = hor / AspectRatio;
-			    }
-			}
-		    }
-		else
-		    {
-		    if (oldwidth == 0.0)	// we have not done any Mandelbrot yet
-			{
-			oldwidth = 4.0;
-			oldvert = j.y - oldwidth / 2.0;
-			oldhor = j.x - (oldwidth * (double) xdots / (double) ydots) / 2.0;
-			}
-		    if (BigNumFlag)
-			{
-			BigHor = Big_oldhor;
-			BigVert = Big_oldvert;
-			BigWidth = Big_oldwidth;
-			}
-		    else
-			{
-			hor = oldhor;
-			vert = oldvert;
-			mandel_width = oldwidth;
-			}
-		    if (RealTimeJuliaFlag)
-			{
-			InitRTJulia(hwnd);
-			FindCursorRealPos(&CursorLocShort);
-			if (DrawJulia(hwnd, CursorLocShort) < 0)
-			    RealTimeJuliaFlag = FALSE;
-			}
-		    }
+		gManp->juliaflag = !gManp->juliaflag;
 		HardStopNow(hwnd, "Julia");
-		time_to_restart = TRUE;
+		gManp->ToggleJulia(hwnd, CursorLocShort);
 		break;
 
 	    case IDM_STEREO:
-		if (pairflag)
+		if (gManp->pairflag)
 		    {
-		    pairflag = FALSE;
-		    calcmode = oldcalcmode;		// restore after stereo pair
+		    gManp->pairflag = FALSE;
+		    gManp->calcmode = gManp->oldcalcmode;		// restore after stereo pair
 		    }
 		else
 		    {
-		    pairflag = 10;
-		    oldcalcmode = calcmode;
-		    _3dflag = FALSE;
+		    gManp->pairflag = 10;
+		    gManp->oldcalcmode = gManp->calcmode;
+		    gManp->_3dflag = FALSE;
 		    }
 
 		HardStopNow(hwnd, "Stereo");
-		time_to_reinit = TRUE;
+		gManp->time_to_reinit = TRUE;
 		break;
 
 	    case IDM_REALTIMEJULIA:
-		RealTimeJuliaFlag = !RealTimeJuliaFlag;
-		if (RealTimeJuliaFlag)
+		gManp->RealTimeJuliaFlag = !gManp->RealTimeJuliaFlag;
+		if (gManp->RealTimeJuliaFlag)
 		    {
-		    if (!juliaflag)		// doesn't make a lot of sense if we are in julia already
+		    if (!gManp->juliaflag)		// doesn't make a lot of sense if we are in julia already
 			{
-			InitRTJulia(hwnd);
+			gManp->InitRTJulia(hwnd);
 			FindCursorRealPos(&CursorLocShort);
-			if (DrawJulia(hwnd, CursorLocShort) < 0)
-			    RealTimeJuliaFlag = FALSE;
+			if (gManp->DrawJulia(hwnd, CursorLocShort) < 0)
+			    gManp->RealTimeJuliaFlag = FALSE;
 			}
 		    return 1;			// ensure that we don't splatter initial RT Julia set
 		    }
 		else
 		    {
 		    HardStopNow(hwnd, "RTJulia");
-		    time_to_restart = TRUE;
+		    gManp->time_to_restart = TRUE;
 		    }
 		break;
 
@@ -1523,32 +1371,34 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		    if (DialogBox(hInst, "StereoPairDlg", hwnd, StereoPairDlg) == FALSE)
 			return 0;
 		    else
-			time_to_reinit = TRUE;
+			gManp->time_to_reinit = TRUE;
 		    break;
 
 	    case IDM_HAILSTONE_TOGGLE_AXES:
 		g_pOtherFunctions->ShowAxes = !g_pOtherFunctions->ShowAxes;
-		time_to_reinit = TRUE;
+		gManp->time_to_reinit = TRUE;
 		break;
 
 	    case IDM_HAILSTONE_TOGGLE_LABELS:
 		g_pOtherFunctions->ShowPointLabels = !g_pOtherFunctions->ShowPointLabels;
-		time_to_reinit = TRUE;
+		gManp->time_to_reinit = TRUE;
 		break;
 
 	    case IDM_HAILSTONE_TOGGLE_DOTS:
 		g_pOtherFunctions->ShowDots = !g_pOtherFunctions->ShowDots;
-		time_to_reinit = TRUE;
+		gManp->time_to_reinit = TRUE;
 		break;
 
 	    case IDM_TOGGLE_DISPLAY_PALETTE:
-		TrueCol.DisplayPaletteFlag = !TrueCol.DisplayPaletteFlag;
+		gManp->TrueCol.DisplayPaletteFlag = !gManp->TrueCol.DisplayPaletteFlag;
+/*
 		Secondaryhwnd = hwnd;
 		Secondarymessage = message;
 		SecondarywParam = wParam;
 		SecondarylParam = lParam;
-		DisplayPalette(hwnd, TrueCol.DisplayPaletteFlag);
-		DisplayFractal(hwnd);
+*/
+		DisplayPalette(hwnd, gManp->TrueCol.DisplayPaletteFlag);
+		gManp->DisplayFractal(hwnd);
 		return 0;								// don't break as we don't want to reinit
 
 //	    case IDM_IMAGE_SIZE:
@@ -1556,17 +1406,17 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 //		break;
 
 	    case IDM_REDO:
-		LoadUndo(FALSE);
+		gManp->LoadUndo(FALSE);
 		HardStopNow(hwnd, "redo");
-		time_to_zoom = TRUE;
-		time_to_restart = TRUE;
+		gManp->time_to_zoom = TRUE;
+		gManp->time_to_restart = TRUE;
 		break;
 
 	    case IDM_UNDO:
-		LoadUndo(TRUE);
+		gManp->LoadUndo(TRUE);
 		HardStopNow(hwnd, "undo");
-		time_to_zoom = TRUE;
-		time_to_restart = TRUE;
+		gManp->time_to_zoom = TRUE;
+		gManp->time_to_restart = TRUE;
 		break;
 
 	    case IDM_UPDATE_FRACTAL:
@@ -1575,7 +1425,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		if (result = UpdateFractal(hwnd) ==  TRUE)
 		    {
 		    HardStopNow(hwnd, "update fractal");
-		    time_to_reinit = TRUE;
+		    gManp->time_to_reinit = TRUE;
 		    }
 		break;
 		}
@@ -1584,7 +1434,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		{
 		struct	UNDO	RestoreFract;
 
-		BigNumFlag = FALSE;
+		gManp->BigNumFlag = FALSE;
 //		Dib.ClearDib(0L);
 		if (InitNewFractal(hwnd) == FALSE)
 		    {
@@ -1593,27 +1443,27 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		    }
 		else
 		    {
-		    Undo(&RestoreFract);
+		    gManp->Undo(&RestoreFract);
 		    HardStopNow(hwnd, "fractal type changed");
-		    time_to_reinit = TRUE;
-		    calcfracinit();
+		    gManp->time_to_reinit = TRUE;
+		    gManp->calcfracinit();
 		    }
 		break;
 		}
 
 	    case IDM_TOGGLEPERT:
 		{
-		WORD    OldType = type;
-		int	OldSubtype = subtype;
-		if (TogglePerturbation(&type, &subtype) < 0)
+		WORD    OldType = gManp->type;
+		int	OldSubtype = gManp->subtype;
+		if (TogglePerturbation(&gManp->type, &gManp->subtype) < 0)
 		    {
-		    type = OldType;
-		    subtype = OldSubtype;
+		    gManp->type = OldType;
+		    gManp->subtype = OldSubtype;
 		    MessageBox(hwnd, "There is no equivelent method to toggle into", "Perturbation", MB_ICONEXCLAMATION | MB_OK);
 		    }
 		else
 		    {
-		    time_to_reinit = TRUE;
+		    gManp->time_to_reinit = TRUE;
 		    HardStopNow(hwnd, "toggle perturbation");
 		    }
 		break;
@@ -1630,15 +1480,15 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		    return 0;
 		else
 		    {
-		    if (OutsideMethod == TIERAZONFILTERS)
+		    if (gManp->OutsideMethod == TIERAZONFILTERS)
 			if (DialogBox (hInst, "SelectTierazonDlg", hwnd, SelectFilterDlg) == FALSE)
 			    return 0;
-		    if (OutsideMethod == TIERAZONCOLOURS)
+		    if (gManp->OutsideMethod == TIERAZONCOLOURS)
 			if (DialogBox (hInst, "SelectTierazonDlg", hwnd, SelectColourDlg) == FALSE)
 			    return 0;
-		    TrueCol.FillPalette(REPEAT, TrueCol.PalettePtr, threshold);
+		    gManp->TrueCol.FillPalette(REPEAT, gManp->TrueCol.PalettePtr, gManp->threshold);
 		    HardStopNow(hwnd, "Fractal options changed");
-		    time_to_reinit = TRUE;
+		    gManp->time_to_reinit = TRUE;
 		    }
 		break;
 		}
@@ -1646,73 +1496,36 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    case IDM_FDOPTIONS:
 		if (DialogBox (hInst, "SelectFDOptionDlg", hwnd, SelectFDOptionDlg) == FALSE)
 		    return 0;
+		else
+		    {
+		    HardStopNow(hwnd, "FD Filter options change");
+		    gManp->time_to_reinit = TRUE;
+		    }
 		break;
 
 	    case IDM_FRACTALCOORDS:
 		if (DialogBox (hInst, "CoordDlg", hwnd, CoordDlg) == FALSE)
 		    return 0;
 		else
-		    time_to_reinit = TRUE;
+		    {
+		    HardStopNow(hwnd, "Fractal co-ordinate change change");
+		    gManp->time_to_reinit = TRUE;
+		    }
 		break;
 	    case IDM_IMAGE_SIZE:
 		if (DialogBox (hInst, "ImageSizeDlg", hwnd, ImageSizeDlg) == FALSE)
 		    return 0;
 		else
 		    {
-		    time_to_reinit = TRUE;
+		    gManp->time_to_reinit = TRUE;
 		    HardStopNow(hwnd, "image size change");
 //		    ClosePtrs();				// ready for next screen
 		    mainview(hwnd, FALSE);			// all screen specific stuff
 		    }
 		break;
 	    }
-	Secondaryhwnd = hwnd;
-	Secondarymessage = message;
-	SecondarywParam = wParam;
-	SecondarylParam = lParam;
-//	time_to_reinit = TRUE;
 	return 0;
 	}
-    Secondaryhwnd = hwnd;
-    Secondarymessage = message;
-    SecondarywParam = wParam;
-    SecondarylParam = lParam;
-    return 0;
-    }
-
-/****************************************************************************
- *                                                                          *
- *  FUNCTION   : MenuCommand ( HWND hwnd, WORD wParam)                      *
- *                                                                          *
- *  PURPOSE    : Processes menu commands.                                   *
- *                                                                          *
- *  RETURNS    : TRUE  - if command could be processed.                     *
- *               FALSE - otherwise                                          *
- *                                                                          *
- ****************************************************************************/
-
-int	SecondaryWndProc (void)
-
-    {
-    static	HWND	hwndPlot;
-    HWND	hwnd;
-    UINT	message;
-    WPARAM	wParam;
-    LPARAM	lParam;
-
-    hwnd = Secondaryhwnd;
-    message = Secondarymessage;
-    wParam = SecondarywParam;
-    lParam = SecondarylParam;
-
-    if (time_to_zoom)
-	{
-	time_to_zoom = FALSE;
-	return 0;			// no commands to process
-	}
-
-    if (time_to_restart)
-	AutoStereoActive = FALSE;
     return 0;
     }
 
@@ -1724,18 +1537,18 @@ void	ChangeView(HWND hwnd, int xdest, int ydest, int widthdest, int heightdest, 
     { 
     HPALETTE hpalT;
 
-    BeginPaint(hwnd, &ps);
-    hpalT = SelectPalette (ps.hdc, hpal, FALSE);
-    RealizePalette(ps.hdc);
-    SetMapMode(ps.hdc,MM_TEXT);
-    SetBkMode(ps.hdc,TRANSPARENT);
-    SetStretchBltMode (ps.hdc, STRETCH_DELETESCANS) ;	// correct stretch mode for zoom etc
-    StretchDIBits (ps.hdc, xdest, ydest, widthdest, heightdest, xsrc, ysrc, widthsrc, heightsrc,
-			       (LPSTR)Dib.DibPixels.data(), (LPBITMAPINFO)Dib.pDibInf, DIB_PAL_COLORS, SRCCOPY);
-    SelectPalette(ps.hdc,hpalT,FALSE);
+    BeginPaint(hwnd, &gManp->ps);
+    hpalT = SelectPalette (gManp->ps.hdc, hpal, FALSE);
+    RealizePalette(gManp->ps.hdc);
+    SetMapMode(gManp->ps.hdc,MM_TEXT);
+    SetBkMode(gManp->ps.hdc,TRANSPARENT);
+    SetStretchBltMode (gManp->ps.hdc, STRETCH_DELETESCANS) ;	// correct stretch mode for zoom etc
+    StretchDIBits (gManp->ps.hdc, xdest, ydest, widthdest, heightdest, xsrc, ysrc, widthsrc, heightsrc,
+			       (LPSTR)gManp->Dib.DibPixels.data(), (LPBITMAPINFO)gManp->Dib.pDibInf, DIB_PAL_COLORS, SRCCOPY);
+    SelectPalette(gManp->ps.hdc,hpalT,FALSE);
 //    if (ShowStatusBar)
-	OutputStatusBar(hwnd);
-    EndPaint(hwnd, &ps);
+	gManp->OutputStatusBar(hwnd);
+    EndPaint(hwnd, &gManp->ps);
     }
 
 /*-----------------------------------------
@@ -1749,18 +1562,16 @@ void	SetupView(HWND hwnd)
 
     xFrame = GetSystemMetrics(SM_CXFRAME) * 2;			// 2017 version of development environment reports only half the size of 2008 version. Not sure why
     yFrame = GetSystemMetrics(SM_CYFRAME) * 2;
-    InvalidateRect(hwnd, &r, FALSE);
-    caption = GetSystemMetrics(SM_CYCAPTION) + xFrame * 2 + GetSystemMetrics(SM_CYMENU) * 2;
-    scroll_width = yFrame * 2;
-    display_width = ptSize.x + scroll_width;
-    display_height = ptSize.y + caption;					// include caption
-    display_width = (display_width < screenx) ? display_width : screenx;	// large pictures
-    display_height = (display_height < screeny) ? display_height : screeny;
-    MoveWindow (hwnd, (screenx - display_width) / 2, (screeny - display_height) / 2,
-							    display_width, display_height, TRUE);
-
-    HorOffset = (screenx - display_width) / 2 + yFrame;
-    VertOffset = (screeny - display_height) / 2 + GetSystemMetrics(SM_CYCAPTION) + yFrame + GetSystemMetrics(SM_CYMENU);
+    InvalidateRect(hwnd, &gManp->r, FALSE);
+    gManp->caption = GetSystemMetrics(SM_CYCAPTION) + xFrame * 2 + GetSystemMetrics(SM_CYMENU) * 2;
+    gManp->scroll_width = yFrame * 2;
+    display_width = gManp->ptSize.x + gManp->scroll_width;
+    display_height = gManp->ptSize.y + gManp->caption;					// include caption
+    display_width = (display_width < gManp->screenx) ? display_width : gManp->screenx;	// large pictures
+    display_height = (display_height < gManp->screeny) ? display_height : gManp->screeny;
+    MoveWindow (hwnd, (gManp->screenx - display_width) / 2, (gManp->screeny - display_height) / 2, display_width, display_height, TRUE);
+    HorOffset = (gManp->screenx - display_width) / 2 + yFrame;
+    VertOffset = (gManp->screeny - display_height) / 2 + GetSystemMetrics(SM_CYCAPTION) + yFrame + GetSystemMetrics(SM_CYMENU);
     if (first)
 	{
 	ShowWindow (hwnd, SW_MAXIMIZE);
@@ -1785,7 +1596,7 @@ void	FindCursorRealPos(POINTS *ptReal)
 	Setup Fractal defaults when new fractal selected
   -----------------------------------------------------------*/
 
-void	InitFract(int type)
+void	CManp::InitFract(int type)
     {
     int	i;
 
@@ -1812,69 +1623,69 @@ BOOL	InitNewFractal(HWND hwnd)
     {
     static  int	OldType;
 
-    Fractal.InitData();				// setup for next fractal
+    gManp->Fractal.InitData();				// setup for next fractal
     InitTrueColourPalette(FALSE);
-    setup_defaults();
-    IsPAR = FALSE;
-    IsKFR = FALSE;
-    OscProcess.DisplayAxisImages = FALSE;
+    gManp->setup_defaults();
+    gManp->IsPAR = FALSE;
+    gManp->IsKFR = FALSE;
+    gManp->OscProcess.DisplayAxisImages = FALSE;
     DisplayAxisLabels = FALSE;
-    OscProcess.AxisDisplay = OFF;
-    TrueCol.IsMAPFile = false;
+    gManp->OscProcess.AxisDisplay = OFF;
+    gManp->TrueCol.IsMAPFile = false;
 
     if (WasFractPar)				// was our last time through this dialogue box a FRACTINT PAR?
-	type = FRACTPAR;				// allow the dialogue box to remember where we were last time
+	gManp->type = FRACTPAR;				// allow the dialogue box to remember where we were last time
     if (DialogBox (hInst, "FractTypeDlg", hwnd, FractTypeDlg) == TRUE)
 	{
-	cycleflag = FALSE;
+	gManp->cycleflag = FALSE;
 	WasFractPar = FALSE;
-	juliaflag = (fractalspecific[type].juliaflag == JULIAFP);
-	if (type != OldType)
+	gManp->juliaflag = (fractalspecific[gManp->type].juliaflag == JULIAFP);
+	if (gManp->type != OldType)
 	    {
-	    xAxis = 0;
-	    yAxis = 1;
-	    zAxis = 2;
+	    gManp->xAxis = 0;
+	    gManp->yAxis = 1;
+	    gManp->zAxis = 2;
 	    }
-	OldType = type;
-	if (type == FPPICKOVER || type == FPLORENZ3D || type == FPLORENZ3D1 || type == FPLORENZ3D3 
-	    || type == FPLORENZ3D4 || type == FPROSSLER || type == IFS)
+	OldType = gManp->type;
+	if (gManp->type == FPPICKOVER || gManp->type == FPLORENZ3D || gManp->type == FPLORENZ3D1 || gManp->type == FPLORENZ3D3
+	    || gManp->type == FPLORENZ3D4 || gManp->type == FPROSSLER || gManp->type == IFS)
 	    {
-	    x_rot = 60.0;
-	    y_rot = 30.0;
-	    z_rot = 0.0;
+	    gManp->x_rot = 60.0;
+	    gManp->y_rot = 30.0;
+	    gManp->z_rot = 0.0;
 	    }
-	else if (type == KAM3DFP) 
+	else if (gManp->type == KAM3DFP)
 	    {
-	    x_rot = 30.0;
-	    y_rot = 15.0;
-	    z_rot = 0.0;
+	    gManp->x_rot = 30.0;
+	    gManp->y_rot = 15.0;
+	    gManp->z_rot = 0.0;
 	    }
-	else if (type == SURFACES) 
+	else if (gManp->type == SURFACES)
 	    {
-	    x_rot = -20.0;
-	    y_rot = 15.0;
-	    z_rot = 0.0;
+	    gManp->x_rot = -20.0;
+	    gManp->y_rot = 15.0;
+	    gManp->z_rot = 0.0;
 	    }
 	else 
 	    {
-	    x_rot = 10.0;
-	    y_rot = 5.0;
-	    z_rot = 0.0;
+	    gManp->x_rot = 10.0;
+	    gManp->y_rot = 5.0;
+	    gManp->z_rot = 0.0;
 	    }
 
-	if (type == KAM3DFP || type == KAMFP || type == IFS)
-	    threshold = 1000L;
-	switch (type)					// further subtypes?
+	if (gManp->type == KAM3DFP || gManp->type == KAMFP || gManp->type == IFS)
+	    gManp->threshold = 1000L;
+	switch (gManp->type)					// further subtypes?
 	    {
 	    case LSYSTEM:					// LSystem Fractal
 		if (LsysFileOpenDlg (hwnd, LSYSFile, szTitleName) < 0)
 		    return FALSE;
 		if (load_lsystems(hwnd, LSYSFile) >= 0)
 		    {
-		    type = LSYSTEM;
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
+		    gManp->type = LSYSTEM;
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
 		    }
 		else
 		    return FALSE;
@@ -1885,18 +1696,18 @@ BOOL	InitNewFractal(HWND hwnd)
 		break;                 
 	    case FORMULA:					// Formula Fractal
 	    case FFORMULA:
-		type = FORMULA;
+		gManp->type = FORMULA;
 		if (FormulaFileOpenDlg (hwnd, FRMFile, szTitleName) < 0)
 		    return FALSE;
 		if (get_formula_names(hwnd, FRMFile) < 0)
 		    return FALSE;
 		if (DialogBox (hInst, "SelectFractal", hwnd, SelectFractal))
 		    {
-		    InitFract(type);
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
-		    if (DialogBox (hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
+		    gManp->InitFract(gManp->type);
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
+		    if (DialogBox (hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    if (!fpFormulaSetup(FRMFile))
 			return FALSE;
@@ -1907,100 +1718,100 @@ BOOL	InitNewFractal(HWND hwnd)
 	    case SCREENFORMULA:					// On screen Formula Fractal
 		if (DialogBox (hInst, "ScrnFormDlg", hwnd, ScrnFormDlg))
 		    {
-		    InitFract(type);
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
-		    if (DialogBox (hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
+		    gManp->InitFract(gManp->type);
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
+		    if (DialogBox (hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
-		    if (ProcessFormulaString(FormulaString) == -1)
+		    if (ProcessFormulaString(gManp->FormulaString) == -1)
 			return FALSE;
 		    }
 		else
 		    return FALSE;
 		break;                 
 	    case TIERAZON:					// Generic Tierazon Fractal
-		type = TIERAZON;
+		gManp->type = TIERAZON;
 		setup_Tierazon();				// count number of Tierazon fractals in database
 		if (DialogBox (hInst, "SelectTierazonDlg", hwnd, SelectTierazonDlg) == FALSE)
 		    return FALSE;
 		else
 		    {
-		    InitFract(type);
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
+		    gManp->InitFract(gManp->type);
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
 		    LoadTierazonParams();			// get parameters  and other subtype specific stuff from Tierazon database 
-		    if (DialogBox (hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
+		    if (DialogBox (hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    }
 		break;                 
 	    case MANDELDERIVATIVES:				// Generic Mandelbrot Derivatives Fractal
-		type = MANDELDERIVATIVES;
+		gManp->type = MANDELDERIVATIVES;
 		setup_MandelDeriv();				// count number of Madelbrot derivatives in database
 		if (DialogBox(hInst, "SelectTierazonDlg", hwnd, SelectMandelDerivDlg) == FALSE)
 		    return FALSE;
 		else
 		    {
-		    InitFract(type);
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
+		    gManp->InitFract(gManp->type);
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
 		    LoadMandelDerivParams();			// get parameters  and other subtype specific stuff from Mandelbrot Derivatives database 
-		    if (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
+		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    }
 		break;
 	    case SLOPEDERIVATIVE:				// Generic Mandelbrot Derivatives Fractal
-		type = SLOPEDERIVATIVE;
+		gManp->type = SLOPEDERIVATIVE;
 		setup_SlopeDeriv();				// count number of Madelbrot derivatives in database
 		if (DialogBox(hInst, "SelectTierazonDlg", hwnd, SelectSlopeDerivDlg) == FALSE)
 		    return FALSE;
 		else
 		    {
-		    InitFract(type);
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
+		    gManp->InitFract(gManp->type);
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
 		    LoadSlopeDerivParams();			// get parameters  and other subtype specific stuff from Slope Derivative database 
-		    if (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
+		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    }
 		break;
 	    case SLOPEFORWARDDIFF:				// Generic Mandelbrot Forward Differencing Fractal
-		type = SLOPEFORWARDDIFF;
+		gManp->type = SLOPEFORWARDDIFF;
 		setup_SlopeFwdDiff();				// count number of Madelbrot derivatives in database
 		if (DialogBox(hInst, "SelectTierazonDlg", hwnd, SelectSlopeFwdDiffDlg) == FALSE)
 		    return FALSE;
 		else
 		    {
-		    InitFract(type);
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
+		    gManp->InitFract(gManp->type);
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
 		    LoadSlopeFwdDiffParams();			// get parameters  and other subtype specific stuff from Forward Differencing database 
-		    if (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
+		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    }
 		break;
 	    case PERTURBATION:					// fractals calculated using perturbation
-		type = PERTURBATION;
+		gManp->type = PERTURBATION;
 		setup_Perturbation();				// count number of perturbation fractals in database
 		if (DialogBox(hInst, "SelectTierazonDlg", hwnd, SelectPertDlg) == FALSE)
 		    return FALSE;
 		else
 		    {
-		    InitFract(type);
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
+		    gManp->InitFract(gManp->type);
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
 		    LoadPerturbationParams();			// get parameters and other subtype specific stuff from Perturbation database 
-		    if (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
+		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    }
 		break;
 	    case OSCILLATORS:					// Generic Oscillator Fractal
-		type = OSCILLATORS;
+		gManp->type = OSCILLATORS;
 		DisplayAxes = FALSE;
 		PlotCentre = FALSE;
 		setup_Oscillator();				// count number of Oscillator fractals in database
@@ -2009,16 +1820,16 @@ BOOL	InitNewFractal(HWND hwnd)
 		else
 		    {
 		    LoadParams();			// get parameters  and other subtype specific stuff from Oscillator database 
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
-		    if (DialogBox (hInst, OscillatorSpecific[subtype].DialogueName, hwnd, OscillatorSpecific[subtype].DialogueType) == FALSE)
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
+		    if (DialogBox (hInst, OscillatorSpecific[gManp->subtype].DialogueName, hwnd, OscillatorSpecific[gManp->subtype].DialogueType) == FALSE)
 			return FALSE;
 		    }
 		InitTrueColourPalette(FALSE);
 		break;                 
 	    case FRACTALMAPS:					// Generic Fractal Map
-		type = FRACTALMAPS;
+		gManp->type = FRACTALMAPS;
 		DisplayAxes = FALSE;
 		PlotCentre = FALSE;
 		setup_FractalMaps();				// count number of fractal maps in database
@@ -2027,16 +1838,16 @@ BOOL	InitNewFractal(HWND hwnd)
 		else
 		    {
 		    LoadParams();			// get parameters  and other subtype specific stuff from Fractal Map database 
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
-		    if (DialogBox(hInst, FractalMapSpecific[subtype].DialogueName, hwnd, FractalMapSpecific[subtype].DialogueType) == FALSE)
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
+		    if (DialogBox(hInst, FractalMapSpecific[gManp->subtype].DialogueName, hwnd, FractalMapSpecific[gManp->subtype].DialogueType) == FALSE)
 			return FALSE;
 		    }
 		InitTrueColourPalette(FALSE);
 		break;
 	    case SPROTTMAPS:					// Generic Fractal Map
-		type = SPROTTMAPS;
+		gManp->type = SPROTTMAPS;
 		DisplayAxes = FALSE;
 		PlotCentre = FALSE;
 		setup_SprottMaps();				// count number of fractal maps in database
@@ -2045,16 +1856,16 @@ BOOL	InitNewFractal(HWND hwnd)
 		else
 		    {
 		    LoadParams();			// get parameters  and other subtype specific stuff from Fractal Map database 
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
-		    if (DialogBox(hInst, SprottMapSpecific[subtype].DialogueName, hwnd, SprottMapSpecific[subtype].DialogueType) == FALSE)
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
+		    if (DialogBox(hInst, SprottMapSpecific[gManp->subtype].DialogueName, hwnd, SprottMapSpecific[gManp->subtype].DialogueType) == FALSE)
 			return FALSE;
 		    }
 		InitTrueColourPalette(FALSE);
 		break;
 	    case SURFACES:					// Generic Fractal Map
-		type = SURFACES;
+		gManp->type = SURFACES;
 		DisplayAxes = FALSE;
 		PlotCentre = FALSE;
 		setup_Surface();				// count number of surfaces in database
@@ -2063,16 +1874,16 @@ BOOL	InitNewFractal(HWND hwnd)
 		else
 		    {
 		    LoadParams();			// get parameters  and other subtype specific stuff from Surface database 
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
-		    if (DialogBox (hInst, SurfaceSpecific[subtype].DialogueName, hwnd, SurfaceSpecific[subtype].DialogueType) == FALSE)
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
+		    if (DialogBox (hInst, SurfaceSpecific[gManp->subtype].DialogueName, hwnd, SurfaceSpecific[gManp->subtype].DialogueType) == FALSE)
 			return FALSE;
 		    }
 		InitTrueColourPalette(FALSE);
 		break;                 
 	    case KNOTS:					// Generic Fractal Map
-		type = KNOTS;
+		gManp->type = KNOTS;
 		DisplayAxes = FALSE;
 		PlotCentre = FALSE;
 		setup_Knot();				// count number of surfaces in database
@@ -2081,16 +1892,16 @@ BOOL	InitNewFractal(HWND hwnd)
 		else
 		    {
 		    LoadParams();			// get parameters  and other subtype specific stuff from Knot database 
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
-		    if (DialogBox (hInst, SurfaceSpecific[subtype].DialogueName, hwnd, KnotSpecific[subtype].DialogueType) == FALSE)
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
+		    if (DialogBox (hInst, SurfaceSpecific[gManp->subtype].DialogueName, hwnd, KnotSpecific[gManp->subtype].DialogueType) == FALSE)
 			return FALSE;
 		    }
 		InitTrueColourPalette(FALSE);
 		break;                 
 	    case CURVES:					// Generic Fractal Map
-		type = CURVES;
+		gManp->type = CURVES;
 		DisplayAxes = FALSE;
 		PlotCentre = FALSE;
 		setup_Curve();				// count number of surfaces in database
@@ -2099,10 +1910,10 @@ BOOL	InitNewFractal(HWND hwnd)
 		else
 		    {
 		    LoadParams();			// get parameters  and other subtype specific stuff from Curves database 
-		    time_to_reinit = FALSE;
-		    time_to_restart = TRUE;
-		    time_to_load = FALSE;
-		    if (DialogBox (hInst, SurfaceSpecific[subtype].DialogueName, hwnd, CurveSpecific[subtype].DialogueType) == FALSE)
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
+		    if (DialogBox (hInst, SurfaceSpecific[gManp->subtype].DialogueName, hwnd, CurveSpecific[gManp->subtype].DialogueType) == FALSE)
 			return FALSE;
 		    }
 		InitTrueColourPalette(FALSE);
@@ -2110,7 +1921,7 @@ BOOL	InitNewFractal(HWND hwnd)
 	    case FRACTPAR:					// Fractint Par File
 		if (FractintParFileOpenDlg (hwnd, FracPARFile, szTitleName) < 0)
 		    return FALSE;
-		setup_defaults();
+		gManp->setup_defaults();
 		if (load_par(hwnd, FracPARFile) < 0)
 		    return FALSE;
 		WasFractPar = TRUE;
@@ -2118,9 +1929,9 @@ BOOL	InitNewFractal(HWND hwnd)
 		    return FALSE;
 		if (FractintPar(hwnd, FracPARFile) < 0)	// Fractint Par fractals 
 		    return FALSE;
-		time_to_reinit = FALSE;
-		time_to_restart = TRUE;
-		time_to_load = FALSE;
+		gManp->time_to_reinit = FALSE;
+		gManp->time_to_restart = TRUE;
+		gManp->time_to_load = FALSE;
 		break;                 
 	    case IFS:					// Iterated File Systems Fractal
 		if (IFSFileOpenDlg (hwnd, IFSFile, szTitleName) < 0)
@@ -2131,14 +1942,14 @@ BOOL	InitNewFractal(HWND hwnd)
 		    {
 		    if (ifsload(hwnd, IFSFile) >= 0)
 			{
-			time_to_reinit = FALSE;
-			time_to_restart = TRUE;
-			time_to_load = FALSE;
+			gManp->time_to_reinit = FALSE;
+			gManp->time_to_restart = TRUE;
+			gManp->time_to_load = FALSE;
 //			hor = -6.0;
-			hor = (ifs_type == 0) ? -12.0 : -6.0;
+			gManp->hor = (ifs_type == 0) ? -12.0 : -6.0;
 //			vert = (ifs_type == 0) ? -8.0 : -4.0;
-			vert = -4.0;
-			mandel_width = (ifs_type == 0) ? 16.0 : 8.0;
+			gManp->vert = -4.0;
+			gManp->mandel_width = (ifs_type == 0) ? 16.0 : 8.0;
 			}
 		    }
 		else
@@ -2146,26 +1957,26 @@ BOOL	InitNewFractal(HWND hwnd)
 		break;      
 	    case BUDDHABROT:
 		InitMultipliers();
-		InitFract(type);
+		gManp->InitFract(gManp->type);
 		if (DialogBox(hInst, fractalspecific[BUDDHABROT].DialogueName, hwnd, fractalspecific[BUDDHABROT].DialogueType) == FALSE)
 		    return FALSE;
 		InitTrueColourPalette(FALSE);
-		hor = fractalspecific[BUDDHABROT].hor;
-		vert = fractalspecific[BUDDHABROT].vert;
-		mandel_width = fractalspecific[BUDDHABROT].width;
+		gManp->hor = fractalspecific[BUDDHABROT].hor;
+		gManp->vert = fractalspecific[BUDDHABROT].vert;
+		gManp->mandel_width = fractalspecific[BUDDHABROT].width;
 		break;
 	    case NEWTON:
 	    case NEWTBASIN:
-		juliaflag = (fractalspecific[type].juliaflag);		// default view is of julia Newton
+		gManp->juliaflag = (fractalspecific[gManp->type].juliaflag);		// default view is of julia Newton
 		// fall through (no break;)
 	    default:
-		InitFract(type);
-		if (DialogBox (hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
+		gManp->InitFract(gManp->type);
+		if (DialogBox (hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 		    return FALSE;
 		InitTrueColourPalette(FALSE);
-		hor = fractalspecific[type].hor;
-		vert = fractalspecific[type].vert;
-		mandel_width = fractalspecific[type].width;
+		gManp->hor = fractalspecific[gManp->type].hor;
+		gManp->vert = fractalspecific[gManp->type].vert;
+		gManp->mandel_width = fractalspecific[gManp->type].width;
 		break;                           
 	    }
 	return TRUE;
@@ -2174,71 +1985,160 @@ BOOL	InitNewFractal(HWND hwnd)
     }
      
 /*-----------------------------------------------------------
+    Toggle between Mandelbrot and Julia implementation 
+  -----------------------------------------------------------*/
+
+void	CManp::ToggleJulia(HWND hwnd, POINTS &CursorLocShort)
+    {
+    double	temp_1 = 0.0;
+    double	temp_2 = 0.0;
+    if (juliaflag)
+	{
+	if (BigNumFlag)
+	    {
+	    temp_1 = (double)mpfr_get_d(BigHor.x, MPFR_RNDN);
+	    temp_2 = (double)mpfr_get_d(BigWidth.x, MPFR_RNDN);
+	    j.x = temp_1 + (temp_2 * (double)xdots / (double)ydots) / 2.0;
+	    temp_1 = (double)mpfr_get_d(BigVert.x, MPFR_RNDN);
+	    j.y = temp_1 + temp_2 / 2.0;
+	    Big_oldhor = BigHor;
+	    Big_oldvert = BigVert;
+	    Big_oldwidth = BigWidth;
+	    if (AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
+		{
+		BigWidth = 4.0;
+		BigVert = -2.0;
+		BigHor = BigVert * AspectRatio;
+		}
+	    else
+		{
+		BigWidth = 4.0 / AspectRatio;
+		BigHor = -2.0;
+		BigVert = BigHor / AspectRatio;
+		}
+	    }
+	else
+	    {
+	    if (RealTimeJuliaFlag)
+		j = q;
+	    else
+		{
+		j.x = hor + (mandel_width * (double)xdots / (double)ydots) / 2.0;
+		j.y = vert + mandel_width / 2.0;
+		}
+	    oldhor = hor;		// store values during julia transformations
+	    oldvert = vert;
+	    oldwidth = mandel_width;
+	    if (AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
+		{
+		mandel_width = 4.0;
+		vert = -2.0;
+		hor = vert * AspectRatio;
+		}
+	    else
+		{
+		mandel_width = 4.0 / AspectRatio;
+		hor = -2.0;
+		vert = hor / AspectRatio;
+		}
+	    }
+	}
+    else
+	{
+	if (oldwidth == 0.0)	// we have not done any Mandelbrot yet
+	    {
+	    oldwidth = 4.0;
+	    oldvert = j.y - oldwidth / 2.0;
+	    oldhor = j.x - (oldwidth * (double)xdots / (double)ydots) / 2.0;
+	    }
+	if (BigNumFlag)
+	    {
+	    BigHor = Big_oldhor;
+	    BigVert = Big_oldvert;
+	    BigWidth = Big_oldwidth;
+	    }
+	else
+	    {
+	    hor = oldhor;
+	    vert = oldvert;
+	    mandel_width = oldwidth;
+	    }
+	if (RealTimeJuliaFlag)
+	    {
+	    InitRTJulia(hwnd);
+	    FindCursorRealPos(&CursorLocShort);
+	    if (DrawJulia(hwnd, CursorLocShort) < 0)
+		RealTimeJuliaFlag = FALSE;
+	    }
+	}
+    time_to_restart = TRUE;
+    }
+
+/*-----------------------------------------------------------
     Update Fractal info when existing fractal selected
   -----------------------------------------------------------*/
 
-    BOOL    UpdateFractal(HWND hwnd)
+BOOL    UpdateFractal(HWND hwnd)
+    {
+    switch (gManp->type)					// further subtypes?
 	{
-	switch (type)					// further subtypes?
-	    {
-	    case LSYSTEM:					// LSystem Fractal
-		DialogBox(hInst, "LSystemDlg", hwnd, LSystemDlg);
-		break;
-	    case FORMULA:					// Formula Fractal
-		time_to_reinit = FALSE;
-		time_to_restart = TRUE;
-		time_to_load = FALSE;
-		if (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
-		    return FALSE;
-		return (fpFormulaSetup(FRMFile));
-	    case SCREENFORMULA:					// On screen Formula Fractal
-		if (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == FALSE)
-		    return FALSE;
-		return !(ProcessFormulaString(FormulaString) == -1);
-	    case TIERAZON:					// Generic Tierazon Fractal
-		return (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == TRUE);
-	    case OSCILLATORS:					// Generic Oscillator Fractal
-		MaxDimensions = OscillatorSpecific[subtype].MaxDimensions;
-		return (DialogBox(hInst, OscillatorSpecific[subtype].DialogueName, hwnd, OscillatorSpecific[subtype].DialogueType) == TRUE);
-	    case FRACTALMAPS:					// Generic Fractal Map
-		MaxDimensions = FractalMapSpecific[subtype].MaxDimensions;
-		return (DialogBox(hInst, FractalMapSpecific[subtype].DialogueName, hwnd, FractalMapSpecific[subtype].DialogueType) == TRUE);
-	    case SPROTTMAPS:					// Generic Sprott Fractal Map
-		MaxDimensions = SprottMapSpecific[subtype].MaxDimensions;
-		return (DialogBox(hInst, SprottMapSpecific[subtype].DialogueName, hwnd, SprottMapSpecific[subtype].DialogueType) == TRUE);
-	    case SURFACES:					// Generic Fractal Map
-		MaxDimensions = SurfaceSpecific[subtype].MaxDimensions;
-		return (DialogBox(hInst, SurfaceSpecific[subtype].DialogueName, hwnd, SurfaceSpecific[subtype].DialogueType) == TRUE);
-	    case KNOTS:					// Generic Fractal Map
-		MaxDimensions = KnotSpecific[subtype].MaxDimensions;
-		return (DialogBox(hInst, SurfaceSpecific[subtype].DialogueName, hwnd, KnotSpecific[subtype].DialogueType) == TRUE);
-	    case CURVES:					// Generic Fractal Map
-		MaxDimensions = CurveSpecific[subtype].MaxDimensions;
-		return (DialogBox(hInst, SurfaceSpecific[subtype].DialogueName, hwnd, CurveSpecific[subtype].DialogueType) == TRUE);
-	    case PERTURBATION:					// Generic Perturbation Fractal
-		Fractal.NumParam = PerturbationSpecific[subtype].numparams;	// we need to know how many params to load
-		return (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == TRUE);
-	    default:
-		return (DialogBox(hInst, fractalspecific[type].DialogueName, hwnd, fractalspecific[type].DialogueType) == TRUE);
-	    }
-	return FALSE;
+	case LSYSTEM:					// LSystem Fractal
+	    DialogBox(hInst, "LSystemDlg", hwnd, LSystemDlg);
+	    break;
+	case FORMULA:					// Formula Fractal
+	    gManp->time_to_reinit = FALSE;
+	    gManp->time_to_restart = TRUE;
+	    gManp->time_to_load = FALSE;
+	    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
+		return FALSE;
+	    return (fpFormulaSetup(FRMFile));
+	case SCREENFORMULA:					// On screen Formula Fractal
+	    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
+		return FALSE;
+	    return !(ProcessFormulaString(gManp->FormulaString) == -1);
+	case TIERAZON:					// Generic Tierazon Fractal
+	    return (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == TRUE);
+	case OSCILLATORS:					// Generic Oscillator Fractal
+	    gManp->MaxDimensions = OscillatorSpecific[gManp->subtype].MaxDimensions;
+	    return (DialogBox(hInst, OscillatorSpecific[gManp->subtype].DialogueName, hwnd, OscillatorSpecific[gManp->subtype].DialogueType) == TRUE);
+	case FRACTALMAPS:					// Generic Fractal Map
+	    gManp->MaxDimensions = FractalMapSpecific[gManp->subtype].MaxDimensions;
+	    return (DialogBox(hInst, FractalMapSpecific[gManp->subtype].DialogueName, hwnd, FractalMapSpecific[gManp->subtype].DialogueType) == TRUE);
+	case SPROTTMAPS:					// Generic Sprott Fractal Map
+	    gManp->MaxDimensions = SprottMapSpecific[gManp->subtype].MaxDimensions;
+	    return (DialogBox(hInst, SprottMapSpecific[gManp->subtype].DialogueName, hwnd, SprottMapSpecific[gManp->subtype].DialogueType) == TRUE);
+	case SURFACES:					// Generic Fractal Map
+	    gManp->MaxDimensions = SurfaceSpecific[gManp->subtype].MaxDimensions;
+	    return (DialogBox(hInst, SurfaceSpecific[gManp->subtype].DialogueName, hwnd, SurfaceSpecific[gManp->subtype].DialogueType) == TRUE);
+	case KNOTS:					// Generic Fractal Map
+	    gManp->MaxDimensions = KnotSpecific[gManp->subtype].MaxDimensions;
+	    return (DialogBox(hInst, SurfaceSpecific[gManp->subtype].DialogueName, hwnd, KnotSpecific[gManp->subtype].DialogueType) == TRUE);
+	case CURVES:					// Generic Fractal Map
+	    gManp->MaxDimensions = CurveSpecific[gManp->subtype].MaxDimensions;
+	    return (DialogBox(hInst, SurfaceSpecific[gManp->subtype].DialogueName, hwnd, CurveSpecific[gManp->subtype].DialogueType) == TRUE);
+	case PERTURBATION:					// Generic Perturbation Fractal
+	    gManp->Fractal.NumParam = PerturbationSpecific[gManp->subtype].numparams;	// we need to know how many params to load
+	    return (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == TRUE);
+	default:
+	    return (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == TRUE);
 	}
+    return FALSE;
+    }
 
-    /*-----------------------------------------
-	Parse Command Line
-  -----------------------------------------*/
+/*-----------------------------------------
+    Parse Command Line
+-----------------------------------------*/
 
 int	CopyArgument(HWND hwnd, char *FileName, char *CommandStr)
-
     {
     char	*p, *q;
     char	*token;
     char	seps[]   = "-/";
     char	ParameterString[MAXDATALINE];
 
-    BatchFlag = FALSE;
-    AutoExitFlag = FALSE;
-    AutoSaveFlag = FALSE;
+    gManp->BatchFlag = FALSE;
+    gManp->AutoExitFlag = FALSE;
+    gManp->AutoSaveFlag = FALSE;
 
     if (*CommandStr == '\0')		// nothing to parse
 	return 0;
@@ -2246,9 +2146,9 @@ int	CopyArgument(HWND hwnd, char *FileName, char *CommandStr)
     if (*CommandStr == '-' || *CommandStr == '/')	// must be a command line with no par file
 	{
 	*szSaveFileName = '\0';		// initialise
-	CommandLineFile = FALSE;
-	AutoStartFlag = TRUE;
-	BatchFlag = TRUE;
+	gManp->CommandLineFile = FALSE;
+	gManp->AutoStartFlag = TRUE;
+	gManp->BatchFlag = TRUE;
 	GetParamData(hwnd, "null", ParameterString, szSaveFileName, FALSE);  
 	InitTrueColourPalette(FALSE);
 	}
@@ -2270,22 +2170,22 @@ int	CopyArgument(HWND hwnd, char *FileName, char *CommandStr)
 	    q++;
 	    }
 	trailing(FileName);
-	CommandLineFile = TRUE;
-	AutoStartFlag = TRUE;
+	gManp->CommandLineFile = TRUE;
+	gManp->AutoStartFlag = TRUE;
 	token = strtok(CommandStr, seps);
 	while (token != NULL)
 	    {
 	    if (toupper(*token) == 'S')		// outputfilename 
 		{
-		AutoSaveFlag = TRUE;
+		gManp->AutoSaveFlag = TRUE;
 		SAFE_SPRINTF(szSaveFileName, "%s", token + 1);
 		}
 	    else if (toupper(*token) == 'E')	// Exit after completion
-		AutoExitFlag = TRUE;
+		gManp->AutoExitFlag = TRUE;
 	    token = strtok(NULL, seps);
 	    }
 
-	BatchFlag = TRUE;
+	gManp->BatchFlag = TRUE;
 	GetParam(hwnd, FileName, szSaveFileName);
 	InitTrueColourPalette(FALSE);
 	}
@@ -2311,10 +2211,10 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-		cycleflag = FALSE;
+	        gManp->cycleflag = FALSE;
 		GetCursorPos(&CursorLocLong);
 		SAFE_SPRINTF(PixelLoc, "%ld, %ld", CursorLocLong.x, CursorLocLong.y);
-		SAFE_SPRINTF(JuliaLoc, "%14.14f, %14.14f", q.x, q.y);
+		SAFE_SPRINTF(JuliaLoc, "%14.14f, %14.14f", gManp->q.x, gManp->q.y);
 		SetDlgItemText(hDlg, IDC_PIXEL, PixelLoc);
 		SetDlgItemText(hDlg, IDC_JULIALOC, JuliaLoc);
 	        return TRUE ;
@@ -2337,8 +2237,8 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
     double  x, y;
     char    s[MAXLINE];
 
-    x = ((double)ptCurrent.x/(double)xdots) * mandel_width * ScreenRatio + hor;
-    y = ((double)(ydots - ptCurrent.y)/(double)ydots) * mandel_width + vert;
+    x = ((double)ptCurrent.x/(double)gManp->xdots) * gManp->mandel_width * gManp->AspectRatio + gManp->hor;
+    y = ((double)(gManp->ydots - ptCurrent.y)/(double)gManp->ydots) * gManp->mandel_width + gManp->vert;
     SAFE_SPRINTF(s, "x=<%lf>,y=<%lf>", x, y);
     SetWindowText (hwnd, s);
     }
@@ -2382,16 +2282,16 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 
     StatusString[0] = '\0';
     StringBuilder sb(StatusString, SIZEOF_BF_VARS * 4);
-    if (BigNumFlag)
+    if (gManp->BigNumFlag)
 	{
-	Big_centrex = BigHor + (BigWidth * (ScreenRatio / 2.0));
-	Big_centrey = BigVert + (BigWidth / 2.0);
+	Big_centrex = gManp->BigHor + (gManp->BigWidth * (gManp->AspectRatio / 2.0));
+	Big_centrey = gManp->BigVert + (gManp->BigWidth / 2.0);
 	s1 = new char[SIZEOF_BF_VARS];
 	s2 = new char[SIZEOF_BF_VARS];
 	s3 = new char[SIZEOF_BF_VARS];
-	BigHor.ToString(s1, SIZEOF_BF_VARS, false);
-	BigVert.ToString(s2, SIZEOF_BF_VARS, false);
-	BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
+	gManp->BigHor.ToString(s1, SIZEOF_BF_VARS, false);
+	gManp->BigVert.ToString(s2, SIZEOF_BF_VARS, false);
+	gManp->BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
 	//	ConvertBignum2String(s1, Big_centrex.x);
 	//	ConvertBignum2String(s2, Big_centrey.x);
 	//	mpfr_sprintf(s3, "%.20Re", BigWidth.x);
@@ -2403,14 +2303,14 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	}
     else
 	{
-	centrex = hor + (mandel_width * (ScreenRatio / 2.0));
-	centrey = vert + (mandel_width / 2.0);
-	if (mandel_width > 0.000001)
-	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %14.14f\r\nY = %14.14f\r\nWidth = %14.14f", centrex, centrey, mandel_width);
+	centrex = gManp->hor + (gManp->mandel_width * (gManp->AspectRatio / 2.0));
+	centrey = gManp->vert + (gManp->mandel_width / 2.0);
+	if (gManp->mandel_width > 0.000001)
+	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %14.14f\r\nY = %14.14f\r\nWidth = %14.14f", centrex, centrey, gManp->mandel_width);
 	else
-	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %14.14f\r\nY = %14.14f\r\nWidth = %14e", centrex, centrey, mandel_width);
+	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %14.14f\r\nY = %14.14f\r\nWidth = %14e", centrex, centrey, gManp->mandel_width);
 	}
-    switch (calcmode)
+    switch (gManp->calcmode)
 	{
 	case 'B':
 	case 'T':
@@ -2421,108 +2321,108 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	case 'G':
 	case 'V':
 	case 'H':
-	    _snprintf_s(PassStr, GENERALFIELDLENGTH, _TRUNCATE, "Pass %d of %d", curpass, totpasses);
+	    _snprintf_s(PassStr, GENERALFIELDLENGTH, _TRUNCATE, "Pass %d of %d", gManp->curpass, gManp->totpasses);
 	    break;
 	    //	default:
 	    //	    SAFE_SPRINTF(PassStr, "Pass %d of %d", curpass, totpasses); 
 	    //	    break;
 	}
-    _snprintf_s(FinishedStr, GENERALFIELDLENGTH, _TRUNCATE, "%s", (finished) ? ", Image Complete" : " ");
-    if (BigNumFlag)	    // now we have double double and quad double...
+    _snprintf_s(FinishedStr, GENERALFIELDLENGTH, _TRUNCATE, "%s", (gManp->finished) ? ", Image Complete" : " ");
+    if (gManp->BigNumFlag)	    // now we have double double and quad double...
 	{
-	if (precision <= DDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
-	    _snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "DD Prec: %d", precision);
-	else if (precision <= QDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
-	    _snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "QD Prec: %d", precision);
+	if (gManp->precision <= DDPRECISION && fractalspecific[gManp->type].flags & USEDOUBLEDOUBLE)
+	    _snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "DD Prec: %d", gManp->precision);
+	else if (gManp->precision <= QDPRECISION && fractalspecific[gManp->type].flags & USEDOUBLEDOUBLE)
+	    _snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "QD Prec: %d", gManp->precision);
 	else
 	    {
-	    if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
-		_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "QD Prec: %d", precision);
+	    if (fractalspecific[gManp->type].flags & FRACTINTINPIXEL || fractalspecific[gManp->type].flags & TRIGINPIXEL)    // Bignum versions not yet available
+		_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "QD Prec: %d", gManp->precision);
 	    else
-		_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Arb Prec: %d", precision);
+		_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Arb Prec: %d", gManp->precision);
 	    }
 	}
     else
-	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Floating Point: %d", precision);
+	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Floating Point: %d", gManp->precision);
 
-    if (type == PERTURBATION)
-	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s-%s, Subtype = %d", (EnableApproximation) ? "(Pert-BLA)" : "(Pert)", GetFractalName(), subtype);
-    else if (type == SLOPEDERIVATIVE)
-	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: (Slope Der)-%s, Subtype = %d", GetFractalName(), subtype);
-    else if (type == SLOPEFORWARDDIFF)
-	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: (Slope Fwd)-%s, Subtype = %d", GetFractalName(), subtype);
-    else if (type == SCREENFORMULA || type == FORMULA || type == FFORMULA)
-	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Formula = <%s>\r\n", FormulaString);
-    else if (type == LSYSTEM || type == FRACTPAR || type == IFS)
-	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Sub=%s", GetFractalName(), lsys_type);
-    else if (type == TIERAZON || type == CROSSROADS || type == ZIGZAG || type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
-	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Sub=%d", GetFractalName(), subtype);
-    else if (type == CUBIC)
+    if (gManp->type == PERTURBATION)
+	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s-%s, Subtype = %d", (&gManp->EnableApproximation) ? "(Pert-BLA)" : "(Pert)", gManp->GetFractalName(), gManp->subtype);
+    else if (gManp->type == SLOPEDERIVATIVE)
+	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: (Slope Der)-%s, Subtype = %d", gManp->GetFractalName(), gManp->subtype);
+    else if (gManp->type == SLOPEFORWARDDIFF)
+	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: (Slope Fwd)-%s, Subtype = %d", gManp->GetFractalName(), gManp->subtype);
+    else if (gManp->type == SCREENFORMULA || gManp->type == FORMULA || gManp->type == FFORMULA)
+	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Formula = <%s>\r\n", gManp->FormulaString);
+    else if (gManp->type == LSYSTEM || gManp->type == FRACTPAR || gManp->type == IFS)
+	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Sub=%s", gManp->GetFractalName(), lsys_type);
+    else if (gManp->type == TIERAZON || gManp->type == CROSSROADS || gManp->type == ZIGZAG || gManp->type == OSCILLATORS || gManp->type == FRACTALMAPS || gManp->type == SPROTTMAPS || gManp->type == SURFACES || gManp->type == KNOTS || gManp->type == CURVES)
+	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Sub=%d", gManp->GetFractalName(), gManp->subtype);
+    else if (gManp->type == CUBIC)
 	{
 	char	ch = 0x20;
-	if (subtype == 0)   ch = 'B';
-	if (subtype == 1)   ch = 'C';
-	if (subtype == 2)   ch = 'F';
-	if (subtype == 3)   ch = 'K';
-	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Sub=C%cIN", GetFractalName(), ch);
+	if (gManp->subtype == 0)   ch = 'B';
+	if (gManp->subtype == 1)   ch = 'C';
+	if (gManp->subtype == 2)   ch = 'F';
+	if (gManp->subtype == 3)   ch = 'K';
+	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Sub=C%cIN", gManp->GetFractalName(), ch);
 	}
-    else if (type == MALTHUS || type == TRIANGLES || type == GEOMETRY || type == CIRCLES || type == PASCALTRIANGLE)
-	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Sub=%c", GetFractalName(), subtype);
+    else if (gManp->type == MALTHUS || gManp->type == TRIANGLES || gManp->type == GEOMETRY || gManp->type == CIRCLES || gManp->type == PASCALTRIANGLE)
+	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Sub=%c", gManp->GetFractalName(), gManp->subtype);
     else
-	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Subtype = %d", GetFractalName(), subtype);
+	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Subtype = %d", gManp->GetFractalName(), gManp->subtype);
 
     SAFE_SPRINTF(ParamStr, "Params: ");
     for (int i = 0; i < NUMPARAM; i++)
 	{
-	if ((fabs(param[i]) < 0.00001 || fabs(param[i]) > 100000.0) && param[i] != 0.0)
-	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9e", i, param[i]);
+	if ((fabs(gManp->param[i]) < 0.00001 || fabs(gManp->param[i]) > 100000.0) && gManp->param[i] != 0.0)
+	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9e", i, gManp->param[i]);
 	else
-	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9f", i, param[i]);
+	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9f", i, gManp->param[i]);
 	SAFE_APPEND(ParamStr, PARAMLENGTH, TempStr);
 	}
     sb.append("%s\r\nPixel [%d][%d], %s%s\r\n%s\r\nThreshold: %ld\r\nArith=%s\r\n%s\r\nBailout: %f\r\nImage Size: [%d][%d] ",
-	FractalType, col, row, PassStr, FinishedStr, PositionString, threshold, PrecisionStr, ParamStr, rqlim, xdots, ydots);
-    if (Fractal.NumFunct == 1)
-	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, "\r\nFn = %s", Fractal.Fn1);
-    else if (Fractal.NumFunct == 2 && type != OSCILLATORS)			// we use NumFunct to display dimensions
-	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, "\r\nFn1 = %s,Fn2 = %s", Fractal.Fn1, Fractal.Fn2);
+	FractalType, gManp->col, gManp->row, PassStr, FinishedStr, PositionString, gManp->threshold, PrecisionStr, ParamStr, gManp->rqlim, gManp->xdots, gManp->ydots);
+    if (gManp->Fractal.NumFunct == 1)
+	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, "\r\nFn = %s", gManp->Fractal.Fn1);
+    else if (gManp->Fractal.NumFunct == 2 && gManp->type != OSCILLATORS)			// we use NumFunct to display dimensions
+	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, "\r\nFn1 = %s,Fn2 = %s", gManp->Fractal.Fn1, gManp->Fractal.Fn2);
     else
 	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, " ");
-    if (RotationAngle != 0)
+    if (gManp->RotationAngle != 0)
 	{
-	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nRotation Angle: %d\r\nRotation Centre: %lf, %lf\r\nMagnification: %le", RotationAngle, RotationCentre.x, RotationCentre.y, (BigNumFlag) ? 1.0 / (double)precision : 2.0 / mandel_width);
+	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nRotation Angle: %d\r\nRotation Centre: %lf, %lf\r\nMagnification: %le", gManp->RotationAngle, gManp->RotationCentre.x, gManp->RotationCentre.y, (gManp->BigNumFlag) ? 1.0 / (double)gManp->precision : 2.0 / gManp->mandel_width);
 	sb.append("%s", TempStr);
 	}
 
-    if (juliaflag)
+    if (gManp->juliaflag)
 	{
-	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nJulia: %lf, %lf", j.x, j.y);
+	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nJulia: %lf, %lf", gManp->j.x, gManp->j.y);
 	sb.append("%s", TempStr);
 	}
 
-    if (type == PERTURBATION || type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF)
+    if (gManp->type == PERTURBATION || gManp->type == SLOPEDERIVATIVE || gManp->type == SLOPEFORWARDDIFF)
 	{
 	sb.append("\r\nPerturbation and Slope Parameters-");
-	if (type == SLOPEDERIVATIVE) SlopeType = DERIVSLOPE;
-	if (type == SLOPEFORWARDDIFF) SlopeType = FWDDIFFSLOPE;
-	sb.append("\r\nSlope Type: %d", SlopeType);
-	if (type == PERTURBATION && EnableApproximation)
+	if (gManp->type == SLOPEDERIVATIVE) gManp->SlopeType = DERIVSLOPE;
+	if (gManp->type == SLOPEFORWARDDIFF) gManp->SlopeType = FWDDIFFSLOPE;
+	sb.append("\r\nSlope Type: %d", gManp->SlopeType);
+	if (gManp->type == PERTURBATION && &gManp->EnableApproximation)
 	    sb.append("\r\nPerturbation uses BiLinear Approximation");
-	sb.append("\r\nSlope Shadow Angle: %lf", lightDirectionDegrees);
-	sb.append("\r\nSlope Shadow Strength: %lf", bumpMappingStrength);
-	sb.append("\r\nSlope Shadow Depth: %lf", bumpMappingDepth);
-	sb.append("\r\nPalette Start: %d", PaletteStart);
-	sb.append("\r\nSlope Light Height: %lf", LightHeight);
-	sb.append("\r\nColour Offset: %d", PalOffset);
-	sb.append("\r\nIteration Divisor: %lf", IterDiv);
-	sb.append("\r\nPert Colour Method: %d", PertColourMethod);
+	sb.append("\r\nSlope Shadow Angle: %lf", gManp->lightDirectionDegrees);
+	sb.append("\r\nSlope Shadow Strength: %lf", gManp->bumpMappingStrength);
+	sb.append("\r\nSlope Shadow Depth: %lf", gManp->bumpMappingDepth);
+	sb.append("\r\nPalette Start: %d", gManp->PaletteStart);
+	sb.append("\r\nSlope Light Height: %lf", gManp->LightHeight);
+	sb.append("\r\nColour Offset: %d", gManp->PalOffset);
+	sb.append("\r\nIteration Divisor: %lf", gManp->IterDiv);
+	sb.append("\r\nPert Colour Method: %d", gManp->PertColourMethod);
 	}
-    if (IsPAR)
+    if (gManp->IsPAR)
 	{
 	sb.append("\r\nPAR file=");
 	sb.append("%s", PARFile);
 	}
-    else if (IsKFR)
+    else if (gManp->IsKFR)
 	{
 	sb.append("\r\nKFR file=");
 	sb.append("%s", KFRFile);
@@ -2534,21 +2434,21 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	sb.append("\r\nItemName=");
 	sb.append("%s", lptr[lsys_ptr]);
 	}
-    else if (type == IFS)
+    else if (gManp->type == IFS)
 	{
 	sb.append("\r\nIFS file=");
 	sb.append("%s", IFSFile);
 	sb.append("\r\nItemName=");
 	sb.append("%s", lptr[lsys_ptr]);
 	}
-    else if (type == LSYSTEM)
+    else if (gManp->type == LSYSTEM)
 	{
 	sb.append("\r\nL System file=");
 	sb.append("%s", LSYSFile);
 	sb.append("\r\nItemName=");
 	sb.append("%s", lptr[lsys_ptr]);
 	}
-    else if (type == FORMULA)
+    else if (gManp->type == FORMULA)
 	{
 	sb.append("\r\nFormula file=");
 	sb.append("%s", FRMFile);
@@ -2557,26 +2457,26 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	}
     //    DialogBox(hInst, "StatusInfoDlg", hwnd, StatusInfoDlg);
 //    MessageBox (hwnd, StatusString, fractalspecific[type].name, MB_ICONEXCLAMATION | MB_OK);
-    if (TrueCol.IsMAPFile)
+    if (gManp->TrueCol.IsMAPFile)
 	{
 	sb.append("\r\nMAP file=");
 	sb.append("%s", MAPFile);
 	}
-    if (InsideMethod > NONE || OutsideMethod > NONE)
+    if (gManp->InsideMethod > NONE || gManp->OutsideMethod > NONE)
 	{
-	if (OutsideMethod > TIERAZONCOLOURS)
-	    _snprintf_s(FilterString, GENERALFIELDLENGTH, _TRUNCATE, "\r\nTZColour = %d, ", ColourMethod);
-	else if (OutsideMethod > TIERAZONFILTERS)
-	    _snprintf_s(FilterString, GENERALFIELDLENGTH, _TRUNCATE, "\r\nTZFilter = %d, Fractal Dimension Options = %d, ", FilterType, nFDOption);
-	else if (InsideMethod > NONE)
-	    _snprintf_s(FilterString, GENERALFIELDLENGTH, _TRUNCATE, "\r\nFilter=%d, ", InsideMethod);
+	if (gManp->OutsideMethod > TIERAZONCOLOURS)
+	    _snprintf_s(FilterString, GENERALFIELDLENGTH, _TRUNCATE, "\r\nTZColour = %d, ", gManp->ColourMethod);
+	else if (gManp->OutsideMethod > TIERAZONFILTERS)
+	    _snprintf_s(FilterString, GENERALFIELDLENGTH, _TRUNCATE, "\r\nTZFilter = %d, Fractal Dimension Options = %d, ", gManp->FilterType, gManp->nFDOption);
+	else if (gManp->InsideMethod > NONE)
+	    _snprintf_s(FilterString, GENERALFIELDLENGTH, _TRUNCATE, "\r\nFilter=%d, ", gManp->InsideMethod);
 	else
-	    _snprintf_s(FilterString, GENERALFIELDLENGTH, _TRUNCATE, "\r\nFilter=%d, ", OutsideMethod);
+	    _snprintf_s(FilterString, GENERALFIELDLENGTH, _TRUNCATE, "\r\nFilter=%d, ", gManp->OutsideMethod);
 	sb.append("%s", FilterString);
 	}
-    if (ColourSpeed != 0.0)		// used for colour smoothing
+    if (gManp->ColourSpeed != 0.0)		// used for colour smoothing
 	{
-	_snprintf_s(ColourData, SHORTFIELDLENGTH, _TRUNCATE, "\r\nColour Speed for Smoothing=%lf, ", ColourSpeed);
+	_snprintf_s(ColourData, SHORTFIELDLENGTH, _TRUNCATE, "\r\nColour Speed for Smoothing=%lf, ", gManp->ColourSpeed);
 	sb.append("%s", ColourData);
 	}
 

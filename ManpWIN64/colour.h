@@ -11,6 +11,7 @@
 #define WIN95	
 #endif
 
+
 #define IDC_START_RED	213
 #define IDC_START_BLUE	214
 #define IDC_START_GREEN	215
@@ -69,7 +70,7 @@ class CTrueCol
 	short		InsideRed;			// values for r, g, b channels for inside colour
 	short		InsideGreen;			
 	short		InsideBlue;
-	int			inside_colour;			// normal 'lake' colour
+	int		inside_colour;			// normal 'lake' colour
 	long		ColoursInPALFile;		// How many colours are in a palette file?
 	long		LocalThreshold;
 	long		FinalThreshold;
@@ -80,6 +81,8 @@ class CTrueCol
 	void		FinalisePalette(int level, long threshold);
 	void		ToggleRandomColour(void);
 	void		SetTrueColourPixel(int b, int g, int r, long threshold);
+	void		MovePalette(CTrueCol *TrueCol, int PaletteShift, int threshold);
+
     private:
     };
 

@@ -84,7 +84,7 @@ int	CPixel::InitFunctions(WORD type, Complex *z, Complex *q)
 	    break;
 
 	case CUBIC:					// Art Matrix Cubic
-	    Init_Cubic<Complex>(z, q, param, juliaflag,	subtype, special, a, b, a2, aa3, t2, t3, temp, v);
+	    Init_Cubic<Complex>(z, q, param, juliaflag,	subtype, a, b, a2, aa3, t2, t3, temp, v);
 	    break;
 
 	case SPECIALNEWT:				// Art Matrix Newton
@@ -300,7 +300,7 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	case CUBIC:					// Art Matrix Cubic
 	    return FunctionsDispatch<Complex, double, WORD>(this, type, z, q, degree, sqr, real_imag, a, a2, aa3, b, v,
-		temp, param, SpecialFlag, iteration, special, subtype, BailoutTestType, rqlim);
+		temp, param, SpecialFlag, iteration, SPECIALINDEX, subtype, BailoutTestType, rqlim);
 
 	case SPECIALNEWT:				// Art Matrix Newton
 	    return Iter_SPECIALNEWT<Complex>(

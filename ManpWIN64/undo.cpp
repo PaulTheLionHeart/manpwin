@@ -7,32 +7,27 @@
     (console drivers & serial I/O) is in separate machine libraries.
 */
 
+#include <Windows.h>
 #include "Undo.h"
 #include "BigDouble.h"
+#include "Manp.h"
 
 /**************** Big Number Globals *********************/
 
-extern	int	decimals;
-extern	BYTE	BigNumFlag;		// True if bignum used
-extern	BigDouble   BigHor, BigVert, BigWidth;
+//extern	int	decimals;
+//extern	BYTE	BigNumFlag;		// True if bignum used
 /**************** Big Number Globals *********************/
 
-extern	double	hor;			// horizontal address 
-extern	double	vert;			// vertical address 
-extern	double	mandel_width;		// width of display 
-extern	WORD	type;			// fractal type
+//extern	WORD	type;			// fractal type
 
-extern	void	ConvertString2Bignum(mpfr_t num, char *s);
-//extern	void	ConvertBignum2String(char *s, mpfr_t num);
-
+//extern	void	ConvertString2Bignum(mpfr_t num, char *s);
 struct	UNDO	undo, TempUNDO;
 
 /**************************************************************************
 	Write to Undo Buffer
 **************************************************************************/
 
-void	InitUndo(void)
-
+void	CManp::InitUndo(void)
     {
     undo.BigNumFlag = FALSE;
     undo.hor = hor;
@@ -44,8 +39,7 @@ void	InitUndo(void)
 	Undo
 **************************************************************************/
 
-void	Redo(struct UNDO *u1)
-
+void	CManp::Redo(struct UNDO *u1)
     {
     BigNumFlag = u1->BigNumFlag;
     type = u1->type;
@@ -68,8 +62,7 @@ void	Redo(struct UNDO *u1)
 	Undo
 **************************************************************************/
 
-void	Undo(struct UNDO *u1)
-
+void	CManp::Undo(struct UNDO *u1)
     {
     u1->BigNumFlag = BigNumFlag;
     u1->type = type;
@@ -78,10 +71,6 @@ void	Undo(struct UNDO *u1)
 	BigHor.ToString(u1->UndoBig_hor, SIZEOF_BF_VARS, false);
 	BigVert.ToString(u1->UndoBig_vert, SIZEOF_BF_VARS, false);
 	BigWidth.SafeSprintf(u1->UndoBig_width, SIZEOF_BF_VARS, "%.20Re");
-//	ConvertBignum2String(u1->UndoBig_hor, BigHor.x);
-//	ConvertBignum2String(u1->UndoBig_vert, BigVert.x);
-//	mpfr_sprintf(u1->UndoBig_width, "%.20Re", BigWidth.x);
-//	ConvertBignum2String(u1->UndoBig_width, BigWidth.x);
 	u1->dec = decimals;
 	}
     else
@@ -96,8 +85,7 @@ void	Undo(struct UNDO *u1)
 	Write to Undo Buffer
 **************************************************************************/
 
-void	SaveUndo(BOOL current)
-
+void	CManp::SaveUndo(BOOL current)
     {
     Undo((current) ? &undo : &TempUNDO);
     }
@@ -106,8 +94,7 @@ void	SaveUndo(BOOL current)
 	Read from Undo Buffer
 **************************************************************************/
 
-void	LoadUndo(BOOL UndoFlag)
-
+void	CManp::LoadUndo(BOOL UndoFlag)
     {
     Redo((UndoFlag) ? &TempUNDO : &undo);
     }

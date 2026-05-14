@@ -13,17 +13,8 @@
 
 extern	int	user_data(HWND);
 
-extern	long	threshold;
-extern	int	subtype;		// Q = quad mand, B = bifurcation
-extern	WORD	type;			// M=mand, J=Julia 1,2,4->
-extern	int	row, col;
-extern	int	xdots, ydots;
-extern	CPlot	Plot;			// image plotting routines 
-
-extern	PAINTSTRUCT 	ps;
-extern	HDC		hdcMem;		// load picture into memory
-extern	RECT 		r;
-extern	HWND		PixelHwnd;	// pointer to handle for pixel updating
+//extern	HDC		hdcMem;		// load picture into memory
+//extern	HWND		PixelHwnd;	// pointer to handle for pixel updating
 extern	WORD		delay;
 extern	std::atomic<bool> gStopRequested;	// force early exit
 
@@ -50,30 +41,30 @@ void	PlotSpiral(double angle, int colour)
 
     temp = colour;
 
-    switch (subtype)
+    switch (gManp->subtype)
 	{ 
 	case 'I':				// linear
-	    radius = (double)temp / (double)threshold;
+	    radius = (double)temp / (double)gManp->threshold;
 	    break;
 	case 'L':				// log
-	    radius = log((double)temp) / log((double)threshold);
+	    radius = log((double)temp) / log((double)gManp->threshold);
 	    break;
 	case 'S':				// square
-	    radius = (double)temp * (double)temp / ((double)threshold * (double)threshold);
+	    radius = (double)temp * (double)temp / ((double)gManp->threshold * (double)gManp->threshold);
 	    break;
 	case 'E':				// exponential
-	    radius = (1.0 / ((double)threshold)) / (1.0 / ((double)temp));
+	    radius = (1.0 / ((double)gManp->threshold)) / (1.0 / ((double)temp));
 	    break;
 	case 'R':				// square root
-	    radius = sqrt((double)temp) / sqrt((double)threshold);
+	    radius = sqrt((double)temp) / sqrt((double)gManp->threshold);
 	    break;
 	default:				// uninitialised - assume linear
-	    radius = (double)temp / (double)threshold;
+	    radius = (double)temp / (double)gManp->threshold;
 	    break;
 	}
                             
-    i = (int)(radius * cos(angle / DEG2RAD) * (ydots / 2 - 1)) + xdots / 2;
-    j = (int)(radius * sin(angle / DEG2RAD) * (ydots / 2 - 1)) + ydots / 2;
+    i = (int)(radius * cos(angle / DEG2RAD) * (gManp->ydots / 2 - 1)) + gManp->xdots / 2;
+    j = (int)(radius * sin(angle / DEG2RAD) * (gManp->ydots / 2 - 1)) + gManp->ydots / 2;
     FibArray[colour].x = i;
     FibArray[colour].y = j;
     FibArray[colour].c = colour % 14 + 1;
@@ -105,8 +96,8 @@ int	Spirals(HWND hwnd, WORD order, WORD delay, CPlot Plot)
          
     for (i = 0; i < order; ++i)
 	{
-	for (j = 0; j < threshold / order; ++j)
-	    if ((j + 1) * order + i < threshold)
+	for (j = 0; j < gManp->threshold / order; ++j)
+	    if ((j + 1) * order + i < gManp->threshold)
 		{
 		if (AbortRequested())
 		    return 0;
@@ -141,9 +132,9 @@ int	Fibonacci(void)
     angle = 0.0;
     step = 360.0 * (2.0 - ((sqrt(5.0) + 1.0) / 2.0));		// Golden Mean ratio in degrees
 
-    if (threshold >= FIBMAX)
-	threshold = FIBMAX - 1;
-    for (j = 0; j < threshold; ++j)
+    if (gManp->threshold >= FIBMAX)
+	gManp->threshold = FIBMAX - 1;
+    for (j = 0; j < gManp->threshold; ++j)
 	{
 	if (AbortRequested())
 	    return 0;
@@ -153,14 +144,14 @@ int	Fibonacci(void)
 	PlotSpiral(angle, j);
 	}
 
-    for (j = 0; j < threshold; ++j)
+    for (j = 0; j < gManp->threshold; ++j)
 	{
-	Plot.PlotPoint(FibArray[j].x, FibArray[j].y, FibArray[j].c);
-	if (FibDelay(PixelHwnd, delay) < 0)
+	gManp->Plot.PlotPoint(FibArray[j].x, FibArray[j].y, FibArray[j].c);
+	if (FibDelay(gManp->GlobalHwnd, delay) < 0)
 	    return -1;
 	}
 
-    if (Spirals(PixelHwnd, SpiralNo, delay, Plot) < 0)
+    if (Spirals(gManp->GlobalHwnd, SpiralNo, delay, gManp->Plot) < 0)
 	return -1;
     return 0;
     }                                                 
@@ -184,8 +175,8 @@ INT_PTR CALLBACK FibTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	        temp = subtype;
-	        switch (subtype)
+	        temp = gManp->subtype;
+	        switch (gManp->subtype)
 		    { 
 		    case 'I':
 			tempParam = IDC_LINEAR;
@@ -211,7 +202,7 @@ INT_PTR CALLBACK FibTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 
 //		SetDlgItemInt(hDlg, IDC_FIBSTEPS, FibSteps, TRUE);
 		SetDlgItemInt(hDlg, IDC_FIBTIME, delay, TRUE);
-		SetDlgItemInt(hDlg, IDM_THRESHOLD, threshold, TRUE);
+		SetDlgItemInt(hDlg, IDM_THRESHOLD, gManp->threshold, TRUE);
 		SetDlgItemInt(hDlg, IDC_FIBSPIRALCOUNT, SpiralNo, TRUE);
 		CheckRadioButton(hDlg, IDC_LINEAR, IDC_SQUAREROOT, tempParam);
 		SetFocus(GetDlgItem(hDlg, tempParam));
@@ -270,7 +261,7 @@ INT_PTR CALLBACK FibTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		        return TRUE ;
 
 		    case IDOK:
-			subtype = temp;
+			gManp->subtype = temp;
 /*			
 			if (temp_step < 0)
 			    FibSteps = threshold;
@@ -285,9 +276,9 @@ INT_PTR CALLBACK FibTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 			    SpiralNo = temp_SpiralNo;
 			else
 			    SpiralNo = 55;
-			threshold = temp_threshold;
-			if (threshold >= MAXTHRESHOLD)
-			    threshold = MAXTHRESHOLD;
+			gManp->threshold = temp_threshold;
+			if (gManp->threshold >= MAXTHRESHOLD)
+			    gManp->threshold = MAXTHRESHOLD;
 			EndDialog (hDlg, TRUE);
 			return TRUE;
 

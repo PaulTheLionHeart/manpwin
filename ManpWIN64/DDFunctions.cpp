@@ -79,7 +79,10 @@ int	CPixel::DDInitFunctions(WORD type, DDComplex *z, DDComplex *q)
 	    break;
 
 	case CUBIC:					// Art Matrix Cubic
-	    Init_Cubic<DDComplex>(z, q, param, juliaflag, subtype, special, aDD, bDD, a2DD, aa3DD, t2DD, t3DD, tempDD, vDD);
+	    SpecialColour.rgbtRed = (BYTE)param[1];
+	    SpecialColour.rgbtGreen = (BYTE)param[2];
+	    SpecialColour.rgbtBlue = (BYTE)param[3];
+	    Init_Cubic<DDComplex>(z, q, param, juliaflag, subtype, aDD, bDD, a2DD, aa3DD, t2DD, t3DD, tempDD, vDD);
 	    break;
 
 	case SPECIALNEWT:				// Art Matrix Newton
@@ -304,7 +307,7 @@ int	CPixel::DDRunFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	case CUBIC:					// Art Matrix Cubic
 	    return FunctionsDispatch<DDComplex, dd_real, WORD>(this, type, z, q, degree, sqrDD, realimagDD,
-		aDD, a2DD, aa3DD, bDD, vDD, tempDD, param, SpecialFlag, iteration, special, subtype, BailoutTestType, rqlim);
+		aDD, a2DD, aa3DD, bDD, vDD, tempDD, param, SpecialFlag, iteration, SPECIALINDEX, subtype, BailoutTestType, rqlim);
 
 	case SPECIALNEWT:				// Art Matrix Newton
 	    return Iter_SPECIALNEWT<DDComplex>(z, q, aDD, bDD, lm5DD, lp5DD, vDD, param, phaseflag, special);

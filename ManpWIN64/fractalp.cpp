@@ -16,7 +16,7 @@
 
 #define	HALF_PI	1.570796326794895
 
-extern	HWND	GlobalHwnd;			// This is the main windows handle
+//extern	HWND	GlobalHwnd;			// This is the main windows handle
 
 /* functions defined elswhere needed for fractalspecific */
 /* moved to prototyp.h */
@@ -1772,9 +1772,9 @@ struct fractalspecificstuff fractalspecific[]=
 //#define CUBIC				173
    {
    "Cubic",
-       "Subtype: 0=CBIN, 1=CCIN, 2=CFIN, 3=CKIN", "Special Colour", realz0, imagz0, ES, ES,ES, ES, ES, ES,
-      0.0, 2.0, 0.0, 0.0, 0, 0,0,0,0,0,
-   -5.3333, -3.0, 6.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
+       "Subtype: 0=CBIN, 1=CCIN, 2=CFIN, 3=CKIN", "Special Colour Red Component", "Special Colour Green Component", "Special Colour Blue Component", realz0, imagz0, ES, ES, ES, ES,
+      0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+   -5.3333, -3.0, 6.0, 0, NOFRACTAL, NOFRACTAL, 6, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -2620,7 +2620,10 @@ struct PerturbationSpecificStuff PerturbationSpecific[] =
 	    "HPDZ Buffalo", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
 	    },
 //	    {
-//	    "Art Matric Cubic", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor (Fwd Diff)","Light Source Height (Derivative)", "Degree", ES, ES, ES, ES, ES, ES, ES, 1.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
+//	    "Fractional Power", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor (Fwd Diff)","Light Source Height (Derivative)", "Degree", ES, ES, ES, ES, ES, ES, ES, 1.0, 1.5, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0, 0
+//	    },
+//	    {
+//	    "Art Matric Cubic", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor (Fwd Diff)","Light Source Height (Derivative)", "0=CBIN, 1=CCIN, 2=CFIN, 3=CKIN", "Special Colour Red Component", "Special Colour Green Component", "Special Colour Blue Component", ES, ES, ES, ES, 1.0, 1.5, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0, 0
 //	    },
 //	    {
 //	    "Sin", 0, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
@@ -3039,8 +3042,13 @@ struct AlternativeSpecificStuff MandelDerivSpecific[] =
 		"Sinh(z^n) + c",						// 12
 		    45.0, 1.5, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0
 		},
+		{
+		"Art Matrix Cubic",						// 13
+		    45.0, 1.5, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 7, 1000.0
+		},
+
 	//	{
-	//	"Mandelbar (Tricorn)",						// 13
+	//	"Mandelbar (Tricorn)",						// 14
 	//	    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0
 	//	},
 	//	{
@@ -3123,7 +3131,7 @@ struct AlternativeSpecificStuff MandelDerivSpecific[] =
 		},
 		{
 		"Art Matrix Cubic",						// 15
-		    1.0, 0.0, 45.0, 50.0, 70.0, 2.0, 0.0, 0.0, 0.0, 0.0, 7, 1000.0
+		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 255.0, 0.0, 0.0, 9, 1000.0
 		},
 		{
 		"Newton Variation: z=z-(z^n - 1)/(3*z-1)+c",			// 16

@@ -19,376 +19,13 @@
 #include	"OscProcess.h"
 #include	"pixel.h"
 #include	"Potential.h"
-
-#ifndef sqr
-#define sqr(x) ((x)*(x))
-#endif
-
-#define OTHER	    0
-#define FRACTINT    1
-#define MANPWIN	    2
-
-// constructors to enable using references to wpixels
-extern std::vector<float> wpixels;
-
-CPixel::CPixel()
-    : wpixels(::wpixels)
-    {}
-
-CPixel::CPixel(std::vector<float>& wp)
-    : wpixels(wp)
-    {}
-
-/**************************************************************************
-	Initialise Pixel
-**************************************************************************/
-
-void	CPixel::InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, dd_real DDBailoutIn, qd_real QDBailoutIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, int precisionIn, 
-		int biomorphIn, int InsideMethodIn, int OutsideMethodIn, int RotationAngleIn, int xdotsIn, int ydotsIn, int nFDOptionIn)
-    {
-    type = typeIn;
-    subtype = subtypeIn;
-    special = specialIn;
-    degree = degreeIn;
-    rqlim = rqlimIn;
-    DDBailout = DDBailoutIn;
-    QDBailout = QDBailoutIn;
-    SpecialFlag = SpecialFlagIn;
-    biomorph = biomorphIn;
-    InsideMethod = InsideMethodIn;
-    OutsideMethod = OutsideMethodIn;
-    nFDOption = nFDOptionIn;
-    RotationAngle = RotationAngleIn;
-    ExpandStarTrailColours = ExpandStarTrailColoursIn;
-    xdots = xdotsIn;						// only the width of the strip
-    ydots = ydotsIn;
-    precision = precisionIn;
-
-    // initialise a number of BigNumvariables that will be used in DD and QD fractals. This prevents NaN in conversion
-    aBig = 0.0; a2Big = 0.0; aa3Big = 0.0; bBig = 0.0; l2Big = 0.0; lm5Big = 0.0; lp5Big = 0.0; ozBig = 0.0; t2Big = 0.0; t3Big = 0.0; vBig = 0.0;
-    tempBig = 0.0; temp1Big = 0.0; temp2Big = 0.0; temp3Big = 0.0; sqrBig = 0.0; sqrsqrBig = 0.0; realimagBig = 0.0; RealImagSqrBig = 0.0; tBig = 0.0;
-    c1Big = 0.0; c2Big = 0.0; cbBig = 0.0; caa3Big = 0.0; z1Big = 0.0; z2Big = 0.0; z3Big = 0.0; z4Big = 0.0; zdBig = 0.0; ztBig;
-    }
-
-void	CPixel::InitPixel1(CTrueCol *TrueColIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, std::vector <float> &wpixelsIn, BYTE juliaflagIn, BYTE calcmodeIn/*, int NonStandardFractalIn*/)
-    {
-    TrueCol = TrueColIn;
-    period_level = period_levelIn;
-    distest = distestIn;
-    invert = invertIn;
-    phaseflag = phaseflagIn;
-    wpixels = wpixelsIn;
-    juliaflag = juliaflagIn;
-    calcmode = calcmodeIn;
-//    NonStandardFractal = NonStandardFractalIn;
-    }
-
-void	CPixel::InitPixel2(int CoordSystemIn, BOOL UseCurrentPaletteIn, int reset_periodIn, int colorsIn, double horIn, double vertIn, double mandel_widthIn, BigDouble BigHorIn, BigDouble BigVertIn, BigDouble BigWidthIn)
-    {
-    CoordSystem = CoordSystemIn;
-    UseCurrentPalette = UseCurrentPaletteIn;
-    reset_period = reset_periodIn;
-    colors = colorsIn;
-    hor = horIn;
-    vert = vertIn;
-    mandel_width = mandel_widthIn;
-    BigHor = BigHorIn;
-    BigVert = BigVertIn;
-    BigWidth = BigWidthIn;
-    }
-
-void	CPixel::InitPixel3(double dStrandsIn, Complex jIn, BYTE pairflagIn, BYTE _3dflagIn, double ScreenRatioIn, WORD coloursIn, CFract *Fract, int BailoutTestTypeIn)
-    {
-    dStrands = dStrandsIn;
-    j = jIn;
-    pairflag = pairflagIn;
-    _3dflag = _3dflagIn;
-    ScreenRatio = ScreenRatioIn;
-    colours = coloursIn;
-    Fn1Index = Fract->Fn1Index;
-    Fn2Index = Fract->Fn2Index;
-    BailoutTestType = BailoutTestTypeIn;
-    }
-
-void	CPixel::InitPixel4(long thresholdIn, BYTE BigNumFlagIn, int logvalIn, double f_radiusIn, double f_xcenterIn, char *LyapSequenceIn, double ColourSpeedIn)
-    {
-    threshold = thresholdIn;
-    BigNumFlag = BigNumFlagIn;
-    if (BigNumFlag)
-	BigBailout = rqlim;
-    logval = logvalIn;
-    f_radius = f_radiusIn;
-    f_xcenter = f_xcenterIn;
-    LyapSequence = LyapSequenceIn;
-    ColourSpeed = ColourSpeedIn;
-    smoothing = (ColourSpeed != 0.0);
-    }
-
-void	CPixel::InitPixel5(double f_ycenterIn, int *symmetryIn, double paramIn[], double potparamIn[], int decompIn, BYTE *logtableIn, int *AutoStereo_valueIn, int widthIn, HWND hwndIn)
-    {
-    f_ycenter = f_ycenterIn;
-    symmetry = symmetryIn;
-    for (int i = 0; i < NUMPERTPARAM; i++)
-	param[i] = paramIn[i];
-    for (int i = 0; i < 3; i++)
-	potparam[i] = potparamIn[i];
-    decomp = decompIn;
-    logtable = logtableIn;
-    AutoStereo_value = AutoStereo_valueIn;
-    width = widthIn;
-    hwnd = hwndIn;
-    }
-
-void	CPixel::InitPixel6(CDib *DibIn, int PlotTypeIn, int *time_to_zoomIn, int *time_to_restartIn, int *time_to_reinitIn, int *time_to_quitIn, long fillcolorIn)
-    {
-    Dib = DibIn; PlotType = PlotTypeIn; time_to_zoom = time_to_zoomIn; time_to_restart = time_to_restartIn; time_to_reinit = time_to_reinitIn; time_to_quit = time_to_quitIn; fillcolor = fillcolorIn; 
-    }
-
-void	CPixel::InitPixel7(int *blockindexIn, int *totpassesIn, int *curpassIn, MATH_TYPE *MathTypeIn, Complex RotationCentreIn, int distestwidthIn, CFract *FractalIn)
-    {
-    blockindex = blockindexIn; totpasses = totpassesIn; curpass = curpassIn;     MathType = MathTypeIn; RotationCentre = RotationCentreIn; distestwidth = distestwidthIn; Fractal = FractalIn;
-    }
-
-void	CPixel::InitPixel8(double bump_transfer_factorIn, int PaletteStartIn, int PaletteShiftIn, double lightDirectionDegreesIn, double bumpMappingDepthIn, double bumpMappingStrengthIn, bool ShowOrbitsIn, RGBTRIPLE OrbitColourIn)
-    {
-    bump_transfer_factor = bump_transfer_factorIn; PaletteStart = PaletteStartIn; PaletteShift = PaletteShiftIn; lightDirectionDegrees = lightDirectionDegreesIn; bumpMappingDepth = bumpMappingDepthIn; bumpMappingStrength = bumpMappingStrengthIn;
-    ShowOrbits = ShowOrbitsIn; OrbitColour = OrbitColourIn;
-    }
-
-/**************************************************************************
-    Smooth the transitions between adjascent pallete colours
-**************************************************************************/
-
-// we need to take symmetry into account when calculating smoothing.
-/*
-RGBTRIPLE CPixel::GetSmoothedColour(double fIter, double color_speed, CTrueCol &TrueCol, CPlot *Plot)
-    {
-    double  color_bias = 0.0;
-    // ---------------------------------------
-    // Move through palette smoothly
-    // Apply palette speed (default 1.0)
-    // ---------------------------------------
-    double v = fIter * (color_speed)+color_bias;
-    //    RGBTRIPLE* rgbPal = reinterpret_cast<RGBTRIPLE*>(TrueCol.PalettePtr);
-    int paletteSize = TrueCol.ColoursInPALFile;
-
-    // Wrap t into [0, paletteSize)
-    double pos = fmod(v, TrueCol.ColoursInPALFile);
-    if (pos < 0) pos += TrueCol.ColoursInPALFile;
-
-    int i0 = (int)pos;
-    int i1 = (i0 + 1) % TrueCol.ColoursInPALFile;
-
-    // Fraction between the two colours
-    double t = v - floor(v);
-
-    double frac = pos - i0;
-    RGBTRIPLE c0;
-    RGBTRIPLE c1;
-    Plot->GetRGB(i0, &c0);
-    Plot->GetRGB(i1, &c1);
-
-    RGBTRIPLE out;
-
-    out.rgbtRed = BYTE(c0.rgbtRed   * (1.0 - t) + c1.rgbtRed   * t);
-    out.rgbtGreen = BYTE(c0.rgbtGreen * (1.0 - t) + c1.rgbtGreen * t);
-    out.rgbtBlue = BYTE(c0.rgbtBlue  * (1.0 - t) + c1.rgbtBlue  * t);
-    return out;
-    }
-*/
-
-/**************************************************************************
-	Setup symmetry etc
-**************************************************************************/
-
-std::string DDToString(const dd_real& v)
-    {
-    char buf[128];
-    snprintf(buf, sizeof(buf), "%.17g", to_double(v)); // temporary
-    return std::string(buf);
-    }
-
-std::string QDToString(const qd_real& v)
-    {
-    char buf[128];
-    snprintf(buf, sizeof(buf), "%.17g", to_double(v)); // temporary
-    return std::string(buf);
-    }
-
-
-int	CPixel::InitArithmetic()
-    {
-/*
-    char	PositionString[SIZEOF_BF_VARS * 3];
-    char	*s1 = nullptr;
-    char	*s2 = nullptr;
-    char	*s3 = nullptr;
-*/
-
-    if (BigNumFlag)
-	{
-	BigDouble BigScreenRatio(ScreenRatio);
-	BigDouble xdotsBig(xdots - 1);
-	BigDouble ydotsBig(ydots - 1);
-
-	BigDouble Bigtemp_x = BigScreenRatio / xdotsBig;
-	BigDouble Bigtemp_y = BigDouble(1.0) / ydotsBig;
-
-	Big_xgap = BigWidth * Bigtemp_x;
-	Big_ygap = BigWidth * Bigtemp_y;
-	BigCloseEnough = Big_ygap / 16.0;
-
-
-
-
-/*
-
-	s1 = new char[SIZEOF_BF_VARS];
-	s2 = new char[SIZEOF_BF_VARS];
-	s3 = new char[SIZEOF_BF_VARS];
-	BigHor.ToString(s1, SIZEOF_BF_VARS, false);
-	BigVert.ToString(s2, SIZEOF_BF_VARS, false);
-	BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
-	//	ConvertBignum2String(s1, Big_centrex.x);
-	//	ConvertBignum2String(s2, Big_centrey.x);
-	//	mpfr_sprintf(s3, "%.20Re", BigWidth.x);
-	//	ConvertBignum2String(s3, BigWidth.x);
-
-	_snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "Big: X = %s\r\nY = %s\r\nWidth = %s\n", s1, s2, s3);
-	OutputDebugStringA(PositionString);
-
-	Big_yymax.ToString(s1, SIZEOF_BF_VARS, false);
-	Big_xgap.ToString(s2, SIZEOF_BF_VARS, false);
-	Big_ygap.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
-	_snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "Big: yymax = %s\r\nxgap = %s\r\nygap = %s\n", s1, s2, s3);
-	OutputDebugStringA(PositionString);
-
-	if (s1) delete[] s1;
-	if (s2) delete[] s2;
-	if (s3) delete[] s3;
-*/
-
-
-
-
-
-
-	if (precision <= DDPRECISION)
-	    {
-	    *MathType = DOUBLEDOUBLE;
-	    if (BigWidth.BigDouble2DD(&DDWidth) < 0) return -1;
-	    if (BigHor.BigDouble2DD(&DDHor) < 0) return -1;
-	    if (Big_yymax.BigDouble2DD(&DDyymax) < 0) return -1;
-	    if (Big_xgap.BigDouble2DD(&DDxgap) < 0) return -1;
-	    if (Big_ygap.BigDouble2DD(&DDygap) < 0) return -1;
-	    if (BigCloseEnough.BigDouble2DD(&DDCloseEnough) < 0) return -1;
-
-/*
-
-	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "DD: X = %s\r\nYymax = %s\r\nWidth = %s\n", DDToString(DDHor).c_str(), DDToString(DDyymax).c_str(), DDToString(DDWidth).c_str());
-	    OutputDebugStringA(PositionString);
-	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "DD: xgap = %s\r\nygap = %s\n", DDToString(DDxgap).c_str(), DDToString(DDygap).c_str());
-	    OutputDebugStringA(PositionString);
-*/
-	    }
-	else if (precision <= QDPRECISION || fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
-	    {
-	    *MathType = QUADDOUBLE;
-	    if (BigWidth.BigDouble2QD(&QDWidth) < 0) return -1;
-	    if (BigHor.BigDouble2QD(&QDHor) < 0) return -1;
-	    if (Big_yymax.BigDouble2QD(&QDyymax) < 0) return -1;
-	    if (Big_xgap.BigDouble2QD(&QDxgap) < 0) return -1;
-	    if (Big_ygap.BigDouble2QD(&QDygap) < 0) return -1;
-	    if (BigCloseEnough.BigDouble2QD(&QDCloseEnough) < 0) return -1;
-
-/*
-	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "QD: X = %s\r\nYymax = %s\r\nWidth = %s\n", QDToString(QDHor).c_str(), QDToString(QDyymax).c_str(), QDToString(QDWidth).c_str());
-	    OutputDebugStringA(PositionString);
-	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "QD: xgap = %s\r\nygap = %s\n", QDToString(QDxgap).c_str(), QDToString(QDygap).c_str());
-	    OutputDebugStringA(PositionString);
-*/
-	    }
-	else
-	    {
-	    *MathType = ARBITRARYPREC;
-	    }
-	}
-    else
-	{
-	*MathType = DOUBLEFLOAT;
-	double	temp_x, temp_y;
-
-	temp_x = ScreenRatio / (double)(xdots - 1);
-	temp_y = 1.0 / (double)(ydots - 1);
-
-	xgap = mandel_width * temp_x;
-	ygap = mandel_width * temp_y;
-	closenuff = ygap / 16.0;
-	}
-    return 0;
-    }
-
-/**************************************************************************
-	Allow internal bignum variables to track current precision requirements
-**************************************************************************/
-
-void	CPixel::ManageBignumPrecision(int precision)
-    {
-    aBig.x.ChangePrecision(precision); aBig.y.ChangePrecision(precision);
-    a2Big.x.ChangePrecision(precision); a2Big.y.ChangePrecision(precision);
-    aa3Big.x.ChangePrecision(precision); aa3Big.y.ChangePrecision(precision);
-    bBig.x.ChangePrecision(precision); bBig.y.ChangePrecision(precision);
-    l2Big.x.ChangePrecision(precision); l2Big.y.ChangePrecision(precision);
-    lm5Big.x.ChangePrecision(precision); lm5Big.y.ChangePrecision(precision);
-    lp5Big.x.ChangePrecision(precision); lp5Big.y.ChangePrecision(precision);
-    ozBig.x.ChangePrecision(precision); ozBig.y.ChangePrecision(precision);
-    t2Big.x.ChangePrecision(precision); t2Big.y.ChangePrecision(precision);
-    t3Big.x.ChangePrecision(precision); t3Big.y.ChangePrecision(precision);
-    vBig.x.ChangePrecision(precision); vBig.y.ChangePrecision(precision);
-    tempBig.x.ChangePrecision(precision); tempBig.y.ChangePrecision(precision);
-    temp1Big.x.ChangePrecision(precision); temp1Big.y.ChangePrecision(precision);
-    temp2Big.x.ChangePrecision(precision); temp2Big.y.ChangePrecision(precision);
-    temp3Big.x.ChangePrecision(precision); temp3Big.y.ChangePrecision(precision);
-    sqrBig.x.ChangePrecision(precision); sqrBig.y.ChangePrecision(precision);
-    sqrsqrBig.x.ChangePrecision(precision); sqrsqrBig.y.ChangePrecision(precision);
-    c1Big.x.ChangePrecision(precision); c1Big.y.ChangePrecision(precision);
-    c2Big.x.ChangePrecision(precision); c2Big.y.ChangePrecision(precision);
-    cbBig.x.ChangePrecision(precision); cbBig.y.ChangePrecision(precision);
-    caa3Big.x.ChangePrecision(precision); caa3Big.y.ChangePrecision(precision);
-    z1Big.x.ChangePrecision(precision); z1Big.y.ChangePrecision(precision);
-    z2Big.x.ChangePrecision(precision); z2Big.y.ChangePrecision(precision);
-    z3Big.x.ChangePrecision(precision); z3Big.y.ChangePrecision(precision);
-    z4Big.x.ChangePrecision(precision); z4Big.y.ChangePrecision(precision);
-    zdBig.x.ChangePrecision(precision); zdBig.y.ChangePrecision(precision);
-    ztBig.x.ChangePrecision(precision); ztBig.y.ChangePrecision(precision);
-    BigOldZ.x.ChangePrecision(precision); BigOldZ.y.ChangePrecision(precision);
-    BigOlderZ.x.ChangePrecision(precision); BigOlderZ.y.ChangePrecision(precision);
-
-    tBig.x.ChangePrecision(precision);  tBig.y.ChangePrecision(precision);
-
-    zBig.x.ChangePrecision(precision); zBig.y.ChangePrecision(precision);
-    qBig.x.ChangePrecision(precision); qBig.y.ChangePrecision(precision);
-    cBig.x.ChangePrecision(precision); cBig.y.ChangePrecision(precision);
-
-    Big_xxmax.ChangePrecision(precision);
-    Big_yymax.ChangePrecision(precision);
-    Big_xxmin.ChangePrecision(precision);
-    Big_yymin.ChangePrecision(precision);
-
-    realimagBig.ChangePrecision(precision);
-    RealImagSqrBig.ChangePrecision(precision);
-    BigBailout.ChangePrecision(precision);
-    Big_xgap.ChangePrecision(precision);
-    Big_ygap.ChangePrecision(precision);
-    BigHor.ChangePrecision(precision);
-    BigVert.ChangePrecision(precision);
-    BigWidth.ChangePrecision(precision);
-    }
+#include	"PixelTemplate.h"
 
 /**************************************************************************
     Small wrappers needed for formula
 **************************************************************************/
 
+// double
 int CPixel::InitFormula(Complex* z, Complex* q)
     {
     return m_parser.FormPerPixelFloat(z, q);
@@ -399,10 +36,33 @@ int CPixel::RunFormula(Complex* z, Complex* q)
     return m_parser.FormulaFloat(z, q);
     }
 
+// DD
+int CPixel::DDInitFormula(DDComplex* z, DDComplex* q)
+    {
+    return m_parser.DDFormPerPixel(z, q);
+    }
+
+int CPixel::DDRunFormula(DDComplex* z, DDComplex* q)
+    {
+    return m_parser.DDFormula(z, q);
+    }
+
+//QD
+int CPixel::QDInitFormula(QDComplex* z, QDComplex* q)
+    {
+    return m_parser.QDFormPerPixel(z, q);
+    }
+
+int CPixel::QDRunFormula(QDComplex* z, QDComplex* q)
+    {
+    return m_parser.QDFormula(z, q);
+    }
+
 /**************************************************************************
 	Initialise fractal
 **************************************************************************/
 
+// double version
 int	CPixel::InitFractal(Complex *z, Complex *q)
     {
     if (fractalspecific[type].flags & FUNCTIONINPIXEL)
@@ -413,9 +73,71 @@ int	CPixel::InitFractal(Complex *z, Complex *q)
 	return(InitFractintTrigFunctions(type, z, q));
     else if (fractalspecific[type].flags & FORMULAINPIXEL)
 	return (InitFormula(z, q));
-//    else if (fractalspecific[type].flags & OTHERFNINPIXEL)
-//	return(InitOtherFunctions(type, z, q));
+    //    else if (fractalspecific[type].flags & OTHERFNINPIXEL)
+    //	return(InitOtherFunctions(type, z, q));
     else if (fractalspecific[type].per_pixel() < 0)
+	return -1;
+    return 0;
+    }
+
+// DD version
+int	CPixel::DDInitFractal(DDComplex *z, DDComplex *q)
+    {
+    if (fractalspecific[type].flags & FUNCTIONINPIXEL)
+	return(DDInitFunctions(type, z, q));
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL)
+	return(DDInitFractintFunctions(type, z, q));
+    else if (fractalspecific[type].flags & TRIGINPIXEL)
+	return(DDInitFractintTrigFunctions(type, z, q));
+    else if (fractalspecific[type].flags & FORMULAINPIXEL)
+	return (DDInitFormula(z, q));
+    //    else if (fractalspecific[type].flags & OTHERFNINPIXEL)
+    //	return(InitOtherFunctions(type, z, q));
+    //    else if (fractalspecific[type].per_pixel() < 0)
+    //	return -1;
+    return 0;
+    }
+
+// QD version
+int	CPixel::QDInitFractal(QDComplex *z, QDComplex *q)
+    {
+    if (fractalspecific[type].flags & FUNCTIONINPIXEL)
+	return(QDInitFunctions(type, z, q));
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL)
+	return(QDInitFractintFunctions(type, z, q));
+    else if (fractalspecific[type].flags & TRIGINPIXEL)
+	return(QDInitFractintTrigFunctions(type, z, q));
+    else if (fractalspecific[type].flags & FORMULAINPIXEL)
+	return (QDInitFormula(z, q));
+    //    else if (fractalspecific[type].flags & OTHERFNINPIXEL)
+    //	return(InitOtherFunctions(type, z, q));
+    else if (fractalspecific[type].per_pixel() < 0)
+	return -1;
+    return 0;
+    }
+
+//big version
+int    CPixel::BigInitFractal(void)
+    {
+    BOOL    IsBig = FALSE;
+    int	    i;
+
+    for (i = 0; BigFractalSpecific[i].big_calctype; i++)
+	if (type == BigFractalSpecific[i].type)	// check the list of "allowed" fractals.    
+	    {
+	    BigFractPtr = i;
+	    IsBig = TRUE;
+	    break;
+	    }
+    if (!IsBig)
+	return -1;
+    if (fractalspecific[type].flags & FUNCTIONINPIXEL)
+	return(BigInitFunctions(type, &zBig, &qBig));
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL)
+	return(BigInitFractintFunctions(type, &zBig, &qBig));
+    else if (/*fractalspecific[type].flags & FRACTINTINPIXEL || */fractalspecific[type].flags & TRIGINPIXEL || fractalspecific[type].flags & FORMULAINPIXEL)    // Bignum versions not yet available
+	return -1;
+    else if (BigFractalSpecific[BigFractPtr].big_per_pixel() < 0)
 	return -1;
     return 0;
     }
@@ -424,6 +146,7 @@ int	CPixel::InitFractal(Complex *z, Complex *q)
 	Run fractal
 **************************************************************************/
 
+// double version
 int	CPixel::RunFractal(Complex *z, Complex *q)
     {
     if (fractalspecific[type].flags & FUNCTIONINPIXEL)
@@ -440,181 +163,162 @@ int	CPixel::RunFractal(Complex *z, Complex *q)
 	return fractalspecific[type].calctype();
     }
 
-/**************************************************************************
-	Filter
-**************************************************************************/
-
-int	CPixel::DoFilter(int method, int hooper)
+// DD version
+int	CPixel::DDRunFractal(DDComplex *z, DDComplex *q)
     {
-    double	magnitude = 0.0;
-    CPotential	Pot;
+    if (fractalspecific[type].flags & FUNCTIONINPIXEL)
+	return(DDRunFunctions(type, z, q, &SpecialFlag, &iteration));
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL)
+	return(DDRunFractintFunctions(type, z, q, &SpecialFlag, &iteration));
+    else if (fractalspecific[type].flags & TRIGINPIXEL)
+	return(DDRunFractintTrigFunctions(type, z, q, &SpecialFlag, &iteration));
+    else if (fractalspecific[type].flags & FORMULAINPIXEL)
+	return (DDRunFormula(z, q));
+    //    else if (fractalspecific[type].flags & OTHERFNINPIXEL)
+    //	return(RunOtherFunctions(type, z, q, &SpecialFlag, iteration));
+    else
+	return fractalspecific[type].calctype();
+    }
 
-    if (colours == 256 && decomp > 0)
-	iteration = FloatDecomposition(z.x, z.y);
-    else if (logval)
-	iteration = (BYTE) (*(logtable + (iteration % MAXTHRESHOLD)));
-    else if (biomorph >= 0)
-	{
-	rqlim2 = sqrt(rqlim);
-	if (fabs(z.x) < rqlim2 || fabs(z.y) < rqlim2)
-	    iteration = biomorph;
-	}
-    else   
-	{
-	switch (method)
-	    {
-	    case EPSCROSS:
-		if (hooper == 1)
-		    iteration = special;
-		else if (hooper == 2)
-		    iteration = (special << 1);
-		break;
-						// these options by Richard Hughes modified by TW
-						// Add 7 to overcome negative values on the MANDEL
-	    case REAL:				// "real"
-		iteration += (long)z.x + 7;
-		break;
-	    case IMAG:	    			// "imag"
-		iteration += (long)z.y + 7;
-		break;
-	    case MULT:				// "mult"
-		if (z.y)
-		    iteration = (long)((double)iteration * (z.x/z.y));
-		break;
-	    case SUM:				// "sum"
-		iteration += (long)(z.x + z.y);
-		break;
-	    case ATAN:				// "atan"
-		iteration = (long)fabs(atan2(z.y, z.x)*180.0/PI);
-		break;
-	    case POTENTIAL:
-		magnitude = sqr(z.x) + sqr(z.y);
-		iteration = Pot.potential(magnitude, iteration, threshold, TrueCol, colors, potparam);
-		break;
-	    case PERT1:
-		if (iteration != threshold)
-		    iteration = (int)((iteration - log2(log2(z.CSumSqr()))) * 5) % 256;				//Get the index of the color array that we are going to read from. 
-	    case PERT2:
-		if (iteration != threshold)
-		    iteration = (int)(iteration - (log(0.5*(z.CSumSqr())) - log(0.5*log(256))) / log(2)) % 256;	//Get the index of the color array that we are going to read from. 
-		  
-	    }
+// QD version
+int	CPixel::QDRunFractal(QDComplex *z, QDComplex *q)
+    {
+    if (fractalspecific[type].flags & FUNCTIONINPIXEL)
+	return(QDRunFunctions(type, z, q, &SpecialFlag, &iteration));
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL)
+	return(QDRunFractintFunctions(type, z, q, &SpecialFlag, &iteration));
+    else if (fractalspecific[type].flags & TRIGINPIXEL)
+	return(QDRunFractintTrigFunctions(type, z, q, &SpecialFlag, &iteration));
+    else if (fractalspecific[type].flags & FORMULAINPIXEL)
+	return (QDRunFormula(z, q));
+    //    else if (fractalspecific[type].flags & OTHERFNINPIXEL)
+    //	return(RunOtherFunctions(type, z, q, &SpecialFlag, iteration));
+    else
+	return fractalspecific[type].calctype();
+    }
 
-	// eliminate negative colors & wrap arounds
-	if (iteration < 0)
-	    iteration = 0;
-	if (iteration > threshold && decomp <= threshold)		// for small thresholds, we can still have higher decomp levels
-	    iteration = threshold;
-	}
-    return 0;
+// Big version
+int    CPixel::BigRunFractal(void)
+    {
+    if (fractalspecific[type].flags & FUNCTIONINPIXEL)
+	return(BigRunFunctions(type, &zBig, &qBig, &SpecialFlag, &iteration));
+    else if (fractalspecific[type].flags & FRACTINTINPIXEL)
+	return(BigRunFractintFunctions(type, &zBig, &qBig, &SpecialFlag, &iteration));
+    else
+	return BigFractalSpecific[BigFractPtr].big_calctype();
     }
 
 /**************************************************************************
-	Get Float Iteration per pixel
+	Initialise Tierazon Filters and Julia
 **************************************************************************/
 
-void	CPixel::CalcFloatIteration(double error, std::vector <float> &wpixels, int row, int col, Complex z, Complex OldZ, Complex OlderZ)
+void CPixel::InitTierazonFiltersDouble()
     {
-    double	log_zn, nu, t;
-    int		SlopeDegree, BailoutType;
-    DWORD	index;
-
-    if (FloatIteration < threshold)
+    if (OutsideMethod >= TIERAZONFILTERS)
 	{
-	Complex	a, b, root = { 1.0, 0.0 };
-
-	if (type == TIERAZON)													// Tierazon
-	    {
-	    SlopeDegree = (TierazonSpecific[subtype].SlopeDegree == -1) ? *degree : TierazonSpecific[subtype].SlopeDegree;
-	    BailoutType = TierazonSpecific[subtype].BailoutType;
-	    }
-	else if (type == MANDELDERIVATIVES)													// Mandel derivatives
-	    {
-	    SlopeDegree = (MandelDerivSpecific[subtype].SlopeDegree == -1) ? *degree : MandelDerivSpecific[subtype].SlopeDegree;
-	    BailoutType = MandelDerivSpecific[subtype].BailoutType;
-	    }
-	else
-	    {
-	    SlopeDegree = (fractalspecific[type].SlopeDegree == -1) ? *degree : fractalspecific[type].SlopeDegree;
-	    BailoutType = fractalspecific[type].BailoutType;
-	    }
-
-	switch (BailoutType)
-	    {
-	    case ESCAPING:
-		log_zn = log(z.x * z.x + z.y * z.y) / SlopeDegree;
-		nu = log(log_zn / log(SlopeDegree)) / log(SlopeDegree);
-		FloatIteration = FloatIteration + 1 - nu;
-		break;
-
-	    case ESCAPING1:
-		log_zn = log(sqr(rqlim)) - log(OldZ.x * OldZ.x + OldZ.y * OldZ.y);		// escape method 1 (page 24 Fractal-Zoomer Algorithms.docx)
-		t = log(z.x * z.x + z.y * z.y) - log(OldZ.x * OldZ.x + OldZ.y * OldZ.y);
-		nu = log_zn / t;
-		FloatIteration = FloatIteration + nu;
-		break;
-	    case ESCAPING2:
-		log_zn = log(z.x * z.x + z.y * z.y) / log(sqr(rqlim));				// escape method 2 (page 24 Fractal-Zoomer Algorithms.docx)
-		t = log(z.x * z.x + z.y * z.y) / log(OldZ.x * OldZ.x + OldZ.y * OldZ.y);
-		nu = log_zn / t;
-		FloatIteration = FloatIteration + 1 - nu;
-		break;
-	    case CONVERGING:
-		a = OldZ - OlderZ;
-		b = z - OldZ;
-		log_zn = log(error) - log(a.x * a.x + a.y * a.y);				// convergence method 1 (page 25 Fractal-Zoomer Algorithms.docx)
-		t = log(b.x * b.x + b.y * b.y) - log(a.x * a.x + a.y * a.y);
-		nu = log_zn / t;
-		FloatIteration = FloatIteration + nu;
-		break;
-	    case CONVERGING1:
-		a = OldZ - OlderZ;
-		b = z - OldZ;
-		log_zn = log(error) / log(b.x * b.x + b.y * b.y);				// convergence method 2 (page 25 Fractal-Zoomer Algorithms.docx)
-		t = log(b.x * b.x + b.y * b.y) / log(a.x * a.x + a.y * a.y);
-		nu = log_zn / t;
-		FloatIteration = FloatIteration + nu;
-		break;
-	    case CONVERGINGMAG:
-		a = OldZ - root;
-		b = z - root;
-		log_zn = log(error) - log(a.x * a.x + a.y * a.y);				// convergence method 1 (page 25 Fractal-Zoomer Algorithms.docx)
-		t = log(b.x * b.x + b.y * b.y) - log(a.x * a.x + a.y * a.y);
-		nu = log_zn / t;
-		FloatIteration = FloatIteration + nu;
-		break;
-	    case CONVERGINGMAG1:
-		a = OldZ - root;
-		b = z - root;
-		log_zn = log(error) / log(b.x * b.x + b.y * b.y);				// convergence method 2 (page 26 Fractal-Zoomer Algorithms.docx)
-		t = log(b.x * b.x + b.y * b.y) - log(a.x * a.x + a.y * a.y);
-		nu = log_zn / t;
-		FloatIteration = FloatIteration + nu;
-		break;
-	    default:
-		log_zn = log(z.x * z.x + z.y * z.y) / SlopeDegree;
-		nu = log(log_zn / log(SlopeDegree)) / log(SlopeDegree);
-		FloatIteration = FloatIteration + 1 - nu;
-		break;
-	    }
+	TZfilter.InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);
+	TZfilter.LoadFilterQ(q);
 	}
-    if ((type == SPECIALNEWT || type == MATEIN) && special != 0)  // split colours
-	{
-	if (phaseflag == 1)				// second phase
-	    FloatIteration += special;
-	else if (phaseflag == 2)			// third phase
-	    FloatIteration += (special << 1);
-	if (color > threshold)
-	    color = threshold;
-	}						// default first phase
-    if ((long)FloatIteration >= threshold)
-	FloatIteration = (double)threshold;
-    else if (SpecialFlag)
-	FloatIteration = (double)special;
+    }
 
-    index = ((DWORD)row * (DWORD)width) + (DWORD)col;
-    if (col >= 0 && col < xdots - 1 && row >= 0 && row < ydots - 1)
-	wpixels[index] = (float)FloatIteration;
+void CPixel::InitTierazonFiltersDD()
+    {
+    if (OutsideMethod >= TIERAZONFILTERS)
+	{
+	DDComplex DDTemp = qDD;
+
+	Complex tempComplex;
+	tempComplex.x = to_double(DDTemp.x);
+	tempComplex.y = to_double(DDTemp.y);
+
+	TZfilter.InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);
+	TZfilter.LoadFilterQ(tempComplex);
+	}
+    }
+
+void CPixel::InitTierazonFiltersQD()
+    {
+    if (OutsideMethod >= TIERAZONFILTERS)
+	{
+	QDComplex QDTemp = qQD;
+
+	Complex tempComplex;
+	tempComplex.x = to_double(QDTemp.x);
+	tempComplex.y = to_double(QDTemp.y);
+
+	TZfilter.InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);
+	TZfilter.LoadFilterQ(tempComplex);
+	}
+    }
+
+void CPixel::InitTierazonFiltersBig()
+    {
+    if (OutsideMethod >= TIERAZONFILTERS)
+	{
+	Complex tempComplex = qBig.CBig2Double();
+
+	TZfilter.InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);
+	TZfilter.LoadFilterQ(tempComplex);
+	}
+    }
+
+void CPixel::SetupDoubleJulia()
+    {
+    if (juliaflag)
+	{
+	q = j;
+	z = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
+	}
+    else
+	{
+	q = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
+	z = 0;
+	}
+    }
+
+void CPixel::SetupDDJulia()
+    {
+    if (juliaflag)
+	{
+	qDD.x = j.x;
+	qDD.y = j.y;
+	zDD = (invert) ? Invertz2T<DDComplex, dd_real>(cDD, f_radius, f_xcenter, f_ycenter) : cDD;
+	}
+    else
+	{
+	qDD = (invert) ? Invertz2T<DDComplex, dd_real>(cDD, f_radius, f_xcenter, f_ycenter) : cDD;
+	zDD = 0.0;
+	}
+    }
+
+void CPixel::SetupQDJulia()
+    {
+    if (juliaflag)
+	{
+	qQD.x = j.x;
+	qQD.y = j.y;
+	zQD = (invert) ? Invertz2T<QDComplex, qd_real>(cQD, f_radius, f_xcenter, f_ycenter) : cQD;
+	}
+    else
+	{
+	qQD = (invert) ? Invertz2T<QDComplex, qd_real>(cQD, f_radius, f_xcenter, f_ycenter) : cQD;
+	zQD = 0.0;
+	}
+    }
+
+void CPixel::SetupBigJulia()
+    {
+    if (juliaflag)
+	{
+	qBig.x = j.x;
+	qBig.y = j.y;
+	zBig = (invert) ? Invertz2T<BigComplex, BigDouble>(cBig, f_radius, f_xcenter, f_ycenter) : cBig;
+	}
+    else
+	{
+	qBig = (invert) ? Invertz2T<BigComplex, BigDouble>(cBig, f_radius, f_xcenter, f_ycenter) : cBig;
+	zBig = 0.0;
+	}
     }
 
 /**************************************************************************
@@ -623,10 +327,12 @@ void	CPixel::CalcFloatIteration(double error, std::vector <float> &wpixels, int 
 
 long	CPixel::dofract(HWND hwnd, int row, int col)
     {
-    int	real_iteration;				// actual count for orbit deletion
+//    int	real_iteration;				// actual count for orbit deletion
 
     Complex	saved;
-    int		savedand, savedincr;		// for periodicity checking
+    DDComplex	DDSaved;
+    QDComplex	QDSaved;
+    BigComplex	BigSaved;
     int		result;
     int		hooper = 0;
     double	close;
@@ -635,52 +341,102 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
     double	min_orbit;			// orbit value closest to origin
     long	min_index;			// iteration of min_orbit
     double	tantable[16];			// used for Star Trails
+    DDComplex	DDTemp;
+    QDComplex	QDTemp;
+    Complex	tempComplex;
 
-    if (OutsideMethod == STARTRAIL)
-       {
-       int	i;
-       for(i = 0; i < 16; i++)
-	    tantable[i] = 0.0;
-       }
-    close = 0.01;
-    magnitude = 0.0;
-    min_orbit = 100000.0;
-
-    if (period_level == 0 || InsideMethod == ZMAG || OutsideMethod == STARTRAIL)
-	oldcolour = 32767; 			// don't check periodicity at all
-    else //if (reset_period)
-	oldcolour = 240;			// don't check periodicity 1st n iterations
-
-    SpecialFlag = FALSE;			// no special colour yet. Use for decomp etc 
-    saved = 0;
-    savedand = 1;				// begin checking every other cycle
-    savedincr = 1;				// start checking the very first time 
-
-    iteration = 0L;
-    FloatIteration = 0.0;
-    real_iteration = 0;
-    phaseflag = 0;			// assume all type 5, 9 fractals same colour 
-    if (OutsideMethod >= TIERAZONFILTERS)
+    if (!BigNumFlag)
 	{
-	TZfilter.InitFilter(OutsideMethod, threshold, dStrands, nFDOption, UseCurrentPalette);		// initialise the constants used by Tierazon fractals
-	TZfilter.LoadFilterQ(q);
+	if (OutsideMethod == STARTRAIL)
+	    {
+	    int	i;
+	    for (i = 0; i < 16; i++)
+		tantable[i] = 0.0;
+	    }
+
+	InitTierazonFiltersDouble();
+	SetupDoubleJulia();
+	if (InitFractal(&z, &q) < 0) return BLUE;
 	}
-
-    if (juliaflag)
+    else if (precision <= DDPRECISION)
 	{
-	q = j;
-	z = (invert) ? invertz2(c) : c;
+	if (cBig.x.BigDouble2DD(&cDD.x) < 0) return 0L;
+	if (cBig.y.BigDouble2DD(&cDD.y) < 0) return 0L;
+	InitTierazonFiltersDD();
+	SetupDDJulia();
+	DDInitFractal(&zDD, &qDD);
+	}
+    else if (precision <= QDPRECISION)
+	{
+	if (cBig.x.BigDouble2QD(&cQD.x) < 0) return 0L;
+	if (cBig.y.BigDouble2QD(&cQD.y) < 0) return 0L;
+	InitTierazonFiltersQD();
+	SetupQDJulia();
+	QDInitFractal(&zQD, &qQD);
 	}
     else
 	{
-	q = (invert) ? invertz2(c) : c;
-	z = 0;
+	InitTierazonFiltersBig();
+	SetupBigJulia();
+	if (BigInitFractal() < 0) return BLUE;
 	}
 
-    if (InitFractal(&z, &q) < 0)
-	return(BLUE);
+// ============================================================
+// PRE-LOOP RUNTIME INITIALISATION
+// ============================================================
 
-    if (distest)
+// --- iteration state ---
+    iteration = 0;
+    real_iteration = 0;
+    FloatIteration = 0.0;
+
+    // --- flags ---
+    SpecialFlag = FALSE;
+    phaseflag = 0;
+    hooper = 0;
+
+    // --- periodicity ---
+    if (period_level == 0 || InsideMethod == ZMAG || OutsideMethod == STARTRAIL)
+	oldcolour = 32767;
+    else
+	oldcolour = 240;
+
+    savedand = 1;				// begin checking every other cycle
+    savedincr = 1;				// start checking the very first time 
+
+    close = 0.01;
+
+    // --- periodicity state -
+    saved = 0.0;
+    DDSaved = 0.0;
+    QDSaved = 0.0;
+    BigSaved = 0.0;
+
+    // --- orbit tracking (per arithmetic) ---
+    switch (MathType)
+	{
+	case DOUBLEFLOAT:
+	    magnitude = 0.0;
+	    min_orbit = 100000.0;
+	    break;
+
+	case DOUBLEDOUBLE:
+	    magnitude = 0.0;
+	    min_orbit = 100000.0;
+	    break;
+
+	case QUADDOUBLE:
+	    magnitude = 0.0;
+	    min_orbit = 100000.0;
+	    break;
+
+	case ARBITRARYPREC:
+	    magnitude = 0.0;
+	    min_orbit = 100000.0;
+	    break;
+	}
+    
+    if (!BigNumFlag && distest)
 	{
 //	rqlim = rqlim_save;		    /* start with regular bailout */
 //	if (distest != 1 || colors == 2)    /* not doing regular outside colors */
@@ -702,22 +458,34 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
     if (OutsideMethod == POTENTIAL)
 	rqlim = (potparam[2] > 0) ? potparam[2] : 4.0;
 
-    FloatIteration = 0.0;
     for EVER
 	{
 	if (calcmode == 'F')
 	    {
-	    OlderZ = OldZ;
-	    OldZ = z;
-	    }   
+	    switch (MathType)
+		{
+		case DOUBLEFLOAT:
+		    OlderZ = OldZ; OldZ = z; break;
 
+		case DOUBLEDOUBLE:
+		    DDOlderZ = DDOldZ; DDOldZ = zDD; break;
+
+		case QUADDOUBLE:
+		    QDOlderZ = QDOldZ; QDOldZ = zQD;  break;
+
+		case ARBITRARYPREC:
+		    BigOlderZ = BigOldZ; BigOldZ = zBig; break;
+		}
+	    }
+	// --- iteration limit ---
 	if (FloatIteration >= threshold)
-//    if (iteration >= threshold)
 	    break;
+
+	// --- update counters ---
 	iteration++;
 	FloatIteration++;
-	if (distest)
-	    {
+	if (!BigNumFlag && distest)			// --- distance estimator path (no point implementing anywhere except double)
+	    {			
 	    double ftemp;
 	 // Distance estimator for points near Mandelbrot set
 	 // Original code by Phil Wilson, hacked around by PB
@@ -751,67 +519,303 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
 	    }
 	else						// the usual case
 	    {
-	    result = RunFractal(&z, &q);
+	    // --- arithmetic-specific fractal step ---
+	    switch (MathType)
+		{
+		case DOUBLEFLOAT:
+		    result = RunFractal(&z, &q);
+		    break;
+
+		case DOUBLEDOUBLE:
+		    result = DDRunFractal(&zDD, &qDD);
+		    break;
+
+		case QUADDOUBLE:
+		    result = QDRunFractal(&zQD, &qQD);
+		    break;
+
+		case ARBITRARYPREC:
+		    result = BigRunFractal();
+		    break;
+		}
+
 	    if (result == -1)				// divide by zero error
 		return(BLUE);				// division by zero (Was Blue)
 	    else if (result == 1)			// escape time
 		break;
 	    }
 
-	TempPt = z;
-	OscProcess.ChangeCoordSystem(&z.x, &z.y, &TempZ, TempPt.x, TempPt.y, (double)iteration, CoordSystem);
-							// result = 0 so continue iteration
-	if (OutsideMethod == STARTRAIL)
+	// --- coordinate transform (double only at this stage) ---
+	if (MathType == DOUBLEFLOAT)
 	    {
-	    if(0 < iteration && iteration < 16)
-		tantable[iteration - 1] = z.y/(z.x + 0.000001);
+	    TempPt = z;
+	    OscProcess.ChangeCoordSystem(&z.x, &z.y, &TempZ, TempPt.x, TempPt.y, (double)iteration, CoordSystem);
 	    }
-	else if (OutsideMethod == EPSCROSS)
-	    {
-	    hooper = 0;
-	    if (fabs(z.x) < close)
-		{
-		hooper = 1; // close to y axis
-		break;
-		}
-	    else if (fabs(z.y) < close)
-		{
-		hooper = 2; // close to x axis
-		break;
-		}
-	    }
-	else if (InsideMethod == BOF60 || InsideMethod == BOF61)
-	    {
-	    magnitude = z.CSumSqr();
-	    if (magnitude < min_orbit)
-		{
-		min_orbit = magnitude;
-		min_index = iteration + 1L;
-		}
-	    }
-	else if (OutsideMethod >= TIERAZONFILTERS)
-	    TZfilter.DoTierazonFilter(z, &iteration);
 
-	if (iteration > oldcolour)			// check periodicity
+	// result = 0 so continue iteration
+	
+	    // --- feature processing ---
+	if (MathType == DOUBLEFLOAT)		// Step 1 — Double(fully wired)
 	    {
-	    if ((iteration & savedand) == 0)		// time to save a new value
+	    // StarTrail
+	    if (OutsideMethod == STARTRAIL)
 		{
-		saved = z;
-		if (--savedincr == 0)			// time to lengthen the periodicity?
+		if (iteration < 16)
+		    tantable[iteration - 1] = z.y / (z.x + 0.000001);
+		}
+
+	    // EPSCROSS
+	    else if (InsideMethod == EPSCROSS)
+		{
+		hooper = 0;
+
+		if (fabs(z.x) < close)
 		    {
-		    savedand = (savedand << 1) + 1;	// longer periodicity
-		    savedincr = 4;			// restart counter
+		    hooper = 1; // close to y axis
+		    break;
+		    }
+
+		if (fabs(z.y) < close)
+		    {
+		    hooper = 2; // close to x axis
+		    break;
 		    }
 		}
-	    else		     			// check against an old save
+
+	    // BOF60 / BOF61
+	    else if (InsideMethod == BOF60 || InsideMethod == BOF61)
 		{
-		if (fabs(saved.x - z.x) < closenuff)
-		    if (fabs(saved.y - z.y) < closenuff)
-			iteration = threshold;
+		magnitude = z.CSumSqr();
+
+		if (magnitude < min_orbit)
+		    {
+		    min_orbit = magnitude;
+		    min_index = (long)iteration + 1L;
+		    }
 		}
-      	    }
+
+	    // Tierazon
+	    else if (OutsideMethod >= TIERAZONFILTERS)
+		{
+		TZfilter.DoTierazonFilter(z, &iteration);
+		}
+	    }
+	//  Step 2 — DD
+	else if (MathType == DOUBLEDOUBLE)		    //  Step 2 — DD
+	    {
+	    // EPSCROSS
+	    if (InsideMethod == EPSCROSS)
+		{
+		hooper = 0;
+
+		if (abs(zDD.x) < close)
+		    {
+		    hooper = 1;
+		    break;
+		    }
+
+		if (abs(zDD.y) < close)
+		    {
+		    hooper = 2;
+		    break;
+		    }
+		}
+
+	    // BOF60 / BOF61
+	    else if (InsideMethod == BOF60 || InsideMethod == BOF61)
+		{
+		magnitude = zDD.CSumSqr();
+
+		if (magnitude < min_orbit)
+		    {
+		    min_orbit = magnitude;
+		    min_index = (long)iteration + 1L;
+		    }
+		}
+
+	    // Tierazon
+	    else if (OutsideMethod >= TIERAZONFILTERS)
+		{
+		DDTemp = zDD;
+		tempComplex;
+		tempComplex.x = to_double(DDTemp.x);
+		tempComplex.y = to_double(DDTemp.y);
+		TZfilter.DoTierazonFilter(tempComplex, &iteration);
+		}
+	    }
+	else if (MathType == QUADDOUBLE)			// Step 3 — QD
+	    {
+	    if (InsideMethod == EPSCROSS)
+		{
+		hooper = 0;
+
+		if (abs(zQD.x) < close)
+		    {
+		    hooper = 1;
+		    break;
+		    }
+
+		if (abs(zQD.y) < close)
+		    {
+		    hooper = 2;
+		    break;
+		    }
+		}
+	    else if (InsideMethod == BOF60 || InsideMethod == BOF61)
+		{
+		magnitude = zQD.CSumSqr();
+
+		if (magnitude < min_orbit)
+		    {
+		    min_orbit = magnitude;
+		    min_index = (long)iteration + 1L;
+		    }
+		}
+	    else if (OutsideMethod >= TIERAZONFILTERS)
+		{
+		QDTemp = zQD;
+		tempComplex;
+		tempComplex.x = to_double(QDTemp.x);
+		tempComplex.y = to_double(QDTemp.y);
+		TZfilter.DoTierazonFilter(tempComplex, &iteration);
+		}
+	    }
+	else if (MathType == ARBITRARYPREC)	    // Step 4 — Big
+	    {
+	    if (InsideMethod == EPSCROSS)
+		{
+		hooper = 0;
+
+		Complex temp = zBig.CBig2Double();
+
+		if (fabs(temp.x) < close)
+		    {
+		    hooper = 1;
+		    break;
+		    }
+
+		if (fabs(temp.y) < close)
+		    {
+		    hooper = 2;
+		    break;
+		    }
+		}
+	    else if (InsideMethod == BOF60 || InsideMethod == BOF61)
+		{
+		magnitude = zBig.CSumSqr();
+
+		if (magnitude < min_orbit)
+		    {
+		    min_orbit = magnitude;
+		    min_index = (long)iteration + 1L;
+		    }
+		}
+	    else if (OutsideMethod >= TIERAZONFILTERS)
+		{
+		tempComplex = zBig.CBig2Double();
+		TZfilter.DoTierazonFilter(tempComplex, &iteration);
+		}
+	    }
+
+	// --- periodicity check ---
+	switch (MathType)
+	    {
+	    case DOUBLEFLOAT:
+		{
+		if (iteration > oldcolour)
+		    {
+		    if (!(iteration & savedand))
+			{
+			if (z == saved)
+			    {
+			    iteration = threshold;
+			    break;
+			    }
+
+			saved = z;
+			}
+		    }
+		}
+		break;
+
+	    case DOUBLEDOUBLE:
+		if (iteration > oldcolour)			// check periodicity
+		    {
+		    if ((iteration & savedand) == 0)		// time to save a new value
+			{
+			DDSaved = zDD;
+			if (--savedincr == 0)			// time to lengthen the periodicity?
+			    {
+			    savedand = (savedand << 1) + 1;	// longer periodicity
+			    savedincr = 4;			// restart counter
+			    }
+			}
+		    else		     			// check against an old save
+			{
+			dd_real   xAbs = DDSaved.x - zDD.x;
+			dd_real   yAbs = DDSaved.y - zDD.y;
+
+			if (abs(xAbs) < DDCloseEnough)
+			    if (abs(yAbs) < DDCloseEnough)
+				iteration = threshold;
+			}
+		    }
+		break;
+
+	    case QUADDOUBLE:
+		if (iteration > oldcolour)
+		    {
+		    if ((iteration & savedand) == 0)		// time to save a new value
+			{
+			QDSaved = zQD;
+			if (--savedincr == 0)			// time to lengthen the periodicity?
+			    {
+			    savedand = (savedand << 1) + 1;	// longer periodicity
+			    savedincr = 4;			// restart counter
+			    }
+			}
+		    else		     			// check against an old save
+			{
+			qd_real   xAbs = QDSaved.x - zQD.x;
+			qd_real   yAbs = QDSaved.y - zQD.y;
+
+			if (abs(xAbs) < QDCloseEnough)
+			    if (abs(yAbs) < QDCloseEnough)
+				iteration = threshold;
+			}
+		    }
+		break;
+
+	    case ARBITRARYPREC:
+		// leave as-is for now (or plug original logic later)
+		if (iteration > oldcolour)			// check periodicity
+		    {
+		    if ((iteration & savedand) == 0)		// time to save a new value
+			{
+			BigSaved = zBig;
+			if (--savedincr == 0)			// time to lengthen the periodicity?
+			    {
+			    savedand = (savedand << 1) + 1;	// longer periodicity
+			    savedincr = 4;			// restart counter
+			    }
+			}
+		    else		     			// check against an old save
+			{
+			BigDouble   xAbs = BigSaved.x - zBig.x;
+			BigDouble   yAbs = BigSaved.y - zBig.y;
+
+			if (xAbs.BigAbs() < BigCloseEnough)
+			    if (yAbs.BigAbs() < BigCloseEnough)
+				iteration = threshold;
+			}
+		    }
+
+		break;
+	    }
+
 	}
 
+    // --- periodicity state update ---
     if (iteration >= threshold && period_level)
 	oldcolour = 0;		// check periodicity immediately next time
     else
@@ -820,13 +824,36 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
 //    if (juliaflag && ShowOrbits)
 //	plot_orbits(special, NUM_ORBITS);
 
+ // --- Tierazon finalisation ---
     if (OutsideMethod >= TIERAZONFILTERS)
 	{
-	TZfilter.EndTierazonFilter(z, &iteration, TrueCol);
+	switch (MathType)
+	    {
+	    case DOUBLEFLOAT:
+		TZfilter.EndTierazonFilter(z, &iteration, TrueCol);
+		break;
+
+	    case DOUBLEDOUBLE:
+		tempComplex.x = to_double(zDD.x);
+		tempComplex.y = to_double(zDD.y);
+		TZfilter.EndTierazonFilter(tempComplex, &iteration, TrueCol);
+		break;
+
+	    case QUADDOUBLE:
+		tempComplex.x = to_double(zQD.x);
+		tempComplex.y = to_double(zQD.y);
+		TZfilter.EndTierazonFilter(tempComplex, &iteration, TrueCol);
+		break;
+
+	    case ARBITRARYPREC:
+		tempComplex = zBig.CBig2Double();
+		TZfilter.EndTierazonFilter(tempComplex, &iteration, TrueCol);
+		break;
+	    }
+
 	return iteration;
 	}
-
-    else if (OutsideMethod == STARTRAIL)
+    else if (OutsideMethod == STARTRAIL)		// --- StarTrail ---
 	{
 	int i;
 	double diff;
@@ -842,10 +869,12 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
 	    }
 	}
 
+    // --- special colour --
     if (SpecialFlag)
-	iteration = special;		// flag for special colour
+	iteration = (type == CUBIC) ? SPECIALINDEX : special;		// flag for special colour
 
-    if (distest)
+    // --- distance estimation (double only) ---
+    if (MathType == DOUBLEFLOAT && distest) 
 	{
 	double	dist, temp;
 
@@ -889,10 +918,53 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
 //	z = dem_new;
 	}
 
+
+
+    // --- final colouring ---
     if (iteration < threshold)
 	{
-//	DoFilter(InsideMethod, hooper);
-	DoFilter(OutsideMethod, hooper);
+	switch (MathType)
+	    {
+	    case DOUBLEFLOAT:
+		iteration = DoFilterT<Complex, double>(
+		    iteration, z, OutsideMethod, hooper,
+		    threshold, colours, decomp, biomorph,
+		    rqlim, special, logval, logtable,
+		    colors, TrueCol, potparam);
+		break;
+
+	    case DOUBLEDOUBLE:
+		tempComplex.x = to_double(zDD.x);
+		tempComplex.y = to_double(zDD.y);
+
+		iteration = DoFilterT<Complex, double>(
+		    iteration, tempComplex, OutsideMethod, hooper,
+		    threshold, colours, decomp, biomorph,
+		    rqlim, special, logval, logtable,
+		    colors, TrueCol, potparam);
+		break;
+
+	    case QUADDOUBLE:
+		tempComplex.x = to_double(zQD.x);
+		tempComplex.y = to_double(zQD.y);
+
+		iteration = DoFilterT<Complex, double>(
+		    iteration, tempComplex, OutsideMethod, hooper,
+		    threshold, colours, decomp, biomorph,
+		    rqlim, special, logval, logtable,
+		    colors, TrueCol, potparam);
+		break;
+
+	    case ARBITRARYPREC:
+		tempComplex = zBig.CBig2Double();
+
+		iteration = DoFilterT<Complex, double>(
+		    iteration, tempComplex, OutsideMethod, hooper,
+		    threshold, colours, decomp, biomorph,
+		    rqlim, special, logval, logtable,
+		    colors, TrueCol, potparam);
+		break;
+	    }
 	}
     else
 	{
@@ -900,124 +972,70 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
 	    iteration = (int)(sqrt(min_orbit) * 75.0);
 	else if (InsideMethod == BOF61)
 	    iteration = min_index;
-	else if (InsideMethod == ZMAG)
-	    iteration = (int)((z.CSumSqr()) * (threshold >> 1) + 1);
 	else
 	    iteration = threshold;
 	}
 
-//    plot_pixel:
-
-//    if (type == RATIONALMAP)
-//	return(iteration);
+    // --- phase adjustments ---
     if ((type == NEWTON || type == NEWTBASIN) && subtype != 'N')
-	iteration = color;						// Newton root colour
+	iteration = color;
 
-    if ((type == SPECIALNEWT || type == MATEIN) && special != 0)  // split colours
+    if ((type == SPECIALNEWT || type == MATEIN) && special != 0)
 	{
-	if (phaseflag == 1)				// second phase
+	if (phaseflag == 1)
 	    iteration += special;
-	else if (phaseflag == 2)			// third phase
+	else if (phaseflag == 2)
 	    iteration += (special << 1);
-	}						// default first phase
+	}
 
+    // --- forward difference (placeholder / fwd diff) ---
     if (calcmode == 'F' || smoothing)
 	{
 	SlopeError = 1.0e-9;
-	CalcFloatIteration(SlopeError, wpixels, row, col, z, OldZ, OlderZ);
+	// Step 1: compute (template)
+	switch (MathType)
+	    {
+	    case DOUBLEFLOAT:
+		FloatIteration = ComputeFloatIterationT<Complex>(FloatIteration, SlopeError, z, OldZ, OlderZ, type, subtype, degree, rqlim, threshold);
+		break;
+
+	    case DOUBLEDOUBLE:
+		FloatIteration = ComputeFloatIterationT<DDComplex>(FloatIteration, SlopeError, zDD, DDOldZ, DDOlderZ, type, subtype, degree, rqlim, threshold);
+		break;
+
+	    case QUADDOUBLE:
+		FloatIteration = ComputeFloatIterationT<QDComplex>(FloatIteration, SlopeError, zQD, QDOldZ, QDOlderZ, type, subtype, degree, rqlim, threshold);
+		break;
+
+	    case ARBITRARYPREC:
+		FloatIteration = ComputeFloatIterationT<BigComplex>(FloatIteration, SlopeError, zBig, BigOldZ, BigOlderZ, type, subtype, degree, rqlim, threshold);
+		break;
+	    }
+
+	// Step 2: pixel adjustments (PUT IT HERE)
+	if ((type == SPECIALNEWT || type == MATEIN) && special != 0)
+	    {
+	    if (phaseflag == 1)
+		FloatIteration += special;
+	    else if (phaseflag == 2)
+		FloatIteration += (special << 1);
+
+	    if (color > threshold)
+		color = threshold;
+	    }
+	if ((long)FloatIteration >= threshold)
+	    FloatIteration = INSIDEPIXEL;
+	else if (SpecialFlag)
+	    FloatIteration = SPECIALPIXEL;
+
+	// Step 3: store
+	DWORD	index = ((DWORD)row * (DWORD)width) + (DWORD)col;
+	if (col >= 0 && col < xdots - 1 && row >= 0 && row < ydots - 1)
+	    gManp->wpixels[index] = (float)FloatIteration;
 	}
+	
     return(iteration);
     }
-
-/**************************************************************************
-    Invert fractal
-**************************************************************************/
-
-Complex	CPixel::invertz2(Complex  & Cmplx1)
-    {
-    Complex	temp;
-    double	tempsqrx;
-
-    temp.x = Cmplx1.x;
-    temp.y = Cmplx1.y;
-    temp.x -= f_xcenter; temp.y -= f_ycenter;	// Normalize values to center of circle
-
-    tempsqrx = sqr(temp.x) + sqr(temp.y);	// Get old radius
-    if (fabs(tempsqrx) > FLT_MIN)
-	tempsqrx = f_radius / tempsqrx;
-    else
-	tempsqrx = FLT_MAX;			// a big number, but not TOO big
-    temp.x *= tempsqrx;
-    temp.y *= tempsqrx;				// Perform inversion
-    temp.x += f_xcenter;
-    temp.y += f_ycenter;			// Renormalize
-    return  temp;
-    }
-
-/**************************************************************************
-MPFR DIRECT ROUTING FOR SELECTED TIERAZON SUBTYPES
-
-Certain Tierazon/Flarium fractals (e.g. subtypes 3, 51, 126, 129)
-are numerically unstable or outright incorrect when evaluated using
-lower-precision arithmetic (double-double / quad-double).
-
-These formulas typically involve:
-    - iterative accumulation (e.g. Phoenix-style)
-    - higher-order terms
-    - or transcendental functions (sin/cos/exp)
-
-which cause precision loss or divergence in DD/QD long before the
-interesting structure is reached.
-
-To ensure correctness, we detect these subtypes early (here in calc_frac)
-and force execution through the MPFR (BigComplex) path.
-
-IMPORTANT:
-- This decision must be made here because arithmetic type selection
-  (DD/QD/Big) happens before fractal iteration begins.
-- Routing later (inside Tierazon functions) is too late.
-- We bypass DD/QD entirely to avoid incorrect intermediate states.
-
-PERFORMANCE NOTE:
-- MPFR is slower, but these subtypes are not reliable in DD/QD anyway.
-- This is a correctness-first decision.
-
-FUTURE WORK:
-- Investigate adaptive precision selection per pixel or per region
-- Optimise MPFR path (reuse temporaries, reduce allocations)
-- Possibly re-enable DD/QD for these subtypes if stability improves
-
-**************************************************************************/
-
-/*
-static bool IsDirectMPFRTierazonSubtype(int subtype)
-    {
-    switch (subtype)
-	{
-//	case 3:		// removed because we fixed DD/QD trig
-//	case 51:	// removed because it crashes mpfr
-	case 126:
-	case 129:
-	    return true;
-	default:
-	    return false;
-	}
-    }
-
-static bool ForceDirectMPFRForCurrentFractal(int subtype, WORD type)
-    {
-    // Pseudocode:
-    // 1. Is the current fractal a Tierazon/Flarium style fractal?
-    // 2. If not, return false.
-    // 3. Read the current Tierazon subtype from the existing settings/state.
-    // 4. Return IsDirectMPFRTierazonSubtype(subtype).
-
-    if (type != TIERAZON)   // replace with your real condition
-	return false;
-
-    return IsDirectMPFRTierazonSubtype(subtype);
-    }
-*/
 
 /************************************************************************
 	Calculate Fractal using a "standard" mode
@@ -1025,83 +1043,59 @@ static bool ForceDirectMPFRForCurrentFractal(int subtype, WORD type)
 
 long	CPixel::calc_frac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
     {
-    if (BigNumFlag)
-	{
-/*
-	// Force MPFR for known precision-sensitive Tierazon subtypes
-	// (DD/QD produce incorrect results for these)
-	if (ForceDirectMPFRForCurrentFractal(subtype, type))
-	    return BigCalcFrac(hwnd, row, col, user_data);
-	if (*MathType == DOUBLEDOUBLE)
-	    return (DDCalcFrac(hwnd, row, col, user_data));
-	else if (*MathType == QUADDOUBLE)
-	    return (QDCalcFrac(hwnd, row, col, user_data));
-	else if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
-	    return (QDCalcFrac(hwnd, row, col, user_data));		// Arbitrary precision isn't available yet so let's push quad double as far as we can
-	else
-*/
-	    return (BigCalcFrac(hwnd, row, col, user_data));
-	}
-
-//    if (NonStandardFractal)						// does fractal use standard plotting mode?
-//	return(-1);
-
     if (pairflag)							// half size screens: only do every second row / col
 	if (row % pairflag || col % pairflag)
 	    if (row != (int)ydots - 1)				// must trigger for last line
 		return(threshold);
-    if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)		// save calcs in rotating, just remap
+
+    if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)
 	{
+	// --- handle row change ---
 	if (row != oldrow)
 	    {
-	    if (pairflag && row)					// draw row for right hand image
-		draw_right_image((short)(oldrow));			// PHD to fix
-	    switch (RotationAngle)
-		{
-		case NORMAL:					// normal
-		    c.y = yymax - row * ygap;
-		    break;
-		case 90:						// 90 degrees
-		    c.x = yymax - row * xgap;
-		    break;
-		case 180:						// 180 degrees
-		    c.y = -(yymax - row * ygap);
-		    break;
-		case 270:						// 270 degrees
-		    c.x = -(yymax - row * xgap);
-		    break;
-		}
-	    oldrow = row;
+	    if (pairflag && row)
+		draw_right_image((short)(oldrow));
 	    }
-	if (col != oldcol)
-	    {
-	    switch (RotationAngle)
-		{
-		case NORMAL:					// normal
-		    c.x = col * xgap + hor;
-		    break;
-		case 90:						// 90 degrees
-		    c.y = col * ygap + hor;
-		    break;
-		case 180:						// 180 degrees
-		    c.x = -(col * xgap + hor);
-		    break;
-		case 270:						// 270 degrees
-		    c.y = -(col * ygap + hor);
-		    break;
-		}
 
-	    oldcol = col;
+	if (BigNumFlag)
+	    {
+	    ComputeRotatedCoordsT(row, col, oldrow, oldcol, RotationAngle, cBig.x, cBig.y, Big_xgap, Big_ygap, Big_yymax, BigHor);
+	    }
+	else
+	    {
+	    ComputeRotatedCoordsT(row, col, oldrow, oldcol, RotationAngle, c.x, c.y, xgap, ygap, yymax, hor);
 	    }
 	}
     else
 	{
-	double  zero = 0.0;
-	Mat.DoTransformation(&(c.x), &(c.y), &zero, col * xgap + hor, yymax - row * ygap, 0.0);
+	if (BigNumFlag)
+	    {
+	    BigDouble  zero = 0.0;
+	    BigDouble brow(row);
+	    BigDouble bcol(col);
+	    BigMat.DoTransformation(&cBig.x, &cBig.y, &zero, Big_xgap * bcol + BigHor, Big_yymax - Big_xgap * brow, 0.0);
+	    }
+	else
+	    {
+	    double  zero = 0.0;
+	    Mat.DoTransformation(&(c.x), &(c.y), &zero, col * xgap + hor, yymax - row * ygap, 0.0);
+	    }
 	}
+
     if (user_data(hwnd) == -1)
 	return(-1);
-    color = (type == CIRCLESQ || type == FPCIRCLE) ? ((int)(floor(c.CSumSqr())) & 0x00ff) : dofract(hwnd, row, col);
+
+    bool useExtended = (fractalspecific[type].flags & USEDOUBLEDOUBLE);
+
+    if (type == CIRCLESQ || type == FPCIRCLE)
+	{
+	color = ((int)(floor(c.CSumSqr())) & 0x00ff);
+	}
+    else
+	{
+	color = dofract(hwnd, row, col);
+	}
+
     reset_period = 0;
 
     if (color > threshold && decomp <= threshold)		// for small thresholds, we can still have higher decomp levels

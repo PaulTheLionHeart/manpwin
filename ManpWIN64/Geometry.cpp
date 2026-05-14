@@ -6,9 +6,8 @@
 */
 
 #include "OtherFunctions.h"
+#include "Manp.h"
 
-#define MIN(a,b) (a <= b ? a : b)
-#define MAX(a,b) (a >= b ? a : b)
 #define MAXPOINTS 16
 
 /**************************************************************************
@@ -16,7 +15,6 @@
 ***************************************************************************/
 
 int	COtherFunctions::DoGeometry(void)
-
     {
     int	    i, j, k;
     double  phase, size, x, y, t;
@@ -27,11 +25,11 @@ int	COtherFunctions::DoGeometry(void)
     DWORD   colour;
 
     srand((unsigned)time(NULL));			// randomize things
-    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double) (ydots - 1) / mandel_width;
+    xscale = (double) (gManp->xdots - 1) / (mandel_width * ScreenRatio);
+    yscale = (double) (gManp->ydots - 1) / mandel_width;
     for (i = 0; i < count; i++)
 	{
-	colour = (count < threshold) ? threshold * (DWORD)i / count : (DWORD)(i % threshold);
+	colour = (count < gManp->threshold) ? gManp->threshold * (DWORD)i / count : (DWORD)(i % gManp->threshold);
 	size = h * (1 - sqrt((double)rand() / 32767.0)) / 50;
 	x = rand() / 32767.0;
 	y = rand() / 32767.0;

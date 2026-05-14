@@ -15,7 +15,6 @@
 #define	    MAX_BUMP_MAPPING_DEPTH		100
 #define	    DEFAULT_BUMP_MAPPING_STRENGTH	50
 #define	    MAXDERPRECISION			150				// after this derivative slope calcs runs out of precision 
-#define	    WIDTHBYTES(i)			((i+31)/32*4)
 #define	    PI					3.141592653589793238462643383279
 
 #define	    NOSLOPE				0
@@ -23,6 +22,53 @@
 #define	    DERIVSLOPE				2
 
 #pragma once
+
+// There are so many arguments to pass into the template, so let's make a struct to hold it all
+struct FwdDiffContext
+    {
+    // --- environment ---
+    HWND hwnd;
+    int NumThreads;
+    char* StatusBarInfo;
+    bool* ThreadComplete;
+
+    // --- fractal config ---
+    int subtype;
+    char variety;
+    double* param;
+    RGBTRIPLE SpecialColour;
+    int PaletteShift;
+    WORD *degree;
+    // --- rendering ---
+    CDib* Dib;
+    std::vector<float>* wpixels;
+    CPlot* Plot;
+
+    // --- geometry ---
+    int xdots;
+    int ydots;
+    int width;
+
+    // --- threading ---
+    std::vector<std::pair<int, int>>* pixelOrder;
+    std::atomic<int>* workIndex;
+    int totalPixels;
+    };
+
+//extern	inline void UpdateProgress(std::atomic<int>* workIndex, int totalPixels, char* StatusBarInfo, int NumThreads);
+
+typedef	struct MySlopeData
+    {
+    CTrueCol	*TrueCol;			// colouring scheme
+    int		NumThreads;
+    int		i;
+    // stuff for new plotting modes
+    std::vector<std::pair<int, int>>* pixelOrder;
+    std::atomic<int>* workIndex;
+    int		totalPixels;
+    HANDLE	ghMutex;
+    } SlopeThreadData, *pSlopeThreadData;
+
 class CSlope
     {
     public:
@@ -31,70 +77,37 @@ class CSlope
 
 	int	RunSlopeDerivative(HWND GlobalHwnd, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtype, int NumThreads, int thread, Complex j, double mandel_width, double hor, double vert, 
 								BYTE BigNumFlag, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
-								BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, int precision, double ColourSpeedIn, HANDLE ghMutex);
+								BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, int precision, double ColourSpeedIn, HANDLE ghMutex, std::vector<std::pair<int, int>> *pixelOrder,
+								std::atomic<int> *workIndex, int totalPixels);
 	int	RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, 
 								BYTE BigNumFlag, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
-								std::vector <float> &wpixels, BYTE juliaflag, int xdots, int ydots, int width, WORD *degreeIn, int precision, double ColourSpeedIn);
-	int	RunSlopeFwdDiffDouble(int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
-								double rqlim, long threshold, CDib *Dib, std::vector <float> &wpixels, BYTE juliaflag, int xdots, int ydots, int width);
-	int	RunSlopeFwdDiffDD(int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
-								BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth,
-								double rqlim, long threshold, CDib *Dib, std::vector <float> &wpixels, BYTE juliaflag, int xdots, int ydots, int width);
-	int	RunSlopeFwdDiffQD(int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
-								BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth,
-								double rqlim, long threshold, CDib *Dib, std::vector <float> &wpixels, BYTE juliaflag, int xdots, int ydots, int width);
-	int	RunSlopeFwdDiffBig(int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, Complex j, double mandel_width, double hor, double vert, double xgap, double ygap,
-								BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth,
-								double rqlim, long threshold, CDib *Dib, std::vector <float> &wpixels, BYTE juliaflag, int xdots, int ydots, int width);
+								std::vector <float> *wpixels, BYTE juliaflag, int xdots, int ydots, int width, WORD *degreeIn, int precision, double ColourSpeedIn, std::vector<std::pair<int, int>> *pixelOrder,
+								std::atomic<int> *workIndex, int totalPixels);
+
 	RGBTRIPLE GetSmoothedColour(double fIter, double color_speed, CTrueCol &TrueCol, CPlot *Plot);
 
-
-
-
-	void	InitRender(long threshold, CTrueCol *TrueCol, CDib *Dib, std::vector <float> &wpixels, int PaletteShift, double bump_transfer_factor, int PaletteStart, double lightDirectionDegrees, 
-		double bumpMappingDepth, double bumpMappingStrength);
+	void	InitRender(long threshold, CTrueCol *TrueCol, CDib *Dib, /*std::vector <float> *wpixels, */int PaletteShift, double bump_transfer_factor, int PaletteStart, double lightDirectionDegrees, 
+		double bumpMappingDepth, double bumpMappingStrength, RGBTRIPLE SpecialColourIn);
 	int	RenderSlope(int xdots, int ydots, int PertColourMethod, int PalOffset, double IterDiv, double ColourSpeedIn);
-	void	DoSlopeFwdDiffFn(Complex *z, Complex *q);
-	void	DoBigSlopeFwdDiffFn(BigComplex *z, BigComplex *q, BigComplex *bBig, BigComplex *aa3Big);
-	void	DoDDSlopeFwdDiffFn(DDComplex *z, DDComplex *q, DDComplex *bDD, DDComplex *aa3DD);
-	void	DoQDSlopeFwdDiffFn(QDComplex *z, QDComplex *q, QDComplex *bQD, QDComplex *aa3QD);
+
 	void	SlopeIsExiting(void);
 	bool	EndSlope;
 	double	param[NUMSLOPEDERIVPARAM];
 	int	PaletteStart;
 	int	PaletteShift = 0;
+	// Art Matrix Cubic
+	RGBTRIPLE	SpecialColour;
 
     private:
-	double	cdot(Complex a, Complex b);
-	double	GiveReflection(Complex j, BYTE juliaflag, Complex Z, int &iterations, double &smoothIter, double rqlim, long threshold, Complex v);
-	double	GiveBigReflection(Complex j, BYTE juliaflag, BigComplex C, int &iterations, double &smoothIter, double rqlim, long threshold, Complex v);
-	double	GiveDDReflection(Complex j, BYTE juliaflag, DDComplex cDD, int &iterations, double &smoothIter, double rqlim, long threshold, Complex v);
-	double	GiveQDReflection(Complex j, BYTE juliaflag, QDComplex cQD, int &iterations, double &smoothIter, double rqlim, long threshold, Complex v);
-	int	BigDouble2DD(dd_real *out, BigDouble *in);
-	int	BigDouble2QD(qd_real *out, BigDouble *in);
+
 	int	ConvertBignumsDD(BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, dd_real *DDxgap, dd_real *DDygap, dd_real *DDhor, dd_real *DDvert, dd_real *DDWidth);
 	int	ConvertBignumsQD(BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, qd_real *QDxgap, qd_real *QDygap, qd_real *QDhor, qd_real *QDvert, qd_real *QDWidth);
 	RGBTRIPLE compute_colour(CTrueCol *TrueCol, Complex j, BYTE juliaflag, Complex c, BigComplex cBig, QDComplex cQD, DDComplex cDD, double rqlim, long threshold, BYTE BigNumFlag, Complex v, bool *Time2Exit, 
 		int &iterations, double &reflectionOut, double &smoothIterations);
 	void	Create2DVector(Complex *v, double LightAngle);
-	double	getGradientX(std::vector <float> &wpixels, int index, int width);
-	double	getGradientY(std::vector <float> &wpixels, int index, int width, int height);
+	double	getGradientX(std::vector <float> *wpixels, int index, int width);
+	double	getGradientY(std::vector <float> *wpixels, int index, int width, int height);
 	int	changeBrightnessOfColorScaling(int rgb, double delta, double bump_transfer_factor);
-	void	InitFwd(BYTE BigNumFlag, BYTE juliaflag, 
-		DDComplex cDD, DDComplex *zDD, DDComplex *qDD, DDComplex *aDD, DDComplex *bDD, DDComplex *vDD, DDComplex *a2DD, DDComplex *aa3DD,
-		QDComplex cQD, QDComplex *zQD, QDComplex *qQD, QDComplex *aQD, QDComplex *bQD, QDComplex *vQD, QDComplex *a2QD, QDComplex *aa3QD,
-		BigComplex cBig, BigComplex *zBig, BigComplex *qBig, BigComplex *aBig, BigComplex *bBig, BigComplex *vBig, BigComplex *a2Big, BigComplex *aa3Big,
-		Complex j, Complex c, Complex *z, Complex *q);
-	void	InitFwdDouble(BYTE juliaflag, Complex j, Complex c, Complex *z, Complex *q);
-	void	InitFwdDD(BYTE juliaflag, 
-		DDComplex cDD, DDComplex *zDD, DDComplex *qDD, DDComplex *aDD, DDComplex *bDD, DDComplex *vDD, DDComplex *a2DD, DDComplex *aa3DD,
-		Complex j, Complex c, Complex *z, Complex *q);
-	void	InitFwdQD(BYTE juliaflag,
-		QDComplex cQD, QDComplex *zQD, QDComplex *qQD, QDComplex *aQD, QDComplex *bQD, QDComplex *vQD, QDComplex *a2QD, QDComplex *aa3QD, 
-		Complex j, Complex c, Complex *z, Complex *q);
-	void	InitFwdBig(BYTE juliaflag,
-		BigComplex cBig, BigComplex *zBig, BigComplex *qBig, BigComplex *aBig, BigComplex *bBig, BigComplex *vBig, BigComplex *a2Big, BigComplex *aa3Big,
-		Complex j, Complex c, Complex *z, Complex *q);
 
 	HWND	hwnd;
 	int	NumThreads;
@@ -109,7 +122,6 @@ class CSlope
 	CTrueCol *TrueCol;
 	CDib	*Dib;
 	CBigTrig	BigTrig;		// alternative thread-friendly trig functions
-	std::vector<float> &wpixels;
 	double	bump_transfer_factor, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, LightHeight;
 	double	xgap, ygap;
 	BigDouble   Big_xgap, Big_ygap;
@@ -132,10 +144,7 @@ class CSlope
 	const int MaxColorComponentValue = 255;
 	static RGBTRIPLE color[3];	// 24-bit rgb color
 	int	StripStart;
-	int	effectiveThreads;	// actual running threads
 	int	StripMult;		// e.g. 4 or 8
-	int	TotalStrips;		// effectiveThreads * StripMult
-	int	StripWidth;		// (xdots + TotalStrips - 1) / TotalStrips
 	int	subtype;
 	int	SlopeDegree = 2;	// used to tell FwdDiff algorithm the degree of the polymomial for slope calculations
 	CPlot	Plot;
@@ -143,7 +152,6 @@ class CSlope
 	double	ColourSpeed = 0.0;
 
 	// Art Matrix Cubic
-	WORD	SpecialColour;
 	Complex	t2, t3, a, b, v, a2, aa3;
 	BigComplex	zNewtonBig;
 	DDComplex	zNewtonDD;

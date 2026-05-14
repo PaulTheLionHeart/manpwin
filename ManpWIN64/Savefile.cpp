@@ -8,12 +8,13 @@
 #include <stdio.h>
 #include <string.h>
 #include "manpwin.h"
+#include "manp.h"
 
 int     save_file_type;
 
-extern	double	hor;			/* horizontal address */
-extern	double	vert;			/* vertical address */
-extern	double	mandel_width;		/* width of display */
+//extern	double	hor;			/* horizontal address */
+//extern	double	vert;			/* vertical address */
+//extern	double	mandel_width;		/* width of display */
 
 extern	char	MPGPath[];		// path for MPEG files
 extern	char	GIFPath[];		// path for GIF files
@@ -422,7 +423,7 @@ void	SaveFile (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
     switch (save_file_type)
 	{
 	case FILE_PAR:
-	    output_batch(hor, vert, mandel_width, hwnd, lpstrFileName);
+	    output_batch(gManp->hor, gManp->vert, gManp->mandel_width, hwnd, lpstrFileName);
 	    break;
 	case FILE_KFR:
 	    WriteKallesFile(hwnd, lpstrFileName);

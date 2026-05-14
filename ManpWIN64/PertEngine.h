@@ -1,4 +1,3 @@
-#pragma once
 #include <windows.h>
 #include "mpfr.h"
 //#include "Point.h"
@@ -34,6 +33,8 @@
 #define max(a,b)		(((a) > (b)) ? (a) : (b))
 #define min(a,b)		(((a) < (b)) ? (a) : (b))
 
+#pragma once
+
 struct StoreReferenceData
     {
     bool	valid = false;
@@ -57,25 +58,30 @@ typedef	struct MyData
     bool RSRsign;
     int(*user_data)(HWND hwnd);		// detect user input
     int(*potential)(double, int);	// plot potential
-    CTZfilter *TZfilter;		// pass through Tierazon filters
     CTrueCol *TrueCol;			// colouring scheme
     int *pPertProgress;			// pass back the status of each thread
     int	ArithType;
     int	MaxRefIteration;
     int	i;				// thread number
+    // stuff for new plotting modes
+    std::vector<std::pair<int, int>>* pixelOrder;
+    std::atomic<int>* workIndex;
+    int totalPixels;
     HANDLE  ghMutex;
-    } MYDATA, *PMYDATA;
+    } PertThreadData, *pPertThreadData;
 
 class CPerturbation
     {
     public:
 	CPerturbation();			// default binds to global wpixels
 	CPerturbation(std::vector<float>&);	// explicit
-	int	initialiseCalculateFrame(CDib *DibIn, CSlope *Slope, int xStartIn, int xEndIn, int HeightIn, int threshold, BigDouble xZoomPointin, BigDouble yZoomPointin, BigDouble BigWidthIn, int decimals, CTZfilter *TZfilter, HWND hwndIn,
-		int ThreadIn, std::vector<float> &wpixelsIn, double paramIn[], double potparamIn[], int PaletteShiftIn, int *PlotTypeIn, int SlopeTypeIn, double lightDirectionDegrees, double bumpMappingDepth, double bumpMappingStrength,
-		int PaletteStartIn, double LightHeightIn, int PertColourMethodIn, int PalOffset, double IterDiv, bool EnableApproximationIn, BYTE _3dflagIn, double ColourSpeedIn, int NumberThreadsIn);
+	int	initialiseCalculateFrame(CDib *DibIn, /*CSlope *Slope, */int xStartIn, int xEndIn, int HeightIn, int threshold, BigDouble xZoomPointin, BigDouble yZoomPointin, BigDouble BigWidthIn, int decimals, int OutsideMethodIn, 
+		int InsideMethodIn, HWND hwndIn, int ThreadIn, /*std::vector<float> &wpixelsIn, */double paramIn[], double potparamIn[], int PaletteShiftIn, int *PlotTypeIn, int SlopeTypeIn, double lightDirectionDegrees, 
+		double bumpMappingDepth, double bumpMappingStrength, int PaletteStartIn, double LightHeightIn, int PertColourMethodIn, int PalOffset, double IterDiv, bool EnableApproximationIn, BYTE _3dflagIn, double ColourSpeedIn, int NumberThreadsIn);
 	int	calculateOneFrame(double bailout, char* StatusBarInfo, int powerin, int InsideMethodIn, int OutsideMethodIn, int biomorphin, int subtypein, Complex rsrAin, bool rsrSignIn, int user_data(HWND hwnd), int xdotsIn, 
-		CTZfilter &TZfilter, CTrueCol &TrueCol, int *pPertProgress, BYTE &ThreadComplete, bool Multi, int delay, char *PertErrorMessage, int ArithTypeIn, int MaxRefIteration, int SlopeDegreeIn, HANDLE ghMutex);
+		/*CTZfilter &TZfilter, */CTrueCol &TrueCol, int *pPertProgress, BYTE &ThreadComplete, bool Multi, int delay, char *PertErrorMessage, int ArithTypeIn, int MaxRefIteration, int SlopeDegreeIn, 
+		std::vector<std::pair<int, int>> *pixelOrder, std::atomic<int> *workIndex, int totalPixels, HANDLE ghMutex);
+//	int	CPerturbation::RenderPertPixel(int x, int y, PertRenderContext& ctx);
 	void	AttachSharedTables(const std::vector<Complex>* xs, const std::vector<ExpComplex>* exs, const BLAS* bla/*, int maxRefIter*/);
 
 	int	BigComplex2ExpComplex(ExpComplex *a, BigComplex b);
@@ -83,6 +89,7 @@ class CPerturbation
 
 	int	SlopeType;
 	int	PaletteShift = 0;
+	CSlope	Slope;
 
     private:
 	void	LoadPascal(std::vector<long>   &PascalArray, int n);
@@ -94,16 +101,16 @@ class CPerturbation
 	void	ProcessDerivativeSlope(Complex dc, Complex z, HANDLE ghMutex, long MaxIteration, long iteration, CTrueCol &TrueCol, int x, int y);
 	void	BigProcessDerivativeSlope(ExpComplex ExpDC, ExpComplex ExpTemp, HANDLE ghMutex, long MaxIteration, long iteration, CTrueCol &TrueCol, int x, int y);
 	void	ProcessDerivativeSlopeMain(Complex z, double reflection, HANDLE ghMutex, long MaxIteration, long iteration, CTrueCol &TrueCol, int x, int y);
-	int	ColourProcessing(Complex z, long iteration, int x, int y, CTrueCol &TrueCol, CTZfilter &TZfilter, double bailout);
-	int	ColourProcessingExp(ExpComplex z, long iteration, int x, int y, CTrueCol &TrueCol, CTZfilter &TZfilter, double bailout);
+	int	ColourProcessing(Complex z, long iteration, int x, int y, CTrueCol &TrueCol, /*CTZfilter &TZfilter, */double bailout);
+	int	ColourProcessingExp(ExpComplex z, long iteration, int x, int y, CTrueCol &TrueCol, /*CTZfilter &TZfilter, */double bailout);
 
 	void	BigPertFunctions(ExpComplex *XRef, ExpComplex *DeltaSubN, ExpComplex *DeltaSub0);
 	int	Bignum2FloatExp(floatexp *a, BigDouble b);
 	int	FloatExp2Bignum(BigDouble *a, floatexp b);
 	int	ExpComplex2BigComplex(BigComplex *a, ExpComplex b);
 
-	int	iterateFractalWithPerturbationBLA(const std::vector<Complex> *XSubN, int MaxIteration, double bailout, Complex& DeltaSub0, const BLAS *Bla, CTZfilter &TZfilter, Complex &z, Complex &dc, int user_data(HWND hwnd));
-	int	iterateFractalWithPerturbationBLAExp(const std::vector<ExpComplex> *XSubN, int MaxIteration, double bailout, ExpComplex& DeltaSub0, const BLAS *Bla, CTZfilter &TZfilter, ExpComplex &z, ExpComplex &dc, int user_data(HWND hwnd));
+	int	iterateFractalWithPerturbationBLA(const std::vector<Complex> *XSubN, int MaxIteration, double bailout, Complex& DeltaSub0, const BLAS *Bla, /*CTZfilter &TZfilter, */Complex &z, Complex &dc, int user_data(HWND hwnd));
+	int	iterateFractalWithPerturbationBLAExp(const std::vector<ExpComplex> *XSubN, int MaxIteration, double bailout, ExpComplex& DeltaSub0, const BLAS *Bla, /*CTZfilter &TZfilter, */ExpComplex &z, ExpComplex &dc, int user_data(HWND hwnd));
 	RGBTRIPLE GetSmoothedColour(double fIter, double color_speed, CTrueCol &TrueCol, CPlot *Plot);
 
 	CBigTrig	BigTrig;		// alternative thread-friendly trig functions
@@ -122,16 +129,16 @@ class CPerturbation
 	double	min_orbit;			// orbit value closest to origin
 	long	min_index;			// iteration of min_orbit
 
-//	std::vector<floatexp>	ExpPerturbationToleranceCheck;
 	const std::vector<ExpComplex>	*ExpXSubN;
-//	std::vector<double>	PerturbationToleranceCheck;
 	const std::vector<Complex>	*XSubN;
+	
+	CTZfilter TZfilter;
 
 	std::vector<long>   PascalArray {0};
-	std::vector<float> &wpixels;	// an array of doubles holding slope modified iteration counts
+//	std::vector<float> &wpixels;	// an array of doubles holding slope modified iteration counts
 	Complex	rsrA;			// TheRedshiftRider value of a
 	bool	rsrSign;		// TheRedshiftRider sign true if positive
-	CSlope	*Slope;
+//	CSlope	*Slope;
 	CDib	*Dib;
 	double	param[NUMPERTPARAM];
 	double	potparam[3];		// potential parameters

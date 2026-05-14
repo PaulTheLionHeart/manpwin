@@ -2,7 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#include "manp.h"
+//#include "manp.h"
 #include "big.h"
 
 //#define	BIGNUMZSIZE	0x1000
@@ -15,7 +15,7 @@ char	UndoBig_hor[SIZEOF_BF_VARS];
 char	UndoBig_vert[SIZEOF_BF_VARS];
 char	UndoBig_width[SIZEOF_BF_VARS];
 int	dec;
-DOUBLE	hor;						// horizontal address
-DOUBLE	vert;						// vertical address
-DOUBLE	mandel_width;					// width of display
+double	hor;						// horizontal address
+double	vert;						// vertical address
+double	mandel_width;					// width of display
 };

@@ -1,7 +1,7 @@
 #include <Windows.h>
 #include "colour.h"
 #include "Dib.h"
-#include "Manp.h"
+//#include "Manp.h"
 #include "fractype.h"
 
 #pragma once

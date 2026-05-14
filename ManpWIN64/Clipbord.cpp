@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "manpwin.h"
+#include "manp.h"
 #include "Dib.h"
 //#include "winbit.h"
 
@@ -27,13 +28,13 @@ extern	int			file_type;
 extern	HPALETTE 		hpal;
 extern	HANDLE  	 	BitMap; 			// Bitmap Handle
 extern	BOOL	Picture_active_flag;
-extern	int	xdots, ydots, bits_per_pixel, height, width;
+//extern	int	xdots, ydots, bits_per_pixel, height, width;
 
 	BYTE	*CreateDib(WORD, WORD, BYTE *, WORD);
 extern	int	DibBlt(HDC,int,int,int, int,HANDLE,int,int);
 BYTE		*GetOrthoPalette(BYTE *);
 extern	int	Force24Bit(HWND, char *);
-extern	CDib	Dib;				// Device Independent Bitmap
+//extern	CDib	Dib;				// Device Independent Bitmap
 
 int CopyPictureToClipboard(HWND hwnd)
     {
@@ -44,10 +45,10 @@ int CopyPictureToClipboard(HWND hwnd)
     DWORD	PictureSize, Offset;
     BYTE	palette[768];
 
-    if(bits_per_pixel==24) 
+    if(gManp->Dib.BitsPerPixel==24)
 	GetOrthoPalette(palette);
 
-    if((hdest=CreateDib((WORD)width, (WORD)height, (BYTE *)palette, (WORD)bits_per_pixel))==NULL) 
+    if((hdest=CreateDib((WORD)gManp->width, (WORD)gManp->height, (BYTE *)palette, (WORD)gManp->Dib.BitsPerPixel))==NULL)
 	{
 	DestroyAllObjects();
 	return(-1);
@@ -59,7 +60,7 @@ int CopyPictureToClipboard(HWND hwnd)
 	return(-1);
 	}
 
-    switch (bits_per_pixel)
+    switch (gManp->Dib.BitsPerPixel)
 	{
 	case 1:
 	    colours_used = 2;
@@ -79,7 +80,7 @@ int CopyPictureToClipboard(HWND hwnd)
     Offset = (DWORD)sizeof(BITMAPINFOHEADER)+
 			    (DWORD)colours_used*(DWORD)sizeof(RGBQUAD);
 
-    memcpy((char *)lpbd + Offset,(char *)Dib.DibPixels.data(), PictureSize);	// picture
+    memcpy((char *)lpbd + Offset,(char *)gManp->Dib.DibPixels.data(), PictureSize);	// picture
 
     lpbd=NULL;
     OpenClipboard(hwnd);
@@ -174,7 +175,7 @@ BYTE *CreateDib(WORD dx, WORD dy, BYTE *palette, WORD bits)
     bi.biYPelsPerMeter  = 0;
     bi.biClrUsed        = bits > 8 ? 0L : (DWORD)((1<<bits) & 0xffff);
     bi.biClrImportant   = bi.biClrUsed;
-    bi.biSizeImage	    = WIDTHBYTES(bi.biWidth*bi.biBitCount)*(long)dy;
+    bi.biSizeImage	= (DWORD)ComputeWidthBytes(bi.biWidth*bi.biBitCount, (long)dy);
 
     if ((hdibN = (BYTE *)GlobalAlloc(GMEM_MOVEABLE | GMEM_DISCARDABLE |
 		GMEM_ZEROINIT,sizeof(BITMAPINFOHEADER) +

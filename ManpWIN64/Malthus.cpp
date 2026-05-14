@@ -6,6 +6,7 @@
 */
 
 #include "OtherFunctions.h"
+#include "Manp.h"
 
 static	double	xscale, yscale;
 static	int	frames = 100;
@@ -65,14 +66,13 @@ int	COtherFunctions::DisplayMalthus(double c1[], DWORD colour, int dimensions)
 ***************************************************************************/
 
 int	COtherFunctions::DoMalthus(void)
-
     {
 //    int	    px, py;
 
     int	    i, j, k;
-    double  pold = 0.1, pnew = 0.1, rate = param[0], RateInc;
+    double  pold = 0.1, pnew = 0.1, rate = gManp->param[0], RateInc;
     double  y = 0, x = 0, c1[3];
-    int	    colour = 1, cor = (param[3] != 0.0) ? threshold / (int) param[3] : threshold;
+    int	    colour = 1, cor = (gManp->param[3] != 0.0) ? gManp->threshold / (int)gManp->param[3] : gManp->threshold;
  
 
 
@@ -82,8 +82,8 @@ int	COtherFunctions::DoMalthus(void)
 
 
 
-    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double) (ydots - 1) / mandel_width;
+    xscale = (double) (gManp->xdots - 1) / (mandel_width * ScreenRatio);
+    yscale = (double) (gManp->ydots - 1) / mandel_width;
 
     if (OscProcess.OscAnimProc == INITANIM)
 	{
@@ -102,7 +102,7 @@ int	COtherFunctions::DoMalthus(void)
 	Mat.InitTransformation((cMax[xAxis] + cMin[xAxis]) / 2, (cMax[yAxis] + cMin[yAxis]) / 2, (cMax[zAxis] + cMin[zAxis]) / 2, x_rot, y_rot, z_rot);	// translate to the centre of the object
 	}
 
-    RateInc = (param[2] > 0.0) ? 0.1 / param[2] : 0.01;
+    RateInc = (gManp->param[2] > 0.0) ? 0.1 / gManp->param[2] : 0.01;
     if (subtype == 'B' || subtype == 'I')
 	rate /= 100.0;
     if (subtype == 'Q')
@@ -110,17 +110,17 @@ int	COtherFunctions::DoMalthus(void)
 
     if (cor < 1) 
 	cor = 1;
-    for (j = 0; j < (int) param[1]; j++)
+    for (j = 0; j < (int)gManp->param[1]; j++)
 	{
         colour += cor;
-        if (colour >= threshold)
+        if (colour >= gManp->threshold)
 	    colour = 1;
-	for (k = 0; k < (int) param[2]; k++)
+	for (k = 0; k < (int)gManp->param[2]; k++)
 	    {
 	    int count = 0;
 	    rate += RateInc;
 	    pold = 0.01;
-	    for (i = 0; i < threshold; i++)
+	    for (i = 0; i < gManp->threshold; i++)
 		{
 		switch (subtype)
 		    {
@@ -249,7 +249,7 @@ int	COtherFunctions::DoMalthus(void)
 		if (pold == pnew)
 		    {
 		    count++;
-		    if (count > threshold)
+		    if (count > gManp->threshold)
 			break;
 		    }
 		else 

@@ -10,29 +10,31 @@
 */
 
 #include "pixel.h"
+#include "manp.h"
 
 /**************************************************************************
 	General escape-time engine 
 **************************************************************************/
 
-int	CPixel::PerformWorklist(int NumberThreadsIn, int ThreadNumber, BYTE *ThreadComplete, HANDLE *ghMutexIn, int user_data(HWND hwnd))
+int	CPixel::PerformWorklist(int NumberThreadsIn, int ThreadNumber, BYTE *ThreadComplete, HANDLE *ghMutexIn, int SPECIALINDEXIn, int user_data(HWND hwnd))
     {
     int		StripWidth;
 
     ghMutex = ghMutexIn;
     NumberThreads = NumberThreadsIn;
+    SPECIALINDEX = SPECIALINDEXIn;
     multiThreaded = (NumberThreads > 1);
     int	flags = USEPALETTE + ((calcmode != 'F' && type != PERTURBATION && type != SLOPEFORWARDDIFF) ? USEWPIXELS : 0);
-    Plot.InitPlot(threshold, TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, flags);
+    Plot.InitPlot(threshold, TrueCol, &gManp->wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, flags);
     *ThreadComplete = false;
     if (RotationAngle != NORMAL && RotationAngle != 90 && RotationAngle != 180 && RotationAngle != 270)
 	{
 	double  z_rot = (double)RotationAngle;
-	if (*MathType == DOUBLEFLOAT)
+	if (MathType == DOUBLEFLOAT)
 	    Mat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
-	else if (*MathType == DOUBLEDOUBLE)
+	else if (MathType == DOUBLEDOUBLE)
 	    DDMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
-	else if (QUADDOUBLE)
+	else if (MathType == QUADDOUBLE)
 	    QDMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
 	else
 	    BigMat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
@@ -42,10 +44,12 @@ int	CPixel::PerformWorklist(int NumberThreadsIn, int ThreadNumber, BYTE *ThreadC
     if (BigNumFlag)
 	ManageBignumPrecision(precision);					// allow internal bignum variables to track current precision requirements
     if (distest)								// setup stuff for distance estimator
-	InitDistEst(&xxmin, &xxmax, &yymin, &yymax, &xx3rd, &yy3rd, &distestwidth, distest);
+	InitDistEst(&xxmin, &xxmax, &yymin, &yymax, &gManp->xx3rd, &gManp->yy3rd, &distestwidth, distest);
 
     if (calcmode == 'F')
-	Slope.InitRender(threshold, TrueCol, Dib, wpixels, PaletteShift, bump_transfer_factor, PaletteStart, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength);
+	{
+	Slope.InitRender(threshold, TrueCol, Dib, PaletteShift, bump_transfer_factor, PaletteStart, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, SpecialColour);
+	}
     if (RunThread(hwnd, ThreadNumber, StripWidth, &Slope, Fractal, user_data) < 0)
 	return -1;
     if (juliaflag && ShowOrbits)
@@ -120,6 +124,8 @@ int	CPixel::RunThread(HWND hwnd, int ThreadNumberIn, int StripWidthIn, CSlope *S
 	if (_3dflag || pairflag)
 	    calcmode = '1';				// 3D can only be done on single pass
 	if (calcmode == 'F')
+	    // WARNING: rqlim is modified here for forward-diff mode.
+	    // This affects bailout and may override initial fractal definition.
 	    if (rqlim < 1000.0 && type != KLEINIAN)
 		rqlim = 1000.0;	// short term fix?
 	if (StandardCalculationMode(hwnd, user_data) < 0)

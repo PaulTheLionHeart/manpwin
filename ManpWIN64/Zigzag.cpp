@@ -7,6 +7,7 @@
 
 #include "OtherFunctions.h"
 #include "SafeStrings.h"
+#include "Manp.h"
 
 int	COtherFunctions::DoZigzag()
 
@@ -19,15 +20,15 @@ int	COtherFunctions::DoZigzag()
     char    c[120];
     BYTE    subtype = 0;
 
-    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double) (ydots - 1) / mandel_width;
+    xscale = (double) (gManp->xdots - 1) / (mandel_width * ScreenRatio);
+    yscale = (double) (gManp->ydots - 1) / mandel_width;
 
-    a = param[0];
-    k1 = param[1];
-    e1 = (int)param[2];
-    e2 = (int)param[3];
-    subtype = (int)param[4];
-    n = (int)param[5];
+    a = gManp->param[0];
+    k1 = gManp->param[1];
+    e1 = (int)gManp->param[2];
+    e2 = (int)gManp->param[3];
+    subtype = (int)gManp->param[4];
+    n = (int)gManp->param[5];
     if (k1 == 0.0)
 	k1 = 1E-30;
     *totpasses = 10;
@@ -91,9 +92,9 @@ int	COtherFunctions::DoZigzag()
 	k = (int)((vert + mandel_width - y) * yscale);
 
 	// okay, let's do some boundary tests. 
-	if ((j < 0 || j >= xdots) && (k < 0 || k >= ydots))
+	if ((j < 0 || j >= gManp->xdots) && (k < 0 || k >= gManp->ydots))
 	    continue;
-	colour = (i * 5) % threshold;
+	colour = (i * 5) % gManp->threshold;
 
 	Plot.genline(j0, k0, j, k, colour);
 

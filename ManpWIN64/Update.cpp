@@ -5,11 +5,6 @@
 #include "CodeVersion.h"
 
 static	UINT	UpdateTimerID;				// update timer ID
-	WORD	UpdateDelay = 1000;			// delay in milliseconds
-
-extern	void	DisplayStatusBarInfo(int, char *);
-extern	BOOL	RunAnimation;				// are we in the middle of an animation run?
-extern	WORD	type;					// M=mand, J=Julia 1,2,4->
 
 #ifdef NEWCODE
 extern	bool	PertImageComplete;			// kill timer when perturbation is complete
@@ -17,15 +12,14 @@ extern	bool	PertImageComplete;			// kill timer when perturbation is complete
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-extern	HWND	GlobalHwnd;				// This is the main windows handle
+//extern	HWND	GlobalHwnd;				// This is the main windows handle
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**************************************************************************
 	init screen update
 **************************************************************************/
 
-void	UpdateInit(void)
-
+void	CManp::UpdateInit(void)
     {
     int	Delay = 10;
 
@@ -42,8 +36,7 @@ void	UpdateInit(void)
 	Close update
 **************************************************************************/
 
-int	UpdateClose(void)
-
+int	CManp::UpdateClose(void)
     {
 #ifdef NEWCODE
     if (type == PERTURBATION && !PertImageComplete)
@@ -59,8 +52,7 @@ int	UpdateClose(void)
 	Update 
 **************************************************************************/
 
-int	DoUpdate(void)
-
+int	CManp::DoUpdate(void)
     {
     if (UpdateTimerID != 0)
 	UpdateTimerID = KillTimer (GlobalHwnd, UPDATETIMER);

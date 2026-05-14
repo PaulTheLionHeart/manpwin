@@ -14,7 +14,7 @@
 #include "Fractype.h"
 #include "ManpWin.h"
 #include "Pixel.h"
-#include "Manp.h"
+//#include "Manp.h"
 #include "polygon.h"
 #include "preview.h"
 
@@ -45,9 +45,6 @@
 // stuff for Apollonius Fractal
 #define SQRT3    1.732050807568877193
 
-// Global pointer for Hailstone toggle access
-extern class COtherFunctions* g_pOtherFunctions;
-
 //////////////////////////////////////////////////////////////////////
 // Class definition
 //////////////////////////////////////////////////////////////////////
@@ -58,9 +55,9 @@ class COtherFunctions
 	COtherFunctions();
 	COtherFunctions(std::vector<float>& wp);
 	int	InitOtherFunctions(WORD type, int subtypeIn, HWND hwndIn, CTrueCol *TrueColIn, CDib *DibIn, char *AntStatusIn, struct __timeb64 FrameEndIn, struct __timeb64 FrameStartIn, double mandel_widthIn,
-		double horIn, double vertIn, double ScreenRatioIn, int *totpassesIn, int *curpassIn, int user_dataIn(HWND hwnd), std::vector<float> &wpixelsIn, int CoordSystemIn, //COscProcess OscProcessIn, 
+		double horIn, double vertIn, double ScreenRatioIn, int *totpassesIn, int *curpassIn, int user_dataIn(HWND hwnd), /*std::vector<float> &wpixelsIn, */int CoordSystemIn, //COscProcess OscProcessIn, 
 		int xAxisIn, int yAxisIn, int zAxisIn);
-	int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *iteration, int xdots, int ydots, double param[], long threshold, int rotate(int dir));
+	int	RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *iteration, int xdots, int ydots, double param[], long threshold, int rotate(int dir));
 
 	// stuff for Triangles
 	void	GetExpandPalette(BOOL);		// spread colours across palette
@@ -111,7 +108,6 @@ class COtherFunctions
 
     private:
 	CPlot	Plot;
-	std::vector <float> &wpixels;
 	COscProcess OscProcess;
 	int	subtype;
 	int	type;
@@ -165,8 +161,8 @@ class COtherFunctions
 	// stuff for ant
 #define RANDOMANT(n)    ((int)((long)((long)rand() * (long)(n)) >> 15)) // Generate Random Number 0 <= r < n
 #define MAX_ANTS        256
-#define XO              (xdots/2)
-#define YO              (ydots/2)
+#define XO              (gManp->xdots/2)
+#define YO              (gManp->ydots/2)
 #define DIRS            4
 #define INNER_LOOP      100
 	int	*incx[DIRS];         // tab for 4 directions
@@ -223,7 +219,7 @@ class COtherFunctions
 	int	FilledCircle = 1;		// 1 = filled, 2 = unfilled, 3 = 3D
 
 	// stuff for Sierpinski Flowers
-	int	COtherFunctions::DoSierpinskiFlower();
+	int	DoSierpinskiFlower();
 
 	// stuff for Pascal Triangle : Escher (Sierpinski)
 	int	DoPascal();

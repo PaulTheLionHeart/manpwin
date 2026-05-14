@@ -12,6 +12,7 @@
 #include "manpwin.h"
 #include "OscProcess.h"
 #include "Plot.h"
+#include "Manp.h"
 
 //#define MAXLINE		150		/* length of line */
 #define TRUE		1
@@ -20,15 +21,7 @@
 #define	ESC_CHAR	0x1b
 #define	MAXREAL		1E+10
 
-extern	double	mandel_width;			/* width of display */
-extern	double	hor;				/* horizontal address */
-extern	double	vert;				/* vertical address */
-extern	double	ScreenRatio;			// ratio of width / height for the screen
-extern	long	threshold;			/* maximum iterations */
-extern	HWND	GlobalHwnd;			// to allow passing of hwnd 
-extern	double	param[];
-extern	int	CoordSystem;
-extern	int	xdots, ydots;
+//extern	HWND	GlobalHwnd;			// to allow passing of hwnd 
 
 extern	int	user_data(HWND);
 static	double	xscale, yscale, cosa, sina;
@@ -36,16 +29,11 @@ static	double	xscale, yscale, cosa, sina;
 
 void	henon(int, double *, double *);
 
-extern	CPlot	Plot;		// image plotting routines 
-extern	CDib    Dib;				// Device Independent Bitmap
-extern	COscProcess	OscProcess;
-
 /**************************************************************************
 	Do Hénon Mapping
 **************************************************************************/
 
 int	DoHenon(void)
-
     {
     int		i, j, orbitn, HenonPoints;
     double	HenonA, xold, yold, HenonXStart, HenonYStart, HenonStep;//    char	s[200];
@@ -53,26 +41,26 @@ int	DoHenon(void)
 //    SetWindowText (GlobalHwnd, "Entering Henon()");
 //      "shapes", "points per orbit", "x start", "y start", "step size", ES,
 
-    HenonA = param[0];
-    HenonPoints = (int)param[1];
-    HenonXStart = param[2];
-    HenonYStart = param[3];
-    HenonStep = param[4];
-    orbitn = (int)param[5];
+    HenonA = gManp->param[0];
+    HenonPoints = (int)gManp->param[1];
+    HenonXStart = gManp->param[2];
+    HenonYStart = gManp->param[3];
+    HenonStep = gManp->param[4];
+    orbitn = (int)gManp->param[5];
 
     cosa = cos(HenonA);
     sina = sin(HenonA);
     xold = HenonXStart;					/* starting pt for 1st orbit */
     yold = HenonYStart;
-    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double) (ydots - 1) / mandel_width;
+    xscale = (double) (gManp->xdots - 1) / (gManp->mandel_width * gManp->AspectRatio);
+    yscale = (double) (gManp->ydots - 1) / gManp->mandel_width;
     for (j = 0; j < orbitn; ++j)			/* main loop j = orbit no. */
 	{
 //	_snprintf_s(s, MAXLINE, _TRUNCATE, "Henon Mapping Orbit %d of %d", j, orbitn);
 //	SetWindowText (GlobalHwnd, s);
 	for (i = 0; i < HenonPoints; ++i)
 	    {
-	    if (user_data(GlobalHwnd) == -1)		/* user pressed a key? */
+	    if (user_data(gManp->GlobalHwnd) == -1)		/* user pressed a key? */
 		return (-1);
 	    if ((xold < MAXREAL && xold > - MAXREAL)
 				    && (yold < MAXREAL && yold > -MAXREAL))
@@ -98,13 +86,13 @@ void	henon(int j, double *yold, double *xold)
     xnew = *xold * cosa - temp * sina;
     ynew = *xold * sina + temp * cosa;
     							// use iteration count as the z axis value
-    OscProcess.ChangeCoordSystem(&xnew, &ynew, &temp, xnew, ynew, (double)j, CoordSystem);
+    gManp->OscProcess.ChangeCoordSystem(&xnew, &ynew, &temp, xnew, ynew, (double)j, gManp->CoordSystem);
 
-    p1 = (int)((xnew - hor) * xscale + 0.5);
-    p2 = (int)((vert + mandel_width - ynew) * yscale + 0.5);
+    p1 = (int)((xnew - gManp->hor) * xscale + 0.5);
+    p2 = (int)((gManp->vert + gManp->mandel_width - ynew) * yscale + 0.5);
 
-    if (p1 > 0 && p1 < xdots && p2 > 0 && p2 < ydots)
-	Plot.PlotPoint((WORD)p1, (WORD)p2, (DWORD)(j % threshold));
+    if (p1 > 0 && p1 < gManp->xdots && p2 > 0 && p2 < gManp->ydots)
+	gManp->Plot.PlotPoint((WORD)p1, (WORD)p2, (DWORD)(j % gManp->threshold));
     *xold = xnew;
     *yold = ynew;
     }

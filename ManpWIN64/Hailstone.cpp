@@ -18,7 +18,7 @@
 #include <cmath>
 
 extern HWND GlobalHwnd;
-extern WORD threshold;
+//extern WORD threshold;
 
 /**************************************************************************
     Constructor
@@ -499,8 +499,8 @@ void CHailstone::DrawPointLabels(HWND hwnd, HDC hdc, double centerX, double cent
         textRect.right = screenX + 200;
         textRect.bottom = screenY + 5;
 
-        extern CDib Dib;
-        Dib.Text2Dib(hdc, &textRect, RGB(255, 255, 255), RGB(0, 0, 0), &lf, TRANSPARENT, labelText);
+//        extern CDib Dib;
+	gManp->Dib.Text2Dib(hdc, &textRect, RGB(255, 255, 255), RGB(0, 0, 0), &lf, TRANSPARENT, labelText);
 	}
     }
 
@@ -550,7 +550,7 @@ void CHailstone::DrawInfoOverlay(HWND hwnd, HDC hdc, int screenWidth, int screen
     strcpy(lf.lfFaceName, "Arial");
 
     // Draw each line with slight offset
-    extern CDib Dib;
+//    extern CDib Dib;
     for (int i = 0; i < lineCount; i++)
 	{
         RECT textRect;
@@ -559,7 +559,7 @@ void CHailstone::DrawInfoOverlay(HWND hwnd, HDC hdc, int screenWidth, int screen
         textRect.right = 400;
         textRect.bottom = textRect.top + 20;
 
-        Dib.Text2Dib(hdc, &textRect, RGB(255, 0, 255), RGB(0, 0, 0), &lf, TRANSPARENT, lines[i]);
+	gManp->Dib.Text2Dib(hdc, &textRect, RGB(255, 0, 255), RGB(0, 0, 0), &lf, TRANSPARENT, lines[i]);
 	}
     }
 

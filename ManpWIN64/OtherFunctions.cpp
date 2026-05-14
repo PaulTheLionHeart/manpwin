@@ -10,37 +10,31 @@
 #include "OtherFunctions.h"
 #include "SafeStrings.h"
 #include "Hailstone.h"
+#include "Manp.h"
 
-extern std::vector<float> wpixels;
-extern	int	CurrentRenderMode;		// to decide how to exit threads cleanly
-
-// Global pointer for Hailstone toggle access
-COtherFunctions* g_pOtherFunctions = nullptr;
+//extern std::vector<float> wpixels;
+//extern	int	CurrentRenderMode;		// to decide how to exit threads cleanly
 
 COtherFunctions::COtherFunctions()
-    : wpixels(::wpixels)
     {
-    g_pOtherFunctions = this;
     }
 
 COtherFunctions::COtherFunctions(std::vector<float>& wp)
-    : wpixels(wp)
     {
-    g_pOtherFunctions = this;
     }
-
+    
 /**************************************************************************
 	Initialise functions for each pixel
 **************************************************************************/
 
 int	COtherFunctions::InitOtherFunctions(WORD typeIn, int subtypeIn, HWND hwndIn, CTrueCol *TrueColIn, CDib *DibIn, char *AntStatusIn, struct __timeb64 FrameEndIn, struct __timeb64 FrameStartIn, double mandel_widthIn, 
-		double horIn, double vertIn, double ScreenRatioIn, int *totpassesIn, int *curpassIn, int user_dataIn(HWND hwnd), std::vector<float> &wpixelsIn, int CoordSystemIn, //COscProcess OscProcessIn, 
+		double horIn, double vertIn, double ScreenRatioIn, int *totpassesIn, int *curpassIn, int user_dataIn(HWND hwnd), /*std::vector<float> &wpixelsIn, */int CoordSystemIn, //COscProcess OscProcessIn, 
 		int xAxisIn, int yAxisIn, int zAxisIn)
     {
     type = typeIn;
     subtype = subtypeIn;
     hwnd = hwndIn;
-    wpixels = wpixelsIn;
+//    wpixels = wpixelsIn;
     TrueCol = TrueColIn; 
     AntStatus = AntStatusIn; 
     FrameEnd = FrameEndIn; 
@@ -53,14 +47,14 @@ int	COtherFunctions::InitOtherFunctions(WORD typeIn, int subtypeIn, HWND hwndIn,
     totpasses = totpassesIn;
     curpass = curpassIn;
     UserData = user_dataIn;
-    wpixels = wpixelsIn;
+//    wpixels = wpixelsIn;
     CoordSystem = CoordSystemIn;
     xAxis = xAxisIn;
     yAxis = yAxisIn;
     zAxis = zAxisIn;
     
-    CurrentRenderMode = NOMULTITHREAD;
-    Plot.InitPlot(threshold, TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE + USEWPIXELS);
+    gManp->CurrentRenderMode = NOMULTITHREAD;
+    Plot.InitPlot(gManp->threshold, TrueCol, &gManp->wpixels, gManp->xdots, gManp->ydots, gManp->xdots, gManp->ydots, Dib->BitsPerPixel, Dib, USEPALETTE + USEWPIXELS);
 
     switch (type)
 	{
@@ -936,7 +930,7 @@ int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *itera
 	    long    count = 10000000;
 	    DWORD   colour;
 
-	    Plot.InitPlot(threshold, TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE);
+	    Plot.InitPlot(threshold, TrueCol, &gManp->wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE);
 	    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
 	    yscale = (double) (ydots - 1) / mandel_width;
 
@@ -1319,12 +1313,12 @@ int	COtherFunctions::DoHailstone(int xdots, int ydots)
     HailstoneConfig config;
 
     // Use configuration from param array (set by dialog)
-    config.startX = (int)param[0];
-    config.startY = (int)param[1];
-    config.maxIterations = (int)param[2];
-    config.preset = (HailstonePreset)((int)param[3]);	// Get preset from param[3]
+    config.startX = (int)gManp->param[0];
+    config.startY = (int)gManp->param[1];
+    config.maxIterations = (int)gManp->param[2];
+    config.preset = (HailstonePreset)((int)gManp->param[3]);	// Get preset from param[3]
 
-    if (param[4] == 0)
+    if (gManp->param[4] == 0)
 	{
 	// fallback to old behaviour
 	config.detectCycles = true;
@@ -1334,7 +1328,7 @@ int	COtherFunctions::DoHailstone(int xdots, int ydots)
 	}
     else
 	{
-	int flags = (int)param[4];			// read flags bitwise converted to int from double
+	int flags = (int)gManp->param[4];			// read flags bitwise converted to int from double
 
 	config.showAxes = (flags & HS_SHOW_AXES) != 0;
 	config.showPointLabels = (flags & HS_SHOW_LABELS) != 0;
@@ -1355,7 +1349,7 @@ int	COtherFunctions::DoHailstone(int xdots, int ydots)
     HailstoneYdots = ydots;
 
     // Render the visualization
-    if (pHailstone->Render(hwnd, Plot, xdots, ydots, threshold) < 0)
+    if (pHailstone->Render(hwnd, Plot, xdots, ydots, gManp->threshold) < 0)
 	{
 	delete pHailstone;
 	pHailstone = nullptr;
@@ -1651,7 +1645,7 @@ int COtherFunctions::ReRenderHailstone(int xdots, int ydots)
     memset(Dib->DibPixels.data(), 0, Dib->DibPixels.size());
 
     // Re-render the visualization (sequence already exists)
-    if (pHailstone->Render(hwnd, Plot, xdots, ydots, threshold) < 0)
+    if (pHailstone->Render(hwnd, Plot, xdots, ydots, gManp->threshold) < 0)
 	return -1;
 
     // Re-render statistics

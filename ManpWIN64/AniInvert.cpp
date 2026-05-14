@@ -21,29 +21,8 @@
 #include "colour.h"
 #include "SafeStrings.h"
 
-extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
+//extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
 
-extern	CTrueCol    TrueCol;		// palette info
-
-extern	double	hor;			// horizontal address
-extern	double	vert;			// vertical address
-extern	double	mandel_width;		// final width
-extern	BYTE	BigNumFlag;		// True if bignum used
-extern	long	threshold;
-extern	WORD	special;		// special colour, phase etc
-extern	WORD	degree;			// power
-extern	BYTE	screenflag;		/* replay saved screen */
-extern	int	biomorph;		/* biomorph colour */
-extern	BYTE	cycleflag;		/* do colour cycling */
-extern	int	decomp;			/* number of decomposition colours */
-extern	BYTE	orbit_flag;		/* display orbits? */
-extern	BYTE	exitflag;		/* exit on completion */
-extern	int	invert;			/* Inversion implementation of fractal */
-extern	char	floatflag;		/* floating point maths */
-extern	BYTE	pairflag;		/* stereo pair flag and window size */
-extern	BYTE	orig_palette[];		/* loaded palette */
-extern	WORD	type;			/* M=mand, N=Newton etc */
-extern	int	subtype;		
 extern	char	SCIPath[];		// path for SCI files
 
 extern	BOOL	WritePNGFrames;		// write frames to PNG files
@@ -52,10 +31,9 @@ extern	BOOL	WritePNGList;		// write PNG filenames to a *lst file
 extern	BOOL	WriteMPEGFrames;	// write frames directly to an MPEG file
 
 extern	char	*AnimData(void);
-extern	BOOL	StartImmediately;
+//extern	BOOL	StartImmediately;
 static	int	frames = 100;
 static	double	ScaleFactor = 1.0;
-extern	int	PaletteShift;
 static	int	InvertAnimType = 0;	// 0 = linear
 					// 1 = circular
 					// 2 = cardoid
@@ -79,12 +57,12 @@ static	double	radius = 0.25;
 static	double	Magnitude = 0.49;		// 0.5 sits neatly inside the Mandelbrot set. 0.49 gives great orbits
 static	double	InvertRadius = 1.0;		// inversion radius
 
-extern	double	xgap;			// gap between pixels
-extern	double	ygap;			// gap between pixels
+//extern	double	xgap;			// gap between pixels
+//extern	double	ygap;			// gap between pixels
 
-extern	int	xdots, ydots;
+//extern	int	xdots, ydots;
 
-extern	CDib	Dib;			// Device Independent Bitmap
+//extern	CDib	Dib;			// Device Independent Bitmap
 
 extern	void	ConvertRGB2ASCII(RGBTRIPLE, char *);
 extern	char	*GenerateMPEGFileName (char *, char *);
@@ -96,8 +74,7 @@ extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
 	Cardiod Inversion script generator
 **************************************************************************/
 
-int	CardioidInversionScript(HWND hwnd, char *filename) 
-
+int	CManp::CardioidInversionScript(HWND hwnd, char *filename) 
     {
     int		steps, i, k;
     double	Divisor;
@@ -106,7 +83,6 @@ int	CardioidInversionScript(HWND hwnd, char *filename)
 
     char	s[120];
     FILE	*out;
-    double	AspectRatio = (double)xdots / (double)ydots;
 
     steps = frames;
     Divisor = TWO_PI / (steps - 1);
@@ -167,8 +143,7 @@ int	CardioidInversionScript(HWND hwnd, char *filename)
 	Circle Inversion script generator
 **************************************************************************/
 
-int	CircleInversionScript(HWND hwnd, char *filename) 
-
+int	CManp::CircleInversionScript(HWND hwnd, char *filename)
     {
     int		steps, i, k;
     double	Divisor;
@@ -177,7 +152,6 @@ int	CircleInversionScript(HWND hwnd, char *filename)
 
     char	s[120];
     FILE	*out;
-    double	AspectRatio = (double)xdots / (double)ydots;
 
     steps = frames;
     Divisor = TWO_PI / (steps - 1);
@@ -237,8 +211,7 @@ int	CircleInversionScript(HWND hwnd, char *filename)
 	General Linear Inversion script generator
 **************************************************************************/
 
-int	GenInversionScript(HWND hwnd, char *filename) 
-
+int	CManp::GenInversionScript(HWND hwnd, char *filename)
     {
     int		steps, i, k;
     double	DivisorX, DivisorY;
@@ -247,7 +220,6 @@ int	GenInversionScript(HWND hwnd, char *filename)
 
     char	s[120];
     FILE	*out;
-    double	AspectRatio = (double)xdots / (double)ydots;
 
     steps = frames;
     DivisorX = (EndX - StartX) / steps;
@@ -327,18 +299,18 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-		if (type != POWER)
+		if (gManp->type != POWER)
 		    {
-		    degree = 2;
+		    gManp->degree = 2;
 		    Magnitude = 0.249;
 		    }
 		else
-		    Magnitude = 0.93 / ((double)degree + 2);
+		    Magnitude = 0.93 / ((double)gManp->degree + 2);
 
 		SetWindowText (hDlg, "Inversion Animation Setup");
 		CheckRadioButton(hDlg, IDC_LINEARJUL, IDC_CARDIOID, IDC_LINEARJUL + InvertAnimType);
 		hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
-		SendMessage(hCtrl, BM_SETCHECK, StartImmediately, 0L);
+		SendMessage(hCtrl, BM_SETCHECK, gManp->StartImmediately, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGDIRECT);
 		SendMessage(hCtrl, BM_SETCHECK, WritePNGFrames, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_WRITEMEMDIRECT);
@@ -351,7 +323,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 		SetUpFilename(PNGName, "animpng", "Invert");
 		SetDlgItemText(hDlg, IDC_SCRIPT_FILENAME, ScriptFileName);
 		SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGName);
-		SetDlgItemInt(hDlg, IDC_THRESHOLD_START, threshold, TRUE);
+		SetDlgItemInt(hDlg, IDC_THRESHOLD_START, gManp->threshold, TRUE);
 		SetDlgItemInt(hDlg, IDC_FRAMES, frames, TRUE);
 		SAFE_SPRINTF(s, "%f", ScaleFactor);
 		SetDlgItemText(hDlg, IDC_JULIAWIDTH, s);
@@ -364,7 +336,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 		hCtrl = GetDlgItem (hDlg, IDC_INVERTTEXT);
 		ShowWindow(hCtrl, SW_SHOWNORMAL);
 		SetDlgItemText(hDlg, IDC_INVERTTEXT, "Inv Radius");
-		SetDlgItemInt(hDlg, IDC_PALETTESHIFT1, PaletteShift, TRUE);
+		SetDlgItemInt(hDlg, IDC_PALETTESHIFT1, gManp->PaletteShift, TRUE);
 		switch (InvertAnimType)
 		    {
 		    case 0:						// Linear
@@ -573,7 +545,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 				sscanf(s, "%lf", &Magnitude);
 				break;
 			    }
-			displayCurve(PixelHwnd, InvertAnimType);			// write to main window
+			gManp->displayCurve(gManp->GlobalHwnd, InvertAnimType);			// write to main window
 		        return TRUE ;
 
 		    case IDOK:
@@ -595,9 +567,9 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 //			hCtrl = GetDlgItem (hDlg, IDC_ORBITS1);
 //			ShowOrbits = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 
-			threshold = GetDlgItemInt(hDlg, IDC_THRESHOLD_START, &bTrans, TRUE);
+			gManp->threshold = GetDlgItemInt(hDlg, IDC_THRESHOLD_START, &bTrans, TRUE);
 			hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
-			StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGDIRECT);
 			WritePNGFrames = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_WRITEMEMDIRECT);
@@ -609,7 +581,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 			sscanf(s, "%lf", &ScaleFactor);
 			GetDlgItemText(hDlg, IDC_INVERTRADIUS, s, 200);
 			sscanf(s, "%lf", &InvertRadius);
-			PaletteShift = GetDlgItemInt(hDlg, IDC_PALETTESHIFT1, &bTrans, TRUE);
+			gManp->PaletteShift = GetDlgItemInt(hDlg, IDC_PALETTESHIFT1, &bTrans, TRUE);
 
 			if (frames <= 0)
 			    frames = 20;
@@ -630,7 +602,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 				sscanf(s, "%lf", &EndX);
 				GetDlgItemText(hDlg, IDC_END_Y, s, 200);
 				sscanf(s, "%lf", &EndY);
-				GenInversionScript(hDlg, ScriptFileName);
+				gManp->GenInversionScript(hDlg, ScriptFileName);
 				break;
 			    case 1:
 				GetDlgItemText(hDlg, IDC_START_X, s, 200);
@@ -639,12 +611,12 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 				sscanf(s, "%lf", &CentreY);
 				GetDlgItemText(hDlg, IDC_END_Y, s, 200);
 				sscanf(s, "%lf", &radius);
-				CircleInversionScript(hDlg, ScriptFileName);
+				gManp->CircleInversionScript(hDlg, ScriptFileName);
 				break;
 			    case 2:
 				GetDlgItemText(hDlg, IDC_END_Y, s, 200);
 				sscanf(s, "%lf", &Magnitude);
-				CardioidInversionScript(hDlg, ScriptFileName);
+				gManp->CardioidInversionScript(hDlg, ScriptFileName);
 				break;
 			    }
 

@@ -1,6 +1,7 @@
   /* see Fractint.c for a description of the "include"  hierarchy */
 //#include "port.h"
 #include "prototyp.h"
+#include "..\ManpWIN64\Manp.h"
 
 
 /* start of string literals cleanup */
@@ -63,12 +64,12 @@ void cvtcentermag(double *Xctr, double *Yctr, LDBL *Magnification, double *Xmagf
    double tmpx1, tmpx2, tmpy1, tmpy2, tmpa; /* temporary x, y, angle */
   
    /* simple normal case first */
-   if (xx3rd == xxmin && yy3rd == yymin)
+   if (gManp->xx3rd == gManp->xxmin && gManp->yy3rd == gManp->yymin)
    { /* no rotation or skewing, but stretching is allowed */
-      Width  = xxmax - xxmin;
-      Height = yymax - yymin;
-      *Xctr = (xxmin + xxmax)/2.0;
-      *Yctr = (yymin + yymax)/2.0;
+      Width  = gManp->xxmax - gManp->xxmin;
+      Height = gManp->yymax - gManp->yymin;
+      *Xctr = (gManp->xxmin + gManp->xxmax)/2.0;
+      *Yctr = (gManp->yymin + gManp->yymax)/2.0;
       *Magnification  = 2.0/Height;
       *Xmagfactor =  Height / (DEFAULTASPECT * Width);
       *Rotation = 0.0;
@@ -78,26 +79,26 @@ void cvtcentermag(double *Xctr, double *Yctr, LDBL *Magnification, double *Xmagf
    {
       /* set up triangle ABC, having sides abc */
       /* side a = bottom, b = left, c = diagonal not containing (x3rd,y3rd) */
-      tmpx1 = xxmax - xxmin;
-      tmpy1 = yymax - yymin;
+      tmpx1 = gManp->xxmax - gManp->xxmin;
+      tmpy1 = gManp->yymax - gManp->yymin;
       c2 = tmpx1*tmpx1 + tmpy1*tmpy1;
    
-      tmpx1 = xxmax - xx3rd;
-      tmpy1 = yymin - yy3rd;
+      tmpx1 = gManp->xxmax - gManp->xx3rd;
+      tmpy1 = gManp->yymin - gManp->yy3rd;
       a2 = tmpx1*tmpx1 + tmpy1*tmpy1;
       a = sqrt(a2);
       *Rotation = -rad_to_deg(atan2( tmpy1, tmpx1 )); /* negative for image rotation */
    
-      tmpx2 = xxmin - xx3rd;
-      tmpy2 = yymax - yy3rd;
+      tmpx2 = gManp->xxmin - gManp->xx3rd;
+      tmpy2 = gManp->yymax - gManp->yy3rd;
       b2 = tmpx2*tmpx2 + tmpy2*tmpy2;
       b = sqrt(b2);
    
       tmpa = acos((a2+b2-c2)/(2*a*b)); /* save tmpa for later use */
       *Skew = 90.0 - rad_to_deg(tmpa);
    
-      *Xctr = (xxmin + xxmax)*0.5;
-      *Yctr = (yymin + yymax)*0.5;
+      *Xctr = (gManp->xxmin + gManp->xxmax)*0.5;
+      *Yctr = (gManp->yymin + gManp->yymax)*0.5;
    
       Height = b * sin(tmpa);
    
@@ -106,7 +107,7 @@ void cvtcentermag(double *Xctr, double *Yctr, LDBL *Magnification, double *Xmagf
    
       /* if vector_a cross vector_b is negative */
       /* then adjust for left-hand coordinate system */
-      if ( tmpx1*tmpy2 - tmpx2*tmpy1 < 0 && debugflag != 4010)
+      if ( tmpx1*tmpy2 - tmpx2*tmpy1 < 0)
       {
          *Skew = -*Skew;
          *Xmagfactor = -*Xmagfactor;
@@ -115,10 +116,10 @@ void cvtcentermag(double *Xctr, double *Yctr, LDBL *Magnification, double *Xmagf
    }
    /* just to make par file look nicer */
    if (*Magnification < 0)
-   {
-      *Magnification = -*Magnification;
-      *Rotation += 180;
-   }
+    {
+    *Magnification = -*Magnification;
+    *Rotation += 180;
+    }
 #ifdef DEBUG
    {
       double txmin, txmax, tx3rd, tymin, tymax, ty3rd;
@@ -164,20 +165,20 @@ void cvtcorners(double Xctr, double Yctr, LDBL Magnification, double Xmagfactor,
 
    if (Rotation == 0.0 && Skew == 0.0)
       { /* simple, faster case */
-      xx3rd = xxmin = Xctr - w;
-      xxmax = Xctr + w;
-      yy3rd = yymin = Yctr - h;
-      yymax = Yctr + h;
+       gManp->xx3rd = gManp->xxmin = Xctr - w;
+      gManp->xxmax = Xctr + w;
+      gManp->yy3rd = gManp->yymin = Yctr - h;
+      gManp->yymax = Yctr + h;
       return;
       }
 
    /* in unrotated, untranslated coordinate system */
    tanskew = tan(deg_to_rad(Skew));
-   xxmin = -w + h*tanskew;
-   xxmax =  w - h*tanskew;
-   xx3rd = -w - h*tanskew;
-   yymax = h;
-   yy3rd = yymin = -h;
+   gManp->xxmin = -w + h*tanskew;
+   gManp->xxmax =  w - h*tanskew;
+   gManp->xx3rd = -w - h*tanskew;
+   gManp->yymax = h;
+   gManp->yy3rd = gManp->yymin = -h;
 
    /* rotate coord system and then translate it */
    Rotation = deg_to_rad(Rotation);
@@ -185,22 +186,22 @@ void cvtcorners(double Xctr, double Yctr, LDBL Magnification, double Xmagfactor,
    cosrot = cos(Rotation);
 
    /* top left */
-   x = xxmin * cosrot + yymax *  sinrot;
-   y = -xxmin * sinrot + yymax *  cosrot;
-   xxmin = x + Xctr;
-   yymax = y + Yctr;
+   x = gManp->xxmin * cosrot + gManp->yymax *  sinrot;
+   y = -gManp->xxmin * sinrot + gManp->yymax *  cosrot;
+   gManp->xxmin = x + Xctr;
+   gManp->yymax = y + Yctr;
 
    /* bottom right */
-   x = xxmax * cosrot + yymin *  sinrot;
-   y = -xxmax * sinrot + yymin *  cosrot;
-   xxmax = x + Xctr;
-   yymin = y + Yctr;
+   x = gManp->xxmax * cosrot + gManp->yymin *  sinrot;
+   y = -gManp->xxmax * sinrot + gManp->yymin *  cosrot;
+   gManp->xxmax = x + Xctr;
+   gManp->yymin = y + Yctr;
 
    /* bottom left */
-   x = xx3rd * cosrot + yy3rd *  sinrot;
-   y = -xx3rd * sinrot + yy3rd *  cosrot;
-   xx3rd = x + Xctr;
-   yy3rd = y + Yctr;
+   x = gManp->xx3rd * cosrot + gManp->yy3rd *  sinrot;
+   y = -gManp->xx3rd * sinrot + gManp->yy3rd *  cosrot;
+   gManp->xx3rd = x + Xctr;
+   gManp->yy3rd = y + Yctr;
 
    return;
 }

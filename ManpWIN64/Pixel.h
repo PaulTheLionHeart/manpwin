@@ -40,6 +40,8 @@
 #define PASSWIDTH	10
 #define	MAXTHREADS	40
 
+#pragma once
+
 struct tess
     {				    // one of these per box to be done gets stacked 
     int	    x1, x2, y1, y2;	    // left/right top/bottom x/y coords 
@@ -67,13 +69,13 @@ enum BAILOUTTEST
 
 typedef	struct MyPixelData
     {
-    CTrueCol *TrueCol;				// colouring scheme
+    CTrueCol	*TrueCol;				// colouring scheme
     int		NumThreads;
     int		i;
+    int		SPECIALINDEX;				// points to the Special Colour in the palette - used for Art Matrix Cubic
     HANDLE	ghMutex;
-    } MYPIXELDATA, *PMYPIXELDATA;
+    } PixelThreadData, *pPixelThreadData;
 
-#pragma once
 class CPixel
     {
     public:
@@ -112,7 +114,6 @@ class CPixel
 		BigDouble *Big_xxmax, BigDouble *Big_yymin, BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio, double *xxmin,
 		double *xxmax, double *yymin, double *yymax, WORD special, BYTE juliaflag);
 
-
 	CParser m_parser;
 
 	int	InitFormula(Complex* z, Complex* q);
@@ -128,19 +129,28 @@ class CPixel
 
 
 
-	void	InitPixel0(WORD typeIn, WORD specialIn, int subtypeIn, WORD *degreeIn, double rqlimIn, dd_real DDBailoutIn, qd_real QDBailoutIn, BOOL ExpandStarTrailColoursIn, BYTE SpecialFlagIn, int precisionIn,
-		int biomorphIn, int InsideMethodIn, int OutsideMethodIn, int RotationAngleIn, int xdotsIn, int ydotsIn, int nFDOptionIn);
-	void	InitPixel1(CTrueCol *TrueColIn, int period_levelIn, int distestIn, BOOL invertIn, BYTE phaseflagIn, std::vector <float> &wpixelsIn, BYTE juliaflagIn, BYTE calcmodeIn/*, int NonStandardFractalIn*/);
-	void	InitPixel2(int CoordSystemIn, BOOL UseCurrentPaletteIn, int reset_periodIn, int colorsIn, double horIn, double vertIn, double mandel_widthIn, BigDouble BigHorIn, BigDouble BigVertIn, BigDouble BigWidthIn);
-	void	InitPixel3(double dStrandsIn, Complex jIn, BYTE pairflagIn, BYTE _3dflagIn, double ScreenRatioIn, WORD coloursIn, CFract *Fract, int BailoutTestTypeIn);
-	void	InitPixel4(long thresholdIn, BYTE BigNumFlagIn, int logvalIn, double f_radiusIn, double f_xcenterIn, char *LyapSequenceIn, double ColourSpeedIn);
-	void	InitPixel5(double f_ycenterIn, int *symmetryIn, double paramIn[], double potparamIn[], int decompIn, BYTE *logtableIn, int *AutoStereo_valueIn, int widthIn, HWND hwndIn);
-	void	InitPixel6(CDib *DibIn, int PlotTypeIn, int *time_to_zoomIn, int *time_to_restartIn, int *time_to_reinitIn, int *time_to_quitIn, long fillcolorIn);
-	void	InitPixel7(int *blockindexIn, int *totpassesIn, int *curpassIn, MATH_TYPE *MathTypeIn, Complex RotationCentreIn, int distestwidthIn, CFract *FractalIn);
-	void	InitPixel8(double bump_transfer_factorIn, int PaletteStartIn, int PaletteShiftIn, double lightDirectionDegreesIn, double bumpMappingDepthIn, double bumpMappingStrengthIn, bool ShowOrbitsIn, RGBTRIPLE OrbitColourIn);
-	int	PerformWorklist(int NumberThreads, int ThreadNum, BYTE *ThreadComplete, HANDLE *ghMutex, int user_data(HWND hwnd));
+	void	InitFractalDefinition(WORD typeIn, int subtypeIn, WORD *degreeIn, double rqlimIn, long thresholdIn, int BailoutTestTypeIn, double paramIn[], double potparamIn[], CFract *FractalIn);
+	void	InitControlFlags(BYTE calcmodeIn, BYTE juliaflagIn, BOOL invertIn, BYTE phaseflagIn, BYTE pairflagIn, BYTE _3dflagIn, int period_levelIn, //int reset_periodIn,
+		int distestIn, int InsideMethodIn, int OutsideMethodIn, int biomorphIn, int nFDOptionIn, BYTE SpecialFlagIn);
+	void	InitViewport(double horIn, double vertIn, double mandel_widthIn, BigDouble BigHorIn, BigDouble BigVertIn, BigDouble BigWidthIn, double ScreenRatioIn,
+		int xdotsIn, int ydotsIn, int RotationAngleIn, Complex RotationCentreIn, Complex jIn);
+	void	InitArithmetic(BYTE BigNumFlagIn, int precisionIn);
+	void	InitRendering(/*std::vector <float> *wpixelsIn, */CDib *DibIn, int widthIn, int PlotTypeIn, CTrueCol *TrueColIn, int colorsIn, BOOL UseCurrentPaletteIn, int *AutoStereo_valueIn, int *symmetryIn);
+	void	GeneralInit();
+	void	InitBailout();
+	void	InitRuntimeControl(int *time_to_zoomIn, int *time_to_restartIn, int *time_to_reinitIn, int *time_to_quitIn, int *blockindexIn, int *totpassesIn, int *curpassIn);
+	void	InitColourProcessing(WORD specialIn, WORD coloursIn, int decompIn, int logvalIn, BYTE *logtableIn, char *LyapSequenceIn, double ColourSpeedIn, int PaletteStartIn, int PaletteShiftIn);
+	void	InitVisualEffects(BOOL ExpandStarTrailColoursIn, bool ShowOrbitsIn, RGBTRIPLE OrbitColourIn);
+	void	InitOutput(HWND hwndIn, long fillcolorIn);
+	void	InitFilters(double dStrandsIn);
+	void	InitTransformations(int CoordSystemIn, double f_radiusIn, double f_xcenterIn, double f_ycenterIn, int distestwidthIn);
+	void	InitLightingAndBumpMapping(double bump_transfer_factorIn, double lightDirectionDegreesIn, double bumpMappingDepthIn, double bumpMappingStrengthIn);
+
+	int 	GetArithType();
+	int	PerformWorklist(int NumberThreads, int ThreadNum, BYTE *ThreadComplete, HANDLE *ghMutex, int SPECIALINDEXIn, int user_data(HWND hwnd));
 	void	PixelIsExiting(void);
 	RGBTRIPLE GetSmoothedColour(double fIter, double color_speed, CTrueCol &TrueCol, CPlot *Plot);
+//	void	PlotPixelWithFlags(int x, int y, long colourIndex);
 
 	void	ManageBignumPrecision(int precision);				// allow internal bignum variables to track current precision requirements
 
@@ -155,7 +165,8 @@ class CPixel
 	void	projection(int x, int y, long col);
 	void	init3d(int xdots, int ydots, double x_rot, double y_rot, double z_rot, double sclx, double scly, double sclz, long threshold, double hor, double vert);
 
-	WORD	special;		// special colour for CBIN fractals, phase etc
+	WORD	special;		// special colour for phase etc
+	RGBTRIPLE SpecialColour;	// special colour for CBIN fractals
 	int	logval;			// log colour map starting value 
 	BYTE	*logtable;		// log value table for col comp
 	BOOL	ExpandStarTrailColours;	// use the first 16 colours if false, else expand across the whole iteration range
@@ -232,7 +243,7 @@ class CPixel
 
 	Complex	z, q, j, c, deriv, TempPt;
 
-	std::vector <float> &wpixels;	// an array of doubles holding slope modified iteration counts
+//	std::vector <float> &wpixels;	// an array of doubles holding slope modified iteration counts
 
 	CTrueCol    *TrueCol;		// palette info
 	CTZfilter   TZfilter;		// Tierazon filters
@@ -247,7 +258,7 @@ class CPixel
 //	int	*time_to_quit;		// enable clean exit
 
 	/**************** Big Number Globals *********************/
-	MATH_TYPE   *MathType;
+	MATH_TYPE   MathType;
 	int	BigFractPtr = 0;	// point to the Bignum fractal specific stuff
 	int	decimals = 10, precision;
 	BYTE	BigNumFlag;		// True if bignum used
@@ -304,10 +315,12 @@ class CPixel
 	long	GetPenP(int i) const { return penp[i]; }
 	long	GetPenN(int i) const { return penn[i]; }
 
+	int	SPECIALINDEX = 0;
+
     private:
 	int	DoFilter(int method, int hooper);
-	void	CalcFloatIteration(double error, std::vector <float> &wpixels, int row, int col, Complex z, Complex OldZ, Complex OlderZ);
-	void	CalcBigFloatIteration(double error, std::vector <float> &wpixels, int row, int col, BigComplex z, BigComplex OldZ, BigComplex OlderZ);
+	void	CalcFloatIteration(double error, std::vector <float> *wpixels, int row, int col, Complex z, Complex OldZ, Complex OlderZ);
+	void	CalcBigFloatIteration(double error, std::vector <float> *wpixels, int row, int col, BigComplex z, BigComplex OldZ, BigComplex OlderZ);
 	int	DoBigFilter(int method, int hooper);
 	int	DoDDFilter(int method, int hooper, DDComplex *z);
 	int	DoQDFilter(int method, int hooper, QDComplex *z);
@@ -346,6 +359,23 @@ class CPixel
 	int	BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *qBig);
 	int	BigRunTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *qBig, BYTE *SpecialFlag, long *iteration);
 	int	BigDecomposition(BigDouble z_real, BigDouble z_imag);
+
+	// code specific to Pixel.cpp
+	void	InitTierazonFiltersDouble();
+	void	InitTierazonFiltersDD();
+	void	InitTierazonFiltersQD();
+	void	InitTierazonFiltersBig();
+	void	SetupDoubleJulia();
+	void	SetupDDJulia();
+	void	SetupQDJulia();
+	void	SetupBigJulia();
+
+
+	int	savedand, savedincr;
+	long	real_iteration;
+
+
+
 	PBCOMPLEX ComplexTetration(PBCOMPLEX a, int n);			// start Tetration procedures
 	PBCOMPLEX PBComplexPower(PBCOMPLEX w, PBCOMPLEX z);
 	void	Complex2Polar(PBCOMPLEX *a);
@@ -375,7 +405,7 @@ class CPixel
 	int	ChangeBigPrecision(int dec);
 
 	// double double functions
-	void	CalcDDFloatIteration(double error, std::vector <float> &wpixels, int row, int col, DDComplex z, DDComplex OldZ, DDComplex OlderZ,
+	void	CalcDDFloatIteration(double error, std::vector <float> *wpixels, int row, int col, DDComplex z, DDComplex OldZ, DDComplex OlderZ,
 		double FloatIteration, WORD type, int subtype, WORD *degree, BYTE SpecialFlag, WORD special, int width);
 	int	DDRunTierazonFunctions(int subtype, DDComplex *z, DDComplex *q, DDComplex *z2, BYTE *SpecialFlag, long *iteration);
 	int	DDRunManDerFunctions(int subtype, DDComplex *z, DDComplex *q, BYTE *SpecialFlag, long *iteration);
@@ -384,7 +414,7 @@ class CPixel
 	int	DDInitManDerFunctions(int subtype, DDComplex *z, DDComplex *q);
 
 	// quad double functions
-	void	CalcQDFloatIteration(double error, std::vector <float> &wpixels, int row, int col, QDComplex z, QDComplex OldZ, QDComplex OlderZ,
+	void	CalcQDFloatIteration(double error, std::vector <float> *wpixels, int row, int col, QDComplex z, QDComplex OldZ, QDComplex OlderZ,
 		double FloatIteration, WORD type, int subtype, WORD *degree, BYTE SpecialFlag, WORD special, int width);
 	int	QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDComplex *z2, BYTE *SpecialFlag, long *iteration);
 	int	QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q);
@@ -456,7 +486,7 @@ class CPixel
 	int	guessrow(HWND, int, int, int, int user_data(HWND hwnd));
 	void	plotblock(int, int, int, long, DWORD *dstack);
 	int	ssg_blocksize(void);
-	void	CPixel::ClearGuessMemory(DWORD *dstack);
+	void	ClearGuessMemory(DWORD *dstack);
 	unsigned int prefix[2][maxyblk][maxxblk]; // common temp 
 	int	*blockindex;			// 2 ^ n block size
 	int	*time_to_zoom;
@@ -600,7 +630,7 @@ class CPixel
 	int	overflow;
 
 	// Frothy Basin stuff
-	void	CPixel::set_Froth_palette(HWND hwnd);
+	void	set_Froth_palette(HWND hwnd);
 	char	froth3_256c[20] = "froth3.map";
 	char	froth6_256c[20] = "froth6.map";
 	char	froth3_16c[20] = "froth316.map";
@@ -609,7 +639,7 @@ class CPixel
 	int	froth_altcolor;
 	int	froth_shades;
 	long	oldcolor;
-
+/*
 	// decomposition stuff
 	double	cos45 = 0.70710678118654750;	// cos 45	degrees
 	double	sin45 = 0.70710678118654750;	// sin 45	degrees
@@ -624,7 +654,7 @@ class CPixel
 	double	tan5_625 = 0.09849140335716425; // tan 5.625	degrees
 	double	tan2_8125 = 0.04912684976946725; // tan 2.8125	degrees
 	double	tan1_4063 = 0.02454862210892544; // tan 1.4063	degrees
-
+*/
 	// Filter stuff used in DoFilter()
 	double	rqlim2; 
 

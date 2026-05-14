@@ -6,9 +6,10 @@
 #include <atomic>
 #include "qd_real.h"
 #include "FractalAbort.h"
+#include "..\ManpWIN64\Manp.h"
 
-extern	HWND	GlobalHwnd;			// This is the main windows handle
-extern	int	time_to_quit;			// time to quit?
+//extern	HWND	GlobalHwnd;			// This is the main windows handle
+//extern	int	time_to_quit;			// time to quit?
 extern	std::atomic<bool> gStopRequested;	// force early exit
 
 using namespace qd;
@@ -29,7 +30,7 @@ void dd_real::error(const char *msg)
 	return;
 
     gStopRequested.store(true);
-    MessageBox(GlobalHwnd, msg,	"DD Fatal Error, I'm outta here", MB_ICONEXCLAMATION | MB_OK);
+    MessageBox(gManp->GlobalHwnd, msg,	"DD Fatal Error, I'm outta here", MB_ICONEXCLAMATION | MB_OK);
     throw FractalAbort();
     }
 
@@ -219,7 +220,7 @@ QD_API dd_real sqrt(const dd_real &a) {
 
   double x = 1.0 / std::sqrt(a.x[0]);
   double ax = a.x[0] * x;
-  return dd_real::add(ax, (a - dd_real::sqr(ax)).x[0] * (x * 0.5));
+  return dd_real::add(ax, (a - ax * ax).x[0] * (x * 0.5));
 }
 
 const dd_real dd_real::_2pi = dd_real(6.283185307179586232e+00,

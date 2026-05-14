@@ -22,33 +22,9 @@
 #include "plot.h"
 #include "SafeStrings.h"
 
-extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
+//extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
 
-extern	CDib	Dib;
-extern	CTrueCol    TrueCol;		// palette info
-extern	std::vector<float> wpixels;	// an array of doubles holding slope modified iteration counts
-
-extern	double	hor;			// horizontal address
-extern	double	vert;			// vertical address
-extern	double	mandel_width;		// final width
-extern	BYTE	BigNumFlag;		// True if bignum used
-extern	long	threshold;
-extern	WORD	special;		// special colour, phase etc
-extern	WORD	degree;			// power
-extern	BYTE	screenflag;		/* replay saved screen */
-extern	int	biomorph;		/* biomorph colour */
-extern	BYTE	cycleflag;		/* do colour cycling */
-extern	int	decomp;			/* number of decomposition colours */
-extern	BYTE	orbit_flag;		/* display orbits? */
-extern	BYTE	exitflag;		/* exit on completion */
-extern	BYTE	juliaflag;		/* Julia implementation of fractal */
-extern	char	floatflag;		/* floating point maths */
-extern	BYTE	pairflag;		/* stereo pair flag and window size */
-extern	BYTE	orig_palette[];		/* loaded palette */
-extern	WORD	type;			/* M=mand, N=Newton etc */
-extern	int	subtype;		
-extern	int	width, height, xdots, ydots, bits_per_pixel;
-extern	double	ScreenRatio;		// ratio of width / height for the screen
+//extern	std::vector<float> wpixels;	// an array of doubles holding slope modified iteration counts
 
 extern	char	SCIPath[];		// path for SCI files
 
@@ -58,9 +34,9 @@ extern	BOOL	WritePNGList;		// write PNG filenames to a *lst file
 extern	BOOL	WriteMPEGFrames;	// write frames directly to an MPEG file
 
 extern	char	*AnimData(void);
-extern	BOOL	StartImmediately;
+//extern	BOOL	StartImmediately;
 static	int	frames = 100;
-	BOOL	ShowOrbits = TRUE;	// show julia orbits for each image
+//	BOOL	ShowOrbits = TRUE;	// show julia orbits for each image
 static	double	ScaleFactor = 1.0;
 static	int	JuliaAnimType = 0;	// 0 = linear
 					// 1 = circular
@@ -82,12 +58,8 @@ static	double	CentreY	= 0.0;
 static	double	radius	= 0.25;
 
 static	double	Magnitude = 0.248;	// 0.5 sits neatly inside the Mandelbrot set. 0.49 gives great orbits
-static	int	PaletteShift = 0;
 
-//extern	double	xgap;			// gap between pixels
-//extern	double	ygap;			// gap between pixels
-
-extern	CPlot	Plot;			// image plotting routines 
+//extern	CPlot	Plot;			// image plotting routines 
 extern	Complex	j;
 
 extern	void	ConvertRGB2ASCII(RGBTRIPLE, char *);
@@ -104,7 +76,7 @@ x = a(3cos(t) - cos(3t)),
 y = a(3sin(t) - sin(3t)) 
 **************************************************************************/
 
-int	CardioidJuliaScript(HWND hwnd, char *filename, int PaletteShift)
+int	CManp::CardioidJuliaScript(HWND hwnd, char *filename, int PaletteShift)
 
     {
     int		steps, i, k;
@@ -113,7 +85,6 @@ int	CardioidJuliaScript(HWND hwnd, char *filename, int PaletteShift)
 
     char	s[120];
     FILE	*out;
-    double  AspectRatio = (double)xdots / (double)ydots;
 
     steps = frames;
     Divisor = TWO_PI / (steps - 1);
@@ -177,8 +148,7 @@ int	CardioidJuliaScript(HWND hwnd, char *filename, int PaletteShift)
 	Circle Julia script generator
 **************************************************************************/
 
-int	CircleJuliaScript(HWND hwnd, char *filename, int PaletteShift)
-
+int	CManp::CircleJuliaScript(HWND hwnd, char *filename, int PaletteShift)
     {
     int		steps, i, k;
     double	Divisor;
@@ -186,7 +156,6 @@ int	CircleJuliaScript(HWND hwnd, char *filename, int PaletteShift)
 
     char	s[120];
     FILE	*out;
-    double	AspectRatio = (double)xdots / (double)ydots;
 
     steps = frames;
     Divisor = TWO_PI / (steps - 1);
@@ -246,8 +215,7 @@ int	CircleJuliaScript(HWND hwnd, char *filename, int PaletteShift)
 	General Linear Julia script generator
 **************************************************************************/
 
-int	GenJuliaScript(HWND hwnd, char *filename, int PaletteShift)
-
+int	CManp::GenJuliaScript(HWND hwnd, char *filename, int PaletteShift)
     {
     int		steps, i, k;
     double	DivisorX, DivisorY;
@@ -255,7 +223,6 @@ int	GenJuliaScript(HWND hwnd, char *filename, int PaletteShift)
 
     char	s[120];
     FILE	*out;
-    double	AspectRatio = (double)xdots / (double)ydots;
 
     steps = frames;
     DivisorX = (EndX - StartX) / steps;
@@ -321,8 +288,7 @@ int	GenJuliaScript(HWND hwnd, char *filename, int PaletteShift)
 
 #define	STEPS	10000
 
-int	displayCurve(HWND hwnd, int JuliaAnimType) 
-
+int	CManp::displayCurve(HWND hwnd, int JuliaAnimType)
     {
     int	i;
     double	Divisor, DivisorX, DivisorY;
@@ -331,7 +297,7 @@ int	displayCurve(HWND hwnd, int JuliaAnimType)
 
     BigNumFlag = FALSE;					// we are starting at the shallow end of the pool
     juliaflag = FALSE;
-    xgap = mandel_width * ScreenRatio / (double) xdots;
+    xgap = mandel_width * AspectRatio / (double) xdots;
     ygap = mandel_width / (double) ydots;
 
     if (JuliaAnimType == 0)				// linear
@@ -393,18 +359,18 @@ INT_PTR CALLBACK JuliaAnimDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	        if (type != POWER)
+	        if (gManp->type != POWER)
 		    {
-		    degree = 2;
+		    gManp->degree = 2;
 		    Magnitude = 0.249;
 		    }
 		else
-		    Magnitude = 0.93 / ((double) degree + 2);
+		    Magnitude = 0.93 / ((double)gManp->degree + 2);
 
 	        SetWindowText (hDlg, "Julia Animation Setup");
 		CheckRadioButton(hDlg, IDC_LINEARJUL, IDC_CARDIOID, IDC_LINEARJUL + JuliaAnimType);
 		hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
-		SendMessage(hCtrl, BM_SETCHECK, StartImmediately, 0L);
+		SendMessage(hCtrl, BM_SETCHECK, gManp->StartImmediately, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGDIRECT);
 		SendMessage(hCtrl, BM_SETCHECK, WritePNGFrames, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_WRITEMEMDIRECT);
@@ -417,19 +383,19 @@ INT_PTR CALLBACK JuliaAnimDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 		SetUpFilename(PNGName, "animpng", "Julia");
 		SetDlgItemText(hDlg, IDC_SCRIPT_FILENAME, ScriptFileName);
 		SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGName);
-		SetDlgItemInt(hDlg, IDC_THRESHOLD_START, threshold, TRUE);
+		SetDlgItemInt(hDlg, IDC_THRESHOLD_START, gManp->threshold, TRUE);
 		SetDlgItemInt(hDlg, IDC_FRAMES, frames, TRUE);
 		SAFE_SPRINTF(s, "%f", ScaleFactor);
 		SetDlgItemText(hDlg, IDC_JULIAWIDTH, s);
 		hCtrl = GetDlgItem (hDlg, IDC_ORBITS1);
 		ShowWindow(hCtrl, SW_SHOWNORMAL);
-		SendMessage(hCtrl, BM_SETCHECK, ShowOrbits, 0L);
+		SendMessage(hCtrl, BM_SETCHECK, gManp->ShowOrbits, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_INVERTRADIUS);
 		ShowWindow(hCtrl, SW_HIDE);
 		hCtrl = GetDlgItem (hDlg, IDC_INVERTTEXT);
 		ShowWindow(hCtrl, SW_HIDE);
 		hCtrl = GetDlgItem (hDlg, IDC_ORBITS1);
-		SetDlgItemInt(hDlg, IDC_PALETTESHIFT1, PaletteShift, TRUE);
+		SetDlgItemInt(hDlg, IDC_PALETTESHIFT1, gManp->PaletteShift, TRUE);
 		switch (JuliaAnimType)
 		    {
 		    case 0:						// Linear
@@ -638,7 +604,7 @@ INT_PTR CALLBACK JuliaAnimDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 				sscanf(s, "%lf", &Magnitude);
 				break;
 			    }
-			displayCurve(PixelHwnd, JuliaAnimType);				// write to main window
+			gManp->displayCurve(gManp->GlobalHwnd, JuliaAnimType);				// write to main window
 		        return TRUE ;
 
 		    case IDOK:
@@ -658,11 +624,11 @@ INT_PTR CALLBACK JuliaAnimDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 			strcat_s(ScriptFileName, MAX_PATH, ".sci");
 
 			hCtrl = GetDlgItem (hDlg, IDC_ORBITS1);
-			ShowOrbits = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->ShowOrbits = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 
-			threshold = GetDlgItemInt(hDlg, IDC_THRESHOLD_START, &bTrans, TRUE);
+			gManp->threshold = GetDlgItemInt(hDlg, IDC_THRESHOLD_START, &bTrans, TRUE);
 			hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
-			StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->StartImmediately = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGDIRECT);
 			WritePNGFrames = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem (hDlg, IDC_WRITEMEMDIRECT);
@@ -672,7 +638,7 @@ INT_PTR CALLBACK JuliaAnimDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 			frames = GetDlgItemInt(hDlg, IDC_FRAMES, &bTrans, TRUE);
 			GetDlgItemText(hDlg, IDC_JULIAWIDTH, s, 200);
 			sscanf(s, "%lf", &ScaleFactor);
-			PaletteShift = GetDlgItemInt(hDlg, IDC_PALETTESHIFT1, &bTrans, TRUE);
+			gManp->PaletteShift = GetDlgItemInt(hDlg, IDC_PALETTESHIFT1, &bTrans, TRUE);
 
 			if (frames <= 0)
 			    frames = 20;
@@ -693,7 +659,7 @@ INT_PTR CALLBACK JuliaAnimDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 				sscanf(s, "%lf", &EndX);
 				GetDlgItemText(hDlg, IDC_END_Y, s, 200);
 				sscanf(s, "%lf", &EndY);
-				GenJuliaScript(hDlg, ScriptFileName, PaletteShift);
+				gManp->GenJuliaScript(hDlg, ScriptFileName, gManp->PaletteShift);
 				break;
 			    case 1:
 				GetDlgItemText(hDlg, IDC_START_X, s, 200);
@@ -702,12 +668,12 @@ INT_PTR CALLBACK JuliaAnimDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 				sscanf(s, "%lf", &CentreY);
 				GetDlgItemText(hDlg, IDC_END_Y, s, 200);
 				sscanf(s, "%lf", &radius);
-				CircleJuliaScript(hDlg, ScriptFileName, PaletteShift);
+				gManp->CircleJuliaScript(hDlg, ScriptFileName, gManp->PaletteShift);
 				break;
 			    case 2:
 				GetDlgItemText(hDlg, IDC_END_Y, s, 200);
 				sscanf(s, "%lf", &Magnitude);
-				CardioidJuliaScript(hDlg, ScriptFileName, PaletteShift);
+				gManp->CardioidJuliaScript(hDlg, ScriptFileName, gManp->PaletteShift);
 				break;
 			    }
 

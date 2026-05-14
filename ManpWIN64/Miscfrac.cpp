@@ -6,28 +6,8 @@ Miscellaneous fractal-specific code (formerly in CALCFRAC.C)
 #include "Complex.h"
 #include "Pixel.h"
 #include "resource.h"
+#include "Manp.h"
 
-extern	BYTE	juliaflag;		//* Julia implementation of fractal 
-//extern	Complex	z, q, j;
-extern	double	rqlim;			// bailout level
-extern	WORD	type;			// M=mand, J=Julia 1,2,4-> etc
-extern	int	subtype;		// A - E
-
-extern	int	time_to_zoom;			// time to zoom in or out?
-extern	int	time_to_restart;		// time to restart?
-extern	int	time_to_reinit;			// time to reinitialize?
-extern	int	time_to_quit;			// time to quit?
-extern	int	time_to_load;			// time to load file?
-extern	BOOL	bTrack;				// TRUE if user is selecting a region
-
-extern	std::vector<std::unique_ptr<CPixel>> Pixel;	// routines for escape fractals
-//extern	CPixel	Pixel[];
-
-static	Complex	Sqr;
-static	double	real_imag;		// z_real * z_imag 
-
-int	row, col;
-long	color;
 int	overflow;
 int	save_release;
 
@@ -58,17 +38,7 @@ int	NullSetup(void)				// sometimes we just don't want to do anything
 ***************************************************************************/
 
 int	init_mandel_df(void)
-
     {
-/*
-    if (!juliaflag)
-	{
-	z.x = q.x + param[0];
-	z.y = q.y + param[1];
-	}
-    Sqr = 0;
-    real_imag = 0.0;
-*/
     return 0;
     }
 
@@ -77,16 +47,8 @@ int	init_mandel_df(void)
 ***************************************************************************/
 
 int	do_mandel_df(void)
-
     {
-/*
-    Sqr.x = z.x * z.x;
-    Sqr.y = z.y * z.y;
-    real_imag = z.x * z.y;
-    z.x = q.x + Sqr.x - Sqr.y;
-    z.y = q.y + real_imag + real_imag;
-*/
-    return ((Sqr.x + Sqr.y) >= rqlim);
+    return (true);
     }
 
 /************ standalone engine for "bifurcation" types ***************/
@@ -124,15 +86,14 @@ int	do_mandel_df(void)
 
 int	bifurcation(void)
     {
-    return	Pixel[0]->bifurcation(user_data);
+    return	gManp->Pixel[0]->bifurcation(user_data);
     }
 
 /**************************************************************************
 	Get a key or mouse click and process
 **************************************************************************/
 
-int user_data(HWND hwnd)
-
+int	user_data(HWND hwnd)
     {
     MSG msg;
 
@@ -142,7 +103,7 @@ int user_data(HWND hwnd)
 	DispatchMessage(&msg);
 	}
 
-    if (!bTrack && time_to_reinit + time_to_restart + time_to_quit + time_to_zoom + time_to_load)
+    if (!gManp->bTrack && gManp->time_to_reinit + gManp->time_to_restart + gManp->time_to_quit + gManp->time_to_zoom + gManp->time_to_load)
 	return(-1);					  // don't do this if mouse-button is down
     return 0;
     }

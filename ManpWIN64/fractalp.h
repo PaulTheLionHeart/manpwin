@@ -1,5 +1,6 @@
 /* FRACTALP.H - default values for the ManpWIN routines */
 #include <Windows.h>
+#include "ManpWin.h"
 
 //#define	PRINTOSC				// used for listing oscillator names in d:\temp\OscDump.txt
 #undef	PRINTOSC

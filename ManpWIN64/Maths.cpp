@@ -11,9 +11,6 @@
 #include	"manp.h"
 #include	"Complex.h"
 
-//#define		FLT_MIN		10e-50
-//#define		FLT_MAX		10e+50
-
 /**************************************************************************
 	Complex Power Function
 **************************************************************************/
@@ -21,7 +18,6 @@
 static	double	xt, yt, t2;
 
 void	cpower(Complex *result, Complex *base, int exp)
-
     {
     xt = base->x;   yt = base->y;
 
@@ -52,17 +48,6 @@ void	cpower(Complex *result, Complex *base, int exp)
 	    }
 	exp >>= 1;
 	}
-    }
-
-/**************************************************************************
-	Complex Multiply Function
-**************************************************************************/
-
-void	complex_mult(Complex *pz, Complex arg1, Complex arg2)
-
-    {
-    pz->x = arg1.x * arg2.x - arg1.y * arg2.y;
-    pz->y = arg1.x * arg2.y + arg1.y * arg2.x;
     }
 
 

@@ -15,13 +15,8 @@
 #include "Fract.h"
 #include "BailoutTemplate.h"
 #include "FractintTrigTemplate.h"
+#include "PixelTemplate.h"
 #include "..\parser\TrigFn.h"
-
-// lotsa norty externs that will be resolved when we c++ise parser
-//extern	    int QDFormPerPixel(QDComplex *zIn, QDComplex *qIn);	// norty declarations because this is in the formula parser
-//extern	    int QDFormula(QDComplex *zIn, QDComplex *qIn);
-// end norty externs that will be resolved when we c++ise parser
-
 
 /**************************************************************************
 	Initialise functions for each pixel
@@ -35,7 +30,7 @@ int	CPixel::QDInitFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q)
 	{
 	case HYPERCMPLXFP:
 	case HYPERCMPLXJFP:
-	    tQD = (invert) ? QDInvertz2(cQD) : cQD;
+	    tQD = (invert) ? Invertz2T<QDComplex, qd_real>(cQD, f_radius, f_xcenter, f_ycenter) : cQD;
 	    QDInitFunctions(MANDELFP, z, q);
 	    InitFractintTrigFunctionsT<QDComplex, qd_real>(type, z, q, juliaflag, invert, cQD, qcQD, qciQD, qcjQD, qckQD, tQD, tempQD, temp1QD, temp2QD, temp4QD, sqrQD, Fn2Index, param);
 	    break;
@@ -75,7 +70,7 @@ int	CPixel::QDInitFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q)
 	case FPLAMBDAFNFN:
 	case FPMANLAMFNFN:				// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
 	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
-	    tQD = (invert) ? QDInvertz2(cQD) : cQD;
+	    tQD = (invert) ? Invertz2T<QDComplex, qd_real>(cQD, f_radius, f_xcenter, f_ycenter) : cQD;
 	    InitFractintTrigFunctionsT<QDComplex, qd_real>(type, z, q, juliaflag, invert, cQD, qcQD, qciQD, qcjQD, qckQD, tQD, tempQD, temp1QD, temp2QD, temp4QD, sqrQD, Fn2Index, param);
 	    break;
 

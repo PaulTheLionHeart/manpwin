@@ -1041,6 +1041,7 @@ inline int TierazonIter(
     TComplex b,
     double rqlim,
     WORD* degree,
+    long threshold,
     int bailout_type)
     {
     double  d = 0.0;

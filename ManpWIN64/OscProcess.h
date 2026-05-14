@@ -1,4 +1,4 @@
-#include "Manp.h"
+//#include "Manp.h"
 #include "Dib.h"
 #include "Plot.h"
 #include "Matrix.h"
@@ -6,7 +6,7 @@
 #pragma once
 
 // Macro to determine to round off the given value to the closest byte
-#define WIDTHBYTES(i)   ((i+31)/32*4)
+//#define WIDTHBYTES(i)   ((i+31)/32*4)	    Replaced by ComputeWidthBytes() in Dib.h
 
 //////////////////////////////////////////////////////////////////////
 // Class definition
@@ -18,7 +18,6 @@ class COscProcess
 	COscProcess();                        // default constructor
 	COscProcess(std::vector<float>& wp);  // explicit constructor
 	virtual		~COscProcess();
-//	ProcessType	OscAnimProc;
 	double		cMax[MAXDIM], cMin[MAXDIM], cTot[MAXDIM];
 	double		Range[MAXDIM], Centre[MAXDIM];
 	double		xscale, yscale, ZoomValue;
@@ -32,7 +31,6 @@ class COscProcess
 	int		subtype;
 	double		VertBias = 1.0;				// allow vertical stretching of the image
 	double		zBias = 1.0;				// allow stretching of the image in the z direction
-	double		iterations;
 	int		*xAxis, *yAxis, *zAxis;			// numerical values for axes
 	int		CoordSystem;				// transform between Cartesian, Spherical and Cylindrical co-ordinate systems
 	struct		OscillatorSpecificStuff	*DatabasePtr;	// point to correct database
@@ -40,12 +38,11 @@ class COscProcess
 	BOOL		*RemoveHiddenPixels;			// used in Knots, Surfaces and Curves
 	BOOL		DisplayLines;
 	BOOL		DisplayAxisImages;			// show all possible images for axis pairs
-	std::vector <float> &wpixels;				// floating point iterations for each pixels
 	CTrueCol	*TrueCol;				// palette info
 
 	void		InitOscProc(int dimensions, double mandel_width, double ScreenRatio, int InxDots, int InyDots, WORD InType, int InSubType, ProcessType OscAnimProc, int *xAxis, int *yAxis, int *zAxis,	int FindCentre, 
-			CDib *Dib, double c1[], BYTE PerspectiveFlag, double iterations, RGBTRIPLE OscBackGround, double *x_rot, double *y_rot, double *z_rot, BOOL *InRemoveHiddenPixels, HWND hwndIn, std::vector <float> &wpixelsIn, CTrueCol *TrueColIn);
-	int		COscProcess::DisplayOscillator(double c1[], double cn[], double dt, DWORD colour, double i, int dimensions, BOOL DisplayLines, int xSign, int ySign, double hor, double vert,
+			CDib *Dib, double c1[], BYTE PerspectiveFlag, double iterations, RGBTRIPLE OscBackGround, double *x_rot, double *y_rot, double *z_rot, BOOL *InRemoveHiddenPixels, HWND hwndIn, /*std::vector <float> &wpixelsIn, */CTrueCol *TrueColIn);
+	int		DisplayOscillator(double c1[], double cn[], double dt, DWORD colour, double i, int dimensions, BOOL DisplayLines, int xSign, int ySign, double hor, double vert,
 				double InVertBias, double InzBias, ProcessType OscAnimProc, int InCoordSystem, long threshold, double ColourFactor, int KnotWidth);
 	void		ChangeCoordSystem(double *x1, double *y1, double *z1, double x, double y, double z, int CoordSystem);
 	struct		OscillatorSpecificStuff	*LoadDatabasePointer(WORD InType, int InSubType);
@@ -59,7 +56,7 @@ class COscProcess
 	void		PlotKnot(WORD u, WORD v, DWORD colour, int size, double z, CPlot Plot);
 	int		ChooseOsc(int x, int y);
 
-// stuff for morphing
+	// stuff for morphing
 	int		PlotWidth = 5;				// width of plot for curve or knot
 	int		frames = 100;
 

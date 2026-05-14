@@ -14,7 +14,6 @@
 ***************************************************************************/
 
 void	CQDMatrix::identity(QDMATRIXPTR m)
-
     {
     int	i, j;
 
@@ -32,7 +31,6 @@ void	CQDMatrix::identity(QDMATRIXPTR m)
 ***************************************************************************/
 
 void	CQDMatrix::mat_mul(QDMATRIXPTR mat1, QDMATRIXPTR mat2, QDMATRIXPTR mat3)
-
     {
     QDMATRIX	New;
     int	i, j;

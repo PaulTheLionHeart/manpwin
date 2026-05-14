@@ -37,9 +37,9 @@ int	decode_png_header(HWND, char *, char *);
 
 typedef unsigned long   ULONG;
 
-extern	long	threshold;
+//extern	long	threshold;
 
-extern	CTrueCol    TrueCol;			// palette info
+//extern	CTrueCol    TrueCol;			// palette info
 
 static	char	PNG_error_buffer[240];
 static	HWND	temphwnd;
@@ -47,10 +47,10 @@ static	HWND	temphwnd;
 static	char	*PaletteBuffer = NULL;
 static	char	*PixelBuffer = NULL;
 
-extern	RECT 	r;
-extern	HDC	hdcMem;				// load picture into memory
+//extern	RECT 	r;
+//extern	HDC	hdcMem;				// load picture into memory
 
-extern	int	height, xdots, ydots, width, bits_per_pixel;
+//extern	int	height, xdots, ydots, width, bits_per_pixel;
 
 extern	BYTE	*GetOrthoPalette(BYTE *);
 extern	void	SwapColours(WORD);
@@ -58,13 +58,6 @@ extern	char	*FractData(void);
 extern	int	mainview(HWND, BOOL);
 extern	int	GetParamData(HWND, LPSTR, LPSTR, LPSTR, BOOL);
 extern	void	ClosePtrs(void);
-extern	void	SaveTextPalette(char *);
-//extern	void	SaveIterationsDatabase(char *IterationBuffer);
-//extern	void	LoadIterationsDatabase(char *IterationBuffer, int length);
-extern	void	LoadTextPalette(char *, int);
-extern	void	setup_defaults(void);
-
-extern	CDib	Dib;				// Device Independent Bitmap
 
 static	png_structp	read_ptr;
 static	png_infop	read_info_ptr, end_info_ptr;
@@ -104,6 +97,65 @@ static	void	png_default_error(png_structp png_ptr, png_const_charp message)
     {
     png_default_warning(png_ptr, message);
    // We can return because png_error calls the default handler, which is actually OK in this case.
+    }
+
+/**************************************************************************
+	Fractal palette to string
+**************************************************************************/
+
+void	SaveTextPalette(char *PaletteBuffer)
+    {
+    int		i;
+    char	*p;
+    char	ascii[6];
+    long	LocalThreshold;
+
+    LocalThreshold = (gManp->threshold >= MAXPALETTE) ? MAXPALETTE - 1 : gManp->threshold;
+
+    p = PaletteBuffer;
+    for (i = 0; i < LocalThreshold; i++)
+	{
+	gManp->ConvertRGB2ASCII(gManp->TrueCol.PalettePtr[i], ascii);
+	strncpy(p, ascii, 4);
+	p += 4;
+	}
+    *p = '\0';				// remember to terminate string so strlen() knows where to end
+    }
+
+/**************************************************************************
+	String to Fractal palette
+**************************************************************************/
+
+void	LoadTextPalette(char *PaletteBuffer, int length)
+    {
+    int		i, j, count;
+    char	*p;
+    char	ascii[6];
+    char	ch;
+    BOOL	EndOfData = FALSE;
+    long	LocalThreshold;
+
+    LocalThreshold = (gManp->threshold >= MAXPALETTE) ? MAXPALETTE - 1 : gManp->threshold;
+
+    p = PaletteBuffer;
+    count = 0;
+    for (i = 0; i < LocalThreshold; i++)
+	{
+	for (j = 0; j < 4; j++)
+	    {
+	    ch = *p++;
+	    if (count++ > length)
+		{
+		EndOfData = TRUE;
+		break;
+		}
+	    ascii[j] = ch;
+	    }
+	ascii[4] = '\0';
+	if (EndOfData)
+	    break;
+	gManp->ConvertASCII2RGB(gManp->TrueCol.PalettePtr[i], ascii);
+	}
     }
 
 /**************************************************************************
@@ -222,9 +274,9 @@ int	decode_png_header(HWND hwnd, char *infile, char *szAppName)
     int channels = png_get_channels(read_ptr, read_info_ptr);
     bit_depth = png_get_bit_depth(read_ptr, read_info_ptr);
 
-    bits_per_pixel = channels * bit_depth;			// number of bits per pixel
-    width = (int)width_u;					// with of file
-    height = (int)height_u;					// height of file
+    gManp->Dib.BitsPerPixel = channels * bit_depth;				// number of bits per pixel
+    gManp->width = (int)width_u;					// with of file
+    gManp->height = (int)height_u;					// height of file
     return 0;
     }
 
@@ -234,11 +286,11 @@ int	decode_png_header(HWND hwnd, char *infile, char *szAppName)
 
 int   png_decoder(HWND hwnd, char *szAppName, char *infile)
     {
-    DWORD	linesize;
+    size_t 	linesize;
     char	s[480];
     long	i;
     int		num_text;
-    BYTE	*LinePtr = Dib.DibPixels.data();
+    BYTE	*LinePtr = gManp->Dib.DibPixels.data();
     png_bytep	*row_pointers;
 
     // Setting jmpbuf for read struct
@@ -254,19 +306,19 @@ int   png_decoder(HWND hwnd, char *szAppName, char *infile)
 
     // NOW query rowbytes
     png_size_t rowbytes = png_get_rowbytes(read_ptr, read_info_ptr);
-    linesize = WIDTHBYTES(Dib.DibWidth * Dib.BitsPerPixel);
-    if ((row_pointers = new png_bytep[Dib.DibHeight]) == NULL)
+    linesize = ComputeWidthBytes(gManp->Dib.DibWidth, gManp->Dib.BitsPerPixel);
+    if ((row_pointers = new png_bytep[gManp->Dib.DibHeight]) == NULL)
 	{
 	// free the structures 
 	if (read_ptr != NULL)
 	    png_destroy_read_struct(&read_ptr, &read_info_ptr, &end_info_ptr);
 	fclose(fp);
-	SAFE_SPRINTF(s, "Not enough memory: %d bytes for line buffer in PNG file: ", linesize);
+	SAFE_SPRINTF(s, "Not enough memory: %zu bytes for line buffer in PNG file: ", linesize);
 	MessageBox(hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
 	return -1;
 	}
 
-    for (i = Dib.DibHeight - 1; i >= 0; i--)
+    for (i = gManp->Dib.DibHeight - 1; i >= 0; i--)
 	{
 	row_pointers[i] = (png_bytep)LinePtr;
 	LinePtr += linesize;
@@ -283,7 +335,7 @@ int   png_decoder(HWND hwnd, char *szAppName, char *infile)
 		{
 		if (text_ptr[i].text_length > 0)
 		    {
-		    setup_defaults();
+		    gManp->setup_defaults();
 		    GetParamData(hwnd, infile, text_ptr[i].text, "", TRUE);
 		    }
 		}
@@ -311,7 +363,6 @@ int   png_decoder(HWND hwnd, char *szAppName, char *infile)
 ***************************************************************************/
 
 int	read_png_file(HWND hwnd, char *infile)
-
     {
     char	s[120];
     static HCURSOR	hCursor;
@@ -326,8 +377,9 @@ int	read_png_file(HWND hwnd, char *infile)
 	return -1;
 	}
 
-    xdots = width;
-    ydots = height;
+    gManp->xdots = gManp->width;
+    gManp->ydots = gManp->height;
+    gManp->AspectRatio = (double)gManp->xdots / (double)gManp->ydots;
     ClosePtrs();				// ready for next screen
     mainview(hwnd, TRUE);				// all screen specific stuff
 
@@ -341,7 +393,7 @@ int	read_png_file(HWND hwnd, char *infile)
 
     DataFromPNGFile = TRUE;			// don't splatter screen by loading data over image
 //    palette_flag = TRUE;
-    return (ydots - 1);
+    return (gManp->ydots - 1);
     SetCursor(hCursor);
     }
 
@@ -350,7 +402,6 @@ int	read_png_file(HWND hwnd, char *infile)
 **************************************************************************/
 
 int	write_png_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
-
     {
     char		s[480];
     static HCURSOR	hCursor;
@@ -360,7 +411,7 @@ int	write_png_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
     png_text	TextInfo;
     long	LocalThreshold;
 
-    LocalThreshold = (threshold >= MAXPALETTE) ? MAXPALETTE - 1 : threshold;
+    LocalThreshold = (gManp->threshold >= MAXPALETTE) ? MAXPALETTE - 1 : gManp->threshold;
 
     hCursor = LoadCursor((HINSTANCE)NULL, IDC_WAIT);
     SetCursor(hCursor);
@@ -411,10 +462,10 @@ int	write_png_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
     bit_depth = 8;
     color_type = PNG_COLOR_TYPE_RGB;
     png_set_bgr(write_ptr);
-    png_set_IHDR(write_ptr, write_info_ptr, width, height, bit_depth, color_type, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+    png_set_IHDR(write_ptr, write_info_ptr, gManp->width, gManp->height, bit_depth, color_type, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 //    write_ptr->channels = 3;
     png_write_info(write_ptr,write_info_ptr);
-    if ((row_pointers = (BYTE **) new BYTE[height * sizeof(BYTE *)]) == NULL)
+    if ((row_pointers = (BYTE **) new BYTE[gManp->height * sizeof(BYTE *)]) == NULL)
 	{
 	if (fp != NULL)
 	    fclose(fp);
@@ -427,8 +478,8 @@ int	write_png_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
 	return -1;
 	}
 
-    for (i = 0; i < height; ++i)
-	row_pointers[height - i - 1] = Dib.DibPixels.data() + (long)i * (long)(WIDTHBYTES(width * bits_per_pixel));
+    for (i = 0; i < gManp->height; ++i)
+	row_pointers[gManp->height - i - 1] = gManp->Dib.DibPixels.data() + (long)i * (long)(ComputeWidthBytes(gManp->width, gManp->Dib.BitsPerPixel));
     png_write_image(write_ptr, row_pointers, hwnd);
 
 	     // write uncompressed chunk

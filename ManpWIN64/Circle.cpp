@@ -6,9 +6,8 @@
 */
 
 #include "OtherFunctions.h"
+#include "Manp.h"
 
-#define MIN(a,b) (a <= b ? a : b)
-#define MAX(a,b) (a >= b ? a : b)
 #define MAXPOINTS 48
 
 /*---------------------------------------------------------------------
@@ -32,7 +31,7 @@ void	COtherFunctions::ScaledCircle(double x, double y, double radius, DWORD colo
 	    Plot.DisplayCircle(j, k, rad, colour);
 	    break;
 	case 3: 
-	    Plot.GetRGB(colour%threshold, rgb);
+	    Plot.GetRGB(colour%gManp->threshold, rgb);
 	    Plot.Display3DCircle(Dib, j, k, rad, rgb);
 	    break;
 	}
@@ -47,13 +46,12 @@ void	COtherFunctions::ScaledCircle(double x, double y, double radius, DWORD colo
 ***************************************************************************/
 
 int	COtherFunctions::DoFordFroth()
-
     {
     int	    k, h;
     double  x, y;
 
-    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double) (ydots - 1) / mandel_width;
+    xscale = (double) (gManp->xdots - 1) / (mandel_width * ScreenRatio);
+    yscale = (double) (gManp->ydots - 1) / mandel_width;
 
     if (subtype == 'L')
 	{
@@ -96,8 +94,8 @@ int	COtherFunctions::DoCurvedIFS()
     x = 0.3 ;
     y = 0.1;
 
-    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double) (ydots - 1) / mandel_width;
+    xscale = (double) (gManp->xdots - 1) / (mandel_width * ScreenRatio);
+    yscale = (double) (gManp->ydots - 1) / mandel_width;
 
     srand((unsigned)time(NULL));
     u = 0; v = 0;							// Initial line draw points
@@ -130,7 +128,7 @@ int	COtherFunctions::DoCurvedIFS()
 	    continue;
 	u = (int)((x - hor) * xscale);
 	v = (int)((vert + mandel_width - y) * yscale);
-	Plot.PlotPoint(u, v, (DWORD)i % threshold);
+	Plot.PlotPoint(u, v, (DWORD)i % gManp->threshold);
 	}
 
     return 0;
@@ -141,7 +139,6 @@ int	COtherFunctions::DoCurvedIFS()
   -------------------------------------------------------------------*/
 
 int	COtherFunctions::DoCircles()
-
     {
     int		gen, bot, top, count, i;
     double	dx, dy, l, frac;
@@ -151,8 +148,8 @@ int	COtherFunctions::DoCircles()
     if (UseDefaultPalette)
 	for (int i = 0; i < 256; i++)
 	    TrueCol->PalettePtr[i] = TrueCol->DefaultPalettePtr[i];
-    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double) (ydots - 1) / mandel_width;
+    xscale = (double) (gManp->xdots - 1) / (mandel_width * ScreenRatio);
+    yscale = (double) (gManp->ydots - 1) / mandel_width;
 
     if (Passes > 12)
 	Passes = 12;
@@ -174,7 +171,7 @@ int	COtherFunctions::DoCircles()
 
     for(gen = 0; gen < Passes; gen++)
 	{
-	colour = threshold * (DWORD)gen / Passes;
+	colour = gManp->threshold * (DWORD)gen / Passes;
 	bot = IntPower(2, gen);
 	top = IntPower(2, gen+1);
 	radius /= 2;

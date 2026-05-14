@@ -28,16 +28,8 @@
 #include "SafeStrings.h"
 
 // norty globals
-extern	PAINTSTRUCT 	ps;
-extern	int	xdots, ydots, width, height;
-// some glabal routines that need to be passed in at initialisation
 extern	int	user_data(HWND);
-extern	void	ClearScreen(void);
-extern	void	DisplayStatusBarInfo(int, char *);
-//extern	void	InitTransformation(double tx, double ty, double tz);
-extern	double	GetNumFrames(void);
-//extern	void	DoTransformation(double *x1, double *y1, double *z1, double x, double y, double z);
-extern std::vector<float> wpixels; // use global fallback
+//extern std::vector<float> wpixels; // use global fallback
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -48,17 +40,15 @@ extern std::vector<float> wpixels; // use global fallback
 //////////////////////////////////////////////////////////////////////
 
 COscProcess::COscProcess()
-    : wpixels(::wpixels)            // bind to global version
     {
     // initialize other members here
     }
 
 COscProcess::COscProcess(std::vector<float>& wp)
-    : wpixels(wp)
     {
     // initialize other members here
     }
-
+    
 COscProcess::~COscProcess()
     {
     }
@@ -68,20 +58,20 @@ COscProcess::~COscProcess()
 ***************************************************************************/
 
 void	COscProcess::InitOscProc(int dimensions, double InMandel_width, double InScreenRatio, int InxDots, int InyDots, WORD InType, int InSubType, ProcessType OscAnimProc, int *InxAxis, int *InyAxis, int *InzAxis, int InFindCentre, 
-	CDib *Dib, double c1[], BYTE PerspectiveFlag, double InIterations, RGBTRIPLE InOscBackGround, double *x_rot, double *y_rot, double *z_rot, BOOL *InRemoveHiddenPixels, HWND hwndIn, std::vector <float> &wpixelsIn, CTrueCol *TrueColIn)
+	CDib *Dib, double c1[], BYTE PerspectiveFlag, double InIterations, RGBTRIPLE InOscBackGround, double *x_rot, double *y_rot, double *z_rot, BOOL *InRemoveHiddenPixels, HWND hwndIn, /*std::vector <float> &wpixelsIn, */CTrueCol *TrueColIn)
     {
     int		j;
     
     type = InType;
     subtype = InSubType;
-    iterations = InIterations;
+    gManp->iterations = InIterations;
     FindCentre = InFindCentre;
     mandel_width = InMandel_width;
     ScreenRatio = InScreenRatio;
     xAxis = InxAxis;
     yAxis = InyAxis;
     zAxis = InzAxis;
-    wpixels = wpixelsIn;
+//    wpixels = wpixelsIn;
     TrueCol = TrueColIn;
 
     RemoveHiddenPixels = InRemoveHiddenPixels;
@@ -94,9 +84,9 @@ void	COscProcess::InitOscProc(int dimensions, double InMandel_width, double InSc
     if (dimensions >= MAXDIM)
 	dimensions = MAXDIM - 1;
 
-    Plot.InitPlot(100000L, TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE);
-    xscale = (double)(xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double)(ydots - 1) / mandel_width;
+    Plot.InitPlot(100000L, TrueCol, &gManp->wpixels, gManp->xdots, gManp->ydots, gManp->xdots, gManp->ydots, Dib->BitsPerPixel, Dib, USEPALETTE);
+    xscale = (double)(gManp->xdots - 1) / (mandel_width * ScreenRatio);
+    yscale = (double)(gManp->ydots - 1) / mandel_width;
     axes = dimensions;
 
     if (type == OSCILLATORS)
@@ -128,13 +118,13 @@ void	COscProcess::InitOscProc(int dimensions, double InMandel_width, double InSc
 	{
 	if (*RemoveHiddenPixels)
 	    {
-	    if ((zValuesKnots = new double[xdots * ydots]) == NULL)	// need a floating point value of z for each pixel
+	    if ((zValuesKnots = new double[gManp->xdots * gManp->ydots]) == NULL)	// need a floating point value of z for each pixel
 		{
 		zValuesKnots = NULL;
 		*RemoveHiddenPixels = FALSE;
 		}
 	    else
-		for (j = 0; j < xdots * ydots; j++)
+		for (j = 0; j < gManp->xdots * gManp->ydots; j++)
 		    *(zValuesKnots + j) = -1.0E100;			// negative enough to be in the background
 	    }
 	}
@@ -144,7 +134,7 @@ void	COscProcess::InitOscProc(int dimensions, double InMandel_width, double InSc
 	if (FindCentre == BOUNDARY)
 	    Mat.InitTransformation((cMax[*xAxis] + cMin[*xAxis]) / 2, (cMax[*yAxis] + cMin[*yAxis]) / 2, (cMax[*zAxis] + cMin[*zAxis]) / 2, *x_rot, *y_rot, *z_rot);	// translate to the centre of the object
 	else
-	    Mat.InitTransformation(xSum / iterations, ySum / iterations, zSum / iterations, *x_rot, *y_rot, *z_rot);	// translate to the centre of the object
+	    Mat.InitTransformation(xSum / gManp->iterations, ySum / gManp->iterations, zSum / gManp->iterations, *x_rot, *y_rot, *z_rot);	// translate to the centre of the object
 	}
 
     Dib->ClearDib(OscBackGround.rgbtRed, OscBackGround.rgbtGreen, OscBackGround.rgbtBlue);	// set background colour
@@ -155,9 +145,9 @@ void	COscProcess::InitOscProc(int dimensions, double InMandel_width, double InSc
 ***************************************************************************/
 
 int	COscProcess::DisplayOscillator(double c1[], double cn[], double dt, DWORD colour, double i, int dimensions, BOOL InDisplayLines, int xSign, int ySign, double hor, double vert, 
-															    double InVertBias, double InzBias, ProcessType OscAnimProc, int InCoordSystem, long threshold, double ColourFactor, int KnotWidth)
+											double InVertBias, double InzBias, ProcessType OscAnimProc, int InCoordSystem, long threshold, double ColourFactor, int KnotWidth)
     {
-    double	x, y, z, x1, y1, z1, xRaw, yRaw, zRaw, delta;
+    double	x = 0.0, y = 0.0, z = 0.0, x1 = 0.0, y1 = 0.0, z1 = 0.0, xRaw = 0.0, yRaw = 0.0, zRaw = 0.0, delta = 0.0;
     int		j;
     static	int u, v, uOld, vOld;
     BOOL	PlotLines = TRUE;
@@ -171,7 +161,7 @@ int	COscProcess::DisplayOscillator(double c1[], double cn[], double dt, DWORD co
     zBias = InzBias;
     CoordSystem = InCoordSystem;
 
-    delta = iterations / GetNumFrames();
+    delta = gManp->iterations / gManp->GetNumFrames();
     if (type == OSCILLATORS)
 	{
 	for (j = 0; j < dimensions; j++)
@@ -202,7 +192,7 @@ int	COscProcess::DisplayOscillator(double c1[], double cn[], double dt, DWORD co
 	if (type == KNOTS || type == CURVES) 
 	    *RemoveHiddenPixels = FALSE;									// too fast to see and there's no need
 	if (PointInfo)												// don't crash if we haven't initialised PointInfo
-	    LoadRawMorphData(dimensions, (long)iterations, (long)i, cTot, KnotWidth, xAxis, yAxis, zAxis);
+	    LoadRawMorphData(dimensions, (long)gManp->iterations, (long)i, cTot, KnotWidth, xAxis, yAxis, zAxis);
 	return 0;
 	}
 
@@ -223,13 +213,13 @@ int	COscProcess::DisplayOscillator(double c1[], double cn[], double dt, DWORD co
 	else													// too many points off in the distance
 	    {
 	    if (xSign > 0)											// axis sign
-		u = (int)((x1 - xSum / iterations + (mandel_width * ScreenRatio) / 2) * xscale);
+		u = (int)((x1 - xSum / gManp->iterations + (mandel_width * ScreenRatio) / 2) * xscale);
 	    else
-		u = (int)((xSum / iterations + (mandel_width * ScreenRatio) / 2 - x1) * xscale);
+		u = (int)((xSum / gManp->iterations + (mandel_width * ScreenRatio) / 2 - x1) * xscale);
 	    if (ySign > 0)											// axis sign
-		v = (int)((ySum / iterations * VertBias + mandel_width / 2 - y1 * VertBias) * yscale);
+		v = (int)((ySum / gManp->iterations * VertBias + mandel_width / 2 - y1 * VertBias) * yscale);
 	    else
-		v = (int)((y1 - ySum / iterations + mandel_width / 2) * VertBias * yscale);
+		v = (int)((y1 - ySum / gManp->iterations + mandel_width / 2) * VertBias * yscale);
 	    }
 	}
 
@@ -431,9 +421,9 @@ void	COscProcess::PlotCircle(int CentrePixels)
 	}
     else
 	{
-	xCentre = xSum / iterations;
-	yCentre = ySum / iterations;
-	zCentre = zSum / iterations;
+	xCentre = xSum / gManp->iterations;
+	yCentre = ySum / gManp->iterations;
+	zCentre = zSum / gManp->iterations;
 	}
     u0 = (int)(xCentre + (mandel_width * ScreenRatio / 2) * xscale);
     v0 = (int)(yCentre * VertBias + (mandel_width / 2) * yscale);
@@ -460,9 +450,9 @@ void	COscProcess::PlotAxes(void)
 	}
     else
 	{
-	xCentre = xSum / iterations;
-	yCentre = ySum / iterations;
-	zCentre = zSum / iterations;
+	xCentre = xSum / gManp->iterations;
+	yCentre = ySum / gManp->iterations;
+	zCentre = zSum / gManp->iterations;
 	}
     Mat.DoTransformation(&x0[0], &x0[1], &x0[2], cMin[*xAxis], yCentre, zCentre);
     Mat.DoTransformation(&x1[0], &x1[1], &x1[2], cMax[*xAxis], yCentre, zCentre);
@@ -543,11 +533,11 @@ BOOL	COscProcess::CheckForHiddenPixels(double z, int u, int v)
 	return TRUE;
     if (u < 0) u = 0;
     if (v < 0) v = 0;
-    if (u >= xdots) u = xdots - 1;
-    if (v >= ydots) v = ydots - 1;
-    if (z > *(zValuesKnots + v * xdots + u))
+    if (u >= gManp->xdots) u = gManp->xdots - 1;
+    if (v >= gManp->ydots) v = gManp->ydots - 1;
+    if (z > *(zValuesKnots + v * gManp->xdots + u))
 	{
-	*(zValuesKnots + v * xdots + u) = z;
+	*(zValuesKnots + v * gManp->xdots + u) = z;
 	return TRUE;
 	}
     return FALSE;
@@ -622,7 +612,7 @@ int	COscProcess::InitMorphing(int FractalAxes, long FractalIterations, int *NumF
     {
     int	    i;
 
-    iterations = FractalIterations;
+    gManp->iterations = FractalIterations;
     type = InType;
     OscAnimProc = InOscAnimProc;
     axes = FractalAxes;
@@ -639,13 +629,13 @@ int	COscProcess::InitMorphing(int FractalAxes, long FractalIterations, int *NumF
 
     if (PointInfo == NULL)
 	{
-	PointInfo = new double[axes * (long)iterations];
+	PointInfo = new double[axes * (long)gManp->iterations];
 	if (PointInfo == NULL)
 	    return -1;
 	}
 
     OscAnimProc = MORPHING;
-    *NumFrames = SetupMorph(axes, (long)iterations);
+    *NumFrames = SetupMorph(axes, (long)gManp->iterations);
     return 0;
     }
 
@@ -693,7 +683,7 @@ int	COscProcess::SetupMorph(int axes, long iterations)
 		*zAxis = 0;
 	    }
 //	_snprintf_s(str, MAXLINE, _TRUNCATE, "Setting up axes: %d, %d, %d", *xAxis + 1, *yAxis + 1, *zAxis + 1);
-	DisplayStatusBarInfo(INCOMPLETE, "");		// display status bar
+	gManp->DisplayStatusBarInfo(INCOMPLETE, "");		// display status bar
 	switch (type)			// This loads up the fractal info for all points for each axis
 	    {
 	    case OSCILLATORS:
@@ -733,8 +723,8 @@ int	COscProcess::SetupMorph(int axes, long iterations)
 		}
 	}
 
-    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double) (ydots - 1) / mandel_width;
+    xscale = (double) (gManp->xdots - 1) / (mandel_width * ScreenRatio);
+    yscale = (double) (gManp->ydots - 1) / mandel_width;
 
     if (DisplayAxisImages)
 	{
@@ -805,7 +795,7 @@ int	COscProcess::MorphStep(HWND hwnd, char *FileName, char *MoreInfo, int TotalF
 
     if (user_data(hwnd) == -1)				// user pressed a key?
 	return -1;
-    ClearScreen();
+    gManp->ClearScreen();
     AxisIndex = ThisStep / FramesPerPair;
     Ratio = (double)(ThisStep % FramesPerPair) / (double)FramesPerPair;
     AxisIn1 = In1[AxisIndex];
@@ -822,12 +812,12 @@ int	COscProcess::MorphStep(HWND hwnd, char *FileName, char *MoreInfo, int TotalF
     int NumRows = (axes / 2);
     if (DisplayAxisImages)
 	{
-	HorOffset = (ThisStep % NumColumns) * xdots / NumColumns + xdots / 120;
-	VertOffset = (ThisStep / NumColumns) * ydots / NumRows + ydots / 40;
+	HorOffset = (ThisStep % NumColumns) * gManp->xdots / NumColumns + gManp->xdots / 120;
+	VertOffset = (ThisStep / NumColumns) * gManp->ydots / NumRows + gManp->ydots / 40;
 	}
 
 //    Dib->ClearDib(OscBackGround.rgbtRed, OscBackGround.rgbtGreen, OscBackGround.rgbtBlue);	// set background colour
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
 	colour = (DWORD)(i / 5.0) % threshold;
 	x1 = (1.0 - Ratio) * (Range[AxisIn1]) * (*(PointInfo + axes * i + AxisIn1) - Offset[AxisIn1]);
@@ -836,13 +826,13 @@ int	COscProcess::MorphStep(HWND hwnd, char *FileName, char *MoreInfo, int TotalF
 	y2 = Ratio * (Range[AxisOut2]) * (*(PointInfo + axes * i + AxisOut2) - Offset[AxisOut2]);
 	if (DisplayAxisImages)
 	    {
-	    xNew = (WORD)((x1 + x2) * ydots) + xdots / (2 * NumColumns);
-	    yNew = ydots / (3 * NumRows) - (WORD)((y1 + y2) * ydots);
+	    xNew = (WORD)((x1 + x2) * gManp->ydots) + gManp->xdots / (2 * NumColumns);
+	    yNew = gManp->ydots / (3 * NumRows) - (WORD)((y1 + y2) * gManp->ydots);
 	    }
 	else
 	    {
-	    xNew = (WORD)((x1 + x2) * ydots) + xdots / 2;
-	    yNew = ydots / 2 - (WORD)((y1 + y2) * ydots);
+	    xNew = (WORD)((x1 + x2) * gManp->ydots) + gManp->xdots / 2;
+	    yNew = gManp->ydots / 2 - (WORD)((y1 + y2) * gManp->ydots);
 	    }
 
 	if (type == KNOTS || type == CURVES)
@@ -872,7 +862,7 @@ int	COscProcess::MorphStep(HWND hwnd, char *FileName, char *MoreInfo, int TotalF
 	    }
 	}
     _snprintf_s(s, MAXLINE, _TRUNCATE, "Animating: Frame %d of %d", ThisStep + 1, TotalFrames);
-    DisplayStatusBarInfo(INCOMPLETE, s);		// display status bar
+    gManp->DisplayStatusBarInfo(INCOMPLETE, s);		// display status bar
     _snprintf_s(MoreInfo, MAXLINE, _TRUNCATE, "Paul's Fractals: Frame %d of %d Axes: %d-%d to %d-%d", ThisStep + 1, TotalFrames, In1[AxisIndex] + 1, In2[AxisIndex] + 1, Out1[AxisIndex] + 1, Out2[AxisIndex] + 1);
     SetWindowText(hwnd, s);			// Show formatted text in the caption bar
     return 0;
@@ -901,7 +891,7 @@ int	COscProcess::ChooseOsc(int x, int y)
 	*Dib = DisplayDib;
 //	DisplayAxisImages = FALSE;
 	AxisDisplay = DISPLAYALL;
-	DisplayStatusBarInfo(INFORMATION, "Full list of images for each axis pair");		// display status bar
+	gManp->DisplayStatusBarInfo(INFORMATION, "Full list of images for each axis pair");		// display status bar
 	InvalidateRect(hwnd, NULL, FALSE);
 	return 0;
 	}
@@ -911,8 +901,8 @@ int	COscProcess::ChooseOsc(int x, int y)
 	DisplayDib = *Dib;
 	AxisDisplay = DISPLAYALL;
 	}
-    col = x * NumColumns / xdots;
-    row = y * NumRows / ydots;
+    col = x * NumColumns / gManp->xdots;
+    row = y * NumRows / gManp->ydots;
     cell = row * NumColumns + col;
     *xAxis = In1[cell];
     *yAxis = In2[cell];
@@ -932,7 +922,7 @@ int	COscProcess::ChooseOsc(int x, int y)
 
     if (PointInfo == NULL)
 	{
-	PointInfo = new double[axes * (long)iterations];
+	PointInfo = new double[axes * (long)gManp->iterations];
 	if (PointInfo == NULL)
 	    return -1;
 	}
@@ -949,7 +939,7 @@ int	COscProcess::ChooseOsc(int x, int y)
 	    CloseMorphing();
 	    return -1;
 	    }
-    for (k = 0; k < iterations; k++)
+    for (k = 0; k < gManp->iterations; k++)
 	for (r = 0; r < axes; r++)
 	    {
 	    if (*xAxis == r || *yAxis == r || *zAxis == r)		// only update axes if they are part of current initialisation
@@ -960,8 +950,8 @@ int	COscProcess::ChooseOsc(int x, int y)
 		}
 	    }
 
-    xscale = (double)(xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double)(ydots - 1) / mandel_width;
+    xscale = (double)(gManp->xdots - 1) / (mandel_width * ScreenRatio);
+    yscale = (double)(gManp->ydots - 1) / mandel_width;
     ZoomValue = 0.8 * DatabasePtr->width / mandel_width;
     for (r = 0; r < axes; r++)
 	{
@@ -969,13 +959,13 @@ int	COscProcess::ChooseOsc(int x, int y)
 	Offset[r] = (vMax[r] + vMin[r]) / 2;
 	}
 
-    for (i = 0; i < iterations; i++)
+    for (i = 0; i < gManp->iterations; i++)
 	{
 	colour = (DWORD)(i / 5.0) % 255;
 	x1 = (Range[*xAxis]) * (*(PointInfo + axes * i + *xAxis) - Offset[*xAxis]);
 	y1 = (Range[*yAxis]) * (*(PointInfo + axes * i + *yAxis) - Offset[*yAxis]);
-	xNew = (WORD)(x1 * ydots) + xdots / 2;
-	yNew = ydots / 2 - (WORD)(y1 * ydots);
+	xNew = (WORD)(x1 * gManp->ydots) + gManp->xdots / 2;
+	yNew = gManp->ydots / 2 - (WORD)(y1 * gManp->ydots);
 	if (DisplayLines)
 	    {
 	    Plot.genline(xNew, yNew, xOld, yOld, colour);
@@ -986,9 +976,9 @@ int	COscProcess::ChooseOsc(int x, int y)
 	    Plot.PlotPoint(xNew, yNew, colour);
 	}
 
-    BeginPaint(hwnd, &ps);
-    OutputAxesLabel(hwnd, ps.hdc, *xAxis, *yAxis);
-    EndPaint(hwnd, &ps);
+    BeginPaint(hwnd, &gManp->ps);
+    OutputAxesLabel(hwnd, gManp->ps.hdc, *xAxis, *yAxis);
+    EndPaint(hwnd, &gManp->ps);
     InvalidateRect(hwnd, NULL, FALSE);
     CloseMorphing();
 //    DisplayAxisImages = FALSE;
@@ -1052,8 +1042,7 @@ void	COscProcess::OutputAxesLabel(HWND hwnd, HDC hdc, int x, int y)
 	*(b + 2) = '\0';
 	}
     SAFE_SPRINTF(text, "Displaying axes: %s-%s", a, b);
-    DisplayStatusBarInfo(INFORMATION, text);		// display status bar
-//    Dib->Text2Dib(hdc, &AxisRect, 0x00ffffff, 0L, &lf, TRANSPARENT, text);
+    gManp->DisplayStatusBarInfo(INFORMATION, text);		// display status bar
     }
 
 /**************************************************************************

@@ -45,7 +45,7 @@ class Complex
 	Complex operator*=(const Complex &);
 	Complex operator*=(double &);
 	bool	operator==(Complex &);
-	Complex operator^(double &);
+	Complex operator^(double);
 	Complex operator^(Complex &);
 	Complex operator++(void);
 	Complex operator +(const Complex &);	// Addition Operator

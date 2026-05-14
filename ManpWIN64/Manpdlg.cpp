@@ -28,98 +28,14 @@
 #include "SafeStrings.h"
 #include "..\parser\cmplx.h"
 #include "..\parser\TrigFn.h"
-//#define	MAXTHRESHOLD	10000
 
-extern	double	hor;			// horizontal address
-extern	double	vert;			// vertical address
-extern	double	mandel_width;		// final width
-extern	double	ScreenRatio;		// ratio of width / height for the screen
-extern	long	threshold;		// maximum iterations
-extern	int	Offset3D;		// offset to threshold for 3D display
-extern	BYTE	calcmode;		// 'B' boundary, 'G' guess, etc
-extern	BYTE	oldcalcmode;		// store values during 3D transformations, filters etc
-extern	BYTE	cycleflag;		// do colour cycling
-extern	int	logval, logflag;	// log colour map starting value and flag for use of log palette
-extern	WORD	type;			// M=mand, N=Newton etc
-extern	int	subtype;		
-
-/*			    Sub types:
-Newton			    B=basin, S=stripe, N=normal
-Bifurcation		    Q = quad mand, B = bifurcation
-Cubic			    B = CBIN, C = CCIN, F = CFIN, K = CKIN
-Rational Map		    3 = RAT34, 4 = RAT44
-*/
-extern	int	CoordSystem;
-extern	WORD	special;		// special colour, phase etc
-//extern	BYTE	degree;			// power, degree
-//extern	BYTE	_3dflag;		// replay saved file. 3 = 3D
-extern	RGBTRIPLE OrbitColour;		// Indexed colour for the orbit displays in Julia sets
-extern	int	biomorph;		// biomorph colour
-extern	int	decomp;			// number of decomposition colours
-extern	int	blockindex;		// for solid guessing blocksize
-extern	BYTE	pairflag;		// stereo pair
-extern	int	AutoStereo_value;	// AutoStereo depth value
-extern	double	param[];
-extern	double	potparam[];
-extern	BOOL	RGBFilter;		// If true, we use the plotting routine for RGB filters (no plotting of iteration)
-extern	BOOL	UseCurrentPalette;	// do we use the ManpWIN palette? If false, generate internal filter palette
-extern	double	x_rot;			// angle display plane to x axis
-extern	double	y_rot;			// angle display plane to y axis
-extern	double	z_rot;			// angle display plane to z axis
-extern	double	sclx, scly, sclz;	// scale
 extern	int	HenonPoints;
-extern	int	InsideMethod;		// the number of the inside filter
-extern	int	OutsideMethod;		// the number of the outside filter
-extern	int	RotationAngle;		// in degrees
-extern	Complex	RotationCentre;		// centre of rotation
-extern	int	BailoutTestType;	// type of bailout test
-
-BOOL	ExpandStarTrailColours = TRUE;	// use the first 16 colours if false, else expand across the whole iteration range
-extern	double	dStrands;		// for Tierazon filters
-	long    fillcolor = -1;		// tesseral fillcolor: -1=normal 0 means don't fill
-extern	BOOL	invert;			// invert fractal
-extern	double	f_radius, f_xcenter, f_ycenter;	// inversion radius, center 
-extern	DWORD	BackgroundColour;	// set background colour for IFS and L-System fractals
-extern	int	distest, distestwidth;	// distance estimation
-extern	int	PlotType;
-extern	Complex	j;
-extern	BYTE	juliaflag;		// Julia implementation of fractal 
-
-// stuff for DwdDiff algorithm
-extern	double	bump_transfer_factor;
-extern	int	PaletteStart;
-extern	double	lightDirectionDegrees;
-extern	double	bumpMappingDepth;
-extern	double	bumpMappingStrength;
-extern	double	SlopeError;		// used as error value for Newton type Fwd Diff bailout calcs
-extern	double	ColourSpeed;		// used for colour smoothing
-
-extern double   rqlim;
-
-extern	char	*GetFractalName(void);
 
 // Big num declarations **********************************************************
-//extern	int	dec;
-extern	BYTE	BigNumFlag;		// True if bignum used
-//extern	bf_t	BigTemp, BigTemp1, BigTemp2, BigTemp3, BigTemp4;
-extern	BigDouble   BigHor, BigVert, BigWidth;
+extern	int	decimals;
 // Big num declarations **********************************************************
 
 #define	MAXFUNCTIONS	60
-
-extern	WORD	type;			// fractal type
-
-extern	void	init_log(HWND);
-extern	int	analyse_corner(char *);
-//extern	void	ConvertBignum2String(char *s, mpfr_t num);
-//extern	CMatrix	Mat;			// transformation and rotation matrix
-
-//extern	void	SaveUndo(void);
-//extern	int	atox(char);
-extern	void	InitFract(int);
-
-extern	CFract	Fractal;
-extern	CTrueCol    TrueCol;
 
 /**************************************************************************
 	Dialog Control for 3D Parameters
@@ -140,15 +56,15 @@ INT_PTR CALLBACK Param3D (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-		SAFE_SPRINTF(s, "%2.4f", sclx);
+		SAFE_SPRINTF(s, "%2.4f", gManp->sclx);
 		SetDlgItemText(hDlg, IDC_XSCALE, s);
-		SAFE_SPRINTF(s, "%2.4f", scly);
+		SAFE_SPRINTF(s, "%2.4f", gManp->scly);
 		SetDlgItemText(hDlg, IDC_YSCALE, s);
-		SAFE_SPRINTF(s, "%2.4f", sclz);
+		SAFE_SPRINTF(s, "%2.4f", gManp->sclz);
 		SetDlgItemText(hDlg, IDC_ZSCALE, s);
-		SetDlgItemInt(hDlg, IDC_XROTATE, (int)x_rot, TRUE);
-		SetDlgItemInt(hDlg, IDC_YROTATE, (int)y_rot, TRUE);
-		SetDlgItemInt(hDlg, IDC_ZROTATE, (int)z_rot, TRUE);
+		SetDlgItemInt(hDlg, IDC_XROTATE, (int)gManp->x_rot, TRUE);
+		SetDlgItemInt(hDlg, IDC_YROTATE, (int)gManp->y_rot, TRUE);
+		SetDlgItemInt(hDlg, IDC_ZROTATE, (int)gManp->z_rot, TRUE);
 	        return  TRUE ;
 
 	  case WM_COMMAND:
@@ -180,13 +96,13 @@ INT_PTR CALLBACK Param3D (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		        return  TRUE ;
 
 		    case IDOK:
-			sscanf(temp_xscale, "%lf", &sclx);
-			sscanf(temp_yscale, "%lf", &scly);
-			sscanf(temp_zscale, "%lf", &sclz);
-			x_rot = (double)temp_xrot;
-			y_rot = (double)temp_yrot;
-			z_rot = (double)temp_zrot;
-			cycleflag = FALSE;
+			sscanf(temp_xscale, "%lf", &gManp->sclx);
+			sscanf(temp_yscale, "%lf", &gManp->scly);
+			sscanf(temp_zscale, "%lf", &gManp->sclz);
+			gManp->x_rot = (double)temp_xrot;
+			gManp->y_rot = (double)temp_yrot;
+			gManp->z_rot = (double)temp_zrot;
+			gManp->cycleflag = FALSE;
 			EndDialog (hDlg, TRUE);
 			return  TRUE;
 
@@ -228,46 +144,46 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 	  {
 	  case WM_INITDIALOG:
 //		dStrands = 0.08;
-		SetDlgItemInt(hDlg, IDM_THRESHOLD, threshold, TRUE);
-		SAFE_SPRINTF(s, "%02X%02X%02X", OrbitColour.rgbtRed, OrbitColour.rgbtGreen, OrbitColour.rgbtBlue);
+		SetDlgItemInt(hDlg, IDM_THRESHOLD, gManp->threshold, TRUE);
+		SAFE_SPRINTF(s, "%02X%02X%02X", gManp->OrbitColour.rgbtRed, gManp->OrbitColour.rgbtGreen, gManp->OrbitColour.rgbtBlue);
 		SetDlgItemText(hDlg, IDC_ORBITCOL, s);
-		SetDlgItemInt(hDlg, IDM_ROTDEG, RotationAngle, TRUE);
-		SetDlgItemInt(hDlg, IDM_THRESH_OFF, Offset3D, TRUE);
-		SetDlgItemInt(hDlg, IDM_BLKINDEX, blockindex, TRUE);
-		SetDlgItemInt(hDlg, IDM_LOGVAL, logval, TRUE);
-		SetDlgItemInt(hDlg, IDM_TESSFILLCOL, fillcolor, TRUE);
-		SetDlgItemInt(hDlg, IDM_DECOMP, decomp, TRUE);
-		SetDlgItemInt(hDlg, IDC_SPECIAL, special, TRUE);
-		SetDlgItemInt(hDlg, IDM_BIOMORPH, biomorph, TRUE);
-		SetDlgItemInt(hDlg, IDM_MAXCOL, (int)potparam[0], TRUE);
-		SetDlgItemInt(hDlg, IDM_SLOPE, (int)potparam[1], TRUE);
-		SetDlgItemInt(hDlg, IDM_BAILOUT, (int)potparam[2], TRUE);
-		SetDlgItemInt(hDlg, IDC_DISTEST, distest, TRUE);
-		SetDlgItemInt(hDlg, IDC_DISTESTWIDTH, distestwidth, TRUE);
-		SAFE_SPRINTF(s, "%7.7f", f_radius);
+		SetDlgItemInt(hDlg, IDM_ROTDEG, gManp->RotationAngle, TRUE);
+		SetDlgItemInt(hDlg, IDM_THRESH_OFF, gManp->Offset3D, TRUE);
+		SetDlgItemInt(hDlg, IDM_BLKINDEX, gManp->blockindex, TRUE);
+		SetDlgItemInt(hDlg, IDM_LOGVAL, gManp->logval, TRUE);
+		SetDlgItemInt(hDlg, IDM_TESSFILLCOL, gManp->fillcolor, TRUE);
+		SetDlgItemInt(hDlg, IDM_DECOMP, gManp->decomp, TRUE);
+		SetDlgItemInt(hDlg, IDC_SPECIAL, gManp->special, TRUE);
+		SetDlgItemInt(hDlg, IDM_BIOMORPH, gManp->biomorph, TRUE);
+		SetDlgItemInt(hDlg, IDM_MAXCOL, (int)gManp->potparam[0], TRUE);
+		SetDlgItemInt(hDlg, IDM_SLOPE, (int)gManp->potparam[1], TRUE);
+		SetDlgItemInt(hDlg, IDM_BAILOUT, (int)gManp->potparam[2], TRUE);
+		SetDlgItemInt(hDlg, IDC_DISTEST, gManp->distest, TRUE);
+		SetDlgItemInt(hDlg, IDC_DISTESTWIDTH, gManp->distestwidth, TRUE);
+		SAFE_SPRINTF(s, "%7.7f", gManp->f_radius);
 		SetDlgItemText(hDlg, IDM_RADIUS, s);
-		SAFE_SPRINTF(s, "%7.7f", f_xcenter);
+		SAFE_SPRINTF(s, "%7.7f", gManp->f_xcenter);
 		SetDlgItemText(hDlg, IDM_CENTREX, s);
-		SAFE_SPRINTF(s, "%7.7f", f_ycenter);
+		SAFE_SPRINTF(s, "%7.7f", gManp->f_ycenter);
 		SetDlgItemText(hDlg, IDM_CENTREY, s);
-		SAFE_SPRINTF(s, "%2.2f", dStrands);
+		SAFE_SPRINTF(s, "%2.2f", gManp->dStrands);
 		SetDlgItemText(hDlg, IDM_STALKS, s);
-		SAFE_SPRINTF(s, "%06X", BackgroundColour);
+		SAFE_SPRINTF(s, "%06X", gManp->BackgroundColour);
 		SetDlgItemText(hDlg, IDC_BKGROUNDCOLOUR, s);
 
-		SAFE_SPRINTF(s, "%5.2f", ColourSpeed);
+		SAFE_SPRINTF(s, "%5.2f", gManp->ColourSpeed);
 		SetDlgItemText(hDlg, IDM_COLOURSPEED, s);
-		SAFE_SPRINTF(s, "%5.2f", bump_transfer_factor);
+		SAFE_SPRINTF(s, "%5.2f", gManp->bump_transfer_factor);
 		SetDlgItemText(hDlg, IDM_TRANSFACTOR, s);
-		SetDlgItemInt(hDlg, IDM_STARTPAL, PaletteStart, TRUE);
-		SAFE_SPRINTF(s, "%5.2f", lightDirectionDegrees);
+		SetDlgItemInt(hDlg, IDM_STARTPAL, gManp->PaletteStart, TRUE);
+		SAFE_SPRINTF(s, "%5.2f", gManp->lightDirectionDegrees);
 		SetDlgItemText(hDlg, IDM_LIGHTDIR, s);
-		SAFE_SPRINTF(s, "%5.2f", bumpMappingDepth);
+		SAFE_SPRINTF(s, "%5.2f", gManp->bumpMappingDepth);
 		SetDlgItemText(hDlg, IDM_MAPDEPTH, s);
-		SAFE_SPRINTF(s, "%5.2f", bumpMappingStrength);
+		SAFE_SPRINTF(s, "%5.2f", gManp->bumpMappingStrength);
 		SetDlgItemText(hDlg, IDM_MAPSTRENGTH, s);
 		
-		TempBailoutTest = BailoutTestType;
+		TempBailoutTest = gManp->BailoutTestType;
 		switch (TempBailoutTest)
 		    {
 		    case BAIL_MOD:
@@ -295,7 +211,7 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 
 		CheckRadioButton(hDlg, IDC_BAIL_MOD, IDC_MANR, tempParam);
 
-		tempInsideMethod = InsideMethod;
+		tempInsideMethod = gManp->InsideMethod;
 	        switch (tempInsideMethod)
 		    {
 		    case NONE:
@@ -316,10 +232,10 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    }
 		CheckRadioButton(hDlg, IDC_NO_INSIDE, IDC_BOF61, tempParam);
 
-		tempOutsideMethod = OutsideMethod;
+		tempOutsideMethod = gManp->OutsideMethod;
 		// can't access tierazon filter/colour methods, so set the radio button to TIERAZONFILTERS or TIERAZONCOLOURS
-		if (OutsideMethod > TIERAZONFILTERS)
-		    tempOutsideMethod = (OutsideMethod > TIERAZONCOLOURS) ? TIERAZONCOLOURS : TIERAZONFILTERS;
+		if (gManp->OutsideMethod > TIERAZONFILTERS)
+		    tempOutsideMethod = (gManp->OutsideMethod > TIERAZONCOLOURS) ? TIERAZONCOLOURS : TIERAZONFILTERS;
 		switch (tempOutsideMethod)
 		    {
 		    case NONE:
@@ -364,10 +280,10 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    }
 
 		CheckRadioButton(hDlg, IDC_NO_OUTSIDE, IDC_TIERAZONCOLOURS, tempParam);
-		CheckRadioButton(hDlg, IDC_CARTESIAN, IDC_CONICAL, IDC_CARTESIAN + CoordSystem);
+		CheckRadioButton(hDlg, IDC_CARTESIAN, IDC_CONICAL, IDC_CARTESIAN + gManp->CoordSystem);
 
-		temp = calcmode;
-	        switch (calcmode)
+		temp = gManp->calcmode;
+	        switch (gManp->calcmode)
 		    {
 		    case 'G':
 			tempParam = IDC_GUESS;
@@ -402,8 +318,8 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    }
 		CheckRadioButton(hDlg, IDC_GUESS, IDC_FWDDIFF, tempParam);
 
-		temp_RotationAngle = RotationAngle % 360;
-	        switch (RotationAngle)
+		temp_RotationAngle = gManp->RotationAngle % 360;
+	        switch (gManp->RotationAngle)
 		    {
 		    case NORMAL:
 			tempParam = IDC_NORMAL;
@@ -424,13 +340,13 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		CheckRadioButton(hDlg, IDC_NORMAL, IDC_OTHER_DEGREES, tempParam);
 
 		hCtrl = GetDlgItem (hDlg, IDC_STRETCHPALETTE);
-		SendMessage(hCtrl, BM_SETCHECK, TrueCol.Stretch, 0L);
+		SendMessage(hCtrl, BM_SETCHECK, gManp->TrueCol.Stretch, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_EXPANDSTARCOLS);
-		SendMessage(hCtrl, BM_SETCHECK, ExpandStarTrailColours, 0L);
+		SendMessage(hCtrl, BM_SETCHECK, gManp->ExpandStarTrailColours, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_USEPALETTE);
-		SendMessage(hCtrl, BM_SETCHECK, UseCurrentPalette, 0L);
+		SendMessage(hCtrl, BM_SETCHECK, gManp->UseCurrentPalette, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_INVERTFRACT);
-		SendMessage(hCtrl, BM_SETCHECK, invert, 0L);
+		SendMessage(hCtrl, BM_SETCHECK, gManp->invert, 0L);
 		SetFocus(GetDlgItem(hDlg, tempParam));
 	        return  TRUE ;
 
@@ -449,59 +365,59 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 */
 
 		    case IDC_CARTESIAN:
-			CoordSystem = CARTESIAN;
+			gManp->CoordSystem = CARTESIAN;
 			break;
 		    case IDC_SPHERICAL:
-			CoordSystem = SPHERICAL;
+			gManp->CoordSystem = SPHERICAL;
 			break;
 		    case IDC_CYLINDRICAL:
-			CoordSystem = CYLINDRICAL;
+			gManp->CoordSystem = CYLINDRICAL;
 			break;
 		    case IDC_PARABOLIC:
-			CoordSystem = PARABOLIC;
+			gManp->CoordSystem = PARABOLIC;
 			break;
 		    case IDC_PARABOLOIDAL:
-			CoordSystem = PARABOLOIDAL;
+			gManp->CoordSystem = PARABOLOIDAL;
 			break;
 		    case IDC_ELLIPTICAL:
-			CoordSystem = ELLIPTICAL;
+			gManp->CoordSystem = ELLIPTICAL;
 			break;
 		    case IDC_BIPOLAR:
-			CoordSystem = BIPOLAR;
+			gManp->CoordSystem = BIPOLAR;
 			break;
 		    case IDC_TOROIDAL:
-			CoordSystem = TOROIDAL;
+			gManp->CoordSystem = TOROIDAL;
 			break;
 		    case IDC_PROLATE_SPHEROIDAL:
-			CoordSystem = PROLATE_SPHERE;
+			gManp->CoordSystem = PROLATE_SPHERE;
 			break;
 		    case IDC_OBLATE_SPHEROIDAL:
-			CoordSystem = OBLATE_SPHERE;
+			gManp->CoordSystem = OBLATE_SPHERE;
 			break;
 		    case IDC_BISPHERICAL:
-			CoordSystem = BISPHERICAL;
+			gManp->CoordSystem = BISPHERICAL;
 			break;
 		    case IDC_CONICAL:
-			CoordSystem = CONICAL;
+			gManp->CoordSystem = CONICAL;
 			break;
 		    case IDC_USEPALETTE:
 			hCtrl = GetDlgItem (hDlg, IDC_USEPALETTE) ;
-			UseCurrentPalette = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->UseCurrentPalette = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 		        return  TRUE ;
 
 		    case IDC_EXPANDSTARCOLS:
 			hCtrl = GetDlgItem (hDlg, IDC_EXPANDSTARCOLS) ;
-			ExpandStarTrailColours = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->ExpandStarTrailColours = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 		        return  TRUE ;
 
 		    case IDC_STRETCHPALETTE:
 			hCtrl = GetDlgItem (hDlg, IDC_STRETCHPALETTE) ;
-			TrueCol.Stretch = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->TrueCol.Stretch = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 		        return  TRUE ;
 
 		    case IDC_INVERTFRACT:
 			hCtrl = GetDlgItem (hDlg, IDC_INVERTFRACT) ;
-			invert = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->invert = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 		        return  TRUE ;
 
 		    case IDM_THRESH_OFF:
@@ -737,92 +653,92 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 			return  TRUE ;
 
 		    case IDOK:
-			if (logval == 0 && temp_logval != 0)
-			     init_log(hDlg);			// don't forget to initialise loglist
-			logval = temp_logval; 
-			logflag = (logval != 0);
-			biomorph = temp_biomorph; 
-			decomp = temp_decomp; 
-			blockindex = temp_blockindex;
-			fillcolor = temp_fillcolor;
+			if (gManp->logval == 0 && temp_logval != 0)
+			     gManp->init_log(hDlg);			// don't forget to initialise loglist
+			gManp->logval = temp_logval;
+			gManp->logflag = (gManp->logval != 0);
+			gManp->biomorph = temp_biomorph;
+			gManp->decomp = temp_decomp;
+			gManp->blockindex = temp_blockindex;
+			gManp->fillcolor = temp_fillcolor;
 			temp_threshold = GetDlgItemInt(hDlg, IDM_THRESHOLD, &bTrans, TRUE);
 //			if (temp_threshold >= MAXTHRESHOLD || temp_threshold < 1)
 //			    temp_threshold = MAXTHRESHOLD - 1;
 			if (temp_threshold < 1 || temp_threshold > MAXTHRESHOLD)
 			    temp_threshold = MAXTHRESHOLD;
-			threshold = (int)temp_threshold;
-			Offset3D = temp_3Dthreshold;
+			gManp->threshold = (int)temp_threshold;
+			gManp->Offset3D = temp_3Dthreshold;
 //			if (Offset3D >= MAXTHRESHOLD)
 //			    Offset3D = MAXTHRESHOLD;
 //			inside_colour = temp_inside/* & 0x00ff*/;	// 0 - 255
 //			calcmode = temp;
 			if (temp_special < 0)
-			    special = 0;
+			    gManp->special = 0;
 //			else if (temp_special > 255)
 //			    special = 255;
 			else
-			    special = temp_special;
-			BailoutTestType = TempBailoutTest;
-			InsideMethod = tempInsideMethod;
-			OutsideMethod = tempOutsideMethod;
-			OrbitColour.rgbtBlue = temp_OrbitColour & 0xff;
-			OrbitColour.rgbtGreen = (temp_OrbitColour >> 8) & 0xff;
-			OrbitColour.rgbtRed = (temp_OrbitColour >> 16) & 0xff;
-			if (InsideMethod == POTENTIAL)
+			    gManp->special = temp_special;
+			gManp->BailoutTestType = TempBailoutTest;
+			gManp->InsideMethod = tempInsideMethod;
+			gManp->OutsideMethod = tempOutsideMethod;
+			gManp->OrbitColour.rgbtBlue = temp_OrbitColour & 0xff;
+			gManp->OrbitColour.rgbtGreen = (temp_OrbitColour >> 8) & 0xff;
+			gManp->OrbitColour.rgbtRed = (temp_OrbitColour >> 16) & 0xff;
+			if (gManp->InsideMethod == POTENTIAL)
 			    {
-			    potparam[0] = GetDlgItemInt(hDlg, IDM_MAXCOL, &bTrans, TRUE);
-			    potparam[1] = GetDlgItemInt(hDlg, IDM_SLOPE, &bTrans, TRUE);
-			    potparam[2] = GetDlgItemInt(hDlg, IDM_BAILOUT, &bTrans, TRUE);
+			    gManp->potparam[0] = GetDlgItemInt(hDlg, IDM_MAXCOL, &bTrans, TRUE);
+			    gManp->potparam[1] = GetDlgItemInt(hDlg, IDM_SLOPE, &bTrans, TRUE);
+			    gManp->potparam[2] = GetDlgItemInt(hDlg, IDM_BAILOUT, &bTrans, TRUE);
 			    }
-			if (OutsideMethod >= TIERAZONFILTERS)
+			if (gManp->OutsideMethod >= TIERAZONFILTERS)
 			    {
 			    GetDlgItemText(hDlg, IDM_STALKS, s, 30);
-			    calcmode = '2';
-			    sscanf(s, "%lf", &dStrands);
+			    gManp->calcmode = '2';
+			    sscanf(s, "%lf", &gManp->dStrands);
 			    }
 			else
 			    {
-			    RGBFilter = FALSE;			// don't use the plotting routine for RGB filters
-			    PlotType = NOSYM;
-			    calcmode = temp;
+			    gManp->RGBFilter = FALSE;			// don't use the plotting routine for RGB filters
+			    gManp->PlotType = NOSYM;
+			    gManp->calcmode = temp;
 			    }
 			GetDlgItemText(hDlg, IDM_RADIUS, s, 30);
-			sscanf(s, "%lf", &f_radius);
+			sscanf(s, "%lf", &gManp->f_radius);
 			GetDlgItemText(hDlg, IDM_CENTREX, s, 30);
-			sscanf(s, "%lf", &f_xcenter);
+			sscanf(s, "%lf", &gManp->f_xcenter);
 			GetDlgItemText(hDlg, IDM_CENTREY, s, 30);
-			sscanf(s, "%lf", &f_ycenter);
+			sscanf(s, "%lf", &gManp->f_ycenter);
 			GetDlgItemText(hDlg, IDC_BKGROUNDCOLOUR, s, 10);
-			sscanf(s, "%X", &BackgroundColour);
-			cycleflag = FALSE;
-			RotationAngle = temp_RotationAngle % 360;
+			sscanf(s, "%X", &gManp->BackgroundColour);
+			gManp->cycleflag = FALSE;
+			gManp->RotationAngle = temp_RotationAngle % 360;
 			if (temp_RotationAngle < 0)
-			    RotationAngle = -(-temp_RotationAngle % 360);
+			    gManp->RotationAngle = -(-temp_RotationAngle % 360);
 			else
-			    RotationAngle = temp_RotationAngle % 360;
-			if (RotationAngle != NORMAL && RotationAngle != 90 && RotationAngle != 180 && RotationAngle != 270)
+			    gManp->RotationAngle = temp_RotationAngle % 360;
+			if (gManp->RotationAngle != NORMAL && gManp->RotationAngle != 90 && gManp->RotationAngle != 180 && gManp->RotationAngle != 270)
 			    {
-			    z_rot = (double)RotationAngle;
-			    RotationCentre.x = hor + (mandel_width * ScreenRatio) / 2;
-			    RotationCentre.y = vert + mandel_width / 2;
-			    if (OrigRotationAngle != RotationAngle)
-				Mat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, z_rot);
+			    gManp->z_rot = (double)gManp->RotationAngle;
+			    gManp->RotationCentre.x = gManp->hor + (gManp->mandel_width * gManp->AspectRatio) / 2;
+			    gManp->RotationCentre.y = gManp->vert + gManp->mandel_width / 2;
+			    if (OrigRotationAngle != gManp->RotationAngle)
+				Mat.InitTransformation(gManp->RotationCentre.x, gManp->RotationCentre.y, 0.0, 0.0, 0.0, gManp->z_rot);
 			    }
-			OrigRotationAngle = RotationAngle;
-			distest = GetDlgItemInt(hDlg, IDC_DISTEST, &bTrans, TRUE);
-			distestwidth = GetDlgItemInt(hDlg, IDC_DISTESTWIDTH, &bTrans, TRUE);
+			OrigRotationAngle = gManp->RotationAngle;
+			gManp->distest = GetDlgItemInt(hDlg, IDC_DISTEST, &bTrans, TRUE);
+			gManp->distestwidth = GetDlgItemInt(hDlg, IDC_DISTESTWIDTH, &bTrans, TRUE);
 
 			GetDlgItemText(hDlg, IDM_COLOURSPEED, s, 30);
-			sscanf(s, "%lf", &ColourSpeed);
+			sscanf(s, "%lf", &gManp->ColourSpeed);
 			GetDlgItemText(hDlg, IDM_TRANSFACTOR, s, 30);
-			sscanf(s, "%lf", &bump_transfer_factor);
-			PaletteStart = GetDlgItemInt(hDlg, IDM_STARTPAL, &bTrans, TRUE);
+			sscanf(s, "%lf", &gManp->bump_transfer_factor);
+			gManp->PaletteStart = GetDlgItemInt(hDlg, IDM_STARTPAL, &bTrans, TRUE);
 			GetDlgItemText(hDlg, IDM_LIGHTDIR, s, 30);
-			sscanf(s, "%lf", &lightDirectionDegrees);
+			sscanf(s, "%lf", &gManp->lightDirectionDegrees);
 			GetDlgItemText(hDlg, IDM_MAPDEPTH, s, 30);
-			sscanf(s, "%lf", &bumpMappingDepth);
+			sscanf(s, "%lf", &gManp->bumpMappingDepth);
 			GetDlgItemText(hDlg, IDM_MAPSTRENGTH, s, 30);
-			sscanf(s, "%lf", &bumpMappingStrength);
+			sscanf(s, "%lf", &gManp->bumpMappingStrength);
 
 			EndDialog (hDlg, TRUE);
 			return  TRUE;
@@ -850,9 +766,9 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	        temp = type;
+	        temp = gManp->type;
 //		TempSubtype = subtype;
-	        switch (type)
+	        switch (gManp->type)
 		    {
 		    case MANDELFP:
 			tempParam = IDC_MANDEL;
@@ -1803,9 +1719,9 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			break;
 
 		    case IDOK:
-			type = temp;
+			gManp->type = temp;
 //			subtype = TempSubtype;
-			cycleflag = FALSE;
+			gManp->cycleflag = FALSE;
 			EndDialog (hDlg, TRUE);
 			return  TRUE;
 
@@ -1852,26 +1768,25 @@ INT_PTR CALLBACK AboutDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 **************************************************************************/
 
 void	Centre2Edge(void) 
-
     {
     double	centrex, centrey;
     // local Big num declarations **********************************************************
     BigDouble	Big_centrex, Big_centrey, Big_Scale;
     // local Big num declarations **********************************************************
 
-    if (BigNumFlag)
+    if (gManp->BigNumFlag)
 	{
-	Big_centrex = BigHor;
-	Big_centrey = BigVert;
-	BigHor = Big_centrex - (BigWidth * (ScreenRatio / 2.0));
-	BigVert = Big_centrey - BigWidth / 2.0;
+	Big_centrex = gManp->BigHor;
+	Big_centrey = gManp->BigVert;
+	gManp->BigHor = Big_centrex - (gManp->BigWidth * (gManp->AspectRatio / 2.0));
+	gManp->BigVert = Big_centrey - gManp->BigWidth / 2.0;
 	}
     else
 	{
-	centrex = hor;
-	centrey = vert;
-	hor = centrex - (mandel_width * (ScreenRatio / 2.0));
-	vert = centrey - (mandel_width / 2.0);
+	centrex = gManp->hor;
+	centrey = gManp->vert;
+	gManp->hor = centrex - (gManp->mandel_width * (gManp->AspectRatio / 2.0));
+	gManp->vert = centrey - (gManp->mandel_width / 2.0);
 	}
     }
 
@@ -1879,45 +1794,39 @@ void	Centre2Edge(void)
 	Get corner and width
 **************************************************************************/
 
-extern	void	ConvertString2Bignum(mpfr_t, char *);
-extern	int	getprecbf_mag(void);
-extern	int	ChangeBigPrecision(int decimals);
-extern	int	decimals, precision;
-
 int	GetCorner(char *s1, char *s2, char *s3)
-
     {
-    sscanf(s1, "%lf", &hor);
-    sscanf(s2, "%lf", &vert);
-    sscanf(s3, "%lf", &mandel_width);
+    sscanf(s1, "%lf", &gManp->hor);
+    sscanf(s2, "%lf", &gManp->vert);
+    sscanf(s3, "%lf", &gManp->mandel_width);
 
-    if (mandel_width < DBL_MIN)						// we can do a BigNum calculation here to allow deeper zooming
+    if (gManp->mandel_width < DBL_MIN)						// we can do a BigNum calculation here to allow deeper zooming
 	{
-	ConvertString2Bignum(BigWidth.x, s3);
-	BigNumFlag = TRUE;
+	gManp->ConvertString2Bignum(gManp->BigWidth.x, s3);
+	gManp->BigNumFlag = TRUE;
 	}
 
-    precision = getprecbf_mag();
-    if (precision < 0)							// exceeded allowable precision
+    gManp->precision = gManp->getprecbf_mag();
+    if (gManp->precision < 0)							// exceeded allowable precision
 	return -1;
-    if (precision > DBL_DIG - 3)
+    if (gManp->precision > DBL_DIG - 3)
 	{
-	decimals = precision + PRECISION_FACTOR;
-	if (ChangeBigPrecision(decimals) < 0)				// increase precision of Big numbers	
+	decimals = gManp->precision + PRECISION_FACTOR;
+	if (gManp->ChangeBigPrecision(decimals) < 0)				// increase precision of Big numbers	
 	    return -1;							// too many decimals for library
 
-	BigNumFlag = TRUE;
-	ConvertString2Bignum(BigHor.x, s1);
-	ConvertString2Bignum(BigVert.x, s2);
-	ConvertString2Bignum(BigWidth.x, s3);
-	if (mpfr_sgn(BigWidth.x) == 0)					// no naughty division
-	    mpfr_set_d(BigWidth.x, 1.0, MPFR_RNDN);
+	gManp->BigNumFlag = TRUE;
+	gManp->ConvertString2Bignum(gManp->BigHor.x, s1);
+	gManp->ConvertString2Bignum(gManp->BigVert.x, s2);
+	gManp->ConvertString2Bignum(gManp->BigWidth.x, s3);
+	if (mpfr_sgn(gManp->BigWidth.x) == 0)					// no naughty division
+	    mpfr_set_d(gManp->BigWidth.x, 1.0, MPFR_RNDN);
 	}
     else
 	{
-	BigNumFlag = FALSE;
-	if (mandel_width < DBL_MIN)
-	    mandel_width = 1.0;
+	gManp->BigNumFlag = FALSE;
+	if (gManp->mandel_width < DBL_MIN)
+	    gManp->mandel_width = 1.0;
 	}
     return 0;
     }
@@ -1952,25 +1861,25 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-	      if (Fractal.FractName == NULL)
-		  InitFract(type);
-	      SAFE_SPRINTF(JuliaReal, "%lf", j.x);
-	      SAFE_SPRINTF(JuliaImag, "%lf", j.y);
-	      SAFE_SPRINTF(Bailout, "%lf", rqlim);
+	      if (gManp->Fractal.FractName == NULL)
+		  gManp->InitFract(gManp->type);
+	      SAFE_SPRINTF(JuliaReal, "%lf", gManp->j.x);
+	      SAFE_SPRINTF(JuliaImag, "%lf", gManp->j.y);
+	      SAFE_SPRINTF(Bailout, "%lf", gManp->rqlim);
 	      SetDlgItemText(hDlg, IDC_JULIAREAL, JuliaReal);
 	      SetDlgItemText(hDlg, IDC_JULIAIMAG, JuliaImag);
 	      SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
-	      SetDlgItemText(hDlg, ID_FRACNAME, GetFractalName());
-	      SetDlgItemInt(hDlg, IDC_THRESHOLD, threshold, TRUE);
+	      SetDlgItemText(hDlg, ID_FRACNAME, gManp->GetFractalName());
+	      SetDlgItemInt(hDlg, IDC_THRESHOLD, gManp->threshold, TRUE);
 	      hCtrl = GetDlgItem(hDlg, IDC_CENTRE);
 	      SendMessage(hCtrl, BM_SETCHECK, CentreCoord, 0L);
 	      hCtrl = GetDlgItem(hDlg, IDC_ISJULIA);
-	      SendMessage(hCtrl, BM_SETCHECK, juliaflag, 0L);
-	      if (BigNumFlag)
+	      SendMessage(hCtrl, BM_SETCHECK, gManp->juliaflag, 0L);
+	      if (gManp->BigNumFlag)
 		  {
-		  BigHor.ToString(s1, SIZEOF_BF_VARS, false);
-		  BigVert.ToString(s2, SIZEOF_BF_VARS, false);
-		  BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
+		  gManp->BigHor.ToString(s1, SIZEOF_BF_VARS, false);
+		  gManp->BigVert.ToString(s2, SIZEOF_BF_VARS, false);
+		  gManp->BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
 //		  ConvertBignum2String(s1, BigHor.x);
 //		  ConvertBignum2String(s2, BigVert.x);
 //		  mpfr_sprintf(s3, "%.20Re", BigWidth.x);
@@ -1978,37 +1887,37 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 		  }
 	      else
 		  {
-		  _snprintf_s(s1, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", hor);
-		  _snprintf_s(s2, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", vert);
-		  _snprintf_s(s3, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", mandel_width);
+		  _snprintf_s(s1, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", gManp->hor);
+		  _snprintf_s(s2, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", gManp->vert);
+		  _snprintf_s(s3, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", gManp->mandel_width);
 		  }
 	      
 	      SetDlgItemText(hDlg, IDC_XCOORD, s1);
 	      SetDlgItemText(hDlg, IDC_YCOORD, s2);
 	      SetDlgItemText(hDlg, IDC_WIDTH, s3);
-	      if (Fractal.NumFunct > 0)
+	      if (gManp->Fractal.NumFunct > 0)
 		  {
-		  SetDlgItemText(hDlg, ID_FRACPARAM1, Fractal.Fn1);
+		  SetDlgItemText(hDlg, ID_FRACPARAM1, gManp->Fractal.Fn1);
 		  hCtrl = GetDlgItem (hDlg, ID_FRACPARAM1);
  		  EnableWindow (hCtrl, FALSE);
 		  SetDlgItemText(hDlg, ID_FRACPARTX1, "First Function");
-		  if (Fractal.NumFunct > 1)
+		  if (gManp->Fractal.NumFunct > 1)
 		      {
-		      SetDlgItemText(hDlg, ID_FRACPARAM2, Fractal.Fn2);
+		      SetDlgItemText(hDlg, ID_FRACPARAM2, gManp->Fractal.Fn2);
 		      hCtrl = GetDlgItem (hDlg, ID_FRACPARAM2);
  		      EnableWindow (hCtrl, FALSE);
 		      SetDlgItemText(hDlg, ID_FRACPARTX2, "Second Function");
 		      }
 		  }
-	      for (i = Fractal.NumFunct, k = 0; i < Fractal.NumFunct + Fractal.NumParam && i < 10; i++, k++) 
+	      for (i = gManp->Fractal.NumFunct, k = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < 10; i++, k++)
 		  {
-		  SAFE_SPRINTF(s[k], "%f", *Fractal.ParamValue[k]);
-		  SetDlgItemText(hDlg, ID_FRACPARTX1 + i, fractalspecific[type].paramname[k]);
+		  SAFE_SPRINTF(s[k], "%f", *gManp->Fractal.ParamValue[k]);
+		  SetDlgItemText(hDlg, ID_FRACPARTX1 + i, fractalspecific[gManp->type].paramname[k]);
 		  SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[k]);
 		  hCtrl = GetDlgItem (hDlg, ID_FRACPARAM1 + i);
  		  EnableWindow (hCtrl, TRUE);
 		  }
-	      for (i = Fractal.NumFunct + Fractal.NumParam; i < 10; i++) 
+	      for (i = gManp->Fractal.NumFunct + gManp->Fractal.NumParam; i < 10; i++)
 		  SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
 
 	      return  TRUE ;
@@ -2021,7 +1930,7 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 			hCtrl = GetDlgItem(hDlg, IDC_CENTRE);
 			CentreCoord = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem(hDlg, IDC_ISJULIA);
-			juliaflag = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
+			gManp->juliaflag = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			GetDlgItemText(hDlg, IDC_XCOORD, s1, SIZEOF_BF_VARS);
 			GetDlgItemText(hDlg, IDC_YCOORD, s2, SIZEOF_BF_VARS);
 			GetDlgItemText(hDlg, IDC_WIDTH, s3, SIZEOF_BF_VARS);
@@ -2029,22 +1938,21 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 //			if (analyse_corner(buf) < 0)
 			if (GetCorner(s1, s2, s3) < 0)
 			    {
-			    double  AspectRatio = (double)xdots / (double)ydots;
-			    BigNumFlag = FALSE;
-			    if (AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
+			    gManp->BigNumFlag = FALSE;
+			    if (gManp->AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
 				{
-				mandel_width = 4.0;
-				vert = -2.0;
-				hor = vert * AspectRatio;
+				gManp->mandel_width = 4.0;
+				gManp->vert = -2.0;
+				gManp->hor = gManp->vert * gManp->AspectRatio;
 				}
 			    else
 				{
-				mandel_width = 4.0 / AspectRatio;
-				hor = -2.0;
-				vert = hor / AspectRatio;
+				gManp->mandel_width = 4.0 / gManp->AspectRatio;
+				gManp->hor = -2.0;
+				gManp->vert = gManp->hor / gManp->AspectRatio;
 				}
-			    param[0] = 0.0;
-			    param[1] = 0.0;
+			    gManp->param[0] = 0.0;
+			    gManp->param[1] = 0.0;
 			    SAFE_SPRINTF(t, "Deep Zooming Limit (%d decimals) exceeded", SIZEOF_BF_VARS);
 			    MessageBox (hDlg, t, "ManpWin", MB_ICONEXCLAMATION | MB_OK);
 			    MessageBeep (0);
@@ -2052,21 +1960,21 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 			GetDlgItemText(hDlg, IDC_BAILOUT, Bailout, 100);
 			GetDlgItemText(hDlg, IDC_JULIAREAL, JuliaReal, 100);
 			GetDlgItemText(hDlg, IDC_JULIAIMAG, JuliaImag, 100);
-			rqlim = atof(Bailout);
-			j.x = atof(JuliaReal);
-			j.y = atof(JuliaImag);
+			gManp->rqlim = atof(Bailout);
+			gManp->j.x = atof(JuliaReal);
+			gManp->j.y = atof(JuliaImag);
 			temp_threshold = GetDlgItemInt(hDlg, IDC_THRESHOLD, &bTrans, TRUE);
 			if (temp_threshold < 1 || temp_threshold > MAXTHRESHOLD)
 			    temp_threshold = MAXTHRESHOLD;
-			threshold = (int)temp_threshold;
-			for (i = Fractal.NumFunct, k = 0; i < Fractal.NumFunct + Fractal.NumParam && i < 10; i++, k++)
+			gManp->threshold = (int)temp_threshold;
+			for (i = gManp->Fractal.NumFunct, k = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < 10; i++, k++)
 			    {
 			    GetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[k], 100);
-			    *Fractal.ParamValue[k] = atof(s[k]);
+			    *gManp->Fractal.ParamValue[k] = atof(s[k]);
 			    }
 			if (CentreCoord)
 			    Centre2Edge();
-			cycleflag = FALSE;
+			gManp->cycleflag = FALSE;
 //			if (buf) { delete[] buf; buf = NULL; }
 			if (s1) { delete[] s1; s1 = NULL; }
 			if (s2) { delete[] s2; s2 = NULL; }
@@ -2106,11 +2014,11 @@ INT_PTR CALLBACK ParamDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-		_snprintf_s(s1, DBL_MANT_DIG, _TRUNCATE, "%18.18f", param[0]);
-		_snprintf_s(s2, DBL_MANT_DIG, _TRUNCATE, "%18.18f", param[1]);
-		_snprintf_s(s3, DBL_MANT_DIG, _TRUNCATE, "%18.18f", param[2]);
-		_snprintf_s(s4, DBL_MANT_DIG, _TRUNCATE, "%18.18f", param[3]);
-		_snprintf_s(s5, DBL_MANT_DIG, _TRUNCATE, "%18.18f", param[4]);
+		_snprintf_s(s1, DBL_MANT_DIG, _TRUNCATE, "%18.18f", gManp->param[0]);
+		_snprintf_s(s2, DBL_MANT_DIG, _TRUNCATE, "%18.18f", gManp->param[1]);
+		_snprintf_s(s3, DBL_MANT_DIG, _TRUNCATE, "%18.18f", gManp->param[2]);
+		_snprintf_s(s4, DBL_MANT_DIG, _TRUNCATE, "%18.18f", gManp->param[3]);
+		_snprintf_s(s5, DBL_MANT_DIG, _TRUNCATE, "%18.18f", gManp->param[4]);
 
 		SetDlgItemText(hDlg, IDC_PARAM0, s1);
 		SetDlgItemText(hDlg, IDC_PARAM1, s2);
@@ -2129,13 +2037,13 @@ INT_PTR CALLBACK ParamDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 			GetDlgItemText(hDlg, IDC_PARAM2, s3, DBL_MANT_DIG);
 			GetDlgItemText(hDlg, IDC_PARAM3, s4, DBL_MANT_DIG);
 			GetDlgItemText(hDlg, IDC_PARAM4, s5, DBL_MANT_DIG);
-			param[0] = atof(s1);
-			param[1] = atof(s2);
-			param[2] = atof(s3);
-			param[3] = atof(s4);
-			param[4] = atof(s5);
+			gManp->param[0] = atof(s1);
+			gManp->param[1] = atof(s2);
+			gManp->param[2] = atof(s3);
+			gManp->param[3] = atof(s4);
+			gManp->param[4] = atof(s5);
 
-			cycleflag = FALSE;
+			gManp->cycleflag = FALSE;
 			EndDialog (hDlg, TRUE);
 			return  TRUE;
 
@@ -2166,23 +2074,23 @@ INT_PTR CALLBACK SelectFracParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM
     switch (message) 
 	{
         case WM_INITDIALOG:
-	    SAFE_SPRINTF(Bailout, "%14.14lf", rqlim);
+	    SAFE_SPRINTF(Bailout, "%14.14lf", gManp->rqlim);
 	    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
-	    numtrig = Fractal.TotalFunctions;
-            SetDlgItemText(hDlg, ID_FRACNAME, 	GetFractalName());
+	    numtrig = gManp->Fractal.TotalFunctions;
+            SetDlgItemText(hDlg, ID_FRACNAME, gManp->GetFractalName());
 //            SetDlgItemText(hDlg, ID_FRACNAME, 	fractalspecific[type].name);
-	    if (Fractal.NumFunct > 0)
+	    if (gManp->Fractal.NumFunct > 0)
 		{
 		for (i = 0; i < numtrig; ++i)
-		    SendDlgItemMessage(hDlg, IDC_FNLIST1, LB_ADDSTRING, (WPARAM)NULL, (LPARAM) (LPSTR) Fractal.fnptr[i]);
-		if (index1 == -1 || *Fractal.Fn1 != '\0')		// index not loaded, but have a default
-		    index1 = TrigFn.FindFunct(Fractal.Fn1, numtrig);
-		if (Fractal.NumFunct == 2)
+		    SendDlgItemMessage(hDlg, IDC_FNLIST1, LB_ADDSTRING, (WPARAM)NULL, (LPARAM) (LPSTR)gManp->Fractal.fnptr[i]);
+		if (index1 == -1 || *gManp->Fractal.Fn1 != '\0')		// index not loaded, but have a default
+		    index1 = TrigFn.FindFunct(gManp->Fractal.Fn1, numtrig);
+		if (gManp->Fractal.NumFunct == 2)
 		    {
 		    for (i = 0; i < numtrig; ++i)
-			SendDlgItemMessage(hDlg, IDC_FNLIST2, LB_ADDSTRING, (WPARAM)NULL, (LPARAM) (LPSTR) Fractal.fnptr[i]);
-		    if (index2 == -1 || *Fractal.Fn2 != '\0')		// index not loaded, but have a default
-			index2 = TrigFn.FindFunct(Fractal.Fn2, numtrig);
+			SendDlgItemMessage(hDlg, IDC_FNLIST2, LB_ADDSTRING, (WPARAM)NULL, (LPARAM) (LPSTR)gManp->Fractal.fnptr[i]);
+		    if (index2 == -1 || *gManp->Fractal.Fn2 != '\0')		// index not loaded, but have a default
+			index2 = TrigFn.FindFunct(gManp->Fractal.Fn2, numtrig);
 		    }
 		else
 		    {
@@ -2198,24 +2106,24 @@ INT_PTR CALLBACK SelectFracParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		index2 = -1;
 		}
 
-            SendDlgItemMessage(hDlg, IDC_FNLIST1, LB_SETCURSEL, (WPARAM)Fractal.fnptr, 0L);
+            SendDlgItemMessage(hDlg, IDC_FNLIST1, LB_SETCURSEL, (WPARAM)gManp->Fractal.fnptr, 0L);
 	    if (index1 >= 0 && index1 < numtrig)
-		SetDlgItemText(hDlg, ID_FRACPARAM1, Fractal.fnptr[index1]);
+		SetDlgItemText(hDlg, ID_FRACPARAM1, gManp->Fractal.fnptr[index1]);
 	    SetDlgItemText(hDlg, ID_FRACPARTX1, "First Function");
 
-	    if (Fractal.NumFunct == 2)
+	    if (gManp->Fractal.NumFunct == 2)
 		{
 		if (index2 >= 0 && index2 < numtrig)
-		    SetDlgItemText(hDlg, ID_FRACPARAM2, Fractal.fnptr[index2]);
+		    SetDlgItemText(hDlg, ID_FRACPARAM2, gManp->Fractal.fnptr[index2]);
 		SetDlgItemText(hDlg, ID_FRACPARTX2, "Second Function");
 		}
-            for (i = Fractal.NumFunct, j = 0; i < Fractal.NumFunct + Fractal.NumParam && i < 10; i++, j++) 
+            for (i = gManp->Fractal.NumFunct, j = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < 10; i++, j++)
 		{
-		SAFE_SPRINTF(s[j], "%f", *Fractal.ParamValue[j]);
-		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, Fractal.ParamName[j]);
+		SAFE_SPRINTF(s[j], "%f", *gManp->Fractal.ParamValue[j]);
+		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, gManp->Fractal.ParamName[j]);
 		SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[j]);
 		}
-            for (i = Fractal.NumFunct + Fractal.NumParam; i < 10; i++) 
+            for (i = gManp->Fractal.NumFunct + gManp->Fractal.NumParam; i < 10; i++)
 		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
             return ( TRUE);
 
@@ -2226,34 +2134,34 @@ INT_PTR CALLBACK SelectFracParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM
                 case IDOK:
 //                    index1 = SendDlgItemMessage(hDlg, IDC_FNLIST1, LB_GETCURSEL, 0, 0L);
 //                    index2 = SendDlgItemMessage(hDlg, IDC_FNLIST2, LB_GETCURSEL, 0, 0L);
-                    if (Fractal.NumFunct >= 1)
+                    if (gManp->Fractal.NumFunct >= 1)
 			{
 			if (index1 == LB_ERR) 
 			    {
 			    MessageBox(hDlg, "No Choice selected", "Select From a List", MB_OK | MB_ICONEXCLAMATION);
 			    break;
 			    }
-			Fractal.Fn1Index = index1; 
-			Fractal.Fn1 = TrigFn.FunctList[index1];
-			if (Fractal.NumFunct == 2)
+			gManp->Fractal.Fn1Index = index1;
+			gManp->Fractal.Fn1 = TrigFn.FunctList[index1];
+			if (gManp->Fractal.NumFunct == 2)
 			    {
 			    if (index2 == LB_ERR) 
 				{
 				MessageBox(hDlg, "No Choice selected", "Select From a List", MB_OK | MB_ICONEXCLAMATION);
 				break;
 				}
-			    Fractal.Fn2Index = index2;
-			    Fractal.Fn2 = TrigFn.FunctList[index2];
+			    gManp->Fractal.Fn2Index = index2;
+			    gManp->Fractal.Fn2 = TrigFn.FunctList[index2];
 			    }
 			}
 		    GetDlgItemText(hDlg, IDC_BAILOUT, Bailout, 100);
-		    rqlim = atof(Bailout);
-		    for (i = Fractal.NumFunct, j = 0; i < Fractal.NumFunct + Fractal.NumParam && i < 10; i++, j++) 
+		    gManp->rqlim = atof(Bailout);
+		    for (i = gManp->Fractal.NumFunct, j = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < 10; i++, j++)
 			{
 			GetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[j], 100);
-			*Fractal.ParamValue[j] = atof(s[j]);
+			*gManp->Fractal.ParamValue[j] = atof(s[j]);
 			}
-		    cycleflag = FALSE;
+		    gManp->cycleflag = FALSE;
                     EndDialog(hDlg, TRUE);
                     return ( TRUE);
                   
@@ -2279,8 +2187,8 @@ INT_PTR CALLBACK SelectFracParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				    "Select From a List", MB_OK | MB_ICONEXCLAMATION);
 				break;
 				}
-			    Fractal.Fn1Index = index1;
-			    SetDlgItemText(hDlg, ID_FRACPARAM1, Fractal.fnptr[index1]);
+			    gManp->Fractal.Fn1Index = index1;
+			    SetDlgItemText(hDlg, ID_FRACPARAM1, gManp->Fractal.fnptr[index1]);
 //			    EndDialog(hDlg, TRUE);
 			    return ( TRUE);
                   
@@ -2305,8 +2213,8 @@ INT_PTR CALLBACK SelectFracParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				    "Select From a List", MB_OK | MB_ICONEXCLAMATION);
 				break;
 				}
-			    Fractal.Fn2Index = index2;
-			    SetDlgItemText(hDlg, ID_FRACPARAM2, Fractal.fnptr[index2]);
+			    gManp->Fractal.Fn2Index = index2;
+			    SetDlgItemText(hDlg, ID_FRACPARAM2, gManp->Fractal.fnptr[index2]);
 //			    EndDialog(hDlg, TRUE);
 			    return ( TRUE);
                   
@@ -2332,17 +2240,17 @@ INT_PTR CALLBACK StereoPairDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    SetDlgItemInt(hDlg, IDC_PAIRFLAG, pairflag, TRUE);
-	    SetDlgItemInt(hDlg, IDC_STEREODEPTH, AutoStereo_value, TRUE);
+	    SetDlgItemInt(hDlg, IDC_PAIRFLAG, gManp->pairflag, TRUE);
+	    SetDlgItemInt(hDlg, IDC_STEREODEPTH, gManp->AutoStereo_value, TRUE);
 	    return TRUE;
 	case WM_COMMAND:
 	    switch ((int)LOWORD(wParam))
 		{
 		case IDOK:
-		    pairflag = GetDlgItemInt(hDlg, IDC_PAIRFLAG, &bTrans, TRUE);
-		    AutoStereo_value = GetDlgItemInt(hDlg, IDC_STEREODEPTH, &bTrans, TRUE);
-		    oldcalcmode = calcmode;
-		    calcmode = '1';
+		    gManp->pairflag = GetDlgItemInt(hDlg, IDC_PAIRFLAG, &bTrans, TRUE);
+		    gManp->AutoStereo_value = GetDlgItemInt(hDlg, IDC_STEREODEPTH, &bTrans, TRUE);
+		    gManp->oldcalcmode = gManp->calcmode;
+		    gManp->calcmode = '1';
 		    EndDialog(hDlg, TRUE);
 		    return TRUE;
 			case IDCANCEL:

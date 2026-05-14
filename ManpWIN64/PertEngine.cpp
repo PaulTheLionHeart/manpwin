@@ -25,14 +25,12 @@ extern	std::atomic<long> gPixelsDone;
 extern	void	ShowBignum(BigDouble x, char *Location);
 
 // constructors
-extern	std::vector<float> wpixels;
+//extern	std::vector<float> wpixels;
 
 CPerturbation::CPerturbation()
-    : wpixels(::wpixels)
     {}
 
 CPerturbation::CPerturbation(std::vector<float>& wp)
-    : wpixels(wp)
     {}
 
 void CPerturbation::AttachSharedTables(const std::vector<Complex>* xs, const std::vector<ExpComplex>* exs, const BLAS* bla)
@@ -46,8 +44,8 @@ void CPerturbation::AttachSharedTables(const std::vector<Complex>* xs, const std
 // Initialisation
 //////////////////////////////////////////////////////////////////////
 
-int CPerturbation::initialiseCalculateFrame(CDib *DibIn, CSlope *Slope, int xStartIn, int xEndIn, int HeightIn, int threshold, BigDouble BigCentreXin, BigDouble BigCentreYin, BigDouble BigWidthIn, int decimals, CTZfilter *TZfilter,
-		HWND hwndIn, int ThreadIn, std::vector<float> &wpixelsIn, double paramIn[], double potparamIn[], int PaletteShiftIn, int *PlotTypeIn, int SlopeTypeIn, double lightDirectionDegreesIn, double bumpMappingDepthIn,
+int CPerturbation::initialiseCalculateFrame(CDib *DibIn, /*CSlope *Slope, */int xStartIn, int xEndIn, int HeightIn, int threshold, BigDouble BigCentreXin, BigDouble BigCentreYin, BigDouble BigWidthIn, int decimals, int OutsideMethodIn, int InsideMethodIn,
+		HWND hwndIn, int ThreadIn, /*std::vector<float> &wpixelsIn, */double paramIn[], double potparamIn[], int PaletteShiftIn, int *PlotTypeIn, int SlopeTypeIn, double lightDirectionDegreesIn, double bumpMappingDepthIn,
 		double bumpMappingStrengthIn, int PaletteStartIn, double LightHeightIn, int PertColourMethodIn,	int PalOffsetIn, double IterDivIn, bool EnableApproximationIn, BYTE _3dflagIn, double ColourSpeedIn, int NumberThreadsIn)
     {
     Complex q;
@@ -83,10 +81,10 @@ int CPerturbation::initialiseCalculateFrame(CDib *DibIn, CSlope *Slope, int xSta
     height = HeightIn;
     MaxIteration = threshold;
     EnableApproximation = EnableApproximationIn;
-    OutsideMethod = TZfilter->method;
+    OutsideMethod = OutsideMethodIn;
+    InsideMethod = InsideMethodIn;
     hwnd = hwndIn;
     thread = ThreadIn;
-    wpixels = wpixelsIn;
     Dib = DibIn;
     PaletteShift = PaletteShiftIn;
     for (i = 0; i < NUMPERTPARAM; i++)
@@ -105,6 +103,9 @@ int CPerturbation::initialiseCalculateFrame(CDib *DibIn, CSlope *Slope, int xSta
     IterDiv = IterDivIn;
     gStopRequested = false; // NEW: reset flag before starting threads
 
+    if (gManp->OutsideMethod >= TIERAZONFILTERS)
+	TZfilter.InitFilter(gManp->OutsideMethod, gManp->threshold, gManp->dStrands, gManp->nFDOption, gManp->UseCurrentPalette);
+ 
     return 0;
     }
 
@@ -113,8 +114,8 @@ int CPerturbation::initialiseCalculateFrame(CDib *DibIn, CSlope *Slope, int xSta
 //////////////////////////////////////////////////////////////////////
 
 int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int powerin, int InsideMethodIn, int OutsideMethodIn, int biomorphin, int subtypein, Complex rsrAin, bool rsrSignIn, int user_data(HWND hwnd), int xdotsIn, 
-	CTZfilter &TZfilter, CTrueCol &TrueCol, int *pPertProgress, BYTE &ThreadComplete, bool Multi, int delay, char *PertErrorMessage, int ArithTypeIn, int MaxRefIterationIn, int SlopeDegreeIn, HANDLE ghMutex)
-
+	/*CTZfilter &TZfilter, */CTrueCol &TrueCol, int *pPertProgress, BYTE &ThreadComplete, bool Multi, int delay, char *PertErrorMessage, int ArithTypeIn, int MaxRefIterationIn, int SlopeDegreeIn, 
+	std::vector<std::pair<int, int>> *pixelOrder, std::atomic<int> *workIndex, int totalPixels, HANDLE ghMutex)
     {
     BigComplex	BigDelta;
     Complex	delta;
@@ -152,70 +153,76 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
     LoadPascal(PascalArray, power);
 
     int		lastChecked = -1;
-    double	TotalPoints = (double)(width * height);
-
-    int	    effectiveThreads = (NumberThreads > 0) ? NumberThreads : 1;
-    int	    StripMult = 8;
-
-    int	    StripWidth = xdots / (effectiveThreads * StripMult);
-    if (StripWidth < 1) 
-	StripWidth = 1;
-
-    int TempXdots = ((xdots + StripWidth - 1) / StripWidth) * StripWidth;
-
-    int	    TotalStrips = TempXdots / StripWidth;
-
-    long TotalPixels = (long)xdots * height;
-
     BigDouble	BigPixelSize = BigWidth / (double)(height * 0.5);	// pixel radius so we need to divide by half height
     double	PixelSize = BigPixelSize.BigDoubleToDouble();
 
-    CPlotmode PlotMethod;
-
-    if (height <= 0)
+    if (height <= 0)		// sanity
 	{
 	_snprintf_s(PertErrorMessage, MAXLINE, _TRUNCATE, "calculateOneFrame has negative height=%d", height);
 	return -2;
 	}
 
-    auto yOrder = PlotMethod.generateYOrder(height, currentYMode);
+    // --------------------------------------------
+    // SCHEDULER PATH (ALL NEW MODES)
+    // --------------------------------------------
+    int		iteration = 0;
 
-    for (size_t yi = 0; yi < yOrder.size(); ++yi)
+    // Optional tuning (safe, simple)
+    int	chunk = (currentMode == PlotMode::Tile) ? 1024 : CHUNK_SIZE;
+    const	PlotMode mode = currentMode;
+
+    if (workIndex < 0 || *workIndex >= totalPixels)
 	{
-	int y = yOrder[yi];
-	double progress = (double)gPixelsDone / (double)TotalPixels;
-	if (int(progress * 100) != lastChecked)
-	    {
-	    lastChecked = int(progress * 100);
-	    char	UseBigWidthStr[12];
-	    if (ArithType == DOUBLE || ArithType == DOUBLE || ArithType == DBL_UNSUPPORTED)
-		strcpy(UseBigWidthStr, " Duble");
-	    else
-		strcpy(UseBigWidthStr, " Exp");
-	    _snprintf_s(StatusBarInfo, MAXLINE, _TRUNCATE, "Th=%d, (%d%%)%s", thread, lastChecked, UseBigWidthStr);
-	    if (Multi)
-		{
-		*pPertProgress = lastChecked;
-		if (delay > 0)
-		    {
-		    Sleep(delay);
-		    InvalidateRect(hwnd, NULL, FALSE);
-		    }
-		}
-	    }
+	OutputDebugStringA("Pert: invalid workIndex\n");
+	return -1;
+	}
 
-	for (int strip = thread; strip < TotalStrips	; strip += effectiveThreads)
+    if (pixelOrder->empty())
+	{
+	OutputDebugStringA("Pert: pixelOrder empty\n");
+	return -1;
+	}
+
+    if (pixelOrder != NULL && workIndex != NULL && totalPixels > 0)
+	{
+	while (true)
 	    {
-	    int StripStart = strip * StripWidth;
-	    int StripEnd = StripStart + StripWidth;  // NOTE: NOT min(..., xdots)
-	    int	iteration = 0;
-	    for (int x = StripStart; x < StripEnd; x++)
+	    // Dynamic work distribution across threads
+	    int start = workIndex->fetch_add(chunk, std::memory_order_relaxed);
+	    if (start >= totalPixels)
+		break;
+
+	    for (int k = 0; k < chunk; k++)
 		{
+		int idx = start + k;
+		if (idx >= totalPixels)
+		    break;
+
+		int x, y;
+
+		if (mode == PlotMode::Scanline)
+		    {
+		    // Compute coordinates directly for linear traversal
+		    y = height - 1 - (idx / xdots);
+		    x = idx % xdots;
+		    }
+		else
+		    {
+		    // Use precomputed traversal order (Tile, Spiral, etc.)
+		    x = (*pixelOrder)[idx].first;
+		    y = (*pixelOrder)[idx].second;
+		    }
+
+		if ((idx & 0x3FF) == 0)
+		    {
+		    gManp->UpdateProgress(workIndex, totalPixels, StatusBarInfo, NumberThreads);
+		    }
+
+		// Allow user abort without stalling threads
 		if (AbortRequested())
 		    return -1;
 
-		if (x >= xdots)		// <-- the whole trick
-		    continue;
+		// Fractal pixel computation(performance-critical)
 		gPixelsDone.fetch_add(1, std::memory_order_relaxed);
 
 		if (ArithType == FLOATEXP || ArithType == EXP_UNSUPPORTED)
@@ -226,7 +233,7 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
 		    BigDelta.x = BigPixelSize * (double)(x - xdots / 2);
 		    BigDelta.y = BigPixelSize * (double)(height / 2 - y);
 		    BigComplex2ExpComplex(&ExpDeltaSub0, BigDelta);
-		    if ((iteration = iterateFractalWithPerturbationBLAExp(ExpXSubN, MaxIteration, bailout, ExpDeltaSub0.CHalf(), Bla, TZfilter, zExp, dcExp, user_data)) < 0)
+		    if ((iteration = iterateFractalWithPerturbationBLAExp(ExpXSubN, MaxIteration, bailout, ExpDeltaSub0.CHalf(), Bla, /*TZfilter, */zExp, dcExp, user_data)) < 0)
 			return -1;
 
 		    if (SlopeType == DERIVSLOPE)
@@ -235,32 +242,36 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
 			}
 		    else
 			// final colour write (one pixel only)
-			ColourProcessingExp(zExp, iteration, x, y, TrueCol, TZfilter, bailout);
+			ColourProcessingExp(zExp, iteration, x, y, TrueCol, /*TZfilter, */bailout);
 		    }
 		else
 		    {
 		    Complex	z(0.0, 0.0);
 		    Complex	dc(0.0, 0.0);			// dZ/dc accumulator for derivative slope
 
-		    delta.x = PixelSize * (double)(x - xdots / 2);;
+		    delta.x = PixelSize * (double)(x - xdots / 2);
 		    delta.y = PixelSize * (double)(height / 2 - y);
 		    DeltaSub0 = delta / 2.0;
-		    if ((iteration = iterateFractalWithPerturbationBLA(XSubN, MaxIteration, bailout, DeltaSub0, Bla, TZfilter, z, dc, user_data)) < 0)
+		    if ((iteration = iterateFractalWithPerturbationBLA(XSubN, MaxIteration, bailout, DeltaSub0, Bla, /*TZfilter, */z, dc, user_data)) < 0)
 			return -1;
-		    if (SlopeType == DERIVSLOPE && (iteration < MaxIteration || InsideMethod == 0)) 
+		    if (SlopeType == DERIVSLOPE && (iteration < MaxIteration || InsideMethod == 0))
 			{
 			// Use the same rule as legacy: keep outside slope unless inside filters are active
 			ProcessDerivativeSlope(dc, z, ghMutex, MaxIteration, iteration, TrueCol, x, y);
 			}
 		    else
 			{
-			ColourProcessing(z, iteration, x, y, TrueCol, TZfilter, bailout);
+			ColourProcessing(z, iteration, x, y, TrueCol, /*TZfilter, */bailout);
 			}
 		    }
 		}
 	    }
 	}
-
+    else
+	{
+	_snprintf_s(PertErrorMessage, MAXLINE, _TRUNCATE, "Scheduler not initialised correctly");
+	return -3;
+	}
     ThreadComplete = true;
     return 0;
     }

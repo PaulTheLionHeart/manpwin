@@ -38,7 +38,7 @@ int	CPixel::DDRunTierazonFunctions(int subtype, DDComplex *z, DDComplex *q, DDCo
     DDComplex   a, b, t, z1, z3, zd, zt;
     static	double	    d;
 
-    return TierazonIter<DDComplex, dd_real>(subtype, z, q, z2, &z4DD, sqrDD, realimagDD, SpecialFlag, iteration, caa3DD, cbDD, c1DD, c2DD, bDD, rqlim, degree, BailoutTestType);
+    return TierazonIter<DDComplex, dd_real>(subtype, z, q, z2, &z4DD, sqrDD, realimagDD, SpecialFlag, iteration, caa3DD, cbDD, c1DD, c2DD, bDD, rqlim, degree, threshold, BailoutTestType);
     return 0;
     }
 

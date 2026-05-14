@@ -58,7 +58,7 @@ CTrueCol::~CTrueCol()
 // Global declaration
 //////////////////////////////////////////////////////////////////////
 
-CTrueCol    TrueCol;
+//CTrueCol    TrueCol;
 
 //////////////////////////////////////////////////////////////////////
 //	Initialise True Colour Palette
@@ -125,23 +125,23 @@ void	CTrueCol::InitTrueColPal(BYTE RandFlag, long threshold, int StartColourCycl
 
 	    if (RandomColourFlag)
 		{
-		TrueCol.RedIncInt = rand() / RandomDivisor;
-		TrueCol.GreenIncInt = rand() / RandomDivisor;
-		TrueCol.BlueIncInt = rand() / RandomDivisor;
-		TrueCol.RedStartInt = rand() / RandomDivisor;
-		TrueCol.GreenStartInt = rand() / RandomDivisor;
-		TrueCol.BlueStartInt = rand() / RandomDivisor;
+		gManp->TrueCol.RedIncInt = rand() / RandomDivisor;
+		gManp->TrueCol.GreenIncInt = rand() / RandomDivisor;
+		gManp->TrueCol.BlueIncInt = rand() / RandomDivisor;
+		gManp->TrueCol.RedStartInt = rand() / RandomDivisor;
+		gManp->TrueCol.GreenStartInt = rand() / RandomDivisor;
+		gManp->TrueCol.BlueStartInt = rand() / RandomDivisor;
 		}
 
 	    Randomise = rand();			// to prevent the same value within the second!!
 	    }
 
-	RedStart = (float)(TrueCol.RedStartInt) / 100.0;
-	GreenStart = (float)(TrueCol.GreenStartInt) / 100.0;
-	BlueStart = (float)(TrueCol.BlueStartInt) / 100.0;
-	RedInc = (float)(TrueCol.RedIncInt) / 100.0;
-	GreenInc = (float)(TrueCol.GreenIncInt) / 100.0;
-	BlueInc = (float)(TrueCol.BlueIncInt) / 100.0;
+	RedStart = (float)(gManp->TrueCol.RedStartInt) / 100.0;
+	GreenStart = (float)(gManp->TrueCol.GreenStartInt) / 100.0;
+	BlueStart = (float)(gManp->TrueCol.BlueStartInt) / 100.0;
+	RedInc = (float)(gManp->TrueCol.RedIncInt) / 100.0;
+	GreenInc = (float)(gManp->TrueCol.GreenIncInt) / 100.0;
+	BlueInc = (float)(gManp->TrueCol.BlueIncInt) / 100.0;
 
 	LocalThreshold = (threshold >= MAXPALETTE) ? MAXPALETTE - 1 : threshold;
 	temp = ((long)StartColourCycling > LocalThreshold) ? LocalThreshold : StartColourCycling;
@@ -161,7 +161,7 @@ void	CTrueCol::InitTrueColPal(BYTE RandFlag, long threshold, int StartColourCycl
 	PalettePtr[LocalThreshold].rgbtRed = (BYTE)InsideRed;
 	// set up pointer to correct palette
 //    PalettePtr = TRUE_PALETTE;
-	bits_per_pixel = 24;
+//	bits_per_pixel = 24;
 	}
     }
 
@@ -170,7 +170,6 @@ void	CTrueCol::InitTrueColPal(BYTE RandFlag, long threshold, int StartColourCycl
 **************************************************************************/
 
 void	CTrueCol::FillPalette(int FillType, std::vector<RGBTRIPLE> &pal, long threshold)
-
     {
     long	i, j;
 
@@ -214,7 +213,7 @@ void	CTrueCol::FinalisePalette(int level, long threshold)
 	{
 	for (i = level; i < LocalThreshold; i++)
 	    {
-	    TrueCol.PalettePtr[i] = TrueCol.PalettePtr[i % level];
+	    gManp->TrueCol.PalettePtr[i] = gManp->TrueCol.PalettePtr[i % level];
 	    }
 	}
     }
@@ -235,8 +234,41 @@ void	CTrueCol::ToggleRandomColour(void)
 void	CTrueCol::SetTrueColourPixel(int b, int g, int r, long threshold)
     {
     LocalThreshold = (threshold >= MAXPALETTE) ? MAXPALETTE - 1 : threshold;
-    TrueCol.PalettePtr[LocalThreshold].rgbtBlue = (BYTE)b;
-    TrueCol.PalettePtr[LocalThreshold].rgbtGreen = (BYTE)g;
-    TrueCol.PalettePtr[LocalThreshold].rgbtRed = (BYTE)r;
+    gManp->TrueCol.PalettePtr[LocalThreshold].rgbtBlue = (BYTE)b;
+    gManp->TrueCol.PalettePtr[LocalThreshold].rgbtGreen = (BYTE)g;
+    gManp->TrueCol.PalettePtr[LocalThreshold].rgbtRed = (BYTE)r;
+    }
+
+/**************************************************************************
+   Allow palette to move in zoom animations
+**************************************************************************/
+
+void	CTrueCol::MovePalette(CTrueCol *TrueCol, int PaletteShift, int threshold)
+    {
+    int		i, j, AbsPalShift;
+    RGBTRIPLE	TempPal;
+    long	thresh = TrueCol->FinalThreshold;
+
+    if (PaletteShift == 0)
+	return;
+
+    AbsPalShift = abs(PaletteShift);
+    for (j = 0; j < AbsPalShift; j++)
+	{
+	if (PaletteShift > 0)
+	    {
+	    TempPal = TrueCol->PalettePtr[(thresh - 1) % MAXPALETTE];		// load last entry for 'ron
+	    for (i = thresh - 2; i >= 0; i--)
+		TrueCol->PalettePtr[(i + 1) % MAXPALETTE] = TrueCol->PalettePtr[i % MAXPALETTE];
+	    TrueCol->PalettePtr[0] = TempPal;					// restore last entry to the beginning
+	    }
+	else
+	    {
+	    TrueCol->PalettePtr[0] = TempPal;					// load first entry for 'ron
+	    for (i = 0; i < thresh - 1; i++)
+		TrueCol->PalettePtr[i % MAXPALETTE] = TrueCol->PalettePtr[(i + 1) % MAXPALETTE];
+	    TrueCol->PalettePtr[(thresh - 1) % MAXPALETTE] = TempPal;
+	    }
+	}
     }
 

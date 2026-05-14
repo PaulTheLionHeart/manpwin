@@ -11,11 +11,12 @@
 #include <string.h>
 #include <time.h>
 #include "manpwin.h"
+#include "manp.h"
 #include "resource.h"
 #include "colour.h"
 #include "SafeStrings.h"
 
-#define MAXLINE			480
+//#define MAXLINE			480
 #define NONE			0		// opening bitmap loading flags
 #define DEFAULT			1
 #define NEW			2
@@ -62,11 +63,7 @@ static	char	ManpPath[_MAX_PATH] = "";		// path for ManpWin.EXE where needed
 
 extern	char	ScriptFileName[];			// base name for PNG file animation sequence
 extern	char	PNGName[];				// base name for PNG file sequence
-extern	BOOL	ZoomEdge;				// Zooming process
-extern	BOOL	UseFractintPalette;			// standard EGA palette
 extern	char	statname[];				// MPEG stat file. If statname[] == '-', stats sent to stdout.
-extern	int	NumberThreads;				// Number of threads to be used. If 0, no multi-threading. Used in perturbatio only
-extern	CTrueCol    TrueCol;				// palette info
 static	char	Extension[25];				// default extension
 static	BOOL	UserPath = TRUE;			// use the path to the user data area created when ManpWIN was installed
 
@@ -120,8 +117,8 @@ int	GetManpINIPath(HWND hwnd, char *ManpWinINIFile, char *ManpName)
 
 int	ReadConfig(HWND hwnd)
     {
-    char	buf[MAXLINE];
-    char	ConfigFile[MAXLINE];
+    char	buf[MAX_PATH];
+    char	ConfigFile[MAX_PATH];
     short	status;
 
     *ManpINIFoundDir = '\0';
@@ -408,13 +405,13 @@ int	ReadConfigFile(HWND hwnd, char *filename)
 
 	    if (length = Strlicmp(buf, "ZoomEdge="))		// Do we want to zoom along the edge?
 		{
-		ZoomEdge = (*(buf + length) == 'F') ? FALSE : TRUE;
+		gManp->ZoomEdge = (*(buf + length) == 'F') ? FALSE : TRUE;
 		continue;
 		}
 
 	    if (length = Strlicmp(buf, "UseFractintPalette="))	// Do we want to zoom along the edge?
 		{
-		UseFractintPalette = (*(buf + length) == 'F') ? FALSE : TRUE;
+		gManp->UseFractintPalette = (*(buf + length) == 'F') ? FALSE : TRUE;
 		continue;
 		}
 
@@ -426,13 +423,13 @@ int	ReadConfigFile(HWND hwnd, char *filename)
 	    
 	    if (length = Strlicmp(buf, "ThreadNumber="))	// Number of threads in multi-threaded perturbation
 		{
-		NumberThreads = atoi(buf + length);
+		gManp->NumberThreads = atoi(buf + length);
 		continue;
 		}
 
 	    if (length = Strlicmp(buf, "DisplayPalette="))	// Do we want to zoom along the edge?
 		{
-		TrueCol.DisplayPaletteFlag = (*(buf + length) == 'F') ? FALSE : TRUE;
+		gManp->TrueCol.DisplayPaletteFlag = (*(buf + length) == 'F') ? FALSE : TRUE;
 		continue;
 		}
 	    }
@@ -566,11 +563,11 @@ void	WriteManpINI(HWND hwnd, FILE *fp)
     fprintf(fp, ";\n");
     fprintf(fp, "; Do we want to zoom along the edge?\n");
     fprintf(fp, ";\n");
-    fprintf(fp, "ZoomEdge=%s\n", (ZoomEdge) ? "TRUE" : "FALSE");
+    fprintf(fp, "ZoomEdge=%s\n", (gManp->ZoomEdge) ? "TRUE" : "FALSE");
     fprintf(fp, ";\n");
     fprintf(fp, "; Do we want to use Fractint Palette?\n");
     fprintf(fp, ";\n");
-    fprintf(fp, "UseFractintPalette=%s\n", (UseFractintPalette) ? "TRUE" : "FALSE");
+    fprintf(fp, "UseFractintPalette=%s\n", (gManp->UseFractintPalette) ? "TRUE" : "FALSE");
     fprintf(fp, ";\n");
     fprintf(fp, "; Allow MPEG generator to dump stats into a stats.txt file\n");
     fprintf(fp, ";\n");
@@ -583,11 +580,11 @@ void	WriteManpINI(HWND hwnd, FILE *fp)
     fprintf(fp, "; Number of threads used in multi-threaded perturbation only. \n");
     fprintf(fp, "; If Number of threads = 0, then non-threaded perturbation is used\n");
     fprintf(fp, ";\n");
-    fprintf(fp, "ThreadNumber=%d\n", NumberThreads);
+    fprintf(fp, "ThreadNumber=%d\n", gManp->NumberThreads);
     fprintf(fp, ";\n");
     fprintf(fp, "; Do we display a palette on the right side of the image?\n");
     fprintf(fp, ";\n");
-    fprintf(fp, "DisplayPalette=%s\n", (TrueCol.DisplayPaletteFlag) ? "TRUE" : "FALSE");
+    fprintf(fp, "DisplayPalette=%s\n", (gManp->TrueCol.DisplayPaletteFlag) ? "TRUE" : "FALSE");
     fprintf(fp, ";\n");
     }
 

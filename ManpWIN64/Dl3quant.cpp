@@ -47,6 +47,7 @@
 #include <math.h>
 #include <windows.h>
 #include "manpwin.h"
+#include "manp.h"
 #include "dl3quant.h"
 #include "quanterr.h"
 
@@ -71,7 +72,7 @@
 #define DITHER_MAX 20
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-extern	HWND	GlobalHwnd;				// This is the main windows handle
+//extern	HWND	GlobalHwnd;				// This is the main windows handle
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //extern	StateType	PGVState;		// what state is pgv in?
@@ -104,7 +105,7 @@ dl3quant(uchar *inbuf, uchar *outbuf, int width, int height, int quant_to, int d
     printf("Reducing palette...\n");
 #endif
 
-    reduce_table(GlobalHwnd, quant_to);
+    reduce_table(gManp->GlobalHwnd, quant_to);
 
     set_palette();
 

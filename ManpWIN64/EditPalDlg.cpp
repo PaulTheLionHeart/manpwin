@@ -25,16 +25,6 @@
 #include "Plot.h"
 #include "SafeStrings.h"
 
-extern	BYTE	cycleflag;				// do colour cycling
-extern	long	threshold;				// maximum iterations ... called maxiter in FRACTINT
-extern	PAINTSTRUCT 	ps;
-extern	RECT 	r;
-
-extern	void	DoCaption(HWND, char *);
-
-extern	CTrueCol    TrueCol;			// palette info
-extern	CPlot	Plot;		// image plotting routines 
-
 /**************************************************************************
 	Dialog Control for Setting Inside colour
 **************************************************************************/
@@ -65,13 +55,13 @@ INT_PTR CALLBACK EditPalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		PalPreview.PreviewWidth = PREVIEW_WIDTH;
 		PalPreview.HorOffset = HOR_OFFSET;
 		PalPreview.VertOffset = VERT_OFFSET;
-		cycleflag = FALSE;
-		EditPal.LocalThreshold = (threshold >= MAXPALETTE) ? MAXPALETTE - 1 : threshold;
+		gManp->cycleflag = FALSE;
+		EditPal.LocalThreshold = (gManp->threshold >= MAXPALETTE) ? MAXPALETTE - 1 : gManp->threshold;
 		for (int i = 0; i < EditPal.LocalThreshold; i++)
-		    TempPal[i] = TrueCol.PalettePtr[i];
+		    TempPal[i] = gManp->TrueCol.PalettePtr[i];
 		EditPal.SetupValues(hDlg, color, StartIter, EndIter, TempPal, StartRGB, EndRGB);
 		PalPreview.InitPreview(hDlg);
-		EditPal.CopyPalPreview(hDlg, TempPal, threshold, &PalPreview);
+		EditPal.CopyPalPreview(hDlg, TempPal, gManp->threshold, &PalPreview);
 		PalPreview.Preview(hDlg);
 		InvalidateRect(hDlg,NULL,FALSE);
 		return TRUE ;
@@ -148,15 +138,15 @@ INT_PTR CALLBACK EditPalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 			break;
 		    }
 		EditPal.ChangePixel(color, StartIter, EndIter, TempPal);
-		EditPal.CopyPalPreview(hDlg, TempPal, threshold, &PalPreview);
+		EditPal.CopyPalPreview(hDlg, TempPal, gManp->threshold, &PalPreview);
 		PalPreview.Preview(hDlg);
 	        return TRUE ;
 
 	  case WM_PAINT :
-		BeginPaint(hDlg, &ps);
-		EditPal.CopyPalPreview(hDlg, TempPal, threshold, &PalPreview);
+		BeginPaint(hDlg, &gManp->ps);
+		EditPal.CopyPalPreview(hDlg, TempPal, gManp->threshold, &PalPreview);
 		PalPreview.Preview(hDlg);
-		EndPaint(hDlg, &ps);
+		EndPaint(hDlg, &gManp->ps);
 	        return TRUE ;
 
 	  case WM_LBUTTONDOWN:				// message: left mouse button pressed
@@ -184,10 +174,10 @@ INT_PTR CALLBACK EditPalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 				TempPal[PalPtr].rgbtRed,
 				TempPal[PalPtr].rgbtGreen,
 				TempPal[PalPtr].rgbtBlue);
-		    DoCaption (hDlg, s);
+		    gManp->DoCaption (hDlg, s);
 		    }
 		else
-		    DoCaption (hDlg, "ManpWin Colour Palette Editing");
+		    gManp->DoCaption (hDlg, "ManpWin Colour Palette Editing");
 
 	        return TRUE ;
 
@@ -231,19 +221,19 @@ INT_PTR CALLBACK EditPalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    case IDC_RANGE:
 			EditPal.ChangeRange(color, StartIter, EndIter, TempPal);
 //			CaptureRules(RANGE, StartIter, EndIter);
-			EditPal.CopyPalPreview(hDlg, TempPal, threshold, &PalPreview);
+			EditPal.CopyPalPreview(hDlg, TempPal, gManp->threshold, &PalPreview);
 			PalPreview.Preview(hDlg);
 			break;
 		    case IDC_INVERT:
 			EditPal.InvertRange(StartIter, EndIter, TempPal);
 //			CaptureRules(INVERT, StartIter, EndIter);
-			EditPal.CopyPalPreview(hDlg, TempPal, threshold, &PalPreview);
+			EditPal.CopyPalPreview(hDlg, TempPal, gManp->threshold, &PalPreview);
 			PalPreview.Preview(hDlg);
 			break;
 		    case IDC_GREY:
 			EditPal.GreyScaleRange(StartIter, EndIter, TempPal);
 //			CaptureRules(GREY, StartIter, EndIter);
-			EditPal.CopyPalPreview(hDlg, TempPal, threshold, &PalPreview);
+			EditPal.CopyPalPreview(hDlg, TempPal, gManp->threshold, &PalPreview);
 			PalPreview.Preview(hDlg);
 			break;
 
@@ -268,17 +258,17 @@ INT_PTR CALLBACK EditPalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    case IDC_GREENBLUE:
 		    case IDC_ROTATE:
 			EditPal.SwapColours((int) LOWORD(wParam), StartIter, EndIter, TempPal);
-			EditPal.CopyPalPreview(hDlg, TempPal, threshold, &PalPreview);
+			EditPal.CopyPalPreview(hDlg, TempPal, gManp->threshold, &PalPreview);
 			PalPreview.Preview(hDlg);
 			break;
 		    case IDC_STRETCH:
-			TrueCol.FillPalette(STRETCH, TempPal, threshold);
-			EditPal.CopyPalPreview(hDlg, TempPal, threshold, &PalPreview);
+			gManp->TrueCol.FillPalette(STRETCH, TempPal, gManp->threshold);
+			EditPal.CopyPalPreview(hDlg, TempPal, gManp->threshold, &PalPreview);
 			PalPreview.Preview(hDlg);
 			break;
 		    case IDC_REPEATPAL:
-			TrueCol.FillPalette(REPEAT, TempPal, threshold);
-			EditPal.CopyPalPreview(hDlg, TempPal, threshold, &PalPreview);
+			gManp->TrueCol.FillPalette(REPEAT, TempPal, gManp->threshold);
+			EditPal.CopyPalPreview(hDlg, TempPal, gManp->threshold, &PalPreview);
 			PalPreview.Preview(hDlg);
 			break;
 		    case IDOK:
@@ -286,12 +276,12 @@ INT_PTR CALLBACK EditPalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 			EditPal.GreenStart = color [1];
 			EditPal.BlueStart = color [2];
 			for (int i = 0; i < EditPal.LocalThreshold; i++)
-			    TrueCol.PalettePtr[i] = TempPal[i];
-			TrueCol.SetTrueColourPixel(EditPal.RedStart, EditPal.GreenStart, EditPal.BlueStart, EditPal.LocalThreshold);
-			Plot.RefreshScreen();			// reload screen values
+			    gManp->TrueCol.PalettePtr[i] = TempPal[i];
+			gManp->TrueCol.SetTrueColourPixel(EditPal.RedStart, EditPal.GreenStart, EditPal.BlueStart, EditPal.LocalThreshold);
+			gManp->Plot.RefreshScreen();			// reload screen values
 			hwndParent = GetParent (hDlg) ;
-    			InvalidateRect(hwndParent, &r, FALSE);	// force repaint
-			TrueCol.PalEditFlag = TRUE;
+    			InvalidateRect(hwndParent, &gManp->r, FALSE);	// force repaint
+			gManp->TrueCol.PalEditFlag = TRUE;
 			PalPreview.PreviewDib.CloseDibPtrs();
 			TempPal.resize(0);
 			EndDialog (hDlg, 0);

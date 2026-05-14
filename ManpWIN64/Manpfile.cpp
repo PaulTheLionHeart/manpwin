@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <direct.h>
 #include "manpwin.h"
+#include "manp.h"
 #include "colour.h"
 #include "fractype.h"
 #include "pixel.h"
@@ -17,9 +18,6 @@
 #include "SafeStrings.h"
 
 extern	int     file_type;
-//extern	PAINTSTRUCT 	ps;
-extern	RECT 	r;
-extern	CTrueCol    TrueCol;
 extern	void	DisplayPalette(HWND, BOOL);
 
 extern	char	ANIMPNGPath[];		// path for animated PNG and LST files
@@ -50,20 +48,7 @@ extern	char	MAPFile[];		// MAP file
 extern	char	SCIFile[];		// SCI file
 
 extern	char	WorkingDir[];
-extern	int	DataFromPNGFile;	// loaded PNG file?
-//extern	char	infile[];
-
-//extern	BYTE	palette_flag;		// set palette
-//extern	BYTE	DisplayPaletteFlag;	// Display palette 
-extern	CTrueCol    TrueCol;		// palette info
-//extern	BYTE	*PalettePtr;		// points to true colour palette
-//extern	BYTE	TrueColourFlag;		// Use TrueColour palette generation
-extern	long	threshold;		// maximum iterations
-extern	WORD	type;			// M=mand, J=Julia 1,2,4->
-extern	BOOL	IsPAR;			// are we currently running a PAR file?
-extern	BOOL	IsKFR;			// are we currently running a KFR file?
-
-extern	Complex z, q;
+//extern	int	DataFromPNGFile;	// loaded PNG file?
 
 static	OPENFILENAME ofnPNG;
 static	OPENFILENAME ofnCOL;
@@ -98,7 +83,7 @@ static char *szIFSFilter = "IFS Files (*.IFS)\0*.IFS\0";
 static char *szKFRFilter = "Kalles Files (*.KFR,*.KFP)\0*.KFR;*.KFP\0";
 static	int	result;
 
-extern	CPlot	Plot;		// image plotting routines 
+//extern	CPlot	Plot;		// image plotting routines 
 
 /***************************************************************************
 	Initialise File Open Dialogue Structure
@@ -284,8 +269,8 @@ MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
 	 pstr--;
      pstr++;
      strcpy(PARFile, pstr);
-     IsPAR = TRUE;
-     IsKFR = FALSE;
+     gManp->IsPAR = TRUE;
+     gManp->IsKFR = FALSE;
      return 0;
      }
 
@@ -323,8 +308,8 @@ INT_PTR CALLBACK KFRFileOpenDlg(HWND hwnd, char *lpstrFileName, char *lpstrTitle
 	pstr--;
     pstr++;
     strcpy(KFRFile, pstr);
-    IsKFR = TRUE;
-    IsPAR = FALSE;
+    gManp->IsKFR = TRUE;
+    gManp->IsPAR = FALSE;
 
     return 0;
     }
@@ -567,13 +552,13 @@ void	ReadTriplets(FILE *fip)
 	    break;
 	else
 	    {
-	    TrueCol.PalettePtr[i].rgbtRed = r;
-	    TrueCol.PalettePtr[i].rgbtGreen = g;
-	    TrueCol.PalettePtr[i].rgbtBlue = b;
+	    gManp->TrueCol.PalettePtr[i].rgbtRed = r;
+	    gManp->TrueCol.PalettePtr[i].rgbtGreen = g;
+	    gManp->TrueCol.PalettePtr[i].rgbtBlue = b;
 	    }
 	i++;
 	}
-    TrueCol.ColoursInPALFile = i;
+    gManp->TrueCol.ColoursInPALFile = i;
     }
 
 short	FilePalette(HWND hwnd, char *infile, char *szAppName)
@@ -597,22 +582,19 @@ short	FilePalette(HWND hwnd, char *infile, char *szAppName)
 
 //    SetPalettePointer(PalettePtr);
     ReadTriplets(fip);
-    if (TrueCol.Stretch)
-	TrueCol.FillPalette(STRETCH, TrueCol.PalettePtr, threshold);
+    if (gManp->TrueCol.Stretch)
+	gManp->TrueCol.FillPalette(STRETCH, gManp->TrueCol.PalettePtr, gManp->threshold);
     else
-	TrueCol.FillPalette(REPEAT, TrueCol.PalettePtr, threshold);
+	gManp->TrueCol.FillPalette(REPEAT, gManp->TrueCol.PalettePtr, gManp->threshold);
     fclose(fip);
-    if (!DataFromPNGFile)
+    if (!gManp->DataFromPNGFile)
 	{
-//	if (type == APOLLONIUS || type == CIRCLES || type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
-//	    Pix.run_fractal(&z, &q);				// can't refresh 3D so recreate image
-//	else
-	    Plot.RefreshScreen();
+	gManp->Plot.RefreshScreen();
 	}
 //    if (TrueCol.DisplayPaletteFlag)
-	DisplayPalette(hwnd, TrueCol.DisplayPaletteFlag);
-    InvalidateRect(hwnd, &r, FALSE);
-    DataFromPNGFile = FALSE;
+	DisplayPalette(hwnd, gManp->TrueCol.DisplayPaletteFlag);
+    InvalidateRect(hwnd, &gManp->r, FALSE);
+    gManp->DataFromPNGFile = FALSE;
     return 0;
     }
 
