@@ -1062,7 +1062,8 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    return 0;
 
 	case IDM_USEDEFAULTPALETTE:
-	    gManp->UseFractintPalette = !gManp->UseFractintPalette;
+	    gManp->UseFractintPalette =	!gManp->UseFractintPalette;
+	    gManp->TrueCol.IsMAPFile = gManp->UseFractintPalette;
 	    InitTrueColourPalette(FALSE);
 	    gManp->time_to_reinit = TRUE;
 	    return 0;
