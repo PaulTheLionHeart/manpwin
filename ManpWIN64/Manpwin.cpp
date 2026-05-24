@@ -1619,6 +1619,7 @@ BOOL	InitNewFractal(HWND hwnd)
     static  int	OldType;
 
     gManp->Fractal.InitData();				// setup for next fractal
+    gManp->TrueCol.IsMAPFile = gManp->UseFractintPalette;
     InitTrueColourPalette(FALSE);
     gManp->setup_defaults();
     gManp->IsPAR = FALSE;
