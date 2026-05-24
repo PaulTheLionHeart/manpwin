@@ -95,6 +95,7 @@ void	CManp::init(HWND hwnd)
 
 //    Arg1 = &argfirst; Arg2 = &argsecond;		// needed by all the ?Stk* functions
     save_flag = FALSE;
+    gManp->TrueCol.IsMAPFile = gManp->UseFractintPalette;
     InitTrueColourPalette(FALSE);
 
     /////////					// initialise Fractal object
