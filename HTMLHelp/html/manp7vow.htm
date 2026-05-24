@@ -133,6 +133,36 @@ required for deep zooms and detailed exploration.
 <p>
 See <a href="manp7pre.htm">Types of Arithmetic Supported</a> for further details.
 </p>
+
+<h2>Rendering Data and Colour Systems</h2>
+
+<p>
+ManpWIN internally separates fractal rendering data, rendering metadata,
+palette generation, and final pixel colouring into distinct systems.
+</p>
+
+<p>
+This allows the renderer to support a wide range of arithmetic types,
+palette formats, animation systems, perturbation modes, and external file
+formats while maintaining rendering consistency across different workflows.
+</p>
+
+<p>
+Colour palettes may be generated procedurally using COL files, loaded from
+fixed MAP palettes, or restored from external fractal formats such as PAR files,
+Fractint PAR files and Kalles Fraktaler files.
+</p>
+
+<p>
+Generated or imported palettes are converted into internal runtime lookup
+tables which are then used during final fractal rendering.
+</p>
+
+<p>
+This separation improves interoperability, animation handling, rendering
+stability, and future extensibility of the rendering engine.
+</p>
+
 <h2>Specific ManpWIN Fractals</h2>
 
 <h3>Mandelbrot</h3>
@@ -183,6 +213,13 @@ where the required mathematical properties are not present.
 <p>
 This approach enables extremely deep zoom levels that would be impractical
 using standard arithmetic alone.
+</p>
+
+<p>
+Recent versions of ManpWIN have extended perturbation support to additional
+transcendental and fractional-power function families, including trigonometric,
+hyperbolic, exponential, and fractional-power variants. Derivative slope
+rendering support has also been extended to many of these perturbation modes.
 </p>
 
 <h3>Mandelbrot Derivatives:</h3>
@@ -917,7 +954,7 @@ or accuracy depending on the selected rendering method.
 
 <hr>
 <footer>
-  ManpWIN Help &copy; March 2026
+  ManpWIN Help &copy; May 2026
 </footer>
 
 </body>

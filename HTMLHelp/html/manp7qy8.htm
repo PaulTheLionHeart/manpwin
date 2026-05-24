@@ -93,11 +93,99 @@ ManpWIN has undergone continuous development over many years, with ongoing
 improvements to performance, precision, and fractal exploration capabilities.
 </p>
 
-<h2>Latest Release (April 2026)</h2>
 
-<p><b>ManpWIN 4.02f</b></p>
+<h2>Latest Release (May 2026)</h2>
+
+<p><b>ManpWIN 4.03a</b></p>
 
 <h3>Recent Improvements</h3>
+
+<p>
+ManpWIN 4.03a is a major stability and infrastructure update focused on
+perturbation rendering, animation export reliability, palette handling,
+and modernisation of the internal file and metadata systems.
+</p>
+
+<ul>
+<li>
+Extended perturbation support for additional transcendental and fractional-power functions including:
+<ul>
+<li>Exp</li>
+<li>Sin</li>
+<li>Cos</li>
+<li>Sinh</li>
+<li>z^(n + 0.5)</li>
+</ul>
+</li>
+
+<li>Extended perturbation derivative slope rendering support to the new transcendental and fractional-power function families.
+</li>
+
+<li>Fixed distortion bug affecting perturbation cubic rendering.</li>
+
+<li>Complete rewrite and stabilisation of file read/write systems.</li>
+
+<li>Overhauled management and separation of fractal metadata and rendering data.</li>
+
+<li>Fixed crash when reading Fractint PAR files.</li>
+
+<li>
+Fixed clipboard handling issues that could:
+<ul>
+<li>prevent clipboard loading</li>
+<li>interfere with normal program shutdown</li>
+</ul>
+</li>
+
+<li>Fixed intermittent horizontal and vertical line artifacts appearing in derivative slope rendering.</li>
+
+<li>Fixed status message handling when opening PNG files.</li>
+
+<li>Fixed filename offset issues in file dialogue boxes when handling long filenames.</li>
+
+<li>Fixed Slope dialogue box calling incorrect code paths.</li>
+
+<li>
+Corrected RGB/BGR channel handling affecting:
+<ul>
+<li>Kalles Fraktaler (KFR) files</li>
+<li>MAP palette files</li>
+<li>COL true colour palette files</li>
+<li>Fractint PAR inline palettes</li>
+</ul>
+</li>
+
+<li>Fixed animated GIF writing.</li>
+
+<li>Fixed animated MPEG writing.</li>
+
+<li>Improved animation frame handling and DIB packing behaviour.</li>
+</ul>
+
+<h2>Previous Releases</h2>
+
+<p><b>ManpWIN 4.03</b></p>
+
+<ul>
+<li>Added Art Matrix Cubic support to derivative slope rendering.</li>
+
+<li>Added independent special colour handling separate from the active palette.</li>
+
+<li>Continued migration of global variables into the new <code>CManp</code> management class.</li>
+
+<li>
+Expanded template-based infrastructure for:
+<ul>
+<li>slope fractals</li>
+<li>pixel fractals</li>
+<li>formula parser systems</li>
+</ul>
+</li>
+
+<li>Improved internal maintainability and arithmetic consistency across multiple fractal systems.</li>
+</ul>
+
+<p><b>ManpWIN 4.02f</b></p>
 
 <p>
   This update improves the robustness of ManpWIN's perturbation engine and
@@ -131,8 +219,6 @@ improvements to performance, precision, and fractal exploration capabilities.
     especially for cubic and higher-order fractals.
   </li>
 </ul>
-
-<h2>Previous Releases</h2>
 
 <p><b>ManpWIN 4.02e</b></p>
 
@@ -173,7 +259,7 @@ A detailed development history is maintained by the project owner and can be pro
 <hr>
 
 <footer>
-  ManpWIN Help &copy; March 2026
+  ManpWIN Help &copy; May 2026
 </footer>
 </body>
 </html>
