@@ -8,9 +8,46 @@ ManpWIN is evolving toward a unified mathematical experimentation platform suppo
 
 ---
 
-## Version 4.03
+## Version 4.03a
 
-Major parser and arithmetic architecture modernisation release.
+Major stability, rendering, palette, metadata, and export modernisation release.
+
+---
+
+## Recent Improvements (4.03a)
+
+### Perturbation and Rendering
+* Extended perturbation support for additional transcendental and fractional-power functions
+* Extended derivative slope support for additional perturbation function families
+* Fixed perturbation cubic distortion issues
+* Improved high-precision rendering stability
+
+### File System and Metadata
+* Complete rewrite and stabilisation of file read/write systems
+* Improved management and separation of fractal metadata and rendering data
+* Fixed Fractint PAR loading crash
+* Improved PNG and long filename handling
+
+### Colour and Palette System
+* Corrected RGB/BGR handling affecting:
+  * Kalles Fraktaler (KFR)
+  * MAP palette files
+  * COL true colour palette files
+  * Fractint PAR inline palettes
+
+* Improved palette source handling and rendering consistency
+
+### Animation and Export
+* Fixed animated GIF writing
+* Fixed animated MPEG writing
+* Improved animation frame and DIB handling
+
+### General Stability
+* Fixed intermittent derivative slope rendering artefacts
+* Fixed clipboard handling and shutdown issues
+* Numerous rendering and infrastructure stability improvements
+
+Recent development has also focused on modernising legacy rendering, palette, metadata, and export systems while preserving compatibility with classic ManpWIN workflows and external fractal formats.
 
 ---
 
