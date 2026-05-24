@@ -174,8 +174,8 @@ void	CPlot::PlotPoint(WORD x, WORD y, DWORD colour)
  	{
 	// first do screen
 	local_width = ComputeWidthBytes((DWORD)Dib->DibWidth, (DWORD)bits_per_pixel);
-	i = ((DWORD) (Dib->DibHeight - 1 - y) * (DWORD) (local_width + 3 - ((local_width - 1) % 4)) + (DWORD)(x * 3));
-	if (i + 3 > Dib->DibPixels.size()) 
+	i = (size_t)(Dib->DibHeight - 1 - y) * local_width + (size_t)x * 3;
+	if (i + 3 > Dib->DibPixels.size())
 	    {
 #ifdef _DEBUG
 	    OutputDebugStringA("PlotPoint: pixel write out of bounds\n");
@@ -245,7 +245,7 @@ void	CPlot::OutRGBpoint(WORD x, WORD y, RGBTRIPLE colour)
     // bounds check
     if (x >= Dib->DibWidth || y >= Dib->DibHeight)
 	return;
-    local_width = ComputeWidthBytes(xdots, Dib->BitsPerPixel);
+    local_width = ComputeWidthBytes(Dib->DibWidth, Dib->BitsPerPixel);
     i = (size_t)(Dib->DibHeight - 1 - y) * local_width + (size_t)x * 3;
     if (i + 3 > Dib->DibPixels.size())
 	{
@@ -374,8 +374,7 @@ void CPlot::OutputLine(WORD x0, WORD line, WORD length, DWORD *buffer)
     if ((DWORD)x0 + (DWORD)length >= (DWORD)Dib->DibWidth)
 	length = (WORD)(Dib->DibWidth - 1 - x0);
 
-    const size_t stride = ComputeWidthBytes((DWORD)width, (DWORD)bits_per_pixel)
-	+ 3 - ((ComputeWidthBytes((DWORD)width, (DWORD)bits_per_pixel) - 1) % 4);
+    const size_t stride = ComputeWidthBytes((DWORD)width, (DWORD)bits_per_pixel);
 
     size_t i = ((size_t)(height - 1 - line) * stride) + ((size_t)x0 * 3);
     size_t k = ((size_t)line * (size_t)width) + (size_t)x0;

@@ -323,12 +323,12 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
     if (gManp->type > MAXTYPE && gManp->type != FRACTPAR)	// edit MAXTYPE in fractalp.h if the total number of fractals changes
 	return -1;
 
+    gManp->InitFract(gManp->type);
+    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
+
     switch (gManp->type)				// set defaults
 	{
 	case MANDELFP:					// good old Mandelbrot
-	case NEWTON:					// Newton Fractal
-	case NEWTBASIN:					// Newton Fractal (basin or stripe)
-	case FIBONACCI:					// Fibonacci Spirals
 	case NEWTONAPPLE:				// newton apple
 	case NEWTONFLOWER:				// Newton flower
 	case MAGNET1:					// magnets 1 and 2
@@ -338,19 +338,9 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	case NEWTONJULIANOVA:
 	case TALIS:
 	case NEWTONCROSS:
-	case BIFURCATION:
-	case BIFSTEWART:
-	case BIFLAMBDA:
-	case BIFADSINPI:
-	case BIFEQSINPI:
-	case BIFMAY:
 	case QUADMAND:
 	case IKEDA:
 	case CROSSROADS:
-	case PASCALTRIANGLE:
-	case APOLLONIUS:
-	case APOLLONIUSIFS:
-	case SIERPINSKIFLOWERS:
 	case ZIGZAG:
 	case GARGOYLE:
 	case CURLICUES:
@@ -362,60 +352,8 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	case LPOPCORN:
 	case FPPOPCORNJUL:
 	case LPOPCORNJUL:
-	    //	case BUFFALO:
-	    //	case PERPBUFFALO:
-	    //	case MANDELBAR:
-	    //	case CELTIC:
-	    //	case MANDELBARCELTIC:
-	    //	case PERPCELTIC:
-	    //	case CUBICFLYINGSQUIRREL:
 	case BUDDHABROT:
-	    //	case PERPBURNINGSHIP:
-	case OSCILLATORS:
-	case FRACTALMAPS:
-	case SPROTTMAPS:
-	case SURFACES:
-	case KNOTS:
-	case CURVES:
 	    break;
-	    //	case BIFURCATION:				// Bifurcation Fractal
-	    //	    subtype = 'B';
-	    //	    special = 50;				// cycles before display
-	    //	    break;
-	case CUBIC:					// CUBIC fractals
-	    gManp->subtype = 'B';			// CBIN */
-	    gManp->special = WHITE;
-	    break;
-	case POWER:					// POWER fractals
-	case BURNINGSHIPPOWER:				// Burning Ship of other powers besides quadratic
-	    gManp->special = 3;				// power = 3
-	    break;
-	case NEWTONPOLYGON:				// Newton Polygon fractals
-	    gManp->degree = 5;				// Degree = 5
-	    break;
-	case NEWTONVARIATION:				// Newton Variation fractals
-	    gManp->degree = 3;				// Degree = 3
-	    break;
-	case FOURIER:					// Fourier Analysis fractals
-	    break;
-	case SPECIALNEWT:				// type SPECIALNEWT fractal
-	    gManp->special = 16;			// special in type 5 fractal is multiple colour flag
-	    break;
-	case RATIONALMAP:				// Rational Map type fractal
-	    gManp->subtype = 'A';			// RAT34
-	    gManp->special = WHITE;
-	    break;
-	case SINFRACTAL:				// sin() type fractal
-	case EXPFRACTAL:				// Exponential type fractal
-	case MATEIN:					// MATEIN type fractal
-	    gManp->subtype = 'R';			// REAL
-	    gManp->special = WHITE;			// special colour
-	    break;
-	    //	default:
-	    //	    return -1;					// dunno this fractal
-	}
-    switch (gManp->type)
-	{
 	case NEWTON:					// Newton Fractal
 	case NEWTBASIN:					// Newton Fractal (basin or stripe)
 	    gManp->subtype = 'N';
@@ -429,20 +367,6 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	    strncpy(t, str + 9, 3);
 	    t[3] = '\0';
 	    gManp->special = atoi(t);
-	    //	    fractalspecific[type].isNewton = TRUE;
-	    /*
-			if (isalpha(*(str + 3)))
-			    {
-			    subtype = (int)toupper(*(str + 3));
-			    if (*(str + 3) != '\0')
-				degree = atoi(str + 4);
-			    }
-			else
-			    {
-			    if (*(str + 3) != '\0')
-				degree = atoi(str + 3);
-			    }
-	    */
 	    break;
 	case PERTURBATION:
 	    if (!isdigit(*(str + 3)))				// new format
@@ -458,7 +382,7 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 		    }
 		gManp->EnableApproximation = true;
 		sscanf(PastQuote, "%d,%lf,%lf,%lf,%d,%s", &gManp->SlopeType, &gManp->lightDirectionDegrees, &gManp->bumpMappingDepth, &gManp->bumpMappingStrength, &gManp->PaletteStart, EnableBLA);
-		if (EnableBLA)
+		if (*EnableBLA)
 		    {
 		    if (strcmp(EnableBLA, "true") == 0)
 			gManp->EnableApproximation = true;
@@ -481,14 +405,15 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	case POWER:					// POWER fractals
 	case NEWTONPOLYGON:				// Newton Polygon fractals 
 	case NEWTONVARIATION:				// Newton Variation fractals
-	    if (*(str + 1) != '\0')
+//	    gManp->degree = 5;				// Degree = 5
+	    if (*(str + 3) != '\0')
 		gManp->degree = atoi(str + 3);
 	    break;
 	case TIERAZON:					// Tierazon fractals
 	case SLOPEDERIVATIVE:
 	case SLOPEFORWARDDIFF:
 	case MANDELDERIVATIVES:
-	    if (*(str + 1) != '\0')
+	    if (*(str + 3) != '\0')
 		gManp->subtype = atoi(str + 3);
 	    break;
 	case OSCILLATORS:
@@ -497,8 +422,7 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	case SURFACES:
 	case KNOTS:
 	case CURVES:
-	    gManp->subtype = 1;				// default Mandelbrot
-//	    strncpy(t, str + 3, 3);
+	    gManp->subtype = 1;
 	    gManp->subtype = Name2Subtype(gManp->type, SaveString);	// search database for matching subtype
 	    if (gManp->subtype < 0)
 		{
@@ -517,7 +441,6 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	    BlockAnimation = flags & 0x0020;
 	    FindCentre = flags & 0x0040;
 	    gManp->PerspectiveFlag = flags & 0x0080;
-	    //	    OscProcess.DisplayAxisImages = flags & AXISIMAGEDISP;
 	    xSign = ySign = 1;
 	    gManp->zAxis--;
 	    if (gManp->xAxis < 0)
@@ -535,8 +458,6 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 		}
 	    else
 		gManp->yAxis--;
-	    //	    t[3] = '\0';
-	    //	    subtype = atoi(t);
 	    Axes2Text(AxesText, gManp->xAxis + 1, gManp->yAxis + 1, gManp->zAxis + 1);
 	    break;
 
@@ -564,9 +485,33 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	    if (*(str + 13) != '\0')
 		ReadSliders(str + 13);
 	    break;
-	case BIFURCATION:				// Bifurcation Fractal
 	case CUBIC:					// CUBIC fractals
+	    gManp->subtype = 'B';			// CBIN */
+	    gManp->special = WHITE;
+	    strncpy(t, str + 3, 3);
+	    t[3] = '\0';
+	    gManp->subtype = atoi(t);
+	    strncpy(t, str + 6, 3);
+	    t[3] = '\0';
+	    gManp->special = atoi(t);
+	    break;
 	case RATIONALMAP:				// Rational Map type fractal
+	    gManp->subtype = 'A';			// RAT34
+	    gManp->special = WHITE;
+	    strncpy(t, str + 3, 3);
+	    t[3] = '\0';
+	    gManp->subtype = atoi(t);
+	    strncpy(t, str + 6, 3);
+	    t[3] = '\0';
+	    gManp->special = atoi(t);
+	    break;
+
+	case BIFURCATION:				// Bifurcation Fractal
+	case BIFSTEWART:
+	case BIFLAMBDA:
+	case BIFADSINPI:
+	case BIFEQSINPI:
+	case BIFMAY:
 	case EXPFRACTAL:				// Exponential type fractal
 	    strncpy(t, str + 3, 3);
 	    t[3] = '\0';
@@ -574,19 +519,6 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	    strncpy(t, str + 6, 3);
 	    t[3] = '\0';
 	    gManp->special = atoi(t);
-	    /*
-			if (isalpha(*(str + 3)))
-			    {
-			    subtype = toupper(*(str + 3));
-			    if (*(str + 4) != '\0')
-				special = atoi(str + 4);
-			    }
-			else
-			    {
-			    if (*(str + 3) != '\0')
-				special = atoi(str + 3);
-			    }
-	    */
 	    break;
 
 	case MALTHUS:					// Malthus fractal
@@ -600,26 +532,27 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	    if (*(str + 3) != '\0')
 		gManp->subtype = atoi(str + 3);
 	    break;
-
 	case FIBONACCI:					// Fibonacci Spirals
 	    gManp->subtype = 'I';			// default linear
 	    if (isalpha(*(str + 3)))
 		gManp->subtype = toupper(*(str + 3));
 	    break;
-
 	case SPECIALNEWT:				// type SPECIALNEWT fractal
-							// special in SPECIALNEWT fractal used as multiple colour flag
+	    gManp->special = 16;			// special in SPECIALNEWT fractal used as multiple colour flag
+	    if (*(str + 3) != '\0')
+		gManp->special = atoi(str + 3);
+	    break;
+
 	case SINFRACTAL:				// sin() type fractal
 	case MATEIN:					// MATEIN type fractal
-	if (*(str + 1) != '\0')
-	    gManp->special = atoi(str + 3);
+	    gManp->subtype = 'R';			// REAL
+	    gManp->special = WHITE;			// special colour
+	    if (*(str + 3) != '\0')
+		gManp->special = atoi(str + 3);
 	    break;
 
 	case CIRCLESQ:					// circle squared
 	    gManp->threshold = 256;				// else poor picture
-//	    hor *= 40.0;
-//	    vert *= 40.0;
-//	    mandel_width *= 40.0;
 	    break;
 	case LSYSTEM:
 	    strncpy(t, str + 3, 3);
@@ -910,6 +843,43 @@ void	RemoveQuotes(char *out, char *in)
     }
 
 /**************************************************************************
+	Protect and unprotect strings
+**************************************************************************/
+
+void ProtectQuotedText(char *s)
+    {
+    bool inQuote = false;
+
+    for (; *s; ++s)
+	{
+	if (*s == '"')
+	    {
+	    inQuote = !inQuote;
+	    continue;
+	    }
+
+	if (inQuote)
+	    {
+	    if (*s == ' ')
+		*s = '\x01';
+	    else if (*s == '-')
+		*s = '\x02';
+	    }
+	}
+    }
+
+void UnprotectQuotedText(char *s)
+    {
+    for (; *s; ++s)
+	{
+	if (*s == '\x01')
+	    *s = ' ';
+	else if (*s == '\x02')
+	    *s = '-';
+	}
+    }
+
+/**************************************************************************
 	Analyse param data
 **************************************************************************/
 
@@ -922,18 +892,14 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
     char	SaveString[2048];		// get filenames from quotes.
     char	TempBuffer[SIZEOF_BF_VARS * 3];	// Save entire string to get anything within quotes.
 						// SIZEOF_BF_VARS times 3 because of x, y, width
-    char	*p;				// get the beginning of the string
-    char	*end_of_quoted_formula;		// current position in the string
+    char	*TrailingArgs = NULL;
 
     strcpy(TempBuffer, string);			// get a copy in case of corruption by strtok()
-    end_of_quoted_formula = p = string;		// remember where the beginning of the string is to count how far in the filename is
-
-    token = strtok(string, seps);
+    ProtectQuotedText(TempBuffer);		// Protect quoted text from the parser
+    token = strtok(TempBuffer, seps);
     while (token != NULL)
 	{
-	bool InsideFormulaString = (token < end_of_quoted_formula);
-
-	if (!InsideFormulaString && *token == '-') 
+	if (*token == '-') 
 	    {
 	    TokChar = *(token + 1);
 	    *(token + 1) = TokChar = toupper(TokChar);
@@ -971,7 +937,7 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 		    gManp->_3dflag = TRUE;
 		    break;
 		case 'A':				// replace palette map
-		    RemoveQuotes(MAPFile, trailing(TempBuffer + 2 + (token - p)));
+		    strcpy(MAPFile, SaveString);
 		    break;
 		case 'B':				// biomorph colour
 		    gManp->biomorph = atoi(token + 2);
@@ -1023,9 +989,25 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 		case 'F':				// fractal type
 		    if (*(token + 2) != '\0')
 			{
-			RemoveQuotes(SaveString, trailing(TempBuffer + 2 + (token - p)));
-			end_of_quoted_formula = token + 8 + strlen(SaveString);	// pointer to the end of the formula string to ensure we don't trap on minus signs in the formula
-			if (analyse_fractal(hwnd, token + 2, SaveString, end_of_quoted_formula) < 0)
+			UnprotectQuotedText(token);	// Unprotect it before real-world use
+
+			RemoveQuotes(SaveString, token + 2);
+			UnprotectQuotedText(SaveString);// Unprotect it before real-world use
+
+			char *TrailingArgs = NULL;
+			char *q1 = strchr(token, '"');
+			if (q1)
+			    {
+			    char *q2 = strchr(q1 + 1, '"');
+			    if (q2)
+				{
+				TrailingArgs = q2 + 1;
+				if (*TrailingArgs == ',')
+				    TrailingArgs++;
+				}
+			    }
+
+			if (analyse_fractal(hwnd, token + 2, SaveString, TrailingArgs) < 0)
 			    {
 			    SAFE_SPRINTF(s, "Unknown Fractal <%d> in PAR file", gManp->type);
 			    MessageBox(hwnd, s, "ManpWin", MB_ICONEXCLAMATION | MB_OK);
@@ -1127,8 +1109,9 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 			gManp->AutoStereo_value = atoi(token + 2);
 		    break;
 		case 'S':				// SaveAs filename
-//		    RemoveQuotes(szSaveFileName, trailing(token + 2));
-		    RemoveQuotes(szSaveFileName, trailing(TempBuffer + 2 + (token - p)));
+		    UnprotectQuotedText(token);		// Unprotect it before real-world use
+		    RemoveQuotes(szSaveFileName, trailing(token + 2));
+		    UnprotectQuotedText(szSaveFileName);		    
 		    gManp->AutoSaveFlag = TRUE;
 		    break;
 		case 'T':				// threshold 
@@ -1277,6 +1260,7 @@ char	*FractData(void)
 	//	SAFE_SPRINTF(info, "-c%15.15f,%15.15f,%15.15f,%6.6f,%6.6f -t%d", hor, vert, mandel_width, pert_real, pert_imag, threshold);
 	sb.append("-c%24.24f,%24.24f,%24.24f -t%d", gManp->hor, gManp->vert, gManp->mandel_width, gManp->threshold);
 	}
+    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
     BasicFractData(sb, FALSE);
     sb.append("\n");
     return info;

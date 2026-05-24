@@ -24,6 +24,7 @@ class CManp
 	void	RunMainLoop(HWND hwnd, char* saveFile);
 	int	RunEscapeTimeEngine(HWND hwnd);
 	void	DisplayFractal(HWND hwnd);
+	void	DumpStartupState(const char *where);
 	void	UpdateInit(void);
 	int	UpdateClose(void);
 	int	DoUpdate(void);
@@ -100,6 +101,7 @@ class CManp
 	void	InitAnimParamValues(void);
 	void	BuildJuliaFormulaString(void);
 	void	InitFract(int type);
+	void	RebuildFractalMetadata(WORD type, int subtype);
 	void	ErrorHandler(LPTSTR lpszFunction);
 
 	// script stuff

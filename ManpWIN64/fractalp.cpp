@@ -1773,7 +1773,7 @@ struct fractalspecificstuff fractalspecific[]=
    {
    "Cubic",
        "Subtype: 0=CBIN, 1=CCIN, 2=CFIN, 3=CKIN", "Special Colour Red Component", "Special Colour Green Component", "Special Colour Blue Component", realz0, imagz0, ES, ES, ES, ES,
-      0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 200.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
    -5.3333, -3.0, 6.0, 0, NOFRACTAL, NOFRACTAL, 6, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
@@ -2055,7 +2055,6 @@ struct fractalspecificstuff fractalspecific[]=
    },
 
 //#define TIERAZON             204	// general Tierazon fractal - use subtype to specify which one.
-
    {
    "Tierazon Fractal",
       realz0, imagz0, "degree if applicable", ES, ES, ES,ES, ES, ES, ES,
@@ -2340,7 +2339,7 @@ struct fractalspecificstuff fractalspecific[]=
 	"Slope Using Derivatives", "Mandelbrot = 0, else Power degree", "Use Palette? = 0","Light Source Angle (degrees)","Light Source Height",ES, ES, ES, ES, ES,ES,0.0,0.0,45.0,1.5,0.0,0.0,0,0,0,0,
 	-3.5, -2.0, 4.0, 0, MANDEL, NOFRACTAL, 4, 0, NULL, NULL, USEDOUBLEDOUBLE, NOSYM, 1000.0,
 //	InitSlopeFractal, DoSlopeFractal, "SelectFracParams", SelectFracParams, STDBAILOUT
-	InitSlopeFractal, DoSlopeFractal, "SlopeDlg", PertDlg, STDBAILOUT
+	InitSlopeFractal, DoSlopeFractal, "SlopeDlg", SlopeDlg, STDBAILOUT
     },
     {
 //#define SLOPEFORWARDDIFF	241
@@ -2349,7 +2348,7 @@ struct fractalspecificstuff fractalspecific[]=
 	0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0,0,0,0,
 	-4.0,  -2.0,  4.0, 0, MANDELFP, NOFRACTAL, 4, 0, NULL, NULL, USEDOUBLEDOUBLE, NOSYM, 1280.0,
 //    InitSlopeFractal, DoSlopeFractal, "SelectFracParams", SelectFracParams, STDBAILOUT
-    InitSlopeFractal, DoSlopeFractal, "SlopeDlg", PertDlg, STDBAILOUT
+    InitSlopeFractal, DoSlopeFractal, "SlopeDlg", SlopeDlg, STDBAILOUT
     },
     {
     //#define POLYNOMIAL	242
@@ -2444,7 +2443,7 @@ struct PerturbationSpecificStuff PerturbationSpecific[] =
 	    "Power", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor (Fwd Diff)","Light Source Height (Derivative)", "Degree", ES, ES, ES, ES, ES, ES, ES, 1.0, 1.5, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0, 0
 	    },
 	    {
-	    "Burning Ship", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, "Smoothing Colour Speed", ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0, 0
+	    "Burning Ship", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
 	    },
 	    {
 	    "Cubic Burning Ship", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
@@ -2619,6 +2618,36 @@ struct PerturbationSpecificStuff PerturbationSpecific[] =
 	    {
 	    "HPDZ Buffalo", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
 	    },
+	    {
+	    "Exp", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
+	    },
+	    {
+	    "Sinh", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
+	    },
+ 	    {
+	    "Sin", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
+	    },
+	    {
+	    "Cos", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
+	    },
+	    {
+	    "Fractional Power - z^(a+ib)", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", "Degree", ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0, 0
+	    },
+
+/*
+	    {
+	    "Inverse - 1/(z^n)", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", "Degree", ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0, 0
+	    },
+	    {
+	    "Cosh", 0, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
+	    },
+
+	    {
+	    "Log", 0, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    },
+	    {
+	    "Sqrt", 0, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    },
 //	    {
 //	    "Fractional Power", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor (Fwd Diff)","Light Source Height (Derivative)", "Degree", ES, ES, ES, ES, ES, ES, ES, 1.0, 1.5, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0, 0
 //	    },
@@ -2628,10 +2657,6 @@ struct PerturbationSpecificStuff PerturbationSpecific[] =
 //	    {
 //	    "Sin", 0, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
 //	    },
-//	    {
-//	    "Exp", 0, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
-//	    },
-/*
 	    {
 	    "Cubic Newton", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor 0 = off", "Start Palette 0-255", "Light Direction (Degrees)", "Mapping Depth", "Mapping Strength", ES, "SlopeDegree", ES, ES, ES, 1.0, 0.0, 45.0, 50.0, 50.0, 0.0, 3.0, 0.0, 0.0, 0.0, 6, 16.0, 0
 	    },
@@ -2664,7 +2689,7 @@ struct AlternativeSpecificStuff MandelDerivSpecific[] =
     //    int	    (*calctype)(void);			// name of main fractal function 
     //    int	    (*big_per_pixel)(void);		// Bignum versions 
     //    int	    (*big_calctype)(void); 
-    //    double    paramvalue[4];			// default parameter values 
+    //    double    paramvalue[NUMMANDERIVPARAM];	// default parameter values 
     //    double    rqlim;				// bailout value 
     //    int	    symmetry;				// see above
     //	  int	    SlopeDegree;			// set to -1 if taken from param
@@ -3044,7 +3069,7 @@ struct AlternativeSpecificStuff MandelDerivSpecific[] =
 		},
 		{
 		"Art Matrix Cubic",						// 13
-		    45.0, 1.5, 0.0, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 7, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 200.0, 0.0, 0.0, 0.0, 0.0, 7, 1000.0
 		},
 
 	//	{
@@ -3131,7 +3156,7 @@ struct AlternativeSpecificStuff MandelDerivSpecific[] =
 		},
 		{
 		"Art Matrix Cubic",						// 15
-		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 255.0, 0.0, 0.0, 9, 1000.0
+		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 200.0, 0.0, 0.0, 9, 1000.0
 		},
 		{
 		"Newton Variation: z=z-(z^n - 1)/(3*z-1)+c",			// 16
@@ -3154,7 +3179,7 @@ struct AlternativeSpecificStuff TierazonSpecific[]=
 //    int	    (*calctype)(void);			// name of main fractal function 
 //    int	    (*big_per_pixel)(void);		// Bignum versions 
 //    int	    (*big_calctype)(void); 
-//    double	    paramvalue[4];			// default parameter values 
+//    double	    paramvalue[NUMALTERNATIVEPARAM];	// default parameter values 
 //    double	    rqlim;				// bailout value 
 //    int	    symmetry;				// see above
 //    int	    SlopeDegree;			// set to -1 if taken from param
@@ -4183,6 +4208,7 @@ char	*DirectFormula[] =
     {
     "z = z*z + c + p1 ; Good old Mandelbrot",
     "z = z*z*z + c + p1 ; Basic Cubic", 
+    "z = c = pixel:  z = cosh(z) + c,  |z| <= 1000 ; good for testing pert trig functions",
     "z = z*z*z*z + z*z*z + z*z + c + p1	; https://www.youtube.com/watch?v=IN16QJaNHdo",
     "z = z-(z*z*z*z-z)/(4*z*z*z-z)+c + p1 ; Cute little Newton",
     "z = (z^2+c)/(c^2+z) + p1 ; http://www.fractalforums.com/general-discussion-b77/t24459/msg95822/#msg95822", 

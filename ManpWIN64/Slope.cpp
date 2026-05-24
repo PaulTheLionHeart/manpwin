@@ -149,11 +149,10 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
     double	xgap, ygap;
     dd_real	DDhor, DDvert, DDxgap, DDygap, DDWidth;
     qd_real	QDhor, QDvert, QDxgap, QDygap, QDWidth;
-    RGBTRIPLE	colour;
+    RGBTRIPLE	colour = { 0, 0, 0 };
     int		lastChecked = -1;
     Complex	v;// unit 2D vector in this direction
     int		i;
-    double	LightAngle = param[0];
     bool	Time2Exit = false;
     CPlot	Plot;
     int		iterations = 0;
@@ -162,6 +161,8 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 
     for (i = 0; i < NUMSLOPEDERIVPARAM; i++)
 	param[i] = paramIn[i];
+
+    double	LightAngle = param[0];
 
     precision = precisionIn;
     thread = threadIn;
@@ -345,8 +346,6 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 		*ThreadComplete = true;
 		return -1;
 		}
-	    if (ghMutex != NULL)
-		WaitForSingleObject(ghMutex, INFINITE);  // no time-out interval
 	    if (AbortRequested())
 		return -1;
 	    if (smoothing)
@@ -358,8 +357,11 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 		    inside.rgbtRed = (BYTE)TrueCol->InsideRed;
 		    inside.rgbtGreen = (BYTE)TrueCol->InsideGreen;
 		    inside.rgbtBlue = (BYTE)TrueCol->InsideBlue;
-
+		    if (ghMutex != NULL)
+			WaitForSingleObject(ghMutex, INFINITE);  // no time-out interval
 		    Plot.OutRGBpoint(iX, iY, inside);
+		    if (ghMutex != NULL)
+			ReleaseMutex(ghMutex);
 		    }
 		else
 		    {
@@ -380,13 +382,21 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 		    if ((unsigned)iX >= (unsigned)Dib->DibWidth || (unsigned)iY >= (unsigned)Dib->DibHeight)
 			return -1;
 
+		    if (ghMutex != NULL) 
+			WaitForSingleObject(ghMutex, INFINITE);
 		    Plot.OutRGBpoint(iX, iY, final);
+		    if (ghMutex != NULL)
+			ReleaseMutex(ghMutex);
 		    }
 		}
 	    else
+		{
+		if (ghMutex != NULL)
+		    WaitForSingleObject(ghMutex, INFINITE);
 		Plot.OutRGBpoint(iX, iY, colour);
-	    if (ghMutex != NULL)
-		ReleaseMutex(ghMutex);
+		if (ghMutex != NULL)
+		    ReleaseMutex(ghMutex);
+		}
 
 	    if (user_data(hwnd) < 0)
 		return -1;

@@ -591,7 +591,6 @@ bool	CManp::DecodeFractintColourChar(char c, BYTE& out)
     }
 
 int	CManp::ParseColours(char *value)
-
     {
     int		i, j;
     int		smooth, PalSize;
@@ -655,9 +654,11 @@ int	CManp::ParseColours(char *value)
 			goto badcolor;
 
 		    // store raw 6-bit value for now
-		    if (j == 0) TrueCol.PalettePtr[i].rgbtRed = k6;
+		    // Fractint inline PAR colours are being decoded into RGBTRIPLE storage.
+		    // RGBTRIPLE memory order is Blue, Green, Red.
+		    if (j == 0) TrueCol.PalettePtr[i].rgbtBlue = k6;
 		    if (j == 1) TrueCol.PalettePtr[i].rgbtGreen = k6;
-		    if (j == 2) TrueCol.PalettePtr[i].rgbtBlue = k6;
+		    if (j == 2) TrueCol.PalettePtr[i].rgbtRed = k6;
 
 		    if (smooth)
 			{
@@ -667,17 +668,17 @@ int	CManp::ParseColours(char *value)
 
 			BYTE startVal;
 
-			if (j == 0) startVal = TrueCol.PalettePtr[start].rgbtRed;
+			if (j == 0) startVal = TrueCol.PalettePtr[start].rgbtBlue;
 			if (j == 1) startVal = TrueCol.PalettePtr[start].rgbtGreen;
-			if (j == 2) startVal = TrueCol.PalettePtr[start].rgbtBlue;
+			if (j == 2) startVal = TrueCol.PalettePtr[start].rgbtRed;
 
 			if (k6 == startVal)
 			    {
 			    while (++cnum < spread)
 				{
-				if (j == 0) TrueCol.PalettePtr[start + cnum].rgbtRed = k6;
+				if (j == 0) TrueCol.PalettePtr[start + cnum].rgbtBlue = k6;
 				if (j == 1) TrueCol.PalettePtr[start + cnum].rgbtGreen = k6;
-				if (j == 2) TrueCol.PalettePtr[start + cnum].rgbtBlue = k6;
+				if (j == 2) TrueCol.PalettePtr[start + cnum].rgbtRed = k6;
 				}
 			    }
 			else
@@ -689,9 +690,9 @@ int	CManp::ParseColours(char *value)
 				    (i - (start + cnum)) * startVal +
 					spread / 2) / spread);
 
-				if (j == 0) TrueCol.PalettePtr[start + cnum].rgbtRed = interp;
+				if (j == 0) TrueCol.PalettePtr[start + cnum].rgbtBlue = interp;
 				if (j == 1) TrueCol.PalettePtr[start + cnum].rgbtGreen = interp;
-				if (j == 2) TrueCol.PalettePtr[start + cnum].rgbtBlue = interp;
+				if (j == 2) TrueCol.PalettePtr[start + cnum].rgbtRed = interp;
 				}
 			    }
 			}
@@ -706,14 +707,14 @@ int	CManp::ParseColours(char *value)
     badcolor:
     for (i = 0; i < PalSize; i++)
 	{
-	TrueCol.PalettePtr[i].rgbtRed <<= 2;
-	TrueCol.PalettePtr[i].rgbtGreen <<= 2;
 	TrueCol.PalettePtr[i].rgbtBlue <<= 2;
+	TrueCol.PalettePtr[i].rgbtGreen <<= 2;
+	TrueCol.PalettePtr[i].rgbtRed <<= 2;
 	if (i == TrueCol.inside_colour)
 	    {
-	    TrueCol.InsideRed = TrueCol.PalettePtr[i].rgbtRed;		// values for r, g, b channels for inside colour
+	    TrueCol.InsideRed = TrueCol.PalettePtr[i].rgbtBlue;		// values for r, g, b channels for inside colour
 	    TrueCol.InsideGreen = TrueCol.PalettePtr[i].rgbtGreen;
-	    TrueCol.InsideBlue = TrueCol.PalettePtr[i].rgbtBlue;
+	    TrueCol.InsideBlue = TrueCol.PalettePtr[i].rgbtRed;
 	    }
 	}
 
@@ -1049,7 +1050,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
     char	*tok, *q;
     int		err = 0;
     int		linenum = 0, check = 0;
-    char	*temp = NULL, *buffer = NULL, *word;
+    char	*temp = NULL, *word;
     char	InLine[200];
     char	InLine1[200];
     FILE	*fp;
@@ -1098,8 +1099,8 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	}
 	while (_stricmp(tmp, lptr[lsys_ptr]) != 0);
 
-    buffer = new char[BUFFERSIZE];
-    *buffer = '\0';
+	std::vector<char> buffer(BUFFERSIZE);
+	buffer[0] = '\0';
 
     while(fgets(InLine1, 160, fp))		// Max line length 160 chars
 	{
@@ -1108,10 +1109,10 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	if ((word = strchr(InLine1,';')))	// strip comment
 	    *word = 0;
 	strcpy(InLine, StripStuff(InLine1));
-	strcat_s(buffer, sizeof(buffer), leading(InLine));
+	strcat_s(buffer.data(), buffer.size(), leading(InLine));
 	if (str_find_ci(InLine, "}"))
 	     break;
-	if ((i = (int)strlen(buffer)) > BUFFERSIZE - 160)
+	if ((i = (int)strlen(buffer.data())) > BUFFERSIZE - 160)
 	    {
 	    _snprintf_s(s, 200, _TRUNCATE, "Par Data full, line: <%d>", linenum);
 	    MessageBox (hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
@@ -1119,44 +1120,44 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	    }
 	}    
 
-    if (tok = str_find_ci(buffer, "params="))		// must be first
+    if (tok = str_find_ci(buffer.data(), "params="))		// must be first
 	gManp->ProcessParams(tok);
-    if (tok = str_find_ci(buffer, "maxiter="))
+    if (tok = str_find_ci(buffer.data(), "maxiter="))
 	{
 	gManp->threshold = atol(tok);
 	if (gManp->threshold < 0L)
 	    gManp->threshold = MAXTHRESHOLD;
 	}
-    if (tok = str_find_ci(buffer, "inside="))
+    if (tok = str_find_ci(buffer.data(), "inside="))
 	gManp->Processfilters(tok, INSIDE);
-    if (tok = str_find_ci(buffer, "bailout="))
+    if (tok = str_find_ci(buffer.data(), "bailout="))
 	TempRqlim = (double)atoi(tok);
-    if (tok = str_find_ci(buffer, "decomp="))
+    if (tok = str_find_ci(buffer.data(), "decomp="))
 	gManp->decomp = atoi(tok);
-    if (tok = str_find_ci(buffer, "potential="))
+    if (tok = str_find_ci(buffer.data(), "potential="))
 	{
 	gManp->ProcessPotential(tok);
 	gManp->OutsideMethod = POTENTIAL;
 	}
-    if (tok = str_find_ci(buffer, "corners="))
+    if (tok = str_find_ci(buffer.data(), "corners="))
 	gManp->ProcessCorners(tok, FALSE);
-    if (tok = str_find_ci(buffer, "center-mag="))
+    if (tok = str_find_ci(buffer.data(), "center-mag="))
 	gManp->ProcessCorners(tok, TRUE);
-    if (tok = str_find_ci(buffer, "biomorph="))
+    if (tok = str_find_ci(buffer.data(), "biomorph="))
 	gManp->biomorph = atoi(tok);
-    if (tok = str_find_ci(buffer, "function="))
+    if (tok = str_find_ci(buffer.data(), "function="))
 	gManp->AnalyseFunction(tok);
-    if (tok = str_find_ci(buffer, "colors="))
+    if (tok = str_find_ci(buffer.data(), "colors="))
 	gManp->ParseColours(tok);
-    if (tok = str_find_ci(buffer, "invert="))
+    if (tok = str_find_ci(buffer.data(), "invert="))
 	gManp->ProcessInvert(tok);
-    if (tok = str_find_ci(buffer, "outside="))
+    if (tok = str_find_ci(buffer.data(), "outside="))
 	gManp->Processfilters(tok, OUTSIDE);
-    if (tok = str_find_ci(buffer, "bailoutest="))
+    if (tok = str_find_ci(buffer.data(), "bailoutest="))
 	gManp->BailoutTestType = gManp->ProcessBailoutTest(tok);
-    if (tok = str_find_ci(buffer, "type="))		// must be the only one which is after strlwr
+    if (tok = str_find_ci(buffer.data(), "type="))		// must be the only one which is after strlwr
 	{
-	if (gManp->FindType(hwnd, tok, buffer, &IsFrm, TempRqlim) < 0)
+	if (gManp->FindType(hwnd, tok, buffer.data(), &IsFrm, TempRqlim) < 0)
 	    {
 	    switch (gManp->type)
 		{
@@ -1175,11 +1176,11 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 		}
 	    MessageBox (hwnd, s, "Reading Fractint Par File", MB_ICONEXCLAMATION | MB_OK);
 	    fclose(fp);
-	    if (buffer) { delete[] buffer; buffer = NULL; }
-		return -1;
+	    return -1;
 	    }
+	else
+	    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
 	}
-    if (buffer) { delete[] buffer; buffer = NULL; }
     if (IsFrm)
 	{
 	char *p;

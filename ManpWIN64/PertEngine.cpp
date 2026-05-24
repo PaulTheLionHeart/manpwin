@@ -170,8 +170,9 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
     // Optional tuning (safe, simple)
     int	chunk = (currentMode == PlotMode::Tile) ? 1024 : CHUNK_SIZE;
     const	PlotMode mode = currentMode;
+    int idx = workIndex->load();
 
-    if (workIndex < 0 || *workIndex >= totalPixels)
+    if (idx < 0 || idx >= totalPixels)
 	{
 	OutputDebugStringA("Pert: invalid workIndex\n");
 	return -1;
@@ -183,6 +184,7 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
 	return -1;
 	}
 
+    gManp->DumpStartupState("start calculateOneFrame");
     if (pixelOrder != NULL && workIndex != NULL && totalPixels > 0)
 	{
 	while (true)
@@ -272,7 +274,9 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
 	_snprintf_s(PertErrorMessage, MAXLINE, _TRUNCATE, "Scheduler not initialised correctly");
 	return -3;
 	}
+    gManp->DumpStartupState("after initialiseCalculateFrame");
     ThreadComplete = true;
     return 0;
     }
+
 

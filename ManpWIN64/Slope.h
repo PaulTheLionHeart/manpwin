@@ -142,7 +142,7 @@ class CSlope
 	// color component ( R or G or B) is coded from 0 to 255 
 	// it is 24 bit color RGB file 
 	const int MaxColorComponentValue = 255;
-	static RGBTRIPLE color[3];	// 24-bit rgb color
+//	static RGBTRIPLE color[3];	// 24-bit rgb color
 	int	StripStart;
 	int	StripMult;		// e.g. 4 or 8
 	int	subtype;

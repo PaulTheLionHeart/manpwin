@@ -175,8 +175,7 @@ BYTE *CreateDib(WORD dx, WORD dy, BYTE *palette, WORD bits)
     bi.biYPelsPerMeter  = 0;
     bi.biClrUsed        = bits > 8 ? 0L : (DWORD)((1<<bits) & 0xffff);
     bi.biClrImportant   = bi.biClrUsed;
-    bi.biSizeImage	= (DWORD)ComputeWidthBytes(bi.biWidth*bi.biBitCount, (long)dy);
-
+    bi.biSizeImage	= (DWORD)(ComputeWidthBytes(bi.biWidth, bi.biBitCount) * dy);
     if ((hdibN = (BYTE *)GlobalAlloc(GMEM_MOVEABLE | GMEM_DISCARDABLE |
 		GMEM_ZEROINIT,sizeof(BITMAPINFOHEADER) +
 		    (long)bi.biClrUsed*sizeof(RGBQUAD)+bi.biSizeImage))==NULL)

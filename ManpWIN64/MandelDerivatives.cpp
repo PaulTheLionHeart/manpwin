@@ -36,36 +36,7 @@ void	LoadMandelDerivParams(void)
     // here is where we can do some specific updates to individual Mandelbrot Derivative fractals
     int	i;
 
-    switch (gManp->subtype)
-	{
-	case 2:
-	case 4:
-	case 7:
-	    gManp->Fractal.NumParam = 3;
-	    gManp->Fractal.ParamName[0] = "Polynomial Degree (>= 2)";
-	    gManp->Fractal.ParamName[1] = "Real Perturbation of Z(0)";
-	    gManp->Fractal.ParamName[2] = "Imaginary Perturbation of Z(0)";
-	    break;
-	case 6:
-	    gManp->Fractal.NumParam = 4;
-	    gManp->Fractal.ParamName[0] = "Polynomial Degree (>= 2)";
-	    gManp->Fractal.ParamName[1] = "Real Perturbation of Z(0)";
-	    gManp->Fractal.ParamName[2] = "Imaginary Perturbation of Z(0)";
-	    gManp->Fractal.ParamName[3] = "Rotated? (Only for degree > 2, 1=yes 0=no)";
-	    break;
-	case 55:
-	case 56:
-	    gManp->Fractal.NumParam = 3;
-	    gManp->Fractal.ParamName[0] = (gManp->subtype == 55) ? "SimonBrot Order (>= 2)" : "SimonBrot2 Order (>= 2)";
-	    gManp->Fractal.ParamName[1] = "Real Perturbation of Z(0)";
-	    gManp->Fractal.ParamName[2] = "Imaginary Perturbation of Z(0)";
-	    break;
-	}
-
-//    if (subtype == 133 || subtype == 177)	// Flarium 28 and 245 don't work well with periodicy checking
-//	period_level = FALSE;			// no periodicity checking for Tierazon fractals
-
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < NUMALTERNATIVEPARAM; i++)
 	gManp->param[i] = MandelDerivSpecific[gManp->subtype].paramvalue[i];
     gManp->rqlim = MandelDerivSpecific[gManp->subtype].rqlim;
     }

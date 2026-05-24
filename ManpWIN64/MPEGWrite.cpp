@@ -40,10 +40,6 @@ extern	BOOL		WriteMPEGFrames;	// write frames directly to an MPEG file
 static	int		SetupAnimationFrameList(char *, char *, int *width, int *height, int *TotalFrames);
 static	void		ClosePNGLstPtrs(void);
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//extern	HWND	GlobalHwnd;			// This is the main windows handle
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
 /**************************************************************************
 	Write MPEG File
 **************************************************************************/

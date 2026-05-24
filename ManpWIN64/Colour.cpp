@@ -26,7 +26,7 @@ extern	BYTE	default_palette[];
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTrueCol::CTrueCol()			// device independent bitmap
+CTrueCol::CTrueCol()			// Persistent colour-system initialisation
     {
     RandomDivisor = 128;
     RandomColourFlag = FALSE;
@@ -34,12 +34,14 @@ CTrueCol::CTrueCol()			// device independent bitmap
     DisplayPaletteFlag = TRUE;
     ScriptPaletteFlag = FALSE;
     PalEditFlag = FALSE;
+
     RedStartInt = 60;
     GreenStartInt = 120;
     BlueStartInt = 30;
     RedIncInt = 100;
     GreenIncInt = 255;
     BlueIncInt = 200;
+
     InsideRed = 50;				// values for r, g, b channels for inside colour
     InsideGreen = 50;
     InsideBlue = 50;
@@ -47,6 +49,12 @@ CTrueCol::CTrueCol()			// device independent bitmap
     IsMAPFile = false;				// have we loaded a MAP file?
     PalettePtr.resize(MAXPALETTE); 
     DefaultPalettePtr.resize(MAXPALETTE);
+    for (size_t i = 0; i < ColoursInPALFile; ++i)
+	{
+	DefaultPalettePtr[i].rgbtRed = default_palette[3 * i + 2];
+	DefaultPalettePtr[i].rgbtGreen = default_palette[3 * i + 1];
+	DefaultPalettePtr[i].rgbtBlue = default_palette[3 * i + 0];
+	}
     }
 
 CTrueCol::~CTrueCol()
@@ -61,37 +69,82 @@ CTrueCol::~CTrueCol()
 //CTrueCol    TrueCol;
 
 //////////////////////////////////////////////////////////////////////
-//	Initialise True Colour Palette
+//	Generate True Colour COL
 //////////////////////////////////////////////////////////////////////
 
-/*
-void CTrueCol::LoadDefaultPalette(BYTE default_palette[])
+void CTrueCol::BuildCOLColourSource(BYTE RandFlag, long threshold, int StartColourCycling, int logval)
     {
-    const int nBytes = sizeof(default_palette);
-    const int nCols = nBytes / 3;
+    long    i, cycle, temp;
+    double  RedStart, GreenStart, BlueStart;
+    double  RedInc, GreenInc, BlueInc;
+    float   size;
+    static  WORD Randomise;
 
-    DefaultPalettePtr.clear();
-    DefaultPalettePtr.reserve(nCols);
-
-    for (int i = 0; i < nCols; ++i)
+    if (RandFlag)
 	{
-	RGBTRIPLE c;
-	c.rgbtBlue = default_palette[i * 3 + 0];
-	c.rgbtGreen = default_palette[i * 3 + 1];
-	c.rgbtRed = default_palette[i * 3 + 2];
-	DefaultPalettePtr.push_back(c);
+	srand((unsigned)time(NULL) + Randomise);
+
+	if (RandomColourFlag)
+	    {
+	    gManp->TrueCol.RedIncInt = rand() / RandomDivisor;
+	    gManp->TrueCol.GreenIncInt = rand() / RandomDivisor;
+	    gManp->TrueCol.BlueIncInt = rand() / RandomDivisor;
+	    gManp->TrueCol.RedStartInt = rand() / RandomDivisor;
+	    gManp->TrueCol.GreenStartInt = rand() / RandomDivisor;
+	    gManp->TrueCol.BlueStartInt = rand() / RandomDivisor;
+	    }
+
+	Randomise = rand();
 	}
+
+    RedStart = (float)(gManp->TrueCol.RedStartInt) / 100.0;
+    GreenStart = (float)(gManp->TrueCol.GreenStartInt) / 100.0;
+    BlueStart = (float)(gManp->TrueCol.BlueStartInt) / 100.0;
+
+    RedInc = (float)(gManp->TrueCol.RedIncInt) / 100.0;
+    GreenInc = (float)(gManp->TrueCol.GreenIncInt) / 100.0;
+    BlueInc = (float)(gManp->TrueCol.BlueIncInt) / 100.0;
+
+    LocalThreshold = (threshold >= MAXPALETTE) ? MAXPALETTE - 1	: threshold;
+
+    temp = ((long)StartColourCycling > LocalThreshold) ? LocalThreshold	: StartColourCycling;
+
+    for (i = 1L; i < LocalThreshold; ++i)
+	{
+	cycle = temp + i;
+
+	if (cycle > LocalThreshold)
+	    cycle -= LocalThreshold;
+
+	size = (float)cycle / (float)((logval != 0) ? 256 : LocalThreshold);
+	PalettePtr[i].rgbtBlue = (BYTE)(127.0 * sin(TWO_PI * (size + RedStart) * RedInc)) + 128;
+	PalettePtr[i].rgbtGreen = (BYTE)(127.0 * sin(TWO_PI * (size + GreenStart) * GreenInc)) + 128;
+	PalettePtr[i].rgbtRed = (BYTE)(127.0 * sin(TWO_PI * (size + BlueStart) * BlueInc)) + 128;
+	}
+
+    PalettePtr[LocalThreshold].rgbtBlue = (BYTE)InsideBlue;
+    PalettePtr[LocalThreshold].rgbtGreen = (BYTE)InsideGreen;
+    PalettePtr[LocalThreshold].rgbtRed = (BYTE)InsideRed;
     }
-*/
 
-void	CTrueCol::InitTrueColPal(BYTE RandFlag, long threshold, int StartColourCycling, int logval, int bits_per_pixel, BOOL UseFractintPalette, BYTE default_palette[])
+//////////////////////////////////////////////////////////////////////
+//	Build Palette MAP
+//////////////////////////////////////////////////////////////////////
 
+void CTrueCol::BuildDefaultPaletteSource(long threshold)
     {
-    long	i, cycle, temp;
-    double	RedStart, GreenStart, BlueStart, RedInc, GreenInc, BlueInc;
-    float	size;
-    static	WORD	Randomise;
+    for (int i = 0; i < ColoursInPALFile; i++)
+	PalettePtr[i] = DefaultPalettePtr[i];
 
+    FillPalette(REPEAT, PalettePtr, threshold);
+    }
+
+//////////////////////////////////////////////////////////////////////
+//	Build Palette from sources (MAP table or COL palette generator)
+//////////////////////////////////////////////////////////////////////
+
+void	CTrueCol::BuildIterationColourMap(BYTE RandFlag, long threshold, int StartColourCycling, int logval, BOOL UseFractintPalette)
+    {
     ColoursInPALFile = (long)colourCount;
     if (PalEditFlag)
 	{
@@ -102,66 +155,16 @@ void	CTrueCol::InitTrueColPal(BYTE RandFlag, long threshold, int StartColourCycl
 	return;
 	}
 
-    for (size_t i = 0; i < ColoursInPALFile; ++i)
+    if (IsMAPFile)
 	{
-	DefaultPalettePtr[i].rgbtRed = default_palette[3 * i + 2];
-	DefaultPalettePtr[i].rgbtGreen = default_palette[3 * i + 1];
-	DefaultPalettePtr[i].rgbtBlue = default_palette[3 * i + 0];
-	}
-
-    if (UseFractintPalette)
-	{
-	for (int i = 0; i < ColoursInPALFile; i++)
-	    PalettePtr[i] = DefaultPalettePtr[i];
-//	LoadDefaultPalette(default_palette);
-	FillPalette(REPEAT, PalettePtr, threshold);
+	if (UseFractintPalette)
+	    BuildDefaultPaletteSource(threshold);
+	// else:
+	// external MAP file already populated PalettePtr[] when MAP file loaded or from PAR/PNG/KFR sources
 	}
     else
 	{
-	if (RandFlag)
-	    {
-	    srand((unsigned)time(NULL) + Randomise);// Seed the random-number generator with current time so
-						// that the numbers will be different every time we run.
-
-	    if (RandomColourFlag)
-		{
-		gManp->TrueCol.RedIncInt = rand() / RandomDivisor;
-		gManp->TrueCol.GreenIncInt = rand() / RandomDivisor;
-		gManp->TrueCol.BlueIncInt = rand() / RandomDivisor;
-		gManp->TrueCol.RedStartInt = rand() / RandomDivisor;
-		gManp->TrueCol.GreenStartInt = rand() / RandomDivisor;
-		gManp->TrueCol.BlueStartInt = rand() / RandomDivisor;
-		}
-
-	    Randomise = rand();			// to prevent the same value within the second!!
-	    }
-
-	RedStart = (float)(gManp->TrueCol.RedStartInt) / 100.0;
-	GreenStart = (float)(gManp->TrueCol.GreenStartInt) / 100.0;
-	BlueStart = (float)(gManp->TrueCol.BlueStartInt) / 100.0;
-	RedInc = (float)(gManp->TrueCol.RedIncInt) / 100.0;
-	GreenInc = (float)(gManp->TrueCol.GreenIncInt) / 100.0;
-	BlueInc = (float)(gManp->TrueCol.BlueIncInt) / 100.0;
-
-	LocalThreshold = (threshold >= MAXPALETTE) ? MAXPALETTE - 1 : threshold;
-	temp = ((long)StartColourCycling > LocalThreshold) ? LocalThreshold : StartColourCycling;
-	for (i = 1L; i < LocalThreshold; ++i)
-	    {
-	    cycle = temp + i;
-	    if (cycle > LocalThreshold)
-		cycle -= LocalThreshold;
-	    size = (float)cycle / (float)((logval != 0) ? 256 : LocalThreshold);
-	    PalettePtr[i].rgbtRed = (BYTE)(127.0 * sin(TWO_PI * (size + RedStart) * RedInc)) + 128;
-	    PalettePtr[i].rgbtGreen = (BYTE)(127.0 * sin(TWO_PI * (size + GreenStart) * GreenInc)) + 128;
-	    PalettePtr[i].rgbtBlue = (BYTE)(127.0 * sin(TWO_PI * (size + BlueStart) * BlueInc)) + 128;
-	    }
-
-	PalettePtr[LocalThreshold].rgbtBlue = (BYTE)InsideBlue;
-	PalettePtr[LocalThreshold].rgbtGreen = (BYTE)InsideGreen;
-	PalettePtr[LocalThreshold].rgbtRed = (BYTE)InsideRed;
-	// set up pointer to correct palette
-//    PalettePtr = TRUE_PALETTE;
-//	bits_per_pixel = 24;
+	BuildCOLColourSource(RandFlag, threshold, StartColourCycling, logval);
 	}
     }
 
@@ -189,8 +192,6 @@ void	CTrueCol::FillPalette(int FillType, std::vector<RGBTRIPLE> &pal, long thres
 	std::vector<RGBTRIPLE> buffer {0};		// store old palette
 	buffer.resize(ColoursInPALFile);
 	buffer = pal;
-//	memcpy(buffer, pal, ColoursInPALFile * 3);
-//	for (i = 16; i < LocalThreshold; i++)	// start a little way into the palette to get the starting colours
 	for (i = 0; i < LocalThreshold; i++)	
 	    {
 	    j = (long)(((double)i * (double)ColoursInPALFile) / (double)LocalThreshold);
@@ -204,7 +205,6 @@ void	CTrueCol::FillPalette(int FillType, std::vector<RGBTRIPLE> &pal, long thres
 **************************************************************************/
 
 void	CTrueCol::FinalisePalette(int level, long threshold)
-
     {
     int	    i;
     

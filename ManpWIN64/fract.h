@@ -2,6 +2,8 @@
 //
 //////////////////////////////////////////////////////////////////////
 
+#include "fractalp.h"
+
 #if !defined(AFX_FRACT1_H__6FDA296F_2F52_425E_9566_83DADB05AAFA__INCLUDED_)
 #define AFX_FRACT1_H__6FDA296F_2F52_425E_9566_83DADB05AAFA__INCLUDED_
 
@@ -22,8 +24,8 @@ public:
     void	LoadFunction(char *, int);		// get pointer to trig functions (Fn1, Fn2)
 
     char	*FractName;				// you guessed it
-    double	*ParamValue[10];			// pointers to the parameters to fractal
-    char	*ParamName[10];				// pointers to the parameters names
+    double	*ParamValue[NUMPARAM];			// pointers to the parameters to fractal
+    char	*ParamName[NUMPARAM];			// pointers to the parameters names
     int		NumParam;				// Number of parameters required for fractal
     int		NumFunct;				// Number of functions required for fractal
     int		Fn1Index;				// pointer to first function

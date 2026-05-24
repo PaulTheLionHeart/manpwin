@@ -36,12 +36,25 @@ extern	BYTE	default_palette[];		// default VGA colour palette
 INT_PTR CALLBACK DisplayRGBDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 //////////////////////////////////////////////////////////////////////
-//	Initialise True Colour Palette
+// Build runtime iteration-to-RGB lookup map.
+//
+// The colour source may be:
+//
+// 1. Imported MAP palette data
+// 2. Procedural COL colour generation
+//
+// Both sources populate PalettePtr[], which is the
+// runtime iteration colour lookup table.
+//
 //////////////////////////////////////////////////////////////////////
-
 void	InitTrueColourPalette(BYTE RandFlag)
     {
-    gManp->TrueCol.InitTrueColPal(RandFlag, gManp->threshold, StartColourCycling, gManp->logval, gManp->Dib.BitsPerPixel, gManp->UseFractintPalette, default_palette);
+    gManp->TrueCol.BuildIterationColourMap(RandFlag, gManp->threshold, StartColourCycling, gManp->logval, gManp->UseFractintPalette);
+    }
+
+void	InitIterationColours(BYTE RandFlag)
+    {
+    gManp->TrueCol.BuildIterationColourMap(RandFlag, gManp->threshold, StartColourCycling, gManp->logval, gManp->UseFractintPalette);
     }
 
 /**************************************************************************
@@ -143,9 +156,9 @@ void	SaveTriplets(FILE *fop)
     for (i = 0; i < ((LocalThreshold < 256) ? 256 : LocalThreshold); ++i)
 	{
 	fprintf(fop, "%d %d %d\n",
-	    gManp->TrueCol.PalettePtr[i].rgbtRed,
+	    gManp->TrueCol.PalettePtr[i].rgbtBlue,
 	    gManp->TrueCol.PalettePtr[i].rgbtGreen,
-	    gManp->TrueCol.PalettePtr[i].rgbtBlue);
+	    gManp->TrueCol.PalettePtr[i].rgbtRed);
 	}
     }
 
@@ -525,11 +538,11 @@ INT_PTR CALLBACK ColourDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 		    if (LOWORD(wParam) == IDM_DEFAULTCOL)
 			{
 			gManp->TrueCol.RedStartInt = 60;
-			gManp->TrueCol.GreenStartInt = 120;
-			gManp->TrueCol.BlueStartInt = 30;
+			gManp->TrueCol.GreenStartInt = 30;
+			gManp->TrueCol.BlueStartInt = 120;
 			gManp->TrueCol.RedIncInt = 100;
-			gManp->TrueCol.GreenIncInt = 255;
-			gManp->TrueCol.BlueIncInt = 200;
+			gManp->TrueCol.GreenIncInt = 200;
+			gManp->TrueCol.BlueIncInt = 255;
 			}
 		    else
 			{

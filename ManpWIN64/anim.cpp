@@ -70,6 +70,41 @@ bool	BuildDibFromAnimFrame(const AnimStruct& A, CDib& Dib)
 	memcpy(Dib.DibPixels.data() + y * Dib.WidthBytes, A.pixels.data() + y * A.pitch, A.width * 3);
 	}
 
+
+	{
+	BYTE *p = Dib.DibPixels.data();
+
+	int firstDifferent = 0;
+
+	BYTE b0 = p[0];
+	BYTE g0 = p[1];
+	BYTE r0 = p[2];
+
+	for (int k = 1; k < A.width * A.height; k++)
+	    {
+	    BYTE b = p[k * 3 + 0];
+	    BYTE g = p[k * 3 + 1];
+	    BYTE r = p[k * 3 + 2];
+
+	    if (b != b0 || g != g0 || r != r0)
+		{
+		firstDifferent = k;
+		break;
+		}
+	    }
+
+	char s[240];
+
+	sprintf(
+	    s,
+	    "[BUILD DIB] frame first=%d,%d,%d firstDifferent=%d\n",
+	    b0, g0, r0, firstDifferent);
+
+	OutputDebugStringA(s);
+	}
+
+
+
     return true;
     }
 

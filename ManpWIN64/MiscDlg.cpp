@@ -225,7 +225,6 @@ INT_PTR CALLBACK WalkDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 **************************************************************************/
 
 INT_PTR CALLBACK LyapDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-
     {
     int i, j;
     static	int	index1 = -1, index2 = -1;

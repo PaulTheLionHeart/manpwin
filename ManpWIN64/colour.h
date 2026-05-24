@@ -53,7 +53,9 @@ class CTrueCol
     public:
 	CTrueCol();
 	virtual		~CTrueCol();
-	void		InitTrueColPal(BYTE, long, int, int, int, BOOL, BYTE default_palette[]);
+	void		BuildIterationColourMap(BYTE, long, int, int, BOOL);
+	void		LoadMAPColourSource(long threshold, BYTE default_palette[]);
+	void		GenerateCOLColourSource(BYTE RandFlag, long threshold, int StartColourCycling, int logval);
 	std::vector<RGBTRIPLE> PalettePtr {0};		// [MAXPALETTE];	// for maximum palette
 	WORD		RandomDivisor;			// Scale random true colour palette generation
 	BYTE		RandomColourFlag;		// Use random true colour palette generation
@@ -82,7 +84,10 @@ class CTrueCol
 	void		ToggleRandomColour(void);
 	void		SetTrueColourPixel(int b, int g, int r, long threshold);
 	void		MovePalette(CTrueCol *TrueCol, int PaletteShift, int threshold);
-
     private:
+
+	void		BuildDefaultPaletteSource(long threshold);
+	void		BuildCOLColourSource(BYTE RandFlag, long threshold, int StartColourCycling, int logval);
+
     };
 

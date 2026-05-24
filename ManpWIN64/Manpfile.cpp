@@ -9,13 +9,18 @@
 #include <string.h>
 #include <ctype.h>
 #include <direct.h>
+#include <shlwapi.h>
 #include "manpwin.h"
+#include <dlgs.h>
 #include "manp.h"
 #include "colour.h"
 #include "fractype.h"
 #include "pixel.h"
 #include "Plot.h"
+#include "ManpFile.h"
 #include "SafeStrings.h"
+
+#pragma comment(lib, "Shlwapi.lib")
 
 extern	int     file_type;
 extern	void	DisplayPalette(HWND, BOOL);
@@ -41,36 +46,30 @@ extern	char	FRMFile[];		// Formula file
 extern	char	LSTFile[];		// list file for PNG animation frames
 
 extern	char	PNGFile[];		// PNG file
-//extern	char	MPGFile[];		// MPG file
-//extern	char	GIFFile[];		// GIF file
 extern	char	COLFile[];		// COL file
 extern	char	MAPFile[];		// MAP file
 extern	char	SCIFile[];		// SCI file
 
 extern	char	WorkingDir[];
-//extern	int	DataFromPNGFile;	// loaded PNG file?
 
-static	OPENFILENAME ofnPNG;
-static	OPENFILENAME ofnCOL;
-static	OPENFILENAME ofnMAP;
-static	OPENFILENAME ofnSCI;
-static	OPENFILENAME ofnPAR;
-static	OPENFILENAME ofnKFR;
-static	OPENFILENAME ofnIFS;
-static	OPENFILENAME ofnLSYS;
-static	OPENFILENAME ofnFRM;
-static	OPENFILENAME ofnLST;
-//int	GetManpFileType(char *);
+static	FileDialogInfo LSTDialog;
+static	FileDialogInfo PNGDialog;
+static	FileDialogInfo MAPDialog;
+static	FileDialogInfo COLDialog;
+static	FileDialogInfo PARDialog;
+static	FileDialogInfo FracPARDialog;
+static	FileDialogInfo KFRDialog;
+static	FileDialogInfo SCIDialog;
+static	FileDialogInfo LSYSDialog;
+static	FileDialogInfo IFSDialog;
+static	FileDialogInfo FRMDialog;
+
 char	*str_find_ci(char *, char *);
-
-//char	MAPFileName[255] = "";
-//char	PARFileName[255] = "";
 
 static char OldDir[480] = "";
 
 static char *szMAPFilter = "Palette Map Files (*.MAP)\0*.MAP\0";
 static char *szColFilter = "True Colour Files (*.COL)\0*.COL\0";
-//static char *szFilter = "Parameter Files (*.PAR)\0*.par\0ZSoft Files (*.PCX)\0*.pcx\0";
 static char *szPARFilter = "Parameter Files (*.PAR)\0*.par\0";
 static char *szPNGFilter = "PiNG Files (*.PNG)\0*.PNG\0";
 static char *szLSTFilter = "PNG List Files (*.LST)\0*.LST\0";
@@ -79,237 +78,207 @@ static char *szLSysFilter = "LSys Files (*.L)\0*.L\0";
 static char *szFormulaFilter = "Formula Files (*.FRM)\0*.FRM\0";
 static char *szFractParFilter = "Fractint PAR Files (*.PAR)\0*.par\0";
 static char *szIFSFilter = "IFS Files (*.IFS)\0*.IFS\0";
-//static char *szKFRFilter = "Kalles KFR Files (*.KFR)\0*.KFR\0";
 static char *szKFRFilter = "Kalles Files (*.KFR,*.KFP)\0*.KFR;*.KFP\0";
-static	int	result;
 
-//extern	CPlot	Plot;		// image plotting routines 
+/**************************************************************************
+OpenFileHookProc()
+```
+Explorer-style Open/Save dialog hook procedure.
+
+Purpose:
+Modern Windows Explorer dialogs sometimes position the filename
+edit control caret at the END of long filenames, causing the
+beginning of the filename to be hidden from view.
+
+This hook forces the filename edit control to:
+    - move the caret to the beginning
+    - scroll the edit control fully left
+
+so the entire filename is immediately visible when the dialog opens.
+
+Notes:
+Requires:
+    OFN_ENABLEHOOK
+    OFN_EXPLORER
+
+Used by both:
+    Open dialogs
+    Save dialogs
+
+This preserves modern resizable Explorer-style dialogs while
+fixing annoying filename edit-field behaviour.
+**************************************************************************/
+
+UINT_PTR CALLBACK OpenFileHookProc(HWND hdlg, UINT msg, WPARAM wParam, LPARAM lParam)
+    {
+    if (msg == WM_NOTIFY)
+	{
+	OFNOTIFY* pNotify = (OFNOTIFY*)lParam;
+
+	if (pNotify->hdr.code == CDN_INITDONE)
+	    {
+	    HWND hParent = GetParent(hdlg);
+	    HWND hEdit = GetDlgItem(hParent, edt1);
+
+	    if (hEdit)
+		{
+		SendMessage(hEdit, EM_SETSEL, 0, 0);
+		SendMessage(hEdit, EM_SCROLLCARET, 0, 0);
+		}
+	    }
+	}
+
+    return 0;
+    }
 
 /***************************************************************************
-	Initialise File Open Dialogue Structure
+    Initialise File Open Dialogue Structure
 ***************************************************************************/
 
-void ViewFileInit (HWND hwnd, OPENFILENAME *ofn, char *path, char *filter)
-
+void ViewFileInit (HWND hwnd, OPENFILENAME *ofn, char *path, const char *filter)
     {
+
     ofn->lStructSize		= sizeof (OPENFILENAME) ;
     ofn->hwndOwner	   	= hwnd ;
     ofn->hInstance	   	= NULL ;
     ofn->lpstrFilter		= filter;
     ofn->lpstrCustomFilter 	= NULL ;
     ofn->nMaxCustFilter    	= 0 ;
-    ofn->nFilterIndex		= 0 ;
+    ofn->nFilterIndex		= 1 ;
     ofn->lpstrFile	   	= NULL ;	     // Set in Open and Close functions
     ofn->nMaxFile	   	= _MAX_PATH ;
     ofn->lpstrFileTitle    	= NULL ;	     // Set in Open and Close functions
     ofn->nMaxFileTitle		= _MAX_FNAME + _MAX_EXT ;
     ofn->lpstrInitialDir   	= path ;
     ofn->lpstrTitle	   	= NULL ;
-    ofn->Flags			= 0L;
-//    ofn->Flags		= OFN_CREATEPROMPT; // removed for Windows 10 as it wants to create a new file all the time
+    ofn->Flags			= OFN_EXPLORER | OFN_ENABLEHOOK | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_ENABLESIZING;
+    // Possible future experiment:
+    // OFN_NOCHANGEDIR
+    // We now explicitly track dialog paths.
+    ofn->lpfnHook		= OpenFileHookProc;
     ofn->nFileOffset		= 0 ;
     ofn->nFileExtension    	= 0 ;
     ofn->lpstrDefExt		= "*" ;
     ofn->lCustData	   	= 0L ;
     ofn->lpfnHook	   	= NULL ;
     ofn->lpTemplateName    	= NULL ;
-    //strcpy(MAPFileName, "Default Palette MAP");
+    }
+
+void InitFileDialog(HWND hwnd, FileDialogInfo& dlg, const char* path, const char* file, const char* filter)
+    {
+    strcpy(dlg.Path, path);
+    strcpy(dlg.File, file);
+    dlg.Filter = filter;
+    ViewFileInit(hwnd, &dlg.ofn, dlg.Path, dlg.Filter);
     }
 
 void ViewFileInitialize (HWND hwnd)
-
     {
-    ViewFileInit(hwnd, &ofnLST, ANIMPNGPath, szLSTFilter);		// note that the LST file is in the animPNG folder
-    ViewFileInit(hwnd, &ofnPNG, PNGPath, szPNGFilter);
-    ViewFileInit(hwnd, &ofnCOL, COLPath, szColFilter);
-    ViewFileInit(hwnd, &ofnMAP, MAPPath, szMAPFilter);
-    ViewFileInit(hwnd, &ofnSCI, SCIPath, szSCIFilter);
-    ViewFileInit(hwnd, &ofnPAR, PARPath, szPARFilter);
-    ViewFileInit(hwnd, &ofnKFR, KFRPath, szKFRFilter);
-    ViewFileInit(hwnd, &ofnIFS, IFSPath, szIFSFilter);
-    ViewFileInit(hwnd, &ofnLSYS, LSYSPath, szLSysFilter);
-    ViewFileInit(hwnd, &ofnFRM, FRMPath, szFormulaFilter);
+    InitFileDialog(hwnd, LSTDialog, ANIMPNGPath, LSTFile, szLSTFilter);
+    InitFileDialog(hwnd, PNGDialog, PNGPath, PNGFile, szPNGFilter);
+    InitFileDialog(hwnd, MAPDialog, MAPPath, MAPFile, szMAPFilter);
+    InitFileDialog(hwnd, COLDialog, COLPath, COLFile, szColFilter);
+    InitFileDialog(hwnd, PARDialog, PARPath, PARFile, szPARFilter);
+    InitFileDialog(hwnd, FracPARDialog, FracPARPath, FracPARFile, szFractParFilter);
+    InitFileDialog(hwnd, KFRDialog, KFRPath, KFRFile, szKFRFilter);
+    InitFileDialog(hwnd, SCIDialog, SCIPath, SCIFile, szSCIFilter);
+    InitFileDialog(hwnd, LSYSDialog, LSYSPath, LSYSFile, szLSysFilter);
+    InitFileDialog(hwnd, IFSDialog, IFSPath, IFSFile, szIFSFilter);
+    InitFileDialog(hwnd, FRMDialog, FRMPath, FRMFile, szFormulaFilter);
     }
 
 /***************************************************************************
-	Check directory
+	File Open Dialogue
 ***************************************************************************/
 
-BOOL CheckDir (HWND hwnd, OPENFILENAME *ofn)
-    
+int OpenFileDialog(HWND hwnd, FileDialogInfo& dlg, char* titleName)
     {
-    if (strcmp(OldDir, ofn->lpstrInitialDir) == 0)
-	return (TRUE);
-    else
-	{
-	strcpy(OldDir, ofn->lpstrInitialDir);
-	_chdir(ofn->lpstrInitialDir);
-	return (FALSE);
-	}
+    dlg.ofn.lpstrFile = dlg.File;
+    dlg.ofn.lpstrFileTitle = titleName;
+    dlg.ofn.lpstrInitialDir = dlg.Path;
+    dlg.ofn.lpstrFilter = dlg.Filter;
+    if (GetOpenFileName(&dlg.ofn) == 0)
+	return -1;
+    strcpy_s(dlg.File, MAX_PATH, PathFindFileName(dlg.ofn.lpstrFile));    
+    return 0;
     }
 
 /***************************************************************************
 	List File Open Dialogue
 ***************************************************************************/
 
-INT_PTR CALLBACK LSTFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-     {
-     char	*pstr;
+INT_PTR CALLBACK LSTFileOpenDlg(HWND hwnd, char *lpstrTitleName)
+    {
+    strcpy(LSTDialog.File, LSTFile);
+    if (OpenFileDialog(hwnd, LSTDialog, lpstrTitleName) < 0)
+	return -1;
 
-     if (!CheckDir (hwnd, &ofnLST))			// only load previous file if same directory
-	 {
-	 strcpy(lpstrFileName, LSTFile);         
-	 *lpstrTitleName = '\0';
-	 }
-//     else
-//	 strcpy(lpstrFileName, infile);         
-     ofnLST.lpstrFile	   	= lpstrFileName ;
-     ofnLST.lpstrFileTitle    	= lpstrTitleName ;
-     if (GetOpenFileName (&ofnLST) == 0)
-         return -1;
-     file_type = FILE_LST;
-	// Extract the filename from the full pathname
-     pstr = lpstrFileName + lstrlen(lpstrFileName) - 1;
-     while ((*pstr != '\\') && (*pstr != ':') && (pstr >= lpstrFileName))
-	 pstr--;
-     pstr++;
-     strcpy(LSTFile, pstr);
-     return 0;
-     }
+    file_type = FILE_LST;
+    strcpy_s(LSTFile, MAX_PATH, LSTDialog.File);
+    return 0;
+    }
 
 /***************************************************************************
 	Palette Map File Open Dialogue
 ***************************************************************************/
 
-INT_PTR CALLBACK MAPFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-     {
-     char	*pstr;
+INT_PTR CALLBACK MAPFileOpenDlg(HWND hwnd, char *lpstrTitleName)
+    {
+    strcpy(MAPDialog.File, MAPFile);
+    if (OpenFileDialog(hwnd, MAPDialog, lpstrTitleName) < 0)
+	return -1;
 
-     if (!CheckDir (hwnd, &ofnMAP))			// only load previous file if same directory
-	 {
-	 strcpy(lpstrFileName, MAPFile);         
-	 *lpstrTitleName = '\0';
-	 }
-//     else
-//	 strcpy(lpstrFileName, infile);         
-     ofnMAP.lpstrFile	   	= lpstrFileName ;
-     ofnMAP.lpstrFileTitle    	= lpstrTitleName ;
-     if (GetOpenFileName (&ofnMAP) == 0)
-         return -1;
-     file_type = FILE_MAP;
-	// Extract the filename from the full pathname
-     pstr = lpstrFileName + lstrlen(lpstrFileName) - 1;
-     while ((*pstr != '\\') && (*pstr != ':') && (pstr >= lpstrFileName))
-	 pstr--;
-     pstr++;
-     strcpy(MAPFile, pstr);
-     return 0;
-     }
+    file_type = FILE_MAP;
+    strcpy_s(MAPFile, MAX_PATH, MAPDialog.File);
+    return 0;
+    }
 
 /***************************************************************************
 	True Colour File Open Dialogue
 ***************************************************************************/
 
-INT_PTR CALLBACK ColFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-     {
-     char	*pstr;
+INT_PTR CALLBACK ColFileOpenDlg(HWND hwnd, char *lpstrTitleName)
+    {
+    strcpy(COLDialog.File, COLFile);
+    if (OpenFileDialog(hwnd, COLDialog, lpstrTitleName) < 0)
+	return -1;
 
-     if (!CheckDir (hwnd, &ofnCOL))			// only load previous file if same directory
-	 {
-	 strcpy(lpstrFileName, COLFile);         
-	 *lpstrTitleName = '\0';
-	 }
-//     else
-//	 strcpy(lpstrFileName, infile);         
-     ofnCOL.lpstrFile	   	= lpstrFileName ;
-     ofnCOL.lpstrFileTitle    	= lpstrTitleName ;
-     if (GetOpenFileName (&ofnCOL) == 0)
-         return -1;
-     file_type = FILE_COL;
-	// Extract the filename from the full pathname
-     pstr = lpstrFileName + lstrlen(lpstrFileName) - 1;
-     while ((*pstr != '\\') && (*pstr != ':') && (pstr >= lpstrFileName))
-	 pstr--;
-     pstr++;
-     strcpy(COLFile, pstr);
-     return 0;
-     }
+    file_type = FILE_COL;
+    strcpy_s(COLFile, MAX_PATH, COLDialog.File);
+    return 0;
+    }
 
 /***************************************************************************
 	Parameter File Open Dialogue
 ***************************************************************************/
 
-INT_PTR CALLBACK PARFileOpenDlg (HWND hwnd, char *lpstrFileName, char *lpstrTitleName)
-     {
-     char	*pstr;
+INT_PTR CALLBACK PARFileOpenDlg(HWND hwnd, char *lpstrTitleName)
+    {
+    strcpy_s(PARDialog.File, MAX_PATH, PARFile);
+    if (OpenFileDialog(hwnd, PARDialog,	lpstrTitleName) < 0)
+	return -1;
 
-     if (!CheckDir (hwnd, &ofnPAR))			// only load previous file if same directory
-	 {
-	 strcpy(lpstrFileName, PARFile);         
-	 *lpstrTitleName = '\0';
-	 }
-//     else
-     strcpy(lpstrFileName, PARFile);         
-     ofnPAR.lpstrFile	   	= lpstrFileName ;
-     ofnPAR.lpstrFileTitle    	= lpstrTitleName ;
-     if (GetOpenFileName (&ofnPAR) == 0)
-         return -1;
-
-#ifdef DEBUG
-char	s[200];
-_snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
-//file_type = FILE_BMP;
-#endif
-
-     file_type = FILE_PAR;
-	// Extract the filename from the full pathname
-     pstr = lpstrFileName + lstrlen(lpstrFileName) - 1;
-     while ((*pstr != '\\') && (*pstr != ':') && (pstr >= lpstrFileName))
-	 pstr--;
-     pstr++;
-     strcpy(PARFile, pstr);
-     gManp->IsPAR = TRUE;
-     gManp->IsKFR = FALSE;
-     return 0;
-     }
+    file_type = FILE_PAR;
+    strcpy_s(PARFile, MAX_PATH, PARDialog.File);
+    gManp->IsPAR = TRUE;
+    gManp->IsKFR = FALSE;
+    return 0;
+    }
 
 /***************************************************************************
 	Kalles Parameter File Open Dialogue
 ***************************************************************************/
 
-INT_PTR CALLBACK KFRFileOpenDlg(HWND hwnd, char *lpstrFileName, char *lpstrTitleName)
+INT_PTR CALLBACK KFRFileOpenDlg(HWND hwnd, char *lpstrTitleName)
     {
-    char	*pstr;
-
-    if (!CheckDir(hwnd, &ofnKFR))			// only load previous file if same directory
-	{
-	strcpy(lpstrFileName, KFRFile);
-	*lpstrTitleName = '\0';
-	}
-    //     else
-    strcpy(lpstrFileName, KFRFile);
-    ofnKFR.lpstrFile = lpstrFileName;
-    ofnKFR.lpstrFileTitle = lpstrTitleName;
-    if (GetOpenFileName(&ofnKFR) == 0)
+    strcpy(KFRDialog.File, KFRFile);
+    if (OpenFileDialog(hwnd, KFRDialog, lpstrTitleName) < 0)
 	return -1;
 
-#ifdef DEBUG
-    char	s[200];
-    _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-    MessageBox(hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
-    //file_type = FILE_BMP;
-#endif
-
     file_type = FILE_KFR;
-    // Extract the filename from the full pathname
-    pstr = lpstrFileName + lstrlen(lpstrFileName) - 1;
-    while ((*pstr != '\\') && (*pstr != ':') && (pstr >= lpstrFileName))
-	pstr--;
-    pstr++;
-    strcpy(KFRFile, pstr);
-    gManp->IsKFR = TRUE;
+    strcpy_s(KFRFile, MAX_PATH, KFRDialog.File);
     gManp->IsPAR = FALSE;
+    gManp->IsKFR = TRUE;
 
     return 0;
     }
@@ -318,185 +287,94 @@ INT_PTR CALLBACK KFRFileOpenDlg(HWND hwnd, char *lpstrFileName, char *lpstrTitle
 	PNG Image File Open Dialogue
 ***************************************************************************/
 
-INT_PTR CALLBACK PNGFileOpenDlg (HWND hwnd, char *lpstrFileName, char *lpstrTitleName)
-     {
-     char	*pstr;
+INT_PTR CALLBACK PNGFileOpenDlg(HWND hwnd, char *lpstrTitleName)
+    {
+    strcpy(PNGDialog.File, PNGFile);
+    if (OpenFileDialog(hwnd, PNGDialog, lpstrTitleName) < 0)
+	return -1;
 
-     if (!CheckDir (hwnd, &ofnPNG))			// only load previous file if same directory
-	 {
-	 strcpy(lpstrFileName, PNGFile);         
-	 *lpstrTitleName = '\0';
-	 }
-//     else
-//	 strcpy(lpstrFileName, infile);         
-     ofnPNG.lpstrFile	   	= lpstrFileName ;
-     ofnPNG.lpstrFileTitle    	= lpstrTitleName ;
-     if (GetOpenFileName (&ofnPNG) == 0)
-         return -1;
-
-#ifdef DEBUG
-     _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
-//file_type = FILE_BMP;
-#endif
-
-     file_type = FILE_PNG;
-	// Extract the filename from the full pathname
-     pstr = lpstrFileName + lstrlen(lpstrFileName) - 1;
-     while ((*pstr != '\\') && (*pstr != ':') && (pstr >= lpstrFileName))
-	 pstr--;
-     pstr++;
-     strcpy(PNGFile, pstr);
-     return 0;
-     }
+    file_type = FILE_PNG;
+    strcpy_s(PNGFile, MAX_PATH, PNGDialog.File);
+    return 0;
+    }
 
 /***************************************************************************
 	Animation script File Open Dialogue
 ***************************************************************************/
 
-INT_PTR CALLBACK SCIFileOpenDlg (HWND hwnd, char *lpstrFileName, char *lpstrTitleName)
-     {
-     char	*pstr;
+INT_PTR CALLBACK SCIFileOpenDlg(HWND hwnd, char *lpstrTitleName)
+    {
+    strcpy(SCIDialog.File, SCIFile);
+    if (OpenFileDialog(hwnd, SCIDialog, lpstrTitleName) < 0)
+	return -1;
 
-     if (!CheckDir (hwnd, &ofnSCI))			// only load previous file if same directory
-	 {
-	 strcpy(lpstrFileName, SCIFile);         
-	 *lpstrTitleName = '\0';
-	 }
-//     else
-//	 strcpy(lpstrFileName, infile);         
-     ofnSCI.lpstrFile	   	= lpstrFileName ;
-     ofnSCI.lpstrFileTitle    	= lpstrTitleName ;
-     if (GetOpenFileName (&ofnSCI) == 0)
-         return -1;
-
-#ifdef DEBUG
-     _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
-//file_type = FILE_BMP;
-#endif
-
-     file_type = FILE_SCI;
-	// Extract the filename from the full pathname
-     pstr = lpstrFileName + lstrlen(lpstrFileName) - 1;
-     while ((*pstr != '\\') && (*pstr != ':') && (pstr >= lpstrFileName))
-	 pstr--;
-     pstr++;
-     strcpy(SCIFile, pstr);
-     return 0;
-     }
+    file_type = FILE_SCI;
+    strcpy_s(SCIFile, MAX_PATH, SCIDialog.File);
+    return 0;
+    }
 
 /***************************************************************************
 	LSystem File Open Dialogue
 ***************************************************************************/
 
-INT_PTR CALLBACK LsysFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-     {
-     if (!CheckDir (hwnd, &ofnLSYS))			// only load previous file if same directory
-	 {
-	 strcpy(lpstrFileName, LSYSFile);         
-	 *lpstrTitleName = '\0';
-	 }
-//     else
-//     strcpy(lpstrFileName, LSYSFile);         
-     ofnLSYS.lpstrFile	   	= lpstrFileName ;
-     ofnLSYS.lpstrFileTitle    	= lpstrTitleName ;
-     if (GetOpenFileName (&ofnLSYS) == 0)
-         return -1;
-     file_type = FILE_LSY;
+INT_PTR CALLBACK LsysFileOpenDlg(HWND hwnd, char *lpstrTitleName)
+    {
+    strcpy(LSYSDialog.File, LSYSFile);
+    if (OpenFileDialog(hwnd, LSYSDialog, lpstrTitleName) < 0)
+	return -1;
 
-#ifdef DEBUG
-     _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
-//file_type = FILE_BMP;
-#endif
-
-     return 0;
-     }
+    file_type = FILE_LSY;
+    strcpy_s(LSYSFile, MAX_PATH, LSYSDialog.File);
+    return 0;
+    }
 
 /***************************************************************************
 	Formula File Open Dialogue
 ***************************************************************************/
 
-INT_PTR CALLBACK FormulaFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-     {
-     if (!CheckDir (hwnd, &ofnFRM))			// only load previous file if same directory
-	 {
-	 strcpy(lpstrFileName, FRMFile);         
-	 *lpstrTitleName = '\0';
-	 }
-//     else
-     strcpy(lpstrFileName, FRMFile);         
-     ofnFRM.lpstrFile	   	= lpstrFileName ;
-     ofnFRM.lpstrFileTitle    	= lpstrTitleName ;
-     if (GetOpenFileName (&ofnFRM) == 0)
-         return -1;
-     file_type = FILE_FRM;
+INT_PTR CALLBACK FormulaFileOpenDlg(HWND hwnd, char *lpstrTitleName)
+    {
+    strcpy(FRMDialog.File, FRMFile);
+    if (OpenFileDialog(hwnd, FRMDialog, lpstrTitleName) < 0)
+	return -1;
 
-#ifdef DEBUG
-     _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
-//file_type = FILE_BMP;
-#endif
-
-     return 0;
-     }
+    file_type = FILE_FRM;
+    strcpy_s(FRMFile, MAX_PATH, FRMDialog.File);
+    return 0;
+    }
 
 /***************************************************************************
 	Fractint Par File Open Dialogue
 ***************************************************************************/
 
-INT_PTR CALLBACK FractintParFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-     {
-     if (!CheckDir (hwnd, &ofnPAR))			// only load previous file if same directory
-	 {
-	 strcpy(lpstrFileName, FracPARFile);         
-	 *lpstrTitleName = '\0';
-	 }
-//     else
-     strcpy(lpstrFileName, FracPARFile);         
-     ofnPAR.lpstrFile	   	= lpstrFileName ;
-     ofnPAR.lpstrFileTitle    	= lpstrTitleName ;
-     if (GetOpenFileName (&ofnPAR) == 0)
-         return -1;
-     file_type = FILE_FPR;
+INT_PTR CALLBACK FractintParFileOpenDlg(HWND hwnd, char *lpstrTitleName)
+    {
+    strcpy(FracPARDialog.File, FracPARFile);
+    if (OpenFileDialog(hwnd, FracPARDialog, lpstrTitleName) < 0)
+	return -1;
 
-#ifdef DEBUG
-     _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
-//file_type = FILE_BMP;
-#endif
+    file_type = FILE_PAR;
+    strcpy_s(FracPARFile, MAX_PATH, FracPARDialog.File);
+    gManp->IsPAR = TRUE;
+    gManp->IsKFR = FALSE;
 
-     return 0;
-     }
+    return 0;
+    }
 
 /***************************************************************************
 	IFS File Open Dialogue
 ***************************************************************************/
 
-INT_PTR CALLBACK IFSFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitleName)
-     {
-     if (!CheckDir (hwnd, &ofnIFS))			// only load previous file if same directory
-	 {
-	 strcpy(lpstrFileName, IFSFile);         
-	 *lpstrTitleName = '\0';
-	 }
-//     else
-//	 strcpy(lpstrFileName, infile);         
-     ofnIFS.lpstrFile	   	= lpstrFileName ;
-     ofnIFS.lpstrFileTitle    	= lpstrTitleName ;
-     if (GetOpenFileName (&ofnIFS) == 0)
-         return -1;
-     file_type = FILE_IFS;
+INT_PTR CALLBACK IFSFileOpenDlg(HWND hwnd, char *lpstrTitleName)
+    {
+    strcpy(IFSDialog.File, IFSFile);
+    if (OpenFileDialog(hwnd, IFSDialog, lpstrTitleName) < 0)
+	return -1;
 
-#ifdef DEBUG
-     _snprintf_s(s, 200, _TRUNCATE, "File Mask = %s, Filetype = %d", lpstrFileName, file_type);
-    MessageBox (hwnd, s, "FRED", MB_ICONEXCLAMATION | MB_OK);
-//file_type = FILE_BMP;
-#endif
-
-     return 0;
-     }
+    file_type = FILE_IFS;
+    strcpy_s(IFSFile, MAX_PATH, IFSDialog.File);
+    return 0;
+    }
 
 /***************************************************************************
 	Case insensitive version of str_find() which does not corrupt either string
@@ -505,7 +383,6 @@ INT_PTR CALLBACK IFSFileOpenDlg (HWND hwnd, LPSTR lpstrFileName, LPSTR lpstrTitl
 ***************************************************************************/
 
 char *str_find_ci(char *t, char *s)
-
     {
     char *w, *v, *u, temp;
 
@@ -539,7 +416,6 @@ char *str_find_ci(char *t, char *s)
 **************************************************************************/
 
 void	ReadTriplets(FILE *fip)
-
     {
     long	i;
     char	s[150];
@@ -562,7 +438,6 @@ void	ReadTriplets(FILE *fip)
     }
 
 short	FilePalette(HWND hwnd, char *infile, char *szAppName)
-
     {
     char	s[150];
     char	TempFile[MAX_PATH];

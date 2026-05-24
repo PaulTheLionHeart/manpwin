@@ -284,6 +284,7 @@ int InitPerturbation(void)
 	gManp->RefData->valid = true;
 	}
 
+    gManp->DumpStartupState("after ReferenceZoomPoint");
     gStopRequested.store(false, std::memory_order_relaxed);
     gManp->CurrentRenderMode = RENDER_PERT;
     return 0;
@@ -578,7 +579,7 @@ void	LoadPerturbationParams(void)
     for (i = 0; i < NUMPERTPARAM; i++)
 	{
 	gManp->param[i] = PerturbationSpecific[gManp->subtype].paramvalue[i];
-	gManp->Fractal.ParamName[i] = PerturbationSpecific[gManp->subtype].paramname[i];
+//	gManp->Fractal.ParamName[i] = PerturbationSpecific[gManp->subtype].paramname[i];
 	}
     gManp->rqlim = PerturbationSpecific[gManp->subtype].rqlim;
     gManp->SlopeType = PerturbationSpecific[gManp->subtype].SlopeType;
@@ -1308,13 +1309,13 @@ INT_PTR CALLBACK PertDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	    hCtrl = GetDlgItem(hDlg, IDC_USEBLA);
 	    SendMessage(hCtrl, BM_SETCHECK, gManp->EnableApproximation, 0L);
 
-	    for (i = gManp->Fractal.NumFunct, j = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < 10; i++, j++)
+	    for (i = gManp->Fractal.NumFunct, j = 0; i < gManp->Fractal.NumFunct + PerturbationSpecific[gManp->subtype].numparams && i < 10; i++, j++)
 		{
-		SAFE_SPRINTF(s[j], "%f", *gManp->Fractal.ParamValue[j]);
-		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, gManp->Fractal.ParamName[j]);
+		SAFE_SPRINTF(s[j], "%f", PerturbationSpecific[gManp->subtype].paramvalue[j]);
+		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, PerturbationSpecific[gManp->subtype].paramname[j]);
 		SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[j]);
 		}
-	    for (i = /*Fractal.NumFunct + */gManp->Fractal.NumParam; i < 10; i++)
+	    for (i = /*Fractal.NumFunct + */PerturbationSpecific[gManp->subtype].numparams; i < 10; i++)
 		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
 	    SetDlgItemInt(hDlg, ID_SLOPETYPE, (UINT)gManp->SlopeType, TRUE);
 

@@ -57,7 +57,7 @@ static	WORD		ImageHeight, ImageWidth;
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern	BYTE	DitherBitsPerPixel;		// for reducing bits per pixel
-extern	BYTE	masktable[8];
+//extern	BYTE	masktable[8];
 extern	HCURSOR	hStdCursor;
 
 extern	void	CloseDitherPointers(BYTE);
@@ -113,7 +113,6 @@ static	int	free_code;
 ///////////////////////////////////////////////////////////////
 
 int	putbyte(int byte,FILE *fh)
-
     {
     BYTE	c;
 
@@ -155,7 +154,6 @@ void	CleanupGIF(FILE *fp, LPSTR bp, LPSTR extrabuffer)
 **************************************************************************/
 
 int	write_gif_file(char *outfile, char *title)
-
     {
     char	s[MAXLINE];
     LPBITMAPINFOHEADER lpbi = NULL;
@@ -205,7 +203,7 @@ int	write_gif_file(char *outfile, char *title)
     ImageWidth = gManp->Dib.DibWidth;
     ImageHeight = gManp->Dib.DibHeight;
 
-    linesize = ComputeWidthBytes(ImageWidth, 24);		// even if 8 bits/pixel, need to alloc enough for 24 bit output!!
+    linesize = ImageWidth;
 
     if ((extrabuffer = new char [linesize]) == NULL)
 	{
@@ -262,21 +260,10 @@ if (!GIFWriteScreenDesc(output_file,lpbi,GIFSIG87))
 
     for (i = 1; i < gManp->TotalFrames; i++)			// must be an animated GIF or animated cursor
 	{
-/*
-	if (ANIM[i] == NULL)
-	    {
-	    MessageBox(gManp->GlobalHwnd, "Can't write GIF file due to no image in memory ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
-	    fclose (fp);
-	    SetCursor(hStdCursor);
-	    return -1;
-	    }
-*/
-	const AnimStruct& A = (gManp->AnimationForward) ? gManp->ANIM[0] : gManp->ANIM[gManp->TotalFrames - 1];
+	const AnimStruct& A = (gManp->AnimationForward) ? gManp->ANIM[i] : gManp->ANIM[gManp->TotalFrames - i - 1];
 
 	if (!BuildDibFromAnimFrame(A, gManp->Dib))
 	    return -1;
-	//	Dib = (AnimationForward) ? ANIM[i].animDIB : ANIM[TotalFrames - i - 1].animDIB;
-//	Dib = ANIM[i].animDIB;
 	if ((lpbi = Dither(DitherBitsPerPixel)) == NULL)
 	    {
 	    MessageBox(gManp->GlobalHwnd, "Can't write GIF file due to dither fail ", "GIF write", MB_ICONEXCLAMATION | MB_OK);
@@ -338,7 +325,6 @@ if (!GIFWriteScreenDesc(output_file,lpbi,GIFSIG87))
 **************************************************************************/
 
 int	GIFWriteScreenDesc(FILE *fh, LPBITMAPINFOHEADER lpbi, LPSTR sig)
-
     {
     GIFHEADER gh;
     BYTE	palette[VGA_PAL_SIZE];
@@ -366,10 +352,8 @@ int	GIFWriteScreenDesc(FILE *fh, LPBITMAPINFOHEADER lpbi, LPSTR sig)
     return(TRUE);
     }
 
-
 int	GIFGraphicControlExtension (FILE *fh)
-
-{
+    {
     if (gManp->TotalFrames > 0)				// this is only needed if we write animation frames
 	{
 	putbyte('!',fh);				// Extension introducer
@@ -397,7 +381,6 @@ int	GIFGraphicControlExtension (FILE *fh)
     }
 
 int	GIFWriteImageDesc(FILE *fh, int i, LPBITMAPINFOHEADER lpbi)
-
     {
     GIFIMAGEBLOCK ib;
     BYTE	flags, transparent_colour;
@@ -447,7 +430,6 @@ int	GIFWriteImageDesc(FILE *fh, int i, LPBITMAPINFOHEADER lpbi)
     }
 
 void GIFInitTable(int min_code_size)
-
     {
     int	i;
 
@@ -462,7 +444,6 @@ void GIFInitTable(int min_code_size)
     }
 
 int	GIFFlush(FILE *fh, int n)
-
     {
     putbyte(n,fh);
     if ((int)fwrite((LPSTR)code_buffer, 1, n, fh) != n)
@@ -472,7 +453,6 @@ int	GIFFlush(FILE *fh, int n)
     }
 
 void GIFWriteCode(FILE *fh, int code)
-
     {
     long	temp;
 
@@ -504,12 +484,11 @@ void GIFWriteCode(FILE *fh, int code)
 
 int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
     {
-    BYTE	*linebuffer, *extrabuffer;
+    BYTE *linebuffer;
     int	prefix_code;
     int	suffix_char;
     int	hx,d,min_code_size;
     int	bytes_left = 0, next_byte = 0, this_line = 0;
-    int	i;
     size_t 	linewidth;
     int	percent, display_count;
     char	s[120];
@@ -518,19 +497,10 @@ int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
     ImageHeight = (WORD)lpbi->biHeight;
 
     percent = 0;
-//    SetWindowText (gManp->GlobalHwnd, "Writing GIF File");	// Show formatted text in the caption bar
-
-//linewidth = width;
-    linewidth = ComputeWidthBytes(ImageWidth, gManp->Dib.BitsPerPixel);
+    linewidth = ComputeWidthBytes(ImageWidth, 8);
 
     if ((linebuffer = new BYTE [linewidth]) == NULL)
 	return(BAD_ALLOC);
-
-    if ((extrabuffer = new BYTE [linewidth]) == NULL)
-	{
-	delete [] linebuffer;
-	return(BAD_ALLOC);
-	}
 
     min_code_size = DitherBitsPerPixel;
     if (min_code_size < 2 || min_code_size > 9)
@@ -539,7 +509,6 @@ int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
 	    min_code_size = 2;
 	else
 	    {
-	    delete [] extrabuffer;
 	    delete [] linebuffer;
 	    return(BAD_WRITE);
 	    }
@@ -553,27 +522,6 @@ int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
 
     memcpy(linebuffer,LPBimage(lpbi) + ComputeWidthBytes((DWORD)ImageWidth, (DWORD)DitherBitsPerPixel)
 				    * (DWORD)(ImageHeight - 1 - this_line++), (DWORD)LPBlinewidth(lpbi));
-
-    if (DitherBitsPerPixel == 1)
-	{
-	memcpy(extrabuffer,linebuffer,LPBlinewidth(lpbi));
-	for (i = 0; i < ImageWidth; ++i)
-	    {
-	    if (extrabuffer[i >> 3] & masktable[i & 0x0007])
-		linebuffer[i] = 1;
-	    else
-		linebuffer[i] = 0;
-	    }
-	}
-    else if(DitherBitsPerPixel > 1 && DitherBitsPerPixel <= 4)
-	{
-	memcpy(extrabuffer,linebuffer,LPBlinewidth(lpbi));
-	for (i = 0; i < ImageWidth; ++i)
-	    {
-	    linebuffer[i]=GetChunkyPixel(extrabuffer,i);
-	    }
-	}
-
     bytes_left = ImageWidth - 1;
     next_byte = 0;
     suffix_char = linebuffer[next_byte++];
@@ -600,28 +548,7 @@ int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
 	    if (this_line >= ImageHeight)			// we have compressed all the lines
 		break;
 
-	    memcpy(linebuffer,LPBimage(lpbi) + ComputeWidthBytes((DWORD)ImageWidth, (DWORD)DitherBitsPerPixel)
-				    * (DWORD)(ImageHeight - 1 - this_line++), (DWORD)LPBlinewidth(lpbi));    // load next line
-	    if(DitherBitsPerPixel == 1)
-		{
-		memcpy(extrabuffer,linebuffer,LPBlinewidth(lpbi));
-		for (i = 0; i < LPBwidth(lpbi); ++i)
-		    {
-		    if (extrabuffer[i >> 3] & masktable[i & 0x0007])
-			linebuffer[i] = 1;
-		    else
-			linebuffer[i] = 0;
-		    }
-		}
-	    else if (DitherBitsPerPixel > 1 && DitherBitsPerPixel <= 4)
-		{
-		memcpy(extrabuffer,linebuffer,LPBlinewidth(lpbi));
-		for (i = 0; i < LPBwidth(lpbi); ++i)
-		    {
-		    linebuffer[i] = GetChunkyPixel(extrabuffer, i);
-		    }
-		}
-
+	    memcpy(linebuffer,LPBimage(lpbi) + ComputeWidthBytes((DWORD)ImageWidth, (DWORD)DitherBitsPerPixel) * (DWORD)(ImageHeight - 1 - this_line++), (DWORD)LPBlinewidth(lpbi));    // load next line
 	    bytes_left = ImageWidth - 1;
 	    next_byte = 0;
 	    suffix_char = linebuffer[next_byte++];
@@ -667,8 +594,6 @@ int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
 		}
 	    hx += d;
 	    d += 2;
-//	if (hx >= GIFTABLESIZE)
-//	    hx -= GIFTABLESIZE;
 	    if (hx >= GIFTABLESIZE)		// catch any silly values
 		{
 		hx -= GIFTABLESIZE;
@@ -686,19 +611,16 @@ int	GIFCompressImage(FILE *fh, LPBITMAPINFOHEADER lpbi)
 
     if(!GIFFlush(fh,0))
 	{
-	delete [] extrabuffer;
 	delete [] linebuffer;
 	return(FALSE);
 	}
 
-    delete [] extrabuffer;
     delete [] linebuffer;
 
     return(TRUE);
     }
 
-int	GIFWriteComment(FILE *fh,LPSTR comment)
-
+int	GIFWriteComment(FILE *fh, LPSTR comment)
     {
     int n;
 

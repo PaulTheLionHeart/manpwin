@@ -333,6 +333,7 @@
     <ClInclude Include="Hailstone.h" />
     <ClInclude Include="MandelDerivTemplate.h" />
     <ClInclude Include="Manp.h" />
+    <ClInclude Include="ManpFile.h" />
     <ClInclude Include="Manpwin.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="menu.h" />
@@ -340,6 +341,7 @@
     <ClInclude Include="OscProcess.h" />
     <ClInclude Include="OtherFunctions.h" />
     <ClInclude Include="PertEngine.h" />
+    <ClInclude Include="PerturbationMaths.h" />
     <ClInclude Include="Pixel.h" />
     <ClInclude Include="PixelTemplate.h" />
     <ClInclude Include="Plot.h" />

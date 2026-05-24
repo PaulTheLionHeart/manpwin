@@ -5,6 +5,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "PertEngine.h"
+#include "PerturbationMaths.h"
 
 //////////////////////////////////////////////////////////////////////
 // Individual function point calculations
@@ -720,30 +721,619 @@ void	CPerturbation::PertFunctions(Complex *XRef, Complex *DeltaSubN, Complex *De
 	    DeltaSubN->x = Dnr;
 	    break;
 
-/*
-	case 59:    // Fractional Power
+	case 59:    // Exp perturbation: exp(Z + dz) - exp(Z)
 	    {
-	    double p = param[2];
-
 	    Complex Z = *XRef;
 	    Complex dz = *DeltaSubN;
+	    Complex dc = *DeltaSub0;
 
-	    if (Z.x == 0.0 && Z.y == 0.0)
+	    Complex RefExp = Z.CExp();
+	    Complex dExp = CExpM1Stable(dz);
+
+	    *DeltaSubN = RefExp * dExp + dc;
+	    }
+	    break;	   
+
+	case 60:    // Sinh perturbation: sinh(Z + dz) - sinh(Z)
+	    {
+	    Complex Z = *XRef;
+	    Complex dz = *DeltaSubN;
+	    Complex dc = *DeltaSub0;
+
+	    // A = exp(Z) * (exp(dz) - 1)
+	    Complex expZ = Z.CExp();
+	    Complex dExp = CExpM1Stable(dz);
+	    Complex A = expZ * dExp;
+
+	    // B = exp(-Z) * (exp(-dz) - 1)
+	    Complex negZ;
+	    negZ.x = -Z.x;
+	    negZ.y = -Z.y;
+
+	    Complex negDz;
+	    negDz.x = -dz.x;
+	    negDz.y = -dz.y;
+
+	    Complex expNegZ = negZ.CExp();
+	    Complex dExpNeg = CExpM1Stable(negDz);
+	    Complex B = expNegZ * dExpNeg;
+
+	    if (!std::isfinite(expZ.x) || !std::isfinite(expZ.y) || !std::isfinite(expNegZ.x) || !std::isfinite(expNegZ.y))
 		{
-		*DeltaSubN = (dz ^ p) + *DeltaSub0;
+		char msg[256];
+		sprintf(msg, "[PERT SINH] overflow at iter=unavail Z=(%.17g, %.17g)\n", Z.x, Z.y);
+		OutputDebugStringA(msg);
+
+		DeltaSubN->x = 1.0e300;
+		DeltaSubN->y = 1.0e300;
+		break;
+		}
+
+	    // sinh(Z + dz) - sinh(Z)
+	    // = 0.5 * (A - B)
+	    Complex result = A - B;
+	    result.x *= 0.5;
+	    result.y *= 0.5;
+
+	    *DeltaSubN = result + dc;
+	    }
+	    break;
+
+	case 61:    // Sin perturbation: sin(Z + dz) - sin(Z)
+	    {
+	    Complex Z = *XRef;
+	    Complex dz = *DeltaSubN;
+	    Complex dc = *DeltaSub0;
+
+	    // iZ
+	    Complex iZ;
+	    iZ.x = -Z.y;
+	    iZ.y = Z.x;
+
+	    // i dz
+	    Complex idz;
+	    idz.x = -dz.y;
+	    idz.y = dz.x;
+
+	    // -iZ
+	    Complex neg_iZ;
+	    neg_iZ.x = -iZ.x;
+	    neg_iZ.y = -iZ.y;
+
+	    // -i dz
+	    Complex neg_idz;
+	    neg_idz.x = -idz.x;
+	    neg_idz.y = -idz.y;
+
+	    Complex A = iZ.CExp()     * CExpM1Stable(idz);
+	    Complex B = neg_iZ.CExp() * CExpM1Stable(neg_idz);
+
+	    // (A - B) / (2i)
+	    // divide by i = multiply by -i
+	    Complex diff = A - B;
+
+	    Complex result;
+	    result.x = 0.5 * diff.y;
+	    result.y = -0.5 * diff.x;
+
+	    *DeltaSubN = result + dc;
+	    }
+	    break;
+	    
+	case 62:    // Cos perturbation: cos(Z + dz) - cos(Z)
+	    {
+	    Complex Z = *XRef;
+	    Complex dz = *DeltaSubN;
+	    Complex dc = *DeltaSub0;
+
+	    Complex iZ;
+	    iZ.x = -Z.y;
+	    iZ.y = Z.x;
+
+	    Complex idz;
+	    idz.x = -dz.y;
+	    idz.y = dz.x;
+
+	    Complex neg_iZ;
+	    neg_iZ.x = -iZ.x;
+	    neg_iZ.y = -iZ.y;
+
+	    Complex neg_idz;
+	    neg_idz.x = -idz.x;
+	    neg_idz.y = -idz.y;
+
+	    Complex A = iZ.CExp()     * CExpM1Stable(idz);
+	    Complex B = neg_iZ.CExp() * CExpM1Stable(neg_idz);
+
+	    Complex result = A + B;
+	    result.x *= 0.5;
+	    result.y *= 0.5;
+
+	    *DeltaSubN = result + dc;
+	    }
+	    break;
+	
+	case 63:    // Fractional Half Power: z^(n + 0.5)
+	    {
+	    int power = (int)param[2];
+
+	    if (power < 1)
+		power = 1;
+	    if (power > 10)
+		power = 10;
+
+	    Complex Z  = *XRef;
+	    Complex dz = *DeltaSubN;
+	    Complex dc = *DeltaSub0;
+
+	    Complex Zdz = Z + dz;
+
+	    //------------------------------------------------
+	    // Load Pascal coefficients
+	    //------------------------------------------------
+
+	    std::vector<long> PascalArray(power + 1);
+
+	    LoadPascal(PascalArray, power);
+
+	    //------------------------------------------------
+	    // Compute:
+	    //
+	    // dPoly = (Z + dz)^n - Z^n
+	    //
+	    //        n
+	    //      -----
+	    //      \
+	    //       ) C(n,k) Z^(n-k) dz^k
+	    //      /
+	    //      -----
+	    //      k=1
+	    //------------------------------------------------
+
+	    Complex dPoly(0.0, 0.0);
+
+	    // dz^k
+	    Complex dzPow(1.0, 0.0);
+
+	    for (int k = 1; k <= power; k++)
+		{
+		//--------------------------------------------
+		// dz^k
+		//--------------------------------------------
+
+		dzPow *= dz;
+
+		//--------------------------------------------
+		// Z^(n-k)
+		//--------------------------------------------
+
+		Complex ZPowTerm(1.0, 0.0);
+
+		for (int j = 0; j < power - k; j++)
+		    ZPowTerm *= Z;
+
+		//--------------------------------------------
+		// Add:
+		//
+		// C(n,k) * Z^(n-k) * dz^k
+		//--------------------------------------------
+
+		dPoly +=
+		    ZPowTerm *
+		    dzPow *
+		    (double)PascalArray[k];
+		}
+
+	    //------------------------------------------------
+	    // Compute Z^n
+	    //------------------------------------------------
+
+	    Complex ZPow(1.0, 0.0);
+
+	    for (int i = 0; i < power; i++)
+		ZPow *= Z;
+
+	    //------------------------------------------------
+	    // sqrt perturbation
+	    //
+	    // dSqrt =
+	    // sqrt(Z + dz) - sqrt(Z)
+	    //
+	    // Rationalized:
+	    //
+	    // dz / (sqrt(Z + dz) + sqrt(Z))
+	    //------------------------------------------------
+
+	    Complex sqrtZ   = Z.CSqrt();
+	    Complex sqrtZdz = Zdz.CSqrt();
+
+	    Complex denom = sqrtZ + sqrtZdz;
+
+	    Complex dSqrt;
+
+	    double denomMag2 =
+		denom.x * denom.x +
+		denom.y * denom.y;
+
+	    if (denomMag2 < 1.0e-300)
+		{
+		// rare fallback
+		dSqrt = sqrtZdz - sqrtZ;
 		}
 	    else
 		{
-		Complex ratio = dz / Z;
-		Complex one_plus = Complex(1.0, 0.0) + ratio;
-
-		Complex Zp = Z ^ p;
-
-		*DeltaSubN = Zp * ((one_plus ^ p) - Complex(1.0, 0.0))
-		    + *DeltaSub0;
+		dSqrt = dz / denom;
 		}
-	    break;
+
+	    //------------------------------------------------
+	    // Product perturbation
+	    //
+	    // (ZPow + dPoly)(sqrtZ + dSqrt)
+	    //      - ZPow * sqrtZ
+	    //------------------------------------------------
+
+	    Complex result =
+		(ZPow * dSqrt) +
+		(sqrtZ * dPoly) +
+		(dPoly * dSqrt);
+
+	    *DeltaSubN = result + dc;
 	    }
+	    break;
+
+/*
+	    case 64:
+		{
+		int n = (int)param[2];
+
+		if (n < 1)
+		    n = 1;
+		if (n > 10)
+		    n = 10;
+
+		Complex Z = *XRef;
+		Complex dz = *DeltaSubN;
+		Complex dc = *DeltaSub0;
+
+		Complex Zdz = Z + dz;
+
+		Complex ZPow(1.0, 0.0);
+		Complex ZdzPow(1.0, 0.0);
+
+		for (int i = 0; i < n; i++)
+		    {
+		    ZPow *= Z;
+		    ZdzPow *= Zdz;
+		    }
+
+		double magZPow =
+		    ZPow.x * ZPow.x +
+		    ZPow.y * ZPow.y;
+
+		double magZdzPow =
+		    ZdzPow.x * ZdzPow.x +
+		    ZdzPow.y * ZdzPow.y;
+
+		if (magZPow < 1.0e-300 || magZdzPow < 1.0e-300)
+		    {
+		    DeltaSubN->x = 1.0e300;
+		    DeltaSubN->y = 1.0e300;
+		    }
+		else
+		    {
+		    Complex result =
+			(ZPow - ZdzPow) / (ZPow * ZdzPow);
+
+		    *DeltaSubN = result + dc;
+		    }
+		}
+		break;
+
+	case 64:    // Cosh perturbation
+	    {
+	    Complex Z = *XRef;
+	    Complex dz = *DeltaSubN;
+	    Complex dc = *DeltaSub0;
+
+	    //--------------------------------------------
+	    // Precompute reference orbit values
+	    //--------------------------------------------
+
+	    Complex sinhZ = Z.CSinh();
+	    Complex coshZ = Z.CCosh();
+
+	    //--------------------------------------------
+	    // sinh(dz)
+	    //--------------------------------------------
+
+	    Complex dz2 = dz * dz;
+	    Complex dz3 = dz2 * dz;
+
+	    Complex sinhDz = dz + (dz3 / 6.0);
+
+	    //--------------------------------------------
+	    // Stable:
+	    // cosh(dz) - 1
+	    //
+	    // = 2 sinh²(dz/2)
+	    //--------------------------------------------
+
+	    Complex halfDz = dz * 0.5;
+
+	    Complex sinhHalfDz = halfDz.CSinh();
+
+	    Complex coshMinus1 =
+		sinhHalfDz *
+		sinhHalfDz *
+		2.0;
+
+	    //--------------------------------------------
+	    // Final perturbation
+	    //--------------------------------------------
+
+	    Complex result =
+		(coshZ * coshMinus1)
+		+
+		(sinhZ * sinhDz);
+
+	    *DeltaSubN = result + dc;
+	    }
+	    break;
+
+    	case 64:    // Log perturbation
+	    {
+	    Complex Z = *XRef;
+	    Complex dz = *DeltaSubN;
+	    Complex dc = *DeltaSub0;
+
+	    Complex ratio = dz / Z;
+
+	    Complex onePlus;
+	    onePlus.x = 1.0 + ratio.x;
+	    onePlus.y = ratio.y;
+
+	    Complex dLog = onePlus.CLog();
+
+	    *DeltaSubN = dLog + dc;
+	    }
+	    break;
+
+
+	case 65:    // Sqrt perturbation
+	    {
+	    Complex Z = *XRef;
+	    Complex dz = *DeltaSubN;
+	    Complex dc = *DeltaSub0;
+
+	    // ratio = dz / Z
+	    Complex ratio = dz / Z;
+
+	    // log(1 + dz/Z)
+	    Complex onePlus;
+	    onePlus.x = 1.0 + ratio.x;
+	    onePlus.y = ratio.y;
+
+	    Complex dLog = onePlus.CLog();
+
+	    // 0.5 * log(...)
+	    dLog.x *= 0.5;
+	    dLog.y *= 0.5;
+
+	    // exp(...) - 1
+	    Complex dExp = CExpM1Stable(dLog);
+
+	    // sqrt(Z)
+	    Complex sqrtZ = Z.CSqrt();
+
+	    // sqrt(Z) * (exp(...) - 1)
+	    Complex result = sqrtZ * dExp;
+
+	    *DeltaSubN = result + dc;
+	    }
+	    break;
+*/
+
+/*
+	case 66:    // Fractional Half Power: z^(n + 0.5)
+	    {
+	    int n = (int)param[1];
+
+	    if (n < 1)
+		n = 1;
+	    if (n > 6)
+		n = 6;
+
+	    Complex Z = *XRef;
+	    Complex dz = *DeltaSubN;
+	    Complex dc = *DeltaSub0;
+
+	    Complex Zdz = Z + dz;
+
+	    //------------------------------------------------
+	    // Precompute powers
+	    //------------------------------------------------
+
+	    Complex Z2 = Z * Z;
+	    Complex Z3 = Z2 * Z;
+	    Complex Z4 = Z3 * Z;
+	    Complex Z5 = Z4 * Z;
+	    Complex Z6 = Z5 * Z;
+
+	    Complex dz2 = dz * dz;
+	    Complex dz3 = dz2 * dz;
+	    Complex dz4 = dz3 * dz;
+	    Complex dz5 = dz4 * dz;
+	    Complex dz6 = dz5 * dz;
+
+	    //------------------------------------------------
+	    // Polynomial perturbation:
+	    // dPoly = (Z + dz)^n - Z^n
+	    //------------------------------------------------
+
+	    Complex dPoly;
+	    Complex ZPow;
+
+	    switch (n)
+		{
+		case 1:
+		    ZPow = Z;
+		    dPoly = dz;
+		    break;
+
+		case 2:
+		    ZPow = Z2;
+		    dPoly =
+			(Z * dz * 2.0) +
+			dz2;
+		    break;
+
+		case 3:
+		    ZPow = Z3;
+		    dPoly =
+			(Z2 * dz * 3.0) +
+			(Z * dz2 * 3.0) +
+			dz3;
+		    break;
+
+		case 4:
+		    ZPow = Z4;
+		    dPoly =
+			(Z3 * dz * 4.0) +
+			(Z2 * dz2 * 6.0) +
+			(Z * dz3 * 4.0) +
+			dz4;
+		    break;
+
+		case 5:
+		    ZPow = Z5;
+		    dPoly =
+			(Z4 * dz * 5.0) +
+			(Z3 * dz2 * 10.0) +
+			(Z2 * dz3 * 10.0) +
+			(Z * dz4 * 5.0) +
+			dz5;
+		    break;
+
+		default:    // case 6
+		    ZPow = Z6;
+		    dPoly =
+			(Z5 * dz * 6.0) +
+			(Z4 * dz2 * 15.0) +
+			(Z3 * dz3 * 20.0) +
+			(Z2 * dz4 * 15.0) +
+			(Z * dz5 * 6.0) +
+			dz6;
+		    break;
+		}
+
+	    //------------------------------------------------
+	    // sqrt perturbation
+	    //
+	    // dSqrt = sqrt(Z + dz) - sqrt(Z)
+	    //        = dz / (sqrt(Z + dz) + sqrt(Z))
+	    //------------------------------------------------
+
+	    Complex sqrtZ = Z.CSqrt();
+	    Complex sqrtZdz = Zdz.CSqrt();
+
+	    Complex denom = sqrtZdz + sqrtZ;
+
+	    Complex dSqrt;
+
+	    double denomMag2 =
+		denom.x * denom.x +
+		denom.y * denom.y;
+
+	    if (denomMag2 < 1.0e-300)
+		{
+		// rare fallback
+		dSqrt = sqrtZdz - sqrtZ;
+		}
+	    else
+		{
+		dSqrt = dz / denom;
+		}
+
+	    //------------------------------------------------
+	    // Product perturbation
+	    //
+	    // (ZPow + dPoly)(sqrtZ + dSqrt)
+	    //      - ZPow * sqrtZ
+	    //------------------------------------------------
+
+	    Complex result =
+		(ZPow * dSqrt) +
+		(sqrtZ * dPoly) +
+		(dPoly * dSqrt);
+
+	    *DeltaSubN = result + dc;
+	    }
+	    break;
+*/
+
+/*
+	case 67:    // Fractional Power - z^(a+ib)
+	    {
+	    double pReal = param[1];
+	    double pImag = param[2];
+
+	    if (!std::isfinite(DeltaSubN->x) || !std::isfinite(DeltaSubN->y))
+		{
+		DeltaSubN->x = 1.0e300;
+		DeltaSubN->y = 1.0e300;
+		//		OutputDebugStringA("[PERT POWER] incoming dz is NaN\n");
+//		break;
+		}
+
+	    Complex power(pReal, pImag);
+
+	    Complex Z = *XRef;
+	    Complex dz = *DeltaSubN;
+	    Complex dc = *DeltaSub0;
+
+	    double zmag2 = Z.x * Z.x + Z.y * Z.y;
+
+	    if (Z.x * Z.x < 1.0e-30)
+		{
+		//		OutputDebugStringA("[PERT POWER] Z too close to zero\n");
+		Z.x = 1.0e-100;
+		//		break;
+		}
+	    if (Z.y * Z.y < 1.0e-30)
+		{
+		//		OutputDebugStringA("[PERT POWER] Z too close to zero\n");
+		Z.y = 1.0e-100;
+		//		break;
+		}
+
+	    // ratio = dz / Z
+	    Complex ratio = dz / Z;
+
+	    // log(1 + dz/Z)
+	    Complex onePlus;
+	    onePlus.x = 1.0 + ratio.x;
+	    onePlus.y = ratio.y;
+
+	    Complex dLog = onePlus.CLog();
+
+	    // p * log(...)
+	    dLog = dLog * power;
+
+	    // exp(...) - 1
+	    Complex dExp = CExpM1Stable(dLog);
+
+	    // Z^p
+	    Complex temp = Z.CLog();
+	    temp = temp * power;
+
+	    Complex ZPow = temp.CExp();
+
+	    // final perturbation
+	    Complex result = ZPow * dExp;
+
+	    *DeltaSubN = result + dc;
+	    }
+	    break;
 */
 	default:
 	    Dnr = (2 * r + a) * a - (2 * i + b) * b + a0;

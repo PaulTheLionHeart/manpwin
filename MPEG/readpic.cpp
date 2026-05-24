@@ -324,8 +324,8 @@ static int read_ppm(char *fname,unsigned char *frame[], int FrameNumber)
 	yp = frame[0] + i*FrameWidth;
 	up = u444 + i*FrameWidth;
 	vp = v444 + i*FrameWidth;
-	ptr = DibPtr + ComputeWidthBytes((DWORD)horizontal_size, 24), (vertical_size - i - 1);	// assume frame bits per pixel = 24
-//	ptr = DibFrames[FrameNumber] + WIDTHBYTES((DWORD)horizontal_size * 24) * (vertical_size - i - 1);	// assume frame bits per pixel = 24
+
+	ptr = DibPtr + ComputeWidthBytes((DWORD)horizontal_size, 24) * (vertical_size - i - 1);
 
 	for (j=0; j<horizontal_size; j++)
 	    {

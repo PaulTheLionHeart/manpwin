@@ -8,10 +8,10 @@ void	CPerturbation::BigProcessDerivativeSlope(ExpComplex ExpDC, ExpComplex ExpTe
     BigDouble	BigReflection;
     double	reflection;
 
-    if (subtype == 57)					// polynomial
+    if (subtype == 57)						// polynomial
 	LightHeight = 2.0;					// param 1 is used for a polynomial coefficient, so use a default
     else
-	LightHeight = param[1];				// height 
+	LightHeight = param[1];					// height 
     LightHeight *= 1.333;					// height * 1.333 : seems to need a bit more height to get similar images to double float
     BigComplex	BigZ;
 
@@ -177,6 +177,132 @@ void	CPerturbation::CalculateDerivativeSlope(Complex &dc, Complex z)
 	Cubic *= param[7];
 	Square *= param[8];
 	dc = (Square * 2 + Cubic * 3 + Quartic * 4 + Quintic * 5 + Sixth * 6 + Seventh * 7 + Eighth * 8 + Nineth * 9 + Tenth * 10) * dc + param[9] + 1.0;
+	}
+    else if (subtype == 59)			// Exp
+	{
+	dc = z.CExp() * dc + 1.0;		// d/dz exp(z) = exp(z)
+	}
+    else if (subtype == 60)			// Sinh
+	{
+	dc = z.CCosh() * dc + 1.0;		// d/dz sinh(z) = cosh(z)
+	dc.y = -dc.y;				// Rotate/negate derivative
+	}
+    else if (subtype == 61)			// Sin
+	{
+	dc = z.CCos() * dc + 1.0;		// d/dz sin(z) = cos(z)
+	}
+    else if (subtype == 62)			// Cos
+	{
+	dc = (z.CSin() * -1.0) * dc + 1.0;	// d/dz cos(z) = -sin(z)
+	}
+    else if (subtype == 63)         // Fractional Half Power -> z^(n + 0.5)
+	{
+	int n = (int)param[2];
+
+	if (n < 1)
+	    n = 1;
+	if (n > 6)
+	    n = 6;
+
+	//--------------------------------------------
+	// z^n
+	//--------------------------------------------
+
+	Complex ZPow(1.0, 0.0);
+
+	for (k = 0; k < n; k++)
+	    ZPow *= z;
+
+	//--------------------------------------------
+	// sqrt(z)
+	//--------------------------------------------
+
+	Complex sqrtZ = z.CSqrt();
+
+	//--------------------------------------------
+	// Transport-style field
+	//
+	// Instead of strict derivative:
+	//
+	// (n + 0.5) z^(n-0.5)
+	//
+	// use the function itself:
+	//
+	// z^n * sqrt(z)
+	//
+	// This avoids reciprocal sqrt instability
+	// and follows orbit flow more naturally.
+	//--------------------------------------------
+
+	Complex transport;// =
+//	    (ZPow * 0.85) +
+//	    ((ZPow * sqrtZ) * 0.15);
+
+	transport = ZPow;
+
+	dc = transport * dc + 1.0;
+
+//	Complex transport = ZPow * sqrtZ;
+
+//	dc = transport * dc + 1.0;
+	}
+
+
+
+
+
+
+    else if (subtype == 64)			// Fractional Half Power -> z^(n + 0.5)
+	{
+	int n = (int)param[2];
+
+	if (n < 1)
+	    n = 1;
+	if (n > 6)
+	    n = 6;
+
+	//--------------------------------------------
+	// z^n
+	//--------------------------------------------
+
+	Complex ZPow(1.0, 0.0);
+
+	for (k = 0; k < n; k++)
+	    ZPow *= z;
+
+	//--------------------------------------------
+	// sqrt(z)
+	//--------------------------------------------
+
+	Complex sqrtZ = z.CSqrt();
+
+	double mag2 =
+	    sqrtZ.x * sqrtZ.x +
+	    sqrtZ.y * sqrtZ.y;
+
+	//--------------------------------------------
+	// Avoid divide-by-zero near branch origin
+	//--------------------------------------------
+
+	if (mag2 < 1.0e-300)
+	    {
+	    dc = Complex(1.0e300, 1.0e300);
+	    }
+	else
+	    {
+	    //----------------------------------------
+	    // d/dz z^(n+0.5)
+	    //
+	    // = (n + 0.5) z^(n-0.5)
+	    // = (n + 0.5) z^n / sqrt(z)
+	    //----------------------------------------
+
+	    Complex derivative =
+		(ZPow / sqrtZ) *
+		((double)n + 0.5);
+
+	    dc = derivative * dc + 1.0;
+	    }
 	}
     }
 

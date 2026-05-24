@@ -663,10 +663,6 @@ int	WriteKallesFile(HWND hwnd, char *filename)
 	BigZreal.ToString(s1, SIZEOF_BF_VARS, false);
 	BigZimag.ToString(s2, SIZEOF_BF_VARS, false);
 	BigMag.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
-//	ConvertBignum2String(s1, BigZreal.x);
-//	ConvertBignum2String(s2, BigZimag.x);
-//	BigMag.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
-//	mpfr_sprintf(s3, "%.20Re", BigMag.x);
 	fprintf(fp, "Re: %s\nIm: %s\nZoom: %s\n", s1, s2, s3);
 
 	if (s1) { delete[] s1; s1 = NULL; }
@@ -684,7 +680,7 @@ int	WriteKallesFile(HWND hwnd, char *filename)
     fprintf(fp, "Iterations: %ld\nFractalType: %d\nPower: %d\n", gManp->threshold, FractalType, power);
     fprintf(fp, "Colors: ");
     for (int i = 0; i < gManp->TrueCol.ColoursInPALFile; i++)
-	fprintf(fp, "%d, %d, %d, ", gManp->TrueCol.PalettePtr[i].rgbtBlue, gManp->TrueCol.PalettePtr[i].rgbtGreen, gManp->TrueCol.PalettePtr[i].rgbtRed);
+	fprintf(fp, "%d, %d, %d, ", gManp->TrueCol.PalettePtr[i].rgbtRed, gManp->TrueCol.PalettePtr[i].rgbtGreen, gManp->TrueCol.PalettePtr[i].rgbtBlue);
     fprintf(fp, "\n");
     if (Slopes)
 	fprintf(fp, "Slopes: %d\n", Slopes);

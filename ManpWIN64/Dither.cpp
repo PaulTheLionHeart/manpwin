@@ -60,11 +60,15 @@ static	HANDLE	hsource = NULL;
 static	LPBITMAPINFOHEADER lpbd = NULL;
 static	LPBITMAPINFOHEADER lpbs = NULL;
 static	char	*pstr;				// file name without path
+static	BYTE	*PackedLegacyDib = NULL;
+
 //char		DitherFlag = '2';		// 1 = Bayer or Diffuse Floyd, 2 = Floyd_Steinberg
 // 3 = Floyd_Steinberg + 'Optimal Colour Mapper'
 
-	BYTE		masktable[8] = {0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01};
+//	BYTE		masktable[8] = {0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01};
 static	BYTE		bittable[8]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
+
+LPBITMAPINFOHEADER BuildPackedLegacyDib(CDib& Dib);
 
 static	char bayerPattern[8][8] =
     {
@@ -126,118 +130,65 @@ void	GetOrthoPalette(BYTE *buffer)
     }
 
 /**************************************************************************
-Dithering Engine for 256 Colours
-**************************************************************************/
-
-/*
-void DiffuseFloyd(BYTE *line1,BYTE *line2,short x,short y,short r,
-    short g,short b,short mr,short mg,short mb,short width,short depth)
-    {
-    short dr,dg,db,xpos,vr,vg,vb, a1, b1, c1;
-
-    dr=(r-mr)>>4;
-    dg=(g-mg)>>4;
-    db=(b-mb)>>4;
-
-    vr=dr<<1;
-    vg=dg<<1;
-    vb=db<<1;
-
-    if((x+1) < width && (y+1) < depth)
-	{
-	xpos=RGB_SIZE*(x+1);
-	a1 = *(line2 + xpos+WRGB_RED)  =addb(*(line2 + xpos+WRGB_RED),dr);
-	b1 = *(line2 + xpos+WRGB_GREEN)=addb(*(line2 + xpos+WRGB_GREEN),dg);
-	c1 = *(line2 + xpos+WRGB_BLUE) =addb(*(line2 + xpos+WRGB_BLUE),db);
-
-	}
-
-    dr+=vr; dg+=vg; db+=vb;
-
-    if((x-1) > 0 && (y+1) < depth)
-	{
-	xpos=RGB_SIZE*(x-1);
-	*(line2 + xpos+WRGB_RED)  =addb(*(line2 + xpos+WRGB_RED),dr);
-	*(line2 + xpos+WRGB_GREEN)=addb(*(line2 + xpos+WRGB_GREEN),dg);
-	*(line2 + xpos+WRGB_BLUE) =addb(*(line2 + xpos+WRGB_BLUE),db);
-
-	}
-
-    dr+=vr; dg+=vg; db+=vb;
-
-    if((y+1) < depth)
-	{
-	xpos=RGB_SIZE*(x);
-	*(line2 + xpos+WRGB_RED)  =addb(*(line2 + xpos+WRGB_RED),dr);
-	*(line2 + xpos+WRGB_GREEN)=addb(*(line2 + xpos+WRGB_GREEN),dg);
-	*(line2 + xpos+WRGB_BLUE) =addb(*(line2 + xpos+WRGB_BLUE),db);
-
-	}
-
-    dr+=vr; dg+=vg; db+=vb;
-
-    if((x+1) < width)
-	{
-	xpos=RGB_SIZE*(x+1);
-	*(line1 + xpos+WRGB_RED)  =addb(*(line1 + xpos+WRGB_RED),dr);
-	*(line1 + xpos+WRGB_GREEN)=addb(*(line1 + xpos+WRGB_GREEN),dg);
-	*(line1 + xpos+WRGB_BLUE) =addb(*(line1 + xpos+WRGB_BLUE),db);
-
-	}
-    }
-*/
-
-/**************************************************************************
 Dither to 256 Colours
 **************************************************************************/
 
 LPBITMAPINFOHEADER  Floyd_Steinberg(WORD NewBitsPerPixel)
     {
-    BYTE	*source = NULL, *dest = NULL, *pDestImage = NULL;
+    BYTE	*source = NULL, *dest = NULL;
+    BYTE	*LegacySource = NULL;    
     BYTE	palette[VGA_PAL_SIZE];
-    WORD	i, j;
+    WORD	i;
     WORD	width, height;
-//    BYTE	*pd, *pr, *ps, *pl;
 
     // make a copy of our display DIB so we don't splatter it during dither
-
-    CDib	TempDib(gManp->Dib);
+    CDib	TempDib;
     CDib	InterDib;
 
     width = gManp->Dib.DibWidth;
     height = gManp->Dib.DibHeight;
+
+    if (!TempDib.InitDib(width, height, 24))
+	{
+	ReturnCode = ERR_CREATE_DIB_FAIL;
+	return NULL;
+	}
+
+    memcpy(TempDib.DibPixels.data(), gManp->Dib.DibPixels.data(), min(TempDib.DibPixels.size(), gManp->Dib.DibPixels.size()));
 
     InterDib.InitDib(width, height, 8);
 
     source = TempDib.DibPixels.data();
     dest = InterDib.DibPixels.data();
 
-    // IB 2009-06-02 Floyd_Steinberg requires a packed pixel array.
-    // The following packs the pixel array within TempDib
+    // Bridge modern vector-backed CDib pixels into the legacy packed buffer
+    // expected by dl3quant().
+    LegacySource = new BYTE[(size_t)width * (size_t)height * 3];
+
+    if (LegacySource == NULL)
 	{
-	size_t 	SourceWidthBytes = ComputeWidthBytes((DWORD)width, 24L);
-	RGBTRIPLE *	Dest = (RGBTRIPLE *)((BYTE *)source);
-	RGBTRIPLE *	Source;
-	for(i = 0; i < height; ++i)
-	    {
-	    Source = (RGBTRIPLE *)((BYTE *)source + i * SourceWidthBytes);
-	    for(j = 0; j < width; ++j)
-		{
-		*Dest++ = *Source++;
-		}
-	    }
+	TempDib.CloseDibPtrs();
+	InterDib.CloseDibPtrs();
+	DitherDib.CloseDibPtrs();
+	ReturnCode = ERR_IMAGE_MEMORY_FAIL;
+	return NULL;
 	}
 
-//    if(DitherFlag == '2')
-//	{
-//	ReturnCode = dl1quant(source, dest, width, height, 1 << NewBitsPerPixel, 1, palette);
-//	}
-//    else if(DitherFlag == '3')
-	ReturnCode = dl3quant(source, dest, width, height, 1 << NewBitsPerPixel, 1, palette);
-//    else
-//	{
-//	ReturnCode = ERR_ILLEGAL_DITHER_TYPE;
-//	}
+    for (i = 0; i < height; ++i)
+	{
+	memcpy(LegacySource + (size_t)i * (size_t)width * 3, source + (size_t)i * TempDib.WidthBytes, (size_t)width * 3);
+	}
+
+    source = LegacySource;
+
+    ReturnCode = dl3quant(source, dest, width, height, 1 << NewBitsPerPixel, 1, palette);
+
+    if (LegacySource != NULL)
+	{
+	delete[] LegacySource;
+	LegacySource = NULL;
+	}
+
     if(ReturnCode < 0)
 	{
 	TempDib.CloseDibPtrs();
@@ -267,297 +218,30 @@ LPBITMAPINFOHEADER  Floyd_Steinberg(WORD NewBitsPerPixel)
 	pRgb[i].rgbBlue 	= (BYTE)palette[i * 3 + WRGB_BLUE];
 	}
 
-    BYTE	*pd, *pr, *ps, *pl;
-//    ps = InterDib.DibPixels;
-//    pd = DitherDib.DibPixels;
+    BYTE    *pd, *ps;
     ps = InterDib.DibPixels.data();
     pd = DitherDib.DibPixels.data();
-    switch(NewBitsPerPixel)
-	{
-	case 1:
-	    for(i = 0; i < height; ++i)
-		{
-//		int j8;
-//    BYTE	SourcePix;
-    BYTE	*prj8;
-		pr = ps;
-		pl = pd;
-		ps += width;
-		pd += ComputeWidthBytes((DWORD)width, 1L);
-		for(j = 0, prj8 = pr; j <= width >> 3; ++j, prj8+=8)
-		    {
-		    *(pl + j) =	  (*(prj8 + 0)) << 7 | (*(prj8 + 1)) << 6
-				| (*(prj8 + 2)) << 5 | (*(prj8 + 3)) << 4
-				| (*(prj8 + 4)) << 3 | (*(prj8 + 5)) << 2
-				| (*(prj8 + 6)) << 1 | (*(prj8 + 7)) << 0;
-		    }
-		}
 
-	    break;
-	case 4:
-	    for(i = 0; i < height; ++i)
-		{
-		pr = ps;
-		pl = pd;
-		ps += width;
-		pd += ComputeWidthBytes((DWORD)width, 4L);
-	// IB 2009-06-06 The following looks sus to me - what if there an odd number of pixels
-		for(j = 0; j <= width >> 1;++j)
-		    *(pl + j) = *(pr + j + j + 1) | (*(pr + j + j)) << 4;
-		}
-	    break;
-	case 8:
-	    for(i = 0; i < height; ++i)
-		{
-		// this convoluted copy required because source has word boundaries and destination requires RGB triplets only
-		memcpy(pd + ComputeWidthBytes((DWORD)width, (DWORD)NewBitsPerPixel) * i, ps + i * width, width);
-		}
-	    break;
+    // Copy indexed 8-bit pixels into final DIB. 
+    // dl3quant() already produced tightly packed 8-bit indices.
+    for (i = 0; i < height; ++i)
+	{
+	memcpy(DitherDib.DibPixels.data() + i * DitherDib.WidthBytes, InterDib.DibPixels.data() + i * width, width);
 	}
 
     TempDib.CloseDibPtrs();
     InterDib.CloseDibPtrs();
 
-    return (LPBITMAPINFOHEADER)DitherDib.pDibInf;
-    }
-
-/**************************************************************************
-Dither to 256 Colours
-**************************************************************************/
-
-/*
-LPBITMAPINFOHEADER  Dither256(void)
-    {
-    BYTE	*pr;
-    BYTE	palette[VGA_PAL_SIZE];
-    WORD	k, r, g, b, mr, mg, mb;
-    WORD	i, j;
-    CDib	TempDib;
-    // make a copy of our display DIB so we don't splatter it during dither
-    TempDib = Dib;
-    lpbs = (LPBITMAPINFOHEADER)TempDib.pDibInf;
-
-    GetOrthoPalette(palette);
-
-    DitherDib.InitDib(Dib.DibWidth, Dib.DibHeight, palette, 8);
-    lpbd = (LPBITMAPINFOHEADER)DitherDib.pDibInf;
-
-    BYTE *	source = TempDib.DibPixels;
-    BYTE *	dest = DitherDib.DibPixels;
-
-    for(i = 0; i < DitherDib.DibHeight; ++i)
+    if (PackedLegacyDib != NULL)
 	{
-	for(j = 0; j < DitherDib.DibWidth; ++j)
-	    {
-	    k = RGB_SIZE * j;
-	    r = source[k + WRGB_RED] & 0x00ff;
-	    g = source[k + WRGB_GREEN] & 0x00ff;
-	    b = source[k + WRGB_BLUE] & 0x00ff;
-
-	    k = ORTHOMATCH(r, g, b);
-	    pr = palette + RGB_SIZE * k;
-
-	    *(dest + j) = (BYTE)k;
-	    mr = pr[RGB_RED] & 0x00ff;
-	    mg = pr[RGB_GREEN] & 0x00ff;
-	    mb = pr[RGB_BLUE] & 0x00ff;
-
-	    DiffuseFloyd(source,
-		source + Dib.WidthBytes,
-		j,
-		i,
-		r,
-		g,
-		b,
-		mr,
-		mg,
-		mb,
-		DitherDib.DibWidth,
-		DitherDib.DibHeight);
-
-	    }
-
-	source += (long)Dib.WidthBytes;
-	dest += (long)DitherDib.WidthBytes;
+	delete[] PackedLegacyDib;
+	PackedLegacyDib = NULL;
 	}
 
-    TempDib.CloseDibPtrs();
+    PackedLegacyDib = (BYTE *)BuildPackedLegacyDib(DitherDib);
 
-    return(lpbd);
+    return (LPBITMAPINFOHEADER)PackedLegacyDib;
     }
-*/
-
-/**************************************************************************
-Dither to 16 Colours
-**************************************************************************/
-
-/*
-LPBITMAPINFOHEADER  Dither16(void)
-    {
-    static BYTE fixedpalette[]=
-	{
-	0,  0,  0,
-	255,  0,  0,
-	0,255,  0,
-	255,255,  0,
-	0,  0,255,
-	255,  0,255,
-	0,255,255,
-	255,255,255,
-
-	0,  0,  0,
-	255,  0,  0,
-	0,255,  0,
-	255,255,  0,
-	0,  0,255,
-	255,  0,255,
-	0,255,255,
-	255,255,255
-
-	// start dull colours
-	};
-
-    BYTE	*pl;
-    BYTE	*pd, *pr, *ps, *pDestImage;
-    WORD	i,j,m,n;
-    int	r,g,b;
-
-    DitherDib.InitDib(Dib.DibWidth, Dib.DibHeight, fixedpalette, 4);
-    lpbd = (LPBITMAPINFOHEADER)DitherDib.pDibInf;
-
-    ps = Dib.DibPixels;
-    pd = DitherDib.DibPixels;
-    pDestImage = pd;
-
-    for(i = 0; i < DitherDib.DibHeight; ++i)
-	{
-	pr = ps;
-	ps += Dib.WidthBytes;
-
-	if(Dib.BitsPerPixel > 8)
-	    {
-	    for(j = 0; j < DitherDib.DibWidth;++j)
-		{
-		r = pr[WRGB_RED] & 0x00ff;
-		g = pr[WRGB_GREEN] & 0x00ff;
-		b = pr[WRGB_BLUE] & 0x00ff;
-
-		m = (bayerPattern[j & 0x0007][i & 0x0007] << 2);
-		n = 0;
-
-		if(r > (int)m)
-		    n |= 0x01;
-		if(g > (int)m)
-		    n |= 0x02;
-		if(b > (int)m)
-		    n |= 0x04;
-
-		pr += RGB_SIZE;
-
-		PutChunkyPixel(pd, j, n);
-		}
-	    }
-	else
-	    {
-	    for(j = 0; j < DitherDib.DibWidth;++j)
-		{
-		pl = TrueCol.PalettePtr + *pr++ * RGB_SIZE;
-		r = pl[RGB_RED];
-		g = pl[RGB_GREEN];
-		b = pl[RGB_BLUE];
-
-		m = (bayerPattern[j & 0x0007][i & 0x0007] << 2);
-		n = 0;
-
-		if(r > (int)m)
-		    n |= 0x01;
-		if(g > (int)m)
-		    n |= 0x02;
-		if(b > (int)m)
-		    n |= 0x04;
-
-		PutChunkyPixel(pd,j,n);
-		}
-	    }
-
-	pd += DitherDib.WidthBytes;
-	}
-
-    return(lpbd);
-    }
-*/
-
-/**************************************************************************
-Dither to 2 Colours
-**************************************************************************/
-
-/*
-LPBITMAPINFOHEADER  Dither2(void)
-    {
-    BYTE	*pDestImage;
-    WORD	i,j,n;
-    BYTE	*source=NULL, *dest=NULL, *pss;
-    double	a,fac;
-    BYTE	palette[VGA_PAL_SIZE], greylevel[VGA_COLOURS];
-    BYTE	remap[VGA_COLOURS];
-    static char pal[]="\000\000\000\377\377\377";
-
-    memcpy(palette, pal, 6);
-
-    DitherDib.InitDib(Dib.DibWidth, Dib.DibHeight, palette, 1);
-    lpbd = (LPBITMAPINFOHEADER)DitherDib.pDibInf;
-
-    source = Dib.DibPixels;
-    dest = DitherDib.DibPixels;
-    pDestImage = dest;
-
-    for(i = 0; i < 256; ++i)
-	greylevel[i] = GREYVALUE(TrueCol.PalettePtr[i*RGB_SIZE+RGB_RED],
-	    TrueCol.PalettePtr[i*RGB_SIZE+RGB_GREEN],
-	    TrueCol.PalettePtr[i*RGB_SIZE+RGB_BLUE]);
-
-    fac = 256 / (256 - ((double)DITHERCONTRAST * 2));
-    a = (double)DITHERBRIGHTNESS - (double)DITHERCONTRAST;
-
-    for(i = 0;i < 256; ++i)
-	{
-	if(a > 254)
-	    n=254;
-	else if(a < 1)
-	    n=1;
-	else
-	    n = (WORD) a;
-	remap[i] = (BYTE) n;
-	a += fac;
-	}
-
-    for(i = 0; i < DitherDib.DibHeight; ++i)
-	{
-	for(j = 0; j < DitherDib.DibWidth; ++j)
-	    {
-	    if(Dib.BitsPerPixel == 24)
-		{
-		pss = source + (long)j * RGB_SIZE;
-		n = GREYVALUE(*(pss + 2), *(pss + 1), *(pss + 0));
-		}
-	    else if(Dib.BitsPerPixel == 8)
-		n = (greylevel[source[j]]) & 0x00ff;
-	    else
-		n = (greylevel[GetChunkyPixel(source,j)]) & 0x00ff;
-
-	    if((n = remap[n] >> 2) > (WORD)bayerPattern[i & 0x0007][j & 0x0007])
-		dest[j >> 3] |= masktable[j & 0x0007];
-	    else
-		dest[j >> 3] &= ~masktable[j & 0x0007];
-	    }
-
-	source += Dib.WidthBytes;
-	dest += DitherDib.WidthBytes;
-	}
-
-    return(lpbd);
-    }
-*/
 
 /**************************************************************************
 	Dither the Image to 2, 16 or 256 Colours
@@ -568,7 +252,8 @@ LPBITMAPINFOHEADER  Dither(WORD NewBitsPerPixel)
     char	s[300];
     LPBITMAPINFOHEADER BitMapPtr;
 
-    gManp->Dib.DibTo24();			// Dither assumes we have a 24 bit image. PGV crashes if we don't.
+    if (gManp->Dib.BitsPerPixel != 24)
+	gManp->Dib.DibTo24();
     ReturnCode = NO_ERR;
     BitMapPtr = Floyd_Steinberg(NewBitsPerPixel);
 
@@ -609,13 +294,79 @@ LPBITMAPINFOHEADER  Dither(WORD NewBitsPerPixel)
 	return NULL;
 	}
 
-    // Format filename along with the DIB attributes
-//    CreateTitleBar("", "", DitherDib.DibWidth, DitherDib.DibHeight, NewBitsPerPixel);
-//    UpdateTitleBar(GlobalHwnd);
     ReturnCode = NO_ERR;
     return BitMapPtr;
     }
 
+/**************************************************************************
+Build classic contiguous DIB memory block for legacy GIF encoder.
+
+Modern CDib stores pixels separately in vector<BYTE>, but older GIF
+code expects:
+
+    BITMAPINFOHEADER + palette + image bits
+
+in one contiguous memory block.
+**************************************************************************/
+LPBITMAPINFOHEADER BuildPackedLegacyDib(CDib& Dib)
+    {
+    DWORD PaletteSize;
+    DWORD ImageSize;
+    DWORD TotalSize;
+    DWORD PackedWidthBytes;
+
+    BYTE *Block;
+    LPBITMAPINFOHEADER lpbi;
+    BYTE *DestBits;
+
+    // GIF expects 256 RGBQUAD palette entries
+    PaletteSize = 256 * sizeof(RGBQUAD);
+
+    // Compute packed 8-bit scanline size
+    PackedWidthBytes = (DWORD)ComputeWidthBytes((size_t)Dib.DibWidth, (size_t)Dib.BitsPerPixel);
+
+    ImageSize = PackedWidthBytes * Dib.DibHeight;
+
+    TotalSize = sizeof(BITMAPINFOHEADER) + PaletteSize + ImageSize;
+
+    Block = new BYTE[TotalSize];
+
+    if (Block == NULL)
+	return NULL;
+
+    memset(Block, 0, TotalSize);
+
+    lpbi = (LPBITMAPINFOHEADER)Block;
+
+    // Copy BITMAPINFOHEADER
+    memcpy(lpbi, Dib.pDibInf, sizeof(BITMAPINFOHEADER));
+
+    // Force palette metadata for GIF
+    lpbi->biClrUsed = 256;
+    lpbi->biClrImportant = 256;
+    lpbi->biSizeImage = ImageSize;
+
+    // Copy palette
+    memcpy(
+	(BYTE *)lpbi + sizeof(BITMAPINFOHEADER),
+	DIBPAL(Dib.pDibInf),
+	PaletteSize);
+
+    // Pointer to image bits
+    DestBits =
+	(BYTE *)lpbi
+	+ sizeof(BITMAPINFOHEADER)
+	+ PaletteSize;
+
+    // Copy indexed pixels
+    memcpy(
+	DestBits,
+	Dib.DibPixels.data(),
+	ImageSize);
+
+    return lpbi;
+    }
+       
 void	CloseDitherPointers(BYTE success)
     {
     DitherDib.CloseDibPtrs();

@@ -626,8 +626,80 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->y += centre->y;
 	    Z->x += centre->x;
 	    break;
+
+	case 59:							// Exp
+	    SlopeDegree = 2;
+	    *Z = Z->CExp() + *centre;
+	    break;
+
+	case 60:							// Sinh
+	    SlopeDegree = 2;
+	    *Z = Z->CSinh() + *centre;
+	    break;
+
+	case 61:							// Sin
+	    SlopeDegree = 2;
+	    *Z = Z->CSin() + *centre;
+	    break;
+
+	case 62:							// Cos
+	    SlopeDegree = 2;
+	    *Z = Z->CCos() + *centre;
+	    break;
+
+	case 63:    // z^(n+0.5)
+	    {
+	    SlopeDegree = (int)param[2];
+	    double pReal = (double)((int)param[2]);
+
+	    BigComplex power = pReal + 0.5;
+	    
+	    BigComplex temp = Z->CLog();
+
+	    temp = temp * power;
+
+	    *Z = temp.CExp() + *centre;
+	    }
+	    break;
+
 /*
-	case 59:							// Fractional Power
+	case 64:    // recip(z^n)
+	    {
+    	    SlopeDegree = (int)param[2];
+	    int n = (int)param[2];
+
+	    if (n < 1)
+		n = 1;
+
+	    BigComplex Unity(1.0, 0.0);
+	    BigComplex eps(1.0e-6, 0.0);
+
+	    if (Z->CSumSqr() < 1.0e-4)
+		*Z = eps;
+
+	    *Z = Unity / (*Z ^ n) + *centre;
+	    }
+	    break;
+
+	case 61:							// Cosh
+	    SlopeDegree = 2;
+	    *Z = Z->CCosh() + *centre;
+	    break;
+	    
+	case 64:							// Log
+	    SlopeDegree = 2;
+	    *Z = Z->CLog() + *centre;
+	    break;
+
+	case 65:							// Sqrt
+	    SlopeDegree = 2;
+	    *Z = Z->CSqrt() + *centre;
+	    break;
+*/
+
+
+/*
+	case 60:							// Fractional Power
 	    {
 	    BigDouble	BigPower = param[2];
 	    *Z = (*Z ^ BigPower) + *centre;
@@ -752,7 +824,7 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 
 	// Calculate the set
 	RefFunctions(&centre, &zBig, SlopeDegree, subtype, power, gManp->param, scratch);
-	if (&gManp->EnableApproximation && !WeHaveMaxRefIteration)		// only needed for BLA
+	if (gManp->EnableApproximation && !WeHaveMaxRefIteration)		// only needed for BLA
 	    {
 	    CoordinateMagnitudeSquared = zBig.CSumSqr();			// no point in further testing once we have MaxRefIteration
 	    if ((CoordinateMagnitudeSquared) > bailout && !WeHaveMaxRefIteration)
@@ -782,7 +854,7 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
     SimpleTimer  tBla;
     tBla.start();
 
-    if (&gManp->EnableApproximation)
+    if (gManp->EnableApproximation)
 	{
 	gManp->Bla.clear();
 	int M = gManp->MaxRefIteration; // the period

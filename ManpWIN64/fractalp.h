@@ -60,7 +60,7 @@ extern	struct	fractalspecificstuff	curfractalspecific;	// info about current fra
 
 //extern	int	subtype;		
 
-#define	NUMMANDERIVPARAM	4
+#define	NUMALTERNATIVEPARAM	4
 #define	NUMPERTPARAM		10
 #define	NUMSLOPEDERIVPARAM	10
 
@@ -71,7 +71,7 @@ struct AlternativeSpecificStuff			// database of alternative fractals, e.g. Tier
     int(*calctype)();				// name of main fractal function 
     int(*big_per_pixel)();			// Bignum versions 
     int(*big_calctype)();
-    double  paramvalue[NUMMANDERIVPARAM];	// default parameter values 
+    double  paramvalue[NUMALTERNATIVEPARAM];	// default parameter values 
     double  rqlim;				// bailout value 
     int	    symmetry;				// see above
     int	    SlopeDegree;			// set to -1 if taken from param
@@ -2046,84 +2046,38 @@ extern	int	DoMarcusButterfly1();
 extern	int	DoMarcusButterfly2();
 extern	int	DoMarcusButterfly3();
 extern	int	DoMarcusButterfly4();
+extern	int	init_Tierazon();		// generic Tierazon fractal
+extern	int	do_Tierazon();
+extern	int	init_MandelDeriv();		// generic Mandelbrot Derivatives fractal
+extern	int	do_MandelDeriv();
+extern	int	DoOscillator();
+extern	int	DoFractalMaps();
+extern	int	DoSprottMaps();
+extern	int	DoSurface();
+extern	int	DoKnots();
+extern	int	DoCurves();
 
-
-extern	INT_PTR CALLBACK  ImageSizeDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  RTJuliaLocDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  PlotTypeDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  FractTypeDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  FractalDlg(HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK  FractalTestDlg(HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK  ColourDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  EditPalDlg (HWND, UINT, WPARAM, LPARAM) ;
-//extern	INT_PTR CALLBACK  CubicTypeDlg (HWND, UINT, WPARAM, LPARAM) ;
-//extern	INT_PTR CALLBACK  ExpTypeDlg (HWND, UINT, WPARAM, LPARAM) ;
-//extern	INT_PTR CALLBACK  PowerTypeDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  LSystemDlg (HWND, UINT, WPARAM, LPARAM) ;
-//extern	INT_PTR CALLBACK  NewtonGeneral (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  SpecNewton (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  SelectFractal (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  SelectIFS (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  RatTypeDlg (HWND, UINT, WPARAM, LPARAM) ;
-//extern	INT_PTR CALLBACK  NewtonTypeDlg (HWND, UINT, WPARAM, LPARAM) ;
-//extern	INT_PTR CALLBACK  HenonTypeDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  PlasmaDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  FrothDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  CellularDlg (HWND, UINT, WPARAM, LPARAM) ;
-//extern	INT_PTR CALLBACK  LyapunovDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  BifTypeDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  FibTypeDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  WalkDlg (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK  Param3D (HWND, UINT, WPARAM, LPARAM) ;
-extern	INT_PTR CALLBACK 	JuliaDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK 	InsideDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK 	SaveColFileOpenDlg (HWND, LPSTR, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	SaveMAPFileOpenDlg (HWND, LPSTR, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	ColFileOpenDlg (HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	MAPFileOpenDlg (HWND, LPSTR, LPSTR);
-//extern				GetParamData(HWND, LPSTR, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK	AnimationDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	JuliaAnimDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	AnimStartDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	CoordDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	ParamDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	CreateDirDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	SpecialAnimDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	FourierTypeDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	FastFourierDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	FourierAnimDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	LyapDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	MountainDlg (HWND, UINT, WPARAM, LPARAM);
+// used in fractalp.cpp
+extern	INT_PTR CALLBACK	SelectOscParams(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	SelectFracParams(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK	ParamDlg(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK	LyapDlg(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK	CellularDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	PertDlg(HWND, UINT, WPARAM, LPARAM);
-//extern	INT_PTR CALLBACK		SelectPertParamDlg(HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	SelectOscParams (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	ScrnFormDlg(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK	FourierTypeDlg(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK	FibTypeDlg(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK	MountainDlg(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK	FastFourierDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	MalthusDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	TriangleDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	GeometryDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	CircleDlg(HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	NumTriangleDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	ApolloniusDlg (HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK	SelectOscillatorDlg (HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK	NumTriangleDlg(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK	ApolloniusDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	HailstoneDlg(HWND, UINT, WPARAM, LPARAM);
-/*
-extern	int init_Marcus();			// generic Marcus fractal
-extern	int do_Marcus();
-*/
-extern	int init_Tierazon();		// generic Tierazon fractal
-extern	int do_Tierazon();
-/*
-extern	int init_MandelDeriv();		// generic Mandelbrot Derivatives fractal
-extern	int do_MandelDeriv();
-*/
-//extern	int init_Oscillator();		// generic Oscillator fractal
-extern	int DoOscillator();
-extern	int DoFractalMaps();
-extern	int DoSprottMaps();
-extern	int DoSurface();
-extern	int DoKnots();
-extern	int DoCurves();
+extern	INT_PTR CALLBACK	CreateDirDlg(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK	SlopeDlg(HWND, UINT, WPARAM, LPARAM);
+
 
 
 

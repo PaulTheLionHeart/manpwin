@@ -125,29 +125,29 @@ int		ReplyUsingDIB;			// TRUE for DIB/WM_COPYDATA and FALSE for clipboard
 
 	  // Functions in VIEWFILE.C
 extern	void	ViewFileInitialize(HWND);
-extern	INT_PTR CALLBACK 	PARFileOpenDlg(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	PNGFileOpenDlg(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	SCIFileOpenDlg(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	LSTFileOpenDlg(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	SaveMPGOpenDlg(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	LsysFileOpenDlg(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	FractintParFileOpenDlg(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	IFSFileOpenDlg(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	FormulaFileOpenDlg(HWND, LPSTR, LPSTR);
+extern	INT_PTR CALLBACK 	PARFileOpenDlg(HWND, LPSTR);
+extern	INT_PTR CALLBACK 	PNGFileOpenDlg(HWND, LPSTR);
+extern	INT_PTR CALLBACK 	SCIFileOpenDlg(HWND, LPSTR);
+extern	INT_PTR CALLBACK 	LSTFileOpenDlg(HWND, LPSTR);
+extern	INT_PTR CALLBACK 	LsysFileOpenDlg(HWND, LPSTR);
+extern	INT_PTR CALLBACK 	FractintParFileOpenDlg(HWND, LPSTR);
+extern	INT_PTR CALLBACK 	IFSFileOpenDlg(HWND, LPSTR);
+extern	INT_PTR CALLBACK 	FormulaFileOpenDlg(HWND, LPSTR);
+extern	INT_PTR CALLBACK 	ColFileOpenDlg(HWND, LPSTR);
+extern	INT_PTR CALLBACK 	MAPFileOpenDlg(HWND, LPSTR);
+extern	INT_PTR CALLBACK 	KFRFileOpenDlg(HWND, LPSTR);
 
 // Functions in SAVEFILE.C
 extern	void	SaveFileInitialize(HWND, HINSTANCE);
 extern	INT_PTR CALLBACK 	SavePNGOpenDlg(HWND, LPSTR, LPSTR);
+extern	INT_PTR CALLBACK 	SaveColFileOpenDlg(HWND, LPSTR, LPSTR);
+extern	INT_PTR CALLBACK 	SaveMAPFileOpenDlg(HWND, LPSTR, LPSTR);
 extern	INT_PTR CALLBACK 	SaveParOpenDlg(HWND, LPSTR, LPSTR);
 extern	INT_PTR CALLBACK	SaveKfrOpenDlg(HWND, LPSTR, LPSTR);
 extern	INT_PTR CALLBACK 	SaveParImageOpenDlg(HWND, LPSTR, LPSTR);
+extern	INT_PTR CALLBACK 	SaveMPGOpenDlg(HWND, LPSTR, LPSTR);
 extern	INT_PTR CALLBACK	SaveSVGOpenDlg(HWND, LPSTR, LPSTR);
 extern	void	SaveFile(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	SaveColFileOpenDlg(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	SaveMAPFileOpenDlg(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	ColFileOpenDlg(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	MAPFileOpenDlg(HWND, LPSTR, LPSTR);
-extern	INT_PTR CALLBACK 	KFRFileOpenDlg(HWND, LPSTR, LPSTR);
 
 extern	void	SetScrollRanges(HWND);
 //extern	void	setup_defaults(void);
@@ -684,12 +684,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		InitTrueColourPalette(FALSE);
 
 		gManp->time_to_reinit = TRUE;
-/*
-		Secondaryhwnd = hwnd;
-		Secondarymessage = message;
-		SecondarywParam = wParam;
-		SecondarylParam = lParam;
-*/
 		break;
 
 	  case WM_CLOSE:
@@ -1157,7 +1151,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    return 0;
 
 	case IDM_OPEN_PAR:
-	    if (PARFileOpenDlg(hwnd, PARFile, szTitleName) == 0)
+	    if (PARFileOpenDlg(hwnd, szTitleName) == 0)
 		{
 		gManp->DisplayStatusBarInfo(INITIALISING, "");				// display status bar
 		gManp->setup_defaults();
@@ -1171,7 +1165,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    break;
 
 	case IDM_OPEN_KALLES:
-	    if (KFRFileOpenDlg(hwnd, KFRFile, szTitleName) == 0)
+	    if (KFRFileOpenDlg(hwnd, szTitleName) == 0)
 		{
 		gManp->DisplayStatusBarInfo(INITIALISING, "");				// display status bar
 		gManp->setup_defaults();
@@ -1184,7 +1178,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    break;
 
 	case IDM_OPEN_PNG:
-	    if (PNGFileOpenDlg(hwnd, PNGFile, szTitleName) == 0)
+	    if (PNGFileOpenDlg(hwnd, szTitleName) == 0)
 		{
 		gManp->setup_defaults();
 		if (read_png_file(hwnd, PNGFile) >= 0)
@@ -1198,9 +1192,9 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    break;
 
 	case IDM_OPEN_SCI: 
-	    if (SCIFileOpenDlg(hwnd, ScriptFileName, szTitleName) == 0)
+	    if (SCIFileOpenDlg(hwnd, szTitleName) == 0)
 		{
-		GetPNGSeqFromScript(hwnd, ScriptFileName);
+		GetPNGSeqFromScript(hwnd, SCIFile);
 		if (DialogBox (hInst, "AnimStartDlg", hwnd, AnimStartDlg))
 		    {
 		    if (WriteMPEGFrames)
@@ -1213,7 +1207,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 			}
 		    else
 			{
-			if (gManp->RunScript(hwnd, ScriptFileName) == -1)
+			if (gManp->RunScript(hwnd, SCIFile) == -1)
 			    {
 			    gManp->time_to_reinit = FALSE;
 			    return (-1);
@@ -1227,7 +1221,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    break;
 
 	case IDM_OPEN_LST: 
-	    if (LSTFileOpenDlg(hwnd, LSTFile, szTitleName) == 0)
+	    if (LSTFileOpenDlg(hwnd, szTitleName) == 0)
 		{
 		if (MPEGWrite(MPGFile) < 0)
 		    return 0;
@@ -1238,7 +1232,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    break;
 
 	case IDM_OPEN_TRUE_MAP: 
-	    if (ColFileOpenDlg (hwnd, COLFile, szTitleName) == 0)
+	    if (ColFileOpenDlg (hwnd, szTitleName) == 0)
 		{
 		FileReadColours(hwnd, COLFile, "Paul's Fractals: Get Colour Parameters");
 		InvalidateRect(hwnd, &gManp->r, FALSE);
@@ -1251,7 +1245,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    break;
 	
 	case IDM_OPEN_PAL_MAP: 
-	    if (MAPFileOpenDlg (hwnd, MAPFile, szTitleName) == 0)
+	    if (MAPFileOpenDlg (hwnd, szTitleName) == 0)
 		FilePalette(hwnd, MAPFile, "Paul's Fractals: Get Colour Map");
 	    else
 		return 0;
@@ -1639,6 +1633,7 @@ BOOL	InitNewFractal(HWND hwnd)
 	{
 	gManp->cycleflag = FALSE;
 	WasFractPar = FALSE;
+	gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
 	gManp->juliaflag = (fractalspecific[gManp->type].juliaflag == JULIAFP);
 	if (gManp->type != OldType)
 	    {
@@ -1678,7 +1673,7 @@ BOOL	InitNewFractal(HWND hwnd)
 	switch (gManp->type)					// further subtypes?
 	    {
 	    case LSYSTEM:					// LSystem Fractal
-		if (LsysFileOpenDlg (hwnd, LSYSFile, szTitleName) < 0)
+		if (LsysFileOpenDlg (hwnd, szTitleName) < 0)
 		    return FALSE;
 		if (load_lsystems(hwnd, LSYSFile) >= 0)
 		    {
@@ -1697,7 +1692,7 @@ BOOL	InitNewFractal(HWND hwnd)
 	    case FORMULA:					// Formula Fractal
 	    case FFORMULA:
 		gManp->type = FORMULA;
-		if (FormulaFileOpenDlg (hwnd, FRMFile, szTitleName) < 0)
+		if (FormulaFileOpenDlg (hwnd, szTitleName) < 0)
 		    return FALSE;
 		if (get_formula_names(hwnd, FRMFile) < 0)
 		    return FALSE;
@@ -1919,7 +1914,7 @@ BOOL	InitNewFractal(HWND hwnd)
 		InitTrueColourPalette(FALSE);
 		break;                 
 	    case FRACTPAR:					// Fractint Par File
-		if (FractintParFileOpenDlg (hwnd, FracPARFile, szTitleName) < 0)
+		if (FractintParFileOpenDlg (hwnd, szTitleName) < 0)
 		    return FALSE;
 		gManp->setup_defaults();
 		if (load_par(hwnd, FracPARFile) < 0)
@@ -1934,7 +1929,7 @@ BOOL	InitNewFractal(HWND hwnd)
 		gManp->time_to_load = FALSE;
 		break;                 
 	    case IFS:					// Iterated File Systems Fractal
-		if (IFSFileOpenDlg (hwnd, IFSFile, szTitleName) < 0)
+		if (IFSFileOpenDlg (hwnd, szTitleName) < 0)
 		    return FALSE;
 		if (get_IFS_names(hwnd, IFSFile) < 0)	    // get the IFS fractal names
 		    return FALSE;
@@ -2080,6 +2075,7 @@ void	CManp::ToggleJulia(HWND hwnd, POINTS &CursorLocShort)
 
 BOOL    UpdateFractal(HWND hwnd)
     {
+    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
     switch (gManp->type)					// further subtypes?
 	{
 	case LSYSTEM:					// LSystem Fractal
@@ -2117,7 +2113,6 @@ BOOL    UpdateFractal(HWND hwnd)
 	    gManp->MaxDimensions = CurveSpecific[gManp->subtype].MaxDimensions;
 	    return (DialogBox(hInst, SurfaceSpecific[gManp->subtype].DialogueName, hwnd, CurveSpecific[gManp->subtype].DialogueType) == TRUE);
 	case PERTURBATION:					// Generic Perturbation Fractal
-	    gManp->Fractal.NumParam = PerturbationSpecific[gManp->subtype].numparams;	// we need to know how many params to load
 	    return (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == TRUE);
 	default:
 	    return (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == TRUE);
@@ -2250,7 +2245,7 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 #define	SHORTFIELDLENGTH	48
 #define	GENERALFIELDLENGTH	100
 #define	TEMPLENGTH		200
-#define	PARAMLENGTH		250
+#define	PARAMLENGTH		600
 #define	SUBTYPELENGTH		500
 #define	FRACTALTYPELENGTH	1200
 
@@ -2345,8 +2340,9 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
     else
 	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Floating Point: %d", gManp->precision);
 
+    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
     if (gManp->type == PERTURBATION)
-	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s-%s, Subtype = %d", (&gManp->EnableApproximation) ? "(Pert-BLA)" : "(Pert)", gManp->GetFractalName(), gManp->subtype);
+	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s-%s, Subtype = %d", (gManp->EnableApproximation) ? "(Pert-BLA)" : "(Pert)", gManp->GetFractalName(), gManp->subtype);
     else if (gManp->type == SLOPEDERIVATIVE)
 	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: (Slope Der)-%s, Subtype = %d", gManp->GetFractalName(), gManp->subtype);
     else if (gManp->type == SLOPEFORWARDDIFF)
@@ -2375,9 +2371,9 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
     for (int i = 0; i < NUMPARAM; i++)
 	{
 	if ((fabs(gManp->param[i]) < 0.00001 || fabs(gManp->param[i]) > 100000.0) && gManp->param[i] != 0.0)
-	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9e", i, gManp->param[i]);
+	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9e  \t  %s", i, gManp->param[i], (gManp->Fractal.ParamName[i]) ? gManp->Fractal.ParamName[i] : "N/A");
 	else
-	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9f", i, gManp->param[i]);
+	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9f  \t  %s", i, gManp->param[i], (gManp->Fractal.ParamName[i]) ? gManp->Fractal.ParamName[i] : "N/A");
 	SAFE_APPEND(ParamStr, PARAMLENGTH, TempStr);
 	}
     sb.append("%s\r\nPixel [%d][%d], %s%s\r\n%s\r\nThreshold: %ld\r\nArith=%s\r\n%s\r\nBailout: %f\r\nImage Size: [%d][%d] ",

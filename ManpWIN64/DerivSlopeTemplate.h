@@ -4,6 +4,43 @@
 
 #pragma once
 
+/**************************************************************************
+    Local high-precision abs() for derivative slope only
+***************************************************************************/
+
+inline double CFabsSlope(const Complex& z)
+    {
+    return sqrt(z.x * z.x + z.y * z.y);
+    }
+
+inline dd_real CFabsSlope(const DDComplex& z)
+    {
+    return sqrt((z.x * z.x) + (z.y * z.y));
+    }
+
+inline qd_real CFabsSlope(const QDComplex& z)
+    {
+    return sqrt((z.x * z.x) + (z.y * z.y));
+    }
+
+inline BigDouble CFabsSlope(const BigComplex& z)
+    {
+    BigDouble temp;
+
+    mpfr_mul(temp.x, z.x.x, z.x.x, MPFR_RNDN);
+
+    BigDouble imag2;
+    mpfr_mul(imag2.x, z.y.x, z.y.x, MPFR_RNDN);
+
+    mpfr_add(temp.x, temp.x, imag2.x, MPFR_RNDN);
+
+    BigDouble out;
+    mpfr_sqrt(out.x, temp.x, MPFR_RNDN);
+
+    return out;
+    }
+
+
 /***********************************************************************
 	Let's find the regions of special colour
 ***********************************************************************/
@@ -322,26 +359,46 @@ double	GiveReflectionT(Complex j, BYTE juliaflag, TComplex C, int &iterations, d
 		}
 	    }
 
-	double	SumSqr = Z.CSumSqr();
+	auto SumSqr = Z.CSumSqr();
+
 	if (SumSqr > rqlim)
 	    {
 	    if (smoothing)
 		{
-		// --- tiny incremental change: compute smooth iteration ------------------
-		double mag = sqrt(SumSqr);
+		double SumSqrD = ToDouble(SumSqr);
+		double mag = sqrt(SumSqrD);
 		double smoothIter_local = i + 1 - log(log(mag)) / log(SlopeDegree);
 		smoothIter = smoothIter_local;
-		// ------------------------------------------------------------------------
 		}
 
+	    //------------------------------------------------
+	    // High-precision derivative slope direction
+	    //
+	    // u = Z / dC
+	    // u = u / |u|
+	    //------------------------------------------------
+
 	    u = Z / dC;
+
 	    u = u / u.CFabs();
+
+//	    auto uMag = CFabsSlope(u);
+//	    u = u / uMag;
+
+	    //------------------------------------------------
+	    // Dot product remains high precision until final
+	    // conversion to double.
+	    //------------------------------------------------
+
 	    auto dot_hp = u.x * v.x + u.y * v.y;
+
 	    double dot = ToDouble(dot_hp);
+
 	    reflection = dot + h2;
-//	    reflection = cdot(u, v) + h2;
-	    reflection = reflection / (1.0 + h2); // rescale so that t does not get bigger than 1
-	    if (reflection < 0.0) reflection = 0.0;
+	    reflection = reflection / (1.0 + h2);
+	    if (reflection < 0.0)
+		reflection = 0.0;
+
 	    iterations = i;
 	    break;
 	    }
@@ -352,6 +409,7 @@ double	GiveReflectionT(Complex j, BYTE juliaflag, TComplex C, int &iterations, d
 	smoothIter = (double)threshold;
 	return 0.0;  // reflection brightness = 0
 	}
+
     return reflection;
     }
 
