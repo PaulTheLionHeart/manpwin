@@ -137,30 +137,20 @@ See <a href="manp7pre.htm">Types of Arithmetic Supported</a> for further details
 <h2>Rendering Data and Colour Systems</h2>
 
 <p>
-ManpWIN internally separates fractal rendering data, rendering metadata,
-palette generation, and final pixel colouring into distinct systems.
+ManpWIN separates fractal calculation from colour generation. This
+allows the same fractal to be rendered using different colour systems,
+palette sources and rendering methods.
 </p>
 
 <p>
-This allows the renderer to support a wide range of arithmetic types,
-palette formats, animation systems, perturbation modes, and external file
-formats while maintaining rendering consistency across different workflows.
+Supported colour systems include the classic FRACTINT palette,
+generated True Colour palettes, MAP files and palettes embedded
+within PAR, PNG and KFR files.
 </p>
 
 <p>
-Colour palettes may be generated procedurally using COL files, loaded from
-fixed MAP palettes, or restored from external fractal formats such as PAR files,
-Fractint PAR files and Kalles Fraktaler files.
-</p>
-
-<p>
-Generated or imported palettes are converted into internal runtime lookup
-tables which are then used during final fractal rendering.
-</p>
-
-<p>
-This separation improves interoperability, animation handling, rendering
-stability, and future extensibility of the rendering engine.
+For a detailed explanation of colour modes, palette files, True Colour
+generation and palette editing, see: <a href="manp7col.htm">More About Colour</a>
 </p>
 
 <h2>Specific ManpWIN Fractals</h2>
@@ -954,7 +944,7 @@ or accuracy depending on the selected rendering method.
 
 <hr>
 <footer>
-  ManpWIN Help &copy; May 2026
+  ManpWIN Help &copy; June 2026
 </footer>
 
 </body>

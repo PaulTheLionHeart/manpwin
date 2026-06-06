@@ -59,52 +59,171 @@ footer {
 <h2>Overview</h2>
 
 <p>
-ManpWIN supports two primary colour modes: <b>True Colour</b> and <b>Palette (MAP)</b> mode.
-Each offers different advantages depending on the fractal and rendering method.
+ManpWIN supports several colour systems which combine the classic
+FRACTINT palette approach with modern True Colour palette generation.
+These colour systems are independent of the fractal calculation itself,
+allowing the same fractal to be rendered using different palette sources.
 </p>
 
-<h2>True Colour Mode</h2>
-
 <p>
-True colour mode generates colours algorithmically using RGB start values and
-increments. This allows smooth gradients and is particularly effective for
-fractals with large iteration counts.
+Internally, ManpWIN supports four primary colour states:
 </p>
 
 <ul>
-<li>Supports smooth colour transitions</li>
-<li>Ideal for deep zooms and high iteration renders</li>
-<li>Allows generation of random colour palettes</li>
+<li>Default FRACTINT Palette</li>
+<li>Default True Colour Palette</li>
+<li>Palette Table Mode</li>
+<li>Custom True Colour Palette</li>
 </ul>
 
-<h2>Palette (MAP) Mode</h2>
+<hr>
+
+<h2>Default FRACTINT Palette</h2>
 
 <p>
-In MAP mode, colours are defined by a fixed palette file. Each iteration value
-maps to a specific RGB entry within the palette.
+This is the classic FRACTINT-compatible palette supplied with ManpWIN.
+</p>
+
+<p>
+It provides compatibility with traditional FRACTINT rendering styles
+and many historic fractal images.
+</p>
+
+<p>
+This palette is selected when:
+</p>
+
+<pre>
+UseFractintPalette=TRUE
+</pre>
+
+<p>
+is specified in MANPWIN.INI.
+</p>
+
+<hr>
+
+<h2>Default True Colour Palette</h2>
+
+<p>
+This palette is generated from ManpWIN's built-in True Colour parameters.
+</p>
+
+<p>
+It is selected when:
+</p>
+
+<pre>
+UseFractintPalette=FALSE
+</pre>
+
+<p>
+is specified in MANPWIN.INI.
+</p>
+
+<p>
+The palette is generated from a set of colour parameters and does not
+require an external palette file.
+</p>
+
+<hr>
+
+<h2>Palette Table Mode</h2>
+
+<p>
+Palette Table mode uses an explicit RGB palette table.
+</p>
+
+<p>
+Typical sources include:
 </p>
 
 <ul>
-<li>Uses FRACTINT-compatible *.map files</li>
-<li>Provides precise control over colour bands</li>
-<li>Well suited to classic fractal rendering styles</li>
+<li>MAP files</li>
+<li>PAR embedded palettes</li>
+<li>PNG embedded palettes</li>
+<li>KFR embedded palettes</li>
+<li>Palette Editor output</li>
 </ul>
 
-<h2>Switching Modes</h2>
+<p>
+Once loaded, all of these palette sources are treated identically by
+the renderer. The original source is no longer important.
+</p>
+
+<hr>
+
+<h2>Custom True Colour Palette</h2>
 
 <p>
-Use <b>Ctrl+P</b> to toggle between True Colour and MAP modes.
+Custom True Colour palettes are generated from user-defined colour
+parameters.
 </p>
 
 <p>
-Note: Random palette generation is only available in True Colour mode.
+Typical sources include:
 </p>
+
+<ul>
+<li>COL files</li>
+<li>Random palette generation</li>
+</ul>
+
+<p>
+These palettes are generated from six True Colour parameters and may be
+saved back to COL files.
+</p>
+
+<hr>
+
+<h2>Switching Between Colour Systems</h2>
+
+<p>
+Press <b>Ctrl+P</b> to switch between the default FRACTINT palette and
+the default True Colour palette.
+</p>
+
+<p>
+Loading a MAP, PAR, PNG or KFR palette automatically activates
+Palette Table mode.
+</p>
+
+<p>
+Loading a COL file or generating a random palette automatically activates
+Custom True Colour mode.
+</p>
+
+<hr>
+
+<h2>Saving Colour Information</h2>
+
+<p>
+COL files store the six True Colour generation parameters used to create
+a generated palette.
+</p>
+
+<p>
+MAP files store explicit RGB palette entries.
+</p>
+
+<p>
+Because a palette table does not contain the original True Colour
+parameters, a MAP palette cannot automatically be converted into a COL
+file.
+</p>
+
+<p>
+Similarly, once a palette has been loaded from a MAP, PAR, PNG or KFR
+file, the original True Colour parameters are no longer meaningful.
+</p>
+
+<hr>
 
 <h2>Tierazon Colouring</h2>
 
 <p>
-Tierazon colouring and filtering use a different colour model from standard
-ManpWIN modes.
+Tierazon colouring and filtering use a different colour model from the
+standard ManpWIN colour systems.
 </p>
 
 <p>
@@ -113,9 +232,11 @@ To exit Tierazon colouring:
 
 <ul>
 <li>Load a palette map using <b>Q</b></li>
-<li>Or load a true colour map using <b>L</b></li>
-<li>Alternatively, reselect the fractal using <b>T</b></li>
+<li>Load a True Colour palette using <b>L</b></li>
+<li>Or reselect the fractal using <b>T</b></li>
 </ul>
+
+<hr>
 
 <h2>Notes</h2>
 
@@ -125,18 +246,24 @@ For advanced palette editing, see
 </p>
 
 <p>
-Different fractals and rendering modes may respond differently to colour
-selection. Experimentation with both modes is encouraged to achieve the
-desired visual effect.
+Different fractals and colouring methods may respond differently to
+colour selection. Experimentation with both palette systems is
+encouraged.
 </p>
 
-<hr style="border: 0; height: 1px; background: #333; margin: 30px 0;">
-
+<p>
+The separation of palette generation, palette storage and fractal
+rendering allows ManpWIN to support classic FRACTINT workflows,
+modern True Colour rendering, animation systems, external file
+formats and future colour extensions while maintaining rendering
+consistency.
 </p>
-<footer>
-ManpWIN Help &copy; March 2026
-</footer>
+
+<hr>
+
+<p>
+<i>ManpWIN Help &copy; June 2026</i>
+</p>
 
 </body>
 </html>
-

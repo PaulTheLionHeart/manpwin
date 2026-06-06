@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<title>Status Information</title>
+
+<style>
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+    max-width: 1000px;
+}
+
+h1 { color: #ffd700; }
+h2 { color: #4fd1ff; }
+h3 { color: #88ff66; }
+
+code {
+    background-color: #111;
+    padding: 4px 6px;
+    border-radius: 4px;
+}
+
+pre {
+    background-color: #111;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+table {
+    margin-top: 10px;
+    border-collapse: collapse;
+}
+
+td {
+    padding: 6px 14px 6px 0;
+    vertical-align: top;
+    font-size: 1.05em;
+}
+
+td:empty + td {
+    font-size: 1.05em;
+    color: #cccccc;
+}
+
+code.token {
+    background-color: #1a1a1a;
+    color: #67ff00;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1.2em;
+    letter-spacing: 0.5px;
+}
+
+td:first-child + td {
+    font-weight: 600;
+    color: #ffffff;
+}
+
+td:empty + td {
+    font-weight: normal;
+    color: #bbbb55;
+    font-size: 1.0em;
+}
+
+code.token:hover {
+    background-color: #222;
+    color: #ffdd55;
+}
+
+a {
+    color: #66ccff;
+    text-decoration: underline;
+}
+
+footer {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #888888;
+}
+</style>
+
+</head>
+<body>
+
+<h1>Status Information</h1>
+
+<p>
+Press <b>TAB</b> while rendering or after a render completes to display the
+Status Information window.
+</p>
+
+<p>
+The Status Information window provides detailed information about the current
+fractal, including location, image size, precision, parameters, bailout values,
+rendering mode, thread count, and other diagnostic information relevant to the
+selected fractal type.
+</p>
+
+<p>
+The information displayed varies depending on the fractal engine being used.
+For example, perturbation and slope-rendered fractals may display progress
+information and engine-specific parameters.
+</p>
+
+<p>
+The contents of the Status Information window can be copied directly to the
+clipboard using the <b>Copy</b> button.
+</p>
+
+<p>
+Use the vertical scroll bar to view additional information when the report
+extends beyond the visible window.
+</p>
+
+<hr>
+
+<footer>
+  ManpWIN Help &copy; June 2026
+</footer>
+
+</body>
+</html>
