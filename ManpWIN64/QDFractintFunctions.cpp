@@ -1,16 +1,8 @@
 /*
-    QDFRACTINTFUNCTIONS.CPP a module for the per pixel calculations of fractals originally from Fractint 
-    This version uses double-double arithmetic.
+    QDFRACTINTFUNCTIONS.CPP - a module for the per pixel calculations of fractals originally from Fractint 
+    This version uses quad-double arithmetic.
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
-
-    Note that not all Fractint functions are included because tehre is no need for high resolution
-
-    #ifdef ALLOWALLFRACTINTFUNCTIONS
-
 */
 
 #include <math.h>

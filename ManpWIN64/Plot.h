@@ -1,6 +1,8 @@
-// Plot.h: interface for the CPlot class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    Plot.h - interface for the CPlot class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <windows.h>
 #include <vector>

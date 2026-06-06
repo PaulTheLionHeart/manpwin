@@ -1,14 +1,13 @@
+/*
+    DDFUNCTIONS.CPP - a module for the per pixel calculations of fractals 
 
-// simple example of QD usage to illustrate linking process
-// Alex Kaiser, LBNL, 6/3/2010
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
 
 #include "DDComplex.h"
 #include "pixel.h"
 #include "FunctionTemplate.h"
 #include "BailoutTemplate.h"
-
-//extern	    int DDFormPerPixel(DDComplex *zIn, DDComplex *qIn);	// norty declarations because this is in the formula parser
-//extern	    int DDFormula(DDComplex *zIn, DDComplex *qIn);
 
 /**************************************************************************
 	Initialise functions for each pixel

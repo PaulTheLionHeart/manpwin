@@ -1,6 +1,9 @@
-// Filter.h: interface for the Tierazon filters.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    Filter.h - interface for the Tierazon filters.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #pragma once
 
 #include "Complex.h"

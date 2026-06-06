@@ -1,10 +1,7 @@
 /*
-    FRACTINTFUNCTIONS.CPP a module for the per pixel calculations of fractals originally from Fractint 
+    FRACTINTFUNCTIONS.CPP - a module for the per pixel calculations of fractals originally from Fractint 
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <math.h>
@@ -34,56 +31,6 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	    InitFunctions(MANDELFP, z, q);
 	    InitFractintTrigFunctionsT<Complex, double>(type, z, q, juliaflag, invert, c, qc, qci, qcj, qck, t, temp, temp1, temp2, temp4, sqr, Fn2Index, param);
 	    break;
-/*
-
-
-	    if (juliaflag)
-		{
-		*z = *q;
-		temp.x = t.x;
-		temp.y = t.y;
-		}
-	    else
-		{
-		*z = 0.0;
-		temp = 0.0;
-		}
-	    qc = t.x;
-	    qci = t.y;
-	    qcj = param[2];
-	    qck = param[3];
-	    break;
-*/
-/*
-	    t = (invert) ? invertz2(c) : c;
-	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
-	    InitFractintTrigFunctionsT<Complex>(type, z, q, juliaflag, invert, c, qc, qci, qcj, qck, t, temp, temp1, temp2, temp4, sqr, Fn2Index, param);
-	    break;
-*/
-/*
-	    temp.x = param[0];
-	    temp.y = param[1];
-	    temp2.x = param[2];
-	    temp2.y = param[3];
-	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
-	    if (juliaflag)
-		{
-		temp.x = q->x;
-		temp.y = q->y;
-		}
-	    else
-		{
-		z->x = t.x + param[0];
-		z->y = t.y + param[1];
-		}
-	    sqr.x = sqr(z->x);
-	    sqr.y = sqr(z->y);
-	    temp1 = *z;					// set temp1 to Y value
-	    temp1.x -= 1;
-//	    CMPLXpwr(z, temp1, temp1);
-	    temp1 = *z ^ temp1;
-	    break;
-*/
 
 	case MARKSMANDELPWRFP:
 	case MARKSMANDELPWR:
@@ -123,11 +70,6 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	    t = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
 	    InitFractintTrigFunctionsT<Complex, double>(type, z, q, juliaflag, invert, c, qc, qci, qcj, qck, t, temp, temp1, temp2, temp4, sqr, Fn2Index, param);
 	    break;
-
-//	case FORMULA:
-//	case SCREENFORMULA:
-//	    FormPerPixelFloat(z, q);
-//	    break;
 
 	}
     return 0;
@@ -201,10 +143,6 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 	case NUMFRACTAL:
 	    return NumFractalT<Complex, double>(z, q, Fn1Index, rqlim, BailoutTestType, param);
 	    
-//	case FORMULA:
-//	case SCREENFORMULA:
-//	    return(FormulaFloat(z, q));
-
 	}
     return 0;
     }

@@ -1,10 +1,7 @@
 /*
-    FRACTINTFUNCTIONS.CPP a module for the per pixel calculations of fractals originally from Fractint 
+    FRACTINTFUNCTIONS.CPP - a module for the per pixel calculations of fractals originally from Fractint 
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <math.h>

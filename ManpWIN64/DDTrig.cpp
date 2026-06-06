@@ -1,10 +1,11 @@
-/*********************************************************************
-	DDTrig.cpp - C routines for big floating point trig functions 
-	Wesley Loewer's Big Numbers.     (C) 1994-95, Wesley B. Loewer
+/*
+    DDTrig.cpp - C routines for big floating point trig functions 
+    Wesley Loewer's Big Numbers.     (C) 1994-95, Wesley B. Loewer
 
-	WThis allows an alternative for multi-threading where trig 
-	functions fail using double-double arithmetic
-*********************************************************************/
+    This allows an alternative for multi-threading where trig functions fail using double-double arithmetic
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
 
 #include <Windows.h>
 #include <atomic>

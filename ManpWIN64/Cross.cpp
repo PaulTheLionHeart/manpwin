@@ -1,5 +1,5 @@
 /*
-   CROSS.CPP a module for Cross Fractals
+   CROSS.CPP - a module for Cross Fractals
    Thanks to Marcus Rezende 
 
    Written in Microsoft Visual C++ by Paul de Leeuw.

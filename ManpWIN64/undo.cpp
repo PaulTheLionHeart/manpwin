@@ -1,10 +1,7 @@
 /*
-   UNDO.CPP a module to store and reload parameters for undo.
+   UNDO.CPP - a module to store and reload parameters for undo.
     
     Written in MICROSOFT VISUAL 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <Windows.h>
@@ -12,15 +9,6 @@
 #include "BigDouble.h"
 #include "Manp.h"
 
-/**************** Big Number Globals *********************/
-
-//extern	int	decimals;
-//extern	BYTE	BigNumFlag;		// True if bignum used
-/**************** Big Number Globals *********************/
-
-//extern	WORD	type;			// fractal type
-
-//extern	void	ConvertString2Bignum(mpfr_t num, char *s);
 struct	UNDO	undo, TempUNDO;
 
 /**************************************************************************

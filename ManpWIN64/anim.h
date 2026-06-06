@@ -1,14 +1,13 @@
-////////////////////////////
-// ANIM.H header file
-//
-// Animated GIF and cursor specific stuff
-////////////////////////////
+/*
+    ANIM.H - Animation definitions.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #ifndef ANIM_H
 #define ANIM_H
 
 #include <vector>
-//#include "Dib.h"
 
 #define	MAXANIM		100000	// maximum animation frames
 

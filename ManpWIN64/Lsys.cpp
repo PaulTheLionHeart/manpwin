@@ -1,11 +1,7 @@
 /*
-    LSYS.C a module to investigate Von Koch curves etc. Based on 
-    FRACTINT.EXE.
+    LSYS.CPP - a module to investigate Von Koch curves etc. Based on FRACTINT.EXE.
     
     Written in Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <stdio.h>
@@ -68,7 +64,6 @@ static	int	save_rule(char *, char **);
 **************************************************************************/
 
 static	double	getnumber(char **str)
-
     {
     char	numstr[30];
     double	ret;
@@ -121,16 +116,11 @@ static	double	getnumber(char **str)
 **************************************************************************/
 
 static	char	*findsize(HWND hwnd, char *command, char **rules, char depth)
-
     {
     char	**rulind, tran;
     char	saveang, saverev;
     double	savesize, saverang, savex, savey;
 
-/*
-cursor_at(12, 30);
-printf("Processing level: %d", depth);
-*/
     while ((*command) && (*command != ']'))
 	{
 	if (!(counter++))
@@ -316,7 +306,6 @@ static	void	findscale(HWND hwnd, char *command, char **rules, char depth)
 **************************************************************************/
 
 static	char	*drawLSys(HWND hwnd, char *command, char **rules, char depth)
-
     {
     char	**rulind, tran;
     WORD	lastx, lasty;
@@ -334,14 +323,6 @@ static	char	*drawLSys(HWND hwnd, char *command, char **rules, char depth)
 		endloop = TRUE;
 		return ("");
 		}
-/*
-	    if (getakey() == ESC_CHAR)
-		{
-		bell(2);
-		endloop = TRUE;
-		return ("");
-		}
-*/
 	    }
 
 	tran = 0;
@@ -446,7 +427,6 @@ static	char	*drawLSys(HWND hwnd, char *command, char **rules, char depth)
 		    xpos += size * coss[angle];
 		    ypos += size * sins[angle];
 		    fastline(lastx, lasty, (WORD) xpos, (WORD) ypos, curcolor);
-//		    fastline(lastx, lasty, (WORD) xpos, (WORD) ypos, 15);
 		    break;
 		case '[':
 		    saveang = angle;
@@ -490,7 +470,6 @@ static	char	*drawLSys(HWND hwnd, char *command, char **rules, char depth)
 **************************************************************************/
 
 static	int	readLSystemFile(HWND hwnd, char *str, char *filename)
-
     {
     int	i;
     char	**rulind;
@@ -499,13 +478,12 @@ static	int	readLSystemFile(HWND hwnd, char *str, char *filename)
     int	linenum = 0, check = 0;
     char	InLine[164], fixed[164], *word;
     FILE	*fp;
-    char	msgbuf[481];				/* enough for 6 full lines */
+    char	msgbuf[481];				// enough for 6 full lines
     char	s[200];
 
     maxangle = 0;
     for (linenum = 0; linenum < MAXRULES; ++linenum)
 	ruleptrs[linenum] = NULL;
-
 
     if ((fp = fopen(filename, "r")) == NULL)
 	{
@@ -614,7 +592,6 @@ static	int	readLSystemFile(HWND hwnd, char *str, char *filename)
 **************************************************************************/
 
 int	Lsystem(HWND hwnd, char *filename)
-
     {
     char	order;
     HCURSOR  hCursor;
@@ -633,14 +610,10 @@ int	Lsystem(HWND hwnd, char *filename)
 	{
 	realangle = angle = reverse = 0;
 	curcolor = colour;
-//	openpl(video_mode);
 	drawLSys(hwnd, ruleptrs[0], &ruleptrs[1], order);
-//	if (!endloop)
-//	    bell(1);
 	}
     hCursor = LoadCursor(NULL, IDC_ARROW);		// Load normal cursor.
     free_rules_mem();
-//    closepl(!endloop);
     loaded = 0;
     gManp->DisplayFractal(hwnd);
     return 0;
@@ -651,7 +624,6 @@ int	Lsystem(HWND hwnd, char *filename)
 **************************************************************************/
 
 int	LLoad(HWND hwnd, char *filename)
-
     {
     char i;
     if (readLSystemFile(hwnd, lptr[lsys_ptr], filename) < 0)
@@ -675,7 +647,6 @@ int	LLoad(HWND hwnd, char *filename)
 **************************************************************************/
 
 static	void	free_rules_mem(void)
-
     {
     int	i;
     for (i = 0; i < MAXRULES; ++i)
@@ -688,7 +659,6 @@ static	void	free_rules_mem(void)
 **************************************************************************/
 
 static	int	save_rule(char *rule, char **saveptr)
-
     {
     int	i;
     char	*tmp;
@@ -707,7 +677,6 @@ static	int	save_rule(char *rule, char **saveptr)
 **************************************************************************/
 
 void	thinking(HWND hwnd, int count)
-
     {
     static	int	thinkstate, slow = 0;
     static	char	wheel[] = {'-', '\\', '|', '/'};
@@ -721,7 +690,6 @@ void	thinking(HWND hwnd, int count)
 	}
     }
        	 
-//extern	int	xdots, ydots;
 #define dopoint(x,y,c) { if(x < gManp->xdots && y < gManp->ydots) gManp->Plot.PlotPoint(x,y,c); }
 
 /**************************************************************************
@@ -729,18 +697,8 @@ void	thinking(HWND hwnd, int count)
 **************************************************************************/
 
 int	MPOverflow;
-/*
-long	multiply(long a, long b, int offset)
 
-    {
-    __int64	c;
-
-    c = (__int64)a * (__int64)b;
-    return (long)(((__int64)c) >> offset);
-    }
-*/
 long	divide(long a, long b, int offset)
-
     {
     __int64	c;
 
@@ -818,7 +776,6 @@ void	fastline(const WORD x0, const WORD y0, const WORD x1, const WORD y1, const 
 **************************************************************************/
 
 int	compare_lsys(char *p1, char *p2)
-
     {
     return (_strnicmp(p1, p2, 20));
     }
@@ -828,7 +785,6 @@ int	compare_lsys(char *p1, char *p2)
 **************************************************************************/
 
 int	load_lsystems(HWND hwnd, char *filename)
-
     {
     FILE	*fp;
     char	s[250];
@@ -877,7 +833,6 @@ int	load_lsystems(HWND hwnd, char *filename)
 **************************************************************************/
 
 INT_PTR CALLBACK SelectFractal(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-
     {
     static	int	i;
     static	int	index;

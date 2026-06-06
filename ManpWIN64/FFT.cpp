@@ -1,5 +1,5 @@
 /*
-    FFT.CPP a module for Exploring Fast Fourier Transform
+    FFT.CPP - a module for Exploring Fast Fourier Transform
     
     Written in Microsoft Visual C++ by Paul de Leeuw.
 */

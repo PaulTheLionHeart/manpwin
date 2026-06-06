@@ -1,8 +1,10 @@
-/****************************************************
+/*
     TETRATION.CPP a module to explore Tetration
+
     http://paulbourke.net/fractals/tetration/
+
     Written in Microsoft Visual C++ by Paul de Leeuw.
-****************************************************/
+*/
 
 #include <math.h>
 #include "manp.h"

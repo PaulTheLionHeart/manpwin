@@ -1,9 +1,8 @@
 /*
-   OSCMORPH.CPP a module to explore Morphing Chaotic Oscillators
+   OSCMORPH.CPP - a module to explore Morphing Chaotic Oscillators
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
-
 
 #include	<stdio.h>
 #include	"manp.h"
@@ -29,7 +28,6 @@ extern	char	PNGFile[];			// PNG file
 extern	char	ScriptFileName[];		// base name for script file 
 
 extern	char	*AnimData(void);
-extern	void	ConvertRGB2ASCII(RGBTRIPLE, char *);
 extern	char	*GenerateMPEGFileName(char *, char *);
 extern	char	*GenerateAnimFileName(char *, char *);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);

@@ -1,5 +1,5 @@
 /*
-    TRIG.CPP a module of trig tabkles for sine and cosine
+    TRIG.CPP - a module of trig tabkles for sine and cosine
     
     Written in Microsoft Visual C++ by Paul de Leeuw.
 */

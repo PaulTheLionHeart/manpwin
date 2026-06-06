@@ -1,14 +1,8 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-//
-// EDITPALDLG.CPP a module for palette editing functions.
-//
-//////////////////////////////////////////////////////////////////////////////////////////
-// Author:-
-//	Paul de Leeuw
-//	pdeleeuw at deleeuw dot com dot au	( replace "at" "dot" by the normal characters.)
-//	11/12/2007
-//	This Class includes code to create a true palette and to modify it
-//////////////////////////////////////////////////////////////////////////////////////////
+/*
+    EDITPALDLG.CPP - a module for palette editing functions - GUI implementation.
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
 
 #include <stdio.h>
 #include <string.h>

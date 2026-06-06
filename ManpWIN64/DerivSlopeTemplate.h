@@ -1,3 +1,9 @@
+/*
+    DerivSlopeTemplate.H - Template for handling derivative slope for all arithmetic types.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <windows.h>
 #include <functional>
 #include "Complex.h"
@@ -46,12 +52,7 @@ inline BigDouble CFabsSlope(const BigComplex& z)
 ***********************************************************************/
 
 template <typename TComplex>
-bool IsArtMatrixSpecialPixelT(
-    TComplex C,
-    Complex j,
-    BYTE juliaflag,
-    double* param,
-    long threshold)
+bool IsArtMatrixSpecialPixelT(TComplex C, Complex j, BYTE juliaflag, double* param, long threshold)
     {
     TComplex z, q;
     TComplex a, b, a2 = 0, aa3, t2, t3, temp, v = 0;

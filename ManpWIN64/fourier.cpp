@@ -1,5 +1,5 @@
 /*
-    FOURIER.CPP a module for Fourier Synthesis of signals
+    FOURIER.CPP - a module for Fourier Synthesis of signals
     
     Written in Microsoft Visual C++ by Paul de Leeuw.
 */

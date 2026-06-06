@@ -1,8 +1,8 @@
-//////////////////////////////////////////////////////////////////////
-//
-// colour.h: interface for true colour palettes. implementation of the CTrueCol class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    Colour.h - interface for true colour palettes. implementation of the CTrueCol class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <vector>
 #pragma once
@@ -44,6 +44,14 @@
 #define max(a,b)    (((a) > (b)) ? (a) : (b))
 #define min(a,b)    (((a) < (b)) ? (a) : (b))
 
+enum PaletteMode
+    {
+    PALETTE_FRACTINT = 0,	// default Fractint palette
+    PALETTE_DEFAULT_COL,	// built-in TrueCol parameters
+    PALETTE_TABLE,		// MAP/PAR/KFR/PNG/editor palette
+    PALETTE_CUSTOM_COL		// COL file or random generator
+    };
+
 //////////////////////////////////////////////////////////////////////
 // Class definition
 //////////////////////////////////////////////////////////////////////
@@ -53,7 +61,7 @@ class CTrueCol
     public:
 	CTrueCol();
 	virtual		~CTrueCol();
-	void		BuildIterationColourMap(BYTE, long, int, int, BOOL);
+	void		BuildIterationColourMap(BYTE, long, int, int);
 	void		LoadMAPColourSource(long threshold, BYTE default_palette[]);
 	void		GenerateCOLColourSource(BYTE RandFlag, long threshold, int StartColourCycling, int logval);
 	std::vector<RGBTRIPLE> PalettePtr {0};		// [MAXPALETTE];	// for maximum palette
@@ -76,7 +84,7 @@ class CTrueCol
 	long		ColoursInPALFile;		// How many colours are in a palette file?
 	long		LocalThreshold;
 	long		FinalThreshold;
-	bool		IsMAPFile;			// have we loaded a MAP file?
+	PaletteMode	CurrentPaletteMode;
 	std::vector<RGBTRIPLE> DefaultPalettePtr {0};	// original Fractint VGA Palette
 
 	void		FillPalette(int FillType, std::vector<RGBTRIPLE> &pal, long threshold);

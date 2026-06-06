@@ -1,3 +1,9 @@
+/*
+    FractintTrigTemplate.H - Template for handling Fractint Trig Functions for all arithmetic types.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <windows.h>
 #include <functional>
 #include <cmath>
@@ -285,20 +291,8 @@ struct HyperTrigCaller<QDComplex>
 // =====================================
 
 template<typename TComplex, typename TReal>
-int FractintTrigIterT(
-    int type,
-    TComplex* z,
-    TComplex* q,
-    TComplex& temp,
-    TComplex& temp1,
-    TComplex& temp2,
-    TComplex& temp3,
-    TComplex& sqr,
-    TReal& qc, TReal& qci, TReal& qcj, TReal& qck,
-    int Fn1Index,
-    int Fn2Index,
-    TReal rqlim,
-    int BailoutTestType)
+int FractintTrigIterT(int type, TComplex* z, TComplex* q, TComplex& temp, TComplex& temp1, TComplex& temp2, TComplex& temp3, TComplex& sqr,
+	TReal& qc, TReal& qci, TReal& qcj, TReal& qck, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType)
     {
     CTrigFn TrigFn;
 
@@ -415,14 +409,7 @@ int FractintTrigIterT(
     }
 
 template<typename TComplex, typename TReal>
-int TrigPlusTrigFractalT(
-    TComplex* z,
-    TComplex& temp1,
-    TComplex& temp2,
-    int Fn1Index,
-    int Fn2Index,
-    TReal rqlim,
-    int BailoutTestType)
+int TrigPlusTrigFractalT(TComplex* z, TComplex& temp1, TComplex& temp2, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType)
     {
     CTrigFn TrigFn;
 
@@ -440,13 +427,7 @@ int TrigPlusTrigFractalT(
     }
 
 template<typename TComplex, typename TReal>
-int MandelTrigFractalT(
-    TComplex* z,
-    TComplex& temp1,
-    TComplex& temp3,
-    TComplex& t,
-    int Fn1Index,
-    TReal rqlim)
+int MandelTrigFractalT(TComplex* z, TComplex& temp1, TComplex& temp3, TComplex& t, int Fn1Index, TReal rqlim)
     {
     CTrigFn TrigFn;
 
@@ -508,13 +489,7 @@ int MandelTrigFractalT(
     }
 
 template<typename TComplex, typename TReal>
-int ManTrigPlusExpFractalT(
-    TComplex* z,
-    TComplex& temp1,
-    TComplex& t,
-    int Fn1Index,
-    TReal rqlim,
-    int BailoutTestType)
+int ManTrigPlusExpFractalT(TComplex* z, TComplex& temp1, TComplex& t, int Fn1Index, TReal rqlim, int BailoutTestType)
     {
     CTrigFn TrigFn;
 
@@ -536,14 +511,7 @@ int ManTrigPlusExpFractalT(
     }
 
 template<typename TComplex, typename TReal>
-int ManTrigPlusZSqrFractalT(
-    TComplex* z,
-    TComplex& temp1,
-    TComplex& sqr,
-    TComplex& t,
-    int Fn1Index,
-    TReal rqlim,
-    int BailoutTestType)
+int ManTrigPlusZSqrFractalT(TComplex* z, TComplex& temp1, TComplex& sqr, TComplex& t, int Fn1Index, TReal rqlim, int BailoutTestType)
     {
     CTrigFn TrigFn;
 
@@ -561,14 +529,7 @@ int ManTrigPlusZSqrFractalT(
     }
 
 template<typename TComplex, typename TReal>
-int FnFnPlusFractalT(
-    TComplex* z,
-    TComplex& t,
-    TComplex& temp2,
-    int Fn1Index,
-    int Fn2Index,
-    TReal rqlim,
-    int BailoutTestType)
+int FnFnPlusFractalT(TComplex* z, TComplex& t, TComplex& temp2, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType)
     {
     CTrigFn TrigFn;
 
@@ -587,14 +548,7 @@ int FnFnPlusFractalT(
     }
 
 template<typename TComplex, typename TReal>
-int FnFnMulFractalT(
-    TComplex* z,
-    TComplex& t,
-    TComplex& temp2,
-    int Fn1Index,
-    int Fn2Index,
-    TReal rqlim,
-    int BailoutTestType)
+int FnFnMulFractalT(TComplex* z, TComplex& t, TComplex& temp2, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType)
     {
     CTrigFn TrigFn;
 
@@ -613,12 +567,7 @@ int FnFnMulFractalT(
     }
 
 template<typename TComplex, typename TReal>
-int SqrTrigFractalT(
-    TComplex* z,
-    TComplex& temp1,
-    int Fn1Index,
-    TReal rqlim,
-    int BailoutTestType)
+int SqrTrigFractalT(TComplex* z, TComplex& temp1, int Fn1Index, TReal rqlim, int BailoutTestType)
     {
     CTrigFn TrigFn;
 
@@ -629,11 +578,7 @@ int SqrTrigFractalT(
     }
 
 template<typename TComplex, typename TReal>
-int Sqr1OverTrigFractalT(
-    TComplex* z,
-    int Fn1Index,
-    TReal rqlim,
-    int BailoutTestType)
+int Sqr1OverTrigFractalT(TComplex* z, int Fn1Index, TReal rqlim, int BailoutTestType)
     {
     CTrigFn TrigFn;
 
@@ -645,13 +590,7 @@ int Sqr1OverTrigFractalT(
     }
 
 template<typename TComplex, typename TReal>
-int NumFractalT(
-    TComplex* z,
-    TComplex* q,
-    int Fn1Index,
-    TReal rqlim,
-    int BailoutTestType,
-    double* param)
+int NumFractalT(TComplex* z, TComplex* q, int Fn1Index, TReal rqlim, int BailoutTestType, double* param)
     {
     CTrigFn TrigFn;
 
@@ -675,16 +614,7 @@ int NumFractalT(
 
 // General ZXTrigPlusZ
 template<typename TComplex, typename TReal>
-int ZXTrigPlusZfpFractalT(
-    TComplex* z,
-    TComplex* q,
-    TComplex& temp,
-    TComplex& temp1,
-    TComplex& temp2,
-    TComplex& temp3,
-    int Fn1Index,
-    TReal rqlim,
-    int BailoutTestType)
+int ZXTrigPlusZfpFractalT(TComplex* z, TComplex* q, TComplex& temp, TComplex& temp1, TComplex& temp2, TComplex& temp3, int Fn1Index, TReal rqlim, int BailoutTestType)
     {
     CTrigFn TrigFn;
 
@@ -702,13 +632,7 @@ int ZXTrigPlusZfpFractalT(
 
 // Scott variant
 template<typename TComplex, typename TReal>
-int ScottZXTrigPlusZfpFractalT(
-    TComplex* z,
-    TComplex& temp1,
-    TComplex& temp3,
-    int Fn1Index,
-    TReal rqlim,
-    int BailoutTestType)
+int ScottZXTrigPlusZfpFractalT(TComplex* z, TComplex& temp1, TComplex& temp3, int Fn1Index, TReal rqlim, int BailoutTestType)
     {
     CTrigFn TrigFn;
 
@@ -722,14 +646,7 @@ int ScottZXTrigPlusZfpFractalT(
 
 // Skinner variant
 template<typename TComplex, typename TReal>
-int SkinnerZXTrigSubZfpFractalT(
-    TComplex* z,
-    TComplex& temp,
-    TComplex& temp1,
-    TComplex& temp3,
-    int Fn1Index,
-    TReal rqlim,
-    int BailoutTestType)
+int SkinnerZXTrigSubZfpFractalT(TComplex* z, TComplex& temp, TComplex& temp1, TComplex& temp3, int Fn1Index, TReal rqlim, int BailoutTestType)
     {
     CTrigFn TrigFn;
 

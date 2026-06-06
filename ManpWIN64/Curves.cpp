@@ -1,5 +1,5 @@
 /*
-   CURVES.CPP a module to explore 3D curves
+   CURVES.CPP - a module to explore 3D curves
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
@@ -11,7 +11,7 @@
 #include	"resource.h"
 #include	"fractype.h"
 #include	"fractalp.h"
-#include	"menu.h"
+//#include	"menu.h"
 //#include	"anim.h"
 #include	"OscProcess.h"
 

@@ -1,5 +1,6 @@
 /*
-   OSCANIM.CPP a module to animate Chaotic Oscillators
+   OSCANIM.CPP - a module to animate Chaotic Oscillators
+
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
 
@@ -10,44 +11,36 @@
 #include	"resource.h"
 #include	"fractype.h"
 #include	"fractalp.h"
-#include	"menu.h"
-//#include	"anim.h"
 #include	"colour.h"
 #include	"OscProcess.h"
 #include	"Matrix.h"
 #include	"SafeStrings.h"
 
-//extern	HWND	GlobalHwnd;			// This is the main windows handle
-
-//extern	void	ConvertRGB2ASCII(RGBTRIPLE, char *);
 extern	char	*GenerateMPEGFileName (char *, char *);
 extern	char	*GenerateAnimFileName (char *, char *);
 extern	char	*AnimData(void);
-//extern	int	GenMalthusScript(HWND hwnd, char *filename);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
 
-extern	BOOL	WritePNGFrames;			// write frames to PNG files
-extern	BOOL	WriteMemFrames;			// write frames to memory
-extern	BOOL	WritePNGList;			// write PNG filenames to a *lst file
-extern	BOOL	WriteMPEGFrames;		// write frames directly to an MPEG file
+extern	BOOL	WritePNGFrames;		// write frames to PNG files
+extern	BOOL	WriteMemFrames;		// write frames to memory
+extern	BOOL	WritePNGList;		// write PNG filenames to a *lst file
+extern	BOOL	WriteMPEGFrames;	// write frames directly to an MPEG file
 
-extern	char	ANIMPNGPath[];			// path for animated PNG files and LST files
-extern	char	MPGPath[];			// path for PNG files
-extern	char	PNGPath[];			// path for MPEG files
-extern	char	MPGFile[];			// MPEG file
-extern	char	PNGFile[];			// PNG file
-extern	char	PNGName[];			// base name for PNG file sequence
-extern	char	ScriptFileName[];		// base name for script file 
+extern	char	ANIMPNGPath[];		// path for animated PNG files and LST files
+extern	char	MPGPath[];		// path for PNG files
+extern	char	PNGPath[];		// path for MPEG files
+extern	char	MPGFile[];		// MPEG file
+extern	char	PNGFile[];		// PNG file
+extern	char	PNGName[];		// base name for PNG file sequence
+extern	char	ScriptFileName[];	// base name for script file 
 
-extern	char	PNGName[];			// base name for PNG file sequence
-static	MATRIX	m;				// transformation matrice 
-
-//extern	void	ClearScreen(void);
+extern	char	PNGName[];		// base name for PNG file sequence
+static	MATRIX	m;			// transformation matrice 
 
 static	double	xRotInc, yRotInc, zRotInc; 
 static	int	frames = 100;
-//	BOOL	DisplayLines = TRUE;
 static	int	RotateAnim = ROTATION;
+
 extern	BOOL	DisplayAxes;
 extern	BOOL	PlotCentre;		// display circle at the centre of the oscillator
 extern	int	CentrePixels;		// radius of the display circle at the centre of the oscillator in pixels

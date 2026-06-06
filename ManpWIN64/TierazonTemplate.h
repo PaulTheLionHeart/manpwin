@@ -1,3 +1,9 @@
+/*
+    TierazonTemplate.H - Template for handling Tierazon fractals for all arithmetic types.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <windows.h>
 #include <functional>
 
@@ -8,22 +14,8 @@
 // --------------------------------
 
 template<typename TComplex,typename TReal>
-void TierazonInit_Generic(
-    int subtype,
-    TComplex* z,
-    TComplex* q,
-    TComplex* z2,
-    TComplex& sqr,
-    TReal& real_imag,
-    bool juliaflag,
-    double* param, 
-    WORD *degree,
-    TComplex* cb,
-    TComplex* caa3,
-    TComplex* c1,
-    TComplex* c2,
-    TComplex* b,
-    TComplex* z4)
+void TierazonInit_Generic(int subtype, TComplex* z, TComplex* q, TComplex* z2, TComplex& sqr, TReal& real_imag, bool juliaflag, double* param,  WORD *degree,
+	TComplex* cb, TComplex* caa3, TComplex* c1, TComplex* c2, TComplex* b, TComplex* z4)
     {
     static_assert(std::is_class<TComplex>::value, "TComplex must be a complex type");
     switch (subtype)
@@ -1024,25 +1016,8 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 // --------------------------------
 
 template<typename TComplex, typename TReal>
-inline int TierazonIter(
-    int subtype,
-    TComplex* z,
-    TComplex* q,
-    TComplex* z2,
-    TComplex* z4,
-    TComplex& sqr,
-    TReal& real_imag,
-    BYTE* SpecialFlag,
-    long* iteration,
-    TComplex caa3,
-    TComplex cb,
-    TComplex c1,
-    TComplex c2,
-    TComplex b,
-    double rqlim,
-    WORD* degree,
-    long threshold,
-    int bailout_type)
+inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TComplex* z4, TComplex& sqr, TReal& real_imag, BYTE* SpecialFlag,
+	long* iteration, TComplex caa3, TComplex cb, TComplex c1, TComplex c2, TComplex b, double rqlim, WORD* degree, long threshold, int bailout_type)
     {
     double  d = 0.0;
     TComplex a, t, zd, z1, z3, zt;

@@ -1,16 +1,12 @@
 /*
-    PLOT.CPP a module to interface screen routines with pixels[].
+    PLOT.CPP - a module to interface screen routines with pixels[].
     
     Written in MICROSOFT VISUAL 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <cassert>
 #include "Plot.h"
 
-//extern	std::vector<float> wpixels;		// global vector
 extern	std::atomic<bool> gStopRequested;	// force early exit
 
 ///////////////////////////////////////////////////////////////////////
@@ -283,14 +279,6 @@ DWORD	CPlot::GetColour(WORD x, WORD y)
 		OutputDebugStringA("GetColour: pixel co-ordinate out of bounds\n");
 #endif
 		value = 0L;
-	    }
-
-	    if (value > (DWORD)threshold)
-		{
-#ifdef _DEBUG
-		OutputDebugStringA("GetColour: pixel colour out of bounds\n");
-#endif
-		value = 0L;
 		}
 	    }
 	else
@@ -301,7 +289,6 @@ DWORD	CPlot::GetColour(WORD x, WORD y)
 	    value = 0L;
 	    }
 	}
-
     return value;
     }
 

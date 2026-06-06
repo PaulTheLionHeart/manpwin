@@ -1,5 +1,5 @@
 /*
-   CURLICUES.CPP a module for Fractals by Dr. M. Ecker
+   CURLICUES.CPP - a module for Fractals by Dr. M. Ecker
    Thanks to Marcus Rezende 
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
@@ -12,7 +12,6 @@
 #include	"fractype.h"
 #include	"fractalp.h"
 #include	"BigDouble.h"
-//#include	"anim.h"
 #include	"polygon.h"
 #include	"colour.h"
 #include	"colour.h"
@@ -21,15 +20,11 @@
 
 #define MAXPOINTS 16
 
-//extern	HWND	GlobalHwnd;				// This is the main windows handle
-
 extern	int	user_data(HWND);
 extern	char	*GenerateMPEGFileName (char *, char *);
 extern	char	*GenerateAnimFileName (char *, char *);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
 extern	char	*AnimData(void);
-extern	void	ConvertRGB2ASCII(RGBTRIPLE, char *);
-//extern	void	ConvertBignum2String(char *s, mpfr_t num);
 
 extern	BOOL	WritePNGFrames;			// write frames to PNG files
 extern	BOOL	WriteMemFrames;			// write frames to memory
@@ -75,10 +70,9 @@ int	CManp::GenParameterScript(HWND hwnd, char *filename, int NumVariables)
     fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimData());	// add quotes to filename to trap spaces in path
     if (BigNumFlag)
 	{
-	char	*s1 = nullptr, *s2 = nullptr, *s3 = nullptr;
-	s1 = new char[SIZEOF_BF_VARS];
-	s2 = new char[SIZEOF_BF_VARS];
-	s3 = new char[SIZEOF_BF_VARS];
+	char s1[SIZEOF_BF_VARS]{};
+	char s2[SIZEOF_BF_VARS]{};
+	char s3[SIZEOF_BF_VARS]{};
 	BigHor.ToString(s1, SIZEOF_BF_VARS, false);
 	BigVert.ToString(s2, SIZEOF_BF_VARS, false);
 	BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
@@ -86,9 +80,6 @@ int	CManp::GenParameterScript(HWND hwnd, char *filename, int NumVariables)
 	*(s2 + decimals + 5) = '\0';
 	*(s3 + decimals + 5) = '\0';
 	fprintf(out, " -c%s,%s,%s\n", s1, s2, s3);
-	if (s1) { delete[] s1; s1 = NULL; }
-	if (s2) { delete[] s2; s2 = NULL; }
-	if (s3) { delete[] s3; s3 = NULL; }
 	}
     else
         fprintf(out, " -c%24.24f,%24.24f,%24.24g\n", gManp->hor, gManp->vert, gManp->mandel_width);

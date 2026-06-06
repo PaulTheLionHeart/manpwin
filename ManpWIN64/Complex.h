@@ -1,6 +1,8 @@
-// Complex.h: interface for the Complex class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    Complex.h - interface for the Complex class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #pragma once
 

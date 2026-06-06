@@ -1,12 +1,9 @@
 /*
-    MANPENGINE.CPP a program to investigate the Mandelbrot set. This version dumps
+    MANPENGINE.CPP - a program to investigate the Mandelbrot set. This version dumps
     values of count to file and implements periodic checking. For more 
     information refer to Scientific American August 1985.
     
     Written in MICROSOFT VISUAL 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include "pixel.h"

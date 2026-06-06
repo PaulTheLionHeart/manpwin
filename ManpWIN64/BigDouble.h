@@ -1,3 +1,9 @@
+/*
+    BigDouble.h: interface for the Bignum class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #pragma once
 
 #include	<math.h>

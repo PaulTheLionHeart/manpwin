@@ -1,11 +1,11 @@
 /*
- * Hailstone.cpp - 2D Hailstone Sequence Visualization Implementation
- * 
- * This module implements the 2D Hailstone sequence with cycle detection,
- * auto-scaling visualization, and CSV export capabilities.
- * 
- * Revision history:
- * 13 Mar 2025  Initial implementation for ManpWIN
+    Hailstone.cpp - 2D Hailstone Sequence Visualization Implementation
+  
+    This module implements the 2D Hailstone sequence with cycle detection,
+    auto-scaling visualization, and CSV export capabilities.
+  
+    Revision history:
+    13 Mar 2025  Initial implementation for ManpWIN
  */
 
 #include "Hailstone.h"
@@ -18,7 +18,6 @@
 #include <cmath>
 
 extern HWND GlobalHwnd;
-//extern WORD threshold;
 
 /**************************************************************************
     Constructor

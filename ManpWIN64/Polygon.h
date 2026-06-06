@@ -1,6 +1,8 @@
-// Polygon.h: polygon class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    Polygon.h - interface for the CPoly class - polygon class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include	"Plot.h"
 
@@ -31,8 +33,6 @@ class CPoly
     void init(int vertices, DWORD color);
     void display(CPlot Plot);
     void ints(double);
-//    void intsx(double);
-    void sort(int);
     void sort(int, int, CPlot Plot);
     };
 #endif

@@ -1,6 +1,8 @@
-/*-----------------------------------------
-	Paul's Fractal Generator
-  -----------------------------------------*/
+/*
+   ManpWIN.CPP - Paul's Fractal Generator.
+
+   Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <windows.h>
 #include "manpwin.h"
@@ -30,8 +32,10 @@
 #include "OtherFunctions.h"
 
 extern	std::atomic<bool> gStopRequested;
-extern	void	HardStopNow(HWND hwnd, const char* reason);
+extern	std::atomic<long> gPixelsDone;
 
+extern	void	HardStopNow(HWND hwnd, const char* reason);
+extern	char	*str_find_ci(char *, char *);
 
 LRESULT CALLBACK PASCAL WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
@@ -48,8 +52,6 @@ void	FindCursorRealPos(POINTS *);
 
 extern	BOOL	wintext_initialize(HANDLE, HWND, LPSTR);
 extern	void	output_batch(double, double, double, HWND, LPSTR);
-//extern	int	ZoomIn(HWND, RECT *);			// zoom functions in Zoom.c
-//extern	int	ZoomOut(HWND, RECT *);
 extern	short	FilePalette(HWND, char *, char *);
 extern	short	FileReadColours(HWND, char *, char *);
 extern	int	read_png_file(HWND, char *);
@@ -58,22 +60,18 @@ extern	void	draw3D(HWND);
 extern	void	initFibonacci(void);
 extern	int	load_par(HWND, char *);
 extern	void	DisplayPalette(HWND, BOOL);
-//extern	void	DisplayFractal(HWND);
 extern	int	rotate(int);
 extern	int	CopyPictureToClipboard(HWND);
 extern	int	mainview(HWND, BOOL);
 extern	void	ClosePtrs(void);
 extern	int	FractintPar(HWND, char *);
 extern	int	ReadConfig(HWND);
-//extern	void	OutputStatusBar(HWND);
 extern	int	SaveConfig(HWND);
 extern	void	rotate_vga_palette(int, int);
 extern	int	fpFormulaSetup(char *);
 extern	void	ProcessKeys(HWND, WPARAM);
 extern	char	*trailing(char *instr);
 extern	HWND	DoHtmlHelp(HWND, char *, UINT);
-//extern	int	DoAnimation(void);
-//extern	int	AnimateClose(void);
 extern	int	ProcessFormulaString(char *);
 extern	int	MPEGWrite(char *);
 extern	int	DisplayRGB(POINTS);
@@ -83,10 +81,6 @@ extern	int	TogglePerturbation(WORD *type, int *subtype);
 extern	void	InitMultipliers(void);
 extern	int	ReadKallesFile(HWND hwnd, char *filename);
 
-//extern	int	xdots, ydots, width, height;
-
-//extern	BOOL	DisplayAnimation;		// allow system to know that we are currently displaying an animation
-
 static	char    argumentFileName[MAX_PATH+MAXDATALINE];
 static	HINSTANCE  hInst;
 static	HCURSOR  hCursor;
@@ -95,35 +89,17 @@ static	char	szFileName[MAX_PATH];
 static	char    szTitleName[MAXDATALINE] = "ManpWIN";
 static	char	szSaveFileName[MAX_PATH];
 
-//extern	int	SlopeType;
-//extern	bool	EnableApproximation;		// use BLA on perturbation
-//extern	int	PalOffset;			// begin palette here
-//extern	double	IterDiv;			// divide ieration by this amount
-//extern	double	ColourSpeed;			// used for colour smoothing
-//extern	int	PertColourMethod;		// some ideas from Kalles
-//extern	int	RotationAngle;			// in degrees
-//extern	Complex	RotationCentre;			// centre of rotation
-//extern	char	LyapSequence[];			// hold the AB sequence for Lyapunov fractals
-
 static	int	HorOffset, VertOffset;
-
 static	BOOL	WasFractPar = FALSE;		// did we run a FRACTINT PAR file last time?
-//	BOOL	IsPAR = FALSE;			// are we currently running a PAR file?
-//	BOOL	IsKFR = FALSE;			// are we currently running a KFR file?
-
 static	BOOL	DisplayLoc = FALSE;		// display the current cursor location in the caption bar
-//	BYTE	oldcalcmode;			// store values during 3D transformations
 
-//BOOL	bTrack = FALSE;				// TRUE if user is selecting a region
 RECT	Rect;
 int	Shape = SL_BLOCK;			// Shape to use for the selection rectangle
 
 HWND		CallingWindowHandle = 0L;	// Is ManpWIN called by an external window via WM_COPYDATA message?
 int		ReplyUsingDIB;			// TRUE for DIB/WM_COPYDATA and FALSE for clipboard
-//void	SetupView(HWND, BOOL);
-//void	InitFract(int);
 
-	  // Functions in VIEWFILE.C
+	  // Functions in VIEWFILE.CPP
 extern	void	ViewFileInitialize(HWND);
 extern	INT_PTR CALLBACK 	PARFileOpenDlg(HWND, LPSTR);
 extern	INT_PTR CALLBACK 	PNGFileOpenDlg(HWND, LPSTR);
@@ -137,7 +113,7 @@ extern	INT_PTR CALLBACK 	ColFileOpenDlg(HWND, LPSTR);
 extern	INT_PTR CALLBACK 	MAPFileOpenDlg(HWND, LPSTR);
 extern	INT_PTR CALLBACK 	KFRFileOpenDlg(HWND, LPSTR);
 
-// Functions in SAVEFILE.C
+// Functions in SAVEFILE.CPP
 extern	void	SaveFileInitialize(HWND, HINSTANCE);
 extern	INT_PTR CALLBACK 	SavePNGOpenDlg(HWND, LPSTR, LPSTR);
 extern	INT_PTR CALLBACK 	SaveColFileOpenDlg(HWND, LPSTR, LPSTR);
@@ -150,7 +126,6 @@ extern	INT_PTR CALLBACK	SaveSVGOpenDlg(HWND, LPSTR, LPSTR);
 extern	void	SaveFile(HWND, LPSTR, LPSTR);
 
 extern	void	SetScrollRanges(HWND);
-//extern	void	setup_defaults(void);
 extern	void	InitTrueColourPalette(BYTE);
 extern	int	StartSelection(HWND, POINTS, LPRECT, int);
 extern	int	UpdateSelection(HWND, POINTS, LPRECT, int);
@@ -158,10 +133,8 @@ extern	int	EndSelection(POINTS, LPRECT);
 extern	int	ClearSelection(HWND, LPRECT, int);
 extern	int	load_lsystems(HWND, char *);
 extern	int	Lsystem(HWND, char *);
-//extern	int	calcfracinit(void);
 extern	int	get_IFS_names(HWND, char *);		// get the IFS fractal names
 extern	int	ifsload(HWND, char *);
-//extern	int	RunScript(HWND, char *);
 extern	int	GetPNGSeqFromScript(HWND hwnd, char *FileName);
 
 extern	int	get_formula_names(HWND, char *);	// get the fractal formula names
@@ -184,7 +157,6 @@ extern	int	EndSlope(void);				// end slope threads before exiting
 
 extern	void	LoadPerturbationParams(void);		// get params from Perturbation database
 extern	void	LoadParams(void);			// get params from  database
-//extern	int	DoUpdate(void);
 
 extern	INT_PTR CALLBACK ImageSizeDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK RTJuliaLocDlg(HWND, UINT, WPARAM, LPARAM);
@@ -265,24 +237,14 @@ extern	int	ifs_type;
 extern	BOOL	DisplayAxisLabels;		// show labels for axis pairs
 
 	BOOL	GetPixelColourFlag;		// get the colour of the pixel when mouse button pressed
-//extern	BOOL	StartImmediately;		// immediate start of animation generation
-//extern	BOOL	RunAnimation;			// are we in the middle of an animation run?
 extern	char	ScriptFileName[];		// base name for PNG file animation sequence
 
-//extern	HWND	GlobalHwnd;			// to allow passing of hwnd to find_file_item()
-
-//extern	PAINTSTRUCT 	ps;
-//extern	HDC		hdcMem;			// load picture into memory
-//extern	RECT 		r;
 extern	HPALETTE 	hpal;
 extern	HANDLE  	hLogPal;       		// Temporary Handle
-
-//extern	int	xAxis, yAxis, zAxis;		// numerical values for axes for chaotic oscillators
 
 extern	char	PNGPath[];			// path for PNG files
 extern	char	COLPath[];			// path for COL files
 extern	char	MAPPath[];			// path for MAP files
-//extern	char	SCIPath[];		// path for SCI files
 extern	char	PARPath[];			// path for PAR files
 extern	char	KFRPath[];			// path for KFR files
 
@@ -297,44 +259,21 @@ extern	char	COLFile[];			// COL file
 extern	char	SCIFile[];			// SCI file
 extern	char	MPGFile[];			// MPG file
 extern	char	LSTFile[];			// list file for PNG animation frames
-
-//extern	int	time_to_zoom;			// time to zoom in or out?
-//extern	int	time_to_restart;		// time to restart?
-//extern	int	time_to_reinit;			// time to reinitialize?
-//extern	int	time_to_quit;			// time to quit?
-//extern	int	time_to_load;			// time to load file?
-//extern	int	time_to_break;			// time to break out of animation?
-//extern	int	DataFromPNGFile;		// loaded PNG file?
-//extern	BOOL	bTrack;				// TRUE if user is selecting a region
-//extern	double	ScreenRatio;			// ratio of width / height for the screen
 extern	char	MAPFile[];			// colour map file
-//extern	double	rqlim, rqlim2;
-
-//extern	BOOL	RTJuliaActive;			// block any moire requests until calcs complete
-
-//extern	int	AnimateSuspend(void);
-//extern	int	AnimateResume(void);
-//extern	BOOL	SuspendAnimation;		// pause animation run?
 
 extern	BOOL	DisplayAxes;			// display axes for oscillator etc
 extern	BOOL	PlotCentre;			// display circle at the centre of the oscillator
 
 short	vscroll_count = 0;			// vertical scroll count
 short	hscroll_count = 0;			// horizontal scroll count 
-//BOOL	Reopen_flag = FALSE;			// re-open file
-//BOOL	StartPicture = TRUE;			// starting picture
 HANDLE	hAccTable;				// handle to accelerator table
 char	AccTableAddr[120];			// name of accelerator table       
-//HWND	PixelHwnd;				// pointer to handle for pixel updating
 HWND	hWndCopy;				// Copy of hwnd
 int     file_type = FILE_PNG;			// got to start somewhere
 
 // Styles of app. window
 DWORD	dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | 
                   WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_THICKFRAME;
-
-//POINT	ptSize;					// Stores DIB dimensions
-//static	Complex q = 0.0;
 
 /*-----------------------------------------
 	Main Windows Entry Point
@@ -376,7 +315,7 @@ int PASCAL WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdL
 
     UpdateWindow (hwnd);
     gManp->type = MANDELFP;
-    gManp->GlobalHwnd = hwnd;				// Used in putcolor. Saves a lot of param passing.
+    gManp->GlobalHwnd = hwnd;			// Used in putcolor. Saves a lot of param passing.
 //    PixelHwnd = hwnd;
     gManp->init(hwnd);				// init the main Fractint and screen code 
     initFibonacci();				// just the starting values
@@ -425,8 +364,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		hInst = ((LPCREATESTRUCT)(_int64)lParam)->hInstance;
 		lpfnAboutDlgProc = MakeProcInstance ((DLGPROC *)AboutDlgProc, hInst);
 		gManp->ZoomEdge = TRUE;
-		gManp->UseFractintPalette = FALSE;
 		ReadConfig(hwnd);				// sticky info
+		if (gManp->UseFractintPalette)			// now set up appropriate palette
+		    gManp->TrueCol.CurrentPaletteMode = PALETTE_FRACTINT;
+		else
+		    gManp->TrueCol.CurrentPaletteMode = PALETTE_DEFAULT_COL;
 		ViewFileInitialize (hwnd);			// Initialise file reading routines
 		SaveFileInitialize (hwnd, hInst);		// Initialise file writing routines
 		vscroll_count = 0;				// no scrolling yet
@@ -535,9 +477,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		CheckMenuItem((HMENU)(_int64)wParam, IDM_EDGE, (gManp->ZoomEdge ? MF_CHECKED : MF_UNCHECKED));
 		CheckMenuItem((HMENU)(_int64)wParam, IDM_USEDEFAULTPALETTE, (gManp->UseFractintPalette ? MF_CHECKED : MF_UNCHECKED));
 		CheckMenuItem((HMENU)(_int64)wParam, IDM_DISPLAYLOC, (DisplayLoc ? MF_CHECKED : MF_UNCHECKED));
-//		CheckMenuItem((HMENU)wParam, IDM_SHOWSTATUSBAR, (ShowStatusBar ? MF_CHECKED : MF_UNCHECKED));
-		// Hailstone toggle menu checkmarks
-//		extern COtherFunctions* g_pOtherFunctions;
 		if (g_pOtherFunctions && gManp->type == HAILSTONE)
 		    {
 		    CheckMenuItem((HMENU)(_int64)wParam, IDM_HAILSTONE_TOGGLE_AXES, (g_pOtherFunctions->ShowAxes ? MF_CHECKED : MF_UNCHECKED));
@@ -1050,6 +989,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    if (DialogBox (hInst, "EditPalDlg", hwnd, EditPalDlg) == TRUE)
 		{
 		InvalidateRect(hwnd, &gManp->r, FALSE);
+		gManp->TrueCol.CurrentPaletteMode = PALETTE_TABLE;
 		InitTrueColourPalette(TRUE);
 		gManp->Plot.RefreshScreen();
 		DisplayPalette(hwnd, gManp->TrueCol.DisplayPaletteFlag);
@@ -1063,7 +1003,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 
 	case IDM_USEDEFAULTPALETTE:
 	    gManp->UseFractintPalette =	!gManp->UseFractintPalette;
-	    gManp->TrueCol.IsMAPFile = gManp->UseFractintPalette;
+	    gManp->TrueCol.CurrentPaletteMode = (gManp->UseFractintPalette) ? PALETTE_FRACTINT : PALETTE_DEFAULT_COL;
 	    InitTrueColourPalette(FALSE);
 	    gManp->time_to_reinit = TRUE;
 	    return 0;
@@ -1134,13 +1074,19 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    return 0;
 
 	case IDM_SAVE_TRUE_MAP:
-	    if (SaveColFileOpenDlg (hwnd, szSaveFileName, szTitleName) == 0)
-		save_colour(hwnd, szSaveFileName, "Save Colour Parameters");
-	    return 0;
+	    if (gManp->TrueCol.CurrentPaletteMode == PALETTE_DEFAULT_COL || gManp->TrueCol.CurrentPaletteMode == PALETTE_CUSTOM_COL)
+		{
+		if (SaveColFileOpenDlg (hwnd, szSaveFileName, szTitleName) == 0)
+		    save_colour(hwnd, szSaveFileName, "Save Colour Parameters");
+		}
+	    else
+		MessageBox(hwnd, "The current palette was not generated from True Colour parameters", "Save Colour Parameters", MB_ICONEXCLAMATION | MB_OK);
+	return 0;
 
 	case IDM_SAVE_PAL_MAP:
 	    if (SaveMAPFileOpenDlg(hwnd, szSaveFileName, szTitleName) == 0)
 		{
+		gManp->IsMAP = TRUE;
 		save_palette(hwnd, szSaveFileName, "Save Colour Parameters");
 		strcpy(MAPFile, szSaveFileName);				// palette file to reflect the current map
 		}
@@ -1157,7 +1103,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		gManp->DisplayStatusBarInfo(INITIALISING, "");				// display status bar
 		gManp->setup_defaults();
 		GetParam(hwnd, PARFile, szSaveFileName);
-		gManp->TrueCol.IsMAPFile = false;
+		gManp->TrueCol.CurrentPaletteMode = PALETTE_TABLE;
 		HardStopNow(hwnd, "open .PAR");
 		gManp->time_to_reinit = TRUE;
 		}
@@ -1171,6 +1117,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		gManp->DisplayStatusBarInfo(INITIALISING, "");				// display status bar
 		gManp->setup_defaults();
 		ReadKallesFile(hwnd, KFRFile);
+		gManp->TrueCol.CurrentPaletteMode = PALETTE_TABLE;
 		HardStopNow(hwnd, "open .KFR");
 		gManp->time_to_reinit = TRUE;
 		}
@@ -1187,7 +1134,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		}
 	    else
 		return 0;
-	    gManp->TrueCol.IsMAPFile = false;
+	    gManp->TrueCol.CurrentPaletteMode = PALETTE_TABLE;
 	    HardStopNow(hwnd, "open .PNG");
 	    gManp->time_to_reinit = TRUE;
 	    break;
@@ -1237,6 +1184,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		{
 		FileReadColours(hwnd, COLFile, "Paul's Fractals: Get Colour Parameters");
 		InvalidateRect(hwnd, &gManp->r, FALSE);
+		gManp->TrueCol.CurrentPaletteMode = PALETTE_CUSTOM_COL;
 		InitTrueColourPalette(FALSE);
 		gManp->Plot.RefreshScreen();
 		gManp->time_to_reinit = TRUE;
@@ -1250,7 +1198,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		FilePalette(hwnd, MAPFile, "Paul's Fractals: Get Colour Map");
 	    else
 		return 0;
-	    gManp->TrueCol.IsMAPFile = true;
+	    gManp->TrueCol.CurrentPaletteMode = PALETTE_TABLE;
 	    HardStopNow(hwnd, "MAP");
 //	    time_to_reinit = (type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF);
 	    gManp->time_to_reinit = true;
@@ -1619,15 +1567,16 @@ BOOL	InitNewFractal(HWND hwnd)
     static  int	OldType;
 
     gManp->Fractal.InitData();				// setup for next fractal
-    gManp->TrueCol.IsMAPFile = gManp->UseFractintPalette;
+    gManp->TrueCol.CurrentPaletteMode = (gManp->UseFractintPalette) ? PALETTE_FRACTINT : PALETTE_DEFAULT_COL;
     InitTrueColourPalette(FALSE);
     gManp->setup_defaults();
     gManp->IsPAR = FALSE;
     gManp->IsKFR = FALSE;
+    gManp->IsMAP = FALSE;
+
     gManp->OscProcess.DisplayAxisImages = FALSE;
     DisplayAxisLabels = FALSE;
     gManp->OscProcess.AxisDisplay = OFF;
-    gManp->TrueCol.IsMAPFile = false;
 
     if (WasFractPar)				// was our last time through this dialogue box a FRACTINT PAR?
 	gManp->type = FRACTPAR;				// allow the dialogue box to remember where we were last time
@@ -1635,7 +1584,6 @@ BOOL	InitNewFractal(HWND hwnd)
 	{
 	gManp->cycleflag = FALSE;
 	WasFractPar = FALSE;
-	gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
 	gManp->juliaflag = (fractalspecific[gManp->type].juliaflag == JULIAFP);
 	if (gManp->type != OldType)
 	    {
@@ -1976,6 +1924,7 @@ BOOL	InitNewFractal(HWND hwnd)
 		gManp->mandel_width = fractalspecific[gManp->type].width;
 		break;                           
 	    }
+	gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
 	return TRUE;
 	}           
     return FALSE;    
@@ -2251,6 +2200,40 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 #define	SUBTYPELENGTH		500
 #define	FRACTALTYPELENGTH	1200
 
+ static const char* PixelPlotModeName(char calcmode)
+     {
+     switch (calcmode)
+	 {
+	 case 'B': return "Boundary Trace";
+	 case 'G': return "Solid Guess";
+	 case 'T': return "Tesseral";
+	 case 'S': return "Spiral";
+	 case '1': return "One Pass";
+	 case '2': return "Two Pass";
+	 case 'V': return "Vertical Blinds";
+	 case 'H': return "Horizontal Blinds";
+	 case 'F': return "Forward Difference Slope";
+	 default:  return "Unknown";
+	 }
+     }
+
+static const char* PertSlopePlotModeName(PlotMode mode)
+    {
+    switch (mode)
+        {
+        case PlotMode::Scanline:    return "Scanline";
+        case PlotMode::Column:      return "Column";
+        case PlotMode::Tile:        return "Tile";
+        case PlotMode::SpiralOut:   return "Spiral Out";
+        case PlotMode::SpiralIn:    return "Spiral In";
+        case PlotMode::Random:      return "Random";
+        case PlotMode::Tesseral:    return "Tesseral";
+        case PlotMode::Progressive: return "Progressive";
+        case PlotMode::SolidGuess:  return "Solid Guess";
+        default:                    return "Unknown";
+        }
+    }
+
  INT_PTR CALLBACK StatusInfoDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     {
     char	PassStr[GENERALFIELDLENGTH];
@@ -2262,85 +2245,93 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
     char	FractalType[FRACTALTYPELENGTH];
     char	SubData[SUBTYPELENGTH];
     char	ColourData[SHORTFIELDLENGTH];
-    char	*PositionString = nullptr;
-    char	*StatusString = nullptr;
-    char	*s1 = nullptr;
-    char	*s2 = nullptr;
-    char	*s3 = nullptr;
     double	centrex, centrey;
     BigDouble	Big_centrex, Big_centrey;
+    const unsigned long PixelEngineFlags = FUNCTIONINPIXEL | FRACTINTINPIXEL | FORMULAINPIXEL | TRIGINPIXEL;
 
-    PositionString = new char[SIZEOF_BF_VARS * 3];
-    if (PositionString == NULL)
-	return TRUE;
-    StatusString = new char[SIZEOF_BF_VARS * 4];			// times 3 because of x, y, width & additional part is for other info
-    if (StatusString == NULL)
-	return TRUE;
+    std::vector<char> PositionString(SIZEOF_BF_VARS * 3);
+    std::vector<char> StatusString(SIZEOF_BF_VARS * 4);			// times 3 because of x, y, width & additional part is for other info
 
     StatusString[0] = '\0';
-    StringBuilder sb(StatusString, SIZEOF_BF_VARS * 4);
+    StringBuilder sb(StatusString.data(), StatusString.size());
     if (gManp->BigNumFlag)
 	{
 	Big_centrex = gManp->BigHor + (gManp->BigWidth * (gManp->AspectRatio / 2.0));
 	Big_centrey = gManp->BigVert + (gManp->BigWidth / 2.0);
-	s1 = new char[SIZEOF_BF_VARS];
-	s2 = new char[SIZEOF_BF_VARS];
-	s3 = new char[SIZEOF_BF_VARS];
-	gManp->BigHor.ToString(s1, SIZEOF_BF_VARS, false);
-	gManp->BigVert.ToString(s2, SIZEOF_BF_VARS, false);
-	gManp->BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
-	//	ConvertBignum2String(s1, Big_centrex.x);
-	//	ConvertBignum2String(s2, Big_centrey.x);
-	//	mpfr_sprintf(s3, "%.20Re", BigWidth.x);
-	//	ConvertBignum2String(s3, BigWidth.x);
-	_snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %s\r\nY = %s\r\nWidth = %s", s1, s2, s3);
-	if (s1) delete[] s1;
-	if (s2) delete[] s2;
-	if (s3) delete[] s3;
+	std::vector<char> s1(SIZEOF_BF_VARS);
+	std::vector<char> s2(SIZEOF_BF_VARS);
+	std::vector<char> s3(SIZEOF_BF_VARS);
+	gManp->BigHor.ToString(s1.data(), SIZEOF_BF_VARS, false);
+	gManp->BigVert.ToString(s2.data(), SIZEOF_BF_VARS, false);
+	gManp->BigWidth.SafeSprintf(s3.data(), SIZEOF_BF_VARS, "%.20Re");
+	_snprintf_s(PositionString.data(), SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %s\r\nY = %s\r\nWidth = %s", s1.data(), s2.data(), s3.data());
 	}
     else
 	{
 	centrex = gManp->hor + (gManp->mandel_width * (gManp->AspectRatio / 2.0));
 	centrey = gManp->vert + (gManp->mandel_width / 2.0);
 	if (gManp->mandel_width > 0.000001)
-	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %14.14f\r\nY = %14.14f\r\nWidth = %14.14f", centrex, centrey, gManp->mandel_width);
+	    _snprintf_s(PositionString.data(), SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %14.14f\r\nY = %14.14f\r\nWidth = %14.14f", centrex, centrey, gManp->mandel_width);
 	else
-	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %14.14f\r\nY = %14.14f\r\nWidth = %14e", centrex, centrey, gManp->mandel_width);
+	    _snprintf_s(PositionString.data(), SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %14.14f\r\nY = %14.14f\r\nWidth = %14e", centrex, centrey, gManp->mandel_width);
 	}
-    switch (gManp->calcmode)
+    if (fractalspecific[gManp->type].flags & PixelEngineFlags)
 	{
-	case 'B':
-	case 'T':
-	case '1':
-	    _snprintf_s(PassStr, GENERALFIELDLENGTH, _TRUNCATE, "Pass 1 of 1");
-	    break;
-	case '2':
-	case 'G':
-	case 'V':
-	case 'H':
-	    _snprintf_s(PassStr, GENERALFIELDLENGTH, _TRUNCATE, "Pass %d of %d", gManp->curpass, gManp->totpasses);
-	    break;
-	    //	default:
-	    //	    SAFE_SPRINTF(PassStr, "Pass %d of %d", curpass, totpasses); 
-	    //	    break;
-	}
-    _snprintf_s(FinishedStr, GENERALFIELDLENGTH, _TRUNCATE, "%s", (gManp->finished) ? ", Image Complete" : " ");
-    if (gManp->BigNumFlag)	    // now we have double double and quad double...
-	{
-	if (gManp->precision <= DDPRECISION && fractalspecific[gManp->type].flags & USEDOUBLEDOUBLE)
-	    _snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "DD Prec: %d", gManp->precision);
-	else if (gManp->precision <= QDPRECISION && fractalspecific[gManp->type].flags & USEDOUBLEDOUBLE)
-	    _snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "QD Prec: %d", gManp->precision);
-	else
+	switch (gManp->calcmode)
 	    {
-	    if (fractalspecific[gManp->type].flags & FRACTINTINPIXEL || fractalspecific[gManp->type].flags & TRIGINPIXEL)    // Bignum versions not yet available
-		_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "QD Prec: %d", gManp->precision);
-	    else
-		_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Arb Prec: %d", gManp->precision);
+	    case 'B':
+	    case 'T':
+	    case '1':
+		_snprintf_s(PassStr, GENERALFIELDLENGTH, _TRUNCATE, "Pass 1 of 1");
+		break;
+	    case '2':
+	    case 'G':
+	    case 'V':
+	    case 'H':
+		gManp->curpass = gManp->totpasses;
+		for (int i = 0; i < gManp->NumberThreads; i++)
+		    {
+		    if (gManp->PixelCurPass[i] < gManp->curpass)
+			gManp->curpass = gManp->PixelCurPass[i];
+		    }
+		_snprintf_s(PassStr, GENERALFIELDLENGTH, _TRUNCATE, "Pass %d of %d", gManp->curpass, gManp->totpasses);
+		break;
+		//	default:
+		//	    SAFE_SPRINTF(PassStr, "Pass %d of %d", curpass, totpasses); 
+		//	    break;
 	    }
 	}
+//    else if (gManp->type == PERTURBATION || gManp->type == SLOPEDERIVATIVE || gManp->type == SLOPEFORWARDDIFF)
+//	SAFE_SPRINTF(PassStr, "Progress: %.1f%%", (100.0 * gPixelsDone) / (gManp->xdots * gManp->ydots));
+
+    else if (gManp->type == PERTURBATION)
+	{
+	if (str_find_ci(gManp->PertStatus, "Ref=") != 0)
+	    SAFE_SPRINTF(PassStr, "Perturbation %s", gManp->PertStatus);
+	else
+	    SAFE_SPRINTF(PassStr, "Progress (%.0f%%)",
+	    (100.0 * gPixelsDone) / ((double)gManp->xdots * (double)gManp->ydots));
+	}
+    else if (gManp->type == SLOPEDERIVATIVE || gManp->type == SLOPEFORWARDDIFF)
+	{
+	SAFE_SPRINTF(PassStr, "Progress: %.1f%%",
+	    (100.0 * gPixelsDone) / ((double)gManp->xdots * (double)gManp->ydots));
+	}
     else
-	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Floating Point: %d", gManp->precision);
+	PassStr[0] = '\0';			// no pass information available on non-rastor fractals
+
+    _snprintf_s(FinishedStr, GENERALFIELDLENGTH, _TRUNCATE, "%s", (gManp->finished) ? ", Image Complete" : " ");
+
+    if (!gManp->BigNumFlag)
+	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Double Precision");
+    else if (gManp->precision <= DDPRECISION && fractalspecific[gManp->type].flags & USEDOUBLEDOUBLE)
+	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Double Double (%d digits)", gManp->precision);
+    else if (gManp->precision <= QDPRECISION && fractalspecific[gManp->type].flags & USEDOUBLEDOUBLE)
+	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Quad Double (%d digits)", gManp->precision);
+    else if ((fractalspecific[gManp->type].flags & FRACTINTINPIXEL) || (fractalspecific[gManp->type].flags & TRIGINPIXEL))    // Bignum versions not yet available
+	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Quad Double (Arb unsupported)");
+    else
+	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Arbitrary Precision (%d digits)", gManp->precision);
 
     gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
     if (gManp->type == PERTURBATION)
@@ -2378,8 +2369,27 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9f  \t  %s", i, gManp->param[i], (gManp->Fractal.ParamName[i]) ? gManp->Fractal.ParamName[i] : "N/A");
 	SAFE_APPEND(ParamStr, PARAMLENGTH, TempStr);
 	}
-    sb.append("%s\r\nPixel [%d][%d], %s%s\r\n%s\r\nThreshold: %ld\r\nArith=%s\r\n%s\r\nBailout: %f\r\nImage Size: [%d][%d] ",
-	FractalType, gManp->col, gManp->row, PassStr, FinishedStr, PositionString, gManp->threshold, PrecisionStr, ParamStr, gManp->rqlim, gManp->xdots, gManp->ydots);
+
+    sb.append("%s", FractalType);
+    if (PassStr[0] != '\0')
+	sb.append("\r\n%s%s", PassStr, FinishedStr);
+    if (gManp->type == PERTURBATION || gManp->type == SLOPEDERIVATIVE || gManp->type == SLOPEFORWARDDIFF)
+	{
+	sb.append("\r\nPlot Mode: %s", PertSlopePlotModeName(currentMode));
+	}
+    else if (fractalspecific[gManp->type].flags & PixelEngineFlags)
+	{
+	sb.append("\r\nPlot Mode: %s", PixelPlotModeName(gManp->calcmode));
+	}
+
+    sb.append("\r\nThreads: %d", gManp->NumberThreads);
+    sb.append("\r\n%s", PositionString.data());
+    sb.append("\r\nThreshold: %ld", gManp->threshold);
+    sb.append("\r\nArith=%s", PrecisionStr);
+    sb.append("\r\n%s", ParamStr);
+    sb.append("\r\nBailout: %f", gManp->rqlim);
+    sb.append("\r\nImage Size: [%d][%d]", gManp->xdots, gManp->ydots);
+
     if (gManp->Fractal.NumFunct == 1)
 	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, "\r\nFn = %s", gManp->Fractal.Fn1);
     else if (gManp->Fractal.NumFunct == 2 && gManp->type != OSCILLATORS)			// we use NumFunct to display dimensions
@@ -2404,7 +2414,7 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	if (gManp->type == SLOPEDERIVATIVE) gManp->SlopeType = DERIVSLOPE;
 	if (gManp->type == SLOPEFORWARDDIFF) gManp->SlopeType = FWDDIFFSLOPE;
 	sb.append("\r\nSlope Type: %d", gManp->SlopeType);
-	if (gManp->type == PERTURBATION && &gManp->EnableApproximation)
+	if (gManp->type == PERTURBATION && gManp->EnableApproximation)
 	    sb.append("\r\nPerturbation uses BiLinear Approximation");
 	sb.append("\r\nSlope Shadow Angle: %lf", gManp->lightDirectionDegrees);
 	sb.append("\r\nSlope Shadow Strength: %lf", gManp->bumpMappingStrength);
@@ -2419,6 +2429,11 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	{
 	sb.append("\r\nPAR file=");
 	sb.append("%s", PARFile);
+	}
+    else if (gManp->IsFrPAR)
+	{
+	sb.append("\r\nPAR file=");
+	sb.append("%s", FracPARFile);
 	}
     else if (gManp->IsKFR)
 	{
@@ -2453,9 +2468,7 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	sb.append("\r\nItemName=");
 	sb.append("%s", lptr[lsys_ptr]);
 	}
-    //    DialogBox(hInst, "StatusInfoDlg", hwnd, StatusInfoDlg);
-//    MessageBox (hwnd, StatusString, fractalspecific[type].name, MB_ICONEXCLAMATION | MB_OK);
-    if (gManp->TrueCol.IsMAPFile)
+    if (gManp->IsMAP)
 	{
 	sb.append("\r\nMAP file=");
 	sb.append("%s", MAPFile);
@@ -2481,26 +2494,28 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    SetDlgItemText(hDlg, IDC_STATUSINFO, StatusString);
+	    SetDlgItemText(hDlg, IDC_STATUSINFO, StatusString.data());
 	    return TRUE;
 
 	case WM_COMMAND:
 	    switch (wParam)
 		{
 		case IDOK:
-		    if (StatusString)
-			delete[] StatusString;
-		    if (PositionString)
-			delete[] PositionString;
 		    EndDialog(hDlg, TRUE);
 		    return TRUE;
-		case IDCANCEL:
-		    if (StatusString)
-			delete[] StatusString;
-		    if (PositionString)
-			delete[] PositionString;
-		    EndDialog(hDlg, TRUE);
+		case IDC_COPY:
+		    {
+		    HWND hStatus = GetDlgItem(hDlg, IDC_STATUSINFO);
+
+		    if (hStatus)
+			{
+			SendMessage(hStatus, EM_SETSEL, 0, -1);
+			SendMessage(hStatus, WM_COPY, 0, 0);
+			SendMessage(hStatus, EM_SETSEL, -1, -1);
+			}
+
 		    return TRUE;
+		    }
 		}
 	    break;
 	}

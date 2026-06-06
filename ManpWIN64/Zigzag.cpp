@@ -1,5 +1,5 @@
 /*
-   ZIGZAG.CPP a module for Spiral Fractals
+   ZIGZAG.CPP - a module for Spiral Fractals
    Thanks to Marcus Rezende 
 
    Written in Microsoft Visual C++ by Paul de Leeuw.

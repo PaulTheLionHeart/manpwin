@@ -1,10 +1,7 @@
 /*
-    BIF.CPP a module for Bifurcation Images
+    BIF.CPP - a module for Bifurcation Images
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include	<math.h>

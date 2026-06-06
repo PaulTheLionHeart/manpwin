@@ -1,6 +1,7 @@
 /*
-	Clipboard routines
-	Copyright (c) 1997 Paul de Leeuw
+    Clipboard.cpp - Clipboard routines.
+
+    Written in MICROSOFT 'C++' by Paul de Leeuw.
 */
 
 #include <windows.h>
@@ -10,7 +11,6 @@
 #include "manpwin.h"
 #include "manp.h"
 #include "Dib.h"
-//#include "winbit.h"
 
 #define	DestroyAllObjects()	{	\
 	if(hdest != NULL && lpbd != NULL) GlobalUnlock(hdest);\
@@ -28,13 +28,15 @@ extern	int			file_type;
 extern	HPALETTE 		hpal;
 extern	HANDLE  	 	BitMap; 			// Bitmap Handle
 extern	BOOL	Picture_active_flag;
-//extern	int	xdots, ydots, bits_per_pixel, height, width;
 
 	BYTE	*CreateDib(WORD, WORD, BYTE *, WORD);
-extern	int	DibBlt(HDC,int,int,int, int,HANDLE,int,int);
+//extern	int	DibBlt(HDC,int,int,int, int,HANDLE,int,int);
 BYTE		*GetOrthoPalette(BYTE *);
-extern	int	Force24Bit(HWND, char *);
-//extern	CDib	Dib;				// Device Independent Bitmap
+//extern	int	Force24Bit(HWND, char *);
+
+/**************************************************************************
+	Copy image to clipboard
+**************************************************************************/
 
 int CopyPictureToClipboard(HWND hwnd)
     {
@@ -203,4 +205,32 @@ BYTE *CreateDib(WORD dx, WORD dy, BYTE *palette, WORD bits)
 
     GlobalUnlock(hdibN);
     return(hdibN);
+    }
+
+/**************************************************************************
+	Copy text to clipboard
+**************************************************************************/
+
+bool CopyTextToClipboard(HWND hwnd, const std::string& text)
+    {
+    if (!OpenClipboard(hwnd))
+	return false;
+
+    EmptyClipboard();
+    HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, text.size() + 1);
+
+    if (!hMem)
+	{
+	CloseClipboard();
+	return false;
+	}
+
+    char* ptr = static_cast<char*>(GlobalLock(hMem));
+
+    memcpy(ptr, text.c_str(), text.size() + 1);
+    GlobalUnlock(hMem);
+    SetClipboardData(CF_TEXT, hMem);
+    CloseClipboard();
+
+    return true;
     }

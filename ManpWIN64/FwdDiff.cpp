@@ -1,5 +1,5 @@
 /*
-    FWDDIFF.CPP a module for determining the slope using forward differencing calculations of fractals. 
+    FWDDIFF.CPP - a module for determining the slope using forward differencing calculations of fractals. 
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
 

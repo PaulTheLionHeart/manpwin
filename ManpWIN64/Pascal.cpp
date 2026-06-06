@@ -1,5 +1,5 @@
 /*
-   PASCAL.CPP a module for Pascal Fractals
+   PASCAL.CPP - a module for Pascal Fractals
    Thanks to Marcus Rezende 
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
@@ -17,7 +17,6 @@
 #define		ABS(a)		((a >= 0) ? a : -a)
 
 int	COtherFunctions::DoPascal()
-
     {
     int		i, j;
     unsigned	__int64	a[PASCALSIZE];			// use 64 bit unsigned integers for maximum significant figures

@@ -1,4 +1,8 @@
-// Quanterr.h Errors in Dithering and quantisation
+/*
+    Quanterr.h - Errors in Dithering and quantisation.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #define NO_ERR			0
 #define ERR_INIT_TABLE		-1

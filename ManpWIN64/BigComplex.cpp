@@ -1,6 +1,9 @@
-// BigComplex.cpp: interface for the Complex class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    BigComplex.cpp - interface for the mpfr (Bignum) Complex class
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
+
 #include "BigComplex.h"
 #include "Complex.h"
 #include "BigTrig.h"

@@ -1,10 +1,7 @@
 /*
-    FRACZOOM.CPP a program to animate the Mandelbrot set.
+    FRACZOOM.CPP - a program to animate the Mandelbrot set.
     
     Written in Microsoft Visual C++ by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <windows.h>
@@ -24,11 +21,10 @@
 extern	char	SCIPath[];		// path for SCI files
 
 // Big num declarations **********************************************************
-extern	int	decimals/*, precision*/;
+extern	int	decimals;
 // Big num declarations **********************************************************
 
 extern	void	BasicFractData(StringBuilder& sb, BOOL);
-extern	void	ConvertRGB2ASCII(RGBTRIPLE, char *);
 extern	char	*GenerateMPEGFileName (char *, char *);
 extern	char	*GenerateAnimFileName (char *, char *);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
@@ -68,7 +64,9 @@ int	CManp::GenZoomScript(HWND hwnd, char *filename)
     BigDouble	Big_x1, Big_y1, Big_Scale, BigTemp;
 // local Big num declarations **********************************************************
     char	s[120];
-    char	*s1 = nullptr, *s2 = nullptr, *s3 = nullptr;
+    char	s1[SIZEOF_BF_VARS]{};
+    char	s2[SIZEOF_BF_VARS]{};
+    char	s3[SIZEOF_BF_VARS]{};    
     FILE	*out;
     long	LocalThreshold;
     errno_t	err;
@@ -147,9 +145,6 @@ int	CManp::GenZoomScript(HWND hwnd, char *filename)
 
 	    Big_x1 = Big_centrex - (Big_CurrentWidth * Big_Scale);
 	    Big_y1 = Big_centrey - (Big_CurrentWidth / 2.0);
-	    s1 = new char[SIZEOF_BF_VARS];
-	    s2 = new char[SIZEOF_BF_VARS];
-	    s3 = new char[SIZEOF_BF_VARS];
 	    Big_x1.ToString(s1, SIZEOF_BF_VARS, false);
 	    Big_y1.ToString(s2, SIZEOF_BF_VARS, false);
 	    Big_CurrentWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
@@ -157,9 +152,6 @@ int	CManp::GenZoomScript(HWND hwnd, char *filename)
 	    *(s2 + decimals + 5) = '\0';
 	    *(s3 + decimals + 5) = '\0';
 	    fprintf(out, "-c%s,%s,%s\n", s1, s2, s3);
-	    if (s1) { delete[] s1; s1 = NULL; }
-	    if (s2) { delete[] s2; s2 = NULL; }
-	    if (s3) { delete[] s3; s3 = NULL; }
 	    Big_CurrentWidth = Big_CurrentWidth / Big_divisor;
 	    }
 	else
@@ -199,11 +191,11 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 //     static	HANDLE	hCursor;
      static     UINT	tempParam, VariableSize;
      static     BYTE	temp_special;
-     static	char	*buf = nullptr;
-     static	char	*s = nullptr;
-     static	char	*s1 = nullptr;
-     static	char	*s2 = nullptr;
-     static	char	*s3 = nullptr;
+     char		buf[SIZEOF_BF_VARS]{};
+     char		s[SIZEOF_BF_VARS]{};
+     char		s1[SIZEOF_BF_VARS]{};
+     char		s2[SIZEOF_BF_VARS]{};
+     char		s3[SIZEOF_BF_VARS]{};     
      static	char	TempFile[MAX_PATH];
      BOOL		bTrans ;
      BOOL		TempCheck;
@@ -219,10 +211,6 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		MinimumSize = DBL_MANT_DIG;
 		VariableSize = (UINT)((RequestedSize > MinimumSize) ? RequestedSize : MinimumSize);
 		gManp->cycleflag = FALSE;
-		s = new char[SIZEOF_BF_VARS];
-		s1 = new char[SIZEOF_BF_VARS];
-		s2 = new char[SIZEOF_BF_VARS];
-		s3 = new char[SIZEOF_BF_VARS];
 		hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
 		SendMessage(hCtrl, BM_SETCHECK, gManp->StartImmediately, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_SHOWPALETTE);
@@ -357,7 +345,6 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			GetDlgItemText(hDlg, IDC_WIDTH_START, s, VariableSize);
 			sscanf(s, "%lf", &StartWidth);
 			GetDlgItemText(hDlg, IDC_WIDTH_END, s3, VariableSize);
-			buf = new char[SIZEOF_BF_VARS * 3];
 			_snprintf_s(buf, SIZEOF_BF_VARS * 3, _TRUNCATE, "%s,%s,%s, %f, %f", s1, s2, s3, gManp->param[0], gManp->param[1]);	// ensure that real and imag perturbation is unchanged
 			if (gManp->analyse_corner(buf) < 0)
 			    {
@@ -380,19 +367,10 @@ INT_PTR CALLBACK AnimationDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    }
 			else
 			    gManp->GenZoomScript(hDlg, ScriptFileName);
-			if (s1) delete [] s1;
-			if (s2) delete [] s2;
-			if (s3) delete [] s3;
-			if (s) delete [] s;
-			if (buf) delete [] buf;
 			EndDialog (hDlg, TRUE);
 			return TRUE;
 
 		    case IDCANCEL:
-			if (s1) delete [] s1;
-			if (s2) delete [] s2;
-			if (s3) delete [] s3;
-			if (s) delete [] s;
 			EndDialog (hDlg, FALSE);
 			gManp->time_to_restart = FALSE;
 			return FALSE;

@@ -1,3 +1,9 @@
+/*
+    PixelTemplate.h - Template for handling pixel functions for all arithmetic types.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <windows.h>
 #include <functional>
 #include "Complex.h"

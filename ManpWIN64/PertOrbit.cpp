@@ -1,11 +1,13 @@
-/****************************************************
-    PERTORBIT.CPP a module to explore Perturbation Orbit functions
+/*
+    PERTORBIT.CPP - a module to explore Perturbation Orbit functions
+
     Thanks to Claude Heiland-Allen https://fractalforums.org/programming/11/perturbation-code-for-cubic-and-higher-order-polynomials/2783,
     SuperHeal https://fractalforums.org/index.php?topic=5524.new#new
     and Shirom Makkad https://github.com/ShiromMakkad/MandelbrotPerturbation
     for their inspiration and methods of calculating perturbation fractals
+
     Written in Microsoft Visual C++ by Paul de Leeuw.
-****************************************************/
+*/
 
 #include <atomic>
 #include "PertEngine.h"

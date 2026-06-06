@@ -1,3 +1,9 @@
+/*
+    Polygon.cpp - interface for the CPoly class - polygon class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <conio.h>
 
 #include <dos.h>

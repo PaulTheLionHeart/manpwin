@@ -1,3 +1,9 @@
+/*
+    Matrix.h - interface for the CMatrix class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <math.h>
 
 typedef double	MATRIX[4][4];		// matrix of floats 

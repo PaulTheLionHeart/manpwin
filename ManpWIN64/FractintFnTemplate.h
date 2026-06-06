@@ -1,4 +1,8 @@
-// FractintFnTemplate.h
+/*
+    FractintFnTemplate.H - Template for handling Fractint Functions for all arithmetic types.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <windows.h>
 #include <functional>
@@ -11,19 +15,7 @@
 **************************************************************************/
 
 template <typename TComplex, typename TReal>
-inline void Init_Newton(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    WORD* degree,
-    int& subtype,
-    TComplex* roots,
-    TReal& thresh,
-    TReal pi,
-    int& period_level,
-    long& color,
-    bool juliaflag)
+inline void Init_Newton(CPixel* self, TComplex* z, TComplex* q, double* param, WORD* degree, int& subtype, TComplex* roots, TReal& thresh, TReal pi, int& period_level, long& color, bool juliaflag)
     {
     // degree
     *degree = (WORD)param[0];
@@ -72,13 +64,7 @@ inline void Init_Newton(
     }
 
 template <typename TComplex, typename TReal>
-inline void Init_ComplexMarksMand(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    bool juliaflag,
-    TComplex* MarkCoeff)
+inline void Init_ComplexMarksMand(CPixel* self, TComplex* z, TComplex* q, double* param, bool juliaflag, TComplex* MarkCoeff)
     {
     if (!juliaflag)
 	{
@@ -94,13 +80,7 @@ inline void Init_ComplexMarksMand(
     }
 
 template <typename TComplex, typename TReal>
-inline void Init_Spider(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    bool juliaflag,
-    TComplex& temp)
+inline void Init_Spider(CPixel* self, TComplex* z, TComplex* q, double* param, bool juliaflag, TComplex& temp)
     {
     if (!juliaflag)
 	{
@@ -112,17 +92,7 @@ inline void Init_Spider(
     }
 
 template <typename TComplex, typename TReal>
-inline void Init_Manowar(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex* c,
-    double* param,
-    bool juliaflag,
-    bool invert,
-    TComplex& t,
-    TComplex& temp,
-    TComplex& temp1)
+inline void Init_Manowar(CPixel* self, TComplex* z, TComplex* q, TComplex* c, double* param, bool juliaflag, bool invert, TComplex& t, TComplex& temp, TComplex& temp1)
     {
     // No periodicity
     // (you already handle this globally, so nothing needed here)
@@ -147,14 +117,7 @@ inline void Init_Manowar(
     }
 
 template <typename TComplex, typename TReal>
-inline void Init_ComplexNewton(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    TComplex& croot,
-    TComplex& cdegree,
-    int& subtype)
+inline void Init_ComplexNewton(CPixel* self, TComplex* z, TComplex* q, double* param, TComplex& croot, TComplex& cdegree, int& subtype)
     {
     croot.x = TReal(param[2]);
     croot.y = TReal(param[3]);
@@ -168,13 +131,7 @@ inline void Init_ComplexNewton(
     }
 
 template <typename TComplex, typename TReal>
-inline void Init_Lambda(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    bool juliaflag,
-    TComplex& temp)
+inline void Init_Lambda(CPixel* self, TComplex* z, TComplex* q, double* param, bool juliaflag, TComplex& temp)
     {
     // no periodicity
 
@@ -195,26 +152,9 @@ inline void Init_Lambda(
     }
 
 template <typename TComplex, typename TReal>
-inline void Init_ZPowerGroup(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& c,
-    double* param,
-    bool juliaflag,
-    bool invert,
-    TComplex& t,
-    TComplex& temp,
-    TComplex& temp1,
-    TComplex& temp2)
+inline void Init_ZPowerGroup(CPixel* self, TComplex* z, TComplex* q, TComplex& c, double* param, bool juliaflag, bool invert, TComplex& t, TComplex& temp, TComplex& temp1, TComplex& temp2)
     {
-    t = (invert)
-	? InvertZ2<TComplex, TReal>(
-	    c,
-	    TReal(self->f_xcenter),
-	    TReal(self->f_ycenter),
-	    TReal(self->f_radius))
-	: c;
+    t = (invert) ? InvertZ2<TComplex, TReal>(c, TReal(self->f_xcenter), TReal(self->f_ycenter), TReal(self->f_radius)) : c;
 
     temp.x = TReal(param[0]);
     temp.y = TReal(param[1]);
@@ -238,24 +178,9 @@ inline void Init_ZPowerGroup(
     }
 
 template <typename TComplex, typename TReal>
-inline void Init_Marks(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& c,
-    double* param,
-    bool juliaflag,
-    bool invert,
-    TComplex& t,
-    TComplex& MarkCoeff)
+inline void Init_Marks(CPixel* self, TComplex* z, TComplex* q, TComplex& c, double* param, bool juliaflag, bool invert, TComplex& t, TComplex& MarkCoeff)
     {
-    t = (invert)
-	? InvertZ2<TComplex, TReal>(
-	    c,
-	    TReal(self->f_xcenter),
-	    TReal(self->f_ycenter),
-	    TReal(self->f_radius))
-	: c;
+    t = (invert) ? InvertZ2<TComplex, TReal>(c, TReal(self->f_xcenter), TReal(self->f_ycenter), TReal(self->f_radius)) : c;
 
     if (juliaflag)
 	{
@@ -281,27 +206,9 @@ inline void Init_Marks(
     }
 
 template <typename TComplex, typename TReal>
-inline void Init_Quat(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& c,
-    double* param,
-    bool juliaflag,
-    bool invert,
-    TComplex& t,
-    TReal& qc,
-    TReal& qci,
-    TReal& qcj,
-    TReal& qck)
+inline void Init_Quat(CPixel* self, TComplex* z, TComplex* q, TComplex& c, double* param, bool juliaflag, bool invert, TComplex& t, TReal& qc, TReal& qci, TReal& qcj, TReal& qck)
     {
-    t = (invert)
-	? InvertZ2<TComplex, TReal>(
-	    c,
-	    TReal(self->f_xcenter),
-	    TReal(self->f_ycenter),
-	    TReal(self->f_radius))
-	: c;
+    t = (invert) ? InvertZ2<TComplex, TReal>(c, TReal(self->f_xcenter), TReal(self->f_ycenter), TReal(self->f_radius)) : c;
 
     if (juliaflag)
 	{
@@ -320,46 +227,21 @@ inline void Init_Quat(
     qcj = TReal(param[2]);
     qck = TReal(param[3]);
     }
-
-
-
-
-
-
-
-
-
+       	  
 // ------------------------------------------------------------
 // Template version of RunFunctions (first step: Mandel only)
 // ------------------------------------------------------------
 
 template <typename TComplex, typename TReal>
-inline int Iter_Newton(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& z1,
-    TComplex& z2,
-    TComplex& zd,
-    long* iteration,
-    WORD* degree,
-    int subtype,
-    TComplex* roots,
-    TReal thresh,
-    long& color,
-    long threshold)
+inline int Iter_Newton(CPixel* self, TComplex* z, TComplex* q, TComplex& z1, TComplex& z2, TComplex& zd, long* iteration, WORD* degree, int subtype, TComplex* roots, TReal thresh, long& color, long threshold)
     {
     int tmpcolor;
     int i;
 
     color = *iteration;
-
     z2 = *z;
-
     z1 = z->CPolynomial(*degree - 1);
-
     *z = *z - (z1 * *z - *q - TReal(1)) / (z1 * TReal(*degree));
-
     zd = *z - z2;
 
     TReal d = zd.CSumSqr();
@@ -396,15 +278,7 @@ inline int Iter_Newton(
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_ComplexMarksMandelbrot(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& sqr,
-    TReal& realimag,
-    TComplex& coefficient,
-    int bailout_type,
-    TReal rqlim)
+inline int Iter_ComplexMarksMandelbrot(CPixel* self, TComplex* z, TComplex* q, TComplex& sqr, TReal& realimag, TComplex& coefficient, int bailout_type, TReal rqlim)
     {
     sqr.x = z->x * z->x;
     sqr.y = z->y * z->y;
@@ -420,13 +294,7 @@ inline int Iter_ComplexMarksMandelbrot(
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_Spider(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& temp,
-    int bailout_type,
-    TReal rqlim)
+inline int Iter_Spider(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, int bailout_type, TReal rqlim)
     {
     TComplex sqr;
     TReal realimag;
@@ -446,16 +314,7 @@ inline int Iter_Spider(
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_ManOWar(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& temp,
-    TComplex& temp1,
-    TComplex& temp3,
-    double* param,
-    int bailout_type,
-    TReal rqlim)
+inline int Iter_ManOWar(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, TComplex& temp1, TComplex& temp3, double* param, int bailout_type, TReal rqlim)
     {
     TComplex sqr;
 
@@ -493,34 +352,20 @@ inline double RealToDouble(const BigDouble& x)
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_ComplexNewton(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& croot,
-    TComplex& cdegree,
-    long* iteration,
-    int subtype,
-    long& color)
+inline int Iter_ComplexNewton(CPixel* self, TComplex* z, TComplex* q, TComplex& croot, TComplex& cdegree, long* iteration, int subtype, long& color)
     {
     TComplex tmp, cd1, New, temp;
 
     TReal mod;
     long coloriter;
-//    TReal MPthreshold = TReal(0.001);
     double MPthreshold = 0.001;
 
     color = *iteration;
-
     cd1.x = cdegree.x - TReal(1);
     cd1.y = cdegree.y;
-
     temp = (*z) ^ cd1;
-
     New = temp * (*z);
-
     tmp = New - croot;
-
     if (tmp.CSumSqr() < MPthreshold)
 	{
 	if (subtype == 'N')
@@ -530,12 +375,8 @@ inline int Iter_ComplexNewton(
 	    z->y = TReal(0);
 
 	temp = z->CLog();
-
 	tmp = temp * cdegree;
-
 	mod = tmp.y / TReal(TWO_PI);
-
-//	coloriter = (long)to_double(mod);
 	coloriter = (long)RealToDouble(mod);
 
 	if (fabs(mod - TReal(coloriter)) > TReal(0.5))
@@ -567,13 +408,7 @@ inline int Iter_ComplexNewton(
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_Lambda(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& temp,
-    int bailout_type,
-    TReal rqlim)
+inline int Iter_Lambda(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, int bailout_type, TReal rqlim)
     {
     TComplex sqr;
 
@@ -600,13 +435,7 @@ inline int Iter_Lambda(
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_ZPower(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& temp2,
-    int bailout_type,
-    TReal rqlim)
+inline int Iter_ZPower(CPixel* self, TComplex* z, TComplex* q, TComplex& temp2, int bailout_type, TReal rqlim)
     {
     *z = (*z) ^ temp2;
     *z = (*z) + (*q);
@@ -615,14 +444,7 @@ inline int Iter_ZPower(
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_ZtoZPlusZPower(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& temp,
-    double* param,
-    int bailout_type,
-    TReal rqlim)
+inline int Iter_ZtoZPlusZPower(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, double* param, int bailout_type, TReal rqlim)
     {
     temp = z->CPolynomial((int)param[2]);
 
@@ -633,16 +455,7 @@ inline int Iter_ZtoZPlusZPower(
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_MarksMandel(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& temp,
-    TComplex& temp1,
-    TComplex& coefficient,
-    TComplex& t,
-    int bailout_type,
-    TReal rqlim)
+inline int Iter_MarksMandel(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, TComplex& temp1, TComplex& coefficient, TComplex& t, int bailout_type, TReal rqlim)
     {
     TComplex sqr;
 
@@ -663,15 +476,7 @@ inline int Iter_MarksMandel(
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_Quat(
-    CPixel* self,
-    TComplex* z,
-    TComplex& temp,
-    TReal qc,
-    TReal qci,
-    TReal qcj,
-    TReal qck,
-    TReal rqlim)
+inline int Iter_Quat(CPixel* self, TComplex* z, TComplex& temp, TReal qc, TReal qci, TReal qcj, TReal qck, TReal rqlim)
     {
     TReal a0 = z->x;
     TReal a1 = z->y;
@@ -697,15 +502,9 @@ inline int Iter_Quat(
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_Tetrate(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    int bailout_type,
-    TReal rqlim)
+inline int Iter_Tetrate(CPixel* self, TComplex* z, TComplex* q, int bailout_type, TReal rqlim)
     {
     *z = (*q) ^ (*z);
-
     return DoBailout(bailout_type, z, rqlim);
     }
 

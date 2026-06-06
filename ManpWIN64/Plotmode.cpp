@@ -1,3 +1,9 @@
+/*
+    Plotmode.cpp - interface for the CPlotMode class which are all the plotting modes used in slope and perturbation.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <algorithm>
 #include "Plotmode.h"
 
@@ -10,11 +16,6 @@ std::vector<std::pair<int, int>> CPlotMode::generateScanline(int w, int h) {
     std::vector<std::pair<int, int>> pixelOrder;
     pixelOrder.reserve(w * h);
     pixelOrder.resize(w * h);
-/*
-    for (int y = h - 1; y >= 0; y--)
-	for (int x = 0; x < w; x++)
-	    pixelOrder.emplace_back(x, y);
-*/
     return pixelOrder;
     }
 

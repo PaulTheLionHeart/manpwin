@@ -1,5 +1,5 @@
 /*
-   MALTHUS.CPP a module for 3D-Malthus Fractals
+   MALTHUS.CPP - a module for 3D-Malthus Fractals
    Thanks to Marcus Rezende 
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
@@ -73,14 +73,7 @@ int	COtherFunctions::DoMalthus(void)
     double  pold = 0.1, pnew = 0.1, rate = gManp->param[0], RateInc;
     double  y = 0, x = 0, c1[3];
     int	    colour = 1, cor = (gManp->param[3] != 0.0) ? gManp->threshold / (int)gManp->param[3] : gManp->threshold;
- 
-
-
-    double x_rot, y_rot, z_rot = 0.0;
-
-
-
-
+    double  x_rot, y_rot, z_rot = 0.0;
 
     xscale = (double) (gManp->xdots - 1) / (mandel_width * ScreenRatio);
     yscale = (double) (gManp->ydots - 1) / mandel_width;

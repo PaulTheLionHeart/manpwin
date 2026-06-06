@@ -1,6 +1,7 @@
 /*
-	GIF Library
-	Copyright (c) 1999 - 2026 Paul de Leeuw Computers
+    GIFWRITE.CPP - a module for saving animations to GIF files.
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
 */
 
 //note: if the GIF reader returns BAD_FILE on a good file, you have the
@@ -79,15 +80,12 @@ typedef struct {
 
 #define GetChunkyPixel(pxx,nxx) (!((nxx) & 1)) ? (((pxx)[(nxx)>>1] >> 4) & 0x0f) : ((pxx)[(nxx)>>1] & 0x0f)
 
-//void	GIFDoSkipExtension(FILE * fh);
-//int	GIFDoUnpackImage(FILE * fh, int bits, LPBITMAPINFOHEADER lpbi, int flags);
 int	GIFWriteScreenDesc(FILE * fh, LPBITMAPINFOHEADER lpbi, LPSTR sig);
 int	GIFWriteImageDesc(FILE * fh, int i, LPBITMAPINFOHEADER lpbi);
 void	GIFInitTable(int min_code_size);
 int	GIFFlush(FILE * fh,int n);
 void	GIFWriteCode(FILE * fh,int code);
 int	GIFCompressImage(FILE * fh, LPBITMAPINFOHEADER lpbi);
-//int	GIFCompressAnimImage(FILE * fh, LPBITMAPINFOHEADER lpbi, int i);
 int	GIFWriteComment(FILE * fh, LPSTR comment);
 int	GIFGraphicControlExtension (FILE *fh);
 

@@ -1,6 +1,8 @@
-// DDComplex.h: interface for the DDComplex class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    DDComplex.h - interface for the DDComplex class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #pragma once
 

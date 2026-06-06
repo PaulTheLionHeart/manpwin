@@ -1,10 +1,7 @@
 /*
-    MandelDerivatives.CPP a module for the per pixel calculations of fractals. 
+    MandelDerivatives.CPP - a module for the per pixel calculations of Mandelbrot Derivatives. 
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include	<math.h>
@@ -14,8 +11,6 @@
 #include	"fractalp.h"
 
 static	int	MandelDerivPtr = 1, MandelDerivNum = 0;
-
-//extern	long	iteration;			// globals for speed for now at least
 
 /**************************************************************************
     Some simple processing

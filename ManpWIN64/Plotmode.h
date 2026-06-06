@@ -1,3 +1,9 @@
+/*
+    Plotmode.h - interface for the CPlotMode class which are all the plotting modes used in slope and perturbation.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <vector>
 #include <random>
 #include <atomic>

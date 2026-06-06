@@ -1,12 +1,9 @@
 /*
-    MANP.CPP a program to investigate the Mandelbrot set. This version dumps
+    MANP.CPP - a program to investigate the Mandelbrot set. This version dumps
     values of count to file and implements periodic checking. For more 
     information refer to Scientific American August 1985.
     
     Written in MICROSOFT VISUAL 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <stdio.h>
@@ -37,6 +34,8 @@ extern	char	AxesText[];		// used to convert axes and display them
 extern	char	LSYSFile[];
 extern	char	PARFile[];
 extern	char	KFRFile[];
+extern	char	FracPARFile[];		// Fractint PAR file
+
 extern	void	FindCursorRealPos(POINTS *);
 extern	int	SendCopydataMessage(HWND, char *);
 
@@ -48,19 +47,15 @@ extern	char	lsys_type[];
 extern	struct __timeb64 	FrameEnd;
 extern	struct __timeb64 	FrameStart;
 extern	HWND	CallingWindowHandle;	// Is ManpWIN called by an external window via WM_COPYDATA message?
-//extern	int	DataFromPNGFile;	// loaded PNG file?
 
-
-extern	int	find_count_fp(double, double), DoHenon(void), user_data(HWND),
+extern	int	DoHenon(void), user_data(HWND),
 		Lsystem(HWND, char *), dynam2dfloatsetup(void), dynam2dfloat(void),
-		orbit3dfloatsetup(void), orbit3dfloatcalc(void), ifs(HWND), cellular(void), plasma(void), 
-		demowalk(void), orbit2dfloat(void), FractintPar(HWND, char *), 
+		orbit3dfloatsetup(void), orbit3dfloatcalc(void), ifs(HWND), orbit2dfloat(void), FractintPar(HWND, char *), 
 		Fibonacci(void), Fourier(void), RunForm(char *, int), bifurcation(void);
 extern	int	NullSetup(void);				// sometimes we just don't want to do anything 
 extern	int	rotate(int);
 
-extern	void	set_palette(void), 
-		setsymmetry(int, int), DisplayPalette(HWND, BOOL);
+extern	void	set_palette(void), DisplayPalette(HWND, BOOL);
 
 extern	int	write_png_file(HWND, char *, char *, char *); 
 extern	void	ChangeView(HWND, int, int, int, int, int, int, int, int, char);
@@ -83,6 +78,25 @@ CManp::~CManp()
     delete RefData;
     RefData = nullptr;
     }
+
+/**************************************************************************
+	Handy debugging tool
+**************************************************************************/
+
+#ifdef _DEBUG
+void CManp::DebugNumParam(const char* where)
+    {
+    char s[256];
+    sprintf_s(s,
+	"[NumParam] %-40s type=%d subtype=%d slope=%d NumParam=%d\n",
+	where,
+	type,
+	subtype,
+	SlopeType,
+	Fractal.NumParam);
+    OutputDebugStringA(s);
+    }
+#endif
 
 /**************************************************************************
 	Main Fractal Loop - called from WinMain()
@@ -358,7 +372,7 @@ void	CManp::DisplayStatusBarInfo (int complete, char *text)
 	StatusColour = 0x0000FF00;				// colour of status bar
 	if (RunAnimation)					// we completed an animation run
 	    RunAnimation = FALSE;
-	else if (IsPAR)
+	else if (IsPAR || IsFrPAR)
 	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Par File <%s> Completed in %s, %s", text, ShowTime(ElapsedTime), PositionStr);
 	else if (IsKFR)
 	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "KFR File <%s> Completed in %s, %s", text, ShowTime(ElapsedTime), PositionStr);
@@ -748,12 +762,10 @@ void CManp::InitPixelObjects(int threadCount, HWND hwnd)
 	Pixel[i]->InitBailout();
 
 	Pixel[i]->InitRuntimeControl(&time_to_zoom, &time_to_restart,
-	    &time_to_reinit, &time_to_quit,
-	    &blockindex, &totpasses, &curpass);
+	    &time_to_reinit, &time_to_quit, &blockindex, &totpasses, &PixelCurPass[i]);
 
 	Pixel[i]->InitColourProcessing(special, colours, decomp, logval,
-	    logtable, LyapSequence, ColourSpeed,
-	    PaletteStart, PaletteShift);
+	    logtable, LyapSequence, ColourSpeed, PaletteStart, PaletteShift);
 
 	Pixel[i]->InitVisualEffects(ExpandStarTrailColours, ShowOrbits, OrbitColour);
 
@@ -763,9 +775,7 @@ void CManp::InitPixelObjects(int threadCount, HWND hwnd)
 	Pixel[i]->InitTransformations(CoordSystem, f_radius, f_xcenter, f_ycenter, distestwidth);
 
 	Pixel[i]->InitLightingAndBumpMapping(bump_transfer_factor,
-	    lightDirectionDegrees,
-	    bumpMappingDepth,
-	    bumpMappingStrength);
+	    lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength);
 	}
     }
 
@@ -892,6 +902,7 @@ void CManp::HandleRestartPhase(HWND hwnd, char* szSaveFileName)
     _ftime64(&FrameStart);
     time_to_restart = FALSE;
     finished = FALSE;
+    char    *TempFilename;
 
     UpdateInit();
     SetupBailoutDefaults();
@@ -949,8 +960,16 @@ void CManp::HandleRestartPhase(HWND hwnd, char* szSaveFileName)
 
     UpdateClose();
 
-    DisplayStatusBarInfo(COMPLETE,
-        ((IsPAR) ? PARFile : (IsKFR) ? KFRFile : ""));
+    if (IsPAR)
+	TempFilename = PARFile;
+    else if (IsFrPAR)
+	TempFilename = FracPARFile;
+    else if (IsKFR)
+	TempFilename = KFRFile;
+    else
+	TempFilename = "";
+
+    DisplayStatusBarInfo(COMPLETE, TempFilename);
     }
 
 /**************************************************************************
@@ -1185,6 +1204,7 @@ void CManp::InitThreadArrays(int threadCount)
     pPixelDataArray.assign(threadCount, nullptr);
     PixelThreadComplete.assign(threadCount, 0);
     PixelProgress.assign(threadCount, 0);
+    PixelCurPass.assign(threadCount, 1);
     }
 
 /**************************************************************************

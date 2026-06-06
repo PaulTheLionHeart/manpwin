@@ -1,28 +1,17 @@
 /*
-	This module consists only of the fractalspecific structure
-	and a *slew* of defines needed to get it to compile
-*/
+   FRACTALP.CPP - a database of all fractal initialisation data
 
-/* includes needed for fractalspecific */
+   Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "..\parser\fractint.h"
-//#include ".\parser\mpmath.h"
-//#include "helpdefs.h"
 #include "fractype.h"
 #include "fractalp.h"
 
 #define	HALF_PI	1.570796326794895
-
-//extern	HWND	GlobalHwnd;			// This is the main windows handle
-
-/* functions defined elswhere needed for fractalspecific */
-/* moved to prototyp.h */
-
-/* parameter descriptions */
-/* Note: parameters preceded by + are integer parameters */
 
 /* for Mandelbrots */
 static char realz0[] = "Real Perturbation of Z(0)";
@@ -61,11 +50,6 @@ static char recoeftrg1[] = "Real Coefficient First Function";
 static char imcoeftrg1[] = "Imag Coefficient First Function";
 static char recoeftrg2[] = "Real Coefficient Second Function";
 static char imcoeftrg2[] = "Imag Coefficient Second Function";
-
-/* MCP 7-7-91
-static char recoefsqr[] = "Real Coefficient Square Term";
-static char imcoefsqr[] = "Imag Coefficient Square Term";
-*/
 
 static char recoef2nd[] = "Real Coefficient Second Term";
 static char imcoef2nd[] = "Imag Coefficient Second Term";
@@ -135,15 +119,6 @@ static char ES[] = "";
 #define FROTHBAILOUT    6.0
 #define STDBAILOUT	4.0
 #define NOBAILOUT	0.0
-
-//struct moreparams far moreparams[] = 
-//{
-//    ICON,  omega,symdegree,ES,ES,ES,ES,0,3,0,0,0,0,
-//    ICON3D,omega,symdegree,ES,ES,ES,ES,0,3,0,0,0,0,
-//    HYPERCMPLXJFP,ZJ,ZK,   ES,ES,ES,ES,0,0,0,0,0,0,
-//    QUATJULFP    ,ZJ,ZK,   ES,ES,ES,ES,0,0,0,0,0,0,   
-//    -1,      NULL,NULL,NULL,NULL,NULL,NULL,0,0,0,0,0,0
-//};         
 
 char t_barnsleyj1[]= "*barnsleyj1";
 char t_barnsleyj2[]= "*barnsleyj2";

@@ -1,3 +1,9 @@
+/*
+    Default.cpp - default Fractint Palette
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
+
 #include    <Windows.h>
 #include    <vector>
 #include    <cstddef>

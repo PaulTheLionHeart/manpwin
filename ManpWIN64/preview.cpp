@@ -1,6 +1,8 @@
-// Preview.cpp: implementation of the CPreview class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    Preview.cpp - implementation of the CPreview class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include "Preview.h"
 

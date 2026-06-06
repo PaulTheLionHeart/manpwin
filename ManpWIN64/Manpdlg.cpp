@@ -1,7 +1,8 @@
-/**************************************************************************
-	MANPDLG.CPP
-	Manp Dialog Code
-**************************************************************************/
+/*
+    MANPDLG.CPP - Manp Dialog Code
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1837,14 +1838,9 @@ int	GetCorner(char *s1, char *s2, char *s3)
 
 INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
      {
-//     static	HANDLE	hCursor;
      static     UINT	tempParam;
      static     BOOL	CentreCoord = FALSE;
-//     static     char	*buf;
      static	long	temp_threshold;
-     char		*s1 = nullptr;
-     char		*s2 = nullptr;
-     char		*s3 = nullptr;
      BOOL		bTrans;
      HWND		hCtrl;
      char		Bailout[120];
@@ -1853,10 +1849,9 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
      char		JuliaImag[120];
      int		i, k;
      char		s[10][100];
-//     buf = new char [SIZEOF_BF_VARS * 3];		// leave full size because we have no idea how big they are going to be before hand
-     s1 = new char[SIZEOF_BF_VARS];
-     s2 = new char[SIZEOF_BF_VARS];
-     s3 = new char[SIZEOF_BF_VARS];
+     std::vector<char>	s1(SIZEOF_BF_VARS);
+     std::vector<char>	s2(SIZEOF_BF_VARS);
+     std::vector<char>	s3(SIZEOF_BF_VARS);
 
      switch (message)
 	  {
@@ -1877,24 +1872,20 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 	      SendMessage(hCtrl, BM_SETCHECK, gManp->juliaflag, 0L);
 	      if (gManp->BigNumFlag)
 		  {
-		  gManp->BigHor.ToString(s1, SIZEOF_BF_VARS, false);
-		  gManp->BigVert.ToString(s2, SIZEOF_BF_VARS, false);
-		  gManp->BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
-//		  ConvertBignum2String(s1, BigHor.x);
-//		  ConvertBignum2String(s2, BigVert.x);
-//		  mpfr_sprintf(s3, "%.20Re", BigWidth.x);
-//		  ConvertBignum2String(s3, BigWidth.x);
+		  gManp->BigHor.ToString(s1.data(), SIZEOF_BF_VARS, false);
+		  gManp->BigVert.ToString(s2.data(), SIZEOF_BF_VARS, false);
+		  gManp->BigWidth.SafeSprintf(s3.data(), SIZEOF_BF_VARS, "%.20Re");
 		  }
 	      else
 		  {
-		  _snprintf_s(s1, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", gManp->hor);
-		  _snprintf_s(s2, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", gManp->vert);
-		  _snprintf_s(s3, SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", gManp->mandel_width);
+		  _snprintf_s(s1.data(), SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", gManp->hor);
+		  _snprintf_s(s2.data(), SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", gManp->vert);
+		  _snprintf_s(s3.data(), SIZEOF_BF_VARS, _TRUNCATE, "%18.18f", gManp->mandel_width);
 		  }
 	      
-	      SetDlgItemText(hDlg, IDC_XCOORD, s1);
-	      SetDlgItemText(hDlg, IDC_YCOORD, s2);
-	      SetDlgItemText(hDlg, IDC_WIDTH, s3);
+	      SetDlgItemText(hDlg, IDC_XCOORD, s1.data());
+	      SetDlgItemText(hDlg, IDC_YCOORD, s2.data());
+	      SetDlgItemText(hDlg, IDC_WIDTH, s3.data());
 	      if (gManp->Fractal.NumFunct > 0)
 		  {
 		  SetDlgItemText(hDlg, ID_FRACPARAM1, gManp->Fractal.Fn1);
@@ -1926,17 +1917,14 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 	      switch ((int) LOWORD(wParam))
 		    {
 		    case IDOK:
-//			SaveUndo();
 			hCtrl = GetDlgItem(hDlg, IDC_CENTRE);
 			CentreCoord = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 			hCtrl = GetDlgItem(hDlg, IDC_ISJULIA);
 			gManp->juliaflag = (BYTE)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
-			GetDlgItemText(hDlg, IDC_XCOORD, s1, SIZEOF_BF_VARS);
-			GetDlgItemText(hDlg, IDC_YCOORD, s2, SIZEOF_BF_VARS);
-			GetDlgItemText(hDlg, IDC_WIDTH, s3, SIZEOF_BF_VARS);
-//			SAFE_SPRINTF(buf, "%s,%s,%s", s1, s2, s3);
-//			if (analyse_corner(buf) < 0)
-			if (GetCorner(s1, s2, s3) < 0)
+			GetDlgItemText(hDlg, IDC_XCOORD, s1.data(), SIZEOF_BF_VARS);
+			GetDlgItemText(hDlg, IDC_YCOORD, s2.data(), SIZEOF_BF_VARS);
+			GetDlgItemText(hDlg, IDC_WIDTH, s3.data(), SIZEOF_BF_VARS);
+			if (GetCorner(s1.data(), s2.data(), s3.data()) < 0)
 			    {
 			    gManp->BigNumFlag = FALSE;
 			    if (gManp->AspectRatio > 1.0)	// take aspect ration into account when plotting Julia
@@ -1975,27 +1963,15 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 			if (CentreCoord)
 			    Centre2Edge();
 			gManp->cycleflag = FALSE;
-//			if (buf) { delete[] buf; buf = NULL; }
-			if (s1) { delete[] s1; s1 = NULL; }
-			if (s2) { delete[] s2; s2 = NULL; }
-			if (s3) { delete[] s3; s3 = NULL; }
 			EndDialog (hDlg, TRUE);
 			return  TRUE;
 
 		    case IDCANCEL:
-//			if (buf) { delete[] buf; buf = NULL; }
-			if (s1) { delete[] s1; s1 = NULL; }
-			if (s2) { delete[] s2; s2 = NULL; }
-			if (s3) { delete[] s3; s3 = NULL; }
 			EndDialog (hDlg, FALSE);
 			return FALSE;
 		   }
 		   break;
 	    }
-//      if (buf) { delete[] buf; buf = NULL; }
-      if (s1) { delete[] s1; s1 = NULL; }
-      if (s2) { delete[] s2; s2 = NULL; }
-      if (s3) { delete[] s3; s3 = NULL; }
       return FALSE ;
       }
 

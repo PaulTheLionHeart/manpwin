@@ -1,6 +1,8 @@
-// BigComplex.h: interface for the Complex Bignum class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    BigComplex.h: interface for the Complex Bignum class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #pragma once
 
@@ -71,8 +73,6 @@ class BigComplex
 	BigComplex operator /(const BigComplex &);	// Division Operator
 	BigComplex operator /(const BigDouble &);	// complex divide by double Operator
 
-//	void	   CSin(BigComplex& result) const;
-
 	BigComplex CSqr(void);				// square
 	BigComplex CCube(void);				// cube
 	BigComplex CInvert(void);			// invert
@@ -92,35 +92,9 @@ class BigComplex
 	BigComplex BigComplexPower(const BigComplex &) const;	// a^b
 	BigComplex CSqrt(void);				// square root
 	Complex    CBig2Double(void);		// convert BigComplex to Complex
-	BigComplex  BigComplex2DDComplex(const BigComplex& in);
-
-//	void	   MTCExp(BigComplex *out, BigComplex in, BigDouble t1, BigDouble t2, BigDouble t3, BigDouble t4);
-//	void	   MTCSin(BigComplex *out, BigComplex in, BigDouble t1, BigDouble t2, BigDouble t3, BigDouble t4);
-//	void	   MTCCos(BigComplex *out, BigComplex in, BigDouble t1, BigDouble t2, BigDouble t3, BigDouble t4);
-
-
-//	inline friend BigComplex operator*(BigDouble real, BigComplex num)
-//		{return BigComplex(num.x*real, num.y*real);}
-//	inline friend BigComplex operator+(BigDouble real, BigComplex num)
-//		{return BigComplex(num.x+real, num.y);}
-//	inline friend BigComplex operator-(BigDouble real, BigComplex num)
-//		{return BigComplex(real-num.x, -num.y);}
 
 	BigDouble	x, y;
     };
 
-//extern	BigComplex	CSin(BigComplex  &);		// sine of a complex number
-//extern	BigComplex	CCos(BigComplex  &);		// cosine
-//extern	BigComplex	CSqr(BigComplex  &);		// square
-//extern	BigComplex	CCube(BigComplex  &);		// cube
-//extern	BigDouble	BigCSumSqr(BigComplex  &);	// real squared + imaginary squared
-//extern	BigDouble	BigCFabs(BigComplex  &);	// abs
-//extern	double		CSumSqr(BigComplex  &);		// real squared + imaginary squared
-//extern	double		CFabs(BigComplex  &);		// abs
-//extern	BigComplex	CPolynomial(BigComplex  &, int);// take a complex number to an integer power
-//extern	BigComplex	CInvert(BigComplex  &);		// invert
-//extern	BigComplex	CExp(BigComplex  &);		// exponent
-//extern	BigComplex	CLog(BigComplex  &);		// log
-//extern	Complex	CComplexPower(Complex  &, Complex &);	// take a complex number to a complex power
-// now replaced with operator z^x where z and x are both complex.
+
 

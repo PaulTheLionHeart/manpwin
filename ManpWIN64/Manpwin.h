@@ -1,6 +1,8 @@
-/*------------------------
-   MANPWIN.H header file
-  ------------------------*/
+/*
+    MANPWIN.h - Definitions for WinMain and message processing loop.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #undef  huge
 #define huge      
@@ -104,12 +106,6 @@
 
 #ifndef	VIEWMAIN
 #define VIEWMAIN
-//extern	int	height, xdots, ydots, width, bits_per_pixel, planes;
-//extern	BYTE		line_buf[MAXHORIZONTAL * 3];    // true colour = 3 bytes per pixel
-//extern	WORD		numcolors;			// colours in the file
-//extern	int	fdin;					// FILE descripter
-//extern	DWORD 	PASCAL	lread (int, VOID far *, DWORD);
-//extern	WORD	iNumColors;    			// Number of colors supported by device
 #endif
 
 extern std::atomic<bool> gStopRequested;
@@ -196,8 +192,6 @@ struct workliststuff		// work list entry for std escape time engines
 #define	INFORMATION	3
 #define	CALCULATINGREF	4
 #define	CLOSINGTHREADS	5
-
-//extern	WORD	colours;
 
 struct FNCT_LIST
     {

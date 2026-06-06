@@ -1,7 +1,8 @@
-/**************************************************************************
-	CONFIG.CPP
-	Read and interpret config files
-**************************************************************************/
+/*
+    CONFIG.CPP - Read and interpret config files
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
 
 #include <windows.h>
 #include <direct.h>
@@ -16,7 +17,6 @@
 #include "colour.h"
 #include "SafeStrings.h"
 
-//#define MAXLINE			480
 #define NONE			0		// opening bitmap loading flags
 #define DEFAULT			1
 #define NEW			2
@@ -182,7 +182,6 @@ int	ReadConfig(HWND hwnd)
 **************************************************************************/
 
 int	Strlicmp(const char *buf, const char *string)
-
     {
     int length;
 
@@ -197,7 +196,6 @@ int	Strlicmp(const char *buf, const char *string)
 **************************************************************************/
 
 int	ReadConfigFile(HWND hwnd, char *filename)
-
     {
     char	*t;
     char	buf[MAXLINE];
@@ -409,13 +407,13 @@ int	ReadConfigFile(HWND hwnd, char *filename)
 		continue;
 		}
 
-	    if (length = Strlicmp(buf, "UseFractintPalette="))	// Do we want to zoom along the edge?
+	    if (length = Strlicmp(buf, "UseFractintPalette="))	// Do we want to use default Fractint palette?
 		{
 		gManp->UseFractintPalette = (*(buf + length) == 'F') ? FALSE : TRUE;
 		continue;
 		}
 
-	    if (length = Strlicmp(buf, "UserPath="))		// Do we want to zoom along the edge?
+	    if (length = Strlicmp(buf, "UserPath="))		// What is the user's path?
 		{
 		UserPath = (*(buf + length) == 'F') ? FALSE : TRUE;
 		continue;
@@ -427,7 +425,7 @@ int	ReadConfigFile(HWND hwnd, char *filename)
 		continue;
 		}
 
-	    if (length = Strlicmp(buf, "DisplayPalette="))	// Do we want to zoom along the edge?
+	    if (length = Strlicmp(buf, "DisplayPalette="))	// Do we want to show palette?
 		{
 		gManp->TrueCol.DisplayPaletteFlag = (*(buf + length) == 'F') ? FALSE : TRUE;
 		continue;

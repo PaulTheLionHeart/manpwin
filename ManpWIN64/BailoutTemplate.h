@@ -1,13 +1,13 @@
-// BailoutTemplate.h
+/*
+    Bailout.h - Template for handling bailout code for all arithmetic types.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #pragma once
 
 template<typename TComplex, typename TReal>
-inline bool BailoutCore(
-    int type,
-    TComplex* z,
-    const TComplex* sqr,
-    TReal rqlim)
+inline bool BailoutCore(int type, TComplex* z, const TComplex* sqr, TReal rqlim)
     {
     // “If I don’t have sqr — compute it”
     auto sx = sqr ? sqr->x : (z->x * z->x);

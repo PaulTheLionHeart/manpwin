@@ -1,12 +1,12 @@
+/*
+    Potential.h - interface for the CPotential class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include	<windows.h>
 #include	<math.h>
 #include	<float.h>
-//#include	"manp.h"
-//#include	"Fract1.h"
-//#include	"fractype.h"
-//#include	"fractalp.h"
-//#include	".\parser\cmplx.h"
-//#include	".\parser\fractint.h"
 #include	"colour.h"
 
 #pragma once

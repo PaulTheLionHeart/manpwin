@@ -1,5 +1,8 @@
-// MPEGWrite.cpp    interface to ManpWIN for writing MPEG animation of frame sequence
-//////////////////////////
+/*
+   MPEGWrite.cpp - interface to ManpWIN for writing MPEG animation of frame sequence.
+
+   Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <windows.h>
 #include <stdio.h>
@@ -8,7 +11,6 @@
 #include "manpwin.h"
 #include "manp.h"
 #include "Dib.h"
-//#include "Anim.h"
 #include "Colour.h"
 #include "SafeStrings.h"
 
@@ -29,10 +31,7 @@ extern	char		LSTFile[];		// list file for PNG animation frames
 extern	char		ScriptFileName[];	// filename for the script file
 extern	char		ANIMPNGPath[];		// path for PNG files and LST files
 
-//extern	std::vector<AnimStruct> ANIM;		// holds all the date for each animation frame
-//extern	int		gTotalFrames;		// total number of animation frames
 extern	FILE		*outfile, *statfile;	// file descriptors
-//extern	BOOL		AnimationForward;	// order of file frames
 extern	int		file_type;		// if FILE_LST then we are processing a file list of PNG filenames 
 extern	char		MPGPath[];		// path for MPEG files
 extern	BOOL		WriteMPEGFrames;	// write frames directly to an MPEG file

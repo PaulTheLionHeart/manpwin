@@ -1,10 +1,7 @@
 /*
-    GUESS.CPP a module to do super solid guessing.
+    GUESS.CPP - a module to do super solid guessing.
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include "Pixel.h"

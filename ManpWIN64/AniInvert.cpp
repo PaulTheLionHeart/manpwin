@@ -1,10 +1,7 @@
 /*
-    ANIINVERT.CPP a program to animate the Inversion.
+    ANIINVERT.CPP  - a program to animate the Inversion.
     
     Written in Microsoft Visual C++ by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <windows.h>
@@ -21,8 +18,6 @@
 #include "colour.h"
 #include "SafeStrings.h"
 
-//extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
-
 extern	char	SCIPath[];		// path for SCI files
 
 extern	BOOL	WritePNGFrames;		// write frames to PNG files
@@ -31,7 +26,6 @@ extern	BOOL	WritePNGList;		// write PNG filenames to a *lst file
 extern	BOOL	WriteMPEGFrames;	// write frames directly to an MPEG file
 
 extern	char	*AnimData(void);
-//extern	BOOL	StartImmediately;
 static	int	frames = 100;
 static	double	ScaleFactor = 1.0;
 static	int	InvertAnimType = 0;	// 0 = linear
@@ -57,17 +51,8 @@ static	double	radius = 0.25;
 static	double	Magnitude = 0.49;		// 0.5 sits neatly inside the Mandelbrot set. 0.49 gives great orbits
 static	double	InvertRadius = 1.0;		// inversion radius
 
-//extern	double	xgap;			// gap between pixels
-//extern	double	ygap;			// gap between pixels
-
-//extern	int	xdots, ydots;
-
-//extern	CDib	Dib;			// Device Independent Bitmap
-
-extern	void	ConvertRGB2ASCII(RGBTRIPLE, char *);
 extern	char	*GenerateMPEGFileName (char *, char *);
 extern	char	*GenerateAnimFileName (char *, char *);
-extern	int	displayCurve(HWND hwnd, int JuliaAnimType);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
 
 /**************************************************************************

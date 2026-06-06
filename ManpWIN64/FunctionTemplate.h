@@ -1,3 +1,9 @@
+/*
+    FunctionTemplate.H - Template for handling ManpWIN native Functions for all arithmetic types.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <windows.h>
 #include <functional>
 
@@ -8,13 +14,7 @@
 **************************************************************************/
 
 template<typename TComplex, typename TReal>
-void Init_Basic(
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    bool juliaflag,
-    TComplex& sqr,
-    TReal& real_imag)
+void Init_Basic(TComplex* z, TComplex* q, double* param, bool juliaflag, TComplex& sqr, TReal& real_imag)
     {
     if (!juliaflag)
 	{
@@ -27,13 +27,7 @@ void Init_Basic(
     }
 
 template<typename TComplex>
-void Init_Power(
-    WORD type,
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    bool juliaflag,
-    WORD* degree)
+void Init_Power(WORD type, TComplex* z, TComplex* q, double* param, bool juliaflag, WORD* degree)
     {
     *degree = (int)param[0];
     if (*degree < 1)
@@ -51,21 +45,7 @@ void Init_Power(
     }
 
 template<typename TComplex>
-void Init_Cubic(
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    BYTE juliaflag,
-    int& subtype,
- //   RGBTRIPLE& special,
-    TComplex& a,
-    TComplex& b,
-    TComplex& a2,
-    TComplex& aa3,
-    TComplex& t2,
-    TComplex& t3,
-    TComplex& temp,
-    TComplex& v)
+void Init_Cubic(TComplex* z, TComplex* q, double* param, BYTE juliaflag, int& subtype, TComplex& a, TComplex& b, TComplex& a2, TComplex& aa3, TComplex& t2, TComplex& t3, TComplex& temp, TComplex& v)
     {
     // --- subtype ---
     switch ((int)param[0])
@@ -117,13 +97,7 @@ void Init_Cubic(
     }
 
 template<typename TComplex>
-void Init_SPECIALNEWT(
-    TComplex* z,
-    TComplex* q,
-    TComplex& a,
-    TComplex& b,
-    TComplex& lm5,
-    TComplex& lp5)
+void Init_SPECIALNEWT(TComplex* z, TComplex* q, TComplex& a, TComplex& b, TComplex& lm5, TComplex& lp5)
     {
     TComplex l2 = q->CSqr();
 
@@ -135,11 +109,7 @@ void Init_SPECIALNEWT(
     }
 
 template<typename TComplex>
-void Init_SINFRACTAL(
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    bool juliaflag)
+void Init_SINFRACTAL(TComplex* z, TComplex* q, double* param, bool juliaflag)
     {
     if (!juliaflag)
 	{
@@ -148,12 +118,7 @@ void Init_SINFRACTAL(
     }
 
 template<typename TComplex, typename TDegree>
-void Init_TALIS(
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    bool juliaflag,
-    TDegree* degree)
+void Init_TALIS(TComplex* z, TComplex* q, double* param, bool juliaflag, TDegree* degree)
     {
     *degree = (TDegree)param[0];
 
@@ -168,11 +133,7 @@ void Init_TALIS(
     }
 
 template<typename TComplex>
-void Init_POLYNOMIAL(
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    bool juliaflag)
+void Init_POLYNOMIAL(TComplex* z, TComplex* q, double* param, bool juliaflag)
     {
     if (!juliaflag)
 	{
@@ -182,15 +143,7 @@ void Init_POLYNOMIAL(
     }
 
 template<typename TComplex, typename TReal>
-int Init_MATEIN(
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    bool juliaflag,
-    TComplex& oz,
-    TComplex& temp,
-    double& distance,
-    double& absolute)
+int Init_MATEIN(TComplex* z, TComplex* q, double* param, bool juliaflag, TComplex& oz, TComplex& temp, double& distance, double& absolute)
     {
     absolute = q->CSumSqr();
 
@@ -214,13 +167,7 @@ int Init_MATEIN(
     }
 
 template<typename TComplex, typename TDegree>
-void Init_REDSHIFTRIDER(
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    bool juliaflag,
-    TComplex& a,
-    TDegree* degree)
+void Init_REDSHIFTRIDER(TComplex* z, TComplex* q, double* param, bool juliaflag, TComplex& a, TDegree* degree)
     {
     // parameter a
     a.x = param[0];
@@ -238,18 +185,7 @@ void Init_REDSHIFTRIDER(
     }
 
 template<typename TComplex, typename TReal>
-int Init_RATIONALMAP(
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    bool juliaflag,
-    char subtype,
-    TComplex& a,
-    TComplex& b,
-    TComplex& alpha,
-    TComplex& temp,
-    TComplex& temp1,
-    TComplex& temp3)
+int Init_RATIONALMAP(TComplex* z, TComplex* q, double* param, bool juliaflag, char subtype, TComplex& a, TComplex& b, TComplex& alpha, TComplex& temp, TComplex& temp1, TComplex& temp3)
     {
     TComplex cmcc;
 
@@ -317,27 +253,8 @@ int Init_RATIONALMAP(
 // ------------------------------------------------------------
 
 template<typename TComplex, typename TReal, typename TDegree>
-inline int FunctionsDispatch(
-    CPixel* self,
-    WORD type,
-    TComplex* z,
-    TComplex* q,
-    TDegree* degree,
-    TComplex& sqr,
-    TReal& real_imag,
-    TComplex& a,
-    TComplex& a2,
-    TComplex& aa3,
-    TComplex& b,
-    TComplex& v,
-    TComplex& temp,
-    double* param,
-    BYTE* SpecialFlag,
-    long* iteration,
-    int &SPECIALINDEX,
-    char subtype,
-    int bailout_type,
-    TReal rqlim)
+inline int FunctionsDispatch(CPixel* self, WORD type, TComplex* z, TComplex* q, TDegree* degree, TComplex& sqr, TReal& real_imag, TComplex& a, TComplex& a2, TComplex& aa3,
+	TComplex& b, TComplex& v, TComplex& temp, double* param, BYTE* SpecialFlag, long* iteration, int &SPECIALINDEX, char subtype, int bailout_type, TReal rqlim)
     {
     switch (type)
 	{
@@ -455,18 +372,8 @@ inline int FunctionsDispatch(
     return 0;
     }
 
-template<typename TComplex>
-BOOL Iter_SPECIALNEWT(				// Art Matrix Newton
-	TComplex* z,
-	const TComplex* q,
-	TComplex& a,
-	TComplex& b,
-	TComplex& lm5,
-	TComplex& lp5,
-	TComplex& v,
-	double* param,
-	BYTE& phaseflag,
-	WORD& special)
+template<typename TComplex>				// Art Matrix Newton
+BOOL Iter_SPECIALNEWT(TComplex* z, const TComplex* q, TComplex& a, TComplex& b, TComplex& lm5, TComplex& lp5, TComplex& v, double* param, BYTE& phaseflag, WORD& special)
     {
     if ((int)param[0] < 0)
 	special = 2;
@@ -508,18 +415,8 @@ BOOL Iter_SPECIALNEWT(				// Art Matrix Newton
     return FALSE;
     }
 
-template<typename TComplex>
-BOOL Iter_MATEIN(					// Art Matriuc Matein fractal
-    TComplex* z,
-    TComplex* q,
-    TComplex& oz,
-    TComplex& temp,
-    double& distance,
-    double absolute,
-    double* param,
-    double& epsilon,
-    double& escape,
-    BYTE& phaseflag)
+template<typename TComplex>					// Art Matriuc Matein fractal
+BOOL Iter_MATEIN(TComplex* z, TComplex* q, TComplex& oz, TComplex& temp, double& distance, double absolute, double* param, double& epsilon, double& escape, BYTE& phaseflag)
     {
     epsilon = 0.01;
     escape = 10.0E20;
@@ -555,14 +452,8 @@ BOOL Iter_MATEIN(					// Art Matriuc Matein fractal
     Z = L*SIN(Z)
     sin(x+iy)  = sin(x)cosh(y) + icos(x)sinh(y)
 ***************************************************************************/
-template<typename TComplex, typename TReal>
-bool Iter_SINFRACTAL(					// Sine
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    int bailout_type,
-    TReal rqlim)
+template<typename TComplex, typename TReal>					// Sine
+bool Iter_SINFRACTAL(CPixel* self, TComplex* z, TComplex* q, double* param, int bailout_type, TReal rqlim)
     {
     if (param[2] == 0.0)
 	*z = (*q) * z->CSin();
@@ -575,14 +466,8 @@ bool Iter_SINFRACTAL(					// Sine
     return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
     }
 
-template<typename TComplex>
-BOOL Iter_EXP_FRACTAL(					// Exponential
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    WORD* degree,
-    int& subtype,
-    double rqlim)
+template<typename TComplex>					// Exponential
+BOOL Iter_EXP_FRACTAL(TComplex* z, TComplex* q, double* param, WORD* degree, int& subtype, double rqlim)
     {
     int compare;
 
@@ -628,15 +513,7 @@ BOOL Iter_EXP_FRACTAL(					// Exponential
 
 
 template<typename TComplex, typename TReal>
-bool Iter_REDSHIFTRIDER(
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& a,
-    double* param,
-    WORD* degree,
-    int bailout_type,
-    TReal rqlim)
+bool Iter_REDSHIFTRIDER(CPixel* self, TComplex* z, TComplex* q, TComplex& a, double* param, WORD* degree, int bailout_type, TReal rqlim)
     {
     TComplex term =
 	((param[5] == 1.0) ? TComplex(1.0) : TComplex(-1.0))
@@ -648,16 +525,8 @@ bool Iter_REDSHIFTRIDER(
     return DoBailout<TComplex>(bailout_type, z, rqlim);
     }
 
-template<typename TComplex, typename TReal>
-bool Iter_TALIS(					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& a,
-    double* param,
-    WORD* degree,
-    int bailout_type,
-    TReal rqlim)
+template<typename TComplex, typename TReal>					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
+bool Iter_TALIS(CPixel* self, TComplex* z, TComplex* q, TComplex& a, double* param, WORD* degree, int bailout_type, TReal rqlim)
     {
     double m = param[1];
 
@@ -668,14 +537,8 @@ bool Iter_TALIS(					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
     return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
     }
 
-template<typename TComplex, typename TReal>
-bool Iter_POLYNOMIAL(					// Polynomial
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    double* param,
-    int bailout_type,
-    TReal rqlim)
+template<typename TComplex, typename TReal>					// Polynomial
+bool Iter_POLYNOMIAL(CPixel* self, TComplex* z, TComplex* q, double* param, int bailout_type, TReal rqlim)
     {
     TComplex InitialZ = *z;
     TComplex FinalZ = TComplex(0.0);
@@ -698,22 +561,8 @@ bool Iter_POLYNOMIAL(					// Polynomial
     return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
     }
 
-template<typename TComplex, typename  TReal>
-bool Iter_RATIONALMAP(					// Art Matrix Rational Map
-    CPixel* self,
-    TComplex* z,
-    TComplex* q,
-    TComplex& a,
-    TComplex& b,
-    double* param,
-    TReal& der,
-    TReal escape,
-    TReal epsilon,
-    long* iteration,
-    long threshold,
-    WORD special,
-    TComplex& alpha,
-    long* color)
+template<typename TComplex, typename  TReal>					// Art Matrix Rational Map
+bool Iter_RATIONALMAP(CPixel* self, TComplex* z, TComplex* q, TComplex& a, TComplex& b, double* param, TReal& der, TReal escape, TReal epsilon, long* iteration, long threshold, WORD special, TComplex& alpha, long* color)
     {
     TComplex az = a * (*z);              // AZ = A*Z
 

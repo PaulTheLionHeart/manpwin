@@ -1,10 +1,7 @@
 /*
-Arithmetic.cpp a module for conversion of number to and from BigNums.
+Arithmetic.cpp - a module for conversion of number to and from BigNums.
 
 Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-This program is written in "standard" C.Hardware dependant code
-(console drivers & serial I / O) is in separate machine libraries.
 */
 
 #include	<Windows.h>
@@ -24,25 +21,15 @@ This program is written in "standard" C.Hardware dependant code
 
 #define max(a,b)    (((a) > (b)) ? (a) : (b))
 
-//extern	HWND	PixelHwnd;		// pointer to window handle
-//BigDouble	BigCloseEnough, Big_xxmax, Big_yymax, Big_xxmin, Big_yymin, Big_xgap, Big_ygap;
-//BigComplex	zBig, cBig, qBig;
 int	decimals = 10;
 
 /**************** a handy little debugging tool *********************/
 #ifdef	_DEBUG
-//extern	void	ConvertBignum2String(char *s, mpfr_t num);
-void	ShowBignum(BigDouble x, char *Location)
+void ShowBignum(BigDouble x, char *Location)
     {
-    char    *s1;
-    s1 = new char [SIZEOF_BF_VARS + 1];
-    char    ss[24];
-//    ConvertBignum2String(s1, x.x);
+    char s1[SIZEOF_BF_VARS + 1]{};
     x.ToString(s1, SIZEOF_BF_VARS + 1, false);
-    SAFE_SPRINTF(ss, "bflength=%d", (int)strlen(s1));
     MessageBox(gManp->GlobalHwnd, s1, Location, MB_ICONEXCLAMATION | MB_OK);
-    //    MessageBox (PixelHwnd, s1, ss, MB_ICONEXCLAMATION | MB_OK);
-    if (s1) { delete[] s1; s1 = NULL; }
     }
 #endif
 /**************** a handy little debugging tool *********************/

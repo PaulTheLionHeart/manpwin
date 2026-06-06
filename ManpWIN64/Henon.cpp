@@ -1,5 +1,5 @@
 /*
-    HENON.CPP a program to investigate Henon mapping. For more information
+    HENON.CPP - a program to investigate Henon mapping. For more information
     refer to BYTE December 1986.
     
     Written in MICROSNOT VISUAL C++ by Paul de Leeuw.
@@ -14,14 +14,11 @@
 #include "Plot.h"
 #include "Manp.h"
 
-//#define MAXLINE		150		/* length of line */
 #define TRUE		1
 #define FALSE		0
 
 #define	ESC_CHAR	0x1b
 #define	MAXREAL		1E+10
-
-//extern	HWND	GlobalHwnd;			// to allow passing of hwnd 
 
 extern	int	user_data(HWND);
 static	double	xscale, yscale, cosa, sina;

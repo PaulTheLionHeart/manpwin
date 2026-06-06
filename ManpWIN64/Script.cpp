@@ -1,7 +1,8 @@
-/*-----------------------------------------
-	Paul's Fractal Generator
-	Script.cpp - argument and script interpreter
-  -----------------------------------------*/
+/*
+    Script.cpp - a module to interpret animation scripts.
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
 
 #include <windows.h>
 #include <conio.h>
@@ -32,11 +33,9 @@
 extern	int	mainview(HWND, BOOL);
 extern	char	*trailing(char *);
 extern	int	GetParamData(HWND, LPSTR, LPSTR, LPSTR, BOOL);
-//extern	void	setup_defaults(void);
-extern	void	NewtonSetup(void), DisplayPalette(HWND, BOOL);
+extern	void	DisplayPalette(HWND, BOOL);
 extern	int	write_png_file(HWND, char *, char *, char *); 
 extern	int	read_png_file(HWND hwnd, char *infile);
-//extern	void	ClearScreen(void);
 extern	void	InitTrueColourPalette(BYTE);
 extern	int	user_data(HWND);
 	int	RunFourierScript(HWND, char *, char *);
@@ -67,8 +66,6 @@ extern	BOOL	WriteMPEGFrames;	// write frames directly to an MPEG file
 
 extern	BOOL	DisplayAxisLabels;		// show labels for axis pairs
 
-//extern	std::vector<AnimStruct> ANIM;	// holds all the date for each animation frame
-//extern	HWND		GlobalHwnd;	// This is the main windows handle
 struct __timeb64 	FrameEnd;
 struct __timeb64 	FrameStart;
 
@@ -87,7 +84,6 @@ static	BOOL	OscillatorAnimation = FALSE;
 static	BOOL	JuliaSetAnimation = FALSE;
 static	BOOL	InversionSetAnimation = FALSE;
 static	double	divisor;
-//extern	BOOL	Return2Start;					// flag return to reverse sweep
 
 	char	SaveFileOrig[MAXLINE];				// SaveAs filename base name
 	char	FilenameList[MAXLINE];				// filename for list of animation frame filenames
@@ -755,11 +751,15 @@ int	CManp::RunScript(HWND hwnd, char *FileName)
 	pstr++;
 	strcpy(ScriptName, pstr);
 
-	if (OscAnimProc != MORPHING)
+	if (OscAnimProc == MORPHING)
+	    SetWindowText(hwnd, MoreInfo);				// Show morphing text in the caption bar
+	else
+	    {
 	    _snprintf_s(s, MAXLINE, _TRUNCATE, "Paul's Fractals: Frame %d of %d in script file %s, It=%d, BigNum=%s", CurrentFrame + 1, frames, ScriptName, gManp->threshold, (gManp->BigNumFlag) ? "T" : "F");
-	SetWindowText (hwnd, s);			// Show formatted text in the caption bar
+	    SetWindowText (hwnd, s);					// Show formatted text in the caption bar
+	    }
 	ptr = SaveFileOrig;
-	while (*ptr && *ptr != '.')			//strip extension
+	while (*ptr && *ptr != '.')					//strip extension
 	    ptr++;
 	*ptr = '\0';
 

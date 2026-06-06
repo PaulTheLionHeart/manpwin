@@ -1,14 +1,8 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-//
-// COLOUR1.CPP a module for a variety of colour based functions.
-//
-//////////////////////////////////////////////////////////////////////////////////////////
-// Author:-
-//	Paul de Leeuw
-//	pdeleeuw at deleeuw dot com dot au	( replace "at" "dot" by the normal characters.)
-//	10/07/2007
-//	This Class includes code to create a true palette and to modify it
-//////////////////////////////////////////////////////////////////////////////////////////
+/*
+    COLOUR1.CPP a module for a variety of colour based functions.
+
+    Written in MICROSOFT 'C++' by Paul de Leeuw.
+*/
 
 #include <windows.h>
 #include <windowsx.h>
@@ -20,10 +14,6 @@
 #include "colour.h"
 #include "Plot.h"
 #include "SafeStrings.h"
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//extern	HWND	GlobalHwnd;		// This is the main windows handle
-//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define	PREVIEW_HEIGHT	177
 #define	PREVIEW_WIDTH	220
@@ -49,12 +39,12 @@ INT_PTR CALLBACK DisplayRGBDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 //////////////////////////////////////////////////////////////////////
 void	InitTrueColourPalette(BYTE RandFlag)
     {
-    gManp->TrueCol.BuildIterationColourMap(RandFlag, gManp->threshold, StartColourCycling, gManp->logval, gManp->UseFractintPalette);
+    gManp->TrueCol.BuildIterationColourMap(RandFlag, gManp->threshold, StartColourCycling, gManp->logval);
     }
 
 void	InitIterationColours(BYTE RandFlag)
     {
-    gManp->TrueCol.BuildIterationColourMap(RandFlag, gManp->threshold, StartColourCycling, gManp->logval, gManp->UseFractintPalette);
+    gManp->TrueCol.BuildIterationColourMap(RandFlag, gManp->threshold, StartColourCycling, gManp->logval);
     }
 
 /**************************************************************************
@@ -442,6 +432,7 @@ INT_PTR CALLBACK ColourDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 	    color[1] = gManp->TrueCol.GreenStartInt;
 	    color[2] = gManp->TrueCol.BlueStartInt;
 	    color[3] = gManp->TrueCol.RandomDivisor;
+	    gManp->TrueCol.CurrentPaletteMode = PALETTE_CUSTOM_COL;
 	    for (nCtrlID = IDC_REDSCROLL; nCtrlID <= IDC_RANDSCROLL; nCtrlID++)
 		{
 		hCtrl = GetDlgItem(hDlg, nCtrlID);

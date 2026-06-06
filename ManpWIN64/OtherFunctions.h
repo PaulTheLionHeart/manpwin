@@ -1,8 +1,9 @@
-/////////////////////////////////////////////////////////////////////
-//
-// OtherFunctions.h: fractals that aren't raster based.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    OtherFunctions.h - fractals that aren't raster based.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #pragma once
 
 #include <Windows.h>
@@ -167,6 +168,8 @@ class COtherFunctions
 #define INNER_LOOP      100
 	int	*incx[DIRS];         // tab for 4 directions
 	int	*incy[DIRS];
+	std::vector<int> incxStorage;
+	std::vector<int> incyStorage;
 	short	AntRseed;
 	short	AntRflag;
 	char	*AntStatus;

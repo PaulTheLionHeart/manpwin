@@ -1,3 +1,9 @@
+/*
+    DDMatrix.h - interface for the CDDMatrix class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <math.h>
 #include "DDComplex.h"
 typedef dd_real	DDMATRIX[4][4];		// matrix of double-double 

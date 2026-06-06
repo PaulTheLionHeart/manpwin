@@ -1,16 +1,15 @@
-//#include "Manp.h"
+/*
+    OscProcess.h - interface for the COscProcess class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
+#include <vector>
 #include "Dib.h"
 #include "Plot.h"
 #include "Matrix.h"
 
 #pragma once
-
-// Macro to determine to round off the given value to the closest byte
-//#define WIDTHBYTES(i)   ((i+31)/32*4)	    Replaced by ComputeWidthBytes() in Dib.h
-
-//////////////////////////////////////////////////////////////////////
-// Class definition
-//////////////////////////////////////////////////////////////////////
 
 class COscProcess
     {
@@ -34,7 +33,7 @@ class COscProcess
 	int		*xAxis, *yAxis, *zAxis;			// numerical values for axes
 	int		CoordSystem;				// transform between Cartesian, Spherical and Cylindrical co-ordinate systems
 	struct		OscillatorSpecificStuff	*DatabasePtr;	// point to correct database
-	double		*zValuesKnots = NULL;			// array of z values for each pixel
+	std::vector<double> zValuesKnots;			// array of z values for each pixel
 	BOOL		*RemoveHiddenPixels;			// used in Knots, Surfaces and Curves
 	BOOL		DisplayLines;
 	BOOL		DisplayAxisImages;			// show all possible images for axis pairs
@@ -60,7 +59,7 @@ class COscProcess
 	int		PlotWidth = 5;				// width of plot for curve or knot
 	int		frames = 100;
 
-	double		*PointInfo = NULL;			// hold every point for every axis of the fractal
+	std::vector<double> PointInfo;				// hold every point for every axis of the fractal
 	int		In1[1024], In2[1024], Out1[1024], Out2[1024], FramesPerPair;
 	double		vOffset[MAXDIM], hOffset[MAXDIM], Offset[MAXDIM];
 	double		vMax[MAXDIM], vMin[MAXDIM];

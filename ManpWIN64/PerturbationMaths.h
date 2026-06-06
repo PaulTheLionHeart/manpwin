@@ -1,9 +1,15 @@
+/*
+   PerturbationMaths.h - Helper function for Perturbation.
+
+   Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #pragma once
 
 #include "complex.h"
 
 inline Complex CExpM1Stable(const Complex& z)
-{
+    {
     Complex out;
 
     double em1 = expm1(z.x);
@@ -17,4 +23,4 @@ inline Complex CExpM1Stable(const Complex& z)
     out.y = ea * siny;
 
     return out;
-}
+    }

@@ -1,10 +1,12 @@
-/****************************************************
-    PERTENGINE.CPP a module to explore Perturbation
+/*
+    PERTENGINE.CPP - a module to explore Perturbation
+
     Thanks to Claude Heiland-Allen https://fractalforums.org/programming/11/perturbation-code-for-cubic-and-higher-order-polynomials/2783
     and Shirom Makkad https://github.com/ShiromMakkad/MandelbrotPerturbation
     for their inspiration and methods of calculating perturbation fractals
+
     Written in Microsoft Visual C++ by Paul de Leeuw.
-****************************************************/
+*/
 
 #include <windows.h>
 #include <time.h>
@@ -25,8 +27,6 @@ extern	std::atomic<long> gPixelsDone;
 extern	void	ShowBignum(BigDouble x, char *Location);
 
 // constructors
-//extern	std::vector<float> wpixels;
-
 CPerturbation::CPerturbation()
     {}
 

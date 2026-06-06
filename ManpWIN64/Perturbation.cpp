@@ -1,8 +1,10 @@
-/****************************************************
-    PERTURBATION.CPP a module to explore Perturbation
+/*
+    PERTURBATION.CPP - a module to explore Perturbation
+
     Thanks to Shirom Makkad fractaltodesktop@gmail.com
+
     Written in Microsoft Visual C++ by Paul de Leeuw.
-****************************************************/
+*/
 
 #include <process.h>
 #include <strsafe.h>
@@ -28,10 +30,6 @@
 #include "SafeStrings.h"
 
 #define		MAXTHREADS	40
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//extern	HWND	GlobalHwnd;			// This is the main windows handle
-//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 extern	int	user_data(HWND);
 extern	int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND hwnd), char* StatusBarInfo, int *pPertProgress, double bailout, int ArithType, int power, BigDouble BigWidth, int &SlopeDegree, int subtype);
@@ -575,11 +573,9 @@ void	LoadPerturbationParams(void)
     // here is where we can do some specific updates to individual Perturbation fractals
     int	i;
 
-    gManp->Fractal.NumParam = PerturbationSpecific[gManp->subtype].numparams;
     for (i = 0; i < NUMPERTPARAM; i++)
 	{
 	gManp->param[i] = PerturbationSpecific[gManp->subtype].paramvalue[i];
-//	gManp->Fractal.ParamName[i] = PerturbationSpecific[gManp->subtype].paramname[i];
 	}
     gManp->rqlim = PerturbationSpecific[gManp->subtype].rqlim;
     gManp->SlopeType = PerturbationSpecific[gManp->subtype].SlopeType;

@@ -1,5 +1,5 @@
 /*
-   SIERPINSHIFLOWERS.CPP a module for Sierpinski Flower Fractals
+   SIERPINSHIFLOWERS.CPP - a module for Sierpinski Flower Fractals
    Thanks to Marcus Rezende 
 
    Written in Microsoft Visual C++ by Paul de Leeuw.

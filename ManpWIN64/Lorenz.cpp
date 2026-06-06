@@ -1,7 +1,11 @@
 /*
+   LORENZ.CPP - a module to explore Lorenz functions
+
    This file contains two 3 dimensional orbit-type fractal
    generators - IFS and LORENZ3D, along with code to generate
    red/blue 3D images. Tim Wegner
+
+   Written in Microsoft Visual C++ by Paul de Leeuw.
 */
 
 #include <stdio.h>
@@ -9,7 +13,6 @@
 #include <float.h>
 #include <math.h>
 #include <windows.h>
-//#include "fractint.h"
 #include "fractype.h"
 #include "plot.h"
 #include "Dib.h"
@@ -21,38 +24,36 @@
 #include "SafeStrings.h"
 #include "..\parser\TrigFn.h"
 
-#define NUMIFS	  32	 /* number of ifs functions in ifs array */
-#define IFSPARM    7	 /* number of ifs parameters */
-#define IFS3DPARM 13	 /* number of ifs 3D parameters */
-#define XROT	  gManp->x_rot		/* rotate x-axis 60 degrees */
-#define YROT	  gManp->y_rot		/* rotate y-axis 90 degrees */
-#define ZROT	  gManp->z_rot		/* rotate x-axis  0 degrees */
+#define NUMIFS	  32			// number of ifs functions in ifs array
+#define IFSPARM    7			// number of ifs parameters
+#define IFS3DPARM 13			// number of ifs 3D parameters
+#define XROT	  gManp->x_rot		// rotate x-axis 60 degrees
+#define YROT	  gManp->y_rot		// rotate y-axis 90 degrees
+#define ZROT	  gManp->z_rot		// rotate x-axis  0 degrees
 
 #define COSB   dx
 #define SINABC dy
 
 #define	sign(x)		(((x)>0)?1:((x)<0)?-1:0)
 
-//extern	HWND	GlobalHwnd;		// to allow passing of hwnd 
 extern	char	*str_find_ci(char *, char *);
 
 #define	MaxIFSNameChoices   80
 extern	char	lptr[][100];
-//char	*win_choices[80];
 
 struct affine
-{
-   /* weird order so a,b,e and c,d,f are vectors */
+    {
+    // weird order so a,b,e and c,d,f are vectors
    double a;
    double b;
    double e;
    double c;
    double d;
    double f;
-};
+    };
 
 struct float3dvtinf /* data used by 3d view transform subroutine */
-{
+    {
    long ct;		/* iteration counter */
    double orbit[3];		   /* interated function orbit value */
    double viewvect[3];	      /* orbit transformed for viewing */

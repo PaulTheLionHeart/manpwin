@@ -1,6 +1,8 @@
-// BigComplex.h: interface for the Complex Bignum class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    ExpComplex.h - interface for ExpComplex class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #pragma once
 
@@ -26,8 +28,6 @@ class ExpComplex
 
 	ExpComplex(const ExpComplex & Cmplx1)// Copy Constructor
 	    {
-//	    mpfr_set(x.x, Cmplx1.x.x, MPFR_RNDN);
-//	    mpfr_set(y.x, Cmplx1.y.x, MPFR_RNDN);
 	    x = Cmplx1.x;
 	    y = Cmplx1.y;
 	    }

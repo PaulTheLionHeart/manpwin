@@ -1,6 +1,11 @@
+/*
+   PertEngine.CPP - Definition for CPerturbation class.
+
+   Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <windows.h>
 #include "mpfr.h"
-//#include "Point.h"
 #include "filter.h"
 #include "Dib.h"
 #include "colour.h"

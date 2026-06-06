@@ -1,9 +1,8 @@
 /*
-	This module consists of the OscillatorSpecific structure
-	and a *slew* of defines needed to get it to compile
-*/
+   OSCDATABASE.CPP - OscillatorSpecific structure
 
-/* includes needed for fractalspecific */
+   Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,8 +10,7 @@
 #include "fractype.h"
 #include "fractalp.h"
 
-/* empty string */
-static char ES[] = "";
+static char ES[] = "";	    // empty string
 
 //////////////////////////////////////////////////////////////////
 // Database of Chaotic Oscillators

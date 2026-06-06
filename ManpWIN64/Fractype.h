@@ -1,3 +1,9 @@
+/*
+    FRACTYPE.h - define all the fractal types.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #ifndef FRACTYPE_H
 #define FRACTYPE_H
 

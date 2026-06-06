@@ -1,10 +1,7 @@
 /*                                                                
-    BT.CPP a module for boundary tracing routines for MANPWIN.C.
+    BT.CPP - a module for boundary tracing routines.
     
-    Written in MICROSOFT 'C' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
+    Written in MICROSOFT 'C++' by Paul de Leeuw.
 */
 
 #include "Pixel.h"
@@ -14,7 +11,6 @@
 ************************************************************************/
 
 long	CPixel::calc_xy(HWND hwnd, int mx, int my, int user_data(HWND hwnd))
-
     {
     color = (long)Plot.GetColour((WORD)mx, (WORD)my);
 					// see if pixel is black
@@ -36,7 +32,6 @@ long	CPixel::calc_xy(HWND hwnd, int mx, int my, int user_data(HWND hwnd))
 ************************************************************************/
 
 int	CPixel::boundary_trace(HWND hwnd, int C, int R, int user_data(HWND hwnd))
-
     {
     enum
 	{
@@ -182,19 +177,12 @@ int	CPixel::boundary_trace(HWND hwnd, int C, int R, int user_data(HWND hwnd))
 ************************************************************************/
 
 int	CPixel::fillseg(int LeftX, int RightX, int R, long bcolor)
-
     {
-    DWORD	*forwards = NULL;
-    DWORD	*backwards = NULL;
     int		modeON, C;
     int		i;
     long	gcolor;
-    //BYTE	s[1200];
-
-    if ((forwards = new DWORD[width + 200]) == NULL)
-	return(-1);
-    if ((backwards = new DWORD[width * 3]) == NULL)
-	return(-1);
+    std::vector<DWORD> forwards(width + 200);
+    std::vector<DWORD> backwards(width * 3);
 
     modeON = 0;
 
@@ -215,35 +203,35 @@ int	CPixel::fillseg(int LeftX, int RightX, int R, long bcolor)
 	}
 
     if (PlotType == NOSYM) 				// no symmetry! easy!
-	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
+	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards.data());
     else if (PlotType == XAXIS) 			// X-axis symmetry
 	{
-	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
+	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards.data());
 	if ((i = yystop - (R - yystart)) > iystop)
-	    Plot.OutputLine((WORD)LeftX, (WORD)i, (WORD)(RightX - LeftX + 1), forwards);
+	    Plot.OutputLine((WORD)LeftX, (WORD)i, (WORD)(RightX - LeftX + 1), forwards.data());
 	}
     else if (PlotType == ORIGIN) 			// Origin symmetry
 	{
-	reverse_string(backwards, forwards, RightX - LeftX + 1);
-	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
+	reverse_string(backwards.data(), forwards.data(), RightX - LeftX + 1);
+	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards.data());
 	if ((i = yystop - (R - yystart)) > iystop)
-	    Plot.OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)i, (WORD)(RightX - LeftX + 1), backwards);
+	    Plot.OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)i, (WORD)(RightX - LeftX + 1), backwards.data());
 	}
     else if (PlotType == YAXIS) 			// Y-axis symmetry
 	{
-	reverse_string(backwards, forwards, RightX - LeftX + 1);
-	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
-	Plot.OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)R, (WORD)(RightX - LeftX + 1), backwards);
+	reverse_string(backwards.data(), forwards.data(), RightX - LeftX + 1);
+	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards.data());
+	Plot.OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)R, (WORD)(RightX - LeftX + 1), backwards.data());
 	}
     else if (PlotType == XYAXIS) 			// X-axis and Y-axis symmetry
 	{
-	reverse_string(backwards, forwards, RightX - LeftX + 1);
-	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards);
-	Plot.OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)R, (WORD)(RightX - LeftX + 1), backwards);
+	reverse_string(backwards.data(), forwards.data(), RightX - LeftX + 1);
+	Plot.OutputLine((WORD)LeftX, (WORD)R, (WORD)(RightX - LeftX + 1), forwards.data());
+	Plot.OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)R, (WORD)(RightX - LeftX + 1), backwards.data());
 	if ((i = yystop - (R - yystart)) > iystop)
 	    {
-	    Plot.OutputLine((WORD)LeftX, (WORD)i, (WORD)(RightX - LeftX + 1), forwards);
-	    Plot.OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)i, (WORD)(RightX - LeftX + 1), backwards);
+	    Plot.OutputLine((WORD)LeftX, (WORD)i, (WORD)(RightX - LeftX + 1), forwards.data());
+	    Plot.OutputLine((WORD)(xxstop - (RightX - ixstart)), (WORD)i, (WORD)(RightX - LeftX + 1), backwards.data());
 	    }
 	}
     else  						// the other symmetry types are on their own!
@@ -251,18 +239,6 @@ int	CPixel::fillseg(int LeftX, int RightX, int R, long bcolor)
 	for (i = LeftX; i <= RightX; i++)
 	    plot((WORD)i, (WORD)R, forwards[i - LeftX]);
 	}
-
-    if (forwards)
-	{
-	delete forwards;
-	forwards = NULL;
-	}
-    if (backwards)
-	{
-	delete backwards;
-	backwards = NULL;
-	}
-
     return(C);
     }
 
@@ -271,7 +247,6 @@ int	CPixel::fillseg(int LeftX, int RightX, int R, long bcolor)
 ************************************************************************/
 
 void	CPixel::reverse_string(DWORD *t, DWORD *s, int len)
-
     {
     int	i;
 
@@ -285,7 +260,6 @@ void	CPixel::reverse_string(DWORD *t, DWORD *s, int len)
 ************************************************************************/
 
 int	CPixel::bound_trace_main(HWND hwnd, int user_data(HWND hwnd))
-
     {
     int	    i;
 

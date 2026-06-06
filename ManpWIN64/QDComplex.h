@@ -1,6 +1,8 @@
-// QDComplex.h: interface for the QDComplex class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    QDComplex.h - interface for the QDComplex class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #pragma once
 

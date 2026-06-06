@@ -1,3 +1,9 @@
+/*
+    Manp.h - interface for the CManp class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <ctype.h>
 #include <windows.h>
 #include <setjmp.h>
@@ -130,6 +136,7 @@ class CManp
 	void	ReverseAnimDirection(void);
 	void	StepFrame(void);
 	int	AnimateSuspend(void);
+	void	DebugNumParam(const char* where);
 
 	std::vector<std::unique_ptr<CPixel>> Pixel;
 	std::vector<std::unique_ptr<CPerturbation>> PertCalculator;
@@ -193,7 +200,6 @@ class CManp
 	double		AspectRatio;
 	BYTE		RealTimeJuliaFlag = 0;		// Display Julia set in real time
 	int		PaletteStart = 0;
-//	int		totpasses, curpass;		// for 1/2 pass type tracing 
 	long		iteration;
 	double		potparam[3] = { 255.0, 820.0, 20.0 };		// potential parameters
 	double		param[20];			// parameters
@@ -201,7 +207,6 @@ class CManp
 	int		distest = 0, distestwidth = 71;
 	int		finished = FALSE;		// all passes complete 
 	BYTE		*logtable = NULL;		// log value table for col comp 
-//	BYTE		orig_palette[768];		// loaded palette 
 	WORD		special = 2;			// special colour, phase etc
 	WORD		degree;				// power
 	RGBTRIPLE OrbitColour = { 255,255,255 };	// Indexed colour for the orbit displays in Julia sets
@@ -212,7 +217,7 @@ class CManp
 	BOOL		ZoomEdge;			// Zooming process
 	BYTE		_3dflag;			// replay saved file. 3 = 3D 
 	BYTE		exitflag;			// exit on completion
-	BOOL		UseFractintPalette;		// standard VGA palette
+	BOOL		UseFractintPalette = TRUE;	// standard VGA palette
 	int		logval;				// log colour map starting value
 	int		logflag;			// log colour map required or in error
 	int		screenx, screeny;
@@ -271,7 +276,9 @@ class CManp
 	WORD		colours;			// colours in the file
 	BYTE		SpecialFlag;			// tell graphing routine of special conditions
 	bool		IsPAR = false;			// are we currently running a PAR file?
+	bool		IsFrPAR = false;		// are we currently running a Fractint PAR file?
 	bool		IsKFR = false;			// are we currently running a KFR file?
+	bool		IsMAP = false;			// are we currently using a MAP colour file?
 	int		MaxDimensions;
 	DWORD		StatusColour = 0x0000FFFF;	// colour of status bar
 	int		StartFrame = 0;			// allow us to resume animation run
@@ -309,6 +316,7 @@ class CManp
 	bool		UseMutex = false;		// trade off speed for accuracy
 	WORD		UpdateDelay = 1000;		// delay in milliseconds
 	int		totpasses, curpass;		// for 1/2 pass type tracing as well as oscillators etc
+	std::vector<int> PixelCurPass;			// per-thread CPixel pass
 	bool		RunMPEG = false;		// are we in the middle of generating an MPEG file?
 	int		xAxis = 0, yAxis = 1, zAxis = 2;// numerical values for axes. assume normal x = 0, y = 1 and z = 2
 	RGBTRIPLE	OscBackGround = { 0,0,0 };

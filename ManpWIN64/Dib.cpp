@@ -1,6 +1,8 @@
-// Dib.cpp: implementation of the CDib class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    Dib.cpp - implementation of the Device Independent Bitmap - CDib class
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -21,7 +23,6 @@
 #define	RGB_SIZE		3
 
 /* Macro to determine to round off the given value to the closest byte */
-//#define WIDTHBYTES(i)   ((i+31)/32*4) 	    Replaced by ComputeWidthBytes() in Dib.h
 #define PIXELS2BYTES(n)	((n+7)/8)
 #define	GREYVALUE(r,g,b) ((((r*30)/100) + ((g*59)/100) + ((b*11)/100)))
 #define	ORTHOMATCH(r,g,b)  (((r) & 0x00e0) | (((g) >> 3) & 0x001c)  | (((b) >> 6) & 0x0003))

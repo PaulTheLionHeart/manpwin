@@ -1,4 +1,9 @@
-/* FRACTALP.H - default values for the ManpWIN routines */
+/*
+    FRACTALP.h - default values for the each fractal routine.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <Windows.h>
 #include "ManpWin.h"
 

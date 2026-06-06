@@ -1,5 +1,5 @@
 /*
-   KNOTS.CPP a module to explore 3D knots
+   KNOTS.CPP - a module to explore 3D knots
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
@@ -11,11 +11,7 @@
 #include	"resource.h"
 #include	"fractype.h"
 #include	"fractalp.h"
-#include	"menu.h"
-//#include	"anim.h"
 #include	"OscProcess.h"
-
-//extern	HWND	gManp->GlobalHwnd;			// This is the main windows handle
 
 extern	int	user_data(HWND);
 extern	void	PlotExtras(void);
@@ -26,12 +22,7 @@ extern	int	OscillatorNum;
 extern	double	dt;				// delta time
 extern	double	VertBias;			// allow vertical stretching of the image
 extern	double	zBias;				// allow stretching of the image in the z direction
-//extern	int	xAxis, yAxis, zAxis;		// numerical values for axes for chaotic oscillators
 extern	BOOL	RemoveHiddenPixels;
-
-//extern	std::vector <float> wpixels;		// an array of doubles holding slope modified iteration counts
-
-//extern	RGBTRIPLE	OscBackGround;
 
 void	InitKnot(double c1[], int dimensions);
 int	DisplayKnot(double c1[], DWORD colour, int KnotWidth, double i, int dimensions);

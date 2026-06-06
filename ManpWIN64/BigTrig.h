@@ -1,3 +1,9 @@
+/*
+    BigTrig.H - Definitions for Bignum implementation of Trig to overcome multi-threading issues with mpfr.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <string.h>
 #include "big.h"
 #include "BigDouble.h"

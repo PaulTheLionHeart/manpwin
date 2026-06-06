@@ -1,5 +1,5 @@
 /*
-   SPROTTLINZ.CPP a module to explore Sprott-Linz Chaotic Attractor
+   SPROTTLINZ.CPP - a module to explore Sprott-Linz Chaotic Attractor
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
@@ -12,10 +12,8 @@
 #include	"resource.h"
 #include	"fractype.h"
 #include	"fractalp.h"
-#include	"menu.h"
+//#include	"menu.h"
 //#include	"anim.h"
-
-//extern	HWND	gManp->GlobalHwnd;			// This is the main windows handle
 
 extern	int	user_data(HWND);
 extern	void	InitOscillator(double c1[], int dimensions);
@@ -26,7 +24,6 @@ extern	BOOL	DisplayAxes;
 extern	double	dt;				// delta time
 
 static	double	xscale, yscale;
-//extern	double	gManp->iterations;
 
 static	double	xMax, yMax, zMax, xMin, yMin, zMin;
 

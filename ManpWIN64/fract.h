@@ -1,6 +1,8 @@
-// Fract1.h: interface for the CFract class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    Fract.h - interface for the CFract class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include "fractalp.h"
 

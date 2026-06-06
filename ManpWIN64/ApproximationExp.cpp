@@ -1,3 +1,9 @@
+/*
+    ApproximationExp.cpp - code for evaluating floatexp version of BLA (Bivariant Linear Approximation) in perturbation.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <atomic>
 #include "approximation.h"
 

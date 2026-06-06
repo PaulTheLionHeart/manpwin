@@ -1,3 +1,9 @@
+/*
+    BigMatrix.H - Definitions for Bignum implementation of Matrixc class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <math.h>
 #include "BigDouble.h"
 typedef BigDouble	BIGMATRIX[4][4];	// matrix of BigDoubles 

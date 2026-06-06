@@ -1,3 +1,9 @@
+/*
+    MandelDerivTemplate.H - Template for handling Mandelbrot derivatives for all arithmetic types.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <windows.h>
 #include <functional>
 #include <cmath>
@@ -6,16 +12,7 @@
 #pragma once
 
 template<typename TComplex, typename TReal>
-inline void MandelDerivInit(
-    int subtype,
-    bool juliaflag,
-    TComplex* z,
-    TComplex* q,
-    TComplex& sqr,
-    TReal& real_imag,
-    WORD* degree,
-    double* param
-)
+inline void MandelDerivInit(int subtype, bool juliaflag, TComplex* z, TComplex* q, TComplex& sqr, TReal& real_imag, WORD* degree, double* param)
     {
     switch (subtype)
 	{
@@ -65,16 +62,7 @@ inline void MandelDerivInit(
 // Mandelbrot Derivative Template Dispatcher (Tierazon style)
 // ---------------------------------------------------------------------
 template<typename TComplex, typename TReal>
-inline int MandelDerivDispatch(
-    CPixel* self,
-    int subtype,
-    TComplex* z,
-    TComplex* q,
-    WORD* degree,
-    TComplex& sqr,
-    TReal& real_imag,
-    int bailout_type,
-    TReal rqlim)
+inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex* q, WORD* degree, TComplex& sqr, TReal& real_imag, int bailout_type, TReal rqlim)
     {
     TComplex sqrsqr;
     TReal RealImagSqr;

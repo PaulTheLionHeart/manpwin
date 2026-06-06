@@ -1,3 +1,9 @@
+/*
+    BIF.H - Header file for Bif.cpp.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 ///////////////////////////////////
 //  Bif.h - Header file for Bif.cpp
 ///////////////////////////////////

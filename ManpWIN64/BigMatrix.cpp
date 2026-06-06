@@ -1,10 +1,7 @@
 /*
-    BIGMATRIX.CPP a program to do matrix manipulations on Bignum
+    BIGMATRIX.CPP - a program to do matrix manipulations on Bignum
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include "BigMatrix.h"

@@ -1,3 +1,8 @@
+/*
+    PNG.CPP - interface for reading and writing PNG files and the fractal data in a tEXt chunck.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 /* PNG.CPP
  *
  */
@@ -33,24 +38,14 @@
 
 int	png_decoder(HWND, char *, char *);
 int	decode_png_header(HWND, char *, char *);
-//int	load_png_palette(HWND, char *, char *);
 
 typedef unsigned long   ULONG;
-
-//extern	long	threshold;
-
-//extern	CTrueCol    TrueCol;			// palette info
 
 static	char	PNG_error_buffer[240];
 static	HWND	temphwnd;
 
 static	char	*PaletteBuffer = NULL;
 static	char	*PixelBuffer = NULL;
-
-//extern	RECT 	r;
-//extern	HDC	hdcMem;				// load picture into memory
-
-//extern	int	height, xdots, ydots, width, bits_per_pixel;
 
 extern	BYTE	*GetOrthoPalette(BYTE *);
 extern	void	SwapColours(WORD);
@@ -69,8 +64,6 @@ static	int		bit_depth, color_type;
 static	jmp_buf		jmpbuf;
 static	png_textp	text_ptr;
 
-//static	png_structp	png_ptr;
-//static	png_info	*info_ptr;
 static	FILE		*fp = NULL;;
 int			DataFromPNGFile = FALSE;	// loaded PNG file?
 
@@ -350,10 +343,6 @@ int   png_decoder(HWND hwnd, char *szAppName, char *infile)
    // free the structures and line buffer
     // clean up after the read, and free any memory allocated 
     png_destroy_read_struct(&read_ptr, &read_info_ptr, &end_info_ptr);
-
-    // free the structures and line buffer
-    if (row_pointers != NULL)
-	delete[] row_pointers;
     fclose(fp);
     return(0);
     }
@@ -405,7 +394,7 @@ int	write_png_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
     {
     char		s[480];
     static HCURSOR	hCursor;
-    BYTE		**row_pointers = NULL;
+//    BYTE		**row_pointers = NULL;
     FILE		*fp = NULL;
     WORD		i;
     png_text	TextInfo;
@@ -465,22 +454,10 @@ int	write_png_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
     png_set_IHDR(write_ptr, write_info_ptr, gManp->width, gManp->height, bit_depth, color_type, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 //    write_ptr->channels = 3;
     png_write_info(write_ptr,write_info_ptr);
-    if ((row_pointers = (BYTE **) new BYTE[gManp->height * sizeof(BYTE *)]) == NULL)
-	{
-	if (fp != NULL)
-	    fclose(fp);
-	png_destroy_write_struct(&write_ptr, &write_info_ptr);
-	hCursor = LoadCursor((HINSTANCE)NULL, IDC_ARROW);	// Load pointer cursor.
-	SetCursor(hCursor);
-	_snprintf_s(s, 480, _TRUNCATE, "Error: can't allocate memory for row pointer %s, in PNG file: %s", PNG_error_buffer, outfile);
-	MessageBox (hwnd, s, szAppName, MB_ICONEXCLAMATION | MB_OK);
-	MessageBeep (0);
-	return -1;
-	}
-
+    std::vector<BYTE*> row_pointers(gManp->height);
     for (i = 0; i < gManp->height; ++i)
 	row_pointers[gManp->height - i - 1] = gManp->Dib.DibPixels.data() + (long)i * (long)(ComputeWidthBytes(gManp->width, gManp->Dib.BitsPerPixel));
-    png_write_image(write_ptr, row_pointers, hwnd);
+    png_write_image(write_ptr, row_pointers.data(), hwnd);
 
 	     // write uncompressed chunk
     SetWindowText(hwnd, "Writing parameter info");
@@ -491,50 +468,23 @@ int	write_png_file(HWND hwnd, char *outfile, char *szAppName, char *CommentText)
     TextInfo.text_length = strlen(TextInfo.text);		// length of "text" field
     png_set_text(write_ptr,write_info_ptr, &TextInfo, 1);
 
-/*
-    if(PixelBuffer = new char[(DWORD)width * (DWORD)height * 5L])	// we use 5 characters of 6 bits to make an iteration count
-	{
-	     // write compressed chunk
-	SetWindowText(hwnd, "Writing pixel info");
-	TextInfo.compression = PNG_TEXT_COMPRESSION_zTXt;	// compression value
-//	TextInfo.compression = PNG_TEXT_COMPRESSION_NONE;	// compression value
-	TextInfo.key = "Pixels";				// keyword, 1-79 character description of "text"
-	*PixelBuffer = '\0';					// start at the beginning
-	SaveIterationsDatabase(PixelBuffer);
-	TextInfo.text = PixelBuffer;				// comment, may be an empty string (ie "")
-	TextInfo.text_length = strlen(TextInfo.text);		// length of "text" field
-	png_set_text(write_ptr,write_info_ptr, &TextInfo, 1);
-	}
-*/
+    std::vector<char> PaletteBuffer(LocalThreshold * 5);	// we use 5 characters of 6 bits to make an RGB triplet
 
-    if(PaletteBuffer = new char[LocalThreshold * 5])		// we use 5 characters of 6 bits to make an RGB triplet
-	{
-	     // write compressed chunk
-	SetWindowText(hwnd, "Writing palette info");
-	TextInfo.compression = PNG_TEXT_COMPRESSION_zTXt;	// compression value
-//	TextInfo.compression = PNG_TEXT_COMPRESSION_NONE;	// compression value
-	TextInfo.key = "Palette";				// keyword, 1-79 character description of "text"
-	*PaletteBuffer = '\0';					// start at the beginning
-	SaveTextPalette(PaletteBuffer);
-	TextInfo.text = PaletteBuffer;				// comment, may be an empty string (ie "")
-	TextInfo.text_length = strlen(TextInfo.text);		// length of "text" field
-	png_set_text(write_ptr,write_info_ptr, &TextInfo, 1);
-	}
-
-//    png_set_PLTE(write_ptr, write_info_ptr, (png_const_colorp)TrueCol.PalettePtr, 250);
+     // write compressed chunk
+    SetWindowText(hwnd, "Writing palette info");
+    TextInfo.compression = PNG_TEXT_COMPRESSION_zTXt;	// compression value
+    //	TextInfo.compression = PNG_TEXT_COMPRESSION_NONE;	// compression value
+    TextInfo.key = "Palette";				// keyword, 1-79 character description of "text"
+    PaletteBuffer[0] = '\0';					// start at the beginning
+    SaveTextPalette(PaletteBuffer.data());
+    TextInfo.text = PaletteBuffer.data();				// comment, may be an empty string (ie "")
+    TextInfo.text_length = strlen(TextInfo.text);		// length of "text" field
+    png_set_text(write_ptr,write_info_ptr, &TextInfo, 1);
     png_write_end(write_ptr, write_info_ptr);
-//    png_write_destroy(png_ptr);
     png_destroy_write_struct(&write_ptr, &write_info_ptr);
 
     if(fp != NULL)
 	fclose(fp);
-    if (row_pointers != NULL)
-	delete[] row_pointers; row_pointers = NULL;
-    if (PaletteBuffer)
-	delete [] PaletteBuffer;
-    if (PixelBuffer)
-	delete [] PixelBuffer;
-
     hCursor = LoadCursor((HINSTANCE)NULL, IDC_ARROW);		// Load pointer cursor.
     SetCursor(hCursor);
     return 0;

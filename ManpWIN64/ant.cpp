@@ -1,32 +1,29 @@
-/* The Ant Automaton is based on an article in Scientific American, July 1994.
- * The original Fractint implementation was by Tim Wegner in Fractint 19.0.
- * This routine is a major rewrite by Luciano Genero & Fulvio Cappelli using
- * tables for speed, and adds a second ant type, multiple ants, and random
- * rules.
- *
- * Revision history:
- * 20 Mar 95 LG/FC First release of table driven version
- * 31 Mar 95 LG/FC Fixed a bug that writes one pixel off the screen
- * 31 Mar 95 LG/FC Changed ant type 1 to produce the same pattern as the
- *                   original implementation (they were mirrored on the
- *                   x axis)
- * 04 Apr 95 TW    Added wrap option and further modified the code to match
- *                   the original algorithm. It now matches exactly.
- * 10 Apr 95 TW    Suffix array does not contain enough memory. Crashes at
- *                   over 1024x768. Changed to extraseg.
- * 12 Apr 95 TW    Added maxants range check.
- * June 2023 PHD, upgrade to C++ for ManpWIN
- */
+/*
+    Ant.cpp
+
+    The Ant Automaton is based on an article in Scientific American, July 1994.
+    The original Fractint implementation was by Tim Wegner in Fractint 19.0.
+    This routine is a major rewrite by Luciano Genero & Fulvio Cappelli using
+    tables for speed, and adds a second ant type, multiple ants, and random rules.
+ 
+    Revision history:
+    20 Mar 95 LG/FC First release of table driven version
+    31 Mar 95 LG/FC Fixed a bug that writes one pixel off the screen
+    31 Mar 95 LG/FC Changed ant type 1 to produce the same pattern as the
+                    original implementation (they were mirrored on the x axis)
+    04 Apr 95 TW    Added wrap option and further modified the code to match
+                    the original algorithm. It now matches exactly.
+    10 Apr 95 TW    Suffix array does not contain enough memory. Crashes at
+                    over 1024x768. Changed to extraseg.
+    12 Apr 95 TW    Added maxants range check.
+    June 2023 PHD, upgrade to C++ for ManpWIN
+*/
 
 #include "OtherFunctions.h"
 #include "plot.h"
 #include "resource.h"
 #include "SafeStrings.h"
 #include "manp.h"
-
-// possible value of idir e relative movement in the 4 directions
-// for x 0, 1, 0, -1
-// for y 1, 0, -1, 0
 
 extern	int	user_data(HWND);
 
@@ -177,14 +174,14 @@ int	COtherFunctions::ant(void)
 //   int oldhelpmode ;
     long maxpts, wait;
     char rule[MAX_ANTS];
-    char *extra;
 
-    extra = new char [(gManp->xdots + 2) * sizeof(int) * DIRS + (gManp->ydots + 2) * sizeof(int) * MAX_ANTS];
+    incxStorage.resize((gManp->xdots + 2) * DIRS);
+    incyStorage.resize((gManp->ydots + 2) * DIRS);
 
     for (i = 0; i < DIRS; i++)
 	{
-	incx[i] = (int *) (extra + (gManp->xdots + 2) * sizeof(int) * i);
-	incy[i] = (int *) (extra + (gManp->xdots + 2) * sizeof(int) * DIRS + (gManp->ydots + 2) *sizeof(int) * i);
+	incx[i] = incxStorage.data() + (gManp->xdots + 2) * i;
+	incy[i] = incyStorage.data() + (gManp->ydots + 2) * i;
 	}
 
 // In this vectors put all the possible point that the ants can visit. Wrap them from a side to the other instead of simply end calculation
@@ -251,7 +248,6 @@ int	COtherFunctions::ant(void)
     wait = 0;
     TurkMite1(maxants, rule_len, rule, maxpts, wait);
     gManp->DisplayStatusBarInfo(COMPLETE, "");
-    if (extra) { delete[] extra; extra = NULL; }
     return 0;
     }
 

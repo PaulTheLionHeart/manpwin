@@ -1,8 +1,10 @@
-/****************************************************
+/*
     PERTSETUP.CPP a module to explore Perturbation
+
     Thanks to Shirom Makkad fractaltodesktop@gmail.com
+
     Written in Microsoft Visual C++ by Paul de Leeuw.
-****************************************************/
+*/
 
 #include <atomic>
 #include <vector>

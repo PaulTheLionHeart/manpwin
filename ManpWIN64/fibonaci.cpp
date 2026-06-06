@@ -1,5 +1,5 @@
 /*
-    FIBONACI.CPP a module for Fibonacci Spirals
+    FIBONACI.CPP - a module for Fibonacci Spirals
     
     Written in Microsoft Visual C++ by Paul de Leeuw.
 */
@@ -8,13 +8,10 @@
 #include "manp.h"
 #include "colour.h"
 #include "resource.h"
-#include "menu.h"
 #include "Plot.h"
 
 extern	int	user_data(HWND);
 
-//extern	HDC		hdcMem;		// load picture into memory
-//extern	HWND		PixelHwnd;	// pointer to handle for pixel updating
 extern	WORD		delay;
 extern	std::atomic<bool> gStopRequested;	// force early exit
 

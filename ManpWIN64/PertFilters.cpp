@@ -1,11 +1,13 @@
-/****************************************************
-    PERTFILTERS.CPP a module to explore Perturbation filter functions
+/*
+    PERTFILTERS.CPP - a module to explore Perturbation filter functions
+
     Thanks to Claude Heiland-Allen https://fractalforums.org/programming/11/perturbation-code-for-cubic-and-higher-order-polynomials/2783,
     SuperHeal https://fractalforums.org/index.php?topic=5524.new#new
     and Shirom Makkad https://github.com/ShiromMakkad/MandelbrotPerturbation
     for their inspiration and methods of calculating perturbation fractals
+
     Written in Microsoft Visual C++ by Paul de Leeuw.
-****************************************************/
+*/
 
 #include <atomic>
 #include "PertEngine.h"
@@ -26,7 +28,6 @@ RGBTRIPLE CPerturbation::GetSmoothedColour(double fIter, double color_speed, CTr
     // Apply palette speed (default 1.0)
     // ---------------------------------------
     double v = fIter * (color_speed)+color_bias;
-//    RGBTRIPLE* rgbPal = reinterpret_cast<RGBTRIPLE*>(TrueCol.PalettePtr);
     int paletteSize = TrueCol.ColoursInPALFile;
 
     // Wrap t into [0, paletteSize)

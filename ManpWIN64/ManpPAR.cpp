@@ -1,10 +1,7 @@
 /*
-    MANPPAR.CPP a module for handling ManpWIN par files.
+    MANPPAR.CPP - a module for handling ManpWIN par files.
 
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include	"manp.h"
@@ -46,10 +43,6 @@ extern	WORD	steps, NumHarmonics;	// for Fourier Analysis
 extern	BOOL	NonStandardImage;	// has user changed image size?
 
 extern	int	StartColourCycling;	// we can start the colour cycling from any point..good for cycling animations
-//BOOL	invert = FALSE;		// invert fractal
-//extern	double	f_radius, f_xcenter, f_ycenter;	// inversion radius, center 
-//extern	int	xAxis, yAxis, zAxis;	// numerical values for axes for chaotic oscillators
-//extern	int	MaxDimensions;
 extern	int	OscillatorPtr;		// points to current subtype
 extern	int	OscPtrArray[];		// array of pointers to specific oscillators or fractal maps
 extern	double	VertBias;		// allow vertical stretching of the image
@@ -168,9 +161,6 @@ void	output_batch(double h, double v, double w, HWND hwnd, LPSTR filename)
     FILE	*fb;				// batch file   
     char	s[400];
     char	info[MAXDATALINE];
-    char	*s1 = nullptr;
-    char	*s2 = nullptr;
-    char	*s3 = nullptr;
     char	ascii[6];
     long	i, k;
 
@@ -188,16 +178,13 @@ void	output_batch(double h, double v, double w, HWND hwnd, LPSTR filename)
 	{
 	if (gManp->BigNumFlag)
 	    {
-	    s1 = new char[SIZEOF_BF_VARS];
-	    s2 = new char[SIZEOF_BF_VARS];
-	    s3 = new char[SIZEOF_BF_VARS];
-	    gManp->BigHor.ToString(s1, SIZEOF_BF_VARS, false);
-	    gManp->BigVert.ToString(s2, SIZEOF_BF_VARS, false);
-	    gManp->BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
-	    fprintf(fb, "-c%s,%s,%s", s1, s2, s3);
-	    if (s1) delete[] s1;
-	    if (s2) delete[] s2;
-	    if (s3) delete[] s3;
+	    std::vector<char>	s1(SIZEOF_BF_VARS);
+	    std::vector<char>	s2(SIZEOF_BF_VARS);
+	    std::vector<char>	s3(SIZEOF_BF_VARS);
+	    gManp->BigHor.ToString(s1.data(), SIZEOF_BF_VARS, false);
+	    gManp->BigVert.ToString(s2.data(), SIZEOF_BF_VARS, false);
+	    gManp->BigWidth.SafeSprintf(s3.data(), SIZEOF_BF_VARS, "%.20Re");
+	    fprintf(fb, "-c%s,%s,%s", s1.data(), s2.data(), s3.data());
 	    }
 	else
 	    fprintf(fb, "-c%24.24f,%24.24f,%24.24f", h, v, w);
@@ -1231,9 +1218,6 @@ void	FindSubtypeName(char *SubTypeName, int type, int subtype)
 
 char	*FractData(void)
     {
-    char	*s1 = nullptr;
-    char	*s2 = nullptr;
-    char	*s3 = nullptr;
     static	char	info[MAXDATALINE];	// extra SIZEOF_BF_VARS bytes for "-c", "-t" etc, spaces and values
 
     info[0] = '\0';
@@ -1241,16 +1225,13 @@ char	*FractData(void)
 
     if (gManp->BigNumFlag)
 	{
-	s1 = new char[SIZEOF_BF_VARS];
-	s2 = new char[SIZEOF_BF_VARS];
-	s3 = new char[SIZEOF_BF_VARS];
+	char s1[SIZEOF_BF_VARS]{};
+	char s2[SIZEOF_BF_VARS]{};
+	char s3[SIZEOF_BF_VARS]{};
 	gManp->BigHor.ToString(s1, SIZEOF_BF_VARS, false);
 	gManp->BigVert.ToString(s2, SIZEOF_BF_VARS, false);
 	gManp->BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
 	sb.append("-c%s,%s,%s -t%d", s1, s2, s3, gManp->threshold);
-	if (s1) delete[] s1;
-	if (s2) delete[] s2;
-	if (s3) delete[] s3;
 	}
     else
 	{

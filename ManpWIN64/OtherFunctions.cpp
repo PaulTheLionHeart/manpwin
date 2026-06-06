@@ -1,19 +1,13 @@
 /*
-    OtherFUNCTIONS.CPP a module for calculations of fractals that are non-standard 
+    OtherFUNCTIONS.CPP - a module for calculations of fractals that are non-standard 
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include "OtherFunctions.h"
 #include "SafeStrings.h"
 #include "Hailstone.h"
 #include "Manp.h"
-
-//extern std::vector<float> wpixels;
-//extern	int	CurrentRenderMode;		// to decide how to exit threads cleanly
 
 COtherFunctions::COtherFunctions()
     {
@@ -93,7 +87,8 @@ int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *itera
 	case GARGOYLE:		//Numeric Gargoyles - Thanks to "The Loom of God" by Clifford A.Pickover pp 266 - 267.
 	    {
 	    double  r;						// random number between 0 and 1
-	    BYTE    *c, *ch;					// pointers to arrays for holding 0 and 1 vakues
+	    std::vector<BYTE> c;
+	    std::vector<BYTE> ch;
 	    DWORD   colour;
 	    int	    i, j, sum;
 	    long    t;
@@ -107,11 +102,13 @@ int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *itera
 		t /= 10;
 		}
 
-	    if ((c = new BYTE[xdots * ydots]) == NULL)
-		return -1;
-	    if ((ch = new BYTE[xdots * ydots]) == NULL)
+	    try
 		{
-		delete[] c;
+		c.resize((size_t)xdots * (size_t)ydots);
+		ch.resize((size_t)xdots * (size_t)ydots);
+		}
+	    catch (...)
+		{
 		return -1;
 		}
 
@@ -119,7 +116,7 @@ int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *itera
 		for (j = 0; j < xdots; j++)
 		    {
 		    r = (double)rand() / 32767.0;
-		    *(c + i * xdots + j) = (r < 0.5) ? 1 : 0;	// seed space with random 0s and 1s
+		    c[i * xdots + j] = (r < 0.5) ? 1 : 0;	// seed space with random 0s and 1s
 		    }
 
 	    for (;;)	// perform simulation based on a twisted majority rules to form gargoyle objects in 2D
@@ -133,26 +130,24 @@ int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *itera
 		    for (j = 1; j < xdots - 1; j++)
 			{					// compute the sum of neighbouring cells
 			sum =
-			    *(c + (i + 1) * xdots + j + 1) +
-			    *(c + (i - 1) * xdots + j - 1) +
-			    *(c + (i - 1) * xdots + j + 1) +
-			    *(c + (i + 1) * xdots + j - 1) +
-			    *(c + (i + 1) * xdots + j + 0) +
-			    *(c + (i - 1) * xdots + j + 0) +
-			    *(c + (i + 0) * xdots + j + 1) +
-			    *(c + (i + 0) * xdots + j - 1) +
-			    *(c + (i + 0) * xdots + j + 0);
+			    c[(i + 1) * xdots + j + 1] +
+			    c[(i - 1) * xdots + j - 1] +
+			    c[(i - 1) * xdots + j + 1] +
+			    c[(i + 1) * xdots + j - 1] +
+			    c[(i + 1) * xdots + j + 0] +
+			    c[(i - 1) * xdots + j + 0] +
+			    c[(i + 0) * xdots + j + 1] +
+			    c[(i + 0) * xdots + j - 1] +
+			    c[(i + 0) * xdots + j + 0];
 
-			*(ch + i * xdots + j) = (rule[sum]) ? 1 : 0;
+			ch[i * xdots + j] = (rule[sum]) ? 1 : 0;
 			//		*(ch + i * xdots + j) = (sum >= 6 || sum == 4) ? 1 : 0;	// notice the "twist" in the rules that destabilises creachure boundaries
 			colour = threshold * sum / 9;		// 9 is the max possible value of sum
 			Plot.PlotPoint(j, i, colour);
 			}
 		    }
-		memcpy(c, ch, xdots * ydots);
+		std::swap(c, ch);
 		}
-	    delete[] c;
-	    delete[] ch;
 	    return 0;
 	    }
 

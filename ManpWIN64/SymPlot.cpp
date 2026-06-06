@@ -1,27 +1,11 @@
 /*
-    SYMPLOT.CPP a module of symmetry functions.
+    SYMPLOT.CPP - a module of symmetry functions.
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include "Pixel.h"
 #include "SafeStrings.h"
-
-/**************************************************************************
-	Plot using flags that trap SpecialColour usage
-**************************************************************************/
-/*
-void CPixel::PlotPixelWithFlags(int x, int y, long colourIndex)
-    {
-    if (colourIndex == -2)
-	Plot.OutRGBpoint((WORD)x, (WORD)y, SpecialColour);
-    else
-	plot((WORD)x, (WORD)y, colourIndex);
-    }
-*/
 
 /**************************************************************************
 	Select appropriate symmetry plot 

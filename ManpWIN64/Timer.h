@@ -1,3 +1,9 @@
+/*
+    Timer.h - define timer functions for perturbation.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <chrono>
 #include <string>
 #include <cstdio>

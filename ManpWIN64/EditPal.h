@@ -1,3 +1,9 @@
+/*
+    EditPal.h - interface for editing palette CEditPal class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include "Preview.h"
 #include <vector>
 

@@ -1,5 +1,7 @@
 /*
-Miscellaneous fractal-specific code (formerly in CALCFRAC.C)
+   MISCFRAC.CPP - Miscellaneous fractal-specific code (formerly in CALCFRAC.C in Fractint)
+
+   Written in Microsoft Visual C++ by Paul de Leeuw.
 */
 
 #include <windows.h>

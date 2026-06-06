@@ -215,6 +215,7 @@
 #define IDC_HORBLINDS                           606
 #define IDC_SPIRAL                              607
 #define IDC_FWDDIFF                             608
+#define IDC_COPY                                900
 #define IDC_FULLSCREEN                          1000
 #define IDC_HUE4                                1000
 #define IDC_NEWTONFLOWER                        1000

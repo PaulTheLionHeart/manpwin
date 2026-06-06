@@ -1,6 +1,8 @@
-/*------------------------------------------
-   SAVEFILE.CPP --   File Write Functions
-  ------------------------------------------*/
+/*
+    SAVEFILE.CPP - File Write Functions.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <windows.h>
 #include <commdlg.h>
@@ -24,10 +26,8 @@ extern	char	PARPath[];		// path for PAR files
 extern	char	KFRPath[];		// path for KFR files
 extern	char	SVGPath[];		// path for SVG files
 
-//extern	void	close_file(HWND, char *, char *);
 extern	void	output_batch(double, double, double, HWND, LPSTR);
 extern	int	WriteKallesFile(HWND hwnd, char *filename);
-//extern	int	save_screen(HWND, char *, short, short, short, short, short);
 extern	int	write_png_file(HWND, char *, char *, char *); 
 extern	int	write_gif_file(char *, char *);
 extern	int	MPEGWrite(char *);

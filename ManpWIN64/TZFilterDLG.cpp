@@ -1,14 +1,16 @@
-/////////////////////////////////////////////////
-// rsxcolor.c
-/////////////////////////////////////////////////
-//
-// By: stephen c. ferguson
-// http://home1.gte.net/itriazon/
-// email: itriazon@gte.net
-//
-/////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
+/*
+    TierazonDLG.cpp - Dialogue functions for Tierazon fractals.
 
+    By: stephen c. ferguson
+    http://home1.gte.net/itriazon/
+    email: itriazon@gte.net
+
+    Updated in Microsoft Visual 'C++' by Paul de Leeuw.
+    These are listed in numerical order of the functions.
+    Note that CSqr(z) is used in place of z*z and CCube(z) in place of z*z*z for speed
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #define STRICT
 #define WIN32_LEAN_AND_MEAN

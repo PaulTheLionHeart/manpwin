@@ -1,6 +1,8 @@
-/*------------------------------------------
+/*
    SVG.CPP -- SVG File Write Functions
-  ------------------------------------------*/
+
+   Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <windows.h>
 #include <stdio.h>

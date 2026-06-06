@@ -1,3 +1,23 @@
+/*
+    Buddhabrot.cpp - Nebulabrot / Buddhabrot generator.
+
+    Brought to you by Wikipedia...
+    Written by User:Evercat
+
+    Released under the GNU Free Documentation License
+    or the GNU Public License, whichever you prefer:
+    November 23, 2004
+
+    This code is lame and confusing. I apologise.
+    As I like to point out, my C is self-taught.
+
+    Note: some folk mention possible improvements on the talk page:
+    http://en.wikipedia.org/wiki/User_talk:Evercat/Buddhabrot.c
+
+    Written in MICROSOFT 'C++' by Paul de Leeuw.
+*/
+
+
 // Nebulabrot / Buddhabrot generator.
 // Brought to you by Wikipedia...
 // Written by User:Evercat

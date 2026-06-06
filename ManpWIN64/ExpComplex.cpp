@@ -1,6 +1,9 @@
-// BigComplex.cpp: interface for the Complex class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    ExpComplex.cpp: interface for the ExpComplex class.
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
+
 #include "ExpComplex.h"
 
 //Complex::Complex(void)
@@ -15,30 +18,6 @@ ExpComplex::~ExpComplex(void)
 //    mpfr_clear(y.x);
     }
 
-/*
-ExpComplex * ExpComplex::operator =(const BigComplex & Cmplx1)	// Assignment to a BigComplex Operator
-    {
-    double	value;
-    long	exp;
-    BigDouble	t;
-
-    exp = mpfr_get_exp(Cmplx1.x.x);
-    mpfr_set(t.x, Cmplx1.x.x, MPFR_RNDN);
-    mpfr_set_exp(t.x, (mpfr_exp_t)0);
-    value = mpfr_get_d(t.x, MPFR_RNDN);
-    x = value;
-    x.exp += exp;
-
-    exp = mpfr_get_exp(Cmplx1.y.x);
-    mpfr_set(t.x, Cmplx1.y.x, MPFR_RNDN);
-    mpfr_set_exp(t.x, (mpfr_exp_t)0);
-    value = mpfr_get_d(t.x, MPFR_RNDN);
-    y = value;
-    y.exp += exp;
-
-    return this;
-    }
-*/
 ExpComplex * ExpComplex::operator=(const double & value)	// Assignment to double Operator
     {
     x = value;

@@ -1,3 +1,9 @@
+/*
+    QDMatrix.h - interface for the CQDMatrix class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <math.h>
 #include "QDComplex.h"
 typedef qd_real	QDMATRIX[4][4];		// matrix of quad-double 

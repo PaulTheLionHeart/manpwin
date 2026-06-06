@@ -1,6 +1,5 @@
-/****************************************************************************
-
-    PROGRAM: Zoom.cpp (From Winfract V2.00)
+/*
+    Zoom.cpp (From Winfract V2.00)
 
     PURPOSE: Contains library routines for selecting a region
 
@@ -11,7 +10,8 @@
 	EndSelection(POINT, LPRECT) - end selection area
 	ClearSelection(HWND, LPRECT, int) - clear selection area
 
-*******************************************************************************/
+   Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include "windows.h"
 #include "zoom.h"

@@ -1,3 +1,9 @@
+/*
+    APPROXIMATION.H - Definitions for BLA linear approximation used in Perturbation.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <windows.h>
 #include <vector>
 #include <cmath>

@@ -1,7 +1,11 @@
-/* These defines determine the meaning of the fFlags variable.  The low byte
- * is used for the various types of "boxes" to draw.  The high byte is
- * available for special commands.
- */
+/*
+    Zoom.h - interface for zoom mouse functions.
+
+    These defines determine the meaning of the fFlags variable.  The low byte is used for the various 
+    types of "boxes" to draw.  The high byte is available for special commands.
+ 
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #define SL_BOX    1             /* Draw a solid border around the rectangle  */
 #define SL_BLOCK  2             /* Draw a solid rectangle                    */

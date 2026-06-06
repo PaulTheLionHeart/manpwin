@@ -1,13 +1,12 @@
-/////////////////////////////////////////////////
-// rsxcolor.c
-/////////////////////////////////////////////////
-//
-// By: stephen c. ferguson
-// http://home1.gte.net/itriazon/
-// email: itriazon@gte.net
-//
-/////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
+/*
+    COLOURMETHOD.CPP - a module implementing colours in Tierazon.
+
+    Originally written by: stephen c. ferguson
+    http://home1.gte.net/itriazon/
+    email: itriazon@gte.net
+
+    Written in MICROSOFT 'C++' by Paul de Leeuw.
+*/
 
 #define STRICT
 #define WIN32_LEAN_AND_MEAN

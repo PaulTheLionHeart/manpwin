@@ -1,10 +1,7 @@
 /*
-    MATHS.CPP a module for transcendental function evaluation.
+    MATHS.CPP - a module for transcendental function evaluation.
     
     Written in Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include	<math.h>

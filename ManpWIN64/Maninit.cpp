@@ -2,9 +2,6 @@
    MANINIT.CPP a module with initialising type routines for MANP.C.
     
     Written in MICROSOFT VISUAL 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <conio.h>
@@ -25,14 +22,8 @@
 int	period_level;			// 0 for no periodicity checking
 static	int	first_init = TRUE;	// first time once only init done
 
-
-void	get_julia_loc(char *);
-
-extern 	void	bell(int), NewtonSetup(void), /*setup_defaults(void), */
-		InitTrueColourPalette(BYTE)/*, DisplayPalette(HWND, BOOL)*/;
-
+extern 	void	InitTrueColourPalette(BYTE);
 extern	int	mainview(HWND, BOOL);
-//extern	int	init_big_2(HWND);
 
 /**************************************************************************
 	Setup log table
@@ -91,11 +82,7 @@ void	CManp::init(HWND hwnd)
 	return;
 
     colours = 256;
-//    bits_per_pixel = 24;
-
-//    Arg1 = &argfirst; Arg2 = &argsecond;		// needed by all the ?Stk* functions
     save_flag = FALSE;
-    gManp->TrueCol.IsMAPFile = gManp->UseFractintPalette;
     InitTrueColourPalette(FALSE);
 
     /////////					// initialise Fractal object
@@ -116,13 +103,7 @@ void	CManp::init(HWND hwnd)
 int	CManp::analyse_corner(char *s)
     {
     char	*t;
-    char	*s1;
-    char	*s2;
-    char	*s3;
-    char	*s4;
-    char	*s5;
 
-//    int		len1, len2, len3, len4, len5;
     t = s;
     while(*t)
 	{
@@ -131,11 +112,12 @@ int	CManp::analyse_corner(char *s)
 	t++;
 	}
     // keep full size as we don't know how big they are before we analyse them
-    s1 = new char[SIZEOF_BF_VARS];
-    s2 = new char[SIZEOF_BF_VARS];
-    s3 = new char[SIZEOF_BF_VARS];
-    s4 = new char[SIZEOF_BF_VARS];
-    s5 = new char[SIZEOF_BF_VARS];
+    char s1[SIZEOF_BF_VARS]{};
+    char s2[SIZEOF_BF_VARS]{};
+    char s3[SIZEOF_BF_VARS]{};    
+    char s4[SIZEOF_BF_VARS]{};
+    char s5[SIZEOF_BF_VARS]{};
+
     sscanf(s, "%s %s %s %s %s", s1, s2, s3, s4, s5);
     sscanf(s, "%lf %lf %lf %lf %lf", &hor, &vert, &mandel_width, &param[0], &param[1]);
 
@@ -148,11 +130,6 @@ int	CManp::analyse_corner(char *s)
     precision = getprecbf_mag();
     if (precision < 0)							// exceeded allowable precision
 	{
-	if (s1) delete[] s1;
-	if (s2) delete[] s2;
-	if (s3) delete[] s3;
-	if (s4) delete[] s4;
-	if (s5) delete[] s5;
 	return -1;
 	}
     if (precision > DBL_DIG - 3)
@@ -162,11 +139,6 @@ int	CManp::analyse_corner(char *s)
 //	    return -1;
 	if (ChangeBigPrecision(decimals) < 0)				// increase precision of Big numbers	
 	    {
-	    if (s1) delete[] s1;
-	    if (s2) delete[] s2;
-	    if (s3) delete[] s3;
-	    if (s4) delete[] s4;
-	    if (s5) delete[] s5;
 	    return -1;							// too many decimals for library
 	    }
 
@@ -184,11 +156,6 @@ int	CManp::analyse_corner(char *s)
 	if (mandel_width < DBL_MIN)
 	    mandel_width = 1.0;
 	}
-    if (s1) delete[] s1;
-    if (s2) delete[] s2;
-    if (s3) delete[] s3;
-    if (s4) delete[] s4;
-    if (s5) delete[] s5;
     return 0;
     }
 

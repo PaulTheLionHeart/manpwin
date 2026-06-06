@@ -1,7 +1,8 @@
+/*
+   MOUNTAIN.CPP - a program to investigate mountain terrain generation.
 
-/////////////////////////////////////////////////////////////////////
-// MOUNTAIN.CPP a program to investigate mountain terrain generation.
-/////////////////////////////////////////////////////////////////////
+   Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <ctype.h>
 #include <stdio.h>

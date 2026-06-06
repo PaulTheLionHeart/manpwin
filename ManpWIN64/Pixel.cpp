@@ -1,9 +1,7 @@
 /*
-    PIXEL.CPP a module for the per pixel calculations of fractals. 
+    PIXEL.CPP - a module for the per pixel calculations of fractals. 
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" API and not in MFC for portability
 */
 
 #include	<math.h>
@@ -926,43 +924,31 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
 	switch (MathType)
 	    {
 	    case DOUBLEFLOAT:
-		iteration = DoFilterT<Complex, double>(
-		    iteration, z, OutsideMethod, hooper,
-		    threshold, colours, decomp, biomorph,
-		    rqlim, special, logval, logtable,
-		    colors, TrueCol, potparam);
+		iteration = DoFilterT<Complex, double>(iteration, z, OutsideMethod, hooper, threshold, colours, decomp, biomorph,
+		    rqlim, special, logval, logtable, colors, TrueCol, potparam);
 		break;
 
 	    case DOUBLEDOUBLE:
 		tempComplex.x = to_double(zDD.x);
 		tempComplex.y = to_double(zDD.y);
 
-		iteration = DoFilterT<Complex, double>(
-		    iteration, tempComplex, OutsideMethod, hooper,
-		    threshold, colours, decomp, biomorph,
-		    rqlim, special, logval, logtable,
-		    colors, TrueCol, potparam);
+		iteration = DoFilterT<Complex, double>(iteration, tempComplex, OutsideMethod, hooper, threshold, colours, decomp, biomorph,
+		    rqlim, special, logval, logtable, colors, TrueCol, potparam);
 		break;
 
 	    case QUADDOUBLE:
 		tempComplex.x = to_double(zQD.x);
 		tempComplex.y = to_double(zQD.y);
 
-		iteration = DoFilterT<Complex, double>(
-		    iteration, tempComplex, OutsideMethod, hooper,
-		    threshold, colours, decomp, biomorph,
-		    rqlim, special, logval, logtable,
-		    colors, TrueCol, potparam);
+		iteration = DoFilterT<Complex, double>(iteration, tempComplex, OutsideMethod, hooper, threshold, colours, decomp, biomorph,
+		    rqlim, special, logval, logtable, colors, TrueCol, potparam);
 		break;
 
 	    case ARBITRARYPREC:
 		tempComplex = zBig.CBig2Double();
 
-		iteration = DoFilterT<Complex, double>(
-		    iteration, tempComplex, OutsideMethod, hooper,
-		    threshold, colours, decomp, biomorph,
-		    rqlim, special, logval, logtable,
-		    colors, TrueCol, potparam);
+		iteration = DoFilterT<Complex, double>(iteration, tempComplex, OutsideMethod, hooper, threshold, colours, decomp, biomorph,
+		    rqlim, special, logval, logtable, colors, TrueCol, potparam);
 		break;
 	    }
 	}

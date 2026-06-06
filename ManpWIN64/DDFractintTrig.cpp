@@ -1,10 +1,7 @@
 /*
-    DDFRACTINTFUNCTIONS.CPP a module for the per pixel calculations of fractals originally from Fractint Double-double version
+    DDFRACTINTFUNCTIONS.CPP - a module for the per pixel calculations of fractals originally from Fractint Double-double version
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <math.h>
@@ -17,11 +14,6 @@
 #include "PixelTemplate.h"
 #include "FractintTrigTemplate.h"
 #include "..\parser\TrigFn.h"
-
-// lotsa norty externs that will be resolved when we c++ise parser
-//extern	    int DDFormPerPixel(DDComplex *zIn, DDComplex *qIn);	// norty declarations because this is in the formula parser
-//extern	    int DDFormula(DDComplex *zIn, DDComplex *qIn);
-// end norty externs that will be resolved when we c++ise parser
 
 /**************************************************************************
 	Initialise functions for each pixel

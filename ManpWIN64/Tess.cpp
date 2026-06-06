@@ -1,10 +1,7 @@
 /*
-    TESS.CPP a module to do Tesserial plotting.
+    TESS.CPP - a module to do Tesserial plotting.
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include "Pixel.h"
@@ -30,13 +27,14 @@ int	CPixel::tesseral(HWND hwnd, int user_data(HWND hwnd))
     tp->y1 = iystart;
     tp->y2 = iystop;
 
-    if (workpass == 0) { /* not resuming */
+    if (workpass == 0) 
+	{								// not resuming 
 	tp->top = tessrow(hwnd, ixstart,ixstop,iystart, user_data);     // Do top row 
 	tp->bot = tessrow(hwnd, ixstart,ixstop,iystop, user_data);      // Do bottom row
 	tp->lft = tesscol(hwnd, ixstart,iystart+1,iystop-1, user_data); // Do left column 
 	tp->rgt = tesscol(hwnd, ixstop,iystart+1,iystop-1, user_data);  // Do right column 
 
-	if (user_data(hwnd) == -1)			// user pressed a key? */
+	if (user_data(hwnd) == -1)			// user pressed a key? 
 	    {
 	    add_worklist(xxstart,xxstop,yystart,yystop,yystart,0,worksym);
 	    return(-1);
@@ -60,7 +58,7 @@ int	CPixel::tesseral(HWND hwnd, int user_data(HWND hwnd))
 	    {
 	    tp2 = tp;
 	    if (tp->x2 - tp->x1 > tp->y2 - tp->y1) 
-		{ // next divide down middle
+		{					// next divide down middle
 		if (tp->x1 == curx && (tp->x2 - tp->x1 - 2) < xsize)
 		    break;
 		mid = (tp->x1 + tp->x2) >> 1;		// Find mid point
@@ -77,7 +75,7 @@ int	CPixel::tesseral(HWND hwnd, int user_data(HWND hwnd))
 		    break;
 		mid = (tp->y1 + tp->y2) >> 1;		// Find mid point
 		if (mid > cury) 
-		    { // stack bottom part
+		    {					// stack bottom part
 		    memcpy(++tp,tp2,sizeof(*tp));
 		    tp->y2 = mid;
 		    }
@@ -85,7 +83,6 @@ int	CPixel::tesseral(HWND hwnd, int user_data(HWND hwnd))
 		}
 	    }
 	}
-
 
 //   got_status = 4; // for tab_display 
 
@@ -118,29 +115,28 @@ int	CPixel::tesseral(HWND hwnd, int user_data(HWND hwnd))
 	    i = 0;
 	    if(fillcolor != 0)
 		{
-
 		if(fillcolor > 0)
 		    tp->top = fillcolor & (colours-1);
 //		    tp->top = (colours-1);
 
-
-
-		if (guessplot || (j = tp->x2 - tp->x1 - 1) < 2) { // paint dots
+		if (guessplot || (j = tp->x2 - tp->x1 - 1) < 2) 
+		    {						// paint dots
 		    for (col = tp->x1 + 1; col < tp->x2; col++)
-			for (row = tp->y1 + 1; row < tp->y2; row++) {
+			for (row = tp->y1 + 1; row < tp->y2; row++) 
+			    {
 			    plot((WORD)col,(WORD)row,tp->top);
-			    if (user_data(hwnd) == -1)	// user pressed a key? 
+			    if (user_data(hwnd) == -1)		// user pressed a key? 
 				goto tess_end;
 			    }
 		    }
-		else {					// use verline for speed 
+		else {						// use verline for speed 
 		    for (row = tp->y1 + 1; row < tp->y2; row++) 
 			{
 			verline((WORD)row,(WORD)(tp->x1+1),(WORD)(tp->x2-1),(DWORD)(tp->top));
-			if (PlotType != NOSYM)		// symmetry 
+			if (PlotType != NOSYM)			// symmetry 
 			    if ((j = yystop-(row-yystart)) > iystop && j < (int)ydots)
 				verline((WORD)j,(WORD)(tp->x1+1),(WORD)(tp->x2-1),(DWORD)(tp->top));
-			if (user_data(hwnd) == -1)	// user pressed a key? 
+			if (user_data(hwnd) == -1)		// user pressed a key? 
 			    goto tess_end;
 			}
 		    }
@@ -198,7 +194,7 @@ int	CPixel::tesseral(HWND hwnd, int user_data(HWND hwnd))
 
 tess_end:
        if (tp >= (struct tess *)&dstack[0]) 
-	   {				    // didn't complete 
+	   {							// didn't complete 
 	   int i,xsize,ysize;
 	   xsize = ysize = 1;
 	   i = 2;
@@ -218,7 +214,7 @@ tess_end:
        ClearTessMemory(dstack);
        return(0);
 
-    } /* tesseral */
+    } // tesseral 
 
 /**************************************************************************
 	Give back memory

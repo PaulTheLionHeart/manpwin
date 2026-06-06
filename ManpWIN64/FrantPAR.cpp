@@ -1,10 +1,21 @@
 /*
-    FRANTPAR.CPP a module to import PAR files from FRACTINT.EXE.
-    
-    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+    FRANTPAR.CPP imports legacy Fractint PAR files.
 
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
+    Fractint PAR files predate ManpWIN's own parameter format and use
+    different assumptions for fractal names, colour maps, coordinates,
+    formula references, bailout tests, and inline palette encoding.
+
+    This module should be treated as a compatibility translator:
+
+	Fractint PAR text
+	    -> Fractint-specific parsed fields
+	    -> ManpWIN fractal state
+
+    The long-term cleanup goal is to keep Fractint-specific quirks isolated
+    here while applying the converted result through normal ManpWIN metadata,
+    palette, coordinate, and formula systems.
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
 */
 
 #include <stdio.h>
@@ -28,15 +39,11 @@
 #define	INSIDE	TRUE
 #define	OUTSIDE	FALSE
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//extern	HWND	GlobalHwnd;				// This is the main windows handle
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
 extern	char	MAPFile[];		// colour map file
 extern	short int ismand;		// parser version of the inverse of juliaflag
 extern	double	HenonA, HenonXStart, HenonYStart, HenonStep;
 extern	char	lsys_type[];
-Complex	RotationCentre;		// centre of rotation
+Complex	RotationCentre;			// centre of rotation
 extern	double	z_rot;			// angle display plane to z axis 
 
 extern	struct	FractintFilterStuff	FractintFilter[];	// default values for each 
@@ -50,7 +57,7 @@ static	char	loaded = 0;
 static	int	endloop;		// ensure a clean exit
 static	double	param1, param2, param3, param4, param5, param6;
 
-int	par(HWND, char *);
+//int	par(HWND, char *);
 int	ParLoad(HWND, char *);
 
 extern	char	*str_find_ci(char *, char *);
@@ -78,7 +85,6 @@ extern	Complex	j;
 **************************************************************************/
 
 char	*trailing(char *instr)
-
     {
     char *s;
 
@@ -258,30 +264,31 @@ int	AnalyseLSystem(HWND hwnd, char *lsysdata)
 
 int	CManp::AnalyseFunction(char *Trigdata)
     {
-    char	*s, *t;
     static  char	fn1[16], fn2[16]/*, s[1024]*/;
     int		numfn;
     int		FnPtr;
     CTrigFn	TrigFn;
-
-    if ((s = new char[strlen(Trigdata) + 1]) == NULL)
-	return -1;
+    std::vector<char> s(strlen(Trigdata) + 1);
 
 #ifdef DEBUG
     _snprintf_s(s, 1024, _TRUNCATE, "Length %d", strlen(Trigdata));
     MessageBox (hwnd, Trigdata, s, MB_ICONEXCLAMATION | MB_OK);
 #endif   
 
-    strcpy(s, Trigdata);			// don't splatter main string
-    t = s;
-    while(*t && *t != ' ')
+    strcpy_s(s.data(), s.size(), Trigdata);			// don't splatter main string
+    for (char* t = s.data(); *t; ++t)
 	{
+	if (*t == ' ')
+	    {
+	    *t = '\0';
+	    break;
+	    }
+
 	if (*t == '/')
 	    *t = ' ';
-	t++;
 	}
-    *t = '\0';
-    numfn = sscanf(s, "%s %s", fn1, fn2);
+	
+    numfn = sscanf_s(s.data(), "%s %s", fn1, (unsigned)_countof(fn1), fn2, (unsigned)_countof(fn2));
     if (numfn == 1 || numfn == 2)
 	if ((FnPtr = FindFunct(fn1)) >= 0)
 	    {
@@ -298,7 +305,6 @@ int	CManp::AnalyseFunction(char *Trigdata)
 	    }
     if (numfn == 1 || numfn == 2)
 	Fractal.NumFunct = numfn;
-    delete [] s;
     return 0;
     }
 
@@ -308,19 +314,18 @@ int	CManp::AnalyseFunction(char *Trigdata)
 
 int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, double TempRqlim)
     {
-    char	*tok, *tmpstr;
+    char	*tok;
     int		k;
     CTrigFn	TrigFn;
     char	TempLyapSequence[120];		// hold the AB sequence for Lyapunov fractals
 
-    if ((tmpstr = new char[strlen(FractType) + 1]) == NULL)
-	return -1;
+    std::vector<char> tmpstr(strlen(FractType) + 1);
 
-    strcpy(tmpstr, FractType);			// don't splatter main string
+    strcpy_s(tmpstr.data(), tmpstr.size(), FractType);			// don't splatter main string
 
     juliaflag = FALSE;
     sscanf(FractType, "%s", FractName);
-    if (tok = str_find_ci(tmpstr, "ismand="))
+    if (tok = str_find_ci(tmpstr.data(), "ismand="))
 	{
 	juliaflag = (*tok == 'y') ? false : true;
 	ismand = !juliaflag;
@@ -330,7 +335,6 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 	type = LSYSTEM;
 	if (tok = str_find_ci(FractType, "lfile="))
 	    return (AnalyseLSystem(hwnd, tok));
-	delete[] tmpstr;
 	return 0;
 	}
     if (!_strnicmp(FractType, "ManDerivatives", 14))
@@ -338,7 +342,6 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 	type = MANDELDERIVATIVES;
 	subtype = (int)param1;
 	degree = (WORD)param2;
-	delete[] tmpstr;
 	return 0;
 	}
     if (!_strnicmp(FractType, "Perturbation", 12))
@@ -346,7 +349,6 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 	type = PERTURBATION;
 	subtype = (int)param1;
 	degree = (WORD)param2;
-	delete[] tmpstr;
 	return 0;
 	}
     if (!_strnicmp(FractType, "ArtMatrix", 9))
@@ -376,7 +378,6 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 		gManp->param[1] = special;
 		break;
 	    }
-	delete[] tmpstr;
 	return 0;
 	}
     if (!_strnicmp(FractType, "Tierazon", 8))
@@ -384,7 +385,6 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 	type = TIERAZON;
 	subtype = (int)param1;
 	degree = (WORD)param2;
-	delete[] tmpstr;
 	return 0;
 	}
     if (!_strnicmp(FractType, "lyapunov", 8))
@@ -412,7 +412,6 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
     if (!_strnicmp(FractType, "ifs", 3))
 	{
 	type = IFS;
-	delete[] tmpstr;
 	if (tok = str_find_ci(FractType, "ifsfile="))
 	    return (AnalyseIFS(hwnd, tok));
 	return 0;
@@ -433,7 +432,6 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 	    result = AnalyseFormula(tok);
 	    if (result == 0)
 		{
-		delete[] tmpstr;
 		return 0;
 		}
 	    else
@@ -449,7 +447,6 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 	}
     if (fractalspecific[k].name == NULL)
 	{
-	delete[] tmpstr;
 	return -1;
 	}
     else
@@ -500,11 +497,10 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 
 	    }
 
-	if (tok = str_find_ci(tmpstr, "function="))
+	if (tok = str_find_ci(tmpstr.data(), "function="))
 	    {
 	    if (gManp->AnalyseFunction(tok) < 0)
 		{
-		delete[] tmpstr;
 		return -1;
 		}
 	    }
@@ -538,8 +534,6 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 	else
 	    juliaflag = FALSE;
 	}
-
-    delete[] tmpstr;
     return 0;
     }
 
@@ -731,7 +725,7 @@ int	CManp::ParseColours(char *value)
     }
 
 /**************************************************************************
-	Process Corners
+	Process params
 **************************************************************************/
 
 int	CManp::ProcessParams(char *s)
@@ -756,12 +750,12 @@ int	CManp::ProcessParams(char *s)
 int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
     {
     char	*t;
-    char	*s1 = nullptr;
-    char	*s2 = nullptr;
-    char	*s3 = nullptr;
-    char	*s4 = nullptr;
-    char	*s5 = nullptr;
-    char	*s6 = nullptr;
+    char	s1[SIZEOF_BF_VARS]{};
+    char	s2[SIZEOF_BF_VARS]{};
+    char	s3[SIZEOF_BF_VARS]{};
+    char	s4[SIZEOF_BF_VARS]{};
+    char	s5[SIZEOF_BF_VARS]{};
+    char	s6[SIZEOF_BF_VARS]{};
     double	Magnification = 1.0;
     double	Xmagfactor = 1.0;
     double	Rotation = 0.0;
@@ -773,30 +767,33 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
     int		count, NumCorners = 0;
     BigDouble   BigMag, temp, OneOverMag;
 
-    t = s;
-    while(*s && *s != ' ')
+    char CoordText[SIZEOF_BF_VARS * 3]{};			// make sure we can hold 3 bignum co-ordinates
+    strncpy_s(CoordText, sizeof(CoordText), s, _TRUNCATE);
+    char* p = CoordText;
+    while (*p && *p != ' ')
 	{
-	if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-' && *s != 'e')
-	    *s = ' ';
-	s++;
+	if (!isdigit((unsigned char)*p) &&
+	    *p != '.' &&
+	    *p != '+' &&
+	    *p != '-' &&
+	    *p != 'e' &&
+	    *p != 'E')
+	    *p = ' ';
+
+	p++;
 	}
+
+    t = CoordText;
 
     if (CentreFlag)
 	{
-	int count = sscanf(t, "%lf %lf %lf %lf %lf %lf", &hor, &vert, &Magnification, &Xmagfactor, &Rotation, &Skew);
-	if (count != 3 && count != 6)
+	NumCorners = sscanf_s(t, "%lf %lf %lf %lf %lf %lf", &hor, &vert, &Magnification, &Xmagfactor, &Rotation, &Skew);
+
+	if (NumCorners != 3 && NumCorners != 6)
 	    {
 	    OutputDebugStringA("Can't convert fractal location in Fractint par file\n");
 	    return -1;
 	    }
-/*
-	if (count == 3)
-	    {
-    	    Xmagfactor = 0.0;
-	    Rotation = 0.0;
-	    Skew = 0.0;
-	    }
-*/
 	RotationCentre.x = hor;
 	RotationCentre.y = vert;
 	hor -= (AspectRatio / Magnification);
@@ -805,7 +802,7 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
 	}
     else
 	{
-	NumCorners = sscanf(t, "%lf %lf %lf %lf %lf %lf", &floatval[0], &floatval[1], &floatval[2], &floatval[3], &floatval[4], &floatval[5]);
+	NumCorners = sscanf_s(t, "%lf %lf %lf %lf %lf %lf", &floatval[0], &floatval[1], &floatval[2], &floatval[3], &floatval[4], &floatval[5]);
 	if (NumCorners == 4)										// no rotation or skew
 	    {
 	    hor = floatval[0];
@@ -831,66 +828,52 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
 	    RotationCentre.x = hor + (AspectRatio / Magnification);
 	    RotationCentre.y = vert + (1.0 / Magnification);
 	    }
-
-//	count = sscanf(t, "%lf %lf %lf %lf %lf %lf", &hor, &a1, &vert, &a2, &Rotation, &Skew);
+	else
+	    {
+	    OutputDebugStringA("Can't convert fractal corner coordinates in Fractint par file\n");
+	    return -1;
+	    }
 	}
 
     RotationAngle = (int)Rotation;
     if (Rotation == 0.0 || Rotation == 90.0 || Rotation == 180.0 || Rotation == 270.0)		// save calcs in rotating, just remap
+	{
 	RotationCentre = 0.0;
+	}
     else
 	{
-	//	z_rot = Rotation;
-	//	RotationAngle = (int)Rotation;
 	Mat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, Rotation);
 	}
 
     if (gManp->mandel_width < 0.0)
 	gManp->mandel_width = -gManp->mandel_width;
 
-    s1 = new char[SIZEOF_BF_VARS];
-    s2 = new char[SIZEOF_BF_VARS];
-    s3 = new char[SIZEOF_BF_VARS];
-    s4 = new char[SIZEOF_BF_VARS];
-    s5 = new char[SIZEOF_BF_VARS];
-    s6 = new char[SIZEOF_BF_VARS];
-    count = sscanf(t, "%s %s %s %s %s %s", s1, s2, s3, s4, s5, s6);
-/*
-    if (mandel_width < DBL_MIN)			// we can do a BigNum calculation here to allow deeper zooming
+    count = sscanf_s(t,	"%s %s %s %s %s %s",
+	s1, (unsigned)_countof(s1),
+	s2, (unsigned)_countof(s2),
+	s3, (unsigned)_countof(s3),
+	s4, (unsigned)_countof(s4),
+	s5, (unsigned)_countof(s5),
+	s6, (unsigned)_countof(s6));
+
+    if (count < 4)
 	{
-//	if (init_big_dec((int)strlen(s3) + PRECISION_FACTOR) < 0)	// need enough temp precision to load BigWidth
-//	    return -1;
-	ConvertString2Bignum(BigWidth.x, s3);
-	BigNumFlag = TRUE;
+	OutputDebugStringA("Invalid Fractint coordinate format\n");
+	return -1;
 	}
-*/
+
     precision = gManp->getprecbf_mag();
-    if (precision < 0)			// exceeded allowable precision
+    if (precision < 0)							// exceeded allowable precision
 	{
-	if (s1) delete[] s1;
-	if (s2) delete[] s2;
-	if (s3) delete[] s3;
-	if (s4) delete[] s4;
-	if (s5) delete[] s5;
-	if (s6) delete[] s6;
 	OutputDebugStringA("Exceeded allowable precision in Fractint par file\n");
 	return -1;
 	}
     if (precision > DBL_DIG - 3 && NumCorners != 6)			// bignum support not available yout
 	{
 	decimals = precision + PRECISION_FACTOR;
-//	if (!BigNumFlag)
-//	    if (init_big_dec(decimals) < 0)
-//		return -1;
-//	mpfr_set_default_prec(decimals);
-	if (gManp->ChangeBigPrecision(decimals) < 0)				// increase precision of Big numbers	
+
+	if (gManp->ChangeBigPrecision(decimals) < 0)			// increase precision of Big numbers	
 	    {
-	    if (s1) delete[] s1;
-	    if (s2) delete[] s2;
-	    if (s3) delete[] s3;
-	    if (s4) delete[] s4;
-	    if (s5) delete[] s5;
-	    if (s6) delete[] s6;
 	    OutputDebugStringA("Exceeded allowable precision in Fractint par file\n");
 	    return -1;							// too many decimals for library
 	    }
@@ -901,14 +884,8 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
 	if (CentreFlag)
 	    {
 	    ConvertString2Bignum(BigMag.x, s3);
-	    if (mpfr_sgn(BigMag.x) == 0)	// no naughty division
+	    if (mpfr_zero_p(BigMag.x))					// no naughty division
 		{
-		if (s1) delete[] s1;
-		if (s2) delete[] s2;
-		if (s3) delete[] s3;
-		if (s4) delete[] s4;
-		if (s5) delete[] s5;
-		if (s6) delete[] s6;
 		OutputDebugStringA("Naughty division in Fractint par file\n");
 		return -1;
 		}
@@ -932,12 +909,6 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
 	    BigWidth = BigVert - temp;
 	    if (mpfr_sgn(BigWidth.x) == 0)	// no naughty division
 		{
-		if (s1) delete[] s1;
-		if (s2) delete[] s2;
-		if (s3) delete[] s3;
-		if (s4) delete[] s4;
-		if (s5) delete[] s5;
-		if (s6) delete[] s6;
 		OutputDebugStringA("Naughty division in Fractint par file\n");
 		return -1;
 		}
@@ -949,13 +920,6 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
 	if (mandel_width < DBL_MIN)
 	    mandel_width = 1.0;
 	}
-
-    if (s1) delete[] s1;
-    if (s2) delete[] s2;
-    if (s3) delete[] s3;
-    if (s4) delete[] s4;
-    if (s5) delete[] s5;
-    if (s6) delete[] s6;
     return 0;
     }
 
@@ -1050,7 +1014,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
     char	*tok, *q;
     int		err = 0;
     int		linenum = 0, check = 0;
-    char	*temp = NULL, *word;
+    char	*word;
     char	InLine[200];
     char	InLine1[200];
     FILE	*fp;
@@ -1058,6 +1022,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
     bool	IsFrm = false;		// do we have a formula?
     char	tmp[164];
     double	TempRqlim = -1.0;
+    std::vector<char> temp(BUFFERSIZE);
 
     gManp->param[0] = param1 = 0.0;
     gManp->param[1] = param2 = 0.0;
@@ -1171,7 +1136,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 		    _snprintf_s(s, 200, _TRUNCATE, "Error in Formula file");
 		    break;
 		default:
-		    _snprintf_s(s, 200, _TRUNCATE, "Fractal type <%s> not supported by ManpWin", temp);
+		    _snprintf_s(s, 200, _TRUNCATE, "Fractal type <%s> not supported by ManpWin", temp.data());
 		    break;
 		}
 	    MessageBox (hwnd, s, "Reading Fractint Par File", MB_ICONEXCLAMATION | MB_OK);
@@ -1202,8 +1167,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	    ++linenum;
 	    } while (str_find_ci(InLine, "frm:") == 0);
 
-	temp = new char[BUFFERSIZE];
-	*temp = '\0';
+	temp[0] = '\0';
 
 	// now let's interpret any formula if present
 	while (fgets(InLine, 160, fp))		// Max line length 160 chars
@@ -1219,10 +1183,10 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 
 	    if ((word = strchr(InLine, ';')))	// strip comment
 		*word = 0;
-	    strcat_s(temp, BUFFERSIZE, InLine);
+	    strcat_s(temp.data(), BUFFERSIZE, InLine);
 	    if (str_find_ci(InLine, "}"))
 		break;
-	    if ((i = (int)strlen(temp)) > BUFFERSIZE - 200)
+	    if ((i = (int)strlen(temp.data())) > BUFFERSIZE - 200)
 		{
 		_snprintf_s(s, 200, _TRUNCATE, "Par Frm Data full, line: <%d>", linenum);
 		MessageBox(hwnd, s, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
@@ -1230,7 +1194,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 		break;
 		}
 	    }
-	p = temp;
+	p = temp.data();
 	q = gManp->FormulaString;
 
 	bool	WasBackslash = false;
@@ -1279,12 +1243,11 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	*q = '\0';
 
 	ProcessFormulaString(gManp->FormulaString);
-	if (temp) { delete[] temp; temp = NULL; }
 	}
     if (gManp->type == FRACTPAR)				// if we haven't found a fractal, then we still have fractal type FRACTPAR
 	{
 	gManp->type = MANDELFP;
-	_snprintf_s(s, 200, _TRUNCATE, "No fractal type was found <%s>. Assume Mandelbrot", temp);
+	_snprintf_s(s, 200, _TRUNCATE, "No fractal type was found <%s>. Assume Mandelbrot", temp.data());
 	MessageBox (hwnd, s, "Reading Fractint Par File", MB_ICONEXCLAMATION | MB_OK);
 	}
     fclose(fp);

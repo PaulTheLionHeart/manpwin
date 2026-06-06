@@ -1,7 +1,5 @@
 /*
-    DITHER.CPP
-    Dither Library based on works of Alchemy Mindworks Inc 1995
-    The entire source is kept, but the bits not needed in ManpWIN are copied out PHD 2019-06-03
+    DITHER.CPP - Dither Library based on works of Alchemy Mindworks Inc 1995
 
     Written in Microsoft Visual C++ by Paul de Leeuw.
 */
@@ -136,7 +134,6 @@ Dither to 256 Colours
 LPBITMAPINFOHEADER  Floyd_Steinberg(WORD NewBitsPerPixel)
     {
     BYTE	*source = NULL, *dest = NULL;
-    BYTE	*LegacySource = NULL;    
     BYTE	palette[VGA_PAL_SIZE];
     WORD	i;
     WORD	width, height;
@@ -147,6 +144,8 @@ LPBITMAPINFOHEADER  Floyd_Steinberg(WORD NewBitsPerPixel)
 
     width = gManp->Dib.DibWidth;
     height = gManp->Dib.DibHeight;
+
+    std::vector<BYTE> LegacySource((size_t)width * (size_t)height * 3);
 
     if (!TempDib.InitDib(width, height, 24))
 	{
@@ -163,31 +162,15 @@ LPBITMAPINFOHEADER  Floyd_Steinberg(WORD NewBitsPerPixel)
 
     // Bridge modern vector-backed CDib pixels into the legacy packed buffer
     // expected by dl3quant().
-    LegacySource = new BYTE[(size_t)width * (size_t)height * 3];
 
-    if (LegacySource == NULL)
+     for (i = 0; i < height; ++i)
 	{
-	TempDib.CloseDibPtrs();
-	InterDib.CloseDibPtrs();
-	DitherDib.CloseDibPtrs();
-	ReturnCode = ERR_IMAGE_MEMORY_FAIL;
-	return NULL;
+	memcpy(LegacySource.data() + (size_t)i * (size_t)width * 3, source + (size_t)i * TempDib.WidthBytes, (size_t)width * 3);
 	}
 
-    for (i = 0; i < height; ++i)
-	{
-	memcpy(LegacySource + (size_t)i * (size_t)width * 3, source + (size_t)i * TempDib.WidthBytes, (size_t)width * 3);
-	}
-
-    source = LegacySource;
+    source = LegacySource.data();
 
     ReturnCode = dl3quant(source, dest, width, height, 1 << NewBitsPerPixel, 1, palette);
-
-    if (LegacySource != NULL)
-	{
-	delete[] LegacySource;
-	LegacySource = NULL;
-	}
 
     if(ReturnCode < 0)
 	{

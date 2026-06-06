@@ -1,3 +1,9 @@
+/*
+    FloatExp.h - interface for FloatExp arithmetic.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <windows.h>
 #include <math.h>
 /*

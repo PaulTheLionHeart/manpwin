@@ -1,10 +1,12 @@
-////////////////////////////////////////////////////////
-//	POPCORN.CPP a module for the per pixel calculations of the Popcorn fractal. 
-//	Popcorn fractals are instances of Integrated Fractal Systems involving trigonometric
-//	functions. In this program, we study the effect of spherical, swirl and 
-//	pseudo-horseshoe functions on popcorn fractals to produce talismanic and tantric designs.
-//	Written in Microsoft Visual 'C++' by Paul de Leeuw.
-////////////////////////////////////////////////////////
+/*
+    POPCORN.CPP a module for the per pixel calculations of the Popcorn fractal. 
+
+    Popcorn fractals are instances of Integrated Fractal Systems involving trigonometric
+    functions. In this program, we study the effect of spherical, swirl and 
+    pseudo-horseshoe functions on popcorn fractals to produce talismanic and tantric designs.
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
 
 #include "OtherFunctions.h"
 #include "Manp.h"

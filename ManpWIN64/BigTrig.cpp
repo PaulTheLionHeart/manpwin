@@ -1,10 +1,11 @@
-/*********************************************************************
-	BigTrig.cpp - C routines for big floating point trig functions 
-	Wesley Loewer's Big Numbers.     (C) 1994-95, Wesley B. Loewer
+/*
+ BigTrig.cpp - C routines for big floating point trig functions 
+ Wesley Loewer's Big Numbers.     (C) 1994-95, Wesley B. Loewer
 
-	WThis allows an alternative for multi-threading where trig 
-	functions fail using MPFR
-*********************************************************************/
+ WThis allows an alternative for multi-threading where trig functions fail using MPFR
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
 
 #include <atomic>
 #include "BigTrig.h"

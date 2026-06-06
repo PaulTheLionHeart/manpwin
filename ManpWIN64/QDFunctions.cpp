@@ -1,6 +1,8 @@
+/*
+    QDFUNCTIONS.CPP - a module for the per pixel calculations of fractals Quad-double version
 
-// simple example of QD usage to illustrate linking process
-// Alex Kaiser, LBNL, 6/3/2010
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
 
 #include "QDComplex.h"
 #include "pixel.h"

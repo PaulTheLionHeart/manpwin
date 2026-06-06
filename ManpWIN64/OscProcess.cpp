@@ -1,14 +1,8 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-//
-// OSCPROCESS.CPP a module for oscillator, fractal map, surface, knots and curves functions.
-//
-//////////////////////////////////////////////////////////////////////////////////////////
-// Author:-
-//	Paul de Leeuw
-//	pdeleeuw at deleeuw dot com dot au	( replace "at" "dot" by the normal characters.)
-//	11/12/2007
-//	This Class includes code to create a true palette and to modify it
-//////////////////////////////////////////////////////////////////////////////////////////
+/*
+   OSCPROCESS.CPP - a module for oscillator, fractal map, surface, knots and curves functions.
+
+   Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <stdio.h>
 #include <string.h>
@@ -29,11 +23,6 @@
 
 // norty globals
 extern	int	user_data(HWND);
-//extern std::vector<float> wpixels; // use global fallback
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -118,14 +107,7 @@ void	COscProcess::InitOscProc(int dimensions, double InMandel_width, double InSc
 	{
 	if (*RemoveHiddenPixels)
 	    {
-	    if ((zValuesKnots = new double[gManp->xdots * gManp->ydots]) == NULL)	// need a floating point value of z for each pixel
-		{
-		zValuesKnots = NULL;
-		*RemoveHiddenPixels = FALSE;
-		}
-	    else
-		for (j = 0; j < gManp->xdots * gManp->ydots; j++)
-		    *(zValuesKnots + j) = -1.0E100;			// negative enough to be in the background
+	    zValuesKnots.resize((size_t)gManp->xdots * (size_t)gManp->ydots, -1.0E100);
 	    }
 	}
 
@@ -191,7 +173,7 @@ int	COscProcess::DisplayOscillator(double c1[], double cn[], double dt, DWORD co
 	cTot[*zAxis] = z;
 	if (type == KNOTS || type == CURVES) 
 	    *RemoveHiddenPixels = FALSE;									// too fast to see and there's no need
-	if (PointInfo)												// don't crash if we haven't initialised PointInfo
+	if (!PointInfo.empty())											// don't crash if we haven't initialised PointInfo
 	    LoadRawMorphData(dimensions, (long)gManp->iterations, (long)i, cTot, KnotWidth, xAxis, yAxis, zAxis);
 	return 0;
 	}
@@ -279,7 +261,6 @@ int	COscProcess::DisplayOscillator(double c1[], double cn[], double dt, DWORD co
 ***************************************************************************/
 
 void	COscProcess::ChangeCoordSystem(double *x1, double *y1, double *z1, double x, double y, double z, int CoordSystem)
-
     {
     double  a = 1.0;
     double  b = 2.0;
@@ -513,14 +494,8 @@ void	COscProcess::FractalMapColour(double x, double y, double z, int u, int v, b
 
 void	COscProcess::CloseZvalues(void)
     {
-//    BOOL    RemoveHiddenPixels;		// used in Knots, Surfaces and Curves
-
-//    RemoveHiddenPixels = DatabasePtr->flags & 1;
-    if (!*RemoveHiddenPixels)
-	return;
-    if (zValuesKnots)
-	delete[] zValuesKnots;
-    zValuesKnots = NULL;
+    if (*RemoveHiddenPixels)
+	zValuesKnots.clear();
     }
 
 /**************************************************************************
@@ -529,15 +504,13 @@ void	COscProcess::CloseZvalues(void)
 
 BOOL	COscProcess::CheckForHiddenPixels(double z, int u, int v)
     {
-    if (!zValuesKnots)
-	return TRUE;
     if (u < 0) u = 0;
     if (v < 0) v = 0;
     if (u >= gManp->xdots) u = gManp->xdots - 1;
     if (v >= gManp->ydots) v = gManp->ydots - 1;
-    if (z > *(zValuesKnots + v * gManp->xdots + u))
+    if (z > zValuesKnots[v * gManp->xdots + u])
 	{
-	*(zValuesKnots + v * gManp->xdots + u) = z;
+	zValuesKnots[v * gManp->xdots + u] = z;
 	return TRUE;
 	}
     return FALSE;
@@ -627,13 +600,9 @@ int	COscProcess::InitMorphing(int FractalAxes, long FractalIterations, int *NumF
 	vMin[i] = 1.0E30;
 	}
 
-    if (PointInfo == NULL)
-	{
-	PointInfo = new double[axes * (long)gManp->iterations];
-	if (PointInfo == NULL)
-	    return -1;
-	}
-
+    if (PointInfo.empty())
+	PointInfo.resize((size_t)axes * (size_t)gManp->iterations);
+ 
     OscAnimProc = MORPHING;
     *NumFrames = SetupMorph(axes, (long)gManp->iterations);
     return 0;
@@ -653,7 +622,7 @@ void	COscProcess::LoadRawMorphData(int /*axes*/fred, long iterations, long Curre
     PlotWidth = InPlotWidth;
     for (i = 0; i < axes; i++)
 	if (*xAxis == i || *yAxis == i || *zAxis == i)		// only update axes if they are part of current initialisation
-	    *(PointInfo + axes * CurrentPass + i) = cTot[i];
+	    PointInfo[axes * CurrentPass + i] = cTot[i];
     }
 
 /**************************************************************************
@@ -716,7 +685,7 @@ int	COscProcess::SetupMorph(int axes, long iterations)
 		{
 		if (*xAxis == r || *yAxis == r || *zAxis == r)		// only update axes if they are part of current initialisation
 		    {
-		    temp = *(PointInfo + axes * k + r);
+		    temp = PointInfo[axes * k + r];
 		    if (temp < vMin[r]) vMin[r] = temp;
 		    if (temp > vMax[r]) vMax[r] = temp;
 		    }
@@ -820,10 +789,10 @@ int	COscProcess::MorphStep(HWND hwnd, char *FileName, char *MoreInfo, int TotalF
     for (i = 0; i < gManp->iterations; i++)
 	{
 	colour = (DWORD)(i / 5.0) % threshold;
-	x1 = (1.0 - Ratio) * (Range[AxisIn1]) * (*(PointInfo + axes * i + AxisIn1) - Offset[AxisIn1]);
-	x2 = Ratio * (Range[AxisOut1]) * (*(PointInfo + axes * i + AxisOut1) - Offset[AxisOut1]);
-	y1 = (1.0 - Ratio) * (Range[AxisIn2]) * (*(PointInfo + axes * i + AxisIn2) - Offset[AxisIn2]);
-	y2 = Ratio * (Range[AxisOut2]) * (*(PointInfo + axes * i + AxisOut2) - Offset[AxisOut2]);
+	x1 = (1.0 - Ratio) * (Range[AxisIn1]) * (PointInfo[axes * i + AxisIn1] - Offset[AxisIn1]);
+	x2 = Ratio * (Range[AxisOut1]) * (PointInfo[axes * i + AxisOut1] - Offset[AxisOut1]);
+	y1 = (1.0 - Ratio) * (Range[AxisIn2]) * (PointInfo[axes * i + AxisIn2] - Offset[AxisIn2]);
+	y2 = Ratio * (Range[AxisOut2]) * (PointInfo[axes * i + AxisOut2] - Offset[AxisOut2]);
 	if (DisplayAxisImages)
 	    {
 	    xNew = (WORD)((x1 + x2) * gManp->ydots) + gManp->xdots / (2 * NumColumns);
@@ -920,12 +889,8 @@ int	COscProcess::ChooseOsc(int x, int y)
 	vMin[i] = 1.0E30;
 	}
 
-    if (PointInfo == NULL)
-	{
-	PointInfo = new double[axes * (long)gManp->iterations];
-	if (PointInfo == NULL)
-	    return -1;
-	}
+    if (PointInfo.empty())
+	PointInfo.resize((size_t)axes * (size_t)gManp->iterations);
 
     if (type == OSCILLATORS)
 	if (DoOscillator() < 0)
@@ -944,7 +909,7 @@ int	COscProcess::ChooseOsc(int x, int y)
 	    {
 	    if (*xAxis == r || *yAxis == r || *zAxis == r)		// only update axes if they are part of current initialisation
 		{
-		temp = *(PointInfo + axes * k + r);
+		temp = PointInfo[axes * k + r];
 		if (temp < vMin[r]) vMin[r] = temp;
 		if (temp > vMax[r]) vMax[r] = temp;
 		}
@@ -962,8 +927,8 @@ int	COscProcess::ChooseOsc(int x, int y)
     for (i = 0; i < gManp->iterations; i++)
 	{
 	colour = (DWORD)(i / 5.0) % 255;
-	x1 = (Range[*xAxis]) * (*(PointInfo + axes * i + *xAxis) - Offset[*xAxis]);
-	y1 = (Range[*yAxis]) * (*(PointInfo + axes * i + *yAxis) - Offset[*yAxis]);
+	x1 = (Range[*xAxis]) * (PointInfo[axes * i + *xAxis] - Offset[*xAxis]);
+	y1 = (Range[*yAxis]) * (PointInfo[axes * i + *yAxis] - Offset[*yAxis]);
 	xNew = (WORD)(x1 * gManp->ydots) + gManp->xdots / 2;
 	yNew = gManp->ydots / 2 - (WORD)(y1 * gManp->ydots);
 	if (DisplayLines)
@@ -1051,8 +1016,6 @@ void	COscProcess::OutputAxesLabel(HWND hwnd, HDC hdc, int x, int y)
 
 void	COscProcess::CloseMorphing(void)
     {
-    if (PointInfo)
-	delete[] PointInfo;
-    PointInfo = NULL;
+    PointInfo.clear();
     }
 

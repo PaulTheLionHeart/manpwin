@@ -1,9 +1,8 @@
 /*
-    FWDDIFFSLOPETEMPLATE. a module for determining the slope using forward differencing calculations of fractals.
+    FWDDIFFSLOPETEMPLATE - a module for determining the slope using forward differencing calculations of fractals.
 
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
 
-    This program is written in "standard" API and not in MFC for portability
      https://github.com/hrkalona/Fractal-Zoomer/blob/master/src/fractalzoomer/core/ThreadDraw.java#L3640
      https://github.com/hrkalona/Fractal-Zoomer/blob/master/src/fractalzoomer/main/app_settings/BumpMapSettings.java
 */

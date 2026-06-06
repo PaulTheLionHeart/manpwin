@@ -1,3 +1,9 @@
+/*
+    MANPMAIN.CPP - Main image initlaisaation
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 /**************************************************************************
 	MANPMAIN.CPP
 	Main graphics file decoder
@@ -19,20 +25,14 @@
 #include "Dib.h"
 #include "Plot.h"
 #include "manp.h"
-
 						// routines in this module
 void	putline(WORD, BYTE *);
-
-//void	ClearScreen(void);
 
 void	GetRealClientRect (HWND, PRECT);
 void	SetScrollRanges(HWND);
 
 HPALETTE 	 	hpal = NULL;
-//std::vector<float> wpixels;			// an array of doubles holding slope modified iteration counts
 
-//RECT 	WARect;					// this is the usable screen taking taskbar into account
-//extern	int	mandel(HWND);
 extern	void	SetupView(HWND);
 extern	void	ClosePtrs(void);
 extern	int	CopyPictureToClipboard(HWND);
@@ -57,14 +57,11 @@ WORD		colours;			// colours in the file
 DWORD		screen_colours;			// colours in the graphics card
 WORD     	iNumColors;    			// Number of colors supported by device
 long		eofpos;				// position of end of file   
-//HDC		hdcMem;				// load picture into memory
 DWORD		biCompression;			// BMP type compression
 BYTE		line_buf[MAXHORIZONTAL * 3];    // true colour = 3 bytes per pixel
 
 BOOL		NonStandardImage;		// has user changed image size?
 WORD		NewXdots = 800, NewYdots = 450;	// for non standard image sizes
-
-//CDib		Dib;				// Device Independent Bitmap
 
 /**************************************************************************
 	Main entry decoder
@@ -142,7 +139,6 @@ int	mainview(HWND hwnd, BOOL FileFlag)
 	{
 	gManp->wpixels.clear();
 	gManp->wpixels.resize((size_t)gManp->xdots * (size_t)gManp->ydots, 0.0f);
-//	gManp->wpixels.assign(gManp->width * gManp->height, 0.0);
 	gManp->ClearScreen();
 	}
     // reset all the image parameters for the pixel plotting routines

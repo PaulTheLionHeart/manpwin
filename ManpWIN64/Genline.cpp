@@ -1,12 +1,8 @@
 /*
-    GENLINE.CPP -- high level interface to video routines.
+    GENLINE.CPP - line routines.
     Global line routines.
     
-    Written in Visual 'C++' by Paul de Leeuw 23/05/92.
-    VESA P. de Leeuw 22/12/94
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
+    Written in Visual 'C++' by Paul de Leeuw.
 */
 
 #include	<stdlib.h>

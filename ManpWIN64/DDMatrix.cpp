@@ -1,10 +1,7 @@
 /*
-    DDMATRIX.CPP a program to do matrix manipulations on double-double
+    DDMATRIX.CPP - a program to do matrix manipulations on double-double
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include "DDMatrix.h"

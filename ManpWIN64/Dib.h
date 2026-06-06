@@ -1,6 +1,8 @@
-// Dib.h: interface for the CDib class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    Dib.h - interface for the Device Independent Bitmap CDib class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <vector>
 

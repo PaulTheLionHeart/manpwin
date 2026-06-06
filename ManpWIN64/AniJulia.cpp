@@ -1,10 +1,7 @@
 /*
-    ANIJULIA.CPP a program to animate the Julia sets.
+    ANIJULIA.CPP - a program to animate the Julia sets.
     
     Written in Microsoft Visual C++ by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <windows.h>
@@ -22,10 +19,6 @@
 #include "plot.h"
 #include "SafeStrings.h"
 
-//extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
-
-//extern	std::vector<float> wpixels;	// an array of doubles holding slope modified iteration counts
-
 extern	char	SCIPath[];		// path for SCI files
 
 extern	BOOL	WritePNGFrames;		// write frames to PNG files
@@ -34,9 +27,7 @@ extern	BOOL	WritePNGList;		// write PNG filenames to a *lst file
 extern	BOOL	WriteMPEGFrames;	// write frames directly to an MPEG file
 
 extern	char	*AnimData(void);
-//extern	BOOL	StartImmediately;
 static	int	frames = 100;
-//	BOOL	ShowOrbits = TRUE;	// show julia orbits for each image
 static	double	ScaleFactor = 1.0;
 static	int	JuliaAnimType = 0;	// 0 = linear
 					// 1 = circular
@@ -59,10 +50,8 @@ static	double	radius	= 0.25;
 
 static	double	Magnitude = 0.248;	// 0.5 sits neatly inside the Mandelbrot set. 0.49 gives great orbits
 
-//extern	CPlot	Plot;			// image plotting routines 
 extern	Complex	j;
 
-extern	void	ConvertRGB2ASCII(RGBTRIPLE, char *);
 extern	char	*GenerateMPEGFileName (char *, char *);
 extern	char	*GenerateAnimFileName (char *, char *);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
@@ -132,8 +121,6 @@ int	CManp::CardioidJuliaScript(HWND hwnd, char *filename, int PaletteShift)
     for (i = 0; i < steps; i++) 
 	{
 	    {
-//	    j.x = (0.25 - cos(Divisor * (double)i) * (1.0 + cos(Divisor * (double)i)) * Magnitude);
-//	    j.y = (sin(Divisor * (double)i) * (1.0 + cos(Divisor * (double)i)) * Magnitude);
 	    j.x = Magnitude * ((double)degree * cos(Divisor * (double)i) - (cos((double)degree * Divisor * (double)i)));
 	    j.y = Magnitude * ((double)degree * sin(Divisor * (double)i) - (sin((double)degree * Divisor * (double)i)));
 	    fprintf(out, "-j%24.24f,%24.24f,\n", j.x, j.y);

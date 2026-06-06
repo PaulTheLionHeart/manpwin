@@ -1,4 +1,8 @@
-// FractalMathsTemplate.h
+/*
+    FractalMathsTemplate.H - Template for handling additional functions for all arithmetic types.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <windows.h>
 #include <functional>
@@ -7,12 +11,8 @@
 #pragma once
 
 template <typename TComplex, typename TReal>
-inline TComplex InvertZ2(
-    TComplex& c,
-    TReal xcenter,
-    TReal ycenter,
-    TReal radius)
-{
+inline TComplex InvertZ2(TComplex& c, TReal xcenter, TReal ycenter, TReal radius)
+    {
     TComplex temp;
 
     temp.x = c.x - xcenter;
@@ -32,5 +32,5 @@ inline TComplex InvertZ2(
     temp.y += ycenter;
 
     return temp;
-}
+    }
 

@@ -1,10 +1,7 @@
 /*
-    KALLESPAR.CPP a module to import KFR files from Kalles Fraktaler.
+    KALLESPAR.CPP - a module to import KFR files from Kalles Fraktaler.
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <stdio.h>
@@ -31,7 +28,6 @@ extern	struct	FractintFilterStuff	FractintFilter[];	// default values for each
 extern	char	*trailing(char *instr);
 extern	int	Strlicmp(const char *, const char *);
 extern	char	*strtok1(char *, const char *);	// required to use different
-extern	void	ConvertBignum2String(char *s, mpfr_t num);
 
 struct FractintFilterStuff				// database of Fractint Outside filters
     {
@@ -652,9 +648,9 @@ int	WriteKallesFile(HWND hwnd, char *filename)
 
     if (gManp->BigNumFlag)
 	{
-	s1 = new char[SIZEOF_BF_VARS];
-	s2 = new char[SIZEOF_BF_VARS];
-	s3 = new char[SIZEOF_BF_VARS];
+	char s1[SIZEOF_BF_VARS]{};
+	char s2[SIZEOF_BF_VARS]{};
+	char s3[SIZEOF_BF_VARS]{};
 
 	BigZreal = gManp->BigHor + (gManp->BigWidth * gManp->AspectRatio) / 2;
 	BigZimag = -gManp->BigVert - gManp->BigWidth / 2.0;
@@ -664,10 +660,6 @@ int	WriteKallesFile(HWND hwnd, char *filename)
 	BigZimag.ToString(s2, SIZEOF_BF_VARS, false);
 	BigMag.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
 	fprintf(fp, "Re: %s\nIm: %s\nZoom: %s\n", s1, s2, s3);
-
-	if (s1) { delete[] s1; s1 = NULL; }
-	if (s2) { delete[] s2; s2 = NULL; }
-	if (s3) { delete[] s3; s3 = NULL; }
 	}
     else
 	{

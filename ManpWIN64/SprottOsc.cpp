@@ -1,5 +1,5 @@
 /*
-   SPROTTOSC.CPP a module to explore Sprott Chaotic Oscillators
+   SPROTTOSC.CPP - a module to explore Sprott Chaotic Oscillators
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
@@ -12,10 +12,6 @@
 #include	"resource.h"
 #include	"fractype.h"
 #include	"fractalp.h"
-#include	"menu.h"
-//#include	"anim.h"
-
-//extern	HWND	gManp->GlobalHwnd;			// This is the main windows handle
 
 extern	int	user_data(HWND);
 extern	void	InitOscillator(double c1[], int dimensions);

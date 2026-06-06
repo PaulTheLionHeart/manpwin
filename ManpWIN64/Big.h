@@ -1,4 +1,8 @@
-// big.h
+/*
+    BIG.H - Definitions for aritmetic types beyond double.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #ifndef _BIG_H
 #define _BIG_H

@@ -1,5 +1,6 @@
 /*
-   MISCDLG.CPP a module for Fractals that are not bitmapped
+   MISCDLG.CPP - a module for Fractals that are not bitmapped
+
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
 
@@ -286,18 +287,16 @@ extern	char	*str_find_ci(char *, char *);
 void	AnalyseFormulaString(char *Startup, char *OrigStartup, char *Formula, char *Bailout, char *FormulaString)
 
     {
-    char    *p, *s, *t, *u;
-    size_t  length = strlen(FormulaString);
+    char    *s, *t, *u;
 
-    char    *TempStr = new char [length + 1];
-    
-    strcpy(TempStr, FormulaString);			// protect original string
-    p = TempStr;
+    std::vector<char> TempStr(strlen(FormulaString) + 1);
+    strcpy_s(TempStr.data(), TempStr.size(), FormulaString);
+    char* p = TempStr.data();
+    u = str_find_ci(TempStr.data(), ";");		// is it a comment?
 
-    u = str_find_ci(TempStr, ";");			// is it a comment?
     if (u)
 	*u = '\0';					// remove comment
-    s = str_find_ci(TempStr, ":");			// possible initial condition
+    s = str_find_ci(TempStr.data(), ":");			// possible initial condition
     if (s)						// initial condition is given in the string and it's not part of a comment
 	{
 	*(s - 1) = '\0';				// replace the ':' with a NULL
@@ -319,8 +318,6 @@ void	AnalyseFormulaString(char *Startup, char *OrigStartup, char *Formula, char 
 	strcpy(Formula, p);
 	strcpy(Bailout, "|z| < 4.0");
 	}
-    
-    if (TempStr) { delete[] TempStr; TempStr = NULL; }
     }
 
 void	CreateFormulaString(char *Startup, char *Formula, char *Bailout, char *FormulaString)

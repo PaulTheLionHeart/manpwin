@@ -1,5 +1,5 @@
 /*
-   APOLLONIUS.CPP a module for Apollonian Circle Fractals
+   APOLLONIUS.CPP - a module for Apollonian Circle Fractals
    Thanks to Marcus Rezende 
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
@@ -16,12 +16,7 @@
 
 #define SQRT3    1.732050807568877193
 
-//extern	HWND	GlobalHwnd;				// This is the main windows handle
-
 extern	int	user_data(HWND);
-
-//extern	std::vector<float> wpixels;		// an array of doubles holding slope modified iteration counts
-
 static	double	xscale, yscale;
 static	double	shape[2];
 static	DWORD   colour;
@@ -30,62 +25,6 @@ static	long    count = 10000000;
 /**************************************************************************
 	Apollonius Fractal Type Images
 ***************************************************************************/
-
-/*
-int	DoApolloniusIFS(void)
-    {
-    long    n;
-    int	    ix,iy;
-    double  x=0.2,y=0.3,x1=0,y1=0,r=SQRT3;
-    double  a0,b0,f1x,f1y;
-
-    Plot.InitPlot(threshold, &TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib.BitsPerPixel, &Dib, USEPALETTE);
-    xscale = (double) (xdots - 1) / (mandel_width * ScreenRatio);
-    yscale = (double) (ydots - 1) / mandel_width;
-
-    count = (long)param[0];
-    colour = (DWORD)param[1];
-    totpasses = 10;
-    srand((unsigned)time(NULL));			// randomise things
-
-    for (n = 0; n < count; n++) 
-	{
-	if (user_data(GlobalHwnd) == -1)		// user pressed a key?
-	    return -1;
-	curpass = n * 10 / count;
-	a0 = 3 * (1 + r - x) / (pow(1 + r - x,2.0) + y*y) - (1 + r) / (2+r);
-	b0 = 3 * y / (pow(1 + r - x,2.0) + y*y);
-	f1x = a0 / (a0*a0 + b0*b0);
-	f1y = -b0 / (a0*a0 + b0*b0);
-	switch (rand()%3) 
-	    {
-	    case 0:
-		x1 = 3 * (1 + r - x) / (pow(1 + r - x,2.0) + y*y) - (1 + r) / (2 + r);
-		y1 = 3 * y / (pow(1 + r - x,2.0) + y*y);
-		break;
-	    case 1:
-		x1 = -f1x / 2 - f1y * r / 2;
-		y1 = f1x * r / 2 - f1y / 2;
-		break;
-	    case 2:
-		x1 = -f1x / 2 + f1y * r / 2;
-		y1 = -f1x * r / 2 - f1y / 2;
-		break;
-	    }
-	if (n < 100)
-	    continue;
-	ix = (int)((x - hor) * xscale);
-	iy = (int)((vert + mandel_width - y) * yscale);
-
-	x = x1;
-	y = y1;
-	if (ix < 0 || iy < 0 || ix >= xdots || iy >= ydots)
-	    continue;
-	Plot.PlotPoint((WORD)ix, (WORD)iy, colour);
-	}
-    return 0;
-    }
-*/
 
 /*
 <?xml version="1.0" encoding="UTF-8"?>
@@ -128,9 +67,6 @@ static	int	QueuePtr = 0;
 static	short	level[2];
 static	CPreview	CircleScreen;
  
-//extern	PAINTSTRUCT 	ps;
-//extern	CDib		Dib;				// Device Independent Bitmap
-
 // compute the 4th circle touching 3 circles, each of which touch the other two
 CIRCLE	*Kiss(CIRCLE a, CIRCLE b, CIRCLE c, CIRCLE *out, BOOL initial) 
     {

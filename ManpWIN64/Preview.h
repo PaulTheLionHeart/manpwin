@@ -1,6 +1,8 @@
-// Preview1.h: interface for the CPreview class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    Preview.h - interface for the CPreview class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #if !defined(AFX_PREVIEW1_H__8145BF6B_53F4_469E_B8B4_66674A75422C__INCLUDED_)
 #define AFX_PREVIEW1_H__8145BF6B_53F4_469E_B8B4_66674A75422C__INCLUDED_

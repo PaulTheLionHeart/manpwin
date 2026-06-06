@@ -6,15 +6,6 @@
 
 static	UINT	UpdateTimerID;				// update timer ID
 
-#ifdef NEWCODE
-extern	bool	PertImageComplete;			// kill timer when perturbation is complete
-#endif // NEWCODE
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//extern	HWND	GlobalHwnd;				// This is the main windows handle
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
 /**************************************************************************
 	init screen update
 **************************************************************************/

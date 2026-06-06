@@ -1,8 +1,10 @@
-﻿//////////////////////////////////////////////////////////////////////
-// PertFN.cpp a module with Perturbation functions and reference functions
-// Code adapted from Kalles Fraktaler source http://www.chillheimer.de/kallesfraktaler/
-// Written in Microsoft Visual C++ by Paul de Leeuw.
-//////////////////////////////////////////////////////////////////////
+﻿/*
+    PertFNFloatExp.cpp - a module with Perturbation functions and reference functions
+
+    Code adapted from Kalles Fraktaler source http://www.chillheimer.de/kallesfraktaler/
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include "PertEngine.h"
 #include "ExpComplex.h"

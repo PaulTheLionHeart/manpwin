@@ -1,3 +1,9 @@
+/*
+    Slope.h - interface for the CSlope class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <Windows.h>
 #include "colour.h"
 #include "Dib.h"

@@ -1,14 +1,12 @@
-////////////////////////////////////////////////////////////////
-// filter.cpp taken from rsx_filt.c
-////////////////////////////////////////////////////////////////
-//
-// By: stephen c. ferguson
-// http://home1.gte.net/itriazon/
-// email: itriazon@gte.net
-//
-/////////////////////////////////////////////////////
-// Updated in Microsoft Visual 'C++' by Paul de Leeuw.
-/////////////////////////////////////////////////////
+/*
+    filter.cpp - a module for implementing Tierazon filters
+
+    By: stephen c. ferguson
+    http://home1.gte.net/itriazon/
+    email: itriazon@gte.net
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
 
 #define STRICT
 #define WIN32_LEAN_AND_MEAN

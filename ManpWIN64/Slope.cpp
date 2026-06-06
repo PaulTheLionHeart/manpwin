@@ -1,5 +1,6 @@
 /*
-    SLOPE.CPP a module for the per pixel calculations of fractals. 
+    SLOPE.CPP - a module for the per pixel calculations of fractals. 
+
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
 */
 
@@ -8,7 +9,6 @@
 #include	"manp.h"
 #include	"DerivSlopeTemplate.h"
 
-//extern	std::vector<float> wpixels;
 extern	std::atomic<bool> gStopRequested;	// force early exit
 extern	std::atomic<long> gPixelsDone;
 

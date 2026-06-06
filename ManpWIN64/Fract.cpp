@@ -1,6 +1,8 @@
-// Fract.cpp: implementation of the CFract class.
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    Fract.cpp - implementation of the CFract class
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include "Fract.h"
 #include "..\parser\TrigFn.h"

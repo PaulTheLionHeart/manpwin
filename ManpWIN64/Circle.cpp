@@ -1,5 +1,5 @@
 /*
-   CIRCLE.CPP a module for CIRCLE Fractals
+   CIRCLE.CPP - a module for CIRCLE Fractals
    Thanks to Marcus Rezende 
 
    Written in Microsoft Visual C++ by Paul de Leeuw.

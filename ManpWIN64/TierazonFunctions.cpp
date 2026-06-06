@@ -1,15 +1,12 @@
-////////////////////////////////////////////////////////////////
-// Tierazon.cpp a module for the per pixel calculations of Tierazon fractals. 
-//
-// By: stephen c. ferguson
-// http://home1.gte.net/itriazon/
-// email: itriazon@gte.net
-//
-/////////////////////////////////////////////////////
-// Updated in Microsoft Visual 'C++' by Paul de Leeuw.
-// These are listed in numerical order of the functions.
-// Note that CSqr(z) is used in place of z*z and CCube(z) in place of z*z*z for speed
-/////////////////////////////////////////////////////
+/*
+    TierazonFunctions.cpp - Tierazon fractals.
+
+    By: stephen c. ferguson
+    http://home1.gte.net/itriazon/
+    email: itriazon@gte.net
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <math.h>
 #include "Complex.h"

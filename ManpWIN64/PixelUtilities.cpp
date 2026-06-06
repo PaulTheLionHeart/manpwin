@@ -1,9 +1,7 @@
 /*
-    PIXELUTILS.CPP a module for CPixel Utilities. 
+    PIXELUTILS.CPP - a module for CPixel Utilities. 
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" API and not in MFC for portability
 */
 
 #include	<math.h>
@@ -31,7 +29,6 @@
 #define MANPWIN	    2
 
 // constructors to enable using references to wpixels
-//extern std::vector<float> wpixels;
 
 CPixel::CPixel()
     {
@@ -372,13 +369,6 @@ int	CPixel::InitArithmetic()
 	    if (Big_xgap.BigDouble2DD(&DDxgap) < 0) return -1;
 	    if (Big_ygap.BigDouble2DD(&DDygap) < 0) return -1;
 	    if (BigCloseEnough.BigDouble2DD(&DDCloseEnough) < 0) return -1;
-
-/*
-	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "DD: X = %s\r\nYymax = %s\r\nWidth = %s\n", DDToString(DDHor).c_str(), DDToString(DDyymax).c_str(), DDToString(DDWidth).c_str());
-	    OutputDebugStringA(PositionString);
-	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "DD: xgap = %s\r\nygap = %s\n", DDToString(DDxgap).c_str(), DDToString(DDygap).c_str());
-	    OutputDebugStringA(PositionString);
-*/
 	    }
 	else if (precision <= QDPRECISION || fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
 	    {
@@ -389,12 +379,6 @@ int	CPixel::InitArithmetic()
 	    if (Big_xgap.BigDouble2QD(&QDxgap) < 0) return -1;
 	    if (Big_ygap.BigDouble2QD(&QDygap) < 0) return -1;
 	    if (BigCloseEnough.BigDouble2QD(&QDCloseEnough) < 0) return -1;
-/*
-	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "QD: X = %s\r\nYymax = %s\r\nWidth = %s\n", QDToString(QDHor).c_str(), QDToString(QDyymax).c_str(), QDToString(QDWidth).c_str());
-	    OutputDebugStringA(PositionString);
-	    _snprintf_s(PositionString, SIZEOF_BF_VARS * 3, _TRUNCATE, "QD: xgap = %s\r\nygap = %s\n", QDToString(QDxgap).c_str(), QDToString(QDygap).c_str());
-	    OutputDebugStringA(PositionString);
-*/
 	    }
 	else
 	    {

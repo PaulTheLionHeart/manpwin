@@ -1,3 +1,8 @@
+/*
+    Pixel.cpp a module to handle per pixel functions 
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 #include <Windows.h>
 #include "colour.h"
 #include "Dib.h"
@@ -18,7 +23,6 @@
 #include "Fractype.h"
 #include "slope.h"
 #include "plot.h"
-//#include "OtherFunctions.h"
 #include "..\parser\TrigFn.h"
 #include "..\parser\ParserCtx.h"
 
@@ -97,9 +101,6 @@ class CPixel
 	int	DDInitFractal(DDComplex *z, DDComplex *q);
 	int	QDInitFractal(QDComplex *z, QDComplex *q);
 	int	BigInitFractal();
-	int	FloatDecomposition(double z_real, double z_imag);
-	int	DDDecomposition(dd_real z_real, dd_real z_imag);
-	int	QDDecomposition(qd_real z_real, qd_real z_imag);
 	//	int	potential(double mag, int iterations);
 	long	calc_frac(HWND hwnd, int row, int col, int user_data(HWND hwnd));
 	Complex	invertz2(Complex  & Cmplx1);
@@ -123,11 +124,7 @@ class CPixel
 	int	QDInitFormula(QDComplex* z, QDComplex* q);
 	int	QDRunFormula(QDComplex* z, QDComplex* q);
 
-
-
 	void DebugDump(const char* tag) const;
-
-
 
 	void	InitFractalDefinition(WORD typeIn, int subtypeIn, WORD *degreeIn, double rqlimIn, long thresholdIn, int BailoutTestTypeIn, double paramIn[], double potparamIn[], CFract *FractalIn);
 	void	InitControlFlags(BYTE calcmodeIn, BYTE juliaflagIn, BOOL invertIn, BYTE phaseflagIn, BYTE pairflagIn, BYTE _3dflagIn, int period_levelIn, //int reset_periodIn,

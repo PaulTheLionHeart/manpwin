@@ -1,5 +1,10 @@
+/*
+    BigDouble.CPP - interface for the mpfr (Bignum) class
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
+
 #include "BigDouble.h"
-//#include "mpir.h"
 #include "big.h"
 #include "mpfr.h"
 #include <mutex>

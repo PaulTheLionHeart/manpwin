@@ -1,18 +1,25 @@
+/*
+    SymPlot.h - interface for the CSymPlot class.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <Windows.h>
 #include "colour.h"
 #include "Dib.h"
-//#include "Manp.h"
 #include "fractype.h"
 
 #pragma once
 class CSymPlot
     {
     public:
+/*
 	void	InitSymPlot(int xxstartIn, int xxstopIn, int yystartIn, int yystopIn, int yybeginIn, int ixstartIn, int ixstopIn, int iystartIn, int iystopIn, 
 		CDib *DibIn, int PlotTypeIn, CTrueCol *TrueColIn, double *wpixelsIn, int subtypeIn, BYTE degreeIn, long thresholdIn, WORD typeIn, BYTE calcmodeIn, 
 		RGBTRIPLE *FilterRGBIn);
 	void	plot(WORD x, WORD y, DWORD color);
 	void	PlotPixel(WORD, WORD, DWORD);
+*/
 	CTrueCol    *TrueCol;		// palette info
 	CDib	*Dib;
 	double	*wpixels;		// an array of doubles holding slope modified iteration counts
@@ -20,7 +27,7 @@ class CSymPlot
 
     private:
 	// plotting modes
-
+/*
 	void	symplot2(WORD, WORD, DWORD);
 	void	symplot2Y(WORD, WORD, DWORD);
 	void	symplot2J(WORD, WORD, DWORD);
@@ -30,6 +37,7 @@ class CSymPlot
 	void	symplot2basin(WORD, WORD, DWORD);
 	void	FilterPoint(WORD x, WORD y, DWORD colour);	// ignore the colour - naughty use of the global FilterRGB
 	void	GetRGB(DWORD colour, BYTE *rgb);
+*/
 	int	xxstart, xxstop;				// these are same as worklist, 
 	int	yystart, yystop, yybegin;			// declared as separate items  
 	int	ixstart, ixstop, iystart, iystop;		// start, stop here 

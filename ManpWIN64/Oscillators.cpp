@@ -1,5 +1,5 @@
 /*
-   OSCILLATORS.CPP a module to explore Chaotic Oscillators
+   OSCILLATORS.CPP - a module to explore Chaotic Oscillators
    The Duffing oscillator is an example of a periodically forced oscillator with a nonlinear elasticity Thanks to Takashi Kanamaru (2008) 
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
@@ -12,12 +12,8 @@
 #include	"resource.h"
 #include	"fractype.h"
 #include	"fractalp.h"
-#include	"menu.h"
-//#include	"anim.h"
 #include	"OscProcess.h"
 #include	"SafeStrings.h"
-
-//extern	HWND	gManp->GlobalHwnd;			// This is the main windows handle
 
 extern	int	user_data(HWND);
 extern	void	PrintOsc(int);			// used for listing oscillator names in d:\temp\OscDump.txt
@@ -44,12 +40,7 @@ static	double	xSum, ySum, zSum;
 	int	NumVariables;			// number of variables in this oscillator or fractal map
 	int	xSign, ySign;			// sign of x and y axes - allow reflection of image across axis
 
-//	int	xAxis = 0, yAxis = 1, zAxis = 2;// numerical values for axes. assume normal x = 0, y = 1 and z = 2
 	int	FindCentre = AVERAGE;		// statistical average or contained volume
-
-//	RGBTRIPLE   OscBackGround = {0,0,0};
-
-//extern	std::vector<float> wpixels;		// an array of doubles holding slope modified iteration counts
 
 /**************************************************************************
 	Common init Routines

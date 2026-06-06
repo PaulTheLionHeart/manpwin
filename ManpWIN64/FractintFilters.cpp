@@ -1,14 +1,16 @@
-// FRACTINTFILTERS.CPP Filter types in FRACTINT.EXE..
-//
-//////////////////////////////////////////////////////////////////////
+/*
+   FRACTINTFILTERS.CPP - Filter types in FRACTINT.EXE - used in reading fracctint PAR files
+
+   Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <windows.h>
 #include "manpwin.h"
 
 struct FractintFilterStuff				// database of Fractint Outside filters
     {
-    char    *name;				// name of the fractal 
-    char    method;				// only allow '1', '2', blinds or spiral 
+    char    *name;					// name of the fractal 
+    char    method;					// only allow '1', '2', blinds or spiral 
     };
 
 struct	FractintFilterStuff	FractintFilter[]=	// default values for each 

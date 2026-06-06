@@ -1,16 +1,9 @@
-//////////////////////////////////////////////////////////////////////////////////////////
-//
-// COLOUR.CPP a module to edit true colour palettes. implementation of the CTrueCol class.
-//
-//////////////////////////////////////////////////////////////////////////////////////////
-// Author:-
-//	Paul de Leeuw
-//	pdeleeuw at deleeuw dot com dot au	( replace "at" "dot" by the normal characters.)
-//	10/07/2007
-//	This Class includes code to create a true palette and to modify it
-//////////////////////////////////////////////////////////////////////////////////////////
+/*
+    COLOUR.CPP a module to edit true colour palettes. implementation of the CTrueCol class.
 
-//#include <wx/aboutdlg.h>
+    Written in MICROSOFT 'C++' by Paul de Leeuw.
+*/
+
 #include <stdio.h>
 #include <windows.h>
 #include <windowsx.h>
@@ -46,7 +39,7 @@ CTrueCol::CTrueCol()			// Persistent colour-system initialisation
     InsideGreen = 50;
     InsideBlue = 50;
     ColoursInPALFile = 256;			// assume minimum palette size of 256
-    IsMAPFile = false;				// have we loaded a MAP file?
+    CurrentPaletteMode = PALETTE_FRACTINT;
     PalettePtr.resize(MAXPALETTE); 
     DefaultPalettePtr.resize(MAXPALETTE);
     for (size_t i = 0; i < ColoursInPALFile; ++i)
@@ -143,7 +136,7 @@ void CTrueCol::BuildDefaultPaletteSource(long threshold)
 //	Build Palette from sources (MAP table or COL palette generator)
 //////////////////////////////////////////////////////////////////////
 
-void	CTrueCol::BuildIterationColourMap(BYTE RandFlag, long threshold, int StartColourCycling, int logval, BOOL UseFractintPalette)
+void	CTrueCol::BuildIterationColourMap(BYTE RandFlag, long threshold, int StartColourCycling, int logval)
     {
     ColoursInPALFile = (long)colourCount;
     if (PalEditFlag)
@@ -155,16 +148,20 @@ void	CTrueCol::BuildIterationColourMap(BYTE RandFlag, long threshold, int StartC
 	return;
 	}
 
-    if (IsMAPFile)
+    switch (CurrentPaletteMode)
 	{
-	if (UseFractintPalette)
+	case PALETTE_FRACTINT:
 	    BuildDefaultPaletteSource(threshold);
-	// else:
-	// external MAP file already populated PalettePtr[] when MAP file loaded or from PAR/PNG/KFR sources
-	}
-    else
-	{
-	BuildCOLColourSource(RandFlag, threshold, StartColourCycling, logval);
+	    break;
+
+	case PALETTE_DEFAULT_COL:
+	case PALETTE_CUSTOM_COL:
+	    BuildCOLColourSource(RandFlag, threshold, StartColourCycling, logval);
+	    break;
+
+	case PALETTE_TABLE:
+	    // PalettePtr already populated
+	    break;
 	}
     }
 

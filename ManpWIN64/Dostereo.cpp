@@ -1,10 +1,7 @@
 /*
-    DOSTEREO.CPP a module to view 3D images.
+    DOSTEREO.CPP - a module to view 3D images.
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <conio.h>

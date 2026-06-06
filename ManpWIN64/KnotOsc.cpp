@@ -1,5 +1,5 @@
 /*
-   KNOTOSC.CPP a module to explore Knots interpreted as oscillators
+   KNOTOSC.CPP - a module to explore Knots interpreted as oscillators
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
@@ -12,7 +12,7 @@
 #include	"resource.h"
 #include	"fractype.h"
 #include	"fractalp.h"
-#include	"menu.h"
+//#include	"menu.h"
 //#include	"anim.h"
 
 //extern	HWND	GlobalHwnd;			// This is the main windows handle

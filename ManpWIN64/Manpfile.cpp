@@ -1,6 +1,8 @@
-/*------------------------------------------
-   MANPFILE.CPP --   File Read Functions
-  ------------------------------------------*/
+/*
+    MANPFILE.CPP --   File Read Functions
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include <windows.h>
 #include <commdlg.h>
@@ -262,6 +264,7 @@ INT_PTR CALLBACK PARFileOpenDlg(HWND hwnd, char *lpstrTitleName)
     strcpy_s(PARFile, MAX_PATH, PARDialog.File);
     gManp->IsPAR = TRUE;
     gManp->IsKFR = FALSE;
+    gManp->IsFrPAR = FALSE;
     return 0;
     }
 
@@ -279,6 +282,7 @@ INT_PTR CALLBACK KFRFileOpenDlg(HWND hwnd, char *lpstrTitleName)
     strcpy_s(KFRFile, MAX_PATH, KFRDialog.File);
     gManp->IsPAR = FALSE;
     gManp->IsKFR = TRUE;
+    gManp->IsFrPAR = FALSE;
 
     return 0;
     }
@@ -355,8 +359,9 @@ INT_PTR CALLBACK FractintParFileOpenDlg(HWND hwnd, char *lpstrTitleName)
 
     file_type = FILE_PAR;
     strcpy_s(FracPARFile, MAX_PATH, FracPARDialog.File);
-    gManp->IsPAR = TRUE;
+    gManp->IsPAR = FALSE;
     gManp->IsKFR = FALSE;
+    gManp->IsFrPAR = TRUE;
 
     return 0;
     }

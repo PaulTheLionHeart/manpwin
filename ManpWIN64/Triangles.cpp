@@ -1,5 +1,5 @@
 /*
-   TRIANGLES.CPP a module for Triangle Fractals
+   TRIANGLES.CPP - a module for Triangle Fractals
    Thanks to Marcus Rezende 
 
    Written in Microsoft Visual C++ by Paul de Leeuw.

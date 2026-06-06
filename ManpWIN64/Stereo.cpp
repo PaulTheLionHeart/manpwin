@@ -1,10 +1,7 @@
 /*
-    STEREO.CPP a module to view 3D images.
+    STEREO.CPP - a module to view 3D images.
     
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
-
-    This program is written in "standard" C. Hardware dependant code
-    (console drivers & serial I/O) is in separate machine libraries.
 */
 
 #include <conio.h>
@@ -13,7 +10,6 @@
 #include "colour.h"
 #include "plot.h"
 
-//#define MAXLINE		150		/* length of line */
 #define TRUE		1
 #define FALSE		0
 #define EVER		(;;)
@@ -26,10 +22,8 @@
 #define RANDOM(x)	(rand()%(x))
 
 int	orig_mode, eyes, ground;
-int	eye_dots = FALSE;		/* eye dots for AutoStereo */
+int	eye_dots = FALSE;		// eye dots for AutoStereo
 BOOL	AutoStereoActive = FALSE;	// is autostereo currently running?
-
-//BYTE	grayflag = 0;			/* flag to use grey value rather than color number */
 
 static	long	depth, maxc;
 	int	stereo_sign;

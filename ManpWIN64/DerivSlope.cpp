@@ -1,3 +1,9 @@
+/*
+    DerivSlope.cpp - Functions to implement derivative slope in Perturbation
+
+    Written in Microsoft Visual 'C++' by Paul de Leeuw.
+*/
+
 #include "PertEngine.h"
 #include "Manp.h"
 

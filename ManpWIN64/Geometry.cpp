@@ -1,5 +1,5 @@
 /*
-   GEOMETRY.CPP a module for Geometric Shapes Fractals
+   GEOMETRY.CPP - a module for Geometric Shapes Fractals
    Thanks to Marcus Rezende 
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
