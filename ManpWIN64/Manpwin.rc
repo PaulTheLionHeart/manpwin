@@ -113,7 +113,7 @@ STYLE DS_MODALFRAME | DS_SETFONT | WS_POPUP
 FONT 8, "MS Sans Serif"
 {
     EDITTEXT        IDC_PROGRAMNAME, 41, 13, 79, 12, WS_DISABLED | NOT WS_BORDER | ES_CENTER | ES_AUTOHSCROLL
-    CTEXT           "4.03a", IDC_STATIC, 36, 28, 88, 9, SS_CENTER
+    CTEXT           "4.03b", IDC_STATIC, 36, 28, 88, 9, SS_CENTER
     ICON            "MANPWIN", IDC_STATIC, 8, 8, 21, 20, SS_ICON
     CTEXT           "Copyright © Paul de Leeuw Computers\nhttps://www.deleeuw.com.au", IDC_STATIC, 8, 53, 144, 15, SS_CENTER
     PUSHBUTTON      "OK", IDOK, 36, 89, 88, 14, WS_GROUP | NOT WS_TABSTOP
@@ -2350,8 +2350,8 @@ IDI_ICON1          ICON           "icon1.ico"
 //
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 VS_VERSION_INFO VERSIONINFO
-    FILEVERSION     3,0,3,10
-    PRODUCTVERSION  3,0,3,10
+    FILEVERSION     4,0,3,02
+    PRODUCTVERSION  4,0,3,02
     FILEOS          VOS_NT_WINDOWS32
     FILETYPE        VFT_APP
     FILESUBTYPE     VFT2_UNKNOWN
@@ -2365,15 +2365,15 @@ VS_VERSION_INFO VERSIONINFO
             VALUE "Comments", "\0"
             VALUE "CompanyName", "Paul de Leeuw Computers\0"
             VALUE "FileDescription", "Manpwin\0"
-            VALUE "FileVersion", "4.01f\0"
+            VALUE "FileVersion", "4.03b\0"
             VALUE "InternalName", "Manpwin\0"
-            VALUE "LegalCopyright", "Copyright © 2023\0"
+            VALUE "LegalCopyright", "Copyright © 2026\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "Manpwin.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "Paul de Leeuw Computers Manpwin\0"
-            VALUE "ProductVersion", "4.0.1f\0"
-            VALUE "SpecialBuild", "0512\0"
+            VALUE "ProductVersion", "4.03b\0"
+            VALUE "SpecialBuild", "0606\0"
         }
     }
     BLOCK "VarFileInfo"
