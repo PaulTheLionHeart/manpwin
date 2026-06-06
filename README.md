@@ -8,13 +8,35 @@ ManpWIN is evolving toward a unified mathematical experimentation platform suppo
 
 ---
 
-## Version 4.03a
+## Version 4.03b
 
-Major stability, rendering, palette, metadata, and export modernisation release.
+Maintenance, usability, and stability release focused on Status Information modernisation, improved rendering progress reporting, documentation updates, and ongoing infrastructure improvements.
 
 ---
 
-## Recent Improvements (4.03a)
+## Recent Improvements (4.03b)
+
+### Status Information Modernisation
+* Modernised Status Information window
+* Added Thread Count reporting
+* Added Plot Mode reporting
+* Improved raster pass reporting
+* Improved perturbation progress reporting
+* Added Copy button
+* Added dedicated Status Information help page
+
+### Documentation
+* Updated Help system
+* Added Status Information documentation
+* Updated keyboard command documentation
+* Updated revision history
+
+### General Stability
+* Continued infrastructure cleanup
+* Repository synchronisation and cleanup
+* Numerous maintenance and reliability improvements
+
+## Previous Major Release (4.03a)
 
 ### Perturbation and Rendering
 * Extended perturbation support for additional transcendental and fractional-power functions
@@ -246,9 +268,12 @@ A chronological record of major battles during the ManpWIN modernisation.
 - 🐉 Perturbation dragon — fixed uninitialised power causing incorrect rendering after toggling  
 - 🧮 Arithmetic stabilisation — improved trig behaviour across DD/QD/MPFR  
 - 🧱 Template foundation — introduced templated framework for future fractal expansion  
--  🧠 Semantic unification — parser/trig arithmetic consolidated via templates
--  🐉 Layer discipline restored — VM, dispatch, and semantic layers separated cleanly
--  🔮 Transcendental perturbation groundwork — infrastructure prepared for future symbolic perturbation research
+- 🧠 Semantic unification — parser/trig arithmetic consolidated via templates
+- 🐉 Layer discipline restored — VM, dispatch, and semantic layers separated cleanly
+- 🔮 Transcendental perturbation groundwork — infrastructure prepared for future symbolic perturbation research
+-   📊 Status Information modernisation — improved progress reporting and diagnostics
+-   🧵 Thread progress overhaul — status reporting now reflects the slowest active worker thread
+-   📚 Documentation refresh — Status Information help page and keyboard documentation updated
 
 ---
 
