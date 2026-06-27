@@ -95,9 +95,28 @@ improvements to performance, precision, and fractal exploration capabilities.
 
 <h2>Latest Release (June 2026)</h2>
 
-<p><b>ManpWIN 4.03b</b></p>
+<h2>ManpWIN 4.03c</h2>
+
+<p>
+ManpWIN 4.03c is a build and deployment modernisation release focused on
+simplifying installation, improving maintainability, and adopting a modern
+CMake/vcpkg build environment.
+</p>
 
 <h3>Recent Improvements</h3>
+
+<ul>
+    <li>Migrated third-party libraries to modern CMake and vcpkg manifest mode.</li>
+    <li>Updated the build system to use static runtime libraries and static third-party library linking.</li>
+    <li>Simplified deployment by producing a self-contained executable with no third-party runtime DLLs required.</li>
+    <li>Updated installer and build scripts to support the new CMake build structure.</li>
+    <li>Updated the project to build cleanly against current releases of libpng, zlib, GMP and MPFR.</li>
+    <li>Removed legacy dependencies on internal libpng implementation details.</li>
+    <li>General build system cleanup and maintenance.</li>
+    <li>Numerous internal improvements and stability updates.</li>
+</ul><p><b>ManpWIN 4.03b</b></p>
+
+<h2>Previous Releases</h2>
 
 <p>
 ManpWIN 4.03b is a maintenance and usability update focused on improving
@@ -129,8 +148,6 @@ status reporting, diagnostics, documentation, and overall user feedback.
 <li>Numerous internal cleanups and bug fixes.</li>
 
 </ul>
-
-<h2>Previous Releases</h2>
 
 <p><b>ManpWIN 4.03a</b></p>
 
