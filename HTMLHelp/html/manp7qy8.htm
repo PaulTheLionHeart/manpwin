@@ -93,17 +93,43 @@ ManpWIN has undergone continuous development over many years, with ongoing
 improvements to performance, precision, and fractal exploration capabilities.
 </p>
 
-<h2>Latest Release (June 2026)</h2>
+<h2>Latest Release (July 2026)</h2>
 
-<h2>ManpWIN 4.03c</h2>
+<h2>ManpWIN 4.03d</h2>
+
+<p>
+ManpWIN 4.03d is a maintenance and stability update focused on improving
+animation reliability during extremely deep zoom sequences together with
+more robust handling of very large palettes.
+</p>
+
+<h3>Recent Improvements</h3>
+
+<ul>
+    <li>Improved animation script processing for animations using very large iteration counts.</li>
+
+    <li>Improved palette handling when reading and writing animation script files.</li>
+
+    <li>Prevented palette processing from exceeding internal palette limits during animation generation.</li>
+
+    <li>Improved robustness when loading animation scripts containing large palette definitions.</li>
+
+    <li>Improved zoom overlay calculations for extreme magnifications.</li>
+
+    <li>Added documentation describing the logarithmic zoom calculation used for the zoom overlay.</li>
+
+    <li>General stability improvements and internal code maintenance.</li>
+</ul>
+
+<h2>Previous Releases</h2>
+
+</ul><p><b>ManpWIN 4.03c</b></p>
 
 <p>
 ManpWIN 4.03c is a build and deployment modernisation release focused on
 simplifying installation, improving maintainability, and adopting a modern
 CMake/vcpkg build environment.
 </p>
-
-<h3>Recent Improvements</h3>
 
 <ul>
     <li>Migrated third-party libraries to modern CMake and vcpkg manifest mode.</li>
@@ -114,9 +140,8 @@ CMake/vcpkg build environment.
     <li>Removed legacy dependencies on internal libpng implementation details.</li>
     <li>General build system cleanup and maintenance.</li>
     <li>Numerous internal improvements and stability updates.</li>
-</ul><p><b>ManpWIN 4.03b</b></p>
 
-<h2>Previous Releases</h2>
+</ul><p><b>ManpWIN 4.03b</b></p>
 
 <p>
 ManpWIN 4.03b is a maintenance and usability update focused on improving

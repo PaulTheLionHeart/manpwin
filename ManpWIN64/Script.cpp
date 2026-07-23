@@ -368,8 +368,8 @@ int	CManp::InitScript(HWND hwnd, char *FileName, int *TotalFrames)
 	{
 	if (strncmp(buf.data(), "Palette=", 8) == 0)				// we have a palette file
 	    {
-	    for (i = 0; i < EndIter; i++)
-//	    for (i = 0; i < PalIter; i++)
+	    long PaletteEntries = min(EndIter, MAXPALETTE - 1);
+	    for (i = 0; i < PaletteEntries; i++)
 		{
 		for (j = 0; j < 4; j++)
 		    {
@@ -383,11 +383,10 @@ int	CManp::InitScript(HWND hwnd, char *FileName, int *TotalFrames)
 			}
 		    ascii[j] = ch;
 		    }
-		ascii[4] = '\0';
 		if (eof)
 		    break;
-		if (i < MAXPALETTE)
-		    ConvertASCII2RGB(TrueCol.PalettePtr[i], ascii);
+		ascii[4] = '\0';
+		ConvertASCII2RGB(TrueCol.PalettePtr[i], ascii);
 		}
 	    }
 	}

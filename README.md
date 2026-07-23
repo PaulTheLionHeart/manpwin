@@ -8,68 +8,29 @@ ManpWIN is evolving toward a unified mathematical experimentation platform suppo
 
 ---
 
-## Version 4.03b
+## Version 4.03d
 
-Maintenance, usability, and stability release focused on Status Information modernisation, improved rendering progress reporting, documentation updates, and ongoing infrastructure improvements.
+Maintenance and stability release focused on improving animation reliability during extreme deep zoom sequences, robust handling of very large palettes, and continued modernisation of the build system.
 
 ---
 
-## Recent Improvements (4.03b)
+## Recent Improvements (4.03d)
 
-### Status Information Modernisation
-* Modernised Status Information window
-* Added Thread Count reporting
-* Added Plot Mode reporting
-* Improved raster pass reporting
-* Improved perturbation progress reporting
-* Added Copy button
-* Added dedicated Status Information help page
+### Animation and Palette Handling
 
-### Documentation
-* Updated Help system
-* Added Status Information documentation
-* Updated keyboard command documentation
-* Updated revision history
+* Improved animation script processing for animations using very large iteration counts
+* Improved palette handling when reading and writing animation script files
+* Prevented palette processing from exceeding internal palette limits
+* Improved robustness when loading animation scripts containing large palette definitions
+
+### Build System
+
+* Updated CMake build documentation to use the static vcpkg triplet
+* Continued build system cleanup and maintenance
 
 ### General Stability
-* Continued infrastructure cleanup
-* Repository synchronisation and cleanup
-* Numerous maintenance and reliability improvements
 
-## Previous Major Release (4.03a)
-
-### Perturbation and Rendering
-* Extended perturbation support for additional transcendental and fractional-power functions
-* Extended derivative slope support for additional perturbation function families
-* Fixed perturbation cubic distortion issues
-* Improved high-precision rendering stability
-
-### File System and Metadata
-* Complete rewrite and stabilisation of file read/write systems
-* Improved management and separation of fractal metadata and rendering data
-* Fixed Fractint PAR loading crash
-* Improved PNG and long filename handling
-
-### Colour and Palette System
-* Corrected RGB/BGR handling affecting:
-  * Kalles Fraktaler (KFR)
-  * MAP palette files
-  * COL true colour palette files
-  * Fractint PAR inline palettes
-
-* Improved palette source handling and rendering consistency
-
-### Animation and Export
-* Fixed animated GIF writing
-* Fixed animated MPEG writing
-* Improved animation frame and DIB handling
-
-### General Stability
-* Fixed intermittent derivative slope rendering artefacts
-* Fixed clipboard handling and shutdown issues
-* Numerous rendering and infrastructure stability improvements
-
-Recent development has also focused on modernising legacy rendering, palette, metadata, and export systems while preserving compatibility with classic ManpWIN workflows and external fractal formats.
+* Numerous internal stability improvements and code maintenance
 
 ---
 
@@ -177,7 +138,9 @@ cd manpwin
 
 cmake -B build -S . ^
   -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
-  -DVCPKG_TARGET_TRIPLET=x64-windows
+  -DVCPKG_TARGET_TRIPLET=x64-windows-static
+
+The `x64-windows-static` triplet is recommended because it produces a self-contained executable without requiring MPFR or other third-party runtime DLLs.
 
 ---
 
