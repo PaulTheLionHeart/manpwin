@@ -4,29 +4,37 @@ ManpWIN is a Windows fractal exploration and rendering application featuring adv
 
 This repository contains a fully reproducible CMake-based build system supporting consistent Debug and Release builds with Visual Studio 2022.
 
-ManpWIN is evolving toward a unified mathematical experimentation platform supporting deep zoom perturbation, high precision arithmetic, symbolic formula evaluation, and future transcendental perturbation research.
+ManpWIN is a Windows fractal exploration and rendering application featuring advanced Mandelbrot and related fractal techniques including perturbation theory, optional Bilinear Approximation (BLA) acceleration, high-precision arithmetic, slope rendering, and a multithreaded formula parser.
+
+The project combines decades of fractal development with a modern CMake-based build system, providing a powerful platform for both visual exploration and mathematical research into deep-zoom fractals and experimental formulae.
 
 ---
 
-## Version 4.03d
+## Version 4.03e
 
-Maintenance and stability release focused on improving animation reliability during extreme deep zoom sequences, robust handling of very large palettes, and continued modernisation of the build system.
+Maintenance and stability release focused on improving perturbation rendering,
+deep-zoom reliability, Kalles Fraktaler compatibility, and fractal metadata
+handling.
 
 ---
 
-## Recent Improvements (4.03d)
+## Recent Improvements (4.03e)
 
-### Animation and Palette Handling
+### Perturbation and Deep Zoom
 
-* Improved animation script processing for animations using very large iteration counts
-* Improved palette handling when reading and writing animation script files
-* Prevented palette processing from exceeding internal palette limits
-* Improved robustness when loading animation scripts containing large palette definitions
+* Improved perturbation reference generation and rebasing during extremely deep zooms
+* Improved reference orbit stability near the Mandelbrot set boundary around -2.0
+* Reduced perturbation artefacts during very deep zoom rendering
+* Improved overall robustness of perturbation rendering
 
-### Build System
+### Kalles Fraktaler Compatibility
 
-* Updated CMake build documentation to use the static vcpkg triplet
-* Continued build system cleanup and maintenance
+* Fixed reading and writing of smoothing values in `.KFR` files
+
+### Fractal Metadata
+
+* Improved metadata rebuilding for derivative-based, Tierazon, and Mandelbrot derivative fractals
+* Parameter dialogue boxes now consistently reflect the current fractal settings
 
 ### General Stability
 
@@ -37,8 +45,8 @@ Maintenance and stability release focused on improving animation reliability dur
 ## ✨ Features
 
 * Mandelbrot and related fractals
-* Deep zoom using perturbation theory + BLA acceleration (with improved stability)
-* BLA (approximation methods) for massive speed improvements
+* * Extreme deep-zoom rendering using perturbation theory, with optional BLA acceleration for improved performance
+* Optional Bilinear Approximation (BLA) acceleration for faster perturbation rendering
 * Multithreaded rendering engine
 * Multithreaded formula parser
 * Slope derivative rendering modes
@@ -93,7 +101,7 @@ ManpWIN has reached a stable and reproducible build state with a fully functiona
 - ✔ Deterministic rendering across Mandelbrot, perturbation, and formula modes
 - ✔ Stable multithreaded execution (worklist + parser)
 - ✔ Verified Debug and Release builds via CMake + Visual Studio 2022
-- ✔ Successful deep zoom exploration
+- ✔ Verified extreme deep zoom rendering using perturbation theory and high-precision arithmetic
 - ✔ Ongoing collaboration and interest from the mathematical community
 - ✔ Improved numerical stability across multiple arithmetic types (MPFR, DD, QD)
 
@@ -234,9 +242,14 @@ A chronological record of major battles during the ManpWIN modernisation.
 - 🧠 Semantic unification — parser/trig arithmetic consolidated via templates
 - 🐉 Layer discipline restored — VM, dispatch, and semantic layers separated cleanly
 - 🔮 Transcendental perturbation groundwork — infrastructure prepared for future symbolic perturbation research
--   📊 Status Information modernisation — improved progress reporting and diagnostics
--   🧵 Thread progress overhaul — status reporting now reflects the slowest active worker thread
--   📚 Documentation refresh — Status Information help page and keyboard documentation updated
+- 📊 Status Information modernisation — improved progress reporting and diagnostics
+- 🧵 Thread progress overhaul — status reporting now reflects the slowest active worker thread
+- 📚 Documentation refresh — Status Information help page and keyboard documentation updated
+- 🧭 Deep zoom expedition — tracked and eliminated long-standing perturbation teleporting
+- 🛰 Reference orbit refinement — improved perturbation reference generation and rebasing
+- 🧩 Hidden missing `else` — restored correct rebasing when BLA is disabled
+- 🌊 KFR smoothing restored — preserved smoothing values when reading and writing `.KFR` files
+- 📋 Metadata consistency — parameter dialogues now correctly rebuild fractal metadata across all new fractal families
 
 ---
 

@@ -2,7 +2,7 @@
 # Copyright 2025 Paul de Leeuw
 #
 
-add_library(mpeg 
+add_library(mpeg STATIC 
 config.h
 conform.cpp
 fdctref.cpp

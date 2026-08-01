@@ -2,7 +2,7 @@
 # Copyright 2025 Paul de Leeuw
 #
 
-add_library(qdlib 
+add_library(qdlib STATIC
 dd_inline.h
 dd_real.h
 dd_routines.cpp

@@ -1687,6 +1687,7 @@ BOOL	InitNewFractal(HWND hwnd)
 		    gManp->time_to_restart = TRUE;
 		    gManp->time_to_load = FALSE;
 		    LoadTierazonParams();			// get parameters  and other subtype specific stuff from Tierazon database 
+		    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
 		    if (DialogBox (hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    }
@@ -1703,6 +1704,7 @@ BOOL	InitNewFractal(HWND hwnd)
 		    gManp->time_to_restart = TRUE;
 		    gManp->time_to_load = FALSE;
 		    LoadMandelDerivParams();			// get parameters  and other subtype specific stuff from Mandelbrot Derivatives database 
+		    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
 		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    }
@@ -1719,6 +1721,7 @@ BOOL	InitNewFractal(HWND hwnd)
 		    gManp->time_to_restart = TRUE;
 		    gManp->time_to_load = FALSE;
 		    LoadSlopeDerivParams();			// get parameters  and other subtype specific stuff from Slope Derivative database 
+		    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
 		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    }
@@ -1735,6 +1738,7 @@ BOOL	InitNewFractal(HWND hwnd)
 		    gManp->time_to_restart = TRUE;
 		    gManp->time_to_load = FALSE;
 		    LoadSlopeFwdDiffParams();			// get parameters  and other subtype specific stuff from Forward Differencing database 
+		    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
 		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    }
@@ -1751,6 +1755,7 @@ BOOL	InitNewFractal(HWND hwnd)
 		    gManp->time_to_restart = TRUE;
 		    gManp->time_to_load = FALSE;
 		    LoadPerturbationParams();			// get parameters and other subtype specific stuff from Perturbation database 
+		    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
 		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    }

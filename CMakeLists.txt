@@ -7,6 +7,10 @@ cmake_minimum_required(VERSION 3.23)
 
 project(ManpWIN LANGUAGES C CXX)
 
+# CMake helper modules
+list(APPEND CMAKE_MODULE_PATH
+    "${CMAKE_SOURCE_DIR}/cmake")
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -33,20 +37,14 @@ add_subdirectory(pnglib)
 add_subdirectory(ZLib)
 add_subdirectory(MPEG)
 
-find_path(GMP_INCLUDE_DIR gmp.h)
-find_library(GMP_LIBRARY gmp)
-
-find_path(MPFR_INCLUDE_DIR mpfr.h)
-find_library(MPFR_LIBRARY mpfr)
-
-target_include_directories(parser PUBLIC
-    ${GMP_INCLUDE_DIR}
-    ${MPFR_INCLUDE_DIR}
-)
+# GMP and MPFR use custom Find modules in /cmake because the
+# current vcpkg ports do not provide CMake package configuration files.
+find_package(GMP REQUIRED)
+find_package(MPFR REQUIRED)
 
 target_link_libraries(parser PUBLIC
-    ${GMP_LIBRARY}
-    ${MPFR_LIBRARY}
+    GMP::GMP
+    MPFR::MPFR
 )
 
 target_link_libraries(ManpWIN64 PRIVATE
@@ -55,7 +53,7 @@ target_link_libraries(ManpWIN64 PRIVATE
     parser
     mpeg
     qdlib
-    ${GMP_LIBRARY}
-    ${MPFR_LIBRARY}
     htmlhelp
 )
+
+

@@ -340,7 +340,8 @@ const BLAExp * BLAS::lookupExp(int m, floatexp z2, int iterations, int max_itera
                 B = &(bExp[level][ix]);
                 }
             }
-        else {
+        else 
+	    {
             break;
             }
         ix = ix >> 1;

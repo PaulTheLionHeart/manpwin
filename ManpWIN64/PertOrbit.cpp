@@ -53,7 +53,7 @@ int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> 
 	if (AbortRequested())
 	    return -1;
 	ZCoordinateMagnitudeSquared = z.CSumSqr();
-	if (ZCoordinateMagnitudeSquared >= bailout) 
+	if (ZCoordinateMagnitudeSquared > bailout) 
 	    {
 	    return iterations;
 	    }
@@ -121,15 +121,11 @@ int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> 
 		    const double Ax = bPtr->Ax, Ay = bPtr->Ay;
 		    const double Bx = bPtr->Bx, By = bPtr->By;
 
-		    DeltaSubN = Complex(
-			Ax * dz.x - Ay * dz.y + Bx * d0.x - By * d0.y,
-			Ax * dz.y + Ay * dz.x + Bx * d0.y + By * d0.x
-		    );
-		    dz = DeltaSubN;
-//		    DeltaSubN = Complex(bPtr->Ax * dz.x - bPtr->Ay * dz.y + bPtr->Bx * d0.x - bPtr->By * d0.y, bPtr->Ax * dz.y + bPtr->Ay * dz.x + bPtr->Bx * d0.y + bPtr->By * d0.x);
+		    DeltaSubN = Complex(Ax * dz.x - Ay * dz.y + Bx * d0.x - By * d0.y, Ax * dz.y + Ay * dz.x + Bx * d0.y + By * d0.x);
 		    dz = DeltaSubN;
 		    // Propagate derivative if slope is enabled
-		    if (SlopeType == DERIVSLOPE) {
+		    if (SlopeType == DERIVSLOPE) 
+			{
 			Complex A(Ax, Ay);
 			Complex B(Bx, By);
 			dc = A * dc + B;   // Uses your existing Complex ops
@@ -140,10 +136,15 @@ int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> 
 		    DeltaNormSquared = dz.CSumSqr();
 		    }
 		}
+	    else
+		{
+		// Plain perturbation also needs DeltaNormSquared for the standard rebase test.
+		DeltaNormSquared = dz.CSumSqr();
+		}
 	    }
 	if (ArithType == DBL_UNSUPPORTED)		// otherwise it is done in the BLA process
 	    DeltaNormSquared = dz.CSumSqr();
-//rebase
+	// rebase test
 	ZCoordinateMagnitudeSquared = z.CSumSqr();
 	if (ZCoordinateMagnitudeSquared < DeltaNormSquared || (RefIteration >= MaxRefIteration)) 
 	    {
@@ -157,11 +158,12 @@ int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> 
 //////////////////////////////////////////////////////////////////////
 // Individual point calculation - with BLA - Exp
 //////////////////////////////////////////////////////////////////////
+
 int	CPerturbation::iterateFractalWithPerturbationBLAExp(const std::vector<ExpComplex> *XSubN, int MaxIteration, double bailout, ExpComplex& DeltaSub0, const BLAS *Bla, /*CTZfilter &TZfilter, */ExpComplex &z, ExpComplex &dc, int user_data(HWND hwnd))
     {
-    const int frameMaxIter = MaxIteration;			// <<<
-    const size_t refSize = XSubN->size();			// <<<
-    if (refSize <= 0) return frameMaxIter;			// <<<
+    const int frameMaxIter = MaxIteration;
+    const size_t refSize = XSubN->size();
+    if (refSize <= 0) return frameMaxIter;
 
     int iterations = 0;
     int RefIteration = iterations;
@@ -229,13 +231,15 @@ int	CPerturbation::iterateFractalWithPerturbationBLAExp(const std::vector<ExpCom
 	    z = temp1 + dz;
 	    }
 
-	if (OutsideMethod >= TIERAZONFILTERS) {
+	if (OutsideMethod >= TIERAZONFILTERS) 
+	    {
 	    Complex tempComplex;
 	    tempComplex.x = z.x.todouble();
 	    tempComplex.y = z.y.todouble();
 	    TZfilter.DoTierazonFilter(tempComplex, (long*)&iterations);
 	    }
-	else if (InsideMethod == BOF60 || InsideMethod == BOF61) {
+	else if (InsideMethod == BOF60 || InsideMethod == BOF61) 
+	    {
 	    ExpComplex Z = z;
 	    BOFmagnitude = Z.CSumSqr();
 	    if (BOFmagnitude < min_orbit) {
@@ -297,8 +301,9 @@ int	CPerturbation::iterateFractalWithPerturbationBLAExp(const std::vector<ExpCom
 		    ExpDeltaNormSquared = dz.CSumSqrExp(); // update for next loop
 		    }
 		}
-	    else {
-		// --- FIX #2: set when approximation is OFF ---
+	    else 
+		{
+		// Plain perturbation also needs DeltaNormSquared for the standard rebase test.
 		ExpDeltaNormSquared = dz.CSumSqrExp();
 		}
 	    }
@@ -307,7 +312,7 @@ int	CPerturbation::iterateFractalWithPerturbationBLAExp(const std::vector<ExpCom
 	    ExpDeltaNormSquared = dz.CSumSqrExp();
 	    }
 
-	// rebase
+	// rebase test
 	ExpZCoordinateMagnitudeSquared = z.CSumSqrExp();
 	if (ExpZCoordinateMagnitudeSquared < ExpDeltaNormSquared || (RefIteration >= MaxRefIteration))
 	    {

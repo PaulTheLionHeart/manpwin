@@ -246,8 +246,6 @@ TComplex Invertz2T(const TComplex& Cmplx1, TReal f_radius, TReal f_xcenter, TRea
     return temp;
     }
 
-
-
 template<typename T>
 struct MathOps;
 

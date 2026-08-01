@@ -676,7 +676,7 @@ int	WriteKallesFile(HWND hwnd, char *filename)
     fprintf(fp, "\n");
     if (Slopes)
 	fprintf(fp, "Slopes: %d\n", Slopes);
-    fprintf(fp, "Smooth: %d\n", (gManp->PertColourMethod == 4) ? 1 : 0);
+    fprintf(fp, "Smooth: %d\n", (gManp->ColourSpeed > 0.0) ? 1 : 0);
     if (gManp->PalOffset)
 	fprintf(fp, "ColorOffset: %d\n", gManp->PalOffset);
     if (gManp->IterDiv != 1.0)
@@ -787,7 +787,7 @@ int	ReadKallesFile(HWND hwnd, char *filename)
 	if (length = Strlicmp(buffer, "Smooth: "))
 	    {
 	    int i = atoi(buffer + length);
-	    gManp->PertColourMethod = (i == 0) ? 0 : 4;
+	    gManp->ColourSpeed = (i == 0) ? 0.0 : 1.0;
 	    }
 	if (length = Strlicmp(buffer, "FractalType: "))		// must be the only one which is after strlwr
 	    TempType = atoi(buffer + length);

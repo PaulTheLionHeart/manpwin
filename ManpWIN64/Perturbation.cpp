@@ -1290,7 +1290,7 @@ INT_PTR CALLBACK PertDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    SAFE_SPRINTF(Bailout, "%4.4lf", gManp->rqlim);
+	    SAFE_SPRINTF(Bailout, "%4.12lf", gManp->rqlim);
 	    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
 	    SetDlgItemText(hDlg, ID_FRACNAME, gManp->GetFractalName());
 	    SetDlgItemInt(hDlg, ID_STARTPALETTE, gManp->PaletteStart, TRUE);

@@ -771,14 +771,14 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
     tRef.start();
     EnsureReferenceBufferSize(ArithType, maxIteration);
 
-//#ifdef _DEBUG
+#ifdef _DEBUG
     char buf[256];
     sprintf(buf, "ExpXSubN cap: %zu, size: %zu\n", gManp->ExpXSubN.capacity(), gManp->ExpXSubN.size());
     OutputDebugStringA(buf);
 
     sprintf(buf, "XSubN cap: %zu, size: %zu\n", gManp->XSubN.capacity(), gManp->XSubN.size());
     OutputDebugStringA(buf);
-//#endif
+#endif
 
 /*  
     if (ArithType == EXP_UNSUPPORTED || ArithType == FLOATEXP)
@@ -794,6 +794,27 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 */
 
     zBig = 0.0;
+
+
+#ifdef _DEBUG
+    {
+    char cx[256];
+    char cy[256];
+
+    mpfr_snprintf(cx, sizeof(cx), "%.80Re", centre.x.x);
+    mpfr_snprintf(cy, sizeof(cy), "%.80Re", centre.y.x);
+
+    char buf[700];
+    _snprintf_s(buf, sizeof(buf), _TRUNCATE,
+	"PERT REF CENTRE: x=%s y=%s\n",
+	cx, cy);
+
+    OutputDebugStringA(buf);
+    }
+#endif
+
+
+
     for (int i = 0; i <= maxIteration; i++)
 	{
 	if (AbortRequested())
@@ -821,11 +842,52 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 	    int percent = (int)(progress * 100.0);
 
 	    _snprintf_s(gManp->PertStatus, MAXLINE, _TRUNCATE, "Ref=(%d%%)", percent);
-//	    *pPertProgress = percent;
 	    }
+
+	double ReferenceBailout = bailout;
+	// Give the reference orbit a tiny safety margin so it
+	// doesn't terminate on the first numerically ambiguous
+	// escape when constructing the BLA tables.
+
+	if (gManp->EnableApproximation && bailout == 4.0)
+	    ReferenceBailout = 4.00000001;
 
 	// Calculate the set
 	RefFunctions(&centre, &zBig, SlopeDegree, subtype, power, gManp->param, scratch);
+	if (gManp->EnableApproximation && !WeHaveMaxRefIteration)
+	    {
+	    CoordinateMagnitudeSquared = zBig.CSumSqr();
+	    if (CoordinateMagnitudeSquared > ReferenceBailout)
+		{
+		// zBig is now Z[i + 1]. Store that escaped reference value
+		// because the perturbation iterator needs it after advancing
+		// RefIteration from i to i + 1.
+		const int next = i + 1;
+
+		if (next <= maxIteration)
+		    {
+		    if (ArithType == FLOATEXP || ArithType == EXP_UNSUPPORTED)
+			{
+			gManp->PertCalculator[0]->BigComplex2ExpComplex(&gManp->ExpXSubN[next], zBig);
+			}
+		    else
+			{
+			gManp->XSubN[next] = zBig.CBig2Double();
+			}
+
+		    gManp->MaxRefIteration = next;
+		    }
+		else
+		    {
+		    gManp->MaxRefIteration = maxIteration;
+		    }
+
+		WeHaveMaxRefIteration = true;
+		break;
+		}
+	    }
+
+/*
 	if (gManp->EnableApproximation && !WeHaveMaxRefIteration)		// only needed for BLA
 	    {
 	    CoordinateMagnitudeSquared = zBig.CSumSqr();			// no point in further testing once we have MaxRefIteration
@@ -836,6 +898,7 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 		break;								// the rest of the table isn't needed for BLA
 		}
 	    }
+*/
 	}
 
     if (!WeHaveMaxRefIteration)

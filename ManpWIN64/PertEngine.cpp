@@ -170,6 +170,7 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
     // Optional tuning (safe, simple)
     int	chunk = (currentMode == PlotMode::Tile) ? 1024 : CHUNK_SIZE;
     const	PlotMode mode = currentMode;
+/*
     int idx = workIndex->load();
 
     if (idx < 0 || idx >= totalPixels)
@@ -177,7 +178,7 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
 	OutputDebugStringA("Pert: invalid workIndex\n");
 	return -1;
 	}
-
+*/
     if (pixelOrder->empty())
 	{
 	OutputDebugStringA("Pert: pixelOrder empty\n");
