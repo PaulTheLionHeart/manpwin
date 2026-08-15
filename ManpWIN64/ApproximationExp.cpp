@@ -182,6 +182,11 @@ void BLAS::mergeExp(floatexp blaSize/*, JProgressBar progress*/, long divisor)
 
 void BLAS::initExp(int M, std::vector<ExpComplex> &Ref, floatexp blaSize, int powerIn, int subtypeIn, long MaxIterIn, double param[])
     {
+    isValid = false;
+
+    if (AbortRequested())
+	return;
+
     power = powerIn;
     subtype = subtypeIn;
     MaxIter = MaxIterIn;
@@ -193,7 +198,6 @@ void BLAS::initExp(int M, std::vector<ExpComplex> &Ref, floatexp blaSize, int po
     int BLA_STARTING_LEVEL = 4;
     floatexp precision = 1.0 / ((double)(1L << BLA_BITS));
     firstLevel = BLA_STARTING_LEVEL - 1;
-    isValid = false;
 //        size_t  BLASize, BLASSize;    // a few little tests
 //        BLASize = sizeof(BLA);
 //        BLASSize = sizeof(BLAS);
@@ -227,17 +231,15 @@ void BLAS::initExp(int M, std::vector<ExpComplex> &Ref, floatexp blaSize, int po
 	{
 	for(int i = 0; i < firstLevel && i < elementsPerLevel.size(); i++) 
 	    {
+	    if (AbortRequested())
+		return;
 	    removedTotal += elementsPerLevel[i];
 	    }
 	finalTotal -= removedTotal;
 	}
 
     returnL1 = firstLevel == 0;
-
-
-//        long divisor = finalTotal > Constants.MAX_PROGRESS_VALUE ? finalTotal / Constants.PROGRESS_SCALE : 1;
     long divisor = finalTotal > 0x7fffffff ? finalTotal / 10000 : 1;
-
     L = count;
     bExp.resize(count);
     LM1 = L - 1;
@@ -252,71 +254,27 @@ void BLAS::initExp(int M, std::vector<ExpComplex> &Ref, floatexp blaSize, int po
 	bExp[l].resize(elementsPerLevel[l]);
 	}
 
-    initExp(Ref, blaSize, precision/*, progress*/, divisor);
+    if (initExp(Ref, blaSize, precision/*, progress*/, divisor) < 0)
+	return;
     mergeExp(blaSize/*, progress*/, divisor);
     size_t  SizeofbExp = sizeof(bExp) * bExp.size() * bExp[0].size();
-/*
-        for (int i = firstLevel; i < L; ++i) {
-
-            std::ostringstream oss;
-            size_t ItemCount = bExp[i].size();
-            oss << "Level: " << i << " with " << ItemCount << " items ***************\n";
-//            oss << "l = " << bExp[i][0].getL(GetBLAL) << "\tr = " << sqrt(bExp[i][0].r2) << " \n";
-            debugPrint(oss.str());
-            if (ItemCount <= 10) {
-                for (int j = 0; j < ItemCount; j++) {
-                    std::ostringstream oss;
-                    oss << "bExp[" << i << "][" << j << "]: AxV=" << bExp[i][j].Ax.val << " AxE=" << bExp[i][j].Ax.exp << ", AyV=" << bExp[i][j].Ay.val << ", AyE=" << bExp[i][j].Ay.exp 
-		    << ", BxV=" << bExp[i][j].Bx.val << ", BxE=" << bExp[i][j].Bx.exp << ", ByV=" << bExp[i][j].By.val << ", ByE=" << bExp[i][j].By.exp << ", r2V=" << bExp[i][j].r2.val 
-		    << ", r2E=" << bExp[i][j].r2.exp << ", l=" << bExp[i][j].l << "\n";
-                    debugPrint(oss.str());
-                    }
-                }
-            else {
-                for (int j = 0; j < 5; j++) {
-                    std::ostringstream oss;
-                    oss << "bExp[" << i << "][" << j << "]: AxV=" << bExp[i][j].Ax.val << " AxE=" << bExp[i][j].Ax.exp << ", AyV=" << bExp[i][j].Ay.val << ", AyE=" << bExp[i][j].Ay.exp 
-		    << ", BxV=" << bExp[i][j].Bx.val << ", BxE=" << bExp[i][j].Bx.exp << ", ByV=" << bExp[i][j].By.val << ", ByE=" << bExp[i][j].By.exp << ", r2V=" << bExp[i][j].r2.val 
-		    << ", r2E=" << bExp[i][j].r2.exp << ", l=" << bExp[i][j].l << "\n";
-//                    oss << "bExp[" << i << "][" << j << "]: Ax=" << bExp[i][j].Ax.todouble() << ", Ay=" << bExp[i][j].Ay.todouble() << ", Bx=" << bExp[i][j].Bx.todouble() << ", By=" << bExp[i][j].By.todouble() 
-//		    << ", r2=" << bExp[i][j].r2.todouble() << ", l=" << bExp[i][j].l << "\n";
-                    debugPrint(oss.str());
-                    }
-                for (int j = 0; j < 5; j++) {
-                    size_t ItemPtr = j + ItemCount - 5;
-                    std::ostringstream oss;
-                    oss << "bExp[" << i << "][" << ItemPtr << "]: AxV=" << bExp[i][ItemPtr].Ax.val << " AxE=" << bExp[i][ItemPtr].Ax.exp << ", AyV=" << bExp[i][ItemPtr].Ay.val << ", AyE=" << bExp[i][ItemPtr].Ay.exp
-		    << ", BxV=" << bExp[i][ItemPtr].Bx.val << ", BxE=" << bExp[i][ItemPtr].Bx.exp << ", ByV=" << bExp[i][ItemPtr].By.val << ", ByE=" << bExp[i][ItemPtr].By.exp << ", r2V=" << bExp[i][ItemPtr].r2.val
-		    << ", r2E=" << bExp[i][ItemPtr].r2.exp << ", l=" << bExp[i][ItemPtr].l << "\n";
-//                    oss << "bExp[" << i << "][" << ItemPtr << "]: Ax=" << bExp[i][ItemPtr].Ax.todouble() << ", Ay=" << bExp[i][ItemPtr].Ay.todouble() << ", Bx=" << bExp[i][ItemPtr].Bx.todouble() 
-//		    << ", By=" << bExp[i][ItemPtr].By.todouble() << ", r2=" << bExp[i][ItemPtr].r2.todouble() << ", l=" << bExp[i][ItemPtr].l << "\n";
-                    debugPrint(oss.str());
-                    }
-
-                }
-	    }
-*/
-/*
-		{
-		std::ostringstream oss;
-		oss << "l = " << bExp[i][0].l << "\tr = " << sqrt(bExp[i][0].r2.todouble()) << " \n";
-		debugPrint(oss.str());
-		}
-            }
-*/
     isValid = true;
     }
 
-void BLAS::initExp(std::vector<ExpComplex> &Ref, floatexp blaSize, floatexp epsilon/*, JProgressBar progress*/, long divisor) 
+int	BLAS::initExp(std::vector<ExpComplex> &Ref, floatexp blaSize, floatexp epsilon/*, JProgressBar progress*/, long divisor)
     {
     int elements = elementsPerLevel[firstLevel];
     done = 0;
     for (int m = 0; m < elements; m++) 
 	{
+	if (AbortRequested())
+	    return -1;
+
 	if (bExp[firstLevel].size() <= m)
 	    break;
 	createLStepExp(firstLevel, m + 1, Ref, blaSize, epsilon/*, referenceDecompressor*/, &(bExp[firstLevel][m]));
 	}
+    return 0;
     }
 
 const BLAExp * BLAS::lookupExp(int m, floatexp z2, int iterations, int max_iterations) const
@@ -330,7 +288,14 @@ const BLAExp * BLAS::lookupExp(int m, floatexp z2, int iterations, int max_itera
     int ix = (m - 1) >> firstLevel;
     for (int level = firstLevel; level < L; ++level) 
 	{
-        int ixm = (ix << level) + 1;
+	if (AbortRequested())
+	    return nullptr;
+	if (level < 0 || level >= (int)b.size())
+	    return nullptr;
+	if (ix < 0 || ix >= (int)b[level].size())
+	    return nullptr;
+
+	int ixm = (ix << level) + 1;
 	floatexp z2m = bExp[level][ix].r2;
         if (m == ixm && z2 < z2m) 
 	    {

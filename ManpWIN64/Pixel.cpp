@@ -352,30 +352,30 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
 		tantable[i] = 0.0;
 	    }
 
-	InitTierazonFiltersDouble();
 	SetupDoubleJulia();
+	InitTierazonFiltersDouble();
 	if (InitFractal(&z, &q) < 0) return BLUE;
 	}
     else if (precision <= DDPRECISION)
 	{
 	if (cBig.x.BigDouble2DD(&cDD.x) < 0) return 0L;
 	if (cBig.y.BigDouble2DD(&cDD.y) < 0) return 0L;
-	InitTierazonFiltersDD();
 	SetupDDJulia();
+	InitTierazonFiltersDD();
 	DDInitFractal(&zDD, &qDD);
 	}
     else if (precision <= QDPRECISION)
 	{
 	if (cBig.x.BigDouble2QD(&cQD.x) < 0) return 0L;
 	if (cBig.y.BigDouble2QD(&cQD.y) < 0) return 0L;
-	InitTierazonFiltersQD();
 	SetupQDJulia();
+	InitTierazonFiltersQD();
 	QDInitFractal(&zQD, &qQD);
 	}
     else
 	{
-	InitTierazonFiltersBig();
 	SetupBigJulia();
+	InitTierazonFiltersBig();
 	if (BigInitFractal() < 0) return BLUE;
 	}
 

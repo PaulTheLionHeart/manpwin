@@ -7,7 +7,7 @@
 #include "Pixel.h"
 
 /**************************************************************************
-Symmetry plot setup x axis
+    Symmetry plot setup x axis
 **************************************************************************/
 
 int	CPixel::xsym_split(int xaxis_row, int xaxis_between/*, int *symmetry*/)
@@ -52,7 +52,7 @@ int	CPixel::xsym_split(int xaxis_row, int xaxis_between/*, int *symmetry*/)
     }
 
 /**************************************************************************
-Symmetry plot setup y axis
+    Symmetry plot setup y axis
 **************************************************************************/
 
 int	CPixel::ysym_split(int yaxis_col, int yaxis_between/*, int *symmetry*/)
@@ -353,9 +353,9 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
     return 0;
     }
 
-    /**************************************************************************
+/**************************************************************************
     Set up proper symmetrical plot functions
-    **************************************************************************/
+**************************************************************************/
 
 void	CPixel::setsymmetry(int sym, int uselist, BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[],
 	WORD degree, WORD type, int subtype, BYTE calcmode, int RotationAngle, CFract *Fractal, double hor, double vert, double mandel_width, double *xxmax, double *xxmin,

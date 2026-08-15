@@ -142,10 +142,6 @@ class CManp
 	std::vector<std::unique_ptr<CPerturbation>> PertCalculator;
 	std::vector<std::unique_ptr<CSlope>> Slope;
 	std::vector<int> SlopeProgress;
-
-	std::vector<BYTE> PixelThreadComplete;		// Restore to private once we get everything in CManp)
-	std::vector<BYTE> PertThreadComplete;
-	std::vector<BYTE> SlopeThreadComplete;
 	std::vector<float> wpixels {};			// an array of doubles holding slope modified iteration counts
 
 	ProcessType	OscAnimProc = STANDARD;
@@ -374,9 +370,9 @@ class CManp
 	int		time_to_load = 0;		// time to load file?
 	int		time_to_break = 0;		// time to break out of animation?
 
-	int		ThreadCreationDelay = 5;	// not sure if these are required
-	int		ThreadCompletionDelay = 2;
-	int		ThreadEndingDelay = 2;
+	int		ThreadCreationDelay = 0;	// not sure if these are required
+	int		ThreadCompletionDelay = 0;
+	int		ThreadEndingDelay = 0;
 	int		ThreadPertDelay = 0;		// if > 0, show pixel update in real time. Otherwise stay with screen update every second (faster)
 
     private:
@@ -385,7 +381,7 @@ class CManp
 	void	HandleReinitPhase(HWND hwnd, char* szSaveFileName);
 	void	HandleLoadPhase(HWND hwnd);
 	void	SetupBailoutDefaults();
-	int	InitPixelFractal();
+	int	InitPixelFractal(int NumberThreads);
 	void	SetupSpecialColourIndex(CTrueCol &TrueCol, long threshold, RGBTRIPLE SpecialColour, RGBTRIPLE &oldColour, int &SPECIALINDEX);
 	int	DoPixelFractal(HWND hwnd, int distestwidth, int threadCount);
 	void	RestoreSpecialColourSlot(CTrueCol &TrueCol, int SPECIALINDEX);

@@ -174,18 +174,33 @@ void BLAS::mergeOneStep(int m, int elementsSrc, int src, int dest, double blaSiz
 	}
     }
 
-// Add the clear method to free memory  
-void BLAS::clear() 
+// Invalidate the BLA and clear all table and build state.
+void BLAS::clear()
     {
+    isValid = false;
+
     data.clear();
     b.clear();
     bExp.clear();
-    isValid = false;
+    params.clear();
+    elementsPerLevel.clear();
+
+    M = 0;
+    L = 0;
+    LM1 = 0;
+    first = true;
+    firstLevel = 0;
+    returnL1 = false;
+
+    finalTotal = 0;
+    MaxIter = 0;
+    power = 2;
+    subtype = 0;
+    done = 0;
     }
 
 void BLAS::merge(double blaSize, long divisor) 
     {
-//        boolean useThreadsForBla = TaskRender.USE_THREADS_FOR_BLA;
     bool useThreadsForBla = false;
 
     int elementsDst = 0;
@@ -213,6 +228,8 @@ void BLAS::merge(double blaSize, long divisor)
 
 void BLAS::init(int M, std::vector<Complex> &Ref, double blaSize, int powerIn, int subtypeIn, long MaxIterIn, double param[])
     {
+    isValid = false;
+
     if (AbortRequested())
 	return;
     power = powerIn;
@@ -226,7 +243,6 @@ void BLAS::init(int M, std::vector<Complex> &Ref, double blaSize, int powerIn, i
     int BLA_STARTING_LEVEL = 4;
     double precision = 1 / ((double)(1L << BLA_BITS));
     firstLevel = BLA_STARTING_LEVEL - 1;
-    isValid = false;
 //    size_t  BLASize, BLASSize;    // a few little tests
 //    BLASize = sizeof(BLA);
 //    BLASSize = sizeof(BLAS);
@@ -270,10 +286,7 @@ void BLAS::init(int M, std::vector<Complex> &Ref, double blaSize, int powerIn, i
 	}
 
     returnL1 = firstLevel == 0;
-
-//    long divisor = finalTotal > Constants.MAX_PROGRESS_VALUE ? finalTotal / Constants.PROGRESS_SCALE : 1;
     long divisor = finalTotal > 0x7fffffff ? finalTotal / 10000 : 1;
-
     L = count;
     b.resize(count);
     LM1 = L - 1;
@@ -288,48 +301,13 @@ void BLAS::init(int M, std::vector<Complex> &Ref, double blaSize, int powerIn, i
 	b[l].resize(elementsPerLevel[l]);
 	}
 
-    init(Ref, blaSize, precision, divisor);
-
+    if (init(Ref, blaSize, precision, divisor) < 0)
+	return;
     merge(blaSize/*, progress*/, divisor);
-
-    size_t  SizeofB = sizeof(b) * b.size() * b[0].size();
-
-/*
-        for (int i = 0; i < L; ++i) {
-            std::ostringstream oss;
-            size_t ItemCount = b[i].size();
-            oss << "Level: " << i << " with " << ItemCount << " items ***************\n";
-//            oss << "l = " << b[i][0].getL(GetBLAL) << "\tr = " << sqrt(b[i][0].r2) << " \n";
-            debugPrint(oss.str());
-            if (ItemCount <= 10) {
-                for (int j = 0; j < ItemCount; j++) {
-                    std::ostringstream oss;
-                    oss << "b[" << i << "][" << j << "]: Ax=" << b[i][j].Ax << ", Ay=" << b[i][j].Ay << ", Bx=" << b[i][j].Bx << ", By=" << b[i][j].By << ", r2=" << b[i][j].r2 << ", l=" << b[i][j].l << "\n";
-                    debugPrint(oss.str());
-                    }
-                }
-            else {
-                for (int j = 0; j < 5; j++) {
-                    std::ostringstream oss;
-                    oss << "b[" << i << "][" << j << "]: Ax=" << b[i][j].Ax << ", Ay=" << b[i][j].Ay << ", Bx=" << b[i][j].Bx << ", By=" << b[i][j].By << ", r2=" << b[i][j].r2 << ", l=" << b[i][j].l << "\n";
-                    debugPrint(oss.str());
-                    }
-                for (int j = 0; j < 5; j++) {
-                    size_t ItemPtr = j + ItemCount - 5;
-                    std::ostringstream oss;
-                    oss << "b[" << i << "][" << ItemPtr << "]: Ax=" << b[i][ItemPtr].Ax << ", Ay=" << b[i][ItemPtr].Ay << ", Bx=" << b[i][ItemPtr].Bx << ", By=" << b[i][ItemPtr].By << ", r2=" << b[i][ItemPtr].r2 << ", l=" << b[i][ItemPtr].l << "\n";
-                    debugPrint(oss.str());
-                    }
-
-                }
-                
-//            oss << "l = " << b[i][0].getL(GetBLAL) << "\tr = " << sqrt(b[i][0].r2) << " \n";
-            }
-*/
     isValid = true;
     }
 
-void BLAS::init(std::vector<Complex> &Ref, double blaSize, double epsilon, long divisor) 
+int	BLAS::init(std::vector<Complex> &Ref, double blaSize, double epsilon, long divisor)
     {
     int elements = elementsPerLevel[firstLevel];
     // lots of thread stuff deleted for now
@@ -338,11 +316,12 @@ void BLAS::init(std::vector<Complex> &Ref, double blaSize, double epsilon, long 
     for (int m = 0; m < elements; m++) 
 	{
 	if (AbortRequested())
-	    return;
+	    return -1;
 	if (b[firstLevel].size() <= m)
 	    break;
 	createLStep(firstLevel, m + 1, Ref, blaSize, epsilon, &(b[firstLevel][m]));
 	}
+    return 0;
     }
 
 const BLA * BLAS::lookup(int m, double z2, int iterations, int max_iterations) const 
@@ -357,6 +336,10 @@ const BLA * BLAS::lookup(int m, double z2, int iterations, int max_iterations) c
     for (int level = firstLevel; level < L; ++level) 
 	{
 	if (AbortRequested())
+	    return nullptr;
+	if (level < 0 || level >= (int)b.size())
+	    return nullptr;
+	if (ix < 0 || ix >= (int)b[level].size())
 	    return nullptr;
 
         int ixm = (ix << level) + 1;

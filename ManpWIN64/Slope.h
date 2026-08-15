@@ -36,7 +36,6 @@ struct FwdDiffContext
     HWND hwnd;
     int NumThreads;
     char* StatusBarInfo;
-    bool* ThreadComplete;
 
     // --- fractal config ---
     int subtype;
@@ -81,11 +80,11 @@ class CSlope
 	CSlope();                     // default binds to global wpixels
 	CSlope(std::vector<float>&);  // explicit
 
-	int	RunSlopeDerivative(HWND GlobalHwnd, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtype, int NumThreads, int thread, Complex j, double mandel_width, double hor, double vert, 
+	int	RunSlopeDerivative(HWND GlobalHwnd, int user_data(HWND hwnd), char* StatusBarInfo, int subtype, int NumThreads, int thread, Complex j, double mandel_width, double hor, double vert, 
 								BYTE BigNumFlag, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
 								BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, int precision, double ColourSpeedIn, HANDLE ghMutex, std::vector<std::pair<int, int>> *pixelOrder,
 								std::atomic<int> *workIndex, int totalPixels);
-	int	RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, 
+	int	RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, 
 								BYTE BigNumFlag, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
 								std::vector <float> *wpixels, BYTE juliaflag, int xdots, int ydots, int width, WORD *degreeIn, int precision, double ColourSpeedIn, std::vector<std::pair<int, int>> *pixelOrder,
 								std::atomic<int> *workIndex, int totalPixels);

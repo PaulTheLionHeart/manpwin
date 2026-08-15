@@ -137,7 +137,7 @@ void	    CSlope::Create2DVector(Complex *v, double LightAngle)
 	Slope Fractal
 **************************************************************************/
 
-int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, 
+int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, 
 					    double vert, BYTE BigNumFlag, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
 					    BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, int precisionIn, double ColourSpeedIn, HANDLE ghMutex, std::vector<std::pair<int, int>> *pixelOrder,
 					    std::atomic<int> *workIndex, int totalPixels)
@@ -178,9 +178,7 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 
     Create2DVector(&v, LightAngle);
 
-    long TotalPixels = (long)xdots * ydots;
-    *ThreadComplete = false;
-
+    long	TotalPixels = (long)xdots * ydots;
     double	temp_x, temp_y;
     double	ScreenRatio = (double) xdots / (double) ydots;
 
@@ -343,7 +341,6 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 		return 0;
 	    if (EndSlope)		// program is trying to terminate. Better get out of the thread
 		{
-		*ThreadComplete = true;
 		return -1;
 		}
 	    if (AbortRequested())
@@ -406,7 +403,6 @@ int CSlope::RunSlopeDerivative(HWND hwndIn, int user_data(HWND hwnd), char* Stat
 	    gPixelsDone.fetch_add(1, std::memory_order_relaxed);
 	    }
 	}
-	*ThreadComplete = true;
-	return 0;
+    return 0;
     }
 

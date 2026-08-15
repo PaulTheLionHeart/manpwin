@@ -112,8 +112,7 @@ int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTr
 		FloatIteration = 0;
 	    value = static_cast<float>(FloatIteration);
 	    }
-	SlopeIndex = (((DWORD)Dib->DibHeight - 1 - y) * (DWORD)Dib->DibWidth) + (DWORD)x/* + xStart*/;
-//	if (x >= 0 && x < Dib->DibWidth - 1 && y >= 0 && y < Dib->DibHeight - 1 && wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)
+	SlopeIndex = (((DWORD)Dib->DibHeight - 1 - y) * (DWORD)Dib->DibWidth) + (DWORD)x;
 	if (x < Dib->DibWidth && y < Dib->DibHeight && !gStopRequested)
 	    gManp->wpixels[SlopeIndex] = value;
 	}
@@ -281,7 +280,8 @@ int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, i
     CPotential	Pot;
 
     Plot.InitPlot(MaxIteration, &TrueCol, &gManp->wpixels, xdots, height, xdots, height, Dib->BitsPerPixel, Dib, USEPALETTE);
-    if (gManp->wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)	// it's not Null, so we must have initialsed it for fwd diff slope
+    size_t requiredPixels = (size_t)Dib->DibWidth * (size_t)Dib->DibHeight;
+    if (gManp->wpixels.size() >= requiredPixels)			// it's not Null, so we must have initialsed it for fwd diff slope
 	{
 	if (iteration < MaxIteration)
 	    {
@@ -294,10 +294,11 @@ int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, i
 	    }
 	else
 	    FloatIteration = MaxIteration;
-	SlopeIndex = (((DWORD)Dib->DibHeight - 1 - y) * (DWORD)xdots) + (DWORD)x/* + xStart*/;
+	SlopeIndex = (((DWORD)Dib->DibHeight - 1 - y) * (DWORD)xdots) + (DWORD)x;
 	if (AbortRequested())
 	    return -1;
-	if (x >= 0 && x < Dib->DibWidth - 1 && y >= 0 && y < Dib->DibHeight - 1 && gManp->wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)
+
+	if (x >= 0 && x < Dib->DibWidth && y >= 0 && y < Dib->DibHeight && !gStopRequested && gManp->wpixels.size() >= requiredPixels)
 	    gManp->wpixels[SlopeIndex] = (float)FloatIteration;
 	}
 
@@ -326,24 +327,26 @@ int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, i
 //			index = iteration % 256;
 		    index = iteration % TrueCol.ColoursInPALFile;
 		break;
-	    case PERT1:						// something Shirom Makkad added
+	    case PERT1:
 		if (iteration == MaxIteration)
 		    index = MaxIteration;
 		else
 		    {
-		    ZCoordinateMagnitudeSquared = ExpZCoordinateMagnitudeSquared.todouble();
-		    index = (int)((iteration - log2(log2(ZCoordinateMagnitudeSquared))) * 5) % 256; //Get the index of the color array that we are going to read from.
+		    double magnitudeSquared = ExpW.CSumSqr();
+		    index = (int)((iteration - log2(log2(magnitudeSquared))) * 5) % 256;
 		    }
 		break;
-	    case PERT2:						// something Shirom Makkad added
+
+	    case PERT2:
 		if (iteration == MaxIteration)
 		    index = MaxIteration;
 		else
 		    {
-		    ZCoordinateMagnitudeSquared = ExpZCoordinateMagnitudeSquared.todouble();
-		    index = (int)(iteration - (log(0.5*(ZCoordinateMagnitudeSquared)) - log(0.5*log(256))) / log(2)) % 256;
+		    double magnitudeSquared = ExpW.CSumSqr();
+		    index = (int)(iteration - (log(0.5 * magnitudeSquared) - log(0.5 * log(256))) / log(2)) % 256;
 		    }
 		break;
+
 	    case ZMAG:
 		if (iteration == MaxIteration)			// Zmag
 		    index = (int)((ExpW.CSumSqr()) * (MaxIteration >> 1) + 1);

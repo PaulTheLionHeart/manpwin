@@ -262,7 +262,6 @@ int RunSlopeFwdDiffT(int user_data(HWND), Complex j, TReal mandel_width, TReal h
     ygap = temp_y * mandel_width;
 
     int totalPixels = (int)ctx.pixelOrder->size();
-    *ctx.ThreadComplete = false;
 
     PlotMode mode = currentMode;
     int chunk = (currentMode == PlotMode::Tile) ? 1024 : CHUNK_SIZE;
@@ -431,7 +430,6 @@ int RunSlopeFwdDiffT(int user_data(HWND), Complex j, TReal mandel_width, TReal h
 	    }
 	}
 
-    *ctx.ThreadComplete = true;
     return 0;
     }
 

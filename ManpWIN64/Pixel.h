@@ -132,7 +132,7 @@ class CPixel
 	void	InitViewport(double horIn, double vertIn, double mandel_widthIn, BigDouble BigHorIn, BigDouble BigVertIn, BigDouble BigWidthIn, double ScreenRatioIn,
 		int xdotsIn, int ydotsIn, int RotationAngleIn, Complex RotationCentreIn, Complex jIn);
 	void	InitArithmetic(BYTE BigNumFlagIn, int precisionIn);
-	void	InitRendering(/*std::vector <float> *wpixelsIn, */CDib *DibIn, int widthIn, int PlotTypeIn, CTrueCol *TrueColIn, int colorsIn, BOOL UseCurrentPaletteIn, int *AutoStereo_valueIn, int *symmetryIn);
+	void	InitRendering(CDib *DibIn, int widthIn, int PlotTypeIn, CTrueCol *TrueColIn, int colorsIn, BOOL UseCurrentPaletteIn, int *AutoStereo_valueIn, int *symmetryIn);
 	void	GeneralInit();
 	void	InitBailout();
 	void	InitRuntimeControl(int *time_to_zoomIn, int *time_to_restartIn, int *time_to_reinitIn, int *time_to_quitIn, int *blockindexIn, int *totpassesIn, int *curpassIn);
@@ -144,7 +144,7 @@ class CPixel
 	void	InitLightingAndBumpMapping(double bump_transfer_factorIn, double lightDirectionDegreesIn, double bumpMappingDepthIn, double bumpMappingStrengthIn);
 
 	int 	GetArithType();
-	int	PerformWorklist(int NumberThreads, int ThreadNum, BYTE *ThreadComplete, HANDLE *ghMutex, int SPECIALINDEXIn, int user_data(HWND hwnd));
+	int	PerformWorklist(int NumberThreads, int ThreadNum, HANDLE *ghMutex, int SPECIALINDEXIn, int user_data(HWND hwnd));
 	void	PixelIsExiting(void);
 	RGBTRIPLE GetSmoothedColour(double fIter, double color_speed, CTrueCol &TrueCol, CPlot *Plot);
 //	void	PlotPixelWithFlags(int x, int y, long colourIndex);

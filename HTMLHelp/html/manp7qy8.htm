@@ -95,15 +95,55 @@ improvements to performance, precision, and fractal exploration capabilities.
 
 <h2>Latest Release (August 2026)</h2>
 
-<h2>ManpWIN 4.03e</h2>
+<h2>ManpWIN 4.04</h2>
+
+<p>
+ManpWIN 4.04 is a stability and internal architecture update focused on
+multi-threaded rendering reliability, pixel rendering lifecycle management,
+perturbation filtering, and general rendering consistency.
+</p>
+
+<h3>Recent Improvements</h3>
+
+<ul>
+
+<li>Fixed double-double and quad-double trigonometric function issues that affected some Tierazon fractals.</li>
+
+<li>Fixed 3D rendering in both perturbation and pixel modes by correcting the effective thread count used during rendering.</li>
+
+<li>Improved multi-threaded pixel rendering startup and shutdown reliability.</li>
+
+<li>Fixed unsafe partial thread startup handling when worker creation or memory allocation fails.</li>
+
+<li>Removed obsolete thread-completion flags and now use worker thread handles directly for reliable completion detection.</li>
+
+<li>Applied the same thread-completion simplification to perturbation and slope rendering.</li>
+
+<li>Fixed a long-standing issue where changing the configured thread count during an active render could be overwritten when the previous render finished.</li>
+
+<li>Improved worker strip ownership and symmetry handling during multi-threaded pixel rendering.</li>
+
+<li>Fixed Tierazon filter initialisation ordering that could cause visible seams between multi-threaded rendering strips.</li>
+
+<li>Corrected Tierazon filtering in perturbation rendering so filter processing begins at the correct orbit iteration.</li>
+
+<li>Improved perturbation Tierazon filter coordinate initialisation.</li>
+
+<li>Audited and simplified CPixel initialisation, arithmetic setup, worklist handling, symmetry processing, and thread lifecycle management.</li>
+
+<li>General internal cleanup and stability improvements.</li>
+
+</ul>
+
+<h2>Previous Releases</h2>
+
+<p><b>ManpWIN 4.03e</b></p>
 
 <p>
 ManpWIN 4.03e is a maintenance and stability update focused on improving
 perturbation rendering, deep-zoom reliability, Kalles Fraktaler compatibility,
 and fractal metadata handling.
 </p>
-
-<h3>Recent Improvements</h3>
 
 <ul>
 
@@ -123,9 +163,7 @@ and fractal metadata handling.
 
 </ul>
 
-<h2>Previous Releases</h2>
-
-</ul><p><b>ManpWIN 4.0d</b></p>
+</ul><p><b>ManpWIN 4.03d</b></p>
 
 <p>
 ManpWIN 4.03d is a maintenance and stability update focused on improving
@@ -359,7 +397,7 @@ A detailed development history is maintained by the project owner and can be pro
 <hr>
 
 <footer>
-  ManpWIN Help &copy; June 2026
+  ManpWIN Help &copy; August 2026
 </footer>
 </body>
 </html>

@@ -23,6 +23,9 @@ int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> 
     {
     int iterations = 0;
     int RefIteration = iterations;
+    const int frameMaxIter = MaxIteration;
+    const size_t refSize = XSubN->size();
+    if (refSize <= 0) return frameMaxIter;
 
     Complex DeltaSubN = 0.0; //0
     Complex w, dz, d0, temp1;
@@ -40,7 +43,13 @@ int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> 
 	}
 
     if (OutsideMethod >= TIERAZONFILTERS)
-	TZfilter.LoadFilterQ(DeltaSub0);		// initialise the constants used by Tierazon filters
+	{
+	Complex FilterQ;
+
+	FilterQ.x = BigCentreX.BigDoubleToDouble() + DeltaSub0.x;
+	FilterQ.y = BigCentreY.BigDoubleToDouble() + DeltaSub0.y;
+	TZfilter.LoadFilterQ(FilterQ);			// initialise the constants used by Tierazon filters
+	}
 
     dz = DeltaSubN;
     d0 = DeltaSub0;
@@ -64,16 +73,20 @@ int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> 
 	    CalculateDerivativeSlope(dc, z);
 	    }
 
+	if ((size_t)RefIteration >= refSize)
+	    return frameMaxIter;
 	temp1 = (*XSubN)[RefIteration];
 	PertFunctions(&temp1, &dz, &d0);
 	RefIteration++;
 	if (MaxIteration > 1 && RefIteration < MaxIteration) 
 	    {
+	    if ((size_t)RefIteration >= refSize)
+		return frameMaxIter;
 	    temp1 = (*XSubN)[RefIteration];
 	    z = temp1 + dz;
 	    }
 
-	if (OutsideMethod >= TIERAZONFILTERS)
+	if (OutsideMethod >= TIERAZONFILTERS && iterations > 0)
 	    {
 	    Complex Z = z;
 	    TZfilter.DoTierazonFilter(Z, (long *)&iterations);
@@ -131,6 +144,8 @@ int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> 
 			dc = A * dc + B;   // Uses your existing Complex ops
 			}
 
+		    if ((size_t)RefIteration >= refSize)
+			return frameMaxIter;
 		    temp1 = (*XSubN)[RefIteration];
 		    z = temp1 + dz;
 		    DeltaNormSquared = dz.CSumSqr();
@@ -159,7 +174,7 @@ int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> 
 // Individual point calculation - with BLA - Exp
 //////////////////////////////////////////////////////////////////////
 
-int	CPerturbation::iterateFractalWithPerturbationBLAExp(const std::vector<ExpComplex> *XSubN, int MaxIteration, double bailout, ExpComplex& DeltaSub0, const BLAS *Bla, /*CTZfilter &TZfilter, */ExpComplex &z, ExpComplex &dc, int user_data(HWND hwnd))
+int	CPerturbation::iterateFractalWithPerturbationBLAExp(const std::vector<ExpComplex> *XSubN, int MaxIteration, double bailout, ExpComplex& DeltaSub0, const BLAS *Bla, ExpComplex &z, ExpComplex &dc, int user_data(HWND hwnd))
     {
     const int frameMaxIter = MaxIteration;
     const size_t refSize = XSubN->size();
@@ -183,7 +198,8 @@ int	CPerturbation::iterateFractalWithPerturbationBLAExp(const std::vector<ExpCom
 	min_orbit = 100000.0;
 	}
 
-    if (OutsideMethod >= TIERAZONFILTERS) {
+    if (OutsideMethod >= TIERAZONFILTERS) 
+	{
 	Complex tempComplex;
 	tempComplex.x = z.x.todouble();
 	tempComplex.y = z.y.todouble();
@@ -218,15 +234,15 @@ int	CPerturbation::iterateFractalWithPerturbationBLAExp(const std::vector<ExpCom
 
 	// perturbation iteration
        // Guard for BigPertFunctions usage
-	if ((size_t)RefIteration >= refSize)		    // <<<
-	    return frameMaxIter;                            // <<<
+	if ((size_t)RefIteration >= refSize)
+	    return frameMaxIter;
 	temp1 = (*XSubN)[RefIteration];
 	BigPertFunctions(&temp1, &dz, &d0);
 	RefIteration++;
 	if (MaxIteration > 1 && RefIteration < MaxIteration)
 	    {
-	    if ((size_t)RefIteration >= refSize)           // <<<
-		return frameMaxIter;                        // <<<
+	    if ((size_t)RefIteration >= refSize)
+		return frameMaxIter; 
 	    temp1 = (*XSubN)[RefIteration];
 	    z = temp1 + dz;
 	    }
@@ -291,11 +307,13 @@ int	CPerturbation::iterateFractalWithPerturbationBLAExp(const std::vector<ExpCom
 			}
 
 		    // Recompose z from reference + delta
+		    if ((size_t)RefIteration >= refSize)
+			return frameMaxIter;
 		    z = (*XSubN)[RefIteration];
 		    z += dz;
 			
-		    if ((size_t)RefIteration >= refSize)                 // <<<
-			return frameMaxIter;                              // <<<
+		    if ((size_t)RefIteration >= refSize)
+			return frameMaxIter;
 		    temp1 = (*XSubN)[RefIteration];
 		    z = temp1 + dz;
 		    ExpDeltaNormSquared = dz.CSumSqrExp(); // update for next loop

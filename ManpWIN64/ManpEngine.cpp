@@ -13,7 +13,7 @@
 	General escape-time engine 
 **************************************************************************/
 
-int	CPixel::PerformWorklist(int NumberThreadsIn, int ThreadNumber, BYTE *ThreadComplete, HANDLE *ghMutexIn, int SPECIALINDEXIn, int user_data(HWND hwnd))
+int	CPixel::PerformWorklist(int NumberThreadsIn, int ThreadNumber, HANDLE *ghMutexIn, int SPECIALINDEXIn, int user_data(HWND hwnd))
     {
     int		StripWidth;
 
@@ -23,7 +23,6 @@ int	CPixel::PerformWorklist(int NumberThreadsIn, int ThreadNumber, BYTE *ThreadC
     multiThreaded = (NumberThreads > 1);
     int	flags = USEPALETTE + ((calcmode != 'F' && type != PERTURBATION && type != SLOPEFORWARDDIFF) ? USEWPIXELS : 0);
     Plot.InitPlot(threshold, TrueCol, &gManp->wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, flags);
-    *ThreadComplete = false;
     if (RotationAngle != NORMAL && RotationAngle != 90 && RotationAngle != 180 && RotationAngle != 270)
 	{
 	double  z_rot = (double)RotationAngle;
@@ -51,7 +50,6 @@ int	CPixel::PerformWorklist(int NumberThreadsIn, int ThreadNumber, BYTE *ThreadC
 	return -1;
     if (juliaflag && ShowOrbits)
 	plot_orbits(OrbitColour, NUM_ORBITS);
-    *ThreadComplete = true;
     return 0;
     }
 
@@ -82,20 +80,19 @@ int	CPixel::RunThread(HWND hwnd, int ThreadNumberIn, int StripWidthIn, CSlope *S
 	}
 
     StripWidth = StripWidthIn;
-    if (!num_worklist)					// no worklist from saved file
-	{						// default setup a new worklist
-	iystart = ixstart = yystart = xxstart = yybegin = 0;
-	ixstart = xxstart = xStart;
-	iystop = yystop = ydots - 1;
-	ixstop = xxstop = xEnd - 1;
-	num_worklist = 1;
-	workpass = 0;
-	worklist[0].xxstart = xStart;
-	worklist[0].xxstop = xEnd - 1;
-	worklist[0].yystart = worklist[0].yybegin = 0;
-	worklist[0].yystop = ydots - 1;
-	worklist[0].pass = worklist[0].sym = 0;
-	}
+
+    // default setup a new worklist
+    iystart = ixstart = yystart = xxstart = yybegin = 0;
+    ixstart = xxstart = xStart;
+    iystop = yystop = ydots - 1;
+    ixstop = xxstop = xEnd - 1;
+    num_worklist = 1;
+    workpass = 0;
+    worklist[0].xxstart = xStart;
+    worklist[0].xxstop = xEnd - 1;
+    worklist[0].yystart = worklist[0].yybegin = 0;
+    worklist[0].yystop = ydots - 1;
+    worklist[0].pass = worklist[0].sym = 0;
 
     while (num_worklist > 0)
 	{						// pull top entry off worklist

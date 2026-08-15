@@ -148,17 +148,13 @@ void	CPlot::PlotPoint(WORD x, WORD y, DWORD colour)
     if (AbortRequested())
 	return;
 
-    assert(wpixels != nullptr);
-    static int oobCount = 0;
     if (x >= width || y >= height)
 	{
-	if (oobCount < 10)
-	    OutputDebugStringA("PlotPoint OOB\n");
-	oobCount++;
+#ifdef _DEBUG
+	OutputDebugStringA("PlotPoint OOB\n");
+#endif
+	return;
 	}
-
-    if (x >= width)  x = width - 1;
-    if (y >= height) y = height - 1;
     if (Dib->DibPixels.empty())
 	{
 #ifdef _DEBUG
@@ -197,16 +193,17 @@ void	CPlot::PlotPoint(WORD x, WORD y, DWORD colour)
 
 	if (flags & USEWPIXELS)
 	    {
-	    if (x < width && y < ydots) 
+	    if (wpixels == nullptr)
+		return;
+
+	    if (x < width && y < ydots)
 		{
 		const size_t idx = (size_t)y * (size_t)width + (size_t)x;
+
 		if (idx < wpixels->size())
-		    {
-		    if (wpixels)
-			(*wpixels)[idx] = (float)colour;
-		    }
+		    (*wpixels)[idx] = (float)colour;
 		else
-		    return; // or debug message
+		    return;
 		}
 	    }
 	}
@@ -218,15 +215,6 @@ void	CPlot::PlotPoint(WORD x, WORD y, DWORD colour)
 	    return;
 	memcpy(Dib->DibPixels.data() + offset, &colour, 3);
 	}
-#ifdef _DEBUG
-    if (oobCount > 1)
-	{
-	char buf[128];
-	sprintf_s(buf, "Total OOB pixels: %d\n", oobCount);
-	OutputDebugStringA(buf);
-	oobCount = 0;
-	}
-#endif // _DEBUG
     }
 
 /**************************************************************************
@@ -557,10 +545,6 @@ int	CPlot::Display3DCircle(CDib *Dib3D, int centrex, int centrey, int radius, BY
 
 void	CPlot::FilterPoint(WORD x, WORD y, DWORD colour, RGBTRIPLE *FilterRGB)	// 
     {
-    const size_t widthBytes = ComputeWidthBytes((DWORD)xdots, (DWORD)Dib->BitsPerPixel);
-    const size_t address = widthBytes * (size_t)(ydots - y - 1);
-    const size_t dibOffset = address + ((size_t)x * 3u);
-
     assert(wpixels != nullptr);
     if (AbortRequested())
 	return;
@@ -576,6 +560,10 @@ void	CPlot::FilterPoint(WORD x, WORD y, DWORD colour, RGBTRIPLE *FilterRGB)	//
 
     if (Dib->BitsPerPixel != 24)
 	return;
+
+    const size_t widthBytes = ComputeWidthBytes((DWORD)xdots, (DWORD)Dib->BitsPerPixel);
+    const size_t address = widthBytes * (size_t)(ydots - y - 1);
+    const size_t dibOffset = address + ((size_t)x * 3u);
 
     if (dibOffset + 3u > Dib->DibPixels.size())
 	{

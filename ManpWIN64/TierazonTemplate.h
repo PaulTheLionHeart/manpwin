@@ -1978,6 +1978,8 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    zd = *z - *z2;
 	    return DoBailout(bailout_type, &zd, rqlim);
 
+	// Some Tierazon formulas require an earlier DD->QD transition because of their numerical sensitivity. 
+	// However, this fractal isn't particcularly interesting and doesn't really need QD
 	case 120:					// Flarium 07, Polynomial: z = (z*z+c)^(cn+c)
 	    z1 = *z;
 	    *z = (*z * *z + *q) ^ (*z2 + *q);
@@ -2445,6 +2447,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    return (d < MINSIZE);
 
 	case 174:					// Flarium 118, Sharon Webb: z = (z*z*z*z*z).csin() + c; [Sharon19]
+	    z1 = *z;
 	    t = z->CCube()*z->CSqr();
 	    *z = t.CSin() + *q;
 	    zd = *z - z1;

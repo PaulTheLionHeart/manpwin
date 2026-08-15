@@ -20,6 +20,11 @@ void	CPixel::init3d(int xdots, int ydots, double x_rot, double y_rot, double z_r
     {
     CMatrix Mat;
 
+    this->xdots = xdots;
+    this->ydots = ydots;
+
+    Plot.InitPlot(threshold, TrueCol, &gManp->wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE);
+
 //    Plot.InitPlot(threshold, TrueCol, wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE + USEWPIXELS);
     oldline.clear();
     oldline.resize(xdots);

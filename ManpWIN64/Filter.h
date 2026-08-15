@@ -47,14 +47,14 @@ class CTZfilter
 
 	double	pXTemp[MAXTEMP], pYTemp[MAXTEMP];		// Data array pointers
 	double	temp;
-	double	dStrands_LO, dStrands_HI, zsav, xtot, ytot, ztot, xavg, xdif, yavg, ydif, zavg, zdif, limit;
+	double	dStrands_LO, dStrands_HI, zsav = 0.0, xtot, ytot, ztot, xavg, xdif, yavg, ydif, zavg, zdif, limit;
 	double	d_real, d_imag;
 	long	iteration_x, iteration_y, iteration_z;
 	double	d_color_x = 0, d_color_y = 0, d_color_z = 0;
 	int	n_color_x = 0, n_color_y = 0, n_color_z = 0;
 	double	dsx, dsy, dStrands_LO_cx, dStrands_HI_cx, dStrands_cxd, dStrands_cyd;
 
-	int	ColourOffset, size_x, size_y, j, d, px, py, nUsingBuffers;
+	int	j, d;
 	double	ssq1;
 	double	dStrands_df, limit_cxd, limit_cyd, b;
 	double	dStrands_LO_cy, dStrands_HI_cy, dif_test, m_lower, m_upper, dt;

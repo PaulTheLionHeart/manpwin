@@ -159,20 +159,30 @@ std::vector<std::pair<int, int>> CPlotMode::generateTesseral(int w, int h) {
 // ----------------------------------------------------
 // Progressive Refinement generator
 // ----------------------------------------------------
-std::vector<std::pair<int, int>> CPlotMode::generateProgressive(int w, int h) {
+std::vector<std::pair<int, int>> CPlotMode::generateProgressive(int w, int h)
+    {
     std::vector<std::pair<int, int>> pixelOrder;
-    pixelOrder.reserve(w * h);
+    pixelOrder.reserve((size_t)w * h);
 
-    for (int step = 16; step >= 1; step /= 2) 
-	{ // coarse to fine
-        for (int y = 0; y < h; y += step) 
+    std::vector<char> seen((size_t)w * h, 0);
+
+    for (int step = 16; step >= 1; step /= 2)
+	{
+	for (int y = 0; y < h; y += step)
 	    {
-            for (int x = 0; x < w; x += step) 
+	    for (int x = 0; x < w; x += step)
 		{
-		pixelOrder.emplace_back(x, h - 1 - y);
-                }
-            }
-        }
+		int idx = y * w + x;
+
+		if (!seen[idx])
+		    {
+		    seen[idx] = 1;
+		    pixelOrder.emplace_back(x, h - 1 - y);
+		    }
+		}
+	    }
+	}
+
     return pixelOrder;
     }
 

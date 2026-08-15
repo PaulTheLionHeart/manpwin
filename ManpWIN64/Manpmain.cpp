@@ -45,8 +45,6 @@ extern	int	ReplyUsingDIB;			// 2 for Device Context, 1 for DIB/WM_COPYDATA and 0
 
 extern	int	ThreadCompletionDelay;
 extern	int	ThreadEndingDelay;
-extern	std::vector<BYTE>   SlopeThreadComplete;
-
 extern	std::atomic<bool> gStopRequested;	// force early exit
 
 int		fdin;				// FILE descripter

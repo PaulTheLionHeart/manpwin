@@ -1,52 +1,52 @@
 # ManpWIN
 
-ManpWIN is a Windows fractal exploration and rendering application featuring advanced Mandelbrot and related fractal techniques including perturbation, BLA acceleration, slope shading, and a multithreaded formula parser.
-
-This repository contains a fully reproducible CMake-based build system supporting consistent Debug and Release builds with Visual Studio 2022.
-
 ManpWIN is a Windows fractal exploration and rendering application featuring advanced Mandelbrot and related fractal techniques including perturbation theory, optional Bilinear Approximation (BLA) acceleration, high-precision arithmetic, slope rendering, and a multithreaded formula parser.
 
 The project combines decades of fractal development with a modern CMake-based build system, providing a powerful platform for both visual exploration and mathematical research into deep-zoom fractals and experimental formulae.
 
----
-
-## Version 4.03e
-
-Maintenance and stability release focused on improving perturbation rendering,
-deep-zoom reliability, Kalles Fraktaler compatibility, and fractal metadata
-handling.
+This repository contains a fully reproducible CMake-based build system supporting consistent Debug and Release builds with Visual Studio 2022.
 
 ---
 
-## Recent Improvements (4.03e)
+## Version 4.04
 
-### Perturbation and Deep Zoom
+ManpWIN 4.04 is a stability and architecture update focused on multithreaded rendering reliability, numerical correctness, 3D rendering, Tierazon compatibility, and pixel rendering lifecycle management.
 
-* Improved perturbation reference generation and rebasing during extremely deep zooms
-* Improved reference orbit stability near the Mandelbrot set boundary around -2.0
-* Reduced perturbation artefacts during very deep zoom rendering
-* Improved overall robustness of perturbation rendering
+---
 
-### Kalles Fraktaler Compatibility
+## Recent Improvements (4.04)
 
-* Fixed reading and writing of smoothing values in `.KFR` files
+### Multi-threading and Rendering
 
-### Fractal Metadata
+* Fixed unsafe partial thread startup handling when worker creation or memory allocation fails
+* Replaced obsolete worker-completion flags with direct thread-handle completion checking
+* Simplified completion handling across pixel, perturbation, and slope rendering
+* Fixed 3D rendering in both pixel and perturbation modes by correcting the effective number of rendering threads
+* Improved CPixel worker ownership, symmetry handling, worklist processing, and render lifecycle management
 
-* Improved metadata rebuilding for derivative-based, Tierazon, and Mandelbrot derivative fractals
-* Parameter dialogue boxes now consistently reflect the current fractal settings
+### Numerical Stability
+
+* Fixed double-double and quad-double trigonometric function issues affecting some Tierazon fractals
+* Improved arithmetic consistency across DD and QD rendering paths
+
+### Tierazon and Perturbation
+
+* Fixed Tierazon filter initialisation ordering that could produce visible seams between multithreaded rendering strips
+* Corrected Tierazon filtering in perturbation rendering so filtering begins at the correct orbit iteration
+* Improved Tierazon filter coordinate initialisation in perturbation mode
 
 ### General Stability
 
-* Numerous internal stability improvements and code maintenance
+* Audited and simplified CPixel initialisation and arithmetic setup
+* Removed obsolete thread-completion state and redundant waiting logic
+* General internal cleanup and stability improvements
 
 ---
 
 ## ✨ Features
 
 * Mandelbrot and related fractals
-* * Extreme deep-zoom rendering using perturbation theory, with optional BLA acceleration for improved performance
-* Optional Bilinear Approximation (BLA) acceleration for faster perturbation rendering
+* Extreme deep-zoom rendering using perturbation theory, with optional Bilinear Approximation (BLA) acceleration for improved performance
 * Multithreaded rendering engine
 * Multithreaded formula parser
 * Slope derivative rendering modes
@@ -250,6 +250,10 @@ A chronological record of major battles during the ManpWIN modernisation.
 - 🧩 Hidden missing `else` — restored correct rebasing when BLA is disabled
 - 🌊 KFR smoothing restored — preserved smoothing values when reading and writing `.KFR` files
 - 📋 Metadata consistency — parameter dialogues now correctly rebuild fractal metadata across all new fractal families
+- 🧮 DD/QD trig repair — fixed transcendental arithmetic issues affecting Tierazon fractals
+- 🧊 3D rendering restored — corrected effective thread handling in pixel and perturbation modes
+- 🧵 Thread lifecycle cleanup — removed completion races and simplified worker startup/shutdown handling
+- 🐉 CPixel audit — verified strip ownership, symmetry, worklists, arithmetic initialisation, and rendering lifecycle
 
 ---
 

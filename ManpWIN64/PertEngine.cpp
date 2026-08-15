@@ -27,11 +27,10 @@ extern	std::atomic<long> gPixelsDone;
 extern	void	ShowBignum(BigDouble x, char *Location);
 
 // constructors
-CPerturbation::CPerturbation()
-    {}
+CPerturbation::CPerturbation() = default;
 
-CPerturbation::CPerturbation(std::vector<float>& wp)
-    {}
+//CPerturbation::CPerturbation(std::vector<float>& wp)
+//    {}
 
 void CPerturbation::AttachSharedTables(const std::vector<Complex>* xs, const std::vector<ExpComplex>* exs, const BLAS* bla)
     {
@@ -44,29 +43,28 @@ void CPerturbation::AttachSharedTables(const std::vector<Complex>* xs, const std
 // Initialisation
 //////////////////////////////////////////////////////////////////////
 
-int CPerturbation::initialiseCalculateFrame(CDib *DibIn, /*CSlope *Slope, */int xStartIn, int xEndIn, int HeightIn, int threshold, BigDouble BigCentreXin, BigDouble BigCentreYin, BigDouble BigWidthIn, int decimals, int OutsideMethodIn, int InsideMethodIn,
-		HWND hwndIn, int ThreadIn, /*std::vector<float> &wpixelsIn, */double paramIn[], double potparamIn[], int PaletteShiftIn, int *PlotTypeIn, int SlopeTypeIn, double lightDirectionDegreesIn, double bumpMappingDepthIn,
+int CPerturbation::initialiseCalculateFrame(CDib *DibIn, int HeightIn, int threshold, BigDouble BigCentreXin, BigDouble BigCentreYin, BigDouble BigWidthIn, int decimals, int OutsideMethodIn, int InsideMethodIn,
+		HWND hwndIn, int ThreadIn, double paramIn[], double potparamIn[], int PaletteShiftIn, int *PlotTypeIn, int SlopeTypeIn, double lightDirectionDegreesIn, double bumpMappingDepthIn,
 		double bumpMappingStrengthIn, int PaletteStartIn, double LightHeightIn, int PertColourMethodIn,	int PalOffsetIn, double IterDivIn, bool EnableApproximationIn, BYTE _3dflagIn, double ColourSpeedIn, int NumberThreadsIn)
     {
     Complex q;
     int	    i;
 
-    int bitcount = decimals * SAFETYMARGIN;
+    // compute your desired bitcount from the incoming 'decimals'
+    mpfr_prec_t bitcount = decimals * SAFETYMARGIN;
+
     if (bitcount < 30)
 	bitcount = 30;
+
     if (bitcount > SIZEOF_BF_VARS - 10)
 	bitcount = SIZEOF_BF_VARS - 10;
-    precision = decimals - PRECISION_FACTOR;
 
     mpfr_set_default_prec(bitcount);
 
-    // compute your desired bitcount from the incoming 'decimals'
-    mpfr_prec_t p = std::max<mpfr_prec_t>(30, decimals * SAFETYMARGIN);
-
     // ensure member mpfr_t's have enough precision BEFORE assignment
-    mpfr_prec_round(BigCentreX.x, p, MPFR_RNDN);
-    mpfr_prec_round(BigCentreY.x, p, MPFR_RNDN);
-    mpfr_prec_round(BigWidth.x, p, MPFR_RNDN);
+    mpfr_prec_round(BigCentreX.x, bitcount, MPFR_RNDN);
+    mpfr_prec_round(BigCentreY.x, bitcount, MPFR_RNDN);
+    mpfr_prec_round(BigWidth.x, bitcount, MPFR_RNDN);
 
     // now do the copies — no truncation
     BigCentreX = BigCentreXin;
@@ -101,7 +99,6 @@ int CPerturbation::initialiseCalculateFrame(CDib *DibIn, /*CSlope *Slope, */int 
     PertColourMethod = PertColourMethodIn;
     PalOffset = PalOffsetIn;
     IterDiv = IterDivIn;
-    gStopRequested = false; // NEW: reset flag before starting threads
 
     if (gManp->OutsideMethod >= TIERAZONFILTERS)
 	TZfilter.InitFilter(gManp->OutsideMethod, gManp->threshold, gManp->dStrands, gManp->nFDOption, gManp->UseCurrentPalette);
@@ -114,13 +111,19 @@ int CPerturbation::initialiseCalculateFrame(CDib *DibIn, /*CSlope *Slope, */int 
 //////////////////////////////////////////////////////////////////////
 
 int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int powerin, int InsideMethodIn, int OutsideMethodIn, int biomorphin, int subtypein, Complex rsrAin, bool rsrSignIn, int user_data(HWND hwnd), int xdotsIn, 
-	/*CTZfilter &TZfilter, */CTrueCol &TrueCol, int *pPertProgress, BYTE &ThreadComplete, bool Multi, int delay, char *PertErrorMessage, int ArithTypeIn, int MaxRefIterationIn, int SlopeDegreeIn, 
+	CTrueCol &TrueCol, int *pPertProgress, bool Multi, int delay, char *PertErrorMessage, int ArithTypeIn, int MaxRefIterationIn, int SlopeDegreeIn, PlotMode mode,
 	std::vector<std::pair<int, int>> *pixelOrder, std::atomic<int> *workIndex, int totalPixels, HANDLE ghMutex)
     {
     BigComplex	BigDelta;
     Complex	delta;
     ExpComplex	ExpDeltaSub0;
     Complex	DeltaSub0;
+
+    if (Bla == nullptr || XSubN == nullptr || ExpXSubN == nullptr)
+	{
+	strcpy(PertErrorMessage, "Perturbation engine not initialised");
+	return -4;
+	}
 
     xdots = xdotsIn;
     rsrA = rsrAin;
@@ -140,8 +143,6 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
     MaxRefIteration = MaxRefIterationIn;
     ArithType = ArithTypeIn;
 
-    ThreadComplete = false;
-
     if (SlopeType == DERIVSLOPE)
 	{
 	Complex	    w;			// unit 2D vector
@@ -153,32 +154,22 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
     LoadPascal(PascalArray, power);
 
     int		lastChecked = -1;
-    BigDouble	BigPixelSize = BigWidth / (double)(height * 0.5);	// pixel radius so we need to divide by half height
-    double	PixelSize = BigPixelSize.BigDoubleToDouble();
-
     if (height <= 0)		// sanity
 	{
 	_snprintf_s(PertErrorMessage, MAXLINE, _TRUNCATE, "calculateOneFrame has negative height=%d", height);
 	return -2;
 	}
 
-    // --------------------------------------------
+    BigDouble	BigPixelSize = BigWidth / (double)(height * 0.5);	// pixel radius so we need to divide by half height
+    double	PixelSize = BigPixelSize.BigDoubleToDouble();
+
+     // --------------------------------------------
     // SCHEDULER PATH (ALL NEW MODES)
     // --------------------------------------------
     int		iteration = 0;
 
     // Optional tuning (safe, simple)
-    int	chunk = (currentMode == PlotMode::Tile) ? 1024 : CHUNK_SIZE;
-    const	PlotMode mode = currentMode;
-/*
-    int idx = workIndex->load();
-
-    if (idx < 0 || idx >= totalPixels)
-	{
-	OutputDebugStringA("Pert: invalid workIndex\n");
-	return -1;
-	}
-*/
+    int chunk = (mode == PlotMode::Tile) ? 1024 : CHUNK_SIZE;
     if (pixelOrder->empty())
 	{
 	OutputDebugStringA("Pert: pixelOrder empty\n");
@@ -276,7 +267,6 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
 	return -3;
 	}
     gManp->DumpStartupState("after initialiseCalculateFrame");
-    ThreadComplete = true;
     return 0;
     }
 

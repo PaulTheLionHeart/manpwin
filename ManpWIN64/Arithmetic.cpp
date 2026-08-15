@@ -130,35 +130,36 @@ BOOL	CManp::IsBignumFractal(int type)
 int	CManp::calcfracinit(void)
     {
     precision = getprecbf_mag();
+    if (precision < 0)
+	return -1;
+
     decimals = precision + PRECISION_FACTOR;
 
     if (BigNumFlag)
 	{
 	if (precision <= DBL_DIG - 3)	// switch back to double when zooming out if using BigNum
-//	if (precision <= DBL_DIG - 13)	// switch back to double when zooming out if using BigNum
 	    {
 	    BigCornerstoFloat();
 	    OldPrecision = 0;
 	    }
-//	if (precision > OldPrecision + 3)
+	// Update in 10-digit steps to avoid changing MPFR precision on every
+	// small increase in the required calculation precision.
 	if (precision > OldPrecision + 10)
 	    {
-//  This is a cludge that resets all the internal parameters of Bignum and allows ongoing increases in the number of decimals
+	    // Periodically increase the precision of persistent BigNum variables
+	    // as the zoom deepens.  Existing values are preserved.
 	    if (ChangeBigPrecision(decimals) < 0)
 		{
 		MessageBox (GlobalHwnd, "Ran out of resolution - retry", "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
-		return FALSE; 
+		return -1;
 		}
 
 	    OldPrecision = precision;
 	    }
 	}
-//    else if ((precision > DBL_DIG - 13) && IsBignumFractal(type))
     else if ((precision > DBL_DIG - 3) && IsBignumFractal(type))
 	{					// switch to BigNum when zooming in if using double
 	OldPrecision = 0;
-//	if (init_big_dec(decimals) < 0)
-//	    return -1;
 	FloatCornerstoBig();
 	}
     return 0;

@@ -632,22 +632,14 @@ void CManp::SetupSpecialColourIndex(CTrueCol &TrueCol, long threshold, RGBTRIPLE
 	Initialise Manp engine
 **************************************************************************/
 
-int	CManp::InitPixelFractal()
+int	CManp::InitPixelFractal(int threadCount)
     {
     int		i;
-    static	bool	FirstTime = true;
 
-    if (NumberThreads > MAXTHREADS)
-	NumberThreads = MAXTHREADS;
+    if (threadCount > MAXTHREADS)
+	threadCount = MAXTHREADS;
 
-    if (FirstTime)
-	{
-	for (i = 0; i < NumberThreads; i++)
-	    pPixelDataArray[i] = nullptr;			// Ensure address is not reset before being allocated.
-	FirstTime = false;
-	}
-
-    for (i = 0; i < NumberThreads; i++)
+    for (i = 0; i < threadCount; i++)
 	Pixel[i]->EndPixel = false;				// We're not exiting yet
 
     gFatalErrorOccurred.store(false);
@@ -745,37 +737,19 @@ void CManp::InitPixelObjects(int threadCount, HWND hwnd)
 	    Pixel[i]->ManageBignumPrecision(decimals);
 
 	Pixel[i]->InitFractalDefinition(type, subtype, &degree, rqlim, threshold, BailoutTestType, param, potparam, &Fractal);
-
-	Pixel[i]->InitControlFlags(calcmode, juliaflag, invert, phaseflag, pairflag, _3dflag,
-	    period_level, /*reset_period, */distest, InsideMethod, OutsideMethod,
-	    biomorph, nFDOption, SpecialFlag);
-
-	Pixel[i]->InitViewport(hor, vert, mandel_width, BigHor, BigVert, BigWidth,
-	    AspectRatio, xdots, ydots, RotationAngle, RotationCentre, j);
-
+	Pixel[i]->InitControlFlags(calcmode, juliaflag, invert, phaseflag, pairflag, _3dflag, period_level, /*reset_period, */distest, InsideMethod, OutsideMethod, biomorph, nFDOption, SpecialFlag);
+	Pixel[i]->InitViewport(hor, vert, mandel_width, BigHor, BigVert, BigWidth, AspectRatio, xdots, ydots, RotationAngle, RotationCentre, j);
 	Pixel[i]->InitArithmetic(BigNumFlag, precision);
-
-	Pixel[i]->InitRendering(/*wpixels, */&Dib, width, PlotType, &TrueCol,
-	    colors, UseCurrentPalette, &AutoStereo_value, &symmetry);
-
+	Pixel[i]->InitRendering(/*wpixels, */&Dib, width, PlotType, &TrueCol, colors, UseCurrentPalette, &AutoStereo_value, &symmetry);
 	Pixel[i]->GeneralInit();
 	Pixel[i]->InitBailout();
-
-	Pixel[i]->InitRuntimeControl(&time_to_zoom, &time_to_restart,
-	    &time_to_reinit, &time_to_quit, &blockindex, &totpasses, &PixelCurPass[i]);
-
-	Pixel[i]->InitColourProcessing(special, colours, decomp, logval,
-	    logtable, LyapSequence, ColourSpeed, PaletteStart, PaletteShift);
-
+	Pixel[i]->InitRuntimeControl(&time_to_zoom, &time_to_restart, &time_to_reinit, &time_to_quit, &blockindex, &totpasses, &PixelCurPass[i]);
+	Pixel[i]->InitColourProcessing(special, colours, decomp, logval, logtable, LyapSequence, ColourSpeed, PaletteStart, PaletteShift);
 	Pixel[i]->InitVisualEffects(ExpandStarTrailColours, ShowOrbits, OrbitColour);
-
 	Pixel[i]->InitOutput(hwnd, fillcolor);
 	Pixel[i]->InitFilters(dStrands);
-
 	Pixel[i]->InitTransformations(CoordSystem, f_radius, f_xcenter, f_ycenter, distestwidth);
-
-	Pixel[i]->InitLightingAndBumpMapping(bump_transfer_factor,
-	    lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength);
+	Pixel[i]->InitLightingAndBumpMapping(bump_transfer_factor, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength);
 	}
     }
 
@@ -830,7 +804,7 @@ int	CManp::RunEscapeTimeEngine(HWND hwnd)
 	    init_log(hwnd);							// log colour distribution
 	if (_3dflag)
 	    Pixel[0]->init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
-	InitPixelFractal();							// Initialise Manp engine
+	InitPixelFractal(threadCount);							// Initialise Manp engine
 	}
     else
 	{
@@ -1202,7 +1176,6 @@ void CManp::InitThreadArrays(int threadCount)
 
     hPixelThread.assign(threadCount, nullptr);
     pPixelDataArray.assign(threadCount, nullptr);
-    PixelThreadComplete.assign(threadCount, 0);
     PixelProgress.assign(threadCount, 0);
     PixelCurPass.assign(threadCount, 1);
     }

@@ -50,7 +50,7 @@ struct RefScratch
 void	PertSetupArithType(int &ArithType, int subtype, long MaxIteration, int precision, BYTE BigNumFlag)
     {
     // okay, we are going to do some complicated arithmetic calculations for the various ways of calculating fractals
-    if (!BigNumFlag || (BigNumFlag && precision <= 300))
+    if (!BigNumFlag || precision <= 300)
 	{
 	if (subtype == 0 || subtype == 1)
 	    ArithType = DOUBLE;
@@ -716,7 +716,7 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
     }
 
 //////////////////////////////////////////////////////////////////////
-// Get memory for the reference table
+//  Prepare storage for the reference table
 //////////////////////////////////////////////////////////////////////
 
 void EnsureReferenceBufferSize(int arithType, int maxIteration)
@@ -725,7 +725,7 @@ void EnsureReferenceBufferSize(int arithType, int maxIteration)
 
     if (arithType == EXP_UNSUPPORTED || arithType == FLOATEXP)
 	{
-	// switching TO ExpXSubN -> free XSubN
+	// Use ExpXSubN and release the unused XSubN buffer.
 	std::vector<decltype(gManp->XSubN)::value_type>().swap(gManp->XSubN);
 
 	if (gManp->ExpXSubN.capacity() > newSize * 2)
@@ -735,7 +735,7 @@ void EnsureReferenceBufferSize(int arithType, int maxIteration)
 	}
     else
 	{
-	// switching TO XSubN -> free ExpXSubN  THIS IS THE KEY
+	// Use XSubN and release the unused ExpXSubN buffer.
 	std::vector<decltype(gManp->ExpXSubN)::value_type>().swap(gManp->ExpXSubN);
 
 	if (gManp->XSubN.capacity() > newSize * 2)
@@ -751,50 +751,33 @@ void EnsureReferenceBufferSize(int arithType, int maxIteration)
 
 int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND hwnd), char* StatusBarInfo, int *pPertProgress, double bailout, int ArithType, int power, BigDouble BigWidth, int &SlopeDegree, int subtype)
     {
+    // ----------------------------------------------------------------
+    // Initialise reference construction
+    // ----------------------------------------------------------------
+
     // Raising this number makes more calculations, but less variation between each calculation (less chance of mis-identifying a glitched point).
     BigComplex	zBig;
     bool	WeHaveMaxRefIteration = false;
     double	CoordinateMagnitudeSquared = 0.0;
-    int		lastChecked = -1;
-    constexpr	DWORD	REF_UPDATE_INTERVAL_MS = 250;
     DWORD	lastUpdateTick = GetTickCount();
-    int		lastPercent = -1;
     double	ZoomRadius = mpfr_get_d(BigWidth.x, MPFR_RNDN);
 //    char	buf[256];
 
-    if (!gManp->precision)				// not set up yet
+// Ensure precision has been initialised before creating RefScratch.
+// The Reference contract should ultimately guarantee this before entry.
+    if (!gManp->precision)
 	gManp->calcfracinit();
     RefScratch scratch;
     scratch.Init(gManp->precision * SAFETYMARGIN);	// setup temp variables for reference creation
 
+    // ----------------------------------------------------------------
+    // Allocate reference representation
+    // ----------------------------------------------------------------
+
     SimpleTimer  tRef;
     tRef.start();
     EnsureReferenceBufferSize(ArithType, maxIteration);
-
-#ifdef _DEBUG
-    char buf[256];
-    sprintf(buf, "ExpXSubN cap: %zu, size: %zu\n", gManp->ExpXSubN.capacity(), gManp->ExpXSubN.size());
-    OutputDebugStringA(buf);
-
-    sprintf(buf, "XSubN cap: %zu, size: %zu\n", gManp->XSubN.capacity(), gManp->XSubN.size());
-    OutputDebugStringA(buf);
-#endif
-
-/*  
-    if (ArithType == EXP_UNSUPPORTED || ArithType == FLOATEXP)
-	{
-	// get memory for Z array
-	ExpXSubN.resize(maxIteration + 1);
-	}
-    else
-	{
-	// get memory for Z array
-	XSubN.resize(maxIteration + 1);
-	}
-*/
-
     zBig = 0.0;
-
 
 #ifdef _DEBUG
     {
@@ -812,8 +795,6 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
     OutputDebugStringA(buf);
     }
 #endif
-
-
 
     for (int i = 0; i <= maxIteration; i++)
 	{
@@ -886,23 +867,14 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 		break;
 		}
 	    }
-
-/*
-	if (gManp->EnableApproximation && !WeHaveMaxRefIteration)		// only needed for BLA
-	    {
-	    CoordinateMagnitudeSquared = zBig.CSumSqr();			// no point in further testing once we have MaxRefIteration
-	    if ((CoordinateMagnitudeSquared) > bailout && !WeHaveMaxRefIteration)
-		{
-		gManp->MaxRefIteration = i;						// needed for BLA
-		WeHaveMaxRefIteration = true;
-		break;								// the rest of the table isn't needed for BLA
-		}
-	    }
-*/
 	}
 
     if (!WeHaveMaxRefIteration)
 	gManp->MaxRefIteration = maxIteration;	// MaxRefIteration not found in main reference loop
+
+    // ----------------------------------------------------------------
+    // Complete reference construction
+    // ----------------------------------------------------------------
 
     double refSeconds = tRef.stop_ms();
     auto s = FormatElapsed(refSeconds);
@@ -915,6 +887,10 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
     }
 #endif
     scratch.Clear();			// close temp variables for reference creation
+
+    // ----------------------------------------------------------------
+    // Build BLA from completed reference
+    // ----------------------------------------------------------------
 
     SimpleTimer  tBla;
     tBla.start();

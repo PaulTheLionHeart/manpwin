@@ -42,61 +42,64 @@ CPixel::CPixel(std::vector<float>& wp)
 // CPixel INITIALISATION PIPELINE
 // ============================================================
 //
-// The following order MUST be preserved:
+// CPixel objects are created with empty constructors and are then
+// initialised explicitly by CManp::InitPixelObjects().
 //
-// 1. InitFractalDefinition()
-//      - sets type, subtype, degree, rqlim, parameters, Fractal
+// Current initialisation order:
 //
-// 2. InitViewport()
-//      - sets geometry: ScreenRatio, xdots/ydots,
-//        mandel_width, BigHor/BigVert/BigWidth, rotation, Julia seed
+//  1. InitFractalDefinition()
+//       - fractal type/subtype, degree, bailout, iteration limit,
+//         parameters and fractal descriptor
 //
-// 3. InitControlFlags()
-//      - sets iteration and behaviour flags
+//  2. InitControlFlags()
+//       - calculation mode and behavioural flags
 //
-// 4. InitArithmeticInputs()
-//      - sets BigNumFlag and precision
+//  3. InitViewport()
+//       - image geometry, dimensions, rotation and Julia seed
 //
-// 5. InitRendering()
-//      - sets wpixels, Dib, palette, output buffers
+//  4. InitArithmetic(BigNumFlag, precision)
+//       - stores arithmetic-mode inputs only
 //
-// 6. InitRuntimeControl()
-//      - thread control, timing, worklist pointers
+//  5. InitRendering()
+//       - bitmap, palette and rendering state
 //
-// 7. InitColourProcessing()
-//      - palette control, smoothing, log tables, Lyapunov sequence
+//  6. GeneralInit()
+//       - clears internal BigDouble working variables
 //
-// 8. InitVisualEffects()
-//      - star trails, orbit display
+//  7. InitBailout()
+//       - initialises arithmetic bailout values from rqlim
 //
-// 9. InitFilters()
-//      - filter parameters (e.g. strands)
+//  8. InitRuntimeControl()
+//       - render-control and progress pointers
 //
-// 10. InitFwdDiff()
-//      - lighting / bump mapping parameters
+//  9. InitColourProcessing()
+//       - palette, smoothing and colour-processing state
 //
-// 11. InitTransformations()
-//      - coordinate system, radius, centres, distance estimator params
+// 10. InitVisualEffects()
+//       - orbit and star-trail options
 //
-// 12. InitArithmetic()
-//      - depends on:
-//          • fractal type
-//          • viewport (geometry)
-//          • BigNumFlag + precision
-//      - computes:
-//          • MathType
-//          • xgap / ygap (or Big equivalents)
+// 11. InitOutput()
+//       - output window and fill colour
 //
-// 13. InitBailout()
-//      - depends on rqlim + BigNumFlag
+// 12. InitFilters()
+//       - filter parameters
 //
-// 14. GeneralInit()
-//      - final safety initialisation of internal BigNum variables
+// 13. InitTransformations()
+//       - coordinate transformation and distance-estimator inputs
 //
-// NOTE:
-// Some parameters (e.g. rqlim, calcmode) may be modified later
-// during execution (see ManpEngine.cpp).
-// ============================================================
+// 14. InitLightingAndBumpMapping()
+//       - lighting and bump-mapping parameters
+//
+// Later, CPixel::RunThread() calls the no-argument:
+//
+//      InitArithmetic()
+//
+// after the worker/worklist geometry has been established.
+// That routine computes MathType, pixel step sizes and closeness
+// thresholds.
+//
+// Do not confuse the two InitArithmetic() overloads.
+// ==============================================================
 
 void	CPixel::InitFractalDefinition(WORD typeIn, int subtypeIn, WORD *degreeIn, double rqlimIn, long thresholdIn, int BailoutTestTypeIn, double paramIn[], double potparamIn[], CFract *FractalIn)
     {
@@ -154,28 +157,8 @@ void	CPixel::InitControlFlags(BYTE calcmodeIn, BYTE juliaflagIn, BOOL invertIn, 
 // ============================================================
 // ARITHMETIC INITIALISATION
 // ============================================================
-//
-// IMPORTANT DEPENDENCIES:
-//
-// This function is NOT standalone. It depends on prior initialisation of:
-//
-//   - Fractal definition:
-//         type (used via fractalspecific[type].flags)
-//
-//   - Viewport / geometry:
-//         ScreenRatio, xdots, ydots
-//         mandel_width OR BigWidth
-//         BigHor, Big_yymax (for BigNum mode)
-//
-//   - Arithmetic inputs:
-//         BigNumFlag, precision
-//
-// It computes:
-//   - MathType (DOUBLE / DD / QD / Big)
-//   - pixel step sizes (xgap/ygap or Big_xgap/Big_ygap)
-//   - closeness thresholds
-//
-// DO NOT reorder this before the above initialisation steps.
+// Store arithmetic mode inputs for this CPixel worker.
+// Detailed arithmetic setup is performed later by InitArithmetic().
 // ============================================================
 void	CPixel::InitArithmetic(BYTE BigNumFlagIn, int precisionIn)
     {
@@ -183,7 +166,7 @@ void	CPixel::InitArithmetic(BYTE BigNumFlagIn, int precisionIn)
     precision = precisionIn;
     }
 
-void	CPixel::InitRendering(/*std::vector <float> *wpixelsIn, */CDib *DibIn, int widthIn, int PlotTypeIn, CTrueCol *TrueColIn, int colorsIn, BOOL UseCurrentPaletteIn, int *AutoStereo_valueIn, int *symmetryIn)
+void	CPixel::InitRendering(CDib *DibIn, int widthIn, int PlotTypeIn, CTrueCol *TrueColIn, int colorsIn, BOOL UseCurrentPaletteIn, int *AutoStereo_valueIn, int *symmetryIn)
     {
     // NOTE: wpixels is a reference bound in the constructor.
     // This copies pixel data into the shared buffer; it does NOT rebind the reference.
@@ -344,6 +327,31 @@ std::string QDToString(const qd_real& v)
     return std::string(buf);
     }
 
+// ============================================================
+// ARITHMETIC INITIALISATION
+// ============================================================
+//
+// IMPORTANT DEPENDENCIES:
+//
+// This function is NOT standalone. It depends on prior initialisation of:
+//
+// - Fractal definition:
+// type (used via fractalspecific[type].flags)
+//
+// - Viewport / geometry:
+// ScreenRatio, xdots, ydots // mandel_width OR BigWidth
+// BigHor, Big_yymax (for BigNum mode)
+//
+// - Arithmetic inputs:
+// BigNumFlag, precision
+//
+// It computes:
+// - MathType (DOUBLE / DD / QD / Big)
+// - pixel step sizes (xgap/ygap or Big_xgap/Big_ygap)
+// - closeness thresholds
+//
+// DO NOT reorder this before the above initialisation steps.
+// ============================================================
 
 int	CPixel::InitArithmetic()
     {

@@ -150,6 +150,7 @@ void	CPerturbation::CalculateDerivativeSlope(Complex &dc, Complex z)
     else if (subtype == 10)			// Tricorn
 						// z -> (z*)^2 + c, which yields the so-called tricorn fractal shown below.
 	{
+	// Tricorn derivative slope requires a 2×2 real Jacobian; the ordinary complex-derivative slope path is not applicable.
 	Complex	conjugate = z;
 	conjugate.y = -conjugate.y;
 	dc = conjugate * 2 * dc + 1.0;
@@ -360,4 +361,54 @@ void	CPerturbation::BigCalculateDerivativeSlope(ExpComplex &ExpDC, ExpComplex z)
 	ExpSquare = ExpSquare * param[8];
 	ExpDC = (ExpSquare * 2 + ExpCubic * 3 + ExpQuartic * 4 + ExpQuintic * 5 + ExpSixth * 6 + ExpSeventh * 7 + ExpEighth * 8 + ExpNineth * 9 + ExpTenth * 10) * ExpDC + param[9] + 1.0;
 	}
+    else if (subtype == 10)                 // Tricorn
+	{
+	ExpComplex conjugate = z;
+	conjugate.y = -conjugate.y;
+	ExpDC = conjugate * 2 * ExpDC + 1.0;
+	}
+
+    // the following need to wait unti we build floatexp trig functions library
+    /*
+    else if (subtype == 59)                 // Exp
+	{
+	ExpDC = z.CExp() * ExpDC + 1.0;     // d/dz exp(z) = exp(z)
+	}
+
+    else if (subtype == 60)                 // Sinh
+	{
+	ExpDC = z.CCosh() * ExpDC + 1.0;    // d/dz sinh(z) = cosh(z)
+	ExpDC.y = -ExpDC.y;
+	}
+
+    else if (subtype == 61)                 // Sin
+	{
+	ExpDC = z.CCos() * ExpDC + 1.0;     // d/dz sin(z) = cos(z)
+	}
+
+    else if (subtype == 62)                 // Cos
+	{
+	ExpDC = (z.CSin() * -1.0) * ExpDC + 1.0;   // d/dz cos(z) = -sin(z)
+	}
+
+    else if (subtype == 63)                 // Fractional Half Power
+	{
+	int n = (int)param[2];
+
+	if (n < 1)
+	    n = 1;
+	if (n > 6)
+	    n = 6;
+
+	ExpComplex ZPow(1.0, 0.0);
+
+	for (k = 0; k < n; k++)
+	    ZPow *= z;
+
+	// Transport-style field, matching the double implementation.
+	ExpComplex transport = ZPow;
+
+	ExpDC = transport * ExpDC + 1.0;
+	}
+    */
     }

@@ -134,7 +134,7 @@ int	CSlope::changeBrightnessOfColorScaling(int rgb, double delta, double bump_tr
     Slope Fractal
 **************************************************************************/
 
-int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, bool *ThreadComplete, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, 
+int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, 
 	BYTE BigNumFlag, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, std::vector<float> *wpixels, BYTE juliaflag, int xdots,
 	int ydots, int width, WORD *degreeIn, int precision, double ColourSpeedIn, std::vector<std::pair<int, int>> *pixelOrder, std::atomic<int> *workIndex, int totalPixels)
     {
@@ -153,8 +153,6 @@ int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusB
 
     for (i = 0; i < NUMSLOPEDERIVPARAM; i++)
 	param[i] = paramIn[i];
-
-    *ThreadComplete = false;
 
     Plot.InitPlot(threshold, TrueCol, &gManp->wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE);
     if (subtype == 15)					// init Art Matrix Newton
@@ -187,7 +185,6 @@ int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusB
     ctx.hwnd = hwnd;
     ctx.NumThreads = NumThreads;
     ctx.StatusBarInfo = StatusBarInfo;
-    ctx.ThreadComplete = ThreadComplete;
 
     ctx.subtype = subtype;
     ctx.variety = variety;
@@ -243,7 +240,6 @@ int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusB
 	return RunSlopeFwdDiffT<Complex, double>(user_data, j, mandel_width, hor, vert, xgap, ygap, rqlim, threshold, juliaflag, ctx);
 	}
 
-    *ThreadComplete = true;
     return 0;
     }
 

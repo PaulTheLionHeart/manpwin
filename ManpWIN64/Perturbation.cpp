@@ -86,31 +86,33 @@ void Run3DAfterRender()
     if (gManp->wpixels.empty())
 	return;
 
-    assert(gManp->wpixels.size() >= (size_t)gManp->width * gManp->height);
-
-    std::vector<float> wpixels3d;
-    wpixels3d.resize((size_t)gManp->Dib.DibWidth * gManp->Dib.DibHeight);
-
-    for (int y = 0; y < gManp->Dib.DibHeight; ++y)
-	{
-	for (int x = 0; x < gManp->Dib.DibWidth; ++x)
-	    {
-	    size_t src = (size_t)(gManp->Dib.DibHeight - 1 - y) * gManp->Dib.DibWidth + x;
-	    size_t dst = (size_t)y * gManp->Dib.DibWidth + x;
-
-	    wpixels3d[dst] = gManp->wpixels[src];
-	    }
-	}
-
     const int xdots = gManp->Dib.DibWidth;
     const int ydots = gManp->Dib.DibHeight;
     const size_t totalPixels = (size_t)xdots * (size_t)ydots;
 
     if (gManp->wpixels.size() < totalPixels)
-	return;     // no data: bail safely
+	return;     // no complete source buffer: bail safely
+
+    assert(gManp->wpixels.size() >= totalPixels);
+
+    std::vector<float> wpixels3d(totalPixels);
+
+    for (int y = 0; y < ydots; ++y)
+	{
+	for (int x = 0; x < xdots; ++x)
+	    {
+	    size_t src = (size_t)(ydots - 1 - y) * xdots + x;
+	    size_t dst = (size_t)y * xdots + x;
+
+	    wpixels3d[dst] = gManp->wpixels[src];
+	    }
+	}
 
     // 1) Initialise 3D transform exactly as legacy did
-    gManp->Pixel[0]->init3d(xdots, ydots, gManp->x_rot, gManp->y_rot, gManp->z_rot, gManp->sclx, gManp->scly, gManp->sclz, gManp->threshold, gManp->hor, gManp->vert);
+    gManp->Pixel[0]->init3d(xdots, ydots,
+			    gManp->x_rot, gManp->y_rot, gManp->z_rot,
+			    gManp->sclx, gManp->scly, gManp->sclz,
+			    gManp->threshold, gManp->hor, gManp->vert);
 
     // 2) Clear the destination bitmap
     gManp->Dib.ClearDib(0L);
@@ -122,11 +124,12 @@ void Run3DAfterRender()
 	for (int x = 0; x < xdots; ++x)
 	    {
 	    size_t idx = (size_t)(ydots - 1 - y) * xdots + x;
-	    if (idx >= gManp->wpixels.size()) continue;
 
 	    long colour = (long)wpixels3d[idx];
-	    if (colour <= 0) continue;
-	    long zVal = colour; // keep simple for step A
+	    if (colour <= 0)
+		continue;
+
+	    long zVal = colour;		// keep simple for step A
 	    gManp->Pixel[0]->projection(x, y, zVal);
 	    }
 	}
@@ -170,12 +173,9 @@ DWORD	WINAPI PertFunction(LPVOID lpParam)
     int(*UserData)(HWND) = user_data;
     int	    ret = 0;
 
-    gManp->PertThreadComplete[ThreadNum] = false;
     ret = gManp->PertCalculator[ThreadNum]->calculateOneFrame(gManp->rqlim, gManp->PertStatus, gManp->degree, gManp->InsideMethod, gManp->OutsideMethod, gManp->biomorph, gManp->subtype, p->RSRA, p->IsPositive, UserData, gManp->xdots, //*(p->TZfilter),
-	*(p->TrueCol), p->pPertProgress, gManp->PertThreadComplete[ThreadNum], (gManp->NumberThreads > 0), gManp->ThreadPertDelay, gManp->PertErrorMessage, p->ArithType, p->MaxRefIteration, p->SlopeDegree,
+	*(p->TrueCol), p->pPertProgress, (gManp->NumberThreads > 0), gManp->ThreadPertDelay, gManp->PertErrorMessage, p->ArithType, p->MaxRefIteration, p->SlopeDegree, p->mode,
 	p->pixelOrder, p->workIndex, p->totalPixels, p->ghMutex);
-    // --- ALWAYS mark completion ---
-    gManp->PertThreadComplete[ThreadNum] = true;
     return ret;
     }
 
@@ -215,10 +215,7 @@ int InitPerturbation(void)
 	}
 
     // --- Thread arrays (clean + consistent) ---
-//    TZfilter.clear();
-//    TZfilter.resize(threadCount);
     gManp->PertProgress.assign(threadCount, 0);
-    gManp->PertThreadComplete.assign(threadCount, 0);
 
     gManp->hThread.assign(threadCount, nullptr);
     gManp->pDataArray.assign(threadCount, nullptr);
@@ -235,15 +232,11 @@ int InitPerturbation(void)
 	{
 	int baseWidth = gManp->xdots / threadCount;
 	int rem = gManp->xdots % threadCount;
-
-	int xStart = i * baseWidth + min(i, rem);
-	int xEnd = xStart + baseWidth + (i < rem ? 1 : 0);
-
 	auto& pert = gManp->PertCalculator[i];
 
 	pert->AttachSharedTables(&gManp->XSubN, &gManp->ExpXSubN, &gManp->Bla);
 
-	pert->initialiseCalculateFrame(&gManp->Dib, /*&Slope, */xStart, xEnd, (int)gManp->Dib.DibHeight, gManp->threshold, BigCentreX, BigCentreY, gManp->BigWidth, decimals, gManp->OutsideMethod, gManp->InsideMethod, gManp->GlobalHwnd, i, 
+	pert->initialiseCalculateFrame(&gManp->Dib, (int)gManp->Dib.DibHeight, gManp->threshold, BigCentreX, BigCentreY, gManp->BigWidth, decimals, gManp->OutsideMethod, gManp->InsideMethod, gManp->GlobalHwnd, i, 
 		gManp->param, gManp->potparam, gManp->PaletteShift, &gManp->PlotType, gManp->SlopeType, gManp->lightDirectionDegrees, gManp->bumpMappingDepth, gManp->bumpMappingStrength, gManp->PaletteStart, 
 		gManp->LightHeight, gManp->PertColourMethod, gManp->PalOffset, gManp->IterDiv, gManp->EnableApproximation, gManp->_3dflag, gManp->ColourSpeed, threadCount);
 	}
@@ -378,16 +371,11 @@ int	DoPerturbation()
 	gManp->pDataArray[i]->pixelOrder = &pixelOrder;
 	gManp->pDataArray[i]->workIndex = &workIndex;
 	gManp->pDataArray[i]->totalPixels = totalPixels;
+	gManp->pDataArray[i]->mode = mode;
 #ifdef _DEBUG
-	char buf[256];
-	sprintf_s(buf,
-	    "PERT: mode=%d pixelOrder=%zu totalPixels=%d workIndex=%d\n",
-	    (int)currentMode,
-	    pixelOrder.size(),
-	    totalPixels,
-	    workIndex.load());
-
-	OutputDebugStringA(buf);
+	char buf[80];
+	sprintf_s(buf, "Pert thread %d started\n", i);
+	OutputDebugStringA(buf); 
 #endif
 
 
@@ -424,28 +412,18 @@ int	DoPerturbation()
 	    }
 	flag = 1;
 	gManp->curpass = 100;
-	for (i = 0; i < gManp->NumberThreads; i++)
+	for (i = 0; i < threadsStarted; i++)
 	    {
-	    if (i < 0 || i >= (int)gManp->PertThreadComplete.size())
-		return -1;
 	    if (gManp->curpass > gManp->PertProgress[i])
 		gManp->curpass = gManp->PertProgress[i];	// display the slowest thread
-	    if (gManp->PertThreadComplete[i] == 0)		// false
+
+	    if (gManp->hThread[i] != NULL &&
+		WaitForSingleObject(gManp->hThread[i], 0) == WAIT_TIMEOUT)
 		flag = 0;
 	    }
 	if (!gManp->RunAnimation)
 	    gManp->DisplayStatusBarInfo(INCOMPLETE, "");
-	Sleep(gManp->ThreadCompletionDelay);			// give the threads time to close
-	}
-    Sleep(gManp->ThreadEndingDelay);				// make sure all threads are closed before leaving
-
- // WAIT for all threads to actually finish
-    for (i = 0; i < threadsStarted; i++)
-	{
-	if (gManp->hThread[i] != NULL)
-	    {
-	    WaitForSingleObject(gManp->hThread[i], INFINITE);
-	    }
+	Sleep(gManp->ThreadCompletionDelay);			// polling delay
 	}
 
     //  NOW we can safely close handles
@@ -455,6 +433,9 @@ int	DoPerturbation()
 	    {
 	    CloseHandle(gManp->hThread[i]);
 	    gManp->hThread[i] = NULL;
+	    char    buf[256];
+	    sprintf_s(buf, "Pert thread %d finished\n", i);
+	    OutputDebugStringA(buf);
 	    }
 	}
 
@@ -485,9 +466,8 @@ int	DoPerturbation()
     SimpleTimer tCalcSlope;
     tCalcSlope.start();
     auto& pert = gManp->PertCalculator[0];
-
-
-    pert->Slope.PaletteShift = gManp->PertCalculator[0]->PaletteShift;
+    CSlope Slope;
+    Slope.PaletteShift = gManp->PertCalculator[0]->PaletteShift;
     if (pert->SlopeType == FWDDIFFSLOPE)
 	{
 //	if (subtype == 0)					// Mandelbrot
@@ -495,8 +475,8 @@ int	DoPerturbation()
 //	else if (subtype == 1)					// Power
 //	    gManp->param[0] = gManp->param[5];
 	RGBTRIPLE   SpecialColour = {0,0,0};			// future use if we can implement Art Matrix Cubic in perturbation
-	pert->Slope.InitRender(gManp->threshold, &gManp->TrueCol, &gManp->Dib, gManp->PaletteShift, gManp->bump_transfer_factor, gManp->PaletteStart, gManp->lightDirectionDegrees, gManp->bumpMappingDepth, gManp->bumpMappingStrength, SpecialColour);
-	pert->Slope.RenderSlope(gManp->xdots, gManp->ydots, gManp->PertColourMethod, gManp->PalOffset, gManp->IterDiv, gManp->ColourSpeed);
+	Slope.InitRender(gManp->threshold, &gManp->TrueCol, &gManp->Dib, gManp->PaletteShift, gManp->bump_transfer_factor, gManp->PaletteStart, gManp->lightDirectionDegrees, gManp->bumpMappingDepth, gManp->bumpMappingStrength, SpecialColour);
+	Slope.RenderSlope(gManp->xdots, gManp->ydots, gManp->PertColourMethod, gManp->PalOffset, gManp->IterDiv, gManp->ColourSpeed);
 	}
     /*else */if (gManp->_3dflag)
 	{
