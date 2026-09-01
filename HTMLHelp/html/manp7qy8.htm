@@ -93,17 +93,49 @@ ManpWIN has undergone continuous development over many years, with ongoing
 improvements to performance, precision, and fractal exploration capabilities.
 </p>
 
-<h2>Latest Release (August 2026)</h2>
+<h2>Latest Release (September 2026)</h2>
 
-<h2>ManpWIN 4.04</h2>
+<h2>ManpWIN 4.05</h2>
+
+<p>
+ManpWIN 4.05 is a major perturbation, slope rendering, and parameter
+architecture update focused on improving rendering consistency, fractal
+interoperability, and long-term maintainability.
+</p>
+
+<h3>Recent Improvements</h3>
+
+<ul>
+
+<li>Unified ordinary filtering behaviour across pixel, perturbation, and derivative slope rendering.</li>
+
+<li>Added filter and biomorph support to derivative slope rendering while retaining slope lighting.</li>
+
+<li>Fixed several forward-difference slope rendering issues, including subtype 13 calculations, special-colour indexing, and pixel-state handling.</li>
+
+<li>Corrected palette start, offset, and shift handling, and added configurable pre-palette colouring for iterations below the selected Start Palette value.</li>
+
+<li>Expanded and reorganised perturbation and slope parameter handling, including updated dialogue boxes, parameter animation, and parameter-file save/load support.</li>
+
+<li>Improved conversion between equivalent pixel and perturbation fractals, including Polynomial fractals.</li>
+
+<li>Extended Perturbation Polynomial support to eighth-order polynomials.</li>
+
+<li>Fixed a long-standing perturbation power distortion caused by reference orbits being generated before the correct fractal degree was established.</li>
+
+<li>General rendering, stability, and internal architecture improvements.</li>
+
+</ul>
+
+<h2>Previous Releases</h2>
+
+<p><b>ManpWIN 4.04</b></p>
 
 <p>
 ManpWIN 4.04 is a stability and internal architecture update focused on
 multi-threaded rendering reliability, pixel rendering lifecycle management,
 perturbation filtering, and general rendering consistency.
 </p>
-
-<h3>Recent Improvements</h3>
 
 <ul>
 
@@ -135,8 +167,6 @@ perturbation filtering, and general rendering consistency.
 
 </ul>
 
-<h2>Previous Releases</h2>
-
 <p><b>ManpWIN 4.03e</b></p>
 
 <p>
@@ -163,7 +193,7 @@ and fractal metadata handling.
 
 </ul>
 
-</ul><p><b>ManpWIN 4.03d</b></p>
+<p><b>ManpWIN 4.03d</b></p>
 
 <p>
 ManpWIN 4.03d is a maintenance and stability update focused on improving
@@ -187,7 +217,7 @@ more robust handling of very large palettes.
     <li>General stability improvements and internal code maintenance.</li>
 </ul>
 
-</ul><p><b>ManpWIN 4.03c</b></p>
+<p><b>ManpWIN 4.03c</b></p>
 
 <p>
 ManpWIN 4.03c is a build and deployment modernisation release focused on
@@ -397,7 +427,7 @@ A detailed development history is maintained by the project owner and can be pro
 <hr>
 
 <footer>
-  ManpWIN Help &copy; August 2026
+  ManpWIN Help &copy; September 2026
 </footer>
 </body>
 </html>

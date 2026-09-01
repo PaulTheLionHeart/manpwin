@@ -86,6 +86,7 @@ footer {
 
 </head>
 
+<body>
 <h1>Known Limitations</h1>
 
 <h2>Overview</h2>
@@ -112,13 +113,20 @@ Not all FRACTINT fractals are implemented within ManpWIN.
 Some TieraZon filters and mapping methods may produce different results compared
 to the original TieraZon implementation.
 </li>
+
+<li>
+Perturbation and slope parameter layouts were revised in ManpWIN 4.05.
+Older parameter or animation files using the previous layouts may not reproduce
+the same settings. Use <code>Ctrl+T</code> to inspect or adjust the parameter
+values without changing the current fractal location, type, or subtype.
+</li>
 </ul>
 
 <h2>Rendering & Features</h2>
 
 <ul>
 <li>
-Perturbation rendering does not support all filter and colouring methods.
+  Perturbation rendering does not support all filter and colouring methods.
 </li>
 
 <li>
@@ -127,17 +135,17 @@ Perturbation rendering does not support all filter and colouring methods.
 </li>
 
 <li>
-Slope rendering is not available for all fractals or all rendering modes.
+  Slope rendering is not available for all fractals or all rendering modes.
 </li>
 
 <li>
-Some slope methods (particularly those involving trigonometric functions and high
-precision arithmetic) may fall back to slower but stable implementations.
+  Some slope methods (particularly those involving trigonometric functions and high
+  precision arithmetic) may fall back to slower but stable implementations.
 </li>
 
 <li>
-Certain advanced combinations of features (e.g. high precision + slope + complex
-formulas) may result in reduced performance.
+  Certain advanced combinations of features (e.g. high precision + slope + complex
+  formulas) may result in reduced performance.
 </li>
 
 <li>
@@ -255,7 +263,7 @@ These limitations reflect the advanced and evolving nature of high-precision
 <hr>
 
 <footer>
-  ManpWIN Help &copy; March 2026
+  ManpWIN Help &copy; September 2026
 </footer>
 
 </body>

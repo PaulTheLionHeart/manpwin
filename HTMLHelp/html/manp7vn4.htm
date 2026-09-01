@@ -96,7 +96,7 @@ V = Vertical Blinds
 
 <tr><td><code class="token">-t</code></td><td>Maximum iterations (historically called "threshold") (1 - 50,000,000)</td></tr>
 
-<tr><td><code class="token">-i</code></td><td>Inside colour (0 – 255)</td></tr>
+<tr><td><code class="token">-i</code></td><td>Inside colour (0 &ndash; 255)</td></tr>
 
 <tr><td><code class="token">-3</code></td><td>3D plotting parameters:</td></tr>
 
@@ -157,7 +157,7 @@ to control specialised behaviour.
 <tr><td><code class="token">-Q</code></td><td>Coordinate system</td></tr>
 
 <tr><td><code class="token">-V</code></td><td>Bailout limit</td></tr>
-<tr><td><code class="token">-W</code></td><td>Parameter list</td></tr>
+<tr><td><code class="token">-W</code></td><td>Parameter list used by the selected fractal or rendering mode</td></tr>
 <tr><td><code class="token">-X</code></td><td>Invert fractal</td></tr>
 <tr><td><code class="token">-Y</code></td><td>Palette starting offset</td></tr>
 <tr><td><code class="token">-Z</code></td><td>Parameter requirements</td></tr>
@@ -171,6 +171,12 @@ These tokens are specified after the <code class="token">-</code> prefix in para
 <p>
 Some of these tokens originate from early versions of ManpWIN and Fractint,
 and remain for compatibility with existing parameter files.
+</p>
+
+<p>
+Perturbation and slope parameter layouts were revised in ManpWIN 4.05.
+Parameter files created by earlier versions may require adjustment before reuse.
+These files are plain text and may be edited using any standard text editor.
 </p>
 
 <hr>
@@ -208,10 +214,10 @@ These may include:
 </p>
 
 <ul>
-<li><b>Subtype</b> – variant of the fractal</li>
-<li><b>Degree / Power</b> – exponent used in iteration</li>
-<li><b>Special</b> – colouring or behavioural modifier</li>
-<li><b>Additional parameters</b> – context-specific values</li>
+<li><b>Subtype</b> &ndash; variant of the fractal</li>
+<li><b>Degree / Power</b> &ndash; exponent used in iteration</li>
+<li><b>Special</b> &ndash; colouring or behavioural modifier</li>
+<li><b>Additional parameters</b> &ndash; context-specific values</li>
 </ul>
 
 <hr>
@@ -327,7 +333,7 @@ not modified directly by users.
 </p>
 
 <footer>
-ManpWIN Help &copy; March 2026
+ManpWIN Help &copy; September 2026
 </footer>
 
 </body>

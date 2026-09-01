@@ -8,38 +8,31 @@ This repository contains a fully reproducible CMake-based build system supportin
 
 ---
 
-## Version 4.04
+## Version 4.05
 
-ManpWIN 4.04 is a stability and architecture update focused on multithreaded rendering reliability, numerical correctness, 3D rendering, Tierazon compatibility, and pixel rendering lifecycle management.
+ManpWIN 4.05 is a major perturbation, slope-rendering, and parameter architecture update focused on improving rendering consistency, fractal interoperability, colouring behaviour, and long-term maintainability.
 
 ---
 
-## Recent Improvements (4.04)
+## Recent Improvements (4.05)
 
-### Multi-threading and Rendering
+### Rendering and Colouring
 
-* Fixed unsafe partial thread startup handling when worker creation or memory allocation fails
-* Replaced obsolete worker-completion flags with direct thread-handle completion checking
-* Simplified completion handling across pixel, perturbation, and slope rendering
-* Fixed 3D rendering in both pixel and perturbation modes by correcting the effective number of rendering threads
-* Improved CPixel worker ownership, symmetry handling, worklist processing, and render lifecycle management
+* Unified ordinary filtering behaviour across pixel, perturbation, and derivative slope rendering
+* Added filter and biomorph support to derivative slope rendering while retaining slope lighting
+* Fixed several forward-difference slope rendering issues, including subtype 13 calculations, special-colour indexing, and pixel-state handling
+* Corrected palette start, offset, and shift handling, and added configurable pre-palette colouring for iterations below the selected Start Palette value
 
-### Numerical Stability
+### Perturbation and Parameters
 
-* Fixed double-double and quad-double trigonometric function issues affecting some Tierazon fractals
-* Improved arithmetic consistency across DD and QD rendering paths
+* Expanded and reorganised perturbation and slope parameter handling, including updated dialogue boxes, parameter animation, and parameter-file save/load support
+* Improved conversion between equivalent pixel and perturbation fractals, including Polynomial fractals
+* Extended Perturbation Polynomial support to eighth-order polynomials
 
-### Tierazon and Perturbation
+### Stability
 
-* Fixed Tierazon filter initialisation ordering that could produce visible seams between multithreaded rendering strips
-* Corrected Tierazon filtering in perturbation rendering so filtering begins at the correct orbit iteration
-* Improved Tierazon filter coordinate initialisation in perturbation mode
-
-### General Stability
-
-* Audited and simplified CPixel initialisation and arithmetic setup
-* Removed obsolete thread-completion state and redundant waiting logic
-* General internal cleanup and stability improvements
+* Fixed a long-standing perturbation power distortion caused by reference orbits being generated before the correct fractal degree was established
+* General rendering, stability, and internal architecture improvements
 
 ---
 
@@ -104,20 +97,6 @@ ManpWIN has reached a stable and reproducible build state with a fully functiona
 - ✔ Verified extreme deep zoom rendering using perturbation theory and high-precision arithmetic
 - ✔ Ongoing collaboration and interest from the mathematical community
 - ✔ Improved numerical stability across multiple arithmetic types (MPFR, DD, QD)
-
----
-
-## 🆕 Recent Improvements
-
-- Fixed perturbation initialisation issue when reference generation occurs outside the perturbation engine
-- Improved rendering stability after toggling and recomputation
-- Stabilised trigonometric functions across multiple arithmetic types
-- Improved error handling in double-double (DD) and quad-double (QD) modes
-- Introduced template-based framework to support future extensibility of fractal calculations
-- Unified parser semantic architecture using templates
-- Reduced arithmetic-specific duplication across parser and trig systems
-- Introduced unified dispatch framework for DD/QD/MPFR arithmetic
-- Modernised hypercomplex trig implementation
 
 ---
 
@@ -254,6 +233,13 @@ A chronological record of major battles during the ManpWIN modernisation.
 - 🧊 3D rendering restored — corrected effective thread handling in pixel and perturbation modes
 - 🧵 Thread lifecycle cleanup — removed completion races and simplified worker startup/shutdown handling
 - 🐉 CPixel audit — verified strip ownership, symmetry, worklists, arithmetic initialisation, and rendering lifecycle
+- 🎨 Filter unification — shared ordinary filter behaviour across pixel, perturbation, and derivative slope rendering
+- 💡 Slope lighting preserved — filters and biomorphs now work with derivative slope without replacing slope illumination
+- 🎨 Palette cleanup — corrected palette start, offset, and shift handling and added configurable pre-palette colouring
+- 🔄 Fractal interoperability — improved conversion between equivalent pixel and perturbation fractals
+- 🧮 Polynomial expansion — Perturbation Polynomial extended to eighth order
+- 🐉 Power distortion slain — fixed long-standing reference-orbit distortion caused by fractal degree being established too late
+- 🧩 Parameter architecture — expanded perturbation and slope parameters, updated dialogue and animation handling, and simplified parameter-file persistence
 
 ---
 
