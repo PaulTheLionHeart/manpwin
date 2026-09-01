@@ -356,39 +356,25 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	    gManp->special = atoi(t);
 	    break;
 	case PERTURBATION:
-	    if (!isdigit(*(str + 3)))				// new format
-		{
-		char EnableBLA[12] = "";
-		gManp->subtype = 1;					// default Mandelbrot
-		gManp->subtype = PertName2Subtype(gManp->type, SaveString);	// search database for matching subtype
-		if (gManp->subtype < 0)
-		    {
-		    MessageBox(hwnd, SaveString, "Unknown Subtype", MB_ICONEXCLAMATION | MB_OK);
-		    MessageBeep(0);
-		    gManp->subtype = 0;				// use first one if not found
-		    }
-		gManp->EnableApproximation = true;
-		sscanf(PastQuote, "%d,%lf,%lf,%lf,%d,%s", &gManp->SlopeType, &gManp->lightDirectionDegrees, &gManp->bumpMappingDepth, &gManp->bumpMappingStrength, &gManp->PaletteStart, EnableBLA);
-		if (*EnableBLA)
-		    {
-		    if (strcmp(EnableBLA, "true") == 0)
-			gManp->EnableApproximation = true;
-		    else
-			gManp->EnableApproximation = false;
-		    }
+	    {
+	    char EnableBLA[12] = "";
 
-		gManp->OldPertFormat = false;
-		}
-	    else
+	    gManp->subtype = PertName2Subtype(gManp->type, SaveString);
+	    if (gManp->subtype < 0)
 		{
-		gManp->OldPertFormat = true;
-		if (*(str + 1) != '\0')
-		    gManp->subtype = atoi(str + 3);
-		else
-		    gManp->subtype = 0;
+		MessageBox(hwnd, SaveString, "Unknown Subtype", MB_ICONEXCLAMATION | MB_OK);
+		MessageBeep(0);
+		gManp->subtype = 0;
 		}
 
+	    gManp->EnableApproximation = true;
+
+	    sscanf(PastQuote, "%d,%11s", &gManp->SlopeType, EnableBLA);
+
+	    if (*EnableBLA)
+		gManp->EnableApproximation = (strcmp(EnableBLA, "true") == 0);
 	    break;
+	    }
 	case POWER:					// POWER fractals
 	case NEWTONPOLYGON:				// Newton Polygon fractals 
 	case NEWTONVARIATION:				// Newton Variation fractals
@@ -680,9 +666,13 @@ void	CManp::GetParamsList(char *s)
 	NumParams = sscanf(t, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf",
 	    &gManp->param[0], &gManp->param[1], &gManp->param[2], &gManp->param[3], &gManp->param[4], &gManp->param[5], &gManp->param[6], &gManp->param[7], &gManp->param[8], &gManp->param[9],
 	    &gManp->param[10], &gManp->param[11], &gManp->param[12], &gManp->param[13], &gManp->param[14], &gManp->param[15], &gManp->param[16], &gManp->param[17], &gManp->param[18], &gManp->param[19]);
+    else if (type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF || type == PERTURBATION)		// store all 15 parameters as param[15] is used to hold start colour (as a double)
+	Fractal.NumParam = sscanf(t, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", Fractal.ParamValue[0], Fractal.ParamValue[1], Fractal.ParamValue[2], Fractal.ParamValue[3],
+	    Fractal.ParamValue[4], Fractal.ParamValue[5], Fractal.ParamValue[6], Fractal.ParamValue[7], Fractal.ParamValue[8], Fractal.ParamValue[9], Fractal.ParamValue[10], Fractal.ParamValue[11],
+	    Fractal.ParamValue[12], Fractal.ParamValue[13], Fractal.ParamValue[14], Fractal.ParamValue[15]);
     else
-	Fractal.NumParam = sscanf(t, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", Fractal.ParamValue[0], Fractal.ParamValue[1], Fractal.ParamValue[2], Fractal.ParamValue[3], Fractal.ParamValue[4],
-	    Fractal.ParamValue[5], Fractal.ParamValue[6], Fractal.ParamValue[7], Fractal.ParamValue[8], Fractal.ParamValue[9]);
+	Fractal.NumParam = sscanf(t, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", Fractal.ParamValue[0], Fractal.ParamValue[1], Fractal.ParamValue[2], Fractal.ParamValue[3], 
+	    Fractal.ParamValue[4], Fractal.ParamValue[5], Fractal.ParamValue[6], Fractal.ParamValue[7], Fractal.ParamValue[8], Fractal.ParamValue[9]);
     }
 
 /**************************************************************************
@@ -713,9 +703,8 @@ void	CManp::GetBailout(char *s)
 
 void	GetParam(HWND hwnd, LPSTR filename, LPSTR szSaveFileName)
     {
-    // we don't allocate this because we have no idea of the size before we open the file
-    char	string[SIZEOF_BF_VARS * 3];	// times 3 because of x, y, width
-    FILE	*fp;				// param file   
+    std::vector<char> string(SIZEOF_BF_VARS * 3);	// times 3 because of x, y, width
+    FILE	*fp;					// param file   
     char	s[200];
     char	ascii[5];
     int		ptr, ch, j;
@@ -734,13 +723,21 @@ void	GetParam(HWND hwnd, LPSTR filename, LPSTR szSaveFileName)
 	}
 
     ch = fgetc(fp);
-    while (ch != '\0' && ch != '\n' && ch != -1)
+    while (ch != '\0' && ch != '\n' && ch != EOF)
 	{
-	*(string + ptr++) = (char)ch;
+	if (ptr >= (int)string.size() - 1)
+	    {
+	    _snprintf_s(s, 200, _TRUNCATE, "Parameter data too large in file: %s", filename);
+	    MessageBox(hwnd, s, "View", MB_ICONEXCLAMATION | MB_OK);
+	    fclose(fp);
+	    return;
+	    }
+
+	string[ptr++] = (char)ch;
 	ch = fgetc(fp);
 	}
     // Add null to end string
-    if (ch == -1)
+    if (ch == EOF)
 	{
 	_snprintf_s(s, 200, _TRUNCATE, "Can't find info in file: %s", filename);
 	MessageBox(hwnd, s, "View", MB_ICONEXCLAMATION | MB_OK);
@@ -749,15 +746,14 @@ void	GetParam(HWND hwnd, LPSTR filename, LPSTR szSaveFileName)
 	return;
 	}
 
-    *(string + ptr) = '\0';
-    //    fread(string, 1, 255, fp);
-    GetParamData(hwnd, filename, string, szSaveFileName, FALSE);
+    string[ptr] = '\0';
+    GetParamData(hwnd, filename, string.data(), szSaveFileName, FALSE);
     LocalThreshold = (gManp->threshold >= MAXPALETTE) ? MAXPALETTE - 1 : gManp->threshold;
-    if (fgets(string, MAXLINE, fp) == NULL)				// no palette
+    if (fgets(string.data(), MAXLINE, fp) == NULL)			// no palette
 	InitTrueColourPalette(FALSE);					// process anything we found in the param list, eg palette file etc
     else
 	{
-	if (strncmp(string, "Palette=", 8) == 0)			// we have a palette file
+	if (strncmp(string.data(), "Palette=", 8) == 0)			// we have a palette file
 	    {
 	    for (i = 0; i < LocalThreshold; i++)
 		{
@@ -782,7 +778,6 @@ void	GetParam(HWND hwnd, LPSTR filename, LPSTR szSaveFileName)
 	}
 
     gManp->Plot.RefreshScreen();
-    //    if (TrueCol.DisplayPaletteFlag)
     DisplayPalette(hwnd, gManp->TrueCol.DisplayPaletteFlag);
     InvalidateRect(hwnd, &gManp->r, FALSE);	// force repaint
     fclose(fp);
@@ -877,13 +872,13 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
     char	TokChar;
     char	s[200];
     char	SaveString[2048];		// get filenames from quotes.
-    char	TempBuffer[SIZEOF_BF_VARS * 3];	// Save entire string to get anything within quotes.
-						// SIZEOF_BF_VARS times 3 because of x, y, width
+    std::vector<char> TempBuffer(SIZEOF_BF_VARS * 3);	// Save entire string to get anything within quotes.
+							// SIZEOF_BF_VARS times 3 because of x, y, width
     char	*TrailingArgs = NULL;
 
-    strcpy(TempBuffer, string);			// get a copy in case of corruption by strtok()
-    ProtectQuotedText(TempBuffer);		// Protect quoted text from the parser
-    token = strtok(TempBuffer, seps);
+    strcpy_s(TempBuffer.data(), TempBuffer.size(), string);	// get a copy in case of corruption by strtok()
+    ProtectQuotedText(TempBuffer.data());			// Protect quoted text from the parser
+    token = strtok(TempBuffer.data(), seps);
     while (token != NULL)
 	{
 	if (*token == '-') 
@@ -1166,27 +1161,6 @@ gManp->AnalysePalette(token + 2);
     if (gManp->logval)
 	if (gManp->threshold >= MAXTHRESHOLD)
 	    gManp->threshold = MAXTHRESHOLD;
-    if (gManp->OldPertFormat)				// we had to make sure we loaded the param values before we copied them into appropriate parameters
-	{
-	gManp->SlopeType = (int)gManp->param[0];
-	gManp->PaletteStart = (int)gManp->param[1];
-	gManp->lightDirectionDegrees = gManp->param[2];
-	gManp->bumpMappingDepth = gManp->param[3];
-	gManp->bumpMappingStrength = gManp->param[4];
-	if (gManp->subtype == 57)				// all param used for coefficients, so set a default
-	    gManp->LightHeight = 2.0;
-	else
-	    gManp->LightHeight = gManp->param[6];
-	if (gManp->subtype == 1)
-	    gManp->degree = (int)gManp->param[7];
-	else if (gManp->subtype == 11)
-	    gManp->degree = (int)gManp->param[5];
-	}
-    //    if (!IsPNG)
-    //	{
-    //	TrueColourFlag = FALSE;				// colour map takes priority over true colour parameters
-    //	FilePalette(hwnd, MAPFile, "Fractal Parameter File: Get Colour Map");
-    //	}
     return 0;
     }
 
@@ -1225,22 +1199,20 @@ char	*FractData(void)
 
     if (gManp->BigNumFlag)
 	{
-	char s1[SIZEOF_BF_VARS]{};
-	char s2[SIZEOF_BF_VARS]{};
-	char s3[SIZEOF_BF_VARS]{};
-	gManp->BigHor.ToString(s1, SIZEOF_BF_VARS, false);
-	gManp->BigVert.ToString(s2, SIZEOF_BF_VARS, false);
-	gManp->BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
-	sb.append("-c%s,%s,%s -t%d", s1, s2, s3, gManp->threshold);
+	std::vector<char> s1(SIZEOF_BF_VARS);
+	std::vector<char> s2(SIZEOF_BF_VARS);
+	std::vector<char> s3(SIZEOF_BF_VARS);
+
+	gManp->BigHor.ToString(s1.data(), (int)s1.size(), false);
+	gManp->BigVert.ToString(s2.data(), (int)s2.size(), false);
+	gManp->BigWidth.SafeSprintf(s3.data(), (int)s3.size(), "%.20Re");
+	sb.append("-c%s,%s,%s -t%d", s1.data(), s2.data(), s3.data(), gManp->threshold);
 	}
     else
 	{
-	//    if (mandel_width < 0.00000001)
-	//	SAFE_SPRINTF(info, "-c%15.15f,%15.15f,%-15.6g,%6.6f,%6.6f -t%d", hor, vert, mandel_width, pert_real, pert_imag, threshold);
-	//    else
-	//	SAFE_SPRINTF(info, "-c%15.15f,%15.15f,%15.15f,%6.6f,%6.6f -t%d", hor, vert, mandel_width, pert_real, pert_imag, threshold);
 	sb.append("-c%24.24f,%24.24f,%24.24f -t%d", gManp->hor, gManp->vert, gManp->mandel_width, gManp->threshold);
 	}
+
     gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
     BasicFractData(sb, FALSE);
     sb.append("\n");
@@ -1348,7 +1320,7 @@ void	BasicFractData(StringBuilder& sb, BOOL CreateAnim)
 	    break;					// default
 	case PERTURBATION:
 	    FindSubtypeName(SubTypeName, gManp->type, gManp->subtype);
-	    sb.append(" -f%03d\"%s\",%d,%lf,%lf,%lf,%d,%s", gManp->type, SubTypeName, gManp->SlopeType, gManp->lightDirectionDegrees, gManp->bumpMappingDepth, gManp->bumpMappingStrength, gManp->PaletteStart, (&gManp->EnableApproximation ? "true" : "false"));
+	    sb.append(" -f%03d\"%s\",%d,%s", gManp->type, SubTypeName, gManp->SlopeType, (gManp->EnableApproximation ? "true" : "false"));
 	    break;
 	case FRACTALMAPS:
 	case SPROTTMAPS:
@@ -1471,7 +1443,7 @@ void	BasicFractData(StringBuilder& sb, BOOL CreateAnim)
 	{
 	sb.append(" -~%lf", gManp->ColourSpeed);
 	}
-    if (gManp->PalOffset > 0)			// begin palette here
+    if (gManp->PalOffset > 0)			// Kalles palette index offset
 	{
 	sb.append(" -^%d", gManp->PalOffset);
 	}
@@ -1492,7 +1464,17 @@ void	BasicFractData(StringBuilder& sb, BOOL CreateAnim)
 	    sb.append("%g", gManp->param[i]);					// last one without the ','
 	    }
 	}
-    else
+    // Slope/Pert use all 16 transport slots; param[15] stores PrePaletteColour.
+    else if (gManp->type == SLOPEDERIVATIVE || gManp->type == SLOPEFORWARDDIFF || gManp->type == PERTURBATION)
+	{
+	sb.append(" -w");
+	for (i = 0; i < NUMSLOPEPARAM - 1; i++)
+	    {
+	    sb.append("%g,", gManp->param[i]);
+	    }
+	sb.append("%g", gManp->param[i]);					// last one without the ','
+	}
+    else 
 	{
 	if (gManp->Fractal.NumParam > 0)
 	    {
@@ -1520,15 +1502,10 @@ void	CManp::setup_defaults(void)
     OutsideMethod = NONE;
     special = GREEN;
     degree = 3;
-    //    cycles = 50;			// cycles before display
     subtype = 0;
-    //    subtype = ' ';
     gManp->exitflag = FALSE;
     RotationAngle = NORMAL;
-    //    PaletteFileFlag = FALSE;
-    //    TrueColourFlag = FALSE;
     TrueCol.RandomDivisor = 128;
-    //    TrueCol.DisplayPaletteFlag = TRUE;
     fillcolor = -1;			// tesseral fillcolor: -1=normal 0 means don't fill     
     period_level = 1;
     TrueCol.inside_colour = 246;
@@ -1536,12 +1513,9 @@ void	CManp::setup_defaults(void)
     TrueCol.InsideGreen = 40;
     TrueCol.InsideBlue = 40;
     threshold = 250;
-//    screenflag = FALSE;
     NonStandardImage = FALSE;
     _3dflag = FALSE;
     PerspectiveFlag = FALSE;
-    //    palette_flag = FALSE;
-    //    dumpflag = FALSE;
     grayflag = FALSE;
     CoordSystem = CARTESIAN;
     RGBFilter = FALSE;			// don't use the plotting routine for RGB filters
@@ -1572,15 +1546,9 @@ void	CManp::setup_defaults(void)
     biomorph = -1;
     decomp = 0;
     juliaflag = FALSE;
-    //    juliaflag = FALSE;
     RealTimeJuliaFlag = FALSE;
     logval = FALSE;
     Return2Start = FALSE;
-//    HenonXStart = 0.098;
-//    HenonYStart = 0.061;
-//    HenonPoints = 5000;
-//    HenonA = 1.111;
-//    HenonStep = 0.005;
     hor = -3.5;
     vert = -2.0;
     mandel_width = 4.0;
@@ -1601,7 +1569,7 @@ void	CManp::setup_defaults(void)
     f_radius = 1.0;			// inversion radius 
     f_xcenter = 0.0;			// inversion center 
     f_ycenter = 0.0;
-    PaletteShift = 0;			// fractional palette addressing
+    PaletteShift = 0;			// palette movement between animation frames
     distest = 0, distestwidth = 71;
     for (i = 0; i < 20; i++)
 	gManp->param[i] = 0.0;

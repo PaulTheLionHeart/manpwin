@@ -12,7 +12,7 @@
 #include "Fract.h"
 #include "BailoutTemplate.h"
 #include "FractintTrigTemplate.h"
-#include "PixelTemplate.h"
+#include "FilterTemplate.h"
 #include "..\parser\TrigFn.h"
 
 /**************************************************************************

@@ -41,23 +41,13 @@
 static	int	WaterRed = 0, WaterGreen = 0, WaterBlue = 255;
 static	int	MountainRed = 98, MountainGreen = 100, MountainBlue = 0;
 
-//static	WORD	degree = 8;
-//extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
-//extern	double	param[];
-//extern	PAINTSTRUCT 	ps;
-//extern	RECT 	r;
 extern	BOOL	ShowUnderwaterTerrain = FALSE;
-//extern	int	xdots, ydots;
-
-//extern	CPlot	Plot;		// image plotting routines 
 extern	int	user_data(HWND);
 
-//char	test;
 static	double	rh, l, vt, xx, yy, zz, d, xp, xb, yp, yb, xt, yt, zt, xo = 0.0;
 static	double	x2, y2, z2, x3, y3, z3, w3 = 0.0;
 static	double	xs, ys, zs;				/* scale factors */
 
-//double	data[128][64];
 static	double	data[1 << (MAXLEVEL + 1)][1 << MAXLEVEL];
 
 static	int	ds, mx, my, ax, ay, bx, by, ib, sk, ex, ey = 0;

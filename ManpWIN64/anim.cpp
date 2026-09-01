@@ -90,14 +90,11 @@ bool	BuildDibFromAnimFrame(const AnimStruct& A, CDib& Dib)
 		}
 	    }
 
+/*
 	char s[240];
-
-	sprintf(
-	    s,
-	    "[BUILD DIB] frame first=%d,%d,%d firstDifferent=%d\n",
-	    b0, g0, r0, firstDifferent);
-
+	sprintf(s, "[BUILD DIB] frame first=%d,%d,%d firstDifferent=%d\n", b0, g0, r0, firstDifferent);
 	OutputDebugStringA(s);
+*/
 	}
 
 

@@ -116,7 +116,7 @@ int	CPixel::tesseral(HWND hwnd, int user_data(HWND hwnd))
 	    if(fillcolor != 0)
 		{
 		if(fillcolor > 0)
-		    tp->top = fillcolor & (colours-1);
+		    tp->top = fillcolor & (paletteColours - 1);
 //		    tp->top = (colours-1);
 
 		if (guessplot || (j = tp->x2 - tp->x1 - 1) < 2) 
@@ -129,7 +129,8 @@ int	CPixel::tesseral(HWND hwnd, int user_data(HWND hwnd))
 				goto tess_end;
 			    }
 		    }
-		else {						// use verline for speed 
+		else 
+		    {						// use verline for speed 
 		    for (row = tp->y1 + 1; row < tp->y2; row++) 
 			{
 			verline((WORD)row,(WORD)(tp->x1+1),(WORD)(tp->x2-1),(DWORD)(tp->top));
@@ -154,11 +155,13 @@ int	CPixel::tesseral(HWND hwnd, int user_data(HWND hwnd))
 		    mid = (tp->x1 + tp->x2) >> 1;		// Find mid point 
 		    midcolor = tesscol(hwnd, mid, tp->y1+1, tp->y2-1, user_data); // Do mid column 
 		    if (midcolor == -3) goto tess_end;
-		    if (tp->x2 - mid > 1) {			// right part >= 1 column 
+		    if (tp->x2 - mid > 1)			// right part >= 1 column 
+			{				   
 			if (tp->top == -1) tp->top = -2;
 			if (tp->bot == -1) tp->bot = -2;
 			tp2 = tp;
-			if (mid - tp->x1 > 1) {			// left part >= 1 col, stack right 
+			if (mid - tp->x1 > 1)			// left part >= 1 col, stack right 
+			    {			
 			    memcpy(++tp,tp2,sizeof(*tp));
 			    tp->x2 = mid;
 			    tp->rgt = midcolor;
@@ -174,11 +177,13 @@ int	CPixel::tesseral(HWND hwnd, int user_data(HWND hwnd))
 		    mid = (tp->y1 + tp->y2) >> 1;		// Find mid point 
 		    midcolor = tessrow(hwnd, tp->x1+1, tp->x2-1, mid, user_data); // Do mid row 
 		    if (midcolor == -3) goto tess_end;
-		    if (tp->y2 - mid > 1) {			// bottom part >= 1 column 
+		    if (tp->y2 - mid > 1) 			// bottom part >= 1 column 
+			{
 			if (tp->lft == -1) tp->lft = -2;
 			if (tp->rgt == -1) tp->rgt = -2;
 			tp2 = tp;
-			if (mid - tp->y1 > 1) {			// top also >= 1 col, stack bottom
+			if (mid - tp->y1 > 1) 			// top also >= 1 col, stack bottom
+			    {
 			    memcpy(++tp,tp2,sizeof(*tp));
 			    tp->y2 = mid;
 			    tp->bot = midcolor;

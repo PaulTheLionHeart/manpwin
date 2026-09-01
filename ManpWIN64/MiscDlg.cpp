@@ -230,7 +230,7 @@ INT_PTR CALLBACK LyapDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     int i, j;
     static	int	index1 = -1, index2 = -1;
     static	int	numtrig;
-    char		s[10][100];
+    char		s[NUMPARAM][100];
     char		Bailout[120];
     CTrigFn		TrigFn;
 
@@ -246,7 +246,7 @@ INT_PTR CALLBACK LyapDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		SetDlgItemText(hDlg, ID_FRACPARTX1 + j, gManp->Fractal.ParamName[j]);
 		SetDlgItemText(hDlg, ID_FRACPARAM1 + j, s[j]);
 		}
-            for (i = gManp->Fractal.NumFunct + gManp->Fractal.NumParam; i < 10; i++)
+            for (i = gManp->Fractal.NumFunct + gManp->Fractal.NumParam; i < NUMPARAM; i++)
 		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
 	    SetDlgItemText(hDlg, IDC_LYAPSEQ, gManp->LyapSequence);	// we cheat and use Fractal.Fn1 to store the Lyapunov sequence
 	    return ( TRUE);

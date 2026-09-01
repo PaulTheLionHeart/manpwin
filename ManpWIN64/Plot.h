@@ -9,7 +9,6 @@
 #include <atomic>
 #include "Dib.h"
 #include "manpwin.h"
-//#include "manp.h"
 #include "colour.h"
 #include "fractype.h"
 
@@ -17,17 +16,7 @@
 #define	USEPALETTE  1
 #define	USEWPIXELS  2
 
-// Control flags
-#define PIXEL_NORMAL   0x00
-#define PIXEL_INSIDE   0x01
-#define PIXEL_SPECIAL  0x02
-
 #define TESS_SPECIAL_COLOUR   -4L
-
-// the following are used to control Forward Differencing to set a pixel to special colour or  to make sure that we don't splatter inside 
-// colours when filters are used. These are written into wpixels as control flags
-#define	    INSIDEPIXEL				-1.0
-#define	    SPECIALPIXEL			-2.0
 
 #pragma once
 

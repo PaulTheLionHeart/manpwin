@@ -21,7 +21,7 @@ Written in Microsoft Visual 'C++' by Paul de Leeuw.
 
 #define max(a,b)    (((a) > (b)) ? (a) : (b))
 
-int	decimals = 10;
+//int	decimals = 10;
 
 /**************** a handy little debugging tool *********************/
 #ifdef	_DEBUG

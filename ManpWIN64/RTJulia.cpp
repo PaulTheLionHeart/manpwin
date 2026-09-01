@@ -15,7 +15,7 @@
 #include "pixel.h"
 #include "plot.h"
 #include "SafeStrings.h"
-#include "PixelTemplate.h"
+#include "FilterTemplate.h"
 
 #define	JULIA_SIZE	4.0
 #define	THUMB_SIZE	6

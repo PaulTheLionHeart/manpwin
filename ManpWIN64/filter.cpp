@@ -290,7 +290,7 @@ int	CTZfilter::DoTierazonFilter(Complex z, long *iteration)
 
 	    break;
 
-	case 14:  // testing
+	case 14:
 	    ssq1 = (sqrt((z.CSumSqr())));
 	    if (ssq1 < dStrands_HI && ssq1 > dStrands_LO && zsav == 0)
 		{
@@ -494,7 +494,7 @@ int	CTZfilter::DoTierazonFilter(Complex z, long *iteration)
 		}
 	    break;
 
-	case 26:  // testing
+	case 26:
 	    ssq1 = sqrt(z.CSumSqr());
 	    if (ssq1 < dStrands && zsav == 0)
 		{
@@ -1270,7 +1270,7 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 		}
 	    break;
 
-	case 26:  // testing
+	case 26:  
 	    if (iteration_z && *iteration > 1)
 		{
 		if (iteration_z%2==0)

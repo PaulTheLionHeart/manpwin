@@ -14,10 +14,10 @@ void	CPerturbation::BigProcessDerivativeSlope(ExpComplex ExpDC, ExpComplex ExpTe
     BigDouble	BigReflection;
     double	reflection;
 
-    if (subtype == 57)						// polynomial
-	LightHeight = 2.0;					// param 1 is used for a polynomial coefficient, so use a default
+    if (subtype == 57)
+	LightHeight = param[6];					// height 
     else
-	LightHeight = param[1];					// height 
+	LightHeight = param[9];					// height 
     LightHeight *= 1.333;					// height * 1.333 : seems to need a bit more height to get similar images to double float
     BigComplex	BigZ;
 
@@ -39,16 +39,16 @@ void	CPerturbation::ProcessDerivativeSlope(Complex dc, Complex z, HANDLE ghMutex
     Complex	u;
     double	reflection;
 
-    if (subtype == 57)						// polynomial
-	LightHeight = 2.0;						// param 1 is used for a polynomial coefficient, so use a default
+    if (subtype == 57)
+	LightHeight = param[6];					// height 
     else
-	LightHeight = param[1];					// height 
+	LightHeight = param[9];					// height 
     if (precision > MAXDERPRECISION)				// beyond MAXDERPRECISION precision, upgrade Slope calcs to BigDouble for accuracy.
 	{
 	BigComplex	BigZ;
 
 	LightHeight *= 1.333;					// seems to need a bit more height to get similar images to double float
-	BigDC = dc;							// upgrade to BigDouble for accuracy. As we only do it once per pixel, we can afford the overhead.
+	BigDC = dc;						// upgrade to BigDouble for accuracy. As we only do it once per pixel, we can afford the overhead.
 	BigZ = z;
 	BigU = BigZ / BigDC;
 	BigU = BigU / BigU.CFabs();
@@ -66,17 +66,15 @@ void	CPerturbation::ProcessDerivativeSlope(Complex dc, Complex z, HANDLE ghMutex
 
 void	CPerturbation::ProcessDerivativeSlopeMain(Complex z, double reflection, HANDLE ghMutex, long MaxIteration, long iteration, CTrueCol &TrueCol, int x, int y)
     {
-    BYTE	b;
     RGBTRIPLE	colour;
 
-    CPlot plot;  // binds to global wpixels by default
+    CPlot plot;								// binds to global wpixels by default
     plot.InitPlot(MaxIteration, &TrueCol, &gManp->wpixels, Dib->DibWidth, Dib->DibHeight, Dib->DibWidth, Dib->DibHeight, Dib->BitsPerPixel, Dib, USEPALETTE | USEWPIXELS);
 
     reflection = reflection / (1.0 + LightHeight);			// rescale so that t does not get bigger than 1
     if (reflection < 0.0) reflection = 0.0;
-    //	    if (reflection > 1.0) reflection = 1.0;
     if (ghMutex != NULL)
-	WaitForSingleObject(ghMutex, INFINITE);			// no time-out interval
+	WaitForSingleObject(ghMutex, INFINITE);				// no time-out interval
     if (iteration >= MaxIteration)
 	{
 	colour.rgbtRed = (BYTE)TrueCol.InsideRed;			// M_waves
@@ -85,46 +83,38 @@ void	CPerturbation::ProcessDerivativeSlopeMain(Complex z, double reflection, HAN
 	}
     else // exterior of Mandelbrot set = normal 
 	{
-	b = (BYTE)(255.0 * reflection);
 	if (iteration >= PaletteStart)
 	    {
-//	    if (iteration > 500)
-//		int qwerty = 1;
 	    if (smoothing)
 		{
 		double mag2 = z.x*z.x + z.y*z.y;			// done up top
 		double log_zn = log(mag2) * 0.5;			// log(|z|)
 		double nu = log(log_zn / log(SlopeDegree)) / log(SlopeDegree);
-		double FloatIteration = iteration + 1 - nu;
+		double FloatIteration = iteration + 1 - nu + PalOffset;
 		colour = GetSmoothedColour(FloatIteration, ColourSpeed, TrueCol, &plot);
 		}
 	    else
-		plot.GetRGB((iteration) % TrueCol.ColoursInPALFile, &colour);
+		plot.GetRGB((iteration + PalOffset) % TrueCol.ColoursInPALFile, &colour);
 	    colour.rgbtRed = (BYTE)(colour.rgbtRed * reflection);
 	    colour.rgbtGreen = (BYTE)(colour.rgbtGreen * reflection);
 	    colour.rgbtBlue = (BYTE)(colour.rgbtBlue * reflection);
-/*
-	    colour.rgbtRed = (BYTE)((reflection)   * (double)(*(TrueCol->PalettePtr + ((iteration) % TrueCol->ColoursInPALFile) * 3 + 0))); // Red
-	    colour.rgbtGreen = (BYTE)((reflection) * (double)(*(TrueCol->PalettePtr + ((iteration) % TrueCol->ColoursInPALFile) * 3 + 1))); // Green
-	    colour.rgbtBlue = (BYTE)((reflection)  * (double)(*(TrueCol->PalettePtr + ((iteration) % TrueCol->ColoursInPALFile) * 3 + 2))); // Blue 
-*/
 	    }
 	else
 	    {
-	    colour.rgbtRed = b;
-	    colour.rgbtGreen = b;
-	    colour.rgbtBlue = b;
+	    BYTE preRed = (BYTE)((gManp->PrePaletteColour >> 16) & 0xFF);
+	    BYTE preGreen = (BYTE)((gManp->PrePaletteColour >> 8) & 0xFF);
+	    BYTE preBlue = (BYTE)(gManp->PrePaletteColour & 0xFF);
+
+	    colour.rgbtRed = (BYTE)(preRed   * reflection);
+	    colour.rgbtGreen = (BYTE)(preGreen * reflection);
+	    colour.rgbtBlue = (BYTE)(preBlue  * reflection);
 	    }
 	}
 	    // plot the point
     plot.OutRGBpoint((WORD)x/* + xStart*/, (WORD)height - 1 - y, colour);
 
-//    local_width = WIDTHBYTES((DWORD)Dib->DibWidth * (DWORD)Dib->BitsPerPixel);
-//    address = ((DWORD)(/*height - 1 - */y) * (DWORD)(local_width + 3 - ((local_width - 1) % 4)) + (DWORD)((thread * width + x) * 3));
-//    memcpy(Dib->DibPixels + address, &colour, 3);
     if (ghMutex != NULL)
 	ReleaseMutex(ghMutex);
-    //	return 0;
     }
 
 //////////////////////////////////////////////////////////////////////
@@ -164,7 +154,9 @@ void	CPerturbation::CalculateDerivativeSlope(Complex &dc, Complex z)
     else if (subtype == 57)			// Polynomial
 						// z^k --> k a z^(k - 1)
 	{
-	Complex	Tenth, Nineth, Eighth, Seventh, Sixth, Quintic, Quartic, Cubic, Square;
+	Complex	Eighth, Seventh, Sixth, Quintic;
+	Complex	Quartic, Cubic, Square;
+
 	Square = z;
 	Cubic = Square * z;
 	Quartic = Cubic * z;
@@ -172,18 +164,16 @@ void	CPerturbation::CalculateDerivativeSlope(Complex &dc, Complex z)
 	Sixth = Quintic * z;
 	Seventh = Sixth * z;
 	Eighth = Seventh * z;
-	Nineth = Eighth * z;
-	Tenth = Nineth * z;
-	Tenth *= param[0];
-	Nineth *= param[1];
-	Eighth *= param[2];
-	Seventh *= param[3];
-	Sixth *= param[4];
-	Quintic *= param[5];
-	Quartic *= param[6];
-	Cubic *= param[7];
-	Square *= param[8];
-	dc = (Square * 2 + Cubic * 3 + Quartic * 4 + Quintic * 5 + Sixth * 6 + Seventh * 7 + Eighth * 8 + Nineth * 9 + Tenth * 10) * dc + param[9] + 1.0;
+
+	Eighth *= param[7];
+	Seventh *= param[8];
+	Sixth *= param[9];
+	Quintic *= param[10];
+	Quartic *= param[11];
+	Cubic *= param[12];
+	Square *= param[13];
+
+	dc = (Square * 2 + Cubic * 3 + Quartic * 4 + Quintic * 5 + Sixth * 6 + Seventh * 7 + Eighth * 8) * dc + param[14] + 1.0;
 	}
     else if (subtype == 59)			// Exp
 	{
@@ -202,9 +192,9 @@ void	CPerturbation::CalculateDerivativeSlope(Complex &dc, Complex z)
 	{
 	dc = (z.CSin() * -1.0) * dc + 1.0;	// d/dz cos(z) = -sin(z)
 	}
-    else if (subtype == 63)         // Fractional Half Power -> z^(n + 0.5)
+    else if (subtype == 63)			// Fractional Half Power -> z^(n + 0.5)
 	{
-	int n = (int)param[2];
+	int n = (int)param[10];
 
 	if (n < 1)
 	    n = 1;
@@ -241,75 +231,9 @@ void	CPerturbation::CalculateDerivativeSlope(Complex &dc, Complex z)
 	// and follows orbit flow more naturally.
 	//--------------------------------------------
 
-	Complex transport;// =
-//	    (ZPow * 0.85) +
-//	    ((ZPow * sqrtZ) * 0.15);
-
+	Complex transport;
 	transport = ZPow;
-
 	dc = transport * dc + 1.0;
-
-//	Complex transport = ZPow * sqrtZ;
-
-//	dc = transport * dc + 1.0;
-	}
-
-
-
-
-
-
-    else if (subtype == 64)			// Fractional Half Power -> z^(n + 0.5)
-	{
-	int n = (int)param[2];
-
-	if (n < 1)
-	    n = 1;
-	if (n > 6)
-	    n = 6;
-
-	//--------------------------------------------
-	// z^n
-	//--------------------------------------------
-
-	Complex ZPow(1.0, 0.0);
-
-	for (k = 0; k < n; k++)
-	    ZPow *= z;
-
-	//--------------------------------------------
-	// sqrt(z)
-	//--------------------------------------------
-
-	Complex sqrtZ = z.CSqrt();
-
-	double mag2 =
-	    sqrtZ.x * sqrtZ.x +
-	    sqrtZ.y * sqrtZ.y;
-
-	//--------------------------------------------
-	// Avoid divide-by-zero near branch origin
-	//--------------------------------------------
-
-	if (mag2 < 1.0e-300)
-	    {
-	    dc = Complex(1.0e300, 1.0e300);
-	    }
-	else
-	    {
-	    //----------------------------------------
-	    // d/dz z^(n+0.5)
-	    //
-	    // = (n + 0.5) z^(n-0.5)
-	    // = (n + 0.5) z^n / sqrt(z)
-	    //----------------------------------------
-
-	    Complex derivative =
-		(ZPow / sqrtZ) *
-		((double)n + 0.5);
-
-	    dc = derivative * dc + 1.0;
-	    }
 	}
     }
 
@@ -332,15 +256,17 @@ void	CPerturbation::BigCalculateDerivativeSlope(ExpComplex &ExpDC, ExpComplex z)
 	    {
 	    temp = 1.0;			// temp2 = 1.0;
 
-	    for (k = 0; k < (int)param[2] - 1; k++)
+	    for (k = 0; k < (int)param[10] - 1; k++)
 		temp *= z;
-	    ExpDC = temp * ExpDC * param[2] + 1.0;	// z^k --> k a z^(k - 1)
+	    ExpDC = temp * ExpDC * param[10] + 1.0;	// z^k --> k a z^(k - 1)
 	    }
 	}
     else if (subtype == 57)			// Polynomial
-						// z^k --> k a z^(k -1)
+						// z^k --> k a z^(k - 1)
 	{
-	ExpComplex	ExpTenth, ExpNineth, ExpEighth, ExpSeventh, ExpSixth, ExpQuintic, ExpQuartic, ExpCubic, ExpSquare;
+	ExpComplex ExpEighth, ExpSeventh, ExpSixth, ExpQuintic;
+	ExpComplex ExpQuartic, ExpCubic, ExpSquare;
+
 	ExpSquare = z;
 	ExpCubic = ExpSquare * z;
 	ExpQuartic = ExpCubic * z;
@@ -348,19 +274,18 @@ void	CPerturbation::BigCalculateDerivativeSlope(ExpComplex &ExpDC, ExpComplex z)
 	ExpSixth = ExpQuintic * z;
 	ExpSeventh = ExpSixth * z;
 	ExpEighth = ExpSeventh * z;
-	ExpNineth = ExpEighth * z;
-	ExpTenth = ExpNineth * z;
-	ExpTenth = ExpTenth * param[0];
-	ExpNineth = ExpNineth * param[1];
-	ExpEighth = ExpEighth * param[2];
-	ExpSeventh = ExpSeventh * param[3];
-	ExpSixth = ExpSixth * param[4];
-	ExpQuintic = ExpQuintic * param[5];
-	ExpQuartic = ExpQuartic * param[6];
-	ExpCubic = ExpCubic * param[7];
-	ExpSquare = ExpSquare * param[8];
-	ExpDC = (ExpSquare * 2 + ExpCubic * 3 + ExpQuartic * 4 + ExpQuintic * 5 + ExpSixth * 6 + ExpSeventh * 7 + ExpEighth * 8 + ExpNineth * 9 + ExpTenth * 10) * ExpDC + param[9] + 1.0;
+
+	ExpEighth = ExpEighth * param[7];
+	ExpSeventh = ExpSeventh * param[8];
+	ExpSixth = ExpSixth * param[9];
+	ExpQuintic = ExpQuintic * param[10];
+	ExpQuartic = ExpQuartic * param[11];
+	ExpCubic = ExpCubic * param[12];
+	ExpSquare = ExpSquare * param[13];
+
+	ExpDC = (ExpSquare * 2 + ExpCubic * 3 + ExpQuartic * 4 + ExpQuintic * 5 + ExpSixth * 6 + ExpSeventh * 7 + ExpEighth * 8 + param[14]) * ExpDC + 1.0;
 	}
+
     else if (subtype == 10)                 // Tricorn
 	{
 	ExpComplex conjugate = z;

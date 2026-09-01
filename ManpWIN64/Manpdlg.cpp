@@ -1848,7 +1848,7 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
      char		JuliaReal[120];
      char		JuliaImag[120];
      int		i, k;
-     char		s[10][100];
+     char		s[NUMPARAM][100];
      std::vector<char>	s1(SIZEOF_BF_VARS);
      std::vector<char>	s2(SIZEOF_BF_VARS);
      std::vector<char>	s3(SIZEOF_BF_VARS);
@@ -1900,7 +1900,7 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 		      SetDlgItemText(hDlg, ID_FRACPARTX2, "Second Function");
 		      }
 		  }
-	      for (i = gManp->Fractal.NumFunct, k = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < 10; i++, k++)
+	      for (i = gManp->Fractal.NumFunct, k = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < NUMPARAM; i++, k++)
 		  {
 		  SAFE_SPRINTF(s[k], "%f", *gManp->Fractal.ParamValue[k]);
 		  SetDlgItemText(hDlg, ID_FRACPARTX1 + i, fractalspecific[gManp->type].paramname[k]);
@@ -1908,7 +1908,7 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 		  hCtrl = GetDlgItem (hDlg, ID_FRACPARAM1 + i);
  		  EnableWindow (hCtrl, TRUE);
 		  }
-	      for (i = gManp->Fractal.NumFunct + gManp->Fractal.NumParam; i < 10; i++)
+	      for (i = gManp->Fractal.NumFunct + gManp->Fractal.NumParam; i < NUMPARAM; i++)
 		  SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
 
 	      return  TRUE ;
@@ -1955,7 +1955,7 @@ INT_PTR CALLBACK CoordDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 			if (temp_threshold < 1 || temp_threshold > MAXTHRESHOLD)
 			    temp_threshold = MAXTHRESHOLD;
 			gManp->threshold = (int)temp_threshold;
-			for (i = gManp->Fractal.NumFunct, k = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < 10; i++, k++)
+			for (i = gManp->Fractal.NumFunct, k = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < NUMPARAM; i++, k++)
 			    {
 			    GetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[k], 100);
 			    *gManp->Fractal.ParamValue[k] = atof(s[k]);
@@ -2043,7 +2043,7 @@ INT_PTR CALLBACK SelectFracParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM
     int i, j;
     static	int	index1 = -1, index2 = -1;
     static	int	numtrig;
-    char		s[10][100];
+    char		s[NUMPARAM][100];
     char		Bailout[120];
     CTrigFn		TrigFn;
 
@@ -2093,13 +2093,13 @@ INT_PTR CALLBACK SelectFracParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 		    SetDlgItemText(hDlg, ID_FRACPARAM2, gManp->Fractal.fnptr[index2]);
 		SetDlgItemText(hDlg, ID_FRACPARTX2, "Second Function");
 		}
-            for (i = gManp->Fractal.NumFunct, j = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < 10; i++, j++)
+            for (i = gManp->Fractal.NumFunct, j = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < NUMPARAM; i++, j++)
 		{
 		SAFE_SPRINTF(s[j], "%f", *gManp->Fractal.ParamValue[j]);
 		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, gManp->Fractal.ParamName[j]);
 		SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[j]);
 		}
-            for (i = gManp->Fractal.NumFunct + gManp->Fractal.NumParam; i < 10; i++)
+            for (i = gManp->Fractal.NumFunct + gManp->Fractal.NumParam; i < NUMPARAM; i++)
 		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
             return ( TRUE);
 
@@ -2132,7 +2132,7 @@ INT_PTR CALLBACK SelectFracParams(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			}
 		    GetDlgItemText(hDlg, IDC_BAILOUT, Bailout, 100);
 		    gManp->rqlim = atof(Bailout);
-		    for (i = gManp->Fractal.NumFunct, j = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < 10; i++, j++)
+		    for (i = gManp->Fractal.NumFunct, j = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < NUMPARAM; i++, j++)
 			{
 			GetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[j], 100);
 			*gManp->Fractal.ParamValue[j] = atof(s[j]);

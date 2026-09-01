@@ -750,12 +750,16 @@ int	CManp::ProcessParams(char *s)
 int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
     {
     char	*t;
-    char	s1[SIZEOF_BF_VARS]{};
-    char	s2[SIZEOF_BF_VARS]{};
-    char	s3[SIZEOF_BF_VARS]{};
-    char	s4[SIZEOF_BF_VARS]{};
-    char	s5[SIZEOF_BF_VARS]{};
-    char	s6[SIZEOF_BF_VARS]{};
+
+    std::vector<char> s1(SIZEOF_BF_VARS);
+    std::vector<char> s2(SIZEOF_BF_VARS);
+    std::vector<char> s3(SIZEOF_BF_VARS);
+    std::vector<char> s4(SIZEOF_BF_VARS);
+    std::vector<char> s5(SIZEOF_BF_VARS);
+    std::vector<char> s6(SIZEOF_BF_VARS);
+
+    std::vector<char> CoordText(SIZEOF_BF_VARS * 3);		// make sure we can hold 3 bignum co-ordinates
+
     double	Magnification = 1.0;
     double	Xmagfactor = 1.0;
     double	Rotation = 0.0;
@@ -767,9 +771,8 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
     int		count, NumCorners = 0;
     BigDouble   BigMag, temp, OneOverMag;
 
-    char CoordText[SIZEOF_BF_VARS * 3]{};			// make sure we can hold 3 bignum co-ordinates
-    strncpy_s(CoordText, sizeof(CoordText), s, _TRUNCATE);
-    char* p = CoordText;
+    strncpy_s(CoordText.data(), CoordText.size(), s, _TRUNCATE);
+    char* p = CoordText.data();
     while (*p && *p != ' ')
 	{
 	if (!isdigit((unsigned char)*p) &&
@@ -783,7 +786,7 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
 	p++;
 	}
 
-    t = CoordText;
+    t = CoordText.data();
 
     if (CentreFlag)
 	{
@@ -848,13 +851,13 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
     if (gManp->mandel_width < 0.0)
 	gManp->mandel_width = -gManp->mandel_width;
 
-    count = sscanf_s(t,	"%s %s %s %s %s %s",
-	s1, (unsigned)_countof(s1),
-	s2, (unsigned)_countof(s2),
-	s3, (unsigned)_countof(s3),
-	s4, (unsigned)_countof(s4),
-	s5, (unsigned)_countof(s5),
-	s6, (unsigned)_countof(s6));
+    count = sscanf_s(t, "%s %s %s %s %s %s",
+	s1.data(), (unsigned)s1.size(),
+	s2.data(), (unsigned)s2.size(),
+	s3.data(), (unsigned)s3.size(),
+	s4.data(), (unsigned)s4.size(),
+	s5.data(), (unsigned)s5.size(),
+	s6.data(), (unsigned)s6.size());
 
     if (count < 4)
 	{
@@ -868,7 +871,7 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
 	OutputDebugStringA("Exceeded allowable precision in Fractint par file\n");
 	return -1;
 	}
-    if (precision > DBL_DIG - 3 && NumCorners != 6)			// bignum support not available yout
+    if (precision > DBL_DIG - 3 && NumCorners != 6)			// bignum support not available yet
 	{
 	decimals = precision + PRECISION_FACTOR;
 
@@ -879,33 +882,24 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
 	    }
 	BigNumFlag = TRUE;
 	BigBailout = rqlim;
-	ConvertString2Bignum(BigHor.x, s1);
-	ConvertString2Bignum(BigVert.x, (CentreFlag) ? s2 : s3);
+	ConvertString2Bignum(BigHor.x, s1.data());
+	ConvertString2Bignum(BigVert.x, CentreFlag ? s2.data() : s3.data());
 	if (CentreFlag)
 	    {
-	    ConvertString2Bignum(BigMag.x, s3);
+	    ConvertString2Bignum(BigMag.x, s3.data());
 	    if (mpfr_zero_p(BigMag.x))					// no naughty division
 		{
 		OutputDebugStringA("Naughty division in Fractint par file\n");
 		return -1;
 		}
 	    OneOverMag = BigMag.BigInvert();
-	    // for debugging
-//	    ConvertBignum2String(s4, BigHor.x);
-//	    ConvertBignum2String(s5, BigVert.x);
-//	    ConvertBignum2String(s6, BigMag.x);
-
 	    BigHor = BigHor - OneOverMag * AspectRatio;
 	    BigVert = BigVert - OneOverMag;
 	    BigWidth = OneOverMag + OneOverMag;
-	    // for debugging
-//	    ConvertBignum2String(s4, BigHor.x);
-//	    ConvertBignum2String(s5, BigVert.x);
-//	    ConvertBignum2String(s6, BigWidth.x);
 	    }
 	else
 	    {
-	    ConvertString2Bignum(temp.x, s4);			// mandel_width = vert - a2;
+	    ConvertString2Bignum(temp.x, s4.data());		// mandel_width = vert - a2;
 	    BigWidth = BigVert - temp;
 	    if (mpfr_sgn(BigWidth.x) == 0)	// no naughty division
 		{

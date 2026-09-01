@@ -22,7 +22,6 @@
 
 extern	int	StartColourCycling;		// we can start the colour cycling from any point..good for cycling animations
 extern	BYTE	default_palette[];		// default VGA colour palette
-//extern	std::vector<float> wpixels;		// an array of doubles holding slope modified iteration counts
 INT_PTR CALLBACK DisplayRGBDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
 //////////////////////////////////////////////////////////////////////
@@ -293,7 +292,6 @@ INT_PTR CALLBACK InsideDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 	    hwndParent = GetParent(hDlg);
 
 	    switch ((int)LOWORD(wParam))
-		//	       switch (wParam)
 		{
 		case SB_PAGEDOWN:
 		    color[nIndex] -= 15;        // fall through
@@ -363,7 +361,7 @@ INT_PTR CALLBACK InsideDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 
 INT_PTR CALLBACK DisplayRGBDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     {
-    int	r, g, b;
+    int		r, g, b;
     char	s[20];
 
     switch (message)
@@ -391,6 +389,125 @@ INT_PTR CALLBACK DisplayRGBDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 	}
     return FALSE;
     }
+
+INT_PTR CALLBACK SetStartRGBDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+    static	    short    color[3];
+    HWND	    hwndParent, hCtrl;
+    short	    nCtrlID, nIndex;
+    char	    s[480];
+    static	    CPreview	PreviewColour;
+
+    PreviewColour.HorOffset = HOR_OFFSET;						// dimensions of preview window
+    PreviewColour.VertOffset = VERT_OFFSET;
+    PreviewColour.PreviewHeight = PREVIEW_HEIGHT;
+    PreviewColour.PreviewWidth = PREVIEW_WIDTH;
+    switch (message)
+	{
+	case WM_INITDIALOG:
+	    color[2] = (WORD)(gManp->PrePaletteColour & 0xff);
+	    color[1] = (WORD)((gManp->PrePaletteColour >> 8) & 0xff);
+	    color[0] = (WORD)((gManp->PrePaletteColour >> 16) & 0xff);
+	    for (nCtrlID = 10; nCtrlID < 13; nCtrlID++)
+		{
+		//		    color[nCtrlID - 10] = 0;
+		hCtrl = GetDlgItem(hDlg, nCtrlID);
+		SetScrollRange(hCtrl, SB_CTL, 0, 255, FALSE);
+		SetScrollPos(hCtrl, SB_CTL, 255 - color[nCtrlID - 10], FALSE);
+		SetDlgItemInt(hDlg, nCtrlID + 3, color[nCtrlID - 10], TRUE);
+		}
+	    PreviewColour.InitPreview(hDlg);
+	    PreviewColour.PreviewDib.ClearDib(color[0], color[1], color[2]);
+	    PreviewColour.Preview(hDlg);
+	    InvalidateRect(hDlg, NULL, FALSE);
+
+	    //		SendMessage (hDlg, WM_HSCROLL, 0, 0L);
+	    return TRUE;
+
+	case WM_VSCROLL:
+
+#ifdef	WIN95								// 32 bit code
+	    hCtrl = GET_WM_COMMAND_HWND(wParam, (_int64)lParam);
+	    if ((nCtrlID = ((WORD)(GetWindowLong(hCtrl, GWL_ID)))) == 0)
+		{
+		_snprintf_s(s, 480, _TRUNCATE, "Error: Scrollbar fail: <%ld>", GetLastError());
+		MessageBox(hDlg, s, "Paul's Graphics Viewer", MB_ICONEXCLAMATION | MB_OK);
+		}
+
+#else									// 16 bit code
+	    hCtrl = (HWND)(HIWORD(lParam));
+	    nCtrlID = GetWindowWord(hCtrl, GWW_ID);
+#endif
+
+	    nIndex = nCtrlID - 10;
+	    hwndParent = GetParent(hDlg);
+
+	    switch ((int)LOWORD(wParam))
+		//	       switch (wParam)
+		{
+		case SB_PAGEDOWN:
+		    color[nIndex] -= 15;        // fall through
+		case SB_LINEDOWN:
+		    color[nIndex] = max(0, color[nIndex] - 1);
+		    break;
+		case SB_PAGEUP:
+		    color[nIndex] += 15;        // fall through
+		case SB_LINEUP:
+		    color[nIndex] = min(255, color[nIndex] + 1);
+		    break;
+		case SB_TOP:
+		    color[nIndex] = 255;
+		    break;
+		case SB_BOTTOM:
+		    color[nIndex] = 0;
+		    break;
+		case SB_THUMBPOSITION:
+		case SB_THUMBTRACK:
+#ifdef	WIN95								// 32 bit code
+		    color[nIndex] = 255 - HIWORD(wParam);
+#else									// 16 bit code
+		    color[nIndex] = LOWORD(lParam);
+#endif
+		    //			 color [nIndex] = LOWORD (lParam) ;
+		    break;
+		default:
+		    return FALSE;
+		}
+	    SetScrollPos(hCtrl, SB_CTL, 255 - color[nIndex], TRUE);
+	    SetDlgItemInt(hDlg, nCtrlID + 3, color[nIndex], TRUE);
+	    PreviewColour.PreviewDib.ClearDib(color[0], color[1], color[2]);
+	    PreviewColour.Preview(hDlg);
+	    return TRUE;
+
+	case WM_PAINT:
+	    BeginPaint(hDlg, &gManp->ps);
+	    PreviewColour.PreviewDib.ClearDib(color[0], color[1], color[2]);
+	    PreviewColour.Preview(hDlg);
+	    EndPaint(hDlg, &gManp->ps);
+	    return TRUE;
+
+	case WM_COMMAND:
+	    switch ((int)LOWORD(wParam))
+		{
+		case IDOK:
+		    gManp->PrePaletteColour = ((DWORD)color[0] << 16) | ((DWORD)color[1] << 8) | (DWORD)color[2];
+		    if (gManp->type == SLOPEDERIVATIVE || gManp->type == SLOPEFORWARDDIFF)
+			gManp->param[15] = (double)gManp->PrePaletteColour;
+		    gManp->Plot.RefreshScreen();			// reload screen values
+		    hwndParent = GetParent(hDlg);
+		    InvalidateRect(hwndParent, &gManp->r, FALSE);	// force repaint
+		    PreviewColour.PreviewDib.CloseDibPtrs();
+		    EndDialog(hDlg, IDOK);
+		    return TRUE;
+		case IDCANCEL:
+		    PreviewColour.PreviewDib.CloseDibPtrs();
+		    EndDialog(hDlg, IDCANCEL);
+		    return TRUE;
+		}
+	    break;
+	}
+    return FALSE;
+    }    
 
 /**************************************************************************
 	Dialog Control for Colour Palette Setting

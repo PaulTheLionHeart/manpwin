@@ -12,6 +12,7 @@
 #include "Complex.h"
 #include "ManpWIN.h"
 #include "Manp.h"
+#include "FilterTemplate.h"
 
 #pragma once
 
@@ -34,7 +35,7 @@ void InitFwdT(BYTE juliaflag, TComplex c, TComplex* z, TComplex* q, TComplex* a,
         *q = c;
 
         if (subtype == 4)   // Sine
-            *z = param[6];
+            *z = param[9];
 
         else if (subtype == 16)  // Newton
             *z = c;
@@ -95,9 +96,8 @@ void DoSlopeFwdDiffFnT(TComplex* z, TComplex* q, TComplex* b, TComplex* aa3, TCo
 //    auto real_imag = z->x * z->y;
 //    auto t = z->x * z->y;
     int k;
-    int degree1, degree2;
 
-    *degree = (int)param[5];
+    *degree = (int)param[9];
 
     switch (subtype)
 	{
@@ -140,7 +140,7 @@ void DoSlopeFwdDiffFnT(TComplex* z, TComplex* q, TComplex* b, TComplex* aa3, TCo
 
 	case 4:						// Sin
 	    SlopeDegree = 2;
-	    if ((int)param[5] == 0)
+	    if ((int)param[10] == 0)
 		*z = z->CSin() * *q;
 	    else
 		*z = z->CSin() + *q;
@@ -165,10 +165,25 @@ void DoSlopeFwdDiffFnT(TComplex* z, TComplex* q, TComplex* b, TComplex* aa3, TCo
 	    break;
 
 	case 8:
-	    degree1 = (int)param[6];
-	    degree2 = (int)param[7];
-	    SlopeDegree = *degree;
-	    *z = z->CPolynomial(*degree) + z->CPolynomial(degree1) + z->CPolynomial(degree2) + *q;
+	    if (param[9] != 0.0)
+		SlopeDegree = 5;
+	    else if (param[10] != 0.0)
+		SlopeDegree = 4;
+	    else if (param[11] != 0.0)
+		SlopeDegree = 3;
+	    else if (param[12] != 0.0)
+		SlopeDegree = 2;
+	    else
+		SlopeDegree = 1;
+
+	    *z =
+		z->CPolynomial(5) * param[9]
+		+ z->CPolynomial(4) * param[10]
+		+ z->CPolynomial(3) * param[11]
+		+ z->CPolynomial(2) * param[12]
+		+ (*z)              * param[13]
+		+ param[14]
+		+ (*q);
 	    break;
 
 	case 9:
@@ -240,10 +255,9 @@ int RunSlopeFwdDiffT(int user_data(HWND), Complex j, TReal mandel_width, TReal h
     TComplex z, z2, c, q;
     TComplex a, b, v, a2, aa3;
     TComplex zNewton = 0.0;
-    TComplex t2;
 
-    TComplex OldZ, OlderZ;
-//    TComplex OldZ2, OlderZ2;
+    TComplex PrevZNewton;
+    bool HavePrevZNewton = false;
 
     double iterations;
     double log_zn, nu;
@@ -253,6 +267,9 @@ int RunSlopeFwdDiffT(int user_data(HWND), Complex j, TReal mandel_width, TReal h
     bool SpecialFlag = false;
     int  SlopeDegree = 2;
 
+    double min_orbit = 0.0;
+    long min_index = 0;
+
     double ScreenRatio = (double)ctx.xdots / (double)ctx.ydots;
 
     TReal temp_x = ScreenRatio / (double)(ctx.xdots - 1);
@@ -261,12 +278,10 @@ int RunSlopeFwdDiffT(int user_data(HWND), Complex j, TReal mandel_width, TReal h
     xgap = temp_x * mandel_width;
     ygap = temp_y * mandel_width;
 
-    int totalPixels = (int)ctx.pixelOrder->size();
+    int totalPixels = ctx.totalPixels;
 
-    PlotMode mode = currentMode;
-    int chunk = (currentMode == PlotMode::Tile) ? 1024 : CHUNK_SIZE;
-
-    const double epsilon = 1e-9;   // tweak if needed
+    PlotMode mode = ctx.mode;
+    int chunk = (mode == PlotMode::Tile) ? 1024 : CHUNK_SIZE;
 
     while (true)
 	{
@@ -305,25 +320,22 @@ int RunSlopeFwdDiffT(int user_data(HWND), Complex j, TReal mandel_width, TReal h
             gPixelsDone.fetch_add(1, std::memory_order_relaxed);
 
 	    SpecialFlag = false;
+	    HavePrevZNewton = false;
+
+	    min_orbit = 0.0;
+	    min_index = 0;
+
+	    if (ctx.InsideMethod == BOF60 || ctx.InsideMethod == BOF61)
+		min_orbit = 100000.0;
 
             // --- INIT ---
             InitFwdT(juliaflag, c, &z, &q, &a, &b, &v, &a2, &aa3, j, ctx.subtype, ctx.variety, ctx.param);
-
-            // --- Forward diff companion ---
-            z2 = z;
-            z2.x += epsilon;
 
             iterations = 0.0;
 
             for (;;)
 		{
-                if (ctx.subtype == 16)
-		    {
-                    OlderZ = OldZ;
-                    OldZ = z;
-		    }
-
-                iterations++;
+                 iterations++;
                 if (iterations >= threshold)
                     break;
 
@@ -332,6 +344,17 @@ int RunSlopeFwdDiffT(int user_data(HWND), Complex j, TReal mandel_width, TReal h
 
                 // --- CORE ITERATION ---
                 DoSlopeFwdDiffFnT(&z,  &q, &b, &aa3, &zNewton, SlopeDegree, ctx.subtype, ctx.variety, ctx.degree, ctx.param);
+
+		if (ctx.InsideMethod == BOF60 || ctx.InsideMethod == BOF61)
+		    {
+		    double BOFmagnitude = ToDouble(z.CSumSqr());
+
+		    if (BOFmagnitude < min_orbit)
+			{
+			min_orbit = BOFmagnitude;
+			min_index = (long)iterations;
+			}
+		    }
 
                 // --- BAILOUT (ONLY z) ---
                 if (ctx.subtype == 15)
@@ -344,7 +367,6 @@ int RunSlopeFwdDiffT(int user_data(HWND), Complex j, TReal mandel_width, TReal h
                         if (q.CSumSqr() < 0.111111)
 			    {
 			    SpecialFlag = true;
-			    iterations = SPECIALPIXEL;
 			    break;
 			    }
                         v = z + a2;
@@ -357,15 +379,18 @@ int RunSlopeFwdDiffT(int user_data(HWND), Complex j, TReal mandel_width, TReal h
                     if (v.CSumSqr() <= 0.000001)
 			{
 			SpecialFlag = true;
-			iterations = SPECIALPIXEL;
-                        break;
+			break;
 			}
 		    }
                 else if (ctx.subtype == 16)
 		    {
-                    double d = zNewton.CSumSqr();
-                    if (d < MINSIZE)
-                        break;
+		    double d = zNewton.CSumSqr();
+
+		    if (d < MINSIZE)
+			break;
+
+		    PrevZNewton = zNewton;
+		    HavePrevZNewton = true;
 		    }
                 else if (z.CSumSqr() >= rqlim)
                     break;
@@ -376,47 +401,80 @@ int RunSlopeFwdDiffT(int user_data(HWND), Complex j, TReal mandel_width, TReal h
 		{
                 if (ctx.subtype == 16)
 		    {
-                    double t;
-                    a = OldZ - OlderZ;
-                    b = z - OldZ;
+		    if (HavePrevZNewton)
+			{
+			double prev = PrevZNewton.CSumSqr();
+			double curr = zNewton.CSumSqr();
 
-                    log_zn = log(MINSIZE) - log(a.CSumSqr());
-                    t = log(b.CSumSqr()) - log(a.CSumSqr());
-                    nu = log_zn / t;
+			log_zn = log(MINSIZE) - log(prev);
+			double t = log(curr) - log(prev);
 
-                    iterations = iterations + nu;
+			nu = log_zn / t;
+			iterations = iterations + nu;
+			}
 		    }
                 else
 		    {
-                    // --- FORWARD DIFF SLOPE ---
-                    TComplex delta = z2 - z;
+		    // Use the escaped magnitude of z, matching the January 2026 code.
+		    log_zn = log((double)z.CSumSqr()) / SlopeDegree;
+		    nu = log(log_zn / log(SlopeDegree)) / log(SlopeDegree);
 
-                    double mag = sqrt((double)(delta.CSumSqr()));
-
-                    log_zn = log(mag) / SlopeDegree;
-                    nu = log(log_zn / log(SlopeDegree)) / log(SlopeDegree);
-
-                    iterations = iterations + 1 - nu;
+		    iterations = iterations + 1 - nu;
 		    }
-
-                if (ctx.subtype == 15 && SpecialFlag)
-                    iterations = SPECIALPIXEL;
 		}
 
-            index = ((DWORD)y * (DWORD)ctx.width) + (DWORD)x;
+	    long FilterIndex = (long)iterations;
 
-            if (x >= 0 && x < ctx.xdots && y >= 0 && y < ctx.ydots)
+	    if ((long)iterations >= threshold)
+		{
+		if (ctx.InsideMethod != NONE)
+		    {
+		    FilterIndex = DoInsideFilterT((long)iterations, z, ctx.InsideMethod, threshold, min_orbit, min_index);
+		    }
+		}
+	    else if (ctx.OutsideMethod != NONE)
+		{
+		int hooper = 0;
+		int paletteColours = ctx.TrueCol->ColoursInPALFile;
+		int decomp = 0;
+		int special = 0;
+		int logval = 0;
+		int potentialColours = ctx.TrueCol->ColoursInPALFile;
+		BYTE *logtable = NULL;
+
+		FilterIndex = DoOutsideFilterT<TComplex, TReal>((long)iterations, z, ctx.OutsideMethod, hooper, threshold, paletteColours, decomp, ctx.biomorph, rqlim, special, logval, logtable, potentialColours, ctx.TrueCol, ctx.potparam);
+		}
+
+	    index = ((DWORD)y * (DWORD)ctx.width) + (DWORD)x;
+
+	    if (x >= 0 && x < ctx.xdots && y >= 0 && y < ctx.ydots)
+		{
+		// wpixels contains the numeric Forward Difference value.
 		(*ctx.wpixels)[index] = (float)iterations;
 
-            if ((long)iterations >= threshold)
-                ColourPtr = threshold;
-            else
-		{
-                if (abs(ctx.PaletteShift) <= 1)
-                    ColourPtr = (long)iterations;
-                else
-                    ColourPtr = ((long)(iterations * ctx.PaletteShift)) % 256;
+		// PixelFlags now carries pixel classification previously encoded
+		// as INSIDEPIXEL and SPECIALPIXEL sentinel values in wpixels.
+		size_t FlagIndex = (size_t)y * (size_t)ctx.xdots + (size_t)x;
+
+		if (SpecialFlag)
+		    (*ctx.PixelFlags)[FlagIndex] |= PIXEL_SPECIAL;
+		else if ((long)iterations >= threshold)
+		    {
+		    // Preserve the inside filter colour index.  RenderSlope() will
+		    // plot this directly without applying Forward Difference lighting.
+		    (*ctx.wpixels)[index] = (float)FilterIndex;
+		    (*ctx.PixelFlags)[FlagIndex] |= PIXEL_INSIDE;
+		    }
+		else if (ctx.OutsideMethod != NONE)
+		    {
+		    // Use the outside filter result as the Forward Difference value.
+		    (*ctx.wpixels)[index] = (float)FilterIndex;
+		    }
 		}
+	    if ((long)iterations >= threshold)
+		ColourPtr = threshold;
+	    else
+		ColourPtr = (long)iterations;
 
             if (AbortRequested())
                 return -1;

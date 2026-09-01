@@ -25,12 +25,9 @@ static	void	set_palette1(BYTE *, BYTE *),set_palette2(BYTE *, BYTE *),
 
 extern 	void	set_palette(void), bell(int);
 extern	int	user_data(HWND);
-//extern	void	init_windows_colours(HWND, char *);
 extern	void	InitTrueColourPalette(BYTE);
 
 static	int	paused;				// rotate-is-paused flag 
-
-//extern	CTrueCol    TrueCol;			// palette info
 
 static unsigned char Red[3]    = {255, 0, 0};	// for shifted-Fkeys
 static unsigned char Green[3]  = { 0,255, 0};
@@ -41,10 +38,6 @@ static unsigned char Yellow[3] = {255,255, 0};
 static unsigned char Brown[3]  = {127,127, 0};
 
 char mapmask[13] = {"*.map"};
-
-//extern	std::vector<float> wpixels;		// floating point iterations for each pixels
-//extern	HWND	GlobalHwnd;			// to allow passing of hwnd 
-//extern	CDib	Dib;				// Device Independent Bitmap
 
 /***************************************************************************
 	Rotate VGA palette

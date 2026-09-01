@@ -640,15 +640,23 @@ int	CManp::InitPixelFractal(int threadCount)
 	threadCount = MAXTHREADS;
 
     for (i = 0; i < threadCount; i++)
-	Pixel[i]->EndPixel = false;				// We're not exiting yet
+	Pixel[i]->EndPixel = false;					// We're not exiting yet
+
+    // All Pixel, Perturbation and Slope render paths pass through here, so clear any pixel classifications left by the previous render.
+    std::fill(PixelFlags.begin(), PixelFlags.end(), PIXEL_NORMAL);	
 
     gFatalErrorOccurred.store(false);
-    gStopRequested.store(false, std::memory_order_relaxed);	// NEW: reset flag before starting threads
+    gStopRequested.store(false, std::memory_order_relaxed);		// reset flag before starting threads
     CurrentRenderMode = RENDER_PIXEL;
     RGBTRIPLE   SpecialColour;
     SpecialColour.rgbtRed = (BYTE)param[1];
     SpecialColour.rgbtGreen = (BYTE)param[2];
     SpecialColour.rgbtBlue = (BYTE)param[3];
+
+    // Preserve the special colour in each Pixel object so Forward
+    // Difference rendering can use the same colour later.
+    for (i = 0; i < threadCount; i++)
+	Pixel[i]->SpecialColour = SpecialColour;
 
     if (type == CUBIC)
 	SetupSpecialColourIndex(TrueCol, threshold, SpecialColour, oldColour, SPECIALINDEX);
@@ -737,10 +745,10 @@ void CManp::InitPixelObjects(int threadCount, HWND hwnd)
 	    Pixel[i]->ManageBignumPrecision(decimals);
 
 	Pixel[i]->InitFractalDefinition(type, subtype, &degree, rqlim, threshold, BailoutTestType, param, potparam, &Fractal);
-	Pixel[i]->InitControlFlags(calcmode, juliaflag, invert, phaseflag, pairflag, _3dflag, period_level, /*reset_period, */distest, InsideMethod, OutsideMethod, biomorph, nFDOption, SpecialFlag);
+	Pixel[i]->InitControlFlags(calcmode, juliaflag, invert, phaseflag, pairflag, _3dflag, period_level, distest, InsideMethod, OutsideMethod, biomorph, nFDOption, SpecialFlag);
 	Pixel[i]->InitViewport(hor, vert, mandel_width, BigHor, BigVert, BigWidth, AspectRatio, xdots, ydots, RotationAngle, RotationCentre, j);
 	Pixel[i]->InitArithmetic(BigNumFlag, precision);
-	Pixel[i]->InitRendering(/*wpixels, */&Dib, width, PlotType, &TrueCol, colors, UseCurrentPalette, &AutoStereo_value, &symmetry);
+	Pixel[i]->InitRendering(&Dib, width, PlotType, &TrueCol, colors, UseCurrentPalette, &AutoStereo_value, &symmetry);
 	Pixel[i]->GeneralInit();
 	Pixel[i]->InitBailout();
 	Pixel[i]->InitRuntimeControl(&time_to_zoom, &time_to_restart, &time_to_reinit, &time_to_quit, &blockindex, &totpasses, &PixelCurPass[i]);
@@ -787,8 +795,8 @@ int	CManp::RunEscapeTimeEngine(HWND hwnd)
     InitThreadArrays(threadCount);
     InitPixelObjects(threadCount, hwnd);					// okay, we have to get the globals into the Pixel object somehow
 
-    //#define debug   1
-    #ifdef debug
+//#define DEBUG_CLASS_SIZES 1
+#ifdef DEBUG_CLASS_SIZES
     size_t	PlotSize, PixelSize, SlopeSize, Others;
 
     PlotSize = sizeof(CPlot);
@@ -796,7 +804,6 @@ int	CManp::RunEscapeTimeEngine(HWND hwnd)
     SlopeSize = sizeof(CSlope);
     Others = sizeof(COtherFunctions);
     #endif
-
 
     if (Pixel.size() > 0 && Pixel[0] != nullptr)
 	{
@@ -1005,14 +1012,77 @@ void CManp::HandleFractalStateMachine(HWND hwnd, char* szSaveFileName)
 void CManp::RebuildFractalMetadata(WORD type, int subtype)
     {
     Fractal.NumParam = 0;
-    for (int i = 0; i < NUMPARAM; i++)					// make sure to clear out old data
+    for (int i = 0; i < MAXPARAM; i++)					// make sure to clear out old data
 	Fractal.ParamName[i] = "";
     switch (type)
 	{
 	case PERTURBATION:
 	    Fractal.NumParam = PerturbationSpecific[subtype].numparams;
-	    for (int i = 0; i < NUMPERTPARAM; i++)
-		Fractal.ParamName[i] = PerturbationSpecific[subtype].paramname[i];
+	    Fractal.ParamName[0] = "Smooth Factor - 0.0 means off";
+	    Fractal.ParamName[1] = "Light Direction (Degrees)";
+	    Fractal.ParamName[2] = "Slope Mapping Depth";
+	    Fractal.ParamName[3] = "Slope Mapping Strength";
+	    Fractal.ParamName[4] = "Slope Transfer Factor";
+	    Fractal.ParamName[5] = "Start Palette 0 - Max Iterations";
+
+	    switch (subtype)
+		{
+		case 0:		// Mandelbrot
+		case 59:	// Exp:
+		case 60:	// Sinh
+		case 61: 	// Sin
+		case 62:	// Cos
+		    Fractal.ParamName[6] = "Pert Colour Method";
+		    Fractal.ParamName[7] = "Iteration Divider";
+		    Fractal.ParamName[8] = "Palette Offset";
+		    Fractal.ParamName[9] = "Light Source Height (Derivative)";
+		    break;
+		case 1:		// power
+		case 63:	// Fractional Power - z^(a+ib)
+		    Fractal.ParamName[6] = "Pert Colour Method";
+		    Fractal.ParamName[7] = "Iteration Divider";
+		    Fractal.ParamName[8] = "Palette Offset";
+		    Fractal.ParamName[9] = "Light Source Height (Derivative)";
+		    Fractal.ParamName[10] = "Degree";
+		    break;
+		case 11:	// Mandelbar Power
+		    Fractal.ParamName[6] = "Pert Colour Method";
+		    Fractal.ParamName[7] = "Iteration Divider";
+		    Fractal.ParamName[8] = "Palette Offset";
+		    Fractal.ParamName[9] = "Degree";
+		    break;
+		case 53:	// TheRedshiftRider: (a*z^2 +/- z^n + c)
+		    Fractal.ParamName[6] = "Pert Colour Method";
+		    Fractal.ParamName[7] = "Iteration Divider";
+		    Fractal.ParamName[8] = "Palette Offset";
+		    Fractal.ParamName[9] = "a real";
+		    Fractal.ParamName[10] = "a imag";
+		    Fractal.ParamName[11] = "n";
+		    Fractal.ParamName[12] = "Positive? (1=yes 0=no)";
+		    break;
+		case 57:
+		    // Polynomial uses a special parameter layout because it requires
+		    // more formula coefficients than the standard Pert layout allows.
+		    Fractal.ParamName[6] = "Light Source Height (Derivative)";
+		    Fractal.ParamName[7] = "Eighth Order Coefficient";
+		    Fractal.ParamName[8] = "Seventh Order Coefficient";
+		    Fractal.ParamName[9] = "Sixth Order Coefficient";
+		    Fractal.ParamName[10] = "Quintic Coefficient";
+		    Fractal.ParamName[11] = "Quartic Coefficient";
+		    Fractal.ParamName[12] = "Cubic Coefficient";
+		    Fractal.ParamName[13] = "Square Coefficient";
+		    Fractal.ParamName[14] = "Z Coefficient";
+		    break;
+		default:
+		    Fractal.ParamName[6] = "Pert Colour Method";
+		    Fractal.ParamName[7] = "Iteration Divider";
+		    Fractal.ParamName[8] = "Palette Offset";
+		    // Reserve a few parameter slots for future slope rendering controls.
+		    // Keeping these fixed avoids another round of parameter reordering.
+		    Fractal.ParamName[9] = "Reserved - not in use";
+		    Fractal.ParamName[10] = "Reserved - not in use";
+		    break;
+		}
 	    break;
 	case MANDELDERIVATIVES:
 	    Fractal.NumParam = fractalspecific[type].numparams;
@@ -1049,29 +1119,38 @@ void CManp::RebuildFractalMetadata(WORD type, int subtype)
 	    Fractal.ParamName[0] = "Light Source Angle (degrees)";
 	    Fractal.ParamName[1] = "Light Source Height";
 	    Fractal.ParamName[2] = "Start Palette 0 - Max Iterations";
+	    Fractal.ParamName[3] = "Smooth Factor - 0.0 means off";
+	    // Reserve a few parameter slots for future slope rendering controls.
+	    // Keeping these fixed avoids another round of parameter reordering.
+	    Fractal.ParamName[4] = "Reserved - not in use";
+	    Fractal.ParamName[5] = "Reserved - not in use";
+	    Fractal.ParamName[6] = "Reserved - not in use";
 
 	    switch (subtype)
 		{
 		case 3:
-		    Fractal.ParamName[3] = "0=multiply, else=plus";
-		    Fractal.ParamName[4] = "Start value for z";
+		    Fractal.ParamName[7] = "0=multiply, else=plus";
+		    Fractal.ParamName[8] = "Start value for z";
 		    break;
 		case 2:
 		case 6:
 		case 10:
 		case 12:
-		    Fractal.ParamName[3] = "Polynomial Degree (>= 0)";
+		    Fractal.ParamName[7] = "Polynomial Degree (>= 0)";
 		    break;
 		case 7:
-		    Fractal.ParamName[3] = "First Polynomial Degree (>= 0)";
-		    Fractal.ParamName[4] = "Second Polynomial Degree (>= 0)";
-		    Fractal.ParamName[5] = "Third Polynomial Degree (>= 0)";
+		    Fractal.ParamName[7] = "Quintic Coefficient";
+		    Fractal.ParamName[8] = "Quartic Coefficient";
+		    Fractal.ParamName[9] = "Cubic Coefficient";
+		    Fractal.ParamName[10] = "Square Coefficient";
+		    Fractal.ParamName[11] = "Z Coefficient";
+		    Fractal.ParamName[12] = "Constant";
 		    break;
 		case 13:
-		    Fractal.ParamName[3] = "0=CBIN, 1=CCIN, 2=CFIN, 3=CKIN";
-		    Fractal.ParamName[4] = "Special Colour Red Component";
-		    Fractal.ParamName[5] = "Special Colour Green Component";
-		    Fractal.ParamName[6] = "Special Colour Blue Component";
+		    Fractal.ParamName[7] = "0=CBIN, 1=CCIN, 2=CFIN, 3=CKIN";
+		    Fractal.ParamName[8] = "Special Colour Red Component";
+		    Fractal.ParamName[9] = "Special Colour Green Component";
+		    Fractal.ParamName[10] = "Special Colour Blue Component";
 		    break;
 		}
 	    break;
@@ -1082,34 +1161,42 @@ void CManp::RebuildFractalMetadata(WORD type, int subtype)
 	    Fractal.ParamName[2] = "Light Direction (Degrees)";
 	    Fractal.ParamName[3] = "Mapping Depth";
 	    Fractal.ParamName[4] = "Mapping Strength";
-	    Fractal.ParamName[5] = "Palette Shift";
+	    Fractal.ParamName[5] = "Smooth Factor - 0.0 means off";
+	    // Reserve a few parameter slots for future slope rendering controls.
+	    // Keeping these fixed avoids another round of parameter reordering.
+	    Fractal.ParamName[6] = "Reserved - not in use";
+	    Fractal.ParamName[7] = "Reserved - not in use";
+	    Fractal.ParamName[8] = "Reserved - not in use";
 
 	    switch (subtype)
 		{
 		case 4:
-		    Fractal.ParamName[5] = "0=multiply, else=plus";
-		    Fractal.ParamName[6] = "Start value for z";
+		    Fractal.ParamName[9] = "0=multiply, else=plus";
+		    Fractal.ParamName[10] = "Start value for z";
 		    break;
 		case 3:
 		case 7:
 		case 11:
 		case 13:
-		    Fractal.ParamName[5] = "Polynomial Degree (>= 0)";
+		    Fractal.ParamName[9] = "Polynomial Degree (>= 0)";
 		    break;
 		case 8:
-		    Fractal.ParamName[5] = "First Polynomial Degree (>= 0)";
-		    Fractal.ParamName[6] = "Second Polynomial Degree (>= 0)";
-		    Fractal.ParamName[7] = "Third Polynomial Degree (>= 0)";
+		    Fractal.ParamName[9] = "Quintic Coefficient";
+		    Fractal.ParamName[10] = "Quartic Coefficient";
+		    Fractal.ParamName[11] = "Cubic Coefficient";
+		    Fractal.ParamName[12] = "Square Coefficient";
+		    Fractal.ParamName[13] = "Z Coefficient";
+		    Fractal.ParamName[14] = "Constant";
 		    break;
 		case 15:
-		    Fractal.ParamName[5] = "0=CBIN, 1=CCIN, 2=CFIN, 3=CKIN";
-		    Fractal.ParamName[6] = "Special Colour Red Component";
-		    Fractal.ParamName[7] = "Special Colour Green Component";
-		    Fractal.ParamName[8] = "Special Colour Blue Component";
+		    Fractal.ParamName[9] = "0=CBIN, 1=CCIN, 2=CFIN, 3=CKIN";
+		    Fractal.ParamName[10] = "Special Colour Red Component";
+		    Fractal.ParamName[11] = "Special Colour Green Component";
+		    Fractal.ParamName[12] = "Special Colour Blue Component";
 
 		    break;
 		case 16:
-		    Fractal.ParamName[5] = "Polynomial Degree (>= 2)";
+		    Fractal.ParamName[9] = "Polynomial Degree (>= 2)";
 		    break;
 		}
 	    break;

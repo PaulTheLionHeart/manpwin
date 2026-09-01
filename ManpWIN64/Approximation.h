@@ -23,7 +23,7 @@ using Real = long double;
 
 #define MAX(a,b)	(((a) > (b)) ? (a) : (b))
 #define MIN(a,b)	(((a) < (b)) ? (a) : (b))
-#define	MAXPOLY		10		// only because we are limited by param[]
+#define	MAXPOLY		8		// only because we are limited by param[]
 
 class BLA {
 public:

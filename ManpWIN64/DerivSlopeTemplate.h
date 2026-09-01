@@ -7,6 +7,7 @@
 #include <windows.h>
 #include <functional>
 #include "Complex.h"
+#include "FilterTemplate.h"
 
 #pragma once
 
@@ -59,7 +60,7 @@ bool IsArtMatrixSpecialPixelT(TComplex C, Complex j, BYTE juliaflag, double* par
     char variety;
 
     // --- variety ---
-    switch ((int)param[4])
+    switch ((int)param[7])
 	{
         case 0: variety = 'B'; break;
         case 1: variety = 'C'; break;
@@ -151,28 +152,160 @@ bool IsArtMatrixSpecialPixelT(TComplex C, Complex j, BYTE juliaflag, double* par
     return false;
     }
 
-/***********************************************************************
-	Some conversion helpers
-***********************************************************************/
+/**************************************************************************
+	Run one Derivative Slope fractal iteration
+**************************************************************************/
 
-inline double ToDouble(double x)
+template <typename TComplex>
+void DoDerivativeSlopeIterationT(TComplex &Z, TComplex &dC, TComplex &Q, double *param, int subtype, char variety, WORD *degree, int &SlopeDegree, TComplex &b, TComplex &aa3, TComplex &t)
     {
-    return x;
-    }
+    int		k;
+    TComplex	sqr, temp;
 
-inline double ToDouble(const dd_real& x)
-    {
-    return to_double(x);
-    }
+    auto real_imag = Z.x * Z.y;
 
-inline double ToDouble(const qd_real& x)
-    {
-    return to_double(x);
-    }
+    switch (subtype)
+	{
+	case 0:					// Mandelbrot
+	    SlopeDegree = 2;
+	    dC = dC * (Z + Z) + 1.0;
+	    sqr.x = Z.x * Z.x;
+	    sqr.y = Z.y * Z.y;
+	    real_imag = Z.x * Z.y;
+	    Z.x = Q.x + sqr.x - sqr.y;
+	    Z.y = Q.y + real_imag + real_imag;
+	    break;
 
-inline double ToDouble(const BigDouble& x)
-    {
-    return x.BigDoubleToDouble();   // or whatever your BigDouble uses
+	case 1:					// Cubic
+	    SlopeDegree = 3;
+	    dC = dC * Z.CSqr() * 3.0 + 1.0;
+	    Z = Z.CCube() + Q;
+	    break;
+
+	case 2:					// Power
+	    SlopeDegree = *degree;
+	    temp = 1.0;
+	    for (k = 0; k < *degree - 1; k++)
+		temp *= Z;
+	    dC = temp * dC * (double)*degree + 1.0;
+	    Z = temp * Z + Q;
+	    break;
+
+	case 3:					// Sine
+	    SlopeDegree = 2;
+	    dC = dC * Z.CCos() + 1.0;
+	    if (param[7] == 0)
+		Z = Z.CSin() * Q;
+	    else
+		Z = Z.CSin() + Q;
+	    break;
+
+	case 4:					// Sine + 1/c
+	    SlopeDegree = 2;
+	    dC = dC * Z.CCos() + 1.0;
+	    Z = Z.CSin() + t / Q;
+	    break;
+
+	case 5:					// exp
+	    SlopeDegree = 2;
+	    dC = dC * Z.CExp() + 1.0;
+	    Z = Z.CExp() + Q;
+	    break;
+
+	case 6:					// Power + 1/c
+	    SlopeDegree = *degree;
+	    temp = 1.0;
+	    for (k = 0; k < *degree - 1; k++)
+		temp *= Z;
+	    dC = temp * dC * (double)*degree + 1.0;
+	    Z = temp * Z + t / Q;
+	    break;
+
+	case 7:
+	    {
+	    if (param[7] != 0.0)
+		SlopeDegree = 5;
+	    else if (param[8] != 0.0)
+		SlopeDegree = 4;
+	    else if (param[9] != 0.0)
+		SlopeDegree = 3;
+	    else if (param[10] != 0.0)
+		SlopeDegree = 2;
+	    else
+		SlopeDegree = 1;
+
+	    TComplex derivative =
+		Z.CPolynomial(4) * (5.0 * param[7])
+		+ Z.CPolynomial(3) * (4.0 * param[8])
+		+ Z.CPolynomial(2) * (3.0 * param[9])
+		+ Z * (2.0 * param[10])
+		+ param[11];
+
+	    dC = dC * derivative + 1.0;
+
+	    Z =
+		Z.CPolynomial(5) * param[7]
+		+ Z.CPolynomial(4) * param[8]
+		+ Z.CPolynomial(3) * param[9]
+		+ Z.CPolynomial(2) * param[10]
+		+ Z * param[11]
+		+ param[12]
+		+ Q;
+		}
+	    break;
+	case 8:
+	    SlopeDegree = 3;
+	    dC = dC * Z.CSqr() * 3.0 + 1.0;
+	    Z = Z.CCube() + (Q - 1.0) * Z + Q;
+	    break;
+
+	case 9:
+	    SlopeDegree = 3;
+	    dC = dC * Z.CSqr() * 0.75 + 2.0;
+	    Z = Z.CCube() / 4.0 + Z + Q;
+	    break;
+
+	case 10:					// Sin(z^n)
+	    SlopeDegree = *degree;
+	    temp = Z.CPolynomial(*degree);
+	    dC = dC * temp.CCos() * Z.CPolynomial(*degree - 1) * param[7] + 1.0;
+	    Z = temp.CSin() + Q;
+	    break;
+
+	case 11:					// Sinh
+	    SlopeDegree = 2;
+	    dC = dC * Z.CSinh() + 1.0;
+	    Z = Z.CSinh() + Q;
+	    break;
+
+	case 12:					// Sinh(z^n)
+	    SlopeDegree = *degree;
+	    temp = Z.CPolynomial(*degree);
+	    dC = dC * temp.CSinh() * Z.CPolynomial(*degree - 1) * param[7] + 1.0;
+	    Z = temp.CSinh() + Q;
+	    break;
+
+	case 13:					// Art Matrix Cubic
+	    {
+	    SlopeDegree = 3;
+	    TComplex oldZ = Z;
+	    TComplex dFdZ;
+
+	    if (variety == 'K')
+		{
+		dFdZ = oldZ.CSqr() * 3.0;
+		Z = oldZ.CCube() + b;
+		}
+	    else
+		{
+		dFdZ = oldZ.CSqr() * 3.0 - aa3;
+		Z = oldZ.CCube() - aa3 * oldZ + b;
+		}
+
+	    dC = dFdZ * dC + 1.0;
+	    break;
+	    }
+	}
     }
 
 /***********************************************************************
@@ -180,25 +313,21 @@ inline double ToDouble(const BigDouble& x)
 ***********************************************************************/
 template <typename TComplex>
 double	GiveReflectionT(Complex j, BYTE juliaflag, TComplex C, int &iterations, double &smoothIter, double rqlim, long threshold, Complex v,
-	double* param, int subtype, char variety, WORD *degree, bool smoothing)
+	double* param, int subtype, char variety, WORD *degree, bool smoothing, int InsideMethod, double &min_orbit, long &min_index, TComplex &FinalZ)
     {
     int		i = 0;					// iteration 
-    int		k;
-    TComplex	sqr, temp, Q;
+    TComplex	Q;
     TComplex	a = 0.0, b = 0.0, aa3 = 0.0, a2 = 0.0;
     int		SlopeDegree = 2;  // default
 
-    int		degree1, degree2;
-
     TComplex	Z = 0.0;				// initial value for iteration Z0
-//    Complex	z = 1.0;				// initial value for iteration Z0 used in Newton fractals
     TComplex	dC = 0.0;				// derivative with respect to c 
-    double	reflection = FP_ZERO; // inside 
+    double	reflection = FP_ZERO;			// inside 
     double	h2 = param[1];				// height factor of the incoming light
     TComplex	u;
     TComplex	t = { 1.0, 0.0 };
 
-    *degree = (int)param[3];
+    *degree = (int)param[7];
     if (juliaflag)
 	{
 	Q = j;
@@ -208,7 +337,7 @@ double	GiveReflectionT(Complex j, BYTE juliaflag, TComplex C, int &iterations, d
 	{
 	if (subtype == 3)				// Sine
 	    {
-	    Z = param[4];
+	    Z = param[8];
 	    Q = C;
 	    }
 	else if (subtype == 13)          // Art Matrix Cubic
@@ -249,118 +378,29 @@ double	GiveReflectionT(Complex j, BYTE juliaflag, TComplex C, int &iterations, d
 	else
 	    Q = C;
 	}
+
+    if (InsideMethod == BOF60 || InsideMethod == BOF61)
+	{
+	min_orbit = 100000.0;
+	min_index = 0;
+	}
+
     for (i = 0; i < threshold; i++)
 	{
 	auto real_imag = Z.x * Z.y;
-	switch (subtype)
-	    {
-	    case 0:					// Mandelbrot
-		SlopeDegree = 2;
-		dC = dC * (Z + Z) + 1.0;
-		sqr.x = Z.x * Z.x;
-		sqr.y = Z.y * Z.y;
-		real_imag = Z.x * Z.y; 
-		Z.x = Q.x + sqr.x - sqr.y;
-		Z.y = Q.y + real_imag + real_imag;
-		break;
-	    case 1:					// Cubic
-		SlopeDegree = 3;
-		dC = dC * Z.CSqr() * 3.0 + 1.0;
-		Z = Z.CCube() + Q;
-		break;
-	    case 2:					// Power
-		SlopeDegree = *degree;
-		temp = 1.0;
-		for (k = 0; k < *degree - 1; k++)
-		    temp *= Z;
-		dC = temp * dC * (double)*degree + 1.0;
-		Z = temp * Z + Q;
-//		dC = dC * Z.CPolynomial((degree - 1)) * (double)degree + 1.0;
-//		Z = Z.CPolynomial(degree) + Q;
-		break;
-	    case 3:					// Sine
-		SlopeDegree = 2;
-		dC = dC * Z.CCos() + 1.0;
-		if (param[3] == 0)
-		    Z = Z.CSin() * Q;
-		else
-		    Z = Z.CSin() + Q;
-		break;
-	    case 4:					// Sine + 1/c
-		SlopeDegree = 2;
-		dC = dC * Z.CCos() + 1.0;
-		Z = Z.CSin() + t / Q;
-		break;
-	    case 5:					// exp
-		SlopeDegree = 2;
-		dC = dC * Z.CExp() + 1.0;
-		Z = Z.CExp() + Q;
-		break;
-	    case 6:					// Power + 1/c
-		SlopeDegree = *degree;
-		temp = 1.0;
-		for (k = 0; k < *degree - 1; k++)
-		    temp *= Z;
-		dC = temp * dC * (double)*degree + 1.0;
-		Z = temp * Z + t/Q;
-		break;
-	    case 7:
-		SlopeDegree = *degree;
-		degree1 = (int)param[4];
-		degree2 = (int)param[5];
-		dC = dC * Z.CPolynomial(*degree - 1) * param[3] + Z.CPolynomial(degree1 - 1) * param[4] + Z.CPolynomial(degree2 - 1) * param[5] + 1.0;
-		Z = Z.CPolynomial(*degree) + Z.CPolynomial(degree1) + Z.CPolynomial(degree2) + Q;
-		break;
-	    case 8:
-		SlopeDegree = 3;
-		dC = dC * Z.CSqr() * 3.0 + 1.0;
-		Z = Z.CCube() + (Q - 1.0) * Z + Q;
-		break;
-	    case 9:
-		SlopeDegree = 3;
-		dC = dC * Z.CSqr() * 0.75 + 2.0;
-		Z = Z.CCube() / 4.0 + Z + Q;
-		break;
-	    case 10:					// Sin(z^n)
-		SlopeDegree = *degree;
-		temp = Z.CPolynomial(*degree);
-		dC = dC * temp.CCos() * Z.CPolynomial(*degree - 1) * param[3] + 1.0;
-		Z = temp.CSin() + Q;
-		break;
-	    case 11:					// Sinh
-		SlopeDegree = 2;
-		dC = dC * Z.CSinh() + 1.0;
-		Z = Z.CSinh() + Q;
-		break;
-	    case 12:					// Sinh(z^n)
-		SlopeDegree = *degree;
-		temp = Z.CPolynomial(*degree);
-		dC = dC * temp.CSinh() * Z.CPolynomial(*degree - 1) * param[3] + 1.0;
-		Z = temp.CSinh() + Q;
-		break;
-	    case 13:    // Art Matrix Cubic
-		{
-		SlopeDegree = 3;
-		TComplex oldZ = Z;
-		TComplex dFdZ;
-
-		if (variety == 'K')
-		    {
-		    dFdZ = oldZ.CSqr() * 3.0;
-		    Z = oldZ.CCube() + b;
-		    }
-		else
-		    {
-		    dFdZ = oldZ.CSqr() * 3.0 - aa3;
-		    Z = oldZ.CCube() - aa3 * oldZ + b;
-		    }
-
-		dC = dFdZ * dC + 1.0;
-		break;
-		}
-	    }
+	DoDerivativeSlopeIterationT(Z, dC, Q, param, subtype, variety, degree, SlopeDegree, b, aa3, t);
 
 	auto SumSqr = Z.CSumSqr();
+	if (InsideMethod == BOF60 || InsideMethod == BOF61)
+	    {
+	    double BOFmagnitude = ToDouble(SumSqr);
+
+	    if (BOFmagnitude < min_orbit)
+		{
+		min_orbit = BOFmagnitude;
+		min_index = i + 1L;
+		}
+	    }
 
 	if (SumSqr > rqlim)
 	    {
@@ -404,11 +444,12 @@ double	GiveReflectionT(Complex j, BYTE juliaflag, TComplex C, int &iterations, d
 	    break;
 	    }
 	}
+    FinalZ = Z;
     if (i >= threshold)
 	{
 	iterations = threshold;
 	smoothIter = (double)threshold;
-	return 0.0;  // reflection brightness = 0
+	return 0.0;			// reflection brightness = 0
 	}
 
     return reflection;

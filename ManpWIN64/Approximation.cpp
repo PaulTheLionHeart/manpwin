@@ -6,6 +6,7 @@
 
 #include <atomic>
 #include "approximation.h"
+#include "fractalp.h"
 
 extern	std::atomic<bool> gStopRequested;	// force early exit
 
@@ -89,7 +90,7 @@ void BLAS::createOneStep(std::vector<Complex> &Ref, int m, double epsilon, BLA* 
 	Complex A = Complex(0.0, 0.0);
 	for (int i = 0; i < MAXPOLY; ++i)
 	    {
-	    const double ak = params[i];				// your polynomial coeffs
+	    const double ak = params[i+7];			// your polynomial coeffs
 	    const int    k = MAXPOLY - i;			// degree for this slot
 	    if (ak == 0.0) continue;
 	    if (k == 0) continue;				// constant term -> no derivative
@@ -115,7 +116,7 @@ void BLAS::createOneStep(std::vector<Complex> &Ref, int m, double epsilon, BLA* 
 	const double absZ = Z.CFabs();
 	for (int i = 0; i < MAXPOLY; ++i)
 	    {
-	    const double ak = params[i];
+	    const double ak = params[i+7];
 	    const int    k = MAXPOLY - i;
 	    if (ak == 0.0 || k < 2) continue;
 	    /*
@@ -236,8 +237,8 @@ void BLAS::init(int M, std::vector<Complex> &Ref, double blaSize, int powerIn, i
     subtype = subtypeIn;
     MaxIter = MaxIterIn;
     params.clear();
-    for (int i = 0; i < 10; i++)
-	params.push_back(param[i]);
+    for (int i = 0; i < NUMPERTPARAM; i++)
+	params.push_back(param[i+7]);
 
     int BLA_BITS = 23;
     int BLA_STARTING_LEVEL = 4;
@@ -310,8 +311,9 @@ void BLAS::init(int M, std::vector<Complex> &Ref, double blaSize, int powerIn, i
 int	BLAS::init(std::vector<Complex> &Ref, double blaSize, double epsilon, long divisor)
     {
     int elements = elementsPerLevel[firstLevel];
-    // lots of thread stuff deleted for now
 
+    // The original Java implementation used multithreaded approximation.
+    // In ManpWIN this table builds in under a second, so the threading overhead and associated complexity were removed.
     done = 0;
     for (int m = 0; m < elements; m++) 
 	{

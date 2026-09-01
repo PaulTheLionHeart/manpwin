@@ -345,11 +345,10 @@ int	CPixel::StandardCalculationMode(HWND hwnd, int user_data(HWND hwnd))
 	    break;
 	case 'F':
 	    if (OneOrTwoPass(hwnd, user_data) == -1)
-//	    if (solidguess(hwnd, Pix) == -1)
-//	    if (bound_trace_main(hwnd, Pix, num_worklist) == -1)
-//	    if (tesseral(hwnd, Pix, user_data) == -1)
 		return -1;
-	    Slope.RenderSlope(xdots, ydots, 0/*PertColourMethod*/, 0/*PalOffset*/, 1.0/*IterDiv*/, ColourSpeed);	// fix later
+	    // Non-Kalles Forward Difference path.
+	    // Keep PertColourMethod = 0, PalOffset = 0 and IterDiv = 1.0; Pert/BLA supplies the real Kalles colour settings.
+	    Slope.RenderSlope(xdots, ydots, 0/*PertColourMethod*/, 0/*PalOffset*/, 1.0/*IterDiv*/, ColourSpeed);
 	    break;
 	default:
 	    calcmode = 'G';

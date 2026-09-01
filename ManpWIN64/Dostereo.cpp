@@ -48,7 +48,7 @@ void	CPixel::init_stereo_pairs(int pairflag, int *AutoStereo_value)
 	*AutoStereo_value = 5;				// low values blow up calcs
         
     depth = xdots / *AutoStereo_value;
-    maxc = (threshold > colours) ? colours : threshold;
+    maxc = (threshold > paletteColours) ? paletteColours : threshold;
 
     EyeSeparation = (float)(xdots / 3);			// 180 PIXELS = 6.5 CMS ON 640X480 SCREEN
 

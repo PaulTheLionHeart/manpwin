@@ -137,6 +137,8 @@ int	mainview(HWND hwnd, BOOL FileFlag)
 	{
 	gManp->wpixels.clear();
 	gManp->wpixels.resize((size_t)gManp->xdots * (size_t)gManp->ydots, 0.0f);
+	gManp->PixelFlags.clear();
+	gManp->PixelFlags.resize((size_t)gManp->xdots * (size_t)gManp->ydots, PIXEL_NORMAL);
 	gManp->ClearScreen();
 	}
     // reset all the image parameters for the pixel plotting routines

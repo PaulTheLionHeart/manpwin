@@ -13,6 +13,8 @@
 #include "PertEngine.h"
 #include "Potential.h"
 #include "Manp.h"
+#include "FilterTemplate.h"
+
 
 extern	std::atomic<bool> gStopRequested;	// force early exit
 
@@ -61,13 +63,12 @@ RGBTRIPLE CPerturbation::GetSmoothedColour(double fIter, double color_speed, CTr
 int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTrueCol &TrueCol, /*CTZfilter &TZfilter, */double bailout)
     {
     int		index;
-    double	magnitude = 0.0;
     double	FloatIteration = 0.0;
-    double	rqlim2 = sqrt(bailout);
     double	log_zn, nu;
+    float	value = 0.0f;
     int		SlopeIndex;
     CPlot	Plot;
-    CPotential	Pot;
+    long	RawIteration = iteration;
 
     Plot.InitPlot(MaxIteration, &TrueCol, &gManp->wpixels, xdots, height, xdots, height, Dib->BitsPerPixel, Dib, USEPALETTE);
 
@@ -86,16 +87,14 @@ int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTr
 	iteration = (int)((double)iteration / IterDiv);
     if (PalOffset && iteration < MaxIteration)
 	iteration = (iteration + PalOffset) % TrueCol.ColoursInPALFile;
-    if (gManp->wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)	// it's not Null, so we must have initialsed it for fwd diff slope
+    if (gManp->wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)	// wpixels is available for smoothing, 3D or Forward Difference data
 	{
-	float value = 0.0;
-
 	if (_3dflag)
 	    {
 	    // 3D: use raw integer iteration count
 	    value = static_cast<float>(iteration);
 	    }
-	else if (SlopeType == FWDDIFFSLOPE/* || SlopeType == DERIVSLOPE*/ || smoothing)
+	else if (SlopeType == FWDDIFFSLOPE || smoothing)
 	    {
 	    FloatIteration = 0.0;
 	    if (iteration < MaxIteration)
@@ -113,23 +112,13 @@ int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTr
 	    value = static_cast<float>(FloatIteration);
 	    }
 	SlopeIndex = (((DWORD)Dib->DibHeight - 1 - y) * (DWORD)Dib->DibWidth) + (DWORD)x;
-	if (x < Dib->DibWidth && y < Dib->DibHeight && !gStopRequested)
+	// Forward Difference is stored after filter processing because the
+	// filtered value may replace the normal fractional iteration value.
+	if (SlopeType != FWDDIFFSLOPE && x < Dib->DibWidth && y < Dib->DibHeight && !gStopRequested)
 	    gManp->wpixels[SlopeIndex] = value;
 	}
 
-    if (biomorph >= 0)						// biomorph
-	{
-	if (iteration == MaxIteration)
-	    index = MaxIteration;
-	else
-	    {
-	    if (fabs(z.x) < rqlim2 || fabs(z.y) < rqlim2)
-		index = biomorph;
-	    else
-		index = iteration % 256;
-	    }
-	}
-    else if (OutsideMethod == NONE && InsideMethod == NONE)		// no filter
+    if (OutsideMethod == NONE && InsideMethod == NONE && biomorph < 0)
 	{
 	if (iteration == MaxIteration)
 	    index = MaxIteration;
@@ -138,127 +127,95 @@ int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTr
 	}
     else
 	{
-	switch (OutsideMethod)
+	// set up some values for filters not used in perturbation
+	int hooper = 0;							// EPSCROSS not being supplied by Pert here
+	int paletteColours = TrueCol.ColoursInPALFile;
+	int decomp = 0;
+	int special = 0;
+	int logval = 0;
+	int potentialColours = TrueCol.ColoursInPALFile;
+	BYTE *logtable = NULL;		
+
+	if (OutsideMethod >= TIERAZONFILTERS)
 	    {
-	    case PERT1:						// something Shirom Makkad added
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else
-		    index = (int)((iteration - log2(log2(ZCoordinateMagnitudeSquared))) * 5) % 256; //Get the index of the color array that we are going to read from. 
-		break;
-	    case PERT2:						// something Shirom Makkad added
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else
-		    index = (int)(iteration - (log(0.5*(ZCoordinateMagnitudeSquared)) - log(0.5*log(256))) / log(2)) % 256;
-		break;
-	    case REAL:						// "real"
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else
-		    index = iteration + (long)z.x + 7;
-		break;
-	    case IMAG:	    					// "imag"
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else
-		    index = iteration + (long)z.y + 7;
-		break;
-	    case MULT:						// "mult"
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else if (z.y)
-		    index = (long)((double)iteration * (z.x / z.y));
-		else
-		    index = iteration;
-		break;
-	    case SUM:						// "sum"
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else
-		    index = iteration + (long)(z.x + z.y);
-		break;
-	    case POTENTIAL:
-		magnitude = sqr(z.x) + sqr(z.y);
-		index = Pot.potential(magnitude, iteration, MaxIteration, &TrueCol, 256, potparam);
-		break;
-	    case ATAN:						// "atan"
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else
-		    index = (long)fabs(atan2(z.y, z.x)*180.0 / PI);
-		break;
-	    default:						// make sure we set all the inside pixels unless there is an inside filter (later on in the next switch)
-		if (OutsideMethod >= TIERAZONFILTERS)		// suite of Tierazon filters and colouring schemes
-		    {
-		    TZfilter.EndTierazonFilter(z, (long *)&iteration, &TrueCol);
-		    index = iteration;
-		    }
-		else
-		    {
-		    //			if (abs(PaletteShift) <= 1)
-		    if (iteration == MaxIteration)
-			index = MaxIteration;
-		    else
-			index = iteration;
-		    //			else
-		    //			    index = (BYTE)(((long)(FloatIteration * abs(PaletteShift))) % 256);
-		    //			index = iteration % 256;
-		    }
-		break;
+	    TZfilter.EndTierazonFilter(z, (long *)&iteration, &TrueCol);
+	    index = iteration;
 	    }
-	switch (InsideMethod)
+	else
 	    {
-	    case ZMAG:
-		if (iteration == MaxIteration)			// Zmag
-		    index = (int)((z.CSumSqr()) * (MaxIteration >> 1) + 1);
-		//		    else
-		//			index = iteration;
-				    //			index = iteration % 256;
-		break;
-	    case BOF60:
-		if (iteration == MaxIteration)
-		    index = (int)(sqrt(min_orbit) * 75.0);
-		//		    else
-		//			index = iteration;
-		break;
-	    case BOF61:
-		if (iteration == MaxIteration)
-		    index = min_index;
-		//		    else
-		//			index = iteration;
-		break;
-	    default:
-		break;
+	    index = DoOutsideFilterT<Complex, double>(iteration, z, OutsideMethod, hooper, MaxIteration, paletteColours, decomp, biomorph,
+		bailout, special, logval, logtable, potentialColours, &TrueCol, potparam);
 	    }
+
+	if (iteration == MaxIteration)
+	    index = DoInsideFilterT(iteration, z, InsideMethod, MaxIteration, min_orbit, min_index);
 	}
+
     if (index > MaxIteration)
 	index = MaxIteration;
     if (index < 0)
 	index = 0;
     if (AbortRequested())
 	return -1;
+
+    if (SlopeType == FWDDIFFSLOPE && gManp->wpixels.size() >= (size_t)Dib->DibWidth * Dib->DibHeight)
+	{
+	SlopeIndex = (((DWORD)Dib->DibHeight - 1 - y) * (DWORD)Dib->DibWidth) + (DWORD)x;
+
+	if (x >= 0 && x < Dib->DibWidth && y >= 0 && y < Dib->DibHeight && !gStopRequested)
+	    {
+	    if (iteration == MaxIteration)
+		{
+		// Inside filter result is a colour index.  Preserve it and
+		// prevent Forward Difference lighting on this pixel.
+		gManp->wpixels[SlopeIndex] = (float)index;
+		gManp->PixelFlags[SlopeIndex] |= PIXEL_INSIDE;
+		}
+	    else if (OutsideMethod != NONE || biomorph >= 0)
+		{
+		// The outside filter result becomes the Forward Difference
+		// value, allowing the filter to modify the slope surface.
+		gManp->wpixels[SlopeIndex] = (float)index;
+		}
+	    else
+		{
+		// Ordinary Forward Difference uses fractional iteration height.
+		gManp->wpixels[SlopeIndex] = value;
+		}
+	    }
+	}
+
     if (SlopeType != DERIVSLOPE || (iteration == MaxIteration && InsideMethod > 0) || EnableApproximation)
 	{
 	if (*PlotType == FILTERPLOT)
-	    Plot.FilterPoint(x/* + xStart*/, height - 1 - y, index, &(TZfilter.FilterRGB));
+	    Plot.FilterPoint(x, height - 1 - y, index, &(TZfilter.FilterRGB));
 	else if (index == MaxIteration)
 	    {
 	    RGBTRIPLE	inside;
 	    inside.rgbtBlue = (BYTE)TrueCol.InsideBlue;
 	    inside.rgbtGreen = (BYTE)TrueCol.InsideGreen;
 	    inside.rgbtRed = (BYTE)TrueCol.InsideRed;
-	    Plot.OutRGBpoint(x/* + xStart*/, height - 1 - y, inside);
+	    Plot.OutRGBpoint(x, height - 1 - y, inside);
 	    }
 	else
 	    {
-	    if (smoothing && InsideMethod == NONE)				// don't splatter inside filter when using smoothing
+	    if (RawIteration < PaletteStart && OutsideMethod == NONE && InsideMethod == NONE && biomorph < 0)
+		{
+		RGBTRIPLE colour;
+
+		colour.rgbtRed = (BYTE)((gManp->PrePaletteColour >> 16) & 0xff);
+		colour.rgbtGreen = (BYTE)((gManp->PrePaletteColour >> 8) & 0xff);
+		colour.rgbtBlue = (BYTE)(gManp->PrePaletteColour & 0xff);
+
+		Plot.OutRGBpoint(x, height - 1 - y, colour);
+		}
+	    else if (smoothing && InsideMethod == NONE)
 		{
 		RGBTRIPLE col = GetSmoothedColour(FloatIteration, ColourSpeed, TrueCol, &Plot);
-		Plot.OutRGBpoint(x/* + xStart*/, height - 1 - y, col);
+		Plot.OutRGBpoint(x, height - 1 - y, col);
 		}
 	    else
-		Plot.PlotPoint(x/* + xStart*/, height - 1 - y, index);
+		Plot.PlotPoint(x, height - 1 - y, index);
 	    }
 	}
     return 0;
@@ -277,11 +234,15 @@ int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, i
     double	log_zn, nu;
     int		SlopeIndex;
     CPlot	Plot;
-    CPotential	Pot;
+    Complex	z;
+    long	RawIteration = iteration;
+
+    z.x = ExpW.x.todouble();
+    z.y = ExpW.y.todouble();
 
     Plot.InitPlot(MaxIteration, &TrueCol, &gManp->wpixels, xdots, height, xdots, height, Dib->BitsPerPixel, Dib, USEPALETTE);
     size_t requiredPixels = (size_t)Dib->DibWidth * (size_t)Dib->DibHeight;
-    if (gManp->wpixels.size() >= requiredPixels)			// it's not Null, so we must have initialsed it for fwd diff slope
+    if (gManp->wpixels.size() >= requiredPixels)			// wpixels is available for smoothing, 3D or Forward Difference data
 	{
 	if (iteration < MaxIteration)
 	    {
@@ -297,152 +258,69 @@ int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, i
 	SlopeIndex = (((DWORD)Dib->DibHeight - 1 - y) * (DWORD)xdots) + (DWORD)x;
 	if (AbortRequested())
 	    return -1;
-
-	if (x >= 0 && x < Dib->DibWidth && y >= 0 && y < Dib->DibHeight && !gStopRequested && gManp->wpixels.size() >= requiredPixels)
-	    gManp->wpixels[SlopeIndex] = (float)FloatIteration;
 	}
 
-    if (biomorph >= 0)						// biomorph
+    if (OutsideMethod == NONE && InsideMethod == NONE && biomorph < 0)
 	{
 	if (iteration == MaxIteration)
 	    index = MaxIteration;
 	else
-	    {
-	    if (ExpW.x.abs() < rqlim2 || ExpW.y.abs() < rqlim2)
-		index = biomorph;
-	    else
-		index = iteration % 256;
-	    }
+	    index = iteration;
 	}
     else
 	{
-	floatexp	temp = 0.0;
-	switch (OutsideMethod)
+	// set up some values for filters not used in perturbation
+	int hooper = 0;							// EPSCROSS not being supplied by Pert here
+	int paletteColours = TrueCol.ColoursInPALFile;
+	int decomp = 0;
+	int special = 0;
+	int logval = 0;
+	int potentialColours = TrueCol.ColoursInPALFile;
+	BYTE *logtable = NULL;
+
+	if (OutsideMethod >= TIERAZONFILTERS)
 	    {
-	    case NONE:						// no filter
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else
-//			index = iteration;
-//			index = iteration % 256;
-		    index = iteration % TrueCol.ColoursInPALFile;
-		break;
-	    case PERT1:
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else
-		    {
-		    double magnitudeSquared = ExpW.CSumSqr();
-		    index = (int)((iteration - log2(log2(magnitudeSquared))) * 5) % 256;
-		    }
-		break;
-
-	    case PERT2:
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else
-		    {
-		    double magnitudeSquared = ExpW.CSumSqr();
-		    index = (int)(iteration - (log(0.5 * magnitudeSquared) - log(0.5 * log(256))) / log(2)) % 256;
-		    }
-		break;
-
-	    case ZMAG:
-		if (iteration == MaxIteration)			// Zmag
-		    index = (int)((ExpW.CSumSqr()) * (MaxIteration >> 1) + 1);
-		else
-		    index = iteration;
-		//			index = iteration % 256;
-		break;
-	    case REAL:						// "real"
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else
-		    index = iteration + (int)(ExpW.x.todouble()) + 7;
-		break;
-	    case IMAG:	    					// "imag"
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else
-		    index = iteration + (int)(ExpW.y.todouble()) + 7;
-		break;
-	    case MULT:						// "mult"
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else if (!(temp == ExpW.y))
-		    {
-		    temp = ExpW.x / ExpW.y;
-		    index = (long)((double)iteration * temp.todouble());
-		    }
-		else
-		    index = iteration;
-		break;
-	    case SUM:						// "sum"
-		if (iteration == MaxIteration)
-		    index = MaxIteration;
-		else
-		    {
-		    temp = ExpW.x + ExpW.y;
-		    index = iteration + (int)(temp.todouble());
-		    }
-		break;
-	    case ATAN:						// "atan"
-		if (iteration == MaxIteration)			// silly bug in BigTrig
-		    index = MaxIteration;
-		else
-		    {
-		    Complex	w;
-		    w.x = ExpW.x.todouble();
-		    w.y = ExpW.y.todouble();
-		    index = (long)fabs(atan2(w.y, w.x)*180.0 / PI);
-		    }
-		break;
-	    case POTENTIAL:
-		magnitude = ExpW.CSumSqr();
-		index = Pot.potential(magnitude, iteration, MaxIteration, &TrueCol, 256, potparam);
-		break;
-	    default:
-		if (OutsideMethod >= TIERAZONFILTERS)			// suite of Tierazon filters and colouring schemes
-		    {
-		    Complex	tempComplex;
-
-		    tempComplex.x = ExpW.x.todouble();
-		    tempComplex.y = ExpW.y.todouble();
-		    TZfilter.EndTierazonFilter(tempComplex, (long *)&iteration, &TrueCol);
-		    index = iteration;
-		    }
-		else						// no filter
-		    {
-		    if (iteration == MaxIteration)
-			index = MaxIteration;
-		    else
-			index = iteration % 256;
-		    }
-		break;
+	    TZfilter.EndTierazonFilter(z, (long *)&iteration, &TrueCol);
+	    index = iteration;
 	    }
-	switch (InsideMethod)
+	else
 	    {
-	    case ZMAG:
-		if (iteration == MaxIteration)			// Zmag
-		    index = (int)((ExpW.CSumSqr()) * (MaxIteration >> 1) + 1);
-//		else
-//		    index = iteration;
-//		    index = iteration % 256;
-		break;
-	    case BOF60:
-		if (iteration == MaxIteration)
-		    index = (int)(sqrt(min_orbit) * 75.0);
-//		else
-//		    index = iteration;
-		break;
-	    case BOF61:
-		if (iteration == MaxIteration)
-		    index = min_index;
-//		else
-//		    index = iteration;
-		break;
-	    default:
-		break;
+	    index = DoOutsideFilterT<Complex, double>(iteration, z, OutsideMethod, hooper, MaxIteration, paletteColours, decomp, biomorph,
+		bailout, special, logval, logtable, potentialColours, &TrueCol, potparam);
+	    }
+
+	if (iteration == MaxIteration)
+	    index = DoInsideFilterT(iteration, z, InsideMethod, MaxIteration, min_orbit, min_index);
+	}
+
+    if (index > MaxIteration)
+	index = MaxIteration;
+    if (index < 0)
+	index = 0;
+
+    if (SlopeType == FWDDIFFSLOPE && gManp->wpixels.size() >= requiredPixels)
+	{
+	SlopeIndex = (((DWORD)Dib->DibHeight - 1 - y) * (DWORD)xdots) + (DWORD)x;
+
+	if (x >= 0 && x < Dib->DibWidth && y >= 0 && y < Dib->DibHeight && !gStopRequested)
+	    {
+	    if (iteration == MaxIteration)
+		{
+		// Preserve the inside filter colour index and prevent
+		// Forward Difference lighting on this pixel.
+		gManp->wpixels[SlopeIndex] = (float)index;
+		gManp->PixelFlags[SlopeIndex] |= PIXEL_INSIDE;
+		}
+	    else if (OutsideMethod != NONE)
+		{
+		// Use the outside filter result as the Forward Difference value.
+		gManp->wpixels[SlopeIndex] = (float)index;
+		}
+	    else
+		{
+		// Ordinary Forward Difference uses fractional iteration height.
+		gManp->wpixels[SlopeIndex] = (float)FloatIteration;
+		}
 	    }
 	}
 
@@ -462,13 +340,26 @@ int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, i
 	    }
 	else
 	    {
-	    if (smoothing && InsideMethod == NONE)				// don't splatter inside filter when using smoothing
+	    if (RawIteration < PaletteStart &&
+		OutsideMethod == NONE &&
+		InsideMethod == NONE &&
+		biomorph < 0)
+		{
+		RGBTRIPLE colour;
+
+		colour.rgbtRed = (BYTE)((gManp->PrePaletteColour >> 16) & 0xff);
+		colour.rgbtGreen = (BYTE)((gManp->PrePaletteColour >> 8) & 0xff);
+		colour.rgbtBlue = (BYTE)(gManp->PrePaletteColour & 0xff);
+
+		Plot.OutRGBpoint(x, height - 1 - y, colour);
+		}
+	    else if (smoothing && InsideMethod == NONE)
 		{
 		RGBTRIPLE col = GetSmoothedColour(FloatIteration, ColourSpeed, TrueCol, &Plot);
-		Plot.OutRGBpoint(x/* + xStart*/, height - 1 - y, col);
+		Plot.OutRGBpoint(x, height - 1 - y, col);
 		}
 	    else
-		Plot.PlotPoint(x/* + xStart*/, height - 1 - y, index);
+		Plot.PlotPoint(x, height - 1 - y, index);
 	    }
 	}
     return 0;

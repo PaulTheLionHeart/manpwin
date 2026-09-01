@@ -700,7 +700,7 @@ void	CPerturbation::PertFunctions(Complex *XRef, Complex *DeltaSubN, Complex *De
 		Complex Zp(1.0, 0.0);
 		Complex sum(0.0, 0.0);
 		LoadPascal(PascalArray, MAXPOLY - m);				// calculate the pascal's triangle coefficients
-		if (param[m] != 0.0)
+		if (param[m+7] != 0.0)
 		    {
 		    for (int i = 0; i < MAXPOLY - m; i++)
 			{
@@ -708,7 +708,7 @@ void	CPerturbation::PertFunctions(Complex *XRef, Complex *DeltaSubN, Complex *De
 			sum *= InitialZ;
 			Zp *= *XRef;
 			}
-		    FinalZ += (sum * param[m]);
+		    FinalZ += (sum * param[m+7]);
 		    }
 		}
 	    *DeltaSubN = FinalZ + *DeltaSub0;
@@ -857,7 +857,7 @@ void	CPerturbation::PertFunctions(Complex *XRef, Complex *DeltaSubN, Complex *De
 	
 	case 63:    // Fractional Half Power: z^(n + 0.5)
 	    {
-	    int power = (int)param[2];
+	    int power = (int)param[10];
 
 	    if (power < 1)
 		power = 1;

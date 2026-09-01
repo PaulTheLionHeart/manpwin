@@ -163,8 +163,7 @@ int	CPixel::bifurcation(int user_data(HWND hwnd))
 		{
 		iz = (Population - vert) * cpuz;
 		if (iz > 0 && iz <= ydots)
-//		    PlotPixel((WORD)col, (WORD)(ydots - (int)iz), (DWORD)(j - cycles));
-		    PlotPixel((WORD)col, (WORD)(ydots - (int)iz), (DWORD)(col % colours));
+		    PlotPixel((WORD)col, (WORD)(ydots - (int)iz), (DWORD)(col % paletteColours));
 		}
 	    }
 	}

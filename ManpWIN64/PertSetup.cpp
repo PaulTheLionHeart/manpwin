@@ -65,29 +65,7 @@ void	PertSetupArithType(int &ArithType, int subtype, long MaxIteration, int prec
 	    ArithType = EXP_UNSUPPORTED;		// use Use BLA perturbation code but don't process via BLA table
 	}
  
- /*
-    size_t newSize = MaxIteration + 1;
-    if (ArithType == EXP_UNSUPPORTED || ArithType == FLOATEXP) 
-	{
-	// get memory for Z array
-	// shrink if we dropped a lot
-	if (ExpXSubN.capacity() > newSize * 2)
-	    {
-	    std::vector<decltype(ExpXSubN)::value_type>().swap(ExpXSubN);
-	    }
-	ExpXSubN.resize(newSize);
-	}
-    else
-	{
-	// get memory for Z array
-	if (XSubN.capacity() > newSize * 2)
-	    {
-	    std::vector<decltype(XSubN)::value_type>().swap(XSubN);
-	    }
-	XSubN.resize(newSize);
-	}
-*/
-    if (gManp->EnableApproximation)
+     if (gManp->EnableApproximation)
 	{
 	if (ArithType == EXP_UNSUPPORTED || ArithType == DBL_UNSUPPORTED)
 	    gManp->EnableApproximation = false;		// we don't support these fractals with BLA
@@ -106,21 +84,18 @@ void	PertSetupArithType(int &ArithType, int subtype, long MaxIteration, int prec
 
 void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subtype, WORD power, double param[], RefScratch& scratch)
     {
-//    mpfr_t	TempReal, TempImag, SqrReal, SqrImag, RealImag;
     BigDouble	zisqr, zrsqr, realimag, temp, RealImagSqr;
     BigComplex	sqrsqr, zabsBig, tempzBig, sqrtzBig, SqrBig;
     BigComplex	aBig;
 
-    Complex	rsrA = { param[1], param[2] };			// TheRedshiftRider value of a
-    bool	rsrSign = (param[4] == 1.0);			// TheRedshiftRider sign true if positive
-//    int		power = (int)param[3];
+    Complex	rsrA = { param[9], param[10] };			// TheRedshiftRider value of a
+    bool	rsrSign = (param[12] == 1.0);			// TheRedshiftRider sign true if positive
 
     switch (subtype)
 	{
 	case 0:							// optimise for Mandelbrot by taking out as many steps as possible
 	    {
 	    BigDouble ZTimes2 = Z->x.BigX2();
-	    SlopeDegree = 2;
 	    //	    Z = Z.CSqr() + centre;
 	    mpfr_sqr(scratch.SqrReal, Z->x.x, MPFR_RNDN);
 	    mpfr_sqr(scratch.SqrImag, Z->y.x, MPFR_RNDN);
@@ -133,7 +108,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    break;
 	    
 	case 1:
-	    SlopeDegree = power;
 	    if (power == 3)
 		*Z = Z->CCube() + *centre;			// optimise for Cubic by taking out as many multiplies as possible
 	    else
@@ -147,7 +121,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	case 2:							// Burning Ship
 	    {
 	    BigDouble ZTimes2 = Z->x.BigX2();
-	    SlopeDegree = 2;
 	    mpfr_sqr(scratch.SqrReal, Z->x.x, MPFR_RNDN);
 	    mpfr_sqr(scratch.SqrImag, Z->y.x, MPFR_RNDN);
 	    mpfr_sub(scratch.TempReal, scratch.SqrReal, scratch.SqrImag, MPFR_RNDN);
@@ -165,13 +138,11 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    break;
 	   
 	case 3:							// Cubic Burning Ship
-	    SlopeDegree = 3;
 	    Z->x = Z->x.BigAbs();
 	    Z->y = Z->y.BigAbs();
 	    *Z = Z->CPolynomial(power) + *centre;
 	    break;
 	case 4:							// 4th Power Burning Ship
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    realimag = Z->x * Z->y;
@@ -179,7 +150,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0 + centre->x;
 	    break;
 	case 5:							// 5th Power Burning Ship
-	    SlopeDegree = 5;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    sqrsqr.x = zrsqr * zrsqr;
@@ -189,7 +159,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = Z->x.BigAbs() * (sqrsqr.x - RealImagSqr * 10.0 + sqrsqr.y * 5.0) + centre->x;
 	    break;
 	case 6:							// Celtic
-	    SlopeDegree = 2;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    realimag = Z->x * Z->y;
@@ -198,7 +167,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = centre->x + temp.BigAbs();
 	    break;
 	case 7:							// Cubic Celtic
-	    SlopeDegree = 3;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    Z->y = (zrsqr * 3.0 - zisqr) * Z->y + centre->y;
@@ -206,7 +174,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = centre->x + temp.BigAbs();
 	    break;
 	case 8:							// 4th Celtic Buffalo
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    Z->y = Z->x * Z->y * (zrsqr - zisqr) * 4.0 + centre->y;
@@ -214,7 +181,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = temp.BigAbs() + centre->x;
 	    break;
 	case 9:							// 5th Celtic
-	    SlopeDegree = 5;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    sqrsqr.x = zrsqr.BigSqr();
@@ -225,7 +191,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = temp.BigAbs() + centre->x;
 	    break;
 	case 10:						// Mandelbar (Tricorn)
-	    SlopeDegree = 2;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    realimag = Z->x * Z->y;
@@ -233,13 +198,11 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->y = centre->y - realimag - realimag;
 	    break;
 	case 11:						// Mandelbar (power)
-	    SlopeDegree = power;
 	    *Z = Z->CPolynomial(power);
 	    Z->y = -Z->y + centre->y;
 	    Z->x = Z->x + centre->x;
 	    break;
 	case 12:						// Buffalo
-	    SlopeDegree = 2;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    Z->y = Z->x.BigAbs() * Z->y.BigAbs() * -2.0 + centre->y;
@@ -249,19 +212,11 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	case 13:						// Cubic Buffalo
 	case 14:						// 4th power Buffalo
 	case 15:						// 5th power Buffalo
-	    SlopeDegree = power;
-	    //	    zrsqr = Z->x.BigSqr();
-//	    zisqr = Z->y.BigSqr();
-//	    temp = (zrsqr * 3.0 - zisqr) * Z->y;
-//	    Z->y = temp.BigAbs() + centre->y;
-//	    temp = (zisqr - zisqr * 3.0) * Z->x;
-//	    Z->x = centre->x + temp.BigAbs();
 	    *Z = Z->CPolynomial(power);
 	    Z->y = Z->y.BigAbs() + centre->y;
 	    Z->x = Z->x.BigAbs() + centre->x;
 	    break;
 	case 16:						// Mandelbar Celtic
-	    SlopeDegree = 2;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    Z->y = Z->x * Z->y * -2.0 + centre->y;
@@ -269,7 +224,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = centre->x + temp.BigAbs();
 	    break;
 	case 17:						// Perpendicular Mandelbrot
-	    SlopeDegree = 2;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = Z->x;
@@ -278,14 +232,12 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->y = -(realimag + realimag - centre->y);
 	    break;
 	case 18:						// Perpendicular Burning Ship
-	    SlopeDegree = 2;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    Z->y = -Z->x * Z->y.BigAbs() * 2 + centre->y;
 	    Z->x = zrsqr - zisqr + centre->x;
 	    break;
 	case 19:						// Perpendicular Celtic
-	    SlopeDegree = 2;
 	    temp = Z->x.BigAbs();
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
@@ -294,7 +246,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = centre->x + temp.BigAbs();
 	    break;
 	case 20:						// Perpendicular Buffalo
-	    SlopeDegree = 2;
 	    temp = Z->y.BigAbs();
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
@@ -303,7 +254,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = centre->x + temp.BigAbs();
 	    break;
 	case 21:						// Cubic Quasi Burning Ship
-	    SlopeDegree = 3;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = (zrsqr * 3.0 - zisqr) * Z->y;
@@ -311,21 +261,18 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = centre->x + (zrsqr - zisqr * 3.0) * Z->x.BigAbs();
 	    break;
 	case 22:						// Cubic Partial BS Real
-	    SlopeDegree = 3;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    Z->y = (zrsqr * 3.0 - zisqr) * Z->y + centre->y;
 	    Z->x = centre->x + (zrsqr - zisqr * 3.0) * Z->x.BigAbs();
 	    break;
 	case 23:						// Cubic Partial BS Imag
-	    SlopeDegree = 3;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    Z->y = (zrsqr * 3.0 - zisqr) * Z->y.BigAbs() - centre->y;
 	    Z->x = centre->x + (zrsqr - zisqr * 3.0) * Z->x;
 	    break;
 	case 24:						// Cubic Flying Squirrel
-	    SlopeDegree = 3;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = (zrsqr * 3.0 - zisqr) * Z->y;
@@ -333,7 +280,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = centre->x + (zrsqr - zisqr * 3.0) * Z->x;
 	    break;
 	case 25:						// Cubic Quasi Perpendicular
-	    SlopeDegree = 3;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = zrsqr * 3.0 - zisqr;
@@ -341,28 +287,24 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = centre->x + (zrsqr - zisqr * 3.0) * Z->x.BigAbs();
 	    break;
 	case 26:							// 4th Burning Ship Partial Imag
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    Z->y = Z->x * Z->y.BigAbs() * 4.0 * (zrsqr - zisqr) - centre->y;
 	    Z->x = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0 + centre->x;
 	    break;
 	case 27:							// 4th Burning Ship Partial Real
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    Z->y = Z->x.BigAbs() * Z->y * 4.0 * (zrsqr - zisqr) + centre->y;
 	    Z->x = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0 + centre->x;
 	    break;
 	case 28:							// 4th Burning Ship Partial Real Mbar
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    Z->y = -Z->x.BigAbs() * Z->y * 4.0 * (zrsqr - zisqr) + centre->y;
 	    Z->x = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0 + centre->x;
 	    break;
 	case 29:							// 4th Celtic Burning Ship Partial Imag
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0;
@@ -370,7 +312,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = temp.BigAbs() + centre->x;
 	    break;
 	case 30:							// 4th Celtic Burning Ship Partial Real
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0;
@@ -378,7 +319,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = temp.BigAbs() + centre->x;
 	    break;
 	case 31:							// 4th Celtic Burning Ship Partial Real Mbar
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0;
@@ -386,7 +326,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = temp.BigAbs() + centre->x;
 	    break;
 	case 32:							// 4th Buffalo Partial Imag
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = Z->x * Z->y * (zrsqr - zisqr);
@@ -394,7 +333,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0 + centre->x;
 	    break;
 	case 33:							// 4th Celtic Mbar
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    Z->y = -Z->x * Z->y * (zrsqr - zisqr) * 4.0 + centre->y;
@@ -402,7 +340,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = temp.BigAbs() + centre->x;
 	    break;
 	case 34:							// 4th False Quasi Perpendicular
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = (zrsqr - zisqr);
@@ -410,7 +347,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0 + centre->x;
 	    break;
 	case 35:							// 4th False Quasi Heart
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = (zrsqr - zisqr);
@@ -418,7 +354,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0 + centre->x;
 	    break;
 	case 36:							// 4th Celtic False Quasi Perpendicular
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = (zrsqr - zisqr);
@@ -427,7 +362,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = temp.BigAbs() + centre->x;
 	    break;
 	case 37:							// 4th Celtic False Quasi Heart
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = (zrsqr - zisqr);
@@ -436,7 +370,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = temp.BigAbs() + centre->x;
 	    break;
 	case 38:							// 4th Imag Quasi Perpendicular / Heart
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = (zrsqr - zisqr);
@@ -444,7 +377,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0 + centre->x;
 	    break;
 	case 39:							// 4th Real Quasi Perpendicular
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = (zrsqr - zisqr);
@@ -452,7 +384,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0 + centre->x;
 	    break;
 	case 40:							// 4th Real Quasi Heart
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = (zrsqr - zisqr);
@@ -460,7 +391,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = zrsqr * zrsqr + zisqr * zisqr - zrsqr * zisqr * 6.0 + centre->x;
 	    break;
 	case 41:							// 4th Celtic Imag Quasi Perpendicular / Heart
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = (zrsqr - zisqr);
@@ -469,7 +399,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = temp.BigAbs() + centre->x;
 	    break;
 	case 42:							// 4th Celtic Real Quasi Perpendicular
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = (zrsqr - zisqr);
@@ -478,7 +407,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = temp.BigAbs() + centre->x;
 	    break;
 	case 43:							// 4th Celtic Real Quasi Heart
-	    SlopeDegree = 4;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    temp = (zrsqr - zisqr);
@@ -487,7 +415,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = temp.BigAbs() + centre->x;
 	    break;
 	case 44:							// 5th Burning Ship Partial
-	    SlopeDegree = 5;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    sqrsqr.x = zrsqr.BigSqr();
@@ -497,7 +424,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = (sqrsqr.x - RealImagSqr * 10.0 + sqrsqr.y * 5.0) * Z->x.BigAbs() + centre->x;
 	    break;
 	case 45:							// 5th Burning Ship Partial Mbar
-	    SlopeDegree = 5;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    sqrsqr.x = zrsqr.BigSqr();
@@ -507,7 +433,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = (sqrsqr.x - RealImagSqr * 10.0 + sqrsqr.y * 5.0) * Z->x.BigAbs() + centre->x;
 	    break;
 	case 46:							// 5th Celtic Mbar
-	    SlopeDegree = 5;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    sqrsqr.x = zrsqr.BigSqr();
@@ -518,7 +443,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = temp.BigAbs() + centre->x;
 	    break;
 	case 47:							// 5th Quasi Burning Ship (BS/Buffalo Hybrid)
-	    SlopeDegree = 5;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    sqrsqr.x = zrsqr.BigSqr();
@@ -529,7 +453,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = (sqrsqr.x - RealImagSqr * 10.0 + sqrsqr.y * 5.0) * Z->x.BigAbs() + centre->x;
 	    break;
 	case 48:							// 5th Quasi Perpendicular
-	    SlopeDegree = 5;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    sqrsqr.x = zrsqr.BigSqr();
@@ -540,7 +463,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = (sqrsqr.x - RealImagSqr * 10.0 + sqrsqr.y * 5.0) * Z->x.BigAbs() + centre->x;
 	    break;
 	case 49:							// 5th Quasi Heart
-	    SlopeDegree = 5;
 	    zrsqr = Z->x.BigSqr();
 	    zisqr = Z->y.BigSqr();
 	    sqrsqr.x = zrsqr.BigSqr();
@@ -551,7 +473,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = (sqrsqr.x - RealImagSqr * 10.0 + sqrsqr.y * 5.0) * Z->x.BigAbs() + centre->x;
 	    break;
 	case 50:							// SimonBrot
-	    SlopeDegree = 2;
 	    zabsBig.x = Z->x.BigAbs();
 	    zabsBig.y = Z->y.BigAbs();
 	    tempzBig.y = Z->y * zabsBig.x + Z->x * zabsBig.y;
@@ -559,7 +480,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    *Z = tempzBig.CPolynomial(2) + *centre;
 	    break;
 	case 51:							// Cubic SimonBrot
-	    SlopeDegree = 3;
 	    zabsBig.x = Z->x.BigAbs();
 	    zabsBig.y = Z->y.BigAbs();
 	    tempzBig.y = Z->y * zabsBig.x + Z->x * zabsBig.y;
@@ -567,7 +487,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    *Z = tempzBig.CPolynomial(3) + *centre;
 	    break;
 	case 52:							// SimonBrot2 4th
-	    SlopeDegree = 4;
 	    tempzBig = *Z * *Z;
 	    zabsBig.x = tempzBig.x.BigAbs();
 	    zabsBig.y = tempzBig.y.BigAbs();
@@ -576,21 +495,17 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    Z->x = Z->x + centre->x;
 	    break;
 	case 53:							// TheRedshiftRider 1: a*z^2+z^3+c
-	    SlopeDegree = power;
 	    aBig = rsrA;	// convert complex -> big complex
 	    *Z = aBig * *Z * *Z + Z->CPolynomial(power) * ((rsrSign) ? 1.0 : -1.0);
 	    *Z = *Z + *centre;
 	    break;
 	case 54:							// Talis
-	    SlopeDegree = 3;
 	    *Z = (Z->CSqr() / (*Z + 1.0)) + *centre;
 	    break;
 	case 55:							// Talis Cubic: ((X ^ 3) / (1 + (X ^ 2))) + C
-	    SlopeDegree = 3;
 	    *Z = (Z->CCube() / (Z->CSqr() + 1.0)) + *centre;
 	    break;
 	case 56:							// Talis Quartic: 
-	    SlopeDegree = 3;
 	    SqrBig = Z->CSqr();
 	    *Z = (SqrBig.CSqr() / (Z->CCube() + 1.0)) + *centre;
 	    break;
@@ -599,20 +514,14 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    BigComplex	InitialZ = *Z;
 	    BigComplex	FinalZ = { 0.0, 0.0 };
 		{
-		for (int i = MAXPOLY - 1; i >= 0; i--)			// find highest order of polynomial
-		    if (param[i] != 0.0)
-			{
-			SlopeDegree = MAXPOLY - i;
-			break;
-			}
 		for (int m = 0; m < MAXPOLY; m++)
 		    {
 		    BigComplex BigComplexTemp = InitialZ;
-		    if (param[m] != 0.0)
+		    if (param[m+7] != 0.0)
 			{
 			for (int k = 0; k < MAXPOLY - m - 1; k++)
 			    BigComplexTemp *= InitialZ;
-			FinalZ += (BigComplexTemp * param[m]);
+			FinalZ += (BigComplexTemp * param[m+7]);
 			}
 		    }
 		*Z = FinalZ + *centre;
@@ -621,7 +530,6 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    break;
 
 	case 58:							// HPDZ Buffalo
-	    SlopeDegree = 2;
 	    tempzBig.x = Z->x.BigAbs();
 	    tempzBig.y = Z->y.BigAbs();
 	    *Z = tempzBig * tempzBig - tempzBig;
@@ -630,29 +538,24 @@ void	RefFunctions(BigComplex *centre, BigComplex *Z, int &SlopeDegree, int subty
 	    break;
 
 	case 59:							// Exp
-	    SlopeDegree = 2;
 	    *Z = Z->CExp() + *centre;
 	    break;
 
 	case 60:							// Sinh
-	    SlopeDegree = 2;
 	    *Z = Z->CSinh() + *centre;
 	    break;
 
 	case 61:							// Sin
-	    SlopeDegree = 2;
 	    *Z = Z->CSin() + *centre;
 	    break;
 
 	case 62:							// Cos
-	    SlopeDegree = 2;
 	    *Z = Z->CCos() + *centre;
 	    break;
 
 	case 63:    // z^(n+0.5)
 	    {
-	    SlopeDegree = (int)param[2];
-	    double pReal = (double)((int)param[2]);
+	    double pReal = (double)((int)param[10]);
 
 	    BigComplex power = pReal + 0.5;
 	    
@@ -927,3 +830,120 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
     return 0;
     }
 
+/**************************************************************************
+	Set slope degree for Perturbation fractals
+
+	SlopeDegree is used by smoothing and Forward Difference slope rendering.
+	It depends on the current fractal subtype and, for some subtypes, the
+	current parameters. It must therefore be initialised for every render
+	and must not depend on whether a new perturbation reference is created.
+**************************************************************************/
+
+void	SetPertSlopeDegree(void)
+    {
+    switch (gManp->subtype)
+	{
+	case 0:						// Mandelbrot
+	case 2:						// Burning Ship
+	case 6:						// Celtic
+	case 10:					// Mandelbar (Tricorn)
+	case 12:					// Buffalo
+	case 16:					// Mandelbar Celtic
+	case 17:					// Perpendicular Mandelbrot
+	case 18:					// Perpendicular Burning Ship
+	case 19:					// Perpendicular Celtic
+	case 20:					// Perpendicular Buffalo
+	case 50:					// SimonBrot
+	case 58:					// HPDZ Buffalo
+	case 59:					// Exp
+	case 60:					// Sinh
+	case 61:					// Sin
+	case 62:					// Cos
+	    gManp->SlopeDegree = 2;
+	    break;
+
+	case 3:						// Cubic Burning Ship
+	case 7:						// Cubic Celtic
+	case 13:					// Cubic Buffalo
+	case 21:					// Cubic Quasi Burning Ship
+	case 22:					// Cubic Partial BS Real
+	case 23:					// Cubic Partial BS Imag
+	case 24:					// Cubic Flying Squirrel
+	case 25:					// Cubic Quasi Perpendicular
+	case 51:					// Cubic SimonBrot
+	case 54:					// Talis
+	case 55:					// Talis Cubic
+	case 56:					// Talis Quartic
+	    gManp->SlopeDegree = 3;
+	    break;
+
+	case 4:						// 4th Power Burning Ship
+	case 8:						// 4th Celtic Buffalo
+	case 14:					// 4th power Buffalo
+	case 26:					// 4th Burning Ship Partial Imag
+	case 27:					// 4th Burning Ship Partial Real
+	case 28:					// 4th Burning Ship Partial Real Mbar
+	case 29:					// 4th Celtic Burning Ship Partial Imag
+	case 30:					// 4th Celtic Burning Ship Partial Real
+	case 31:					// 4th Celtic Burning Ship Partial Real Mbar
+	case 32:					// 4th Buffalo Partial Imag
+	case 33:					// 4th Celtic Mbar
+	case 34:					// 4th False Quasi Perpendicular
+	case 35:					// 4th False Quasi Heart
+	case 36:					// 4th Celtic False Quasi Perpendicular
+	case 37:					// 4th Celtic False Quasi Heart
+	case 38:					// 4th Imag Quasi Perpendicular / Heart
+	case 39:					// 4th Real Quasi Perpendicular
+	case 40:					// 4th Real Quasi Heart
+	case 41:					// 4th Celtic Imag Quasi Perpendicular / Heart
+	case 42:					// 4th Celtic Real Quasi Perpendicular
+	case 43:					// 4th Celtic Real Quasi Heart
+	case 52:					// SimonBrot2 4th
+	    gManp->SlopeDegree = 4;
+	    break;
+
+	case 5:						// 5th Power Burning Ship
+	case 9:						// 5th Celtic
+	case 15:					// 5th power Buffalo
+	case 44:					// 5th Burning Ship Partial
+	case 45:					// 5th Burning Ship Partial Mbar
+	case 46:					// 5th Celtic Mbar
+	case 47:					// 5th Quasi Burning Ship (BS/Buffalo Hybrid)
+	case 48:					// 5th Quasi Perpendicular
+	case 49:					// 5th Quasi Heart
+	    gManp->SlopeDegree = 5;
+	    break;
+
+	case 1:						// Power
+	    gManp->SlopeDegree = (int)gManp->param[10];
+	    break;
+
+	case 11:					// Mandelbar (power)
+	    gManp->SlopeDegree = (int)gManp->param[9];
+	    break;
+
+	case 53:					// TheRedshiftRider: a*z^2 +/- z^n + c
+	    gManp->SlopeDegree = (int)gManp->param[11];
+	    break;
+
+	case 57:					// Polynomial
+	    gManp->SlopeDegree = 1;			// fallback
+	    for (int i = 0; i < MAXPOLY; i++)		// find highest order of polynomial
+		{
+		if (gManp->param[i + 7] != 0.0)
+		    {
+		    gManp->SlopeDegree = MAXPOLY - i;
+		    break;
+		    }
+		}
+	    break;
+
+	case 63:					// Fractional Power - z^(n+0.5)
+	    gManp->SlopeDegree = (int)gManp->param[10];
+	    break;
+
+	default:
+	    gManp->SlopeDegree = 2;
+	    break;
+	}
+    }

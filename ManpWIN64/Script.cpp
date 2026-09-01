@@ -567,6 +567,27 @@ void	CManp::UpdateAnimParamValues(void)
     static  int	count = 0;
     if (!ParamAnimation)	// if we got here by mistake, let's get outa here
 	return;
+    if ((type == SLOPEFORWARDDIFF || type == SLOPEDERIVATIVE) && ParamNumber > 10)
+	{
+	param[ParamNumber] += divisor;
+	if (ParamNumber == 15)
+	    {
+	    rqlim = param[ParamNumber];
+	    switch (MathType)
+		{
+		case DOUBLEDOUBLE:
+		    DDBailout = param[ParamNumber];
+		    break;
+		case QUADDOUBLE:
+		    QDBailout = param[ParamNumber];
+		    break;
+		case ARBITRARYPREC:
+		    BigBailout = param[ParamNumber];
+		    break;
+		}
+	    }
+	}
+
     if (ParamAnimation)
 	{
 	param[ParamNumber] += divisor;

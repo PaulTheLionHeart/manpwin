@@ -9,7 +9,6 @@
 */
 
 #include <atomic>
-#include <cassert>
 #include "slope.h"
 #include "FwdDiffSlopeTemplate.h"
 
@@ -22,36 +21,32 @@ extern	std::atomic<long> gPixelsDone;
 
 RGBTRIPLE CSlope::GetSmoothedColour(double fIter, double ColourSpeed, CTrueCol &TrueCol, CPlot *Plot)
     {
-    double  color_bias = 0.0;
-    // ---------------------------------------
-    // Move through palette smoothly
-    // Apply palette speed (default 1.0)
-    // ---------------------------------------
-    double v = fIter * (ColourSpeed)+color_bias;
-//    RGBTRIPLE* rgbPal = reinterpret_cast<RGBTRIPLE*>(TrueCol.PalettePtr);
-    int paletteSize = TrueCol.ColoursInPALFile;
+    const double color_bias = 0.0;
+    const int paletteSize = TrueCol.ColoursInPALFile;
 
-    // Wrap t into [0, paletteSize)
-    double pos = fmod(v, TrueCol.ColoursInPALFile);
-    if (pos < 0) pos += TrueCol.ColoursInPALFile;
+    double v = fIter * ColourSpeed + color_bias;
+
+    // Wrap into [0, paletteSize).
+    double pos = fmod(v, paletteSize);
+    if (pos < 0)
+	pos += paletteSize;
 
     int i0 = (int)pos;
-    int i1 = (i0 + 1) % TrueCol.ColoursInPALFile;
+    int i1 = (i0 + 1) % paletteSize;
 
-    // Fraction between the two colours
-    double t = v - floor(v);
+    // Fraction between adjacent palette colours.
+    double t = pos - i0;
 
-    double frac = pos - i0;
     RGBTRIPLE c0;
     RGBTRIPLE c1;
     Plot->GetRGB(i0, &c0);
     Plot->GetRGB(i1, &c1);
 
     RGBTRIPLE out;
-
     out.rgbtRed = BYTE(c0.rgbtRed   * (1.0 - t) + c1.rgbtRed   * t);
     out.rgbtGreen = BYTE(c0.rgbtGreen * (1.0 - t) + c1.rgbtGreen * t);
     out.rgbtBlue = BYTE(c0.rgbtBlue  * (1.0 - t) + c1.rgbtBlue  * t);
+
     return out;
     }
 
@@ -61,10 +56,10 @@ RGBTRIPLE CSlope::GetSmoothedColour(double fIter, double ColourSpeed, CTrueCol &
 
 double	CSlope::getGradientX(std::vector <float> *wpixels, int index, int width)
     {
-    int x = index % width;
-    if (index > wpixels->size())
+    if (width <= 1 || index < 0 || (size_t)index >= wpixels->size())
 	return 0.0;
 
+    int x = index % width;
     double it = (*wpixels)[index];
 
     if (x == 0) {
@@ -82,10 +77,10 @@ double	CSlope::getGradientX(std::vector <float> *wpixels, int index, int width)
 
 double	CSlope::getGradientY(std::vector <float> *wpixels, int index, int width, int height)
     {
-    int y = index / width;
-    if (index > wpixels->size())
+    if (width <= 0 || height <= 1 || index < 0 || (size_t)index >= wpixels->size())
 	return 0.0;
 
+    int y = index / width;
     double it = (*wpixels)[index];
 
     if (y == 0) {
@@ -136,7 +131,8 @@ int	CSlope::changeBrightnessOfColorScaling(int rgb, double delta, double bump_tr
 
 int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, 
 	BYTE BigNumFlag, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, std::vector<float> *wpixels, BYTE juliaflag, int xdots,
-	int ydots, int width, WORD *degreeIn, int precision, double ColourSpeedIn, std::vector<std::pair<int, int>> *pixelOrder, std::atomic<int> *workIndex, int totalPixels)
+	int ydots, int width, WORD *degreeIn, int precision, double ColourSpeedIn, std::vector<std::pair<int, int>> *pixelOrder, std::atomic<int> *workIndex, int totalPixels, PlotMode mode, 
+	int InsideMethodIn, int OutsideMethodIn, int biomorphIn, double *potparamIn)
     {
     int	i;
     FwdDiffContext ctx;
@@ -146,18 +142,20 @@ int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusB
     subtype = subtypeIn;
     hwnd = hwndIn;
     degree = degreeIn;
+    InsideMethod = InsideMethodIn;
+    OutsideMethod = OutsideMethodIn;
+    biomorph = biomorphIn;
+    potparam = potparamIn;
     ColourSpeed = ColourSpeedIn;
     smoothing = (ColourSpeed != 0.0);
 
-    gStopRequested = false; // NEW: reset flag before starting threads
-
-    for (i = 0; i < NUMSLOPEDERIVPARAM; i++)
+    for (i = 0; i < NUMSLOPEPARAM; i++)
 	param[i] = paramIn[i];
 
     Plot.InitPlot(threshold, TrueCol, &gManp->wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE);
     if (subtype == 15)					// init Art Matrix Newton
 	{
-	switch ((int)param[5])
+	switch ((int)param[9])
 	    {
 	    case 0:
 		variety = 'B';
@@ -176,9 +174,9 @@ int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusB
 		break;
 	    }
 
-	SpecialColour.rgbtRed = (BYTE)param[6];
-	SpecialColour.rgbtGreen = (BYTE)param[7];
-	SpecialColour.rgbtBlue = (BYTE)param[8];
+	SpecialColour.rgbtRed = (BYTE)param[10];
+	SpecialColour.rgbtGreen = (BYTE)param[11];
+	SpecialColour.rgbtBlue = (BYTE)param[12];
 	}
 
     // load ctx structure to pass into template functions
@@ -192,9 +190,12 @@ int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusB
     ctx.SpecialColour = SpecialColour;
     ctx.PaletteShift = PaletteShift;
     ctx.degree = degree;
+    ctx.mode = mode;
+    ctx.totalPixels = totalPixels;
 
     ctx.Dib = Dib;
     ctx.wpixels = wpixels;
+    ctx.PixelFlags = &gManp->PixelFlags;
     ctx.Plot = &Plot;
 
     ctx.xdots = xdots;
@@ -203,6 +204,12 @@ int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusB
 
     ctx.pixelOrder = pixelOrder;
     ctx.workIndex = workIndex;
+
+    ctx.InsideMethod = InsideMethod;
+    ctx.OutsideMethod = OutsideMethod;
+    ctx.biomorph = biomorph;
+    ctx.potparam = potparam;
+    ctx.TrueCol = TrueCol;
 
     if (BigNumFlag)
 	{
@@ -250,10 +257,9 @@ int	CSlope::RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusB
 void	CSlope::InitRender(long thresholdIn, CTrueCol *TrueColIn, CDib *DibIn, /*std::vector <float> &wpixelsIn, */int PaletteShiftIn, double bump_transfer_factorIn, int PaletteStartIn, double lightDirectionDegreesIn,
 		double bumpMappingDepthIn, double bumpMappingStrengthIn, RGBTRIPLE SpecialColourIn)
     {
-    gStopRequested = false; // NEW: reset flag before starting threads
-    threshold = thresholdIn; TrueCol = TrueColIn;  Dib = DibIn; /*wpixels = wpixelsIn; */PaletteShift = PaletteShiftIn; bump_transfer_factor = bump_transfer_factorIn;
-    PaletteStart = PaletteStartIn; lightDirectionDegrees = lightDirectionDegreesIn; bumpMappingDepth = bumpMappingDepthIn, bumpMappingStrength = bumpMappingStrengthIn;
-    SpecialColour = SpecialColourIn;
+    gStopRequested = false; // reset flag before starting threads
+    threshold = thresholdIn; TrueCol = TrueColIn;  Dib = DibIn; PaletteShift = PaletteShiftIn; bump_transfer_factor = bump_transfer_factorIn; PaletteStart = PaletteStartIn; 
+    lightDirectionDegrees = lightDirectionDegreesIn; bumpMappingDepth = bumpMappingDepthIn, bumpMappingStrength = bumpMappingStrengthIn; SpecialColour = SpecialColourIn;
     }
 
 /**************************************************************************
@@ -265,8 +271,6 @@ int	CSlope::RenderSlope(int xdots, int ydots, int PertColourMethod, int PalOffse
     double	dotp, gradAbs, gradCorr, cosAngle, sizeCorr, smoothGrad, lightAngleRadians, lightx, lighty;
     
     double	iterations;
-    int		lastChecked = -1;
-//    DWORD	index;
     int		x, y;
     double	gradx, grady;
     unsigned char r, g, b;
@@ -275,11 +279,6 @@ int	CSlope::RenderSlope(int xdots, int ydots, int PertColourMethod, int PalOffse
 
     ColourSpeed = ColourSpeedIn; 
     smoothing = (ColourSpeed != 0.0);
-    lastChecked = -1;
-    sizeCorr = 0.0;
-    lightx = 0.0;
-    lighty = 0.0;
-    gStopRequested = false; // NEW: reset flag before starting threads
 
     Plot.InitPlot(threshold, TrueCol, &gManp->wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, USEPALETTE);
     gradCorr = pow(2, (bumpMappingStrength - DEFAULT_BUMP_MAPPING_STRENGTH) * 0.05);
@@ -288,23 +287,35 @@ int	CSlope::RenderSlope(int xdots, int ydots, int PertColourMethod, int PalOffse
     lightx = cos(lightAngleRadians) * gradCorr;
     lighty = sin(lightAngleRadians) * gradCorr;
 
+    const size_t needed = (size_t)xdots * (size_t)ydots;
+    if (gManp->wpixels.size() < needed)
+	return -1;
+
     for (y = 0; y < ydots; y++)
 	{
 	for (x = 0; x < xdots; x++)
 	    {
 	    if (AbortRequested())
 		return -1;
+
 	    const DWORD index = (DWORD)y * (DWORD)xdots + (DWORD)x;
-	    const size_t needed = (size_t)xdots * (size_t)ydots;
-	    if (gManp->wpixels.size() < needed)
-		return 0; // or error: no valid forward differencing buffer
 	    iterations = gManp->wpixels[index];
-	    if (iterations == INSIDEPIXEL)
-		continue;							// do nothing in case we splatter inside filter pixels
-	    if (iterations == SPECIALPIXEL)
+	    double RawIterations = iterations;
+
+	    // Special pixels already have their final colour.
+	    // Do not apply Forward Difference lighting to them.
+	    if (gManp->PixelFlags[index] & PIXEL_SPECIAL)
 		{
-		Plot.OutRGBpoint(iX, iY, SpecialColour);
-		continue;							// set pixel to special colour
+		Plot.OutRGBpoint(x, y, SpecialColour);
+		continue;
+		}
+
+	    // Inside pixels are handled separately from the slope surface.
+	    if (gManp->PixelFlags[index] & PIXEL_INSIDE)
+		{
+		// wpixels contains the filtered inside palette index.
+		Plot.PlotPoint(x, y, (long)iterations);
+		continue;
 		}
 
 	    if (PertColourMethod != 0 && iterations < threshold)		// Kalles colour method
@@ -324,16 +335,17 @@ int	CSlope::RenderSlope(int xdots, int ydots, int PertColourMethod, int PalOffse
 		iterations = ((int)iterations + PalOffset) % TrueCol->ColoursInPALFile;
 
 	    if (iterations >= threshold)
-		{				//  interior of Mandelbrot set = inside_color = blue 
+		{				//  interior of Mandelbrot set = inside_color 
+		// Ordinary inside pixel: use the configured inside colour.
+		// Forward Difference lighting is not applied to inside pixels.
 		colour.rgbtRed = (BYTE)TrueCol->InsideRed;		// M_waves
 		colour.rgbtGreen = (BYTE)TrueCol->InsideGreen;
 		colour.rgbtBlue = (BYTE)TrueCol->InsideBlue;
 		}
 	    else
 		{
-		// modified = rgbs[index];
-		if (iterations < PaletteStart)
-		    modified = 0x00FFFFFF;
+		if (RawIterations < PaletteStart)
+		    modified = gManp->PrePaletteColour;
 		else if (smoothing)		// use colour smoothing
 		    {
 		    // Use smoothed color from existing BLA smoothing code
@@ -344,38 +356,21 @@ int	CSlope::RenderSlope(int xdots, int ydots, int PertColourMethod, int PalOffse
 		    }
 		else
 		    {
-		    if (abs(PaletteShift) > 1)
-			modified = 0xFF000000 | ((DWORD)TrueCol->PalettePtr[(((long)(iterations * abs(PaletteShift))) % TrueCol->ColoursInPALFile)].rgbtBlue << 16)
-					      | ((DWORD)TrueCol->PalettePtr[(((long)(iterations * abs(PaletteShift))) % TrueCol->ColoursInPALFile)].rgbtGreen << 8)
-					      | TrueCol->PalettePtr[(((long)(iterations * abs(PaletteShift))) % TrueCol->ColoursInPALFile)].rgbtRed;
-		    else
-			modified = 0xFF000000 | ((DWORD)TrueCol->PalettePtr[(((long)iterations) % TrueCol->ColoursInPALFile)].rgbtBlue << 16)
-					      | ((DWORD)TrueCol->PalettePtr[(((long)iterations) % TrueCol->ColoursInPALFile)].rgbtGreen << 8)
-					      | TrueCol->PalettePtr[(((long)iterations) % TrueCol->ColoursInPALFile)].rgbtRed;
+		    modified = 0xFF000000 | ((DWORD)TrueCol->PalettePtr[(((long)iterations) % TrueCol->ColoursInPALFile)].rgbtBlue << 16)
+					  | ((DWORD)TrueCol->PalettePtr[(((long)iterations) % TrueCol->ColoursInPALFile)].rgbtGreen << 8)
+					  | TrueCol->PalettePtr[(((long)iterations) % TrueCol->ColoursInPALFile)].rgbtRed;
 		    }
 		gradx = getGradientX(&gManp->wpixels, index, xdots);
 		grady = getGradientY(&gManp->wpixels, index, xdots, ydots);
 		dotp = gradx * lightx + grady * lighty;
-//		int	original_color = modified;		// not sure what this is for
 		if (dotp != 0)
 		    {
 		    gradAbs = sqrt(gradx * gradx + grady * grady);
 		    cosAngle = dotp / gradAbs;
 		    smoothGrad = -2.3562 / (gradAbs * sizeCorr + 1.5) + 1.57;
-		    //smoothGrad = Math.atan(gradAbs * sizeCorr);
 		    modified = changeBrightnessOfColorScaling(modified, cosAngle * smoothGrad, bump_transfer_factor);
 		    }
-		//	    else if (dotp != 0 || (dotp == 0 && !isInt(image_iterations[index]))) 
-		//		{
-		//		gradAbs = sqrt(gradx * gradx + grady * grady);
-		//		cosAngle = dotp / gradAbs;
-		//		smoothGrad = -2.3562 / (gradAbs * sizeCorr + 1.5) + 1.57;
-		//		//smoothGrad = Math.atan(gradAbs * sizeCorr);
-		//		modified = changeBrightnessOfColorBlending(modified, cosAngle * smoothGrad);
-		//		}
-		//	    modified = postProcessingSmoothing(modified, image_iterations, original_color, y, x, image_size, bms.bm_noise_reducing_factor);
-			    // compute  pixel color (24 bit = 3 bytes)
-		//	    rgbs[index] = modified;
+		
 		r = (modified >> 16) & 0xFF;
 		g = (modified >> 8) & 0xFF;
 		b = modified & 0xFF;

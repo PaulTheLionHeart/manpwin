@@ -648,18 +648,20 @@ int	WriteKallesFile(HWND hwnd, char *filename)
 
     if (gManp->BigNumFlag)
 	{
-	char s1[SIZEOF_BF_VARS]{};
-	char s2[SIZEOF_BF_VARS]{};
-	char s3[SIZEOF_BF_VARS]{};
+	std::vector<char> s1(SIZEOF_BF_VARS);
+	std::vector<char> s2(SIZEOF_BF_VARS);
+	std::vector<char> s3(SIZEOF_BF_VARS);
 
 	BigZreal = gManp->BigHor + (gManp->BigWidth * gManp->AspectRatio) / 2;
 	BigZimag = -gManp->BigVert - gManp->BigWidth / 2.0;
 	OneOverMag = gManp->BigWidth.BigInvert();
 	BigMag = OneOverMag * 4.0;
-	BigZreal.ToString(s1, SIZEOF_BF_VARS, false);
-	BigZimag.ToString(s2, SIZEOF_BF_VARS, false);
-	BigMag.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
-	fprintf(fp, "Re: %s\nIm: %s\nZoom: %s\n", s1, s2, s3);
+
+	BigZreal.ToString(s1.data(), (int)s1.size(), false);
+	BigZimag.ToString(s2.data(), (int)s2.size(), false);
+	BigMag.SafeSprintf(s3.data(), (int)s3.size(), "%.20Re");
+
+	fprintf(fp, "Re: %s\nIm: %s\nZoom: %s\n", s1.data(), s2.data(), s3.data());
 	}
     else
 	{

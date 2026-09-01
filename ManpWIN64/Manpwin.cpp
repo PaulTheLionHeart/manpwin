@@ -186,6 +186,7 @@ extern	INT_PTR CALLBACK StereoPairDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK Param3D(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK JuliaDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK InsideDlg(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK SetStartRGBDlg(HWND, UINT, WPARAM, LPARAM);
 extern	int		 GetParamData(HWND, LPSTR, LPSTR, LPSTR, BOOL);
 extern	INT_PTR CALLBACK AnimationDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK JuliaAnimDlg(HWND, UINT, WPARAM, LPARAM);
@@ -454,7 +455,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_SAVE_PAL_MAP, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_CYCLE, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_COLOUR_PAL, MF_ENABLED);
-			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_SETINSIDE, MF_ENABLED);
+			 EnableMenuItem((HMENU)(_int64)wParam, IDM_SETINSIDE, MF_ENABLED);
+			 EnableMenuItem((HMENU)(_int64)wParam, IDM_SET_PRE_PALETTE_START, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_EDITPAL, MF_ENABLED);
 			 break;
 		    case 6:	   // Help menu
@@ -808,11 +810,19 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	    return 0;
 
 	case IDM_SETINSIDE:
-	    if (DialogBox (hInst, "InsideDlg", hwnd, InsideDlg))
+	    if (DialogBox(hInst, "InsideDlg", hwnd, InsideDlg) == IDOK)
 		gManp->DisplayFractal(hwnd);
 	    return 0;
 
- 				  // Messages from Fractals menu
+	case IDM_SET_PRE_PALETTE_START:
+	    if (DialogBox(hInst, "InsideDlg", hwnd, SetStartRGBDlg))
+		{
+		gManp->DisplayFractal(hwnd);
+		gManp->time_to_restart = TRUE;
+		}
+	    return 0;
+
+	    // Messages from Fractals menu
 	case IDM_FRACTLOC:                
 	    if (gManp->RealTimeJuliaFlag)
 		DialogBox (hInst, "RTJuliaLocDlg", hwnd, RTJuliaLocDlg);
@@ -871,6 +881,8 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 			status = (int)DialogBox (hInst, "OscParamAnimDlg", hwnd, ParamAnimDlg);
 		    else if (gManp->type == PERTURBATION)
 			status = (int)DialogBox(hInst, "PertParamAnimDlg", hwnd, ParamAnimDlg);
+		    else if (gManp->type == SLOPEDERIVATIVE || gManp->type == SLOPEFORWARDDIFF)
+			status = (int)DialogBox(hInst, "SLOPEParamAnimDlg", hwnd, ParamAnimDlg);
 		    else
 			status = (int)DialogBox(hInst, "ParamAnimDlg", hwnd, ParamAnimDlg);
 		    break;
@@ -1718,12 +1730,14 @@ BOOL	InitNewFractal(HWND hwnd)
 		    {
 		    gManp->InitFract(gManp->type);
 		    gManp->time_to_reinit = FALSE;
-		    gManp->time_to_restart = TRUE;
 		    gManp->time_to_load = FALSE;
 		    LoadSlopeDerivParams();			// get parameters  and other subtype specific stuff from Slope Derivative database 
 		    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
+		    gManp->param[15] = (double)gManp->PrePaletteColour;
 		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
+		    else
+			gManp->time_to_restart = TRUE;
 		    }
 		break;
 	    case SLOPEFORWARDDIFF:				// Generic Mandelbrot Forward Differencing Fractal
@@ -1735,12 +1749,14 @@ BOOL	InitNewFractal(HWND hwnd)
 		    {
 		    gManp->InitFract(gManp->type);
 		    gManp->time_to_reinit = FALSE;
-		    gManp->time_to_restart = TRUE;
 		    gManp->time_to_load = FALSE;
 		    LoadSlopeFwdDiffParams();			// get parameters  and other subtype specific stuff from Forward Differencing database 
 		    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
+		    gManp->param[15] = (double)gManp->PrePaletteColour;
 		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
+		    else
+			gManp->time_to_restart = TRUE;
 		    }
 		break;
 	    case PERTURBATION:					// fractals calculated using perturbation
@@ -2201,7 +2217,7 @@ INT_PTR CALLBACK RTJuliaLocDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 #define	SHORTFIELDLENGTH	48
 #define	GENERALFIELDLENGTH	100
 #define	TEMPLENGTH		200
-#define	PARAMLENGTH		600
+#define	PARAMLENGTH		1000
 #define	SUBTYPELENGTH		500
 #define	FRACTALTYPELENGTH	1200
 
@@ -2366,12 +2382,26 @@ static const char* PertSlopePlotModeName(PlotMode mode)
 	_snprintf_s(FractalType, FRACTALTYPELENGTH, _TRUNCATE, "Fractal: %s, Subtype = %d", gManp->GetFractalName(), gManp->subtype);
 
     SAFE_SPRINTF(ParamStr, "Params: ");
-    for (int i = 0; i < NUMPARAM; i++)
+    int	NumParam;
+    switch (gManp->type)
+	{
+	case SLOPEDERIVATIVE:
+	case SLOPEFORWARDDIFF:
+	    NumParam = NUMSLOPEPARAM;
+	    break;
+	case PERTURBATION:
+	    NumParam = NUMPERTPARAM;
+	    break;
+	default:
+	    NumParam = NUMPARAM;
+	    break;
+	}
+    for (int i = 0; i < NumParam; i++)
 	{
 	if ((fabs(gManp->param[i]) < 0.00001 || fabs(gManp->param[i]) > 100000.0) && gManp->param[i] != 0.0)
-	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9e  \t  %s", i, gManp->param[i], (gManp->Fractal.ParamName[i]) ? gManp->Fractal.ParamName[i] : "N/A");
+	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9e  \t  %s", i, gManp->param[i], (strcmp(gManp->Fractal.ParamName[i], "") != 0) ? gManp->Fractal.ParamName[i] : "N/A");
 	else
-	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9f  \t  %s", i, gManp->param[i], (gManp->Fractal.ParamName[i]) ? gManp->Fractal.ParamName[i] : "N/A");
+	    _snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\n%d: %-12.9f  \t  %s", i, gManp->param[i], (strcmp(gManp->Fractal.ParamName[i], "") != 0) ? gManp->Fractal.ParamName[i] : "N/A");
 	SAFE_APPEND(ParamStr, PARAMLENGTH, TempStr);
 	}
 

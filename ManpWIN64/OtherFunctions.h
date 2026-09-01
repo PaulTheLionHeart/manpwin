@@ -15,7 +15,6 @@
 #include "Fractype.h"
 #include "ManpWin.h"
 #include "Pixel.h"
-//#include "Manp.h"
 #include "polygon.h"
 #include "preview.h"
 
@@ -56,8 +55,7 @@ class COtherFunctions
 	COtherFunctions();
 	COtherFunctions(std::vector<float>& wp);
 	int	InitOtherFunctions(WORD type, int subtypeIn, HWND hwndIn, CTrueCol *TrueColIn, CDib *DibIn, char *AntStatusIn, struct __timeb64 FrameEndIn, struct __timeb64 FrameStartIn, double mandel_widthIn,
-		double horIn, double vertIn, double ScreenRatioIn, int *totpassesIn, int *curpassIn, int user_dataIn(HWND hwnd), /*std::vector<float> &wpixelsIn, */int CoordSystemIn, //COscProcess OscProcessIn, 
-		int xAxisIn, int yAxisIn, int zAxisIn);
+		double horIn, double vertIn, double ScreenRatioIn, int *totpassesIn, int *curpassIn, int user_dataIn(HWND hwnd), int CoordSystemIn, int xAxisIn, int yAxisIn, int zAxisIn);
 	int	RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *iteration, int xdots, int ydots, double param[], long threshold, int rotate(int dir));
 
 	// stuff for Triangles

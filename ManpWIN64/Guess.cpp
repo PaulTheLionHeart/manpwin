@@ -100,7 +100,6 @@ MessageBox (hwnd, "1.", "guess()", MB_ICONEXCLAMATION | MB_OK);
 		}
 
 	    reset_period = 0;				    // FRACTINT v19.2
-//	    calc_frac(hwnd, y, 0, user_data);		    // added to remove missing pixels evident since early versions of ManpWIN PHD 220716
 	    if (i == -1 || guessrow(hwnd, 1,y,blocksize, user_data) != 0)	// interrupted?
 		{
 		if (y < yystart)

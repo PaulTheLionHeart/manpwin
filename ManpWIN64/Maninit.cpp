@@ -87,7 +87,8 @@ void	CManp::init(HWND hwnd)
 
     /////////					// initialise Fractal object
     Fractal.LoadFnArray();
-    for (i = 0; i < NUMPARAM; i++)
+    // Fractal.ParamValue must cover the largest parameter family, not just NUMPARAM.
+    for (i = 0; i < MAXPARAM; i++)
 	Fractal.ParamValue[i] = &param[i];
     rqlim = 4.0;
     Fractal.rqlim = &rqlim;
@@ -112,18 +113,18 @@ int	CManp::analyse_corner(char *s)
 	t++;
 	}
     // keep full size as we don't know how big they are before we analyse them
-    char s1[SIZEOF_BF_VARS]{};
-    char s2[SIZEOF_BF_VARS]{};
-    char s3[SIZEOF_BF_VARS]{};    
-    char s4[SIZEOF_BF_VARS]{};
-    char s5[SIZEOF_BF_VARS]{};
+    std::vector<char>	s1(SIZEOF_BF_VARS);
+    std::vector<char>	s2(SIZEOF_BF_VARS);
+    std::vector<char>	s3(SIZEOF_BF_VARS);
+    std::vector<char>	s4(SIZEOF_BF_VARS);
+    std::vector<char>	s5(SIZEOF_BF_VARS);
 
-    sscanf(s, "%s %s %s %s %s", s1, s2, s3, s4, s5);
+    sscanf(s, "%s %s %s %s %s", s1.data(), s2.data(), s3.data(), s4.data(), s5.data());
     sscanf(s, "%lf %lf %lf %lf %lf", &hor, &vert, &mandel_width, &param[0], &param[1]);
 
     if (mandel_width < DBL_MIN)						// we can do a BigNum calculation here to allow deeper zooming
 	{
-	ConvertString2Bignum(BigWidth.x, s3);
+	ConvertString2Bignum(BigWidth.x, s3.data());
 	BigNumFlag = TRUE;
 	}
 
@@ -144,9 +145,9 @@ int	CManp::analyse_corner(char *s)
 
 	BigNumFlag = TRUE;
 	BigBailout = rqlim;
-	ConvertString2Bignum(BigHor.x, s1);
-	ConvertString2Bignum(BigVert.x, s2);
-	ConvertString2Bignum(BigWidth.x, s3);
+	ConvertString2Bignum(BigHor.x, s1.data());
+	ConvertString2Bignum(BigVert.x, s2.data());
+	ConvertString2Bignum(BigWidth.x, s3.data());
 	if (mpfr_sgn(BigWidth.x) == 0)					// no naughty division
 	    mpfr_set_d(BigWidth.x, 1.0, MPFR_RNDN);
 	}

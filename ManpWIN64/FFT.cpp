@@ -55,7 +55,6 @@ static	double	real[LEVELS], imag[LEVELS];
 
 extern	double ctable[];
 extern	double stable[];
-//extern	std::vector<float> wpixels;		// an array of doubles holding slope modified iteration counts
 
 static	CPreview	TimeScreen, FreqScreen;
 
@@ -92,8 +91,6 @@ void	fft(int n, int m)
     n2 = n;
     for (k = 0; k < m; ++k)
 	{
-//	cursor_at(16, 38);
-//	printf("%d", k);
 	n1 = n2;
 	n2 >>= 1;
 	jt = n2 >> 1;

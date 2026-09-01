@@ -6,6 +6,7 @@
 
 #include <atomic>
 #include "approximation.h"
+#include "fractalp.h"
 
 extern	std::atomic<bool> gStopRequested;	// force early exit
 
@@ -82,7 +83,7 @@ void BLAS::createOneStepExp(std::vector<ExpComplex> &Ref, int m, floatexp epsilo
 	// derivative A in ExpComplex
 	for (int i = 0; i < MAXPOLY; ++i)
 	    {
-	    const double ak = params[i];
+	    const double ak = params[i+7];
 	    const int    k = MAXPOLY - i;
 	    if (ak == 0.0) continue;
 	    if (k == 0) continue;
@@ -109,7 +110,7 @@ void BLAS::createOneStepExp(std::vector<ExpComplex> &Ref, int m, floatexp epsilo
 
 	for (int i = 0; i < MAXPOLY; ++i)
 	    {
-	    floatexp ak = floatexp(params[i]);     // coefficient
+	    floatexp ak = floatexp(params[i+7]);     // coefficient
 	    int k = MAXPOLY - i;                   // power index high -> low
 
 	    if (ak.iszero() || k < 2)
@@ -191,7 +192,7 @@ void BLAS::initExp(int M, std::vector<ExpComplex> &Ref, floatexp blaSize, int po
     subtype = subtypeIn;
     MaxIter = MaxIterIn;
     params.clear();
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < NUMPERTPARAM; i++)
 	params.push_back(param[i]);
 
     int BLA_BITS = 23;

@@ -13,7 +13,7 @@
 #include "FractintFnTemplate.h"
 #include "BailoutTemplate.h"
 #include "FractalMathsTemplate.h"
-#include "PixelTemplate.h"
+#include "FilterTemplate.h"
 
 /**************************************************************************
 	Initialise functions for each pixel
@@ -463,7 +463,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 		param[0] = 3;				// make it 3
 	    frothsix = param[0] == 6;
 	    froth_altcolor = param[1] != 0;
-	    froth_shades = (colors - 1) / (frothsix ? 6 : 3);
+	    froth_shades = (potentialColours - 1) / (frothsix ? 6 : 3);
 	
 	    if (rqlim < 6.0)
 		rqlim = 6.0;				// rqlim needs to be at least 6 or so 
@@ -763,11 +763,10 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    z->y = Population;
 	    if (TrueCol->inside_colour > 0 && color == 0)
 		color = TrueCol->inside_colour;
-	    else if (color >= colors)
-		color = colors - 1;
+	    else if (color >= potentialColours)
+		color = potentialColours - 1;
 	//    (*plot)((WORD)col, (WORD)row, color);
 	    *iteration = color;
-	//    return color;
 	    return TRUE;
 	    }
 
@@ -801,11 +800,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    z->x = z->x - siny * StepSize;
 	    z->y = z->y - g_sin_x * StepSize;
 	    return DoBailout(BailoutTestType, z, rqlim);
-	}
-
-
-
-
+	    }
 
 	case FROTH:		// Froth Fractal type - per pixel 1/2/g, called with row & col set
 	    {
@@ -901,11 +896,11 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		    }
 		}
 
-	    // inside - Here's where non-palette based images would be nice.  Instead, we'll use blocks of (colors-1)/3 or (colors-1)/6 and use special froth  
+	    // inside - Here's where non-palette based images would be nice.  Instead, we'll use blocks of (potentialColours-1)/3 or (colors-1)/6 and use special froth  
 	    // color maps in attempt to replicate the images of James Alexander.    
 	    if (found_attractor)
 		{
-		if (colors >= 256)
+		if (potentialColours >= 256)
 		    {
 		    if (!froth_altcolor)
 			{
@@ -918,7 +913,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 			color = 1;
 		    color += froth_shades * (found_attractor - 1);
 		    }
-		else if (colors >= 16)
+		else if (potentialColours >= 16)
 		    {						// only alternate coloring scheme available for 16 colors 
 		    long lshade;
 
@@ -1111,15 +1106,12 @@ int	CPixel::lyapunov_cycles(int filter_cycles, double a, double b, double c)
     {
     int color, count, i, lnadjust;
     double lyap, total, temp;
-    // e10=22026.4657948  e-10=0.0000453999297625
 
     for (i = 0; i < filter_cycles; i++) 
 	{
 	for (count = 0; count < lyaLength; count++) 
 	    {
-//	    Rate = lyaRxy[count] ? a : b;
 	    Rate = ((lyaRxy[count] == 2) ? c : (lyaRxy[count] == 1) ? a : b);
-	    //	    if (curfractalspecific->orbitcalc()) {
 	    if (BifurcLambda(Rate, &Population)) 
 		{
 		overflow = TRUE;
@@ -1169,7 +1161,7 @@ jumpout:
 	    lyap = -temp / ((double)lyaLength*i);
 	else
 	    lyap = 1 - exp(temp / ((double)lyaLength*i));
-	color = 1 + (int)(lyap * (colors - 1));
+	color = 1 + (int)(lyap * (potentialColours - 1));
 	}
     return color;
     }
@@ -1182,9 +1174,9 @@ void	CPixel::set_Froth_palette(HWND hwnd)
     {
     char *mapname;
 
-    if (colors >= 16)
+    if (potentialColours >= 16)
 	{
-	if (colors >= 256)
+	if (potentialColours >= 256)
 	    {
 	    if (frothsix)
 		mapname = froth6_256c;
@@ -1198,7 +1190,6 @@ void	CPixel::set_Froth_palette(HWND hwnd)
 	    else
 		mapname = froth3_16c;
 	    }
-//	rotate(1);
 	}
     }
 

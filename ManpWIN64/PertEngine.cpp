@@ -85,7 +85,7 @@ int CPerturbation::initialiseCalculateFrame(CDib *DibIn, int HeightIn, int thres
     thread = ThreadIn;
     Dib = DibIn;
     PaletteShift = PaletteShiftIn;
-    for (i = 0; i < NUMPERTPARAM; i++)
+    for (i = 0; i < NUMPERTPARAM - 1; i++)	// NUMSLOPEPARAM  - 1 because param[15] is reserved for start colour
 	param[i] = paramIn[i];
     for (i = 0; i < 3; i++)
 	potparam[i] = potparamIn[i];

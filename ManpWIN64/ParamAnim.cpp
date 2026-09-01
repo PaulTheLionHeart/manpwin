@@ -52,7 +52,7 @@ static	int	frames = 100;
 	Parameter script generator
 **************************************************************************/
 
-int	CManp::GenParameterScript(HWND hwnd, char *filename, int NumVariables) 
+int	CManp::GenParameterScript(HWND hwnd, char *filename) 
     {
     int		i, k;
     char	s[120];
@@ -70,19 +70,23 @@ int	CManp::GenParameterScript(HWND hwnd, char *filename, int NumVariables)
     fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimData());	// add quotes to filename to trap spaces in path
     if (BigNumFlag)
 	{
-	char s1[SIZEOF_BF_VARS]{};
-	char s2[SIZEOF_BF_VARS]{};
-	char s3[SIZEOF_BF_VARS]{};
-	BigHor.ToString(s1, SIZEOF_BF_VARS, false);
-	BigVert.ToString(s2, SIZEOF_BF_VARS, false);
-	BigWidth.SafeSprintf(s3, SIZEOF_BF_VARS, "%.20Re");
-	*(s1 + decimals + 5) = '\0';					// no need to print too many decimals
-	*(s2 + decimals + 5) = '\0';
-	*(s3 + decimals + 5) = '\0';
-	fprintf(out, " -c%s,%s,%s\n", s1, s2, s3);
+	std::vector<char> s1(SIZEOF_BF_VARS);
+	std::vector<char> s2(SIZEOF_BF_VARS);
+	std::vector<char> s3(SIZEOF_BF_VARS);
+
+	BigHor.ToString(s1.data(), (int)s1.size(), false);
+	BigVert.ToString(s2.data(), (int)s2.size(), false);
+	BigWidth.SafeSprintf(s3.data(), (int)s3.size(), "%.20Re");
+
+	s1[decimals + 5] = '\0';     // no need to print too many decimals
+	s2[decimals + 5] = '\0';
+	s3[decimals + 5] = '\0';
+
+	fprintf(out, " -c%s,%s,%s\n", s1.data(), s2.data(), s3.data());
 	}
     else
-        fprintf(out, " -c%24.24f,%24.24f,%24.24g\n", gManp->hor, gManp->vert, gManp->mandel_width);
+	fprintf(out, " -c%24.24f,%24.24f,%24.24g\n", gManp->hor, gManp->vert, gManp->mandel_width);
+
     fprintf(out, "Parameter Animation: %10.10f %10.10f %d %d %d\n", StartRate, EndRate, frames, ParamNumber, Return2Start);
     fprintf(out, "Palette=\n");
     for (i = 0, k = 0; i < threshold; i++, k++)
@@ -110,7 +114,7 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
      HWND		hCtrl;
      BOOL		TempCheck;
      BOOL		bTrans ;
-     char		s[11][100];
+     char		s[MAXPARAM + 1][100];		// +1 to handle bailout
      static	char	TempFile[MAX_PATH];
      static	char	TempStr[MAX_PATH];
      static	struct	OscillatorSpecificStuff	*DatabasePtr; 
@@ -132,6 +136,10 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		SAFE_SPRINTF(TempStr, "%.12f", EndRate);
 		SetDlgItemText(hDlg, IDC_RATE_END, TempStr);
 		SetDlgItemInt(hDlg, IDC_PARAM_NUM, ParamNumber, TRUE);
+		// Oscillator-family layout:
+		// param[0..9]   = formula constants
+		// param[10..19] = state variables / dimensions
+		// These are displayed as two separate groups of NUMPARAM controls.
 		switch (gManp->type)
 		    {
 		    case OSCILLATORS:
@@ -173,23 +181,31 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			for (i = NumVariables; i < NUMPARAM; i++)
 			    SetDlgItemText(hDlg, ID_FRACVARTX01 + i, "     N/A");
 			break;
-		    default:				// all other fractals
-			if (gManp->type == PERTURBATION)
+		    case SLOPEFORWARDDIFF:
+		    case SLOPEDERIVATIVE:
+		    case PERTURBATION:
+			if (gManp->type == SLOPEFORWARDDIFF || gManp->type == SLOPEDERIVATIVE || gManp->type == PERTURBATION)
 			    {
-			    NumParams = PerturbationSpecific[gManp->subtype].numparams;
-			    SetDlgItemInt(hDlg, ID_FRACVAR01, gManp->SlopeType, TRUE);
-			    SetDlgItemInt(hDlg, ID_FRACVAR02, (UINT)gManp->lightDirectionDegrees, TRUE);
-			    SetDlgItemInt(hDlg, ID_FRACVAR03, (UINT)gManp->bumpMappingStrength, TRUE);
-			    SetDlgItemInt(hDlg, ID_FRACVAR04, (UINT)gManp->bumpMappingDepth, TRUE);
-			    SetDlgItemInt(hDlg, ID_FRACVAR05, gManp->PaletteStart, TRUE);
-			    SetDlgItemInt(hDlg, ID_FRACVAR06, (int)gManp->rqlim, TRUE);
+			    if (gManp->type == SLOPEFORWARDDIFF)
+				NumParams = SlopeFwdDiffSpecific[gManp->subtype].numparams;
+			    else if (gManp->type == SLOPEDERIVATIVE)
+				NumParams = SlopeDerivSpecific[gManp->subtype].numparams;
+			    else if (gManp->type == PERTURBATION)
+				NumParams = PerturbationSpecific[gManp->subtype].numparams;
+			    for (i = 0; i < NumParams && i < NUMSLOPEPARAM - 1; i++)	// NUMSLOPEPARAM  - 1 because param[15] is reserved for start colour
+				{
+				SAFE_SPRINTF(s[i], "%g", *gManp->Fractal.ParamValue[i]);
+				SetDlgItemText(hDlg, ID_FRACPARTX1 + i, gManp->Fractal.ParamName[i]);
+				SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[i]);
+				}
+			    for (i = NumParams; i < NUMSLOPEPARAM - 1; i++)	// NUMSLOPEPARAM  - 1 because param[15] is reserved for start colour
+				SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
+			    SAFE_SPRINTF(s[15], "%f", gManp->rqlim);
+			    SetDlgItemText(hDlg, ID_FRACPARAM16, s[15]);
 			    }
-			else if (gManp->type == SLOPEFORWARDDIFF)
-			    NumParams = SlopeFwdDiffSpecific[gManp->subtype].numparams;
-			else if (gManp->type == SLOPEDERIVATIVE)
-			    NumParams = SlopeDerivSpecific[gManp->subtype].numparams;
-			else 
-			    NumParams = fractalspecific[gManp->type].numparams;
+			break;
+		    default:
+			NumParams = fractalspecific[gManp->type].numparams;
 			for (i = 0; i < NumParams && i < NUMPARAM; i++)
 			    {
 			    SAFE_SPRINTF(s[i], "%g", *gManp->Fractal.ParamValue[i]);
@@ -198,8 +214,9 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    }
 			for (i = NumParams; i < NUMPARAM; i++)
 			    SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
-			SAFE_SPRINTF(s[10], "%f", gManp->rqlim);
-			SetDlgItemText(hDlg, ID_FRACPARAM11, s[10]);
+			SAFE_SPRINTF(s[15], "%f", gManp->rqlim);
+			SetDlgItemText(hDlg, ID_FRACPARAM16, s[15]);
+			break;
 		    }
 
 		SetUpFilename(ScriptFileName, "sci", "Param");
@@ -283,33 +300,43 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			sscanf(StartRateStr, "%lf", &StartRate);
 			GetDlgItemText(hDlg, IDC_RATE_END, EndRateStr, MAX_PATH);
 			sscanf(EndRateStr, "%lf", &EndRate);
-			for (i = 0; i < NumParams && i < 10; i++)	// pick up any changes to the initial parameter values
+
+			int MaxEditableParams;
+
+			if (gManp->type == SLOPEFORWARDDIFF || gManp->type == SLOPEDERIVATIVE || gManp->type == PERTURBATION)
+			    MaxEditableParams = NUMSLOPEPARAM - 1;			// param[15] is reserved for start colour
+			else
+			    MaxEditableParams = NUMPARAM;
+
+			for (i = 0; i < NumParams && i < MaxEditableParams; i++)	// pick up any changes to the initial parameter values
 			    {
 			    GetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[i], 100);
 			    gManp->param[i] = atof(s[i]);
 			    }
-			GetDlgItemText(hDlg, ID_FRACPARAM11, s[10], 100);
-			gManp->rqlim = atof(s[10]);
+
+			// Parameter row 15 is reserved for Bailout in the animation dialog.
+			// It does not correspond to gManp->param[15].
+			GetDlgItemText(hDlg, ID_FRACPARAM16, s[15], 100);
+			gManp->rqlim = atof(s[15]);
 			if (gManp->type == OSCILLATORS || gManp->type == FRACTALMAPS || gManp->type == SPROTTMAPS || gManp->type == SURFACES || gManp->type == KNOTS || gManp->type == CURVES)
 			    {
-			    for (i = 0; i < NumVariables && i < 10; i++)	// pick up any changes to the initial variable values
+			    for (i = 0; i < NumVariables && i < NUMPARAM; i++)	// pick up any changes to the initial variable values
 				{
 				GetDlgItemText(hDlg, ID_FRACVAR01 + i, s[i], 100);
-				gManp->param[i + 10] = atof(s[i]);
+				gManp->param[i + NUMPARAM] = atof(s[i]);
 				}
 			    }
 
 			ParamNumber = GetDlgItemInt(hDlg, IDC_PARAM_NUM, &bTrans, TRUE);
-			if ((ParamNumber < 0 || ParamNumber > 10) && gManp->type != PERTURBATION)
-			    ParamNumber = 0;
-			if (gManp->type == PERTURBATION)
+			if (gManp->type == SLOPEFORWARDDIFF || gManp->type == SLOPEDERIVATIVE || gManp->type == PERTURBATION)
 			    {
-			    gManp->SlopeType = GetDlgItemInt(hDlg, ID_FRACVAR01, &bTrans, TRUE);
-			    gManp->lightDirectionDegrees = (double)GetDlgItemInt(hDlg, ID_FRACVAR02, &bTrans, TRUE);
-			    gManp->bumpMappingStrength = (double)GetDlgItemInt(hDlg, ID_FRACVAR03, &bTrans, TRUE);
-			    gManp->bumpMappingDepth = (double)GetDlgItemInt(hDlg, ID_FRACVAR04, &bTrans, TRUE);
-			    gManp->PaletteStart = GetDlgItemInt(hDlg, ID_FRACVAR05, &bTrans, TRUE);
-			    gManp->rqlim = GetDlgItemInt(hDlg, ID_FRACVAR06, &bTrans, TRUE);
+			    if (ParamNumber < 0 || ParamNumber >= NUMSLOPEPARAM - 1)
+				ParamNumber = 0;
+			    }
+			else
+			    {
+			    if (ParamNumber < 0 || ParamNumber >= NUMPARAM)
+				ParamNumber = 0;
 			    }
 
 			hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGDIRECT);
@@ -325,7 +352,7 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    frames = 20;
 			if (frames > MAXANIM)
 			    frames = MAXANIM;
-			gManp->GenParameterScript(hDlg, ScriptFileName, NumVariables);
+			gManp->GenParameterScript(hDlg, ScriptFileName);
 			EndDialog (hDlg, TRUE);
 			return TRUE;
 

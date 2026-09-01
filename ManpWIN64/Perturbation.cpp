@@ -35,6 +35,7 @@ extern	int	user_data(HWND);
 extern	int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND hwnd), char* StatusBarInfo, int *pPertProgress, double bailout, int ArithType, int power, BigDouble BigWidth, int &SlopeDegree, int subtype);
 extern	void	PertSetupArithType(int &ArithType, int subtype, long MaxIteration, int precision, BYTE BigNumFlag);
 extern	void	ShowBignum(BigDouble x, char *Location);
+extern	void	SetPertSlopeDegree(void);
 
 extern	int	decimals;
 
@@ -220,12 +221,31 @@ int InitPerturbation(void)
     gManp->hThread.assign(threadCount, nullptr);
     gManp->pDataArray.assign(threadCount, nullptr);
 
-    // --- Slope interaction ---
-    if (gManp->OutsideMethod > 0 || gManp->biomorph >= 0)
-	gManp->SlopeType = NOSLOPE;
-
     BigCentreX = gManp->BigHor + (gManp->BigWidth * ((double)gManp->Dib.DibWidth / (double)(2 * gManp->Dib.DibHeight)));
     BigCentreY = -(gManp->BigVert + (gManp->BigWidth / 2.0));
+
+    // initialise degree for those subtypes that need it
+    switch (gManp->subtype)
+	{
+	case 1:
+	    gManp->degree = (int)gManp->param[10];
+	    break;
+	case 11:
+	    gManp->degree = (int)gManp->param[9];
+	    break;
+	case 53:
+	    gManp->degree = (int)gManp->param[11];
+	    break;
+	case 13:
+	    gManp->degree = 3;
+	    break;
+	case 14:
+	    gManp->degree = 4;
+	    break;
+	case 15:
+	    gManp->degree = 5;
+	    break;
+	}
 
     // --- Per-thread setup ---
     for (i = 0; i < threadCount; i++)
@@ -278,6 +298,7 @@ int InitPerturbation(void)
     gManp->DumpStartupState("after ReferenceZoomPoint");
     gStopRequested.store(false, std::memory_order_relaxed);
     gManp->CurrentRenderMode = RENDER_PERT;
+    SetPertSlopeDegree();
     return 0;
     }
 
@@ -316,26 +337,6 @@ int	DoPerturbation()
 	    }
 	}
 
-    switch (gManp->subtype)
-	{
-	case 1:
-	    gManp->degree = (int)gManp->param[2];
-	    break;
-	case 11:
-	case 53:
-	    gManp->degree = (int)gManp->param[1];
-	    break;
-	case 13:
-	    gManp->degree = 3;
-	    break;
-	case 14:
-	    gManp->degree = 4;
-	    break;
-	case 15:
-	    gManp->degree = 5;
-	    break;
-	}
-
     SimpleTimer tPertRender;
     tPertRender.start();
 
@@ -353,12 +354,12 @@ int	DoPerturbation()
 	    break;
 	    }
 
-	if (PerturbationSpecific[gManp->subtype].RedShiftRider == 1)
+	if (gManp->subtype == 53)	// RedShiftRider
 	    {
-	    gManp->pDataArray[i]->RSRA.x = gManp->param[1];
-	    gManp->pDataArray[i]->RSRA.y = gManp->param[2];
-	    gManp->degree = (int)gManp->param[3];
-	    gManp->pDataArray[i]->IsPositive = (gManp->param[4] == 1.0);
+	    gManp->pDataArray[i]->RSRA.x = gManp->param[9];
+	    gManp->pDataArray[i]->RSRA.y = gManp->param[10];
+	    gManp->degree = (int)gManp->param[11];
+	    gManp->pDataArray[i]->IsPositive = (gManp->param[12] == 1.0);
 	    }
 
 	gManp->pDataArray[i]->i = i;
@@ -433,9 +434,9 @@ int	DoPerturbation()
 	    {
 	    CloseHandle(gManp->hThread[i]);
 	    gManp->hThread[i] = NULL;
-	    char    buf[256];
-	    sprintf_s(buf, "Pert thread %d finished\n", i);
-	    OutputDebugStringA(buf);
+//	    char    buf[256];
+//	    sprintf_s(buf, "Pert thread %d finished\n", i);
+//	    OutputDebugStringA(buf);
 	    }
 	}
 
@@ -470,10 +471,6 @@ int	DoPerturbation()
     Slope.PaletteShift = gManp->PertCalculator[0]->PaletteShift;
     if (pert->SlopeType == FWDDIFFSLOPE)
 	{
-//	if (subtype == 0)					// Mandelbrot
-//	    gManp->param[0] = gManp->param[5];				// transfer factor as we already know what the slope type is
-//	else if (subtype == 1)					// Power
-//	    gManp->param[0] = gManp->param[5];
 	RGBTRIPLE   SpecialColour = {0,0,0};			// future use if we can implement Art Matrix Cubic in perturbation
 	Slope.InitRender(gManp->threshold, &gManp->TrueCol, &gManp->Dib, gManp->PaletteShift, gManp->bump_transfer_factor, gManp->PaletteStart, gManp->lightDirectionDegrees, gManp->bumpMappingDepth, gManp->bumpMappingStrength, SpecialColour);
 	Slope.RenderSlope(gManp->xdots, gManp->ydots, gManp->PertColourMethod, gManp->PalOffset, gManp->IterDiv, gManp->ColourSpeed);
@@ -553,16 +550,60 @@ void	LoadPerturbationParams(void)
     // here is where we can do some specific updates to individual Perturbation fractals
     int	i;
 
-    for (i = 0; i < NUMPERTPARAM; i++)
+    for (i = 0; i < NUMPERTPARAM - 1; i++)	// NUMPERTPARAM - 1 because param[15] is reserved for start colour
 	{
 	gManp->param[i] = PerturbationSpecific[gManp->subtype].paramvalue[i];
 	}
     gManp->rqlim = PerturbationSpecific[gManp->subtype].rqlim;
+    gManp->EnableApproximation = (PerturbationSpecific[gManp->subtype].EnableApproximation == 1) ? true : false;
     gManp->SlopeType = PerturbationSpecific[gManp->subtype].SlopeType;
-    gManp->PaletteStart = PerturbationSpecific[gManp->subtype].PaletteStart;
-    gManp->lightDirectionDegrees = PerturbationSpecific[gManp->subtype].lightDirectionDegrees;
-    gManp->bumpMappingDepth = PerturbationSpecific[gManp->subtype].bumpMappingDepth;
-    gManp->bumpMappingStrength = PerturbationSpecific[gManp->subtype].bumpMappingStrength;
+    gManp->ColourSpeed = gManp->param[0];
+    gManp->lightDirectionDegrees = gManp->param[1];
+    gManp->bumpMappingDepth = gManp->param[2];
+    gManp->bumpMappingStrength = gManp->param[3];
+    gManp->bump_transfer_factor = gManp->param[4];
+    gManp->PaletteStart = (int)(gManp->param[5]);
+    if (gManp->subtype == 57)				// Polynomial has a special parameter layout
+	{
+	gManp->LightHeight = gManp->param[6];
+
+	// Polynomial does not use the standard Pert colour controls.
+	gManp->PertColourMethod = 0;
+	gManp->IterDiv = 1.0;
+	gManp->PalOffset = 0;
+	}
+    else
+	{
+	gManp->PertColourMethod = (int)(gManp->param[6]);
+	gManp->IterDiv = gManp->param[7];
+	gManp->PalOffset = (int)(gManp->param[8]);
+	}
+    }
+
+/**************************************************************************
+    Initialise the common Perturbation rendering parameters.
+
+    TogglePerturbation() can enter Perturbation from several fractal types
+    whose param[] slots have different meanings.  Reset the common Pert
+    controls here so values from the previous fractal are not accidentally
+    reinterpreted as smoothing, slope or colouring parameters.
+
+    param[9] and above are subtype-specific and must be initialised by the
+    individual conversion.
+**************************************************************************/
+
+static void InitPertCommonParams()
+    {
+    gManp->rqlim = 1000.0;
+    gManp->param[0] = 0.0;		// Smooth Factor
+    gManp->param[1] = 45.0;		// Light Direction
+    gManp->param[2] = 50.0;		// Slope Mapping Depth
+    gManp->param[3] = 50.0;		// Slope Mapping Strength
+    gManp->param[4] = 1.0;		// Slope Transfer Factor
+    gManp->param[5] = 0.0;		// Start Palette
+    gManp->param[6] = 0.0;		// Pert Colour Method
+    gManp->param[7] = 1.0;		// Iteration Divider
+    gManp->param[8] = 0.0;		// Palette Offset
     }
 
 /**************************************************************************
@@ -576,51 +617,72 @@ int	TogglePerturbation(WORD *type, int *subtype)
     if (*type == MANDELFP || *type == MANDEL)
 	{
 	*type = PERTURBATION;
-	gManp->rqlim = 1000.0;
+	InitPertCommonParams();
 	*subtype = 0;
+	gManp->param[9] = 1.5;			// Light Source Height (Derivative)
 	}
     else if (*type == POWER)
 	{
 	*type = PERTURBATION;
 	*subtype = 1;
-	gManp->rqlim = 1000.0;
-	gManp->param[2] = gManp->degree;
+	InitPertCommonParams();
+	gManp->param[9] = 1.5;			// Light Source Height (Derivative)
+	gManp->param[10] = gManp->degree;	// Pert Power degree
 	}
     else if (*type == REDSHIFTRIDER)
 	{
 	*type = PERTURBATION;
 	*subtype = 53;
-	gManp->param[4] = gManp->param[5];		// copy sign
-	gManp->param[3] = gManp->param[2];
-	gManp->param[2] = gManp->param[1];
-	gManp->param[1] = gManp->param[0];
-	gManp->param[0] = 1.0;			// copy params
+	// Preserve RedShiftRider formula parameters in the Pert layout.
+	gManp->param[12] = gManp->param[5];	// sign
+	gManp->param[11] = gManp->param[2];	// n
+	gManp->param[10] = -gManp->param[1];	// a imag
+	gManp->param[9] = gManp->param[0];	// a real
+
+	InitPertCommonParams();
 	}
     else if (*type == SLOPEDERIVATIVE)
 	{
+	double LightDirection = gManp->param[0];
+	double LightHeight = gManp->param[1];
+	double PaletteStart = gManp->param[2];
+	double SmoothFactor = gManp->param[3];
+	double PolynomialDegree = gManp->param[7];
+
 	*type = PERTURBATION;
-	gManp->rqlim = 1000.0;
+	InitPertCommonParams();
+
 	switch (*subtype)
 	    {
 	    case 0:
 		*subtype = 0;
 		break;
+
 	    case 1:
 		*subtype = 1;
-		gManp->param[2] = 3.0;
+		gManp->param[10] = PolynomialDegree;
 		break;
+
 	    case 2:
 		*subtype = 1;
-		gManp->param[2] = gManp->param[3];
+		gManp->param[10] = gManp->param[7];
 		break;
+
 	    default:
 		return -1;
 	    }
+
+	// Translate common slope controls into the Perturbation layout.
+	gManp->param[0] = SmoothFactor;
+	gManp->param[1] = LightDirection;
+	gManp->param[5] = PaletteStart;
+	gManp->param[9] = LightHeight;
 	}
     else if (*type == TALIS)
 	{
 	*type = PERTURBATION;
-	gManp->rqlim = 12.0;
+	InitPertCommonParams();
+	gManp->rqlim = 12.0;		// special case - overrides defaults set in InitPertCommonParams()
 	switch (gManp->degree)
 	    {
 	    case 2:
@@ -636,20 +698,31 @@ int	TogglePerturbation(WORD *type, int *subtype)
 		*subtype = 54;
 		break;
 	    }
-	/*
-		gManp->param[0] = 1.0;
-		gManp->param[1] = 0.0;
-		gManp->param[2] = 45.0;
-		gManp->param[3] = 50.0;
-		gManp->param[4] = 50.0;
-		gManp->param[5] = 0.0;
-	*/
 	}
+    else if (*type == POLYNOMIAL)
+	{
+	double PolyCoeff[MAXPOLY];
+
+	for (int i = 0; i < MAXPOLY; i++)
+	    PolyCoeff[i] = gManp->param[i + 2];
+
+	*type = PERTURBATION;
+	InitPertCommonParams();
+	gManp->param[6] = 1.5;			// Light Source Height (Derivative)
+	for (int i = 0; i < MAXPOLY; i++)
+	    gManp->param[i + 7] = PolyCoeff[i];
+	}
+
     else if (*type == PERTURBATION)
 	{
 	*type = MANDELDERIVATIVES;		// for most types - exceptions handled separately
 	gManp->rqlim = 4.0;
 	gManp->juliaflag = FALSE;
+	// Clear Pert rendering parameters before reusing these slots for the destination fractal's native parameters.
+	gManp->param[0] = 0.0;
+	gManp->param[1] = 0.0;
+	gManp->param[2] = 0.0;
+	gManp->param[3] = 0.0;
 	switch (*subtype)
 	    {
 	    case 0:
@@ -658,38 +731,31 @@ int	TogglePerturbation(WORD *type, int *subtype)
 		break;
 	    case 1:
 		*type = POWER;
-		gManp->param[0] = gManp->param[2];		// copy degree
-		gManp->param[1] = gManp->param[2] = 0.0;	// reset other params
+		gManp->param[0] = gManp->param[10];		// copy degree
 		break;
 	    case 2:
-		*subtype = 1;			// Burning Ship
-		gManp->param[0] = gManp->param[1] = 0.0;	// reset params
+		*subtype = 1;					// Burning Ship
 		break;
 	    case 3:
-		*subtype = 2;			// cubic Burning Ship
+		*subtype = 2;					// cubic Burning Ship
 		gManp->degree = 3;
 		gManp->param[0] = gManp->degree;
-		gManp->param[1] = gManp->param[2] = 0.0;
 		break;
 	    case 4:
-		*subtype = 21;			// 4th Power Burning Ship
-		gManp->param[0] = gManp->param[1] = 0.0;
+		*subtype = 21;					// 4th Power Burning Ship
 		break;
 	    case 5:
 		*subtype = 46;			// 5th Power Burning Ship
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 6:
 		gManp->degree = 2;
 		*subtype = 7;			// Celtic
 		gManp->param[0] = gManp->degree;
-		gManp->param[1] = gManp->param[2] = 0.0;
 		break;
 	    case 7:
 		gManp->degree = 3;
 		*subtype = 7;			// Cubic Celtic
 		gManp->param[0] = gManp->degree;
-		gManp->param[1] = gManp->param[2] = 0.0;
 		break;
 	    case 8:
 		*subtype = 31;			// Celtic Buffalo 4th
@@ -697,18 +763,15 @@ int	TogglePerturbation(WORD *type, int *subtype)
 		break;
 	    case 9:
 		*subtype = 50;			// Celtic 5th (Buffalo Partial)
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 10:
 		*subtype = 6;			// Mandelbar Tricorn
 		gManp->param[0] = gManp->degree = 2;
-		gManp->param[1] = gManp->param[2] = 0.0;
 		break;
 	    case 11:
 		*subtype = 6;			// Mandelbar power
-		gManp->degree = (BYTE)gManp->param[1];
+		gManp->degree = (BYTE)gManp->param[9];
 		gManp->param[0] = gManp->degree;
-		gManp->param[1] = gManp->param[2] = 0.0;
 		gManp->param[3] = 1.0;
 		if (gManp->degree == 4 || gManp->degree == 5)
 		    gManp->param[3] = 0.0;
@@ -718,12 +781,10 @@ int	TogglePerturbation(WORD *type, int *subtype)
 	    case 12:
 		*subtype = 4;			// Buffalo
 		gManp->param[0] = gManp->degree = 2;
-		gManp->param[1] = gManp->param[2] = 0.0;
 		break;
 	    case 13:
 		*subtype = 4;			// Cubic Buffalo only
 		gManp->param[0] = gManp->degree = 3;
-		gManp->param[1] = gManp->param[2] = 0.0;
 		break;
 	    case 14:
 		*subtype = 4;			// Quartic Buffalo only
@@ -733,177 +794,127 @@ int	TogglePerturbation(WORD *type, int *subtype)
 	    case 15:
 		*subtype = 4;			// Qunitic Buffalo only
 		gManp->param[0] = gManp->degree = 5;
-		gManp->param[1] = gManp->param[2] = 0.0;
 		break;
 	    case 16:
 		*subtype = 8;			// Mandelbar Celtic
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 17:
 		*subtype = 0;			// Perpendicular Mandelbrot
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 18:
 		*subtype = 3;			// Perpendicular Burning Ship
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 19:
 		*subtype = 9;			// Perpendicular Celtic
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 20:
 		*subtype = 5;			// Perpendicular Buffalo
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 21:
 		*subtype = 16;			//  Cubic Quasi Burning Ship 
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 22:
 		*subtype = 13;			// Partial Cubic Burning Ship Real 
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 23:
 		*subtype = 14;			// Partial Cubic Burning Ship Imaginary 
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 24:
 		*subtype = 10;			// Cubic Flying Squirrel (Buffalo Imaginary)
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 25:
 		*subtype = 17;			// Cubic Quasi Perpendicular
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 26:
 		*subtype = 22;			// Burning Ship 4th Partial imag
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 27:
 		*subtype = 23;			// Burning Ship 4th Partial Real
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 28:
 		*subtype = 24;			// Burning Ship 4th Partial Real Mandelbar
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 29:
 		*subtype = 26;			// Celtic Burning Ship 4th Partial imag
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 30:
 		*subtype = 27;			// Celtic Burning Ship 4th Partial Real
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 31:
 		*subtype = 28;			// Celtic Burning Ship 4th Partial Real Mandelbar
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 32:
 		*subtype = 30;			// Buffalo 4th Partial imag
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 33:
 		*subtype = 32;			// Celtic 4th Mandelbar
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 34:
 		*subtype = 33;			// 4th False Quasi Perpendicular 
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 35:
 		*subtype = 34;			// 4th False Quasi Heart 
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 36:
 		*subtype = 35;			// Celtic 4th False Quasi Perpendicular 
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 37:
 		*subtype = 36;			// Celtic 4th False Quasi Heart 
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 38:
 		*subtype = 37;			// Imag Quasi Perpendicular / Heart 4th 
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 39:
 		*subtype = 38;			// 4th Quasi Perpendicular Real 
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 40:
 		*subtype = 39;			// 4th Quasi Heart Real 
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 41:
 		*subtype = 40;			// Celtic Imag Quasi Perpendicular / Heart 4th
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 42:
 		*subtype = 41;			// Celtic 4th Quasi Perpendicular Real 
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 43:
 		*subtype = 42;			// Celtic 4th Quasi Heart Real 
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 44:
 		*subtype = 48;			// Burning Ship 5th Partial
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 45:
 		*subtype = 49;			// Burning Ship 5th Partial Mandelbar
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 46:
 		*subtype = 51;			// Celtic 5th Mandelbar
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 47:
 		*subtype = 52;			// Quazi Burning Ship 5th (BS/Buffalo Hybrid)
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 48:
 		*subtype = 53;			// 5th Quasi Perpendicular
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 49:
 		*subtype = 54;			// 5th Quasi Heart
-		gManp->param[0] = gManp->param[1] = 0.0;
 		break;
 	    case 50:
 		*subtype = 55;			// SimonBrot
 		gManp->param[0] = 4;
-		gManp->param[1] = gManp->param[2] = 0.0;
 		break;
 	    case 51:
 		*subtype = 55;			// Cubic SimonBrot
 		gManp->param[0] = 6;
-		gManp->param[1] = gManp->param[2] = 0.0;
 		break;
 	    case 52:
 		*subtype = 56;			// SimonBrot2
 		gManp->param[0] = 4;
-		gManp->param[1] = gManp->param[2] = 0.0;
 		break;
 	    case 53:
-
-		gManp->param[0] = gManp->param[1];		// copy params
-		gManp->param[1] = gManp->param[2];
-		gManp->param[2] = gManp->param[3];
-		gManp->param[5] = gManp->param[4];		// copy sign
-		gManp->param[3] = gManp->param[4] = 0.0;
-
-		/*
-				gManp->param[4] = gManp->param[5];		// copy sign
-				gManp->param[3] = gManp->param[2];
-				gManp->param[2] = gManp->param[1];
-				gManp->param[1] = gManp->param[0];
-				gManp->param[0] = 1.0;			// copy params
-		*/
-
-
 		*type = REDSHIFTRIDER;
+		gManp->param[0] = gManp->param[9];		// copy params
+		gManp->param[1] = -gManp->param[10];
+		gManp->param[2] = gManp->param[11];
+		gManp->param[5] = gManp->param[12];		// copy sign
 		break;
 	    case 54:
 	    case 55:
@@ -912,15 +923,22 @@ int	TogglePerturbation(WORD *type, int *subtype)
 		gManp->rqlim = 400.0;
 		gManp->param[0] = gManp->degree = *subtype - 52;
 		gManp->param[1] = 1.0;
-		gManp->param[2] = 0.0;
-		gManp->param[3] = 0.0;
 		break;
+	    case 57:			// polynomial
+		{
+		*type = POLYNOMIAL;
+		double PolyCoeff[MAXPOLY];
+
+		for (int i = 0; i < MAXPOLY; i++)
+		    PolyCoeff[i] = gManp->param[i + 7];
+
+		for (int i = 0; i < MAXPOLY; i++)
+		    gManp->param[i + 2] = PolyCoeff[i];
+		}
+		break;
+
 	    case 58:
 		*subtype = 58;		// HPDZ Buffalo
-		gManp->param[0] = 0.0;
-		gManp->param[1] = 0.0;
-		gManp->param[2] = 0.0;
-		gManp->param[3] = 0.0;
 		break;
 	    default:
 		return -1;
@@ -930,8 +948,10 @@ int	TogglePerturbation(WORD *type, int *subtype)
 	}
     else if (*type == MANDELDERIVATIVES)
 	{
+	double PolynomialDegree = gManp->param[0];
+
 	*type = PERTURBATION;
-	gManp->rqlim = 1000.0;
+	InitPertCommonParams();
 	switch (*subtype)
 	    {
 	    case 0:
@@ -973,9 +993,8 @@ int	TogglePerturbation(WORD *type, int *subtype)
 		    *subtype = 10;	// Mandelbar Tricorn
 		else
 		    {
-		    gManp->degree = (BYTE)gManp->param[0];
-		    gManp->param[0] = gManp->param[2] = 0.0;
-		    gManp->param[1] = gManp->degree;
+		    gManp->degree = (BYTE)PolynomialDegree;
+		    gManp->param[9] = gManp->degree;
 		    *subtype = 11;	// Mandelbar Tricorn Higher order
 		    }
 		break;
@@ -1008,11 +1027,11 @@ int	TogglePerturbation(WORD *type, int *subtype)
 		break;
 	    case 19:
 		*subtype = 1;		// 4th Power Mandelbrot				degree is reset to 0
-		gManp->param[2] = gManp->degree = 4;
+		gManp->param[10] = gManp->degree = 4;
 		break;
 	    case 20:
 		*subtype = 11;		// 4th Power Mandelbar
-		gManp->param[1] = gManp->degree = 4;
+		gManp->param[9] = gManp->degree = 4;
 		break;
 	    case 21:
 		*subtype = 4;		// 4th Power Burning Ship
@@ -1075,12 +1094,12 @@ int	TogglePerturbation(WORD *type, int *subtype)
 		*subtype = 43;		// Celtic 4th Quasi Heart Real 
 		break;
 	    case 43:
-		gManp->param[2] = gManp->degree = 5;
+		gManp->param[10] = gManp->degree = 5;
 		*subtype = 1;		// Mandelbrot 4th 
 		break;
 	    case 44:
 		*subtype = 11;		// 5th Mandelbar (vertical)
-		gManp->param[1] = gManp->degree = 5;
+		gManp->param[9] = gManp->degree = 5;
 		break;
 	    case 46:
 		*subtype = 5;		// 5th Power Burning Ship
@@ -1107,7 +1126,7 @@ int	TogglePerturbation(WORD *type, int *subtype)
 		*subtype = 49;		// 5th Quasi Heart
 		break;
 	    case 55:
-		if (gManp->param[0] == 4)
+		if (PolynomialDegree == 4)
 		    *subtype = 50;	// SimonBrot
 		else
 		    *subtype = 51;	// Cubic SimonBrot
@@ -1132,7 +1151,6 @@ int	TogglePerturbation(WORD *type, int *subtype)
 **************************************************************************/
 
 INT_PTR CALLBACK SelectPertDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-
     {
     static	int	i;
     static	int	index = 1;
@@ -1199,7 +1217,6 @@ INT_PTR CALLBACK SelectPertDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 **************************************************************************/
 
 INT_PTR CALLBACK ThreadingDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-
     {
     BOOL		bTrans;
     SYSTEM_INFO		sysinfo;
@@ -1243,66 +1260,46 @@ INT_PTR CALLBACK ThreadingDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
     return (FALSE);
     }
 
-
 /**************************************************************************
     Perturbation Fractal Parameters
 **************************************************************************/
 
 INT_PTR CALLBACK PertDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     {
-    int i, j;
-    char		s[10][100];
+    int i;
+    char		s[NUMPERTPARAM][100];
     char		Bailout[120];
-    char		IterDivTxt[120];
-    char		SmoothTxt[120];
     static  PlotMode	tempMethod;
     static     UINT	tempParam;
-    static     UINT	tempStartPalette;
-    static     UINT	tempSlopeAngle;
-    static     UINT	tempSlopePower;
-    static     UINT	tempSlopeRatio;
-    static     double	tempColorSpeed;
-    static     double	tempIterDiv;
-    static     UINT	tempPalOffset;
     BOOL		bTrans;
     HWND		hCtrl;
 
     switch (message)
 	{
 	case WM_INITDIALOG:
-	    SAFE_SPRINTF(Bailout, "%4.12lf", gManp->rqlim);
+	    SAFE_SPRINTF(Bailout, "%4.4lf", gManp->rqlim);
 	    SetDlgItemText(hDlg, IDC_BAILOUT, Bailout);
 	    SetDlgItemText(hDlg, ID_FRACNAME, gManp->GetFractalName());
-	    SetDlgItemInt(hDlg, ID_STARTPALETTE, gManp->PaletteStart, TRUE);
-	    SetDlgItemInt(hDlg, ID_SLOPEANGLE, (UINT)gManp->lightDirectionDegrees, TRUE);
-	    SetDlgItemInt(hDlg, ID_SLOPERATIO, (UINT)gManp->bumpMappingStrength, TRUE);
-	    SetDlgItemInt(hDlg, ID_SLOPEPOWER, (UINT)gManp->bumpMappingDepth, TRUE);
-	    SAFE_SPRINTF(IterDivTxt, "%4.4lf", gManp->IterDiv);
-	    SetDlgItemText(hDlg, IDC_ITER_DIV, IterDivTxt);
-	    SAFE_SPRINTF(SmoothTxt, "%4.4lf", gManp->ColourSpeed);
-	    SetDlgItemText(hDlg, IDC_SMOOTHING, SmoothTxt);
-	    SetDlgItemInt(hDlg, IDC_PAL_OFFSET, gManp->PalOffset, TRUE);
-	    hCtrl = GetDlgItem(hDlg, IDC_USEBLA);
-	    SendMessage(hCtrl, BM_SETCHECK, gManp->EnableApproximation, 0L);
 
-	    for (i = gManp->Fractal.NumFunct, j = 0; i < gManp->Fractal.NumFunct + PerturbationSpecific[gManp->subtype].numparams && i < 10; i++, j++)
+	    for (i = 0; i < gManp->Fractal.NumParam && i < NUMPERTPARAM - 1; i++)	// NUMPERTPARAM  - 1 because param[15] is reserved for start colour
 		{
-		SAFE_SPRINTF(s[j], "%f", PerturbationSpecific[gManp->subtype].paramvalue[j]);
-		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, PerturbationSpecific[gManp->subtype].paramname[j]);
-		SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[j]);
+		SAFE_SPRINTF(s[i], "%f", *gManp->Fractal.ParamValue[i]);
+		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, gManp->Fractal.ParamName[i]);
+		SetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[i]);
 		}
-	    for (i = /*Fractal.NumFunct + */PerturbationSpecific[gManp->subtype].numparams; i < 10; i++)
+	    for (i = gManp->Fractal.NumParam; i < NUMPERTPARAM - 1; i++)		// NUMPERTPARAM - 1 because param[15] is reserved for start colour
 		SetDlgItemText(hDlg, ID_FRACPARTX1 + i, "     N/A");
-	    SetDlgItemInt(hDlg, ID_SLOPETYPE, (UINT)gManp->SlopeType, TRUE);
 
 	    tempMethod = currentMode;
 	    tempParam = IDC_PLOTMODE0 + (int)tempMethod;
 	    CheckRadioButton(hDlg, IDC_PLOTMODE0, IDC_PLOTMODE8, tempParam);
+	    hCtrl = GetDlgItem(hDlg, IDC_USEBLA);
+	    SendMessage(hCtrl, BM_SETCHECK, gManp->EnableApproximation, 0L);
+	    SetDlgItemInt(hDlg, ID_SLOPETYPE, (UINT)gManp->SlopeType, TRUE);
 	    return (TRUE);
 
 	case WM_COMMAND:
 	    switch ((int)LOWORD(wParam))
-		//	    switch (wParam)
 		{
 		case IDC_PLOTMODE0:
 		case IDC_PLOTMODE1:
@@ -1318,56 +1315,51 @@ INT_PTR CALLBACK PertDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		    CheckRadioButton(hDlg, IDC_PLOTMODE0, IDC_PLOTMODE8, (int)LOWORD(wParam));
 		    return TRUE;
 
-		case ID_STARTPALETTE:
-		    tempStartPalette = GetDlgItemInt(hDlg, ID_STARTPALETTE, &bTrans, TRUE);
-		    return TRUE;
-
-		case ID_SLOPEANGLE:
-		    tempSlopeAngle = GetDlgItemInt(hDlg, ID_SLOPEANGLE, &bTrans, TRUE);
-		    return TRUE;
-
-		case ID_SLOPERATIO:
-		    tempSlopeRatio = GetDlgItemInt(hDlg, ID_SLOPERATIO, &bTrans, TRUE);
-		    return TRUE;
-
-		case ID_SLOPEPOWER:
-		    tempSlopePower = GetDlgItemInt(hDlg, ID_SLOPEPOWER, &bTrans, TRUE);
-		    return TRUE;
-
-		case IDC_ITER_DIV:
-		    GetDlgItemText(hDlg, IDC_ITER_DIV, IterDivTxt, 100);
-		    tempIterDiv = atof(IterDivTxt);
-		    return TRUE;
-
-		case IDC_SMOOTHING:
-		    GetDlgItemText(hDlg, IDC_SMOOTHING, SmoothTxt, 100);
-		    tempColorSpeed = atof(SmoothTxt);
-		    return TRUE;
-
-		case IDC_PAL_OFFSET:
-		    tempPalOffset = GetDlgItemInt(hDlg, IDC_PAL_OFFSET, &bTrans, TRUE);
-		    return TRUE;
-
 		case IDOK:
 		    GetDlgItemText(hDlg, IDC_BAILOUT, Bailout, 100);
 		    gManp->rqlim = atof(Bailout);
 		    currentMode = tempMethod;
-		    gManp->PaletteStart = tempStartPalette;
-		    gManp->lightDirectionDegrees = tempSlopeAngle;
-		    gManp->bumpMappingDepth = tempSlopePower;
-		    gManp->bumpMappingStrength = tempSlopeRatio;
-		    gManp->IterDiv = tempIterDiv;
-		    gManp->ColourSpeed = tempColorSpeed;
-		    gManp->PalOffset = tempPalOffset;
+		    for (i = 0; i < gManp->Fractal.NumParam && i < NUMPERTPARAM - 1; i++)	// NUMPERTPARAM - 1 because param[15] is reserved for start colour
+			{
+			GetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[i], 100);
+			*gManp->Fractal.ParamValue[i] = atof(s[i]);
+			}
 		    hCtrl = GetDlgItem(hDlg, IDC_USEBLA);
+		    // gManp holds the live Pert rendering state.
+		    // param[] is the transport/storage form used by the database, PAR files and parameter animation.
 		    gManp->EnableApproximation = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 		    gManp->SlopeType = GetDlgItemInt(hDlg, ID_SLOPETYPE, &bTrans, TRUE);
-		    for (i = gManp->Fractal.NumFunct, j = 0; i < gManp->Fractal.NumFunct + gManp->Fractal.NumParam && i < 10; i++, j++)
+		    gManp->ColourSpeed = *gManp->Fractal.ParamValue[0];
+		    gManp->lightDirectionDegrees = *gManp->Fractal.ParamValue[1];
+		    gManp->bumpMappingDepth = *gManp->Fractal.ParamValue[2];
+		    gManp->bumpMappingStrength = *gManp->Fractal.ParamValue[3];
+		    gManp->bump_transfer_factor = *gManp->Fractal.ParamValue[4];
+		    gManp->PaletteStart = (int)(*gManp->Fractal.ParamValue[5]);
+		    // Most Pert subtypes use the standard layout:
+		    //   [6] PertColourMethod, [7] IterDiv, [8] PalOffset, [9] LightHeight
+		    // but Polynomial (subtype 57) uses a special layout:
+		    //   [6] LightHeight, [7..14] polynomial coefficients.
+		    // So the runtime copy must be subtype-aware.
+		    if (gManp->subtype == 57)				// Polynomial has a special parameter layout
 			{
-			GetDlgItemText(hDlg, ID_FRACPARAM1 + i, s[j], 100);
-			*gManp->Fractal.ParamValue[j] = atof(s[j]);
+			gManp->LightHeight = *gManp->Fractal.ParamValue[6];
+
+			// Polynomial does not use the standard Pert colour controls.
+			gManp->PertColourMethod = 0;
+			gManp->IterDiv = 1.0;
+			gManp->PalOffset = 0;
 			}
-		    gManp->PaletteStart = GetDlgItemInt(hDlg, ID_STARTPALETTE, &bTrans, TRUE);
+		    else
+			{
+			gManp->PertColourMethod = (int)(*gManp->Fractal.ParamValue[6]);
+			gManp->IterDiv = *gManp->Fractal.ParamValue[7];
+			gManp->PalOffset = (int)(*gManp->Fractal.ParamValue[8]);
+			// Only the subtypes that support derivative slope need LightHeight.
+			if (gManp->subtype == 0 || gManp->subtype == 1 || gManp->subtype == 59 || gManp->subtype == 60 || gManp->subtype == 61 || gManp->subtype == 62 || gManp->subtype == 63)
+			    gManp->LightHeight = *gManp->Fractal.ParamValue[9];
+			else
+			    gManp->LightHeight = 0.0;
+			}
 		    EndDialog(hDlg, TRUE);
 		    return (TRUE);
 
@@ -1378,4 +1370,5 @@ INT_PTR CALLBACK PertDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	}
     return (FALSE);
     }
+
 

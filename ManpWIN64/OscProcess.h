@@ -15,7 +15,7 @@ class COscProcess
     {
     public:
 	COscProcess();                        // default constructor
-	COscProcess(std::vector<float>& wp);  // explicit constructor
+	COscProcess(std::vector<float>& wp);  // bind to supplied wpixels buffer
 	virtual		~COscProcess();
 	double		cMax[MAXDIM], cMin[MAXDIM], cTot[MAXDIM];
 	double		Range[MAXDIM], Centre[MAXDIM];

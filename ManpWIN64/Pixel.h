@@ -35,7 +35,6 @@
 
 #define MAXROOTS		64		// Newton fractals
 #define distance(z1,z2)		(sqr((z1).x-(z2).x)+sqr((z1).y-(z2).y))
-//#define	MINSIZE			1.0e-9
 
 #define	PLUS	1				// MandelPhoenix fractals
 #define	ZERO	0
@@ -43,6 +42,14 @@
 
 #define PASSWIDTH	10
 #define	MAXTHREADS	40
+
+enum PixelResult
+    {
+    PIXEL_BLUE = -1,
+    PIXEL_ZERO = -2,
+    PIXEL_CONTINUE = 0,
+    PIXEL_STOP = 1
+    };
 
 #pragma once
 
@@ -84,7 +91,7 @@ class CPixel
     {
     public:
 	CPixel();                     // default binds to global wpixels
-	CPixel(std::vector<float>&);  // explicit
+	CPixel(std::vector<float>&);  // bind to supplied wpixels buffer
 	int	RunThread(HWND hwnd, int ThreadNumberIn, int StripWidth, CSlope *Slope, CFract *Fractal, int user_data(HWND hwnd));
 	long	dofract(HWND hwnd, int row, int col);
 	long	DoBigFract(HWND hwnd, int row, int col);
@@ -101,13 +108,25 @@ class CPixel
 	int	DDInitFractal(DDComplex *z, DDComplex *q);
 	int	QDInitFractal(QDComplex *z, QDComplex *q);
 	int	BigInitFractal();
-	//	int	potential(double mag, int iterations);
 	long	calc_frac(HWND hwnd, int row, int col, int user_data(HWND hwnd));
 	Complex	invertz2(Complex  & Cmplx1);
 	void	init_stereo_pairs(int pairflag, int *AutoStereo_value);
 	void	do_stereo_pairs(int col, int row, long color);
 	void	draw_right_image(short y);
 	void	InitDistEst(double *xxmin, double *xxmax, double *yymin, double *yymax, double *xx3rd, double *yy3rd, int *distestwidth, int distest);
+
+	// some helpers for DoFract()
+	long	ApplyFinalColour(long iteration, int hooper, double min_orbit, long min_index);
+	void	CheckPeriodicity(Complex& saved, DDComplex& DDSaved, QDComplex& QDSaved, BigComplex& BigSaved);
+	bool	ProcessOrbitFeatures(int& hooper, double close, double& magnitude, double& min_orbit, long& min_index, double* tantable);
+	void	StoreFloatIteration(int row, int col, long ColourIndex);
+	bool	FinaliseOrbitFeatures(long& iteration, double* tantable);
+	bool	FinaliseDistanceEstimation(long &iteration);
+	void	SaveOrbitHistory();
+	int	RunDistanceEstimatorIteration();
+	int	RunStandardIteration();
+	int	InitialisePixelFractal(double(&tantable)[16]);
+	void	InitialisePixelRuntime(Complex& saved, DDComplex& DDSaved, QDComplex& QDSaved, BigComplex& BigSaved, int& hooper, double& close, double& magnitude, double& min_orbit, long& min_index);
 
 	int	StandardCalculationMode(HWND hwnd, int user_data(HWND hwnd));
 	int	FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[], WORD degree, WORD type,
@@ -200,8 +219,8 @@ class CPixel
 	long	color;
 	int	decomp;			// number of decomposition colours
 	long	threshold;
-	int	colors; 		// maximum colours available from file
-	WORD	colours;		// colours in the file
+	int	potentialColours; 	// maximum colours available from file
+	WORD	paletteColours;		// colours in the file
 	long	iteration;
 	double	FloatIteration;
 	long	oldcolour;		// for periodicity checking
@@ -231,28 +250,21 @@ class CPixel
 	double	mandel_width;		// width of display
 	double	xgap;			// gap between pixels
 	double	ygap;			// gap between pixels
-//	int	NonStandardFractal = 0;	// does fractal use standard plotting mode?
 	double	xxmin, xxmax, yymin, yymax;	// boundaries on image
 
 	bool	EndPixel;
-
 	char	*LyapSequence;		// hold the AB sequence for Lyapunov fractals
 
 	Complex	z, q, j, c, deriv, TempPt;
 
-//	std::vector <float> &wpixels;	// an array of doubles holding slope modified iteration counts
-
 	CTrueCol    *TrueCol;		// palette info
 	CTZfilter   TZfilter;		// Tierazon filters
 	COscProcess OscProcess;
-//	RGBTRIPLE   *FilterRGB;		// for Tierazon filters
 	CPlot	    Plot;
 
-//	CLine3d	    *Line3d;		// routines for projection and 3D transforms
 	int	dem_color;
 	Complex	dem_new;
 	double	param[NUMPERTPARAM];
-//	int	*time_to_quit;		// enable clean exit
 
 	/**************** Big Number Globals *********************/
 	MATH_TYPE   MathType;
@@ -324,10 +336,7 @@ class CPixel
 	DDComplex	DDInvertz2(DDComplex  & Cmplx1);
 	QDComplex	QDInvertz2(QDComplex  & Cmplx1);
 	BigComplex	BigInvertz2(BigComplex  & Cmplx1);
-//	bool	BailoutTest(Complex *z, Complex SqrZ);
-//	bool	BigBailoutTest(BigComplex *z, BigComplex SqrZ);
-//	bool	FractintBailoutTest(Complex *z);
-//	bool	BigFractintBailoutTest(BigComplex *z);
+
 	// some fractal routines
 	int	InitFunctions(WORD type, Complex *z, Complex *q);
 	int	RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, long *iteration);
@@ -525,7 +534,6 @@ class CPixel
 	    };
 
 	std::vector<PointInfo> oldline;
-//	struct PointInfo oldline[MAXHORIZONTAL];	// old pixels 
 	struct PointInfo oldpoint;			// old pixels 
 
 	Complex	OldZ, OlderZ;						// local variables for fwd diff calcs
@@ -658,7 +666,7 @@ class CPixel
 	// stuff for rendering FwdDiff slope
 	double	bump_transfer_factor;
 	int	PaletteStart;
-	int	PaletteShift;
+	int	PaletteShift = 0;		// palette movement between animation frames
 	double	lightDirectionDegrees;
 	double	bumpMappingDepth;
 	double	bumpMappingStrength;

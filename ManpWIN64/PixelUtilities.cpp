@@ -17,8 +17,7 @@
 #include	"OscProcess.h"
 #include	"pixel.h"
 #include	"Potential.h"
-#include	"PixelTemplate.h"
-
+#include	"FilterTemplate.h"
 
 #ifndef sqr
 #define sqr(x) ((x)*(x))
@@ -109,7 +108,7 @@ void	CPixel::InitFractalDefinition(WORD typeIn, int subtypeIn, WORD *degreeIn, d
     rqlim = rqlimIn;
     threshold = thresholdIn;
     BailoutTestType = BailoutTestTypeIn;
-    for (int i = 0; i < NUMPERTPARAM; i++)
+    for (int i = 0; i < NUMPERTPARAM - 1; i++)	// NUMPERTPARAM - 1 because param[15] is reserved for start colour
 	param[i] = paramIn[i];
     for (int i = 0; i < 3; i++)
 	potparam[i] = potparamIn[i];
@@ -145,7 +144,6 @@ void	CPixel::InitControlFlags(BYTE calcmodeIn, BYTE juliaflagIn, BOOL invertIn, 
     pairflag = pairflagIn;
     _3dflag = _3dflagIn;
     period_level = period_levelIn;
-    //reset_period = reset_periodIn;
     distest = distestIn;
     InsideMethod = InsideMethodIn;
     OutsideMethod = OutsideMethodIn;
@@ -166,16 +164,15 @@ void	CPixel::InitArithmetic(BYTE BigNumFlagIn, int precisionIn)
     precision = precisionIn;
     }
 
-void	CPixel::InitRendering(CDib *DibIn, int widthIn, int PlotTypeIn, CTrueCol *TrueColIn, int colorsIn, BOOL UseCurrentPaletteIn, int *AutoStereo_valueIn, int *symmetryIn)
+void	CPixel::InitRendering(CDib *DibIn, int widthIn, int PlotTypeIn, CTrueCol *TrueColIn, int potentialColoursIn, BOOL UseCurrentPaletteIn, int *AutoStereo_valueIn, int *symmetryIn)
     {
     // NOTE: wpixels is a reference bound in the constructor.
     // This copies pixel data into the shared buffer; it does NOT rebind the reference.
-//    wpixels = wpixelsIn;
     Dib = DibIn;
     width = widthIn;
     PlotType = PlotTypeIn;
     TrueCol = TrueColIn;
-    colors = colorsIn;
+    potentialColours = potentialColoursIn;
     UseCurrentPalette = UseCurrentPaletteIn;
     AutoStereo_value = AutoStereo_valueIn;
     symmetry = symmetryIn;
@@ -210,10 +207,10 @@ void	CPixel::InitBailout()		    // needs rqlim + BigNumFlag
 	BigBailout = rqlim;
     }
 
-void	CPixel::InitColourProcessing(WORD specialIn, WORD coloursIn, int decompIn, int logvalIn, BYTE *logtableIn, char *LyapSequenceIn, double ColourSpeedIn, int PaletteStartIn, int PaletteShiftIn)
+void	CPixel::InitColourProcessing(WORD specialIn, WORD paletteColoursIn, int decompIn, int logvalIn, BYTE *logtableIn, char *LyapSequenceIn, double ColourSpeedIn, int PaletteStartIn, int PaletteShiftIn)
     {
     special = specialIn;
-    colours = coloursIn;
+    paletteColours = paletteColoursIn;
     decomp = decompIn;
     logval = logvalIn;
     logtable = logtableIn;
@@ -268,62 +265,20 @@ void	CPixel::GeneralInit()             // final safety
     }
 
 /**************************************************************************
-    Smooth the transitions between adjascent pallete colours
-**************************************************************************/
-
-// we need to take symmetry into account when calculating smoothing.
-/*
-RGBTRIPLE CPixel::GetSmoothedColour(double fIter, double color_speed, CTrueCol &TrueCol, CPlot *Plot)
-    {
-    double  color_bias = 0.0;
-    // ---------------------------------------
-    // Move through palette smoothly
-    // Apply palette speed (default 1.0)
-    // ---------------------------------------
-    double v = fIter * (color_speed)+color_bias;
-    //    RGBTRIPLE* rgbPal = reinterpret_cast<RGBTRIPLE*>(TrueCol.PalettePtr);
-    int paletteSize = TrueCol.ColoursInPALFile;
-
-    // Wrap t into [0, paletteSize)
-    double pos = fmod(v, TrueCol.ColoursInPALFile);
-    if (pos < 0) pos += TrueCol.ColoursInPALFile;
-
-    int i0 = (int)pos;
-    int i1 = (i0 + 1) % TrueCol.ColoursInPALFile;
-
-    // Fraction between the two colours
-    double t = v - floor(v);
-
-    double frac = pos - i0;
-    RGBTRIPLE c0;
-    RGBTRIPLE c1;
-    Plot->GetRGB(i0, &c0);
-    Plot->GetRGB(i1, &c1);
-
-    RGBTRIPLE out;
-
-    out.rgbtRed = BYTE(c0.rgbtRed   * (1.0 - t) + c1.rgbtRed   * t);
-    out.rgbtGreen = BYTE(c0.rgbtGreen * (1.0 - t) + c1.rgbtGreen * t);
-    out.rgbtBlue = BYTE(c0.rgbtBlue  * (1.0 - t) + c1.rgbtBlue  * t);
-    return out;
-    }
-*/
-
-/**************************************************************************
 	Setup symmetry etc
 **************************************************************************/
 
 std::string DDToString(const dd_real& v)
     {
     char buf[128];
-    snprintf(buf, sizeof(buf), "%.17g", to_double(v)); // temporary
+    snprintf(buf, sizeof(buf), "%.17g", to_double(v)); 
     return std::string(buf);
     }
 
 std::string QDToString(const qd_real& v)
     {
     char buf[128];
-    snprintf(buf, sizeof(buf), "%.17g", to_double(v)); // temporary
+    snprintf(buf, sizeof(buf), "%.17g", to_double(v)); 
     return std::string(buf);
     }
 

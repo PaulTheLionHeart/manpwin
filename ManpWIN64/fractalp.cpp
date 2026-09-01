@@ -2291,9 +2291,9 @@ struct fractalspecificstuff fractalspecific[]=
     },
 //#define PERTURBATION		237
     {
-   "Perturbation", ES,ES,ES,ES,ES,ES,ES, ES, ES, ES, 2.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,
-   -3.5, -2.0, 4.0, 0, JULIAFP, NOFRACTAL, NUMPARAM, 0, NULL, NULL, 0, XAXIS, 4.00000000001,		// bailout level a smidgen over 4.0 so there's no truncation right at -2.0, 0.0
-   InitPerturbation, DoPerturbation, "PertDlg", PertDlg, STDBAILOUT
+       "Perturbation", ES,ES,ES,ES,ES,ES,ES, ES, ES, ES, 2.0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,
+       -3.5, -2.0, 4.0, 0, JULIAFP, NOFRACTAL, NUMPARAM, 0, NULL, NULL, 0, XAXIS, 4.00000000001,		// bailout level a smidgen over 4.0 so there's no truncation right at -2.0, 0.0
+       InitPerturbation, DoPerturbation, "PertDlg", PertDlg, STDBAILOUT
     },
 //#define KLEINIAN		238
     {
@@ -2386,15 +2386,27 @@ struct fractalspecificstuff fractalspecific[]=
 
 struct PerturbationSpecificStuff PerturbationSpecific[] =
     {
-    //	    old
+    //	  new
     //    char	    *name;				// name of the fractal 
+    //	  int	    SlopeType;				// none, FwdDiff, Derivative
     //    char	    *paramname[NUMPERTPARAM];		// name of the parameters 
     //    double    paramvalue[NUMPERTPARAM];		// default parameter values 
-    //	  int	    numparams;				// Number of parameters 
+    //	  int	    numparams;				// Number of subtype-specific parameters 
     //    double    rqlim;				// bailout value 
-    //    int	    RedDhiftRider;			// 1 if true
+    //	  bool	    EnableApproximation;		// allow approximation
 
-    // new
+    // Fractal.ParamName[0] = "Smooth Factor - 0.0 means off";
+    // Fractal.ParamName[1] = "Light Direction (Degrees)";
+    // Fractal.ParamName[2] = "Slope Mapping Depth";
+    // Fractal.ParamName[3] = "Slope Mapping Strength";
+    // Fractal.ParamName[4] = "Slope Transfer Factor";
+    // Fractal.ParamName[5] = "Start Palette 0 - Max Iterations";
+    // Fractal.ParamName[6] = "Pert Colour Method";
+    // Fractal.ParamName[7] = "Iteration Divider";
+    // Fractal.ParamName[8] = "Palette Offset";
+    // Fractal.ParamName[9] = "Light Source Height (Derivative)";
+
+    // old
     //	    char	*name;				// name of the fractal 
     //	    int		SlopeType;			// none, FwdDiff, Derivative
     //	    int		PaletteStart;			// where does the colour start?
@@ -2408,249 +2420,206 @@ struct PerturbationSpecificStuff PerturbationSpecific[] =
     //	    double	rqlim;				// bailout value 
     //	    int		RedShiftRider;			// true if fractal = RedShiftRider
 
-
-
-
 	    {
-	    "Mandelbrot", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor (Fwd Diff)", "Light Source Height (Derivative)", ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
+	    "Mandelbrot", 2, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 1000.0, 1
 	    },
 	    {
-	    "Power", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor (Fwd Diff)","Light Source Height (Derivative)", "Degree", ES, ES, ES, ES, ES, ES, ES, 1.0, 1.5, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0, 0
+	    "Power", 2, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.5, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 11, 1000.0, 1
 	    },
 	    {
-	    "Burning Ship", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Burning Ship", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Cubic Burning Ship", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Cubic Burning Ship", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Power Burning Ship", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Power Burning Ship", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "5th Power Burning Ship", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "5th Power Burning Ship", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Celtic", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Celtic", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Cubic Celtic", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Cubic Celtic", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Celtic Buffalo", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Celtic Buffalo", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "5th Celtic", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "5th Celtic", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-//	    "Mandelbar (Tricorn)", "Slope? 0 = off, 1 = Fwd Diff, 2 = Derivative", "Start Palette 0-255", "Light Direction (Degrees)", "Mapping Depth (Fwd Diff)", "Mapping Strength (Fwd Diff)", "Slope Transfer Factor (Fwd Diff)", "Light Source Height (Derivative)", ES, ES, ES, 2.0, 0.0, 45.0, 50.0, 50.0, 1.0, 1.5, 0.0, 0.0, 0.0, 7, 1000.0, 0
-	    "Mandelbar (Tricorn)", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Mandelbar (Tricorn)", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Mandelbar Power", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor" ,"Polynomial Degree (2 - 20)", ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
+	    "Mandelbar Power", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 1000.0, 0
 	    },
 	    {
-	    "Buffalo", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Buffalo", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Cubic Buffalo", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Cubic Buffalo", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Power Buffalo", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Power Buffalo", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "5th Power Buffalo", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "5th Power Buffalo", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Mandelbar Celtic", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Mandelbar Celtic", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Perpendicular Mandelbrot", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Perpendicular Mandelbrot", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Perpendicular Burning Ship", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Perpendicular Burning Ship", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Perpendicular Celtic", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Perpendicular Celtic", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Perpendicular Buffalo", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Perpendicular Buffalo", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Cubic Quasi Burning Ship", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Cubic Quasi Burning Ship", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Cubic Partial Burning Ship Real", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Cubic Partial Burning Ship Real", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Cubic Partial Burning Ship Imag", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Cubic Partial Burning Ship Imag", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Cubic Flying Squirrel", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Cubic Flying Squirrel", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Cubic Quasi Perpendicular", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Cubic Quasi Perpendicular", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Burning Ship Partial Imag", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Burning Ship Partial Imag", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Burning Ship Partial Real", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Burning Ship Partial Real", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Burning Ship Partial Real Mbar", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Burning Ship Partial Real Mbar", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Celtic Burning Ship Partial Imag", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Celtic Burning Ship Partial Imag", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Celtic Burning Ship Partial Real", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Celtic Burning Ship Partial Real", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Celtic Burning Ship Partial Real Mbar", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Celtic Burning Ship Partial Real Mbar", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Buffalo Partial Imag", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Buffalo Partial Imag", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Celtic Mbar", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Celtic Mbar", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th False Quasi Perpendicular", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th False Quasi Perpendicular", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th False Quasi Heart", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th False Quasi Heart", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Celtic False Quasi Perpendicular", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Celtic False Quasi Perpendicular", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Celtic False Quasi Heart", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Celtic False Quasi Heart", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Imag Quasi Perpendicular / Heart", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Imag Quasi Perpendicular / Heart", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Real Quasi Perpendicular", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Real Quasi Perpendicular", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Real Quasi Heart", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Real Quasi Heart", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Celtic Imag Quasi Perpendicular / Heart", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Celtic Imag Quasi Perpendicular / Heart", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Celtic Real Quasi Perpendicular", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Celtic Real Quasi Perpendicular", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "4th Celtic Real Quasi Heart", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "4th Celtic Real Quasi Heart", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "5th Burning Ship Partial", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "5th Burning Ship Partial", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "5th Burning Ship Partial Mbar", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "5th Burning Ship Partial Mbar", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "5th Celtic Mbar", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "5th Celtic Mbar", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "5th Quasi Burning Ship (BS/Buffalo Hybrid)", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "5th Quasi Burning Ship (BS/Buffalo Hybrid)", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "5th Quasi Perpendicular", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "5th Quasi Perpendicular", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "5th Quasi Heart", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "5th Quasi Heart", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "SimonBrot", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "SimonBrot", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Cubic SimonBrot", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Cubic SimonBrot", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "SimonBrot2 4th", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "SimonBrot2 4th", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-//	    "TheRedshiftRider: (a*z^2 +/- z^n + c)", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor 0 = off", "Start Palette 0-255", "Light Direction (Degrees)", "Mapping Depth", "Mapping Strength", "a real", "a imag", "n", "Positive? (1=yes 0=no)", ES, 1.0, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 3.0, 1.0, 0.0, 9, 1000.0, 1
-	    "TheRedshiftRider: (a*z^2 +/- z^n + c)", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "a real", "a imag", "n", "Positive? (1=yes 0=no)", ES, ES, ES, ES, ES, 1.0, 1.0, 0.0, 3.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5, 1000.0, 1
+	    "TheRedshiftRider: (a*z^2 +/- z^n + c)", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 3.0, 1.0, 0.0, 0.0, 0.0, 13, 1000.0, 0
 	    },
 	    {
-	    "Talis", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Talis", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Talis Cubic", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Talis Cubic", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Talis Quartic", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "Talis Quartic", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    //	    "Mandelbrot", "Slope? 0 = off, 1 = Fwd Diff, 2 = Derivative", "Start Palette 0-255", "Light Direction (Degrees)", "Mapping Depth (Fwd Diff)", "Mapping Strength (Fwd Diff)", "Slope Transfer Factor (Fwd Diff)", "Light Source Height (Derivative)", ES, ES, ES, 2.0, 0.0, 45.0, 50.0, 50.0, 1.0, 1.5, 0.0, 0.0, 0.0, 7, 1000.0, 0
-
-	    "Polynomial", 2, 0, 45.0, 50.0, 50.0, 0, "Tenth Order Coefficient", "Nineth Order Coefficient", "Eighth Order Coefficient", "Seventh Order Coefficient", "Sixth Order Coefficient", "Quintic Coefficient", "Quartic Coefficient", "Cubic Coefficient", "Square Coefficient", "Z Coefficient",
-								1.0, 0.0, 4.0, 0.0, 7.0, 0.0, 3.0, 2.0, 2.0, 1.0, 10, 1000.0, 0
+	    "Polynomial", 2, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 15, 1000.0, 1
 	    },
 	    {
-	    "HPDZ Buffalo", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
+	    "HPDZ Buffalo", 1, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0, 0
 	    },
 	    {
-	    "Exp", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
+	    "Exp", 2, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 1000.0, 1
 	    },
 	    {
-	    "Sinh", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
+	    "Sinh", 2, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 1000.0, 1
 	    },
- 	    {
-	    "Sin", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
-	    },
-	    {
-	    "Cos", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
-	    },
-	    {
-	    "Fractional Power - z^(a+ib)", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", "Degree", ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0, 0
-	    },
-
-/*
-	    {
-	    "Inverse - 1/(z^n)", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", "Degree", ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0, 0
-	    },
-	    {
-	    "Cosh", 0, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", "Light Source Height (Derivative)", ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2, 1000.0, 0
-	    },
-
-	    {
-	    "Log", 0, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
-	    },
-	    {
-	    "Sqrt", 0, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
-	    },
-//	    {
-//	    "Fractional Power", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor (Fwd Diff)","Light Source Height (Derivative)", "Degree", ES, ES, ES, ES, ES, ES, ES, 1.0, 1.5, 3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0, 0
-//	    },
-//	    {
-//	    "Art Matric Cubic", 2, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor (Fwd Diff)","Light Source Height (Derivative)", "0=CBIN, 1=CCIN, 2=CFIN, 3=CKIN", "Special Colour Red Component", "Special Colour Green Component", "Special Colour Blue Component", ES, ES, ES, ES, 1.0, 1.5, 0.0, 0.0, 255.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0, 0
-//	    },
-//	    {
-//	    "Sin", 0, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor", ES, ES, ES, ES, ES, ES, ES, ES, ES, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1000.0, 0
-//	    },
-	    {
-	    "Cubic Newton", 1, 0, 45.0, 50.0, 50.0, 0, "Slope Transfer Factor 0 = off", "Start Palette 0-255", "Light Direction (Degrees)", "Mapping Depth", "Mapping Strength", ES, "SlopeDegree", ES, ES, ES, 1.0, 0.0, 45.0, 50.0, 50.0, 0.0, 3.0, 0.0, 0.0, 0.0, 6, 16.0, 0
-	    },
 	    {
-	    "Exponential", "Slope Transfer Factor 0 = off", "Start Palette 0-255", "Light Direction (Degrees)", "Mapping Depth", "Mapping Strength", ES, "SlopeDegree", ES, ES, ES, 1.0, 0.0, 45.0, 50.0, 50.0, 0.0, 4.0, 0.0, 0.0, 0.0, 7, 1000.0, 0
+	    "Sin", 2, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 1000.0, 1
 	    },
 	    {
-	    "Sin", "Slope Transfer Factor 0 = off", "Start Palette 0-255", "Light Direction (Degrees)", "Mapping Depth", "Mapping Strength", ES, ES, ES, ES, ES, 1.0, 0.0, 45.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0, 0
+	    "Cos", 2, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 1000.0, 1
 	    },
 	    {
-	    "Magnet1", "Slope Transfer Factor 0 = off", "Start Palette 0-255", "Light Direction (Degrees)", "Mapping Depth", "Mapping Strength", ES, ES, ES, ES, ES, 1.0, 0.0, 45.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0, 0
+	    "Fractional Power - z^(a+ib)",2, 0.0, 45.0, 50.0, 50.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.5, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 11, 1000.0, 1
 	    },
 	    {
-	    "HPDZ Buffalo", ES, ES, ES, ES, ES, ES, 0.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0, 100.0, 0
-	    },
-*/
-
-
-	NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	    nullptr, 0,
+		{
+		0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+		},
+	    0, 0.0, 0
+	    }
     };
 
 //////////////////////////////////////////////////////////////////
@@ -2992,71 +2961,71 @@ struct AlternativeSpecificStuff MandelDerivSpecific[] =
 
 		{
 		"Mandelbrot",							// 0
-		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0
 		},
 		{
 		"Cubic",							// 1
-		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0
 		},
 		{
 		"Power",							// 2
-		    45.0, 1.5, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0
 		},
 		{
 		"Sin",								// 3
-		    45.0, 1.5, 0.0, 1.0, HALF_PI, 0.0, 0.0, 0.0, 0.0, 0.0, 5, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, HALF_PI, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 9, 1000.0
 		},
 		{
 		"Sin + 1/c",							// 4
-		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0
 		},
 		{
 		"Exponential",							// 5
-		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0
 		},
 		{
 		"Power + 1/c",							// 6
-		    45.0, 1.5, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0
 		},
 		{
-		"Polynomial: Z^n + Z^p + Z^q + C",				// 7
-		    45.0, 1.5, 0.0, 4.0, 3.0, 2.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
+		"Polynomial: Z^5 + Z^4 + Z^3 + Z^2 + Z + const + C",		// 7
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 13, 1000.0
 		},
 		{
 		"Cactus: z = z*z*z+(c-1)*z+c",					// 8
-		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0
 		},
 		{
 		"Sharon's Web z = z*z*z / 4 + z + c",				// 9
-		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0
 		},
 		{
 		"Sin(z^n) + c",							// 10
-		    45.0, 1.5, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0
 		},
 		{
 		"Sinh",								// 11
-		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0
 		},
 		{
 		"Sinh(z^n) + c",						// 12
-		    45.0, 1.5, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8, 1000.0
 		},
 		{
 		"Art Matrix Cubic",						// 13
-		    45.0, 1.5, 0.0, 0.0, 0.0, 200.0, 0.0, 0.0, 0.0, 0.0, 7, 1000.0
+		    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 200.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 11, 1000.0
 		},
 
 	//	{
 	//	"Mandelbar (Tricorn)",						// 14
-	//	    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0
+	//	    45.0, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3, 1000.0
 	//	},
 	//	{
 	//	"3rd Order Nova Variation: z=z-(z*z*z-1)/(3*z*z)+c",	// 13
 	//	    45.0, 1.5,  0.0,  4.0, 0.0, 0.0, 1000.0
 	//	},
 
-	    NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	    NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 	};
 
     struct SlopeSpecificStuff SlopeFwdDiffSpecific[] =
@@ -3066,80 +3035,76 @@ struct AlternativeSpecificStuff MandelDerivSpecific[] =
 	//    int	numparams;			// Number of parameters 
 	//    double	rqlim;				// bailout value 
 
-		{
-		"Mandelbrot",							// 0
-		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5, 1000.0
-		},
-		{
-		"Burning Ship",							// 1
-		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5, 1000.0
-		},
-		{
-		"Cubic",							// 2
-		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5, 1000.0
-		},
-		{
-		"Power",							// 3
-		    1.0, 0.0, 45.0, 50.0, 70.0, 4.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
-		},
-		{
-		"Sin",								// 4
-		    1.0, 0.0, 45.0, 50.0, 70.0, 1.0, HALF_PI, 0.0, 0.0, 0.0, 7, 1000.0
-		},
-		{
-		"Sin + 1/c",							// 5
-		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5, 1000.0
-		},
-		{
-		"Exponential",							// 6
-		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5, 1000.0
-		},
-		{
-		"Power + 1/c",							// 7
-//		    1.0, 50, 50.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
-		    1.0, 0.0, 45.0, 50.0, 70.0, 4.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
-		},
-		{
-		"Polynomial: Z^n + Z^p + Z^q + C",				// 8
-		    1.0, 0.0, 45.0, 50.0, 70.0, 4.0, 3.0, 2.0, 0.0, 0.0, 8, 1000.0
-		},
-		{
-		"Cactus: z = z*z*z+(c-1)*z+c",					// 9
-		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5, 1000.0
-		},
-		{
-		"Sharon's Web z = z*z*z / 4 + z + c",				// 10
-		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5, 1000.0
-		},
-		{
-		"Sin(z^n) + c",							// 11
-//		    1.0, 50, 50.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
-		    1.0, 0.0, 45.0, 50.0, 70.0, 4.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
-		},
-		{
-		"Sinh",								// 12
-		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5, 1000.0
-		},
-		{
-		"Sinh(z^n) + c",						// 13
-//		    1.0, 0.0, 45.0, 50.0, 50.0, 4.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
-		    1.0, 50, 50.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
-		},
-		{
-		"Mandelbar (Tricorn)",						// 14
-		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5, 1000.0
-		},
-		{
-		"Art Matrix Cubic",						// 15
-		    1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 200.0, 0.0, 0.0, 9, 1000.0
-		},
-		{
-		"Newton Variation: z=z-(z^n - 1)/(3*z-1)+c",			// 16
-		    1.0, 0.0, 45.0, 50.0, 70.0, 4.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
-		},
-
-	    NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0
-	};
+	    {
+	    "Mandelbrot",							// 0
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
+	    },
+	    {
+	    "Burning Ship",							// 1
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
+	    },
+	    {
+	    "Cubic",							// 2
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
+	    },
+	    {
+	    "Power",							// 3
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 1000.0
+	    },
+	    {
+	    "Sin",								// 4
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 1.0, HALF_PI, 0.0, 0.0, 0.0, 0.0, 0.0, 11, 1000.0
+	    },
+	    {
+	    "Sin + 1/c",							// 5
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
+	    },
+	    {
+	    "Exponential",							// 6
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
+	    },
+	    {
+	    "Power + 1/c",							// 7
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 1000.0
+	    },
+	    {
+	    "Polynomial: Z^5 + Z^4 + Z^3 + Z^2 + Z + const + C",		// 8
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 15, 1000.0
+	    },
+	    {
+	    "Cactus: z = z*z*z+(c-1)*z+c",					// 9
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
+	    },
+	    {
+	    "Sharon's Web z = z*z*z / 4 + z + c",				// 10
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
+	    },
+	    {
+	    "Sin(z^n) + c",							// 11
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 1000.0
+	    },
+	    {
+	    "Sinh",								// 12
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
+	    },
+	    {
+	    "Sinh(z^n) + c",						// 13
+		1.0, 0.0, 45.0, 50.0, 50.0, 0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 1000.0
+	    },
+	    {
+	    "Mandelbar (Tricorn)",						// 14
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6, 1000.0
+	    },
+	    {
+	    "Art Matrix Cubic",						// 15
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 200.0, 0.0, 0.0, 0.0, 0.0, 13, 1000.0
+	    },
+	    {
+	    "Newton Variation: z=z-(z^n - 1)/(3*z-1)+c",			// 16
+		1.0, 0.0, 45.0, 50.0, 70.0, 0.0, 0.0, 0.0, 0.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 10, 1000.0
+	    },
+	    	NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
 
 
 
@@ -4687,19 +4652,19 @@ struct OscillatorSpecificStuff FractalMapSpecific[]=
 	"Bifurcations and Chaos in a Three-Dimensional Generalised Hénon Map - I", "a", "b", "Colour Factor", ES, ES, ES, ES, ES, ES, ES, 0.2759 + 0.15, -0.85, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.2, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -2.14, -1.1, 2.5, 1, 2, 3, 3, 3, 3, NULL, 1, YAXIS, 100000.0,
-	    NullSetup, DoBifurcationsChaos3DHénonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
+	    NullSetup, DoBifurcationsChaos3DHenonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Bifurcations and Chaos in a Three-Dimensional Generalised Hénon Map - II", "a", "b", "Colour Factor", ES, ES, ES, ES, ES, ES, ES, 0.3281 + 0.40, 0.5, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.2, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -1.72, -0.86, 2.2, 1, 2, 3, 3, 3, 3, NULL, 1, YAXIS, 100000.0,
-	    NullSetup, DoBifurcationsChaos3DHénonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
+	    NullSetup, DoBifurcationsChaos3DHenonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Bifurcations and Chaos in a Three-Dimensional Generalised Hénon Map - III", "a", "b", "Colour Factor", ES, ES, ES, ES, ES, ES, ES, 0.756 + 0.15, -0.5, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.2, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -2.42, -1.25, 2.8, 1, 2, 3, 3, 3, 3, NULL, 1, YAXIS, 100000.0,
-	    NullSetup, DoBifurcationsChaos3DHénonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
+	    NullSetup, DoBifurcationsChaos3DHenonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Bifurcations in the Lozi Fractal Map Marcus Variation I", "a", "Colour Factor", ES, ES, ES, ES, ES, ES, ES, ES, 0.95, 10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -4999,19 +4964,19 @@ struct OscillatorSpecificStuff FractalMapSpecific[]=
 	"Complex Dynamics in Generalised Hénon Map I", "a", "b", "c", "d", "e", "Colour Factor", ES, ES, ES, ES, -1.5, 0.3, 0.8, 0.1, 0.1, 100.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.2, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -7.0, -4.4, 8.0, 1, 2, 3, 6, 3, 3, NULL, 1, YAXIS, 100000.0,
-	    NullSetup, DoComplexDynamicsInGeneralisedHénonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
+	    NullSetup, DoComplexDynamicsInGeneralisedHenonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Complex Dynamics in Generalised Hénon Map II", "a", "b", "c", "d", "e", "Colour Factor", ES, ES, ES, ES, 0.5, 0.85, -0.1, -0.04, 0.7, 100.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.2, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -2.4, 0.2, 3.0, 1, 2, 3, 6, 3, 3, NULL, 1, YAXIS, 100000.0,
-	    NullSetup, DoComplexDynamicsInGeneralisedHénonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
+	    NullSetup, DoComplexDynamicsInGeneralisedHenonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Complex Dynamics in Generalised Hénon Map III", "a", "b", "c", "d", "e", "Colour Factor", ES, ES, ES, ES, 0.2, 1.0, 0.01, -1.5, 0.23, 100.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.1, 0.2, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -1.2, -0.6, 1.8, 1, 2, 3, 6, 3, 3, NULL, 1, YAXIS, 100000.0,
-	    NullSetup, DoComplexDynamicsInGeneralisedHénonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
+	    NullSetup, DoComplexDynamicsInGeneralisedHenonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Complex Dynamics of the Simplest Neuron Model: Singular Chaotic Shilnikov Attractor as Neuron Activity", "a", "b", "i", "c", "Colour Factor", ES, ES, ES, ES, ES, 0.9, 0.2, -1.94, 0.5555, 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -5155,7 +5120,7 @@ struct OscillatorSpecificStuff FractalMapSpecific[]=
 	"Dynamical Trapping in the Area-Preserving Hénon Map", "a", "b", "real", "imag", "Colour Factor", ES, ES, ES, ES, ES, 0.218, 0.9989, 1.0, 1.0, 1200.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    "x", "y", "z", ES, ES, ES, ES, ES, ES, ES, 0.091, 0.15, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 	    -2.0, -1.2, 2.4, 1, 2, 3, 5, 3, 3, NULL, 1, YAXIS, 1200000.0,
-	    NullSetup, DoDynamicalTrappingAreaPreservingHénonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
+	    NullSetup, DoDynamicalTrappingAreaPreservingHenonMap, "SelectOscParams", SelectOscParams, 0.0, 1.0, 1.0
 	},
 	{
 	"Dynamic Fractal Map based on Fractint I", "a", "b", "Funtion 1: sin() = 0 else cos()", "Funtion 2: sin() = 0 else cos()", "Funtion 3: sin() = 0 else cos()", "Funtion 4: sin() = 0 else cos()", "Reverse x and y", "Colour Factor", 

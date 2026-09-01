@@ -5,6 +5,7 @@
 */
 
 #include <Windows.h>
+#include <algorithm>
 #include "ManpWin.h"
 
 //#define	PRINTOSC				// used for listing oscillator names in d:\temp\OscDump.txt
@@ -66,8 +67,14 @@ extern	struct	fractalspecificstuff	curfractalspecific;	// info about current fra
 //extern	int	subtype;		
 
 #define	NUMALTERNATIVEPARAM	4
-#define	NUMPERTPARAM		10
-#define	NUMSLOPEDERIVPARAM	10
+#define	NUMPERTPARAM		16
+#define	NUMSLOPEPARAM		16
+
+#define MAX2(a,b) ((a) > (b) ? (a) : (b))
+
+#define MAXPARAM \
+    MAX2(MAX2(NUMPARAM, NUMPERTPARAM), \
+         MAX2(NUMALTERNATIVEPARAM, NUMSLOPEPARAM))
 
 struct AlternativeSpecificStuff			// database of alternative fractals, e.g. Tierazon and Oscillator fractals
     {
@@ -87,22 +94,17 @@ struct PerturbationSpecificStuff		// database of Perturbation fractals
     {
     char	*name;				// name of the fractal 
     int		SlopeType;			// none, FwdDiff, Derivative
-    int		PaletteStart;			// where does the colour start?
-    double	lightDirectionDegrees;		// Slope parameters
-    double	bumpMappingDepth;
-    double	bumpMappingStrength;
-    int		ColourOptions;			// future use?
-    char	*paramname[NUMPERTPARAM];	// name of the parameters 
+ //   char	*paramname[NUMPERTPARAM];	// name of the parameters 
     double	paramvalue[NUMPERTPARAM];	// default parameter values 
     int		numparams;			// Number of parameters 
     double	rqlim;				// bailout value 
-    int		RedShiftRider;			// true if fractal = RedShiftRider
+    bool	EnableApproximation;		// allow approximation
     };
 
 struct SlopeSpecificStuff			// database of Slope fractals
     {
     char	*name;				// name of the fractal 
-    double	paramvalue[NUMSLOPEDERIVPARAM];	// default parameter values 
+    double	paramvalue[NUMSLOPEPARAM];	// default parameter values 
     int		numparams;			// Number of parameters 
     double	rqlim;				// bailout value 
     };
@@ -166,41 +168,70 @@ extern	struct	PerturbationSpecificStuff	PerturbationSpecific[];	// default value
 #define	CONICAL		11
 //#define	BIPOLAR_CYL	11		// removed as it's the same as BIPOLAR
 
-struct OscillatorSpecificStuff			// ManpWIN version
-{
-   char	    *name;				// name of the fractal 
-						// (leading "*" supresses name display) 
-   char	    *paramname[NUMPARAM];		// name of the parameters 
-   double   paramvalue[NUMPARAM];		// default parameter values 
-   char	    *variablename[NUMPARAM];		// name of the variables 
-   double   variablevalue[NUMPARAM];		// default variable values 
-   double   hor;				// default horizontal corner 
-   double   vert;				// default vertical corner
-   double   width;				// default YMIN corner 
-   int	    xAxis;				// x axis uses this dimension
-   int	    yAxis;				// y axis uses this dimension
-   int	    zAxis;				// z axis uses this dimension 
-   int	    numparams;				// Number of parameters 
-   int	    MaxDimensions;			// max number of dimensions 
-   int	    numvariables;			// Number of variables 
-   char	    *function;				// function (used in Thomas oscillator)
-   unsigned flags;				// see above
+/**************************************************************************
+    Oscillator / map / surface parameter storage
 
-   int	    RotationAxes;			// x, y, z axes             
-   double   iterations;				// iterations value 
-   int	    (*per_pixel)();		// once-per-pixel init 
-   int	    (*calctype)();		// name of main fractal function 
-   char	    *DialogueName;			// name of dialogue box
-   DLGPROC  DialogueType;			// function call to dialogue box
-   double   dt;					// delta time 
-   double   VertBias;				// vertical bias 
-   double   zBias;				// z axis bias 
-};
+    This family uses two separate logical groups of values:
+
+	paramvalue[0 .. NUMPARAM-1]
+	    Formula constants / user parameters.
+
+	variablevalue[0 .. NUMPARAM-1]
+	    Initial state variables / dimensions such as x, y, z, u, v, etc.
+
+    At runtime both groups are stored in gManp->param[]:
+
+	gManp->param[0 .. NUMPARAM-1]
+	    Formula parameters.
+
+	gManp->param[NUMPARAM .. (2 * NUMPARAM)-1]
+	    Initial variable values.
+
+    The second group is NOT an extension of the formula parameter list.
+    It represents oscillator/map state variables and may contain up to
+    NUMPARAM dimensions.
+
+    ParamAnimDlg therefore displays these as two separate groups of
+    NUMPARAM controls: Constants and Variables.
+
+    Do not merge this layout with the Slope/Perturbation parameter model.
+**************************************************************************/
+struct OscillatorSpecificStuff			// ManpWIN version
+    {
+    char    *name;				// name of the fractal 
+						// (leading "*" supresses name display) 
+    char    *paramname[NUMPARAM];		// formula parameter names
+    double   paramvalue[NUMPARAM];		// default formula parameter values 
+    // The second group is NOT an extension of the formula parameter list.
+    char    *variablename[NUMPARAM];		// state variable / dimension names 
+    double   variablevalue[NUMPARAM];		// default variable values 
+    double   hor;				// default horizontal corner 
+    double   vert;				// default vertical corner
+    double   width;				// default YMIN corner 
+    int	    xAxis;				// x axis uses this dimension
+    int	    yAxis;				// y axis uses this dimension
+    int	    zAxis;				// z axis uses this dimension 
+    int	    numparams;				// number of formula parameters in use 
+    int	    MaxDimensions;			// maximum oscillator/map dimensions 
+    int	    numvariables;			// number of initial state variables in use 
+    char    *function;				// function (used in Thomas oscillator)
+    unsigned flags;				// see above
+
+    int	    RotationAxes;			// x, y, z axes             
+    double  iterations;				// iterations value 
+    int	    (*per_pixel)();			// once-per-pixel init 
+    int	    (*calctype)();			// name of main fractal function 
+    char    *DialogueName;			// name of dialogue box
+    DLGPROC  DialogueType;			// function call to dialogue box
+    double   dt;				// delta time 
+    double   VertBias;				// vertical bias 
+    double   zBias;				// z axis bias 
+    };
 
 struct CoordSysInfoStuff
-{
-   char	    *CoordSys[14];			// name of the co-ordinate system 
-};
+    {
+    char	    *CoordSys[14];			// name of the co-ordinate system 
+    };
 
 
 extern	struct	OscillatorSpecificStuff		OscillatorSpecific[];	// default values for each 
@@ -1470,9 +1501,9 @@ extern	int	DoChaoticMapNoFixedPoints();
 extern	int	Do2DLogisticSineCouplingMapImageEncryption();
 extern	int	DoRobustCompressionEncryptionImagesBasedSPIHTCoding();
 extern	int	DoDynamicsHigherDimensionalFractionalOrderChaoticMap();
-extern	int	DoComplexDynamicsInGeneralisedHénonMap();
+extern	int	DoComplexDynamicsInGeneralisedHenonMap();
 extern	int	DoOnDynamicsControlSynchronisationFractionalOrderIkedaMap();
-extern	int	DoDynamicalTrappingAreaPreservingHénonMap();
+extern	int	DoDynamicalTrappingAreaPreservingHenonMap();
 extern	int	DoChaosHyperchaosTransitionMap();
 extern	int	DoANewChaoticMapSecureTransmission();
 extern	int	DoRouteChaosViaStrangeNonChaoticAttractors();
@@ -1497,7 +1528,7 @@ extern	int	DoElectronicallyImplementedCoupledLogisticMaps();
 extern	int	DoHenonMarcusMap();
 extern	int	DoANewChaoticAttractorDiscreteMapping();
 extern	int	DoANewNonlinearOscillatorInfiniteNumberMap();
-extern	int	DoBifurcationsChaos3DHénonMap();
+extern	int	DoBifurcationsChaos3DHenonMap();
 extern	int	DoMultistabilityCyclicAttractors();
 extern	int	DoPiObserverDesign();
 extern	int	DoErgodicTheoryMap();

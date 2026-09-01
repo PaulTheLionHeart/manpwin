@@ -26,7 +26,7 @@ class CBigTrig
 	void log_bf(BigDouble* out, const BigDouble& n);
 	void log10_bf(BigDouble* out, const BigDouble& n);
 
-	// Complex (we'll expand later)
+	// Complex support is not implemented here.
 	void CSin(BigComplex* result, const BigComplex& z);
 	void CCos(BigComplex* result, const BigComplex& z);
 	void CExp(BigComplex* result, const BigComplex& z);

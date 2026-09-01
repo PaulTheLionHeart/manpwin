@@ -26,8 +26,8 @@ public:
     void	LoadFunction(char *, int);		// get pointer to trig functions (Fn1, Fn2)
 
     char	*FractName;				// you guessed it
-    double	*ParamValue[NUMPARAM];			// pointers to the parameters to fractal
-    char	*ParamName[NUMPARAM];			// pointers to the parameters names
+    double	*ParamValue[MAXPARAM];			// pointers to the parameters to fractal
+    char	*ParamName[MAXPARAM];			// pointers to the parameters names
     int		NumParam;				// Number of parameters required for fractal
     int		NumFunct;				// Number of functions required for fractal
     int		Fn1Index;				// pointer to first function

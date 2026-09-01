@@ -6,6 +6,7 @@
 
 #include <cassert>
 #include "Plot.h"
+#include "manp.h"
 
 extern	std::atomic<bool> gStopRequested;	// force early exit
 
@@ -51,16 +52,6 @@ bool CPlot::DebugValidate(const char* where) const
 	OutputDebugStringA(where); OutputDebugStringA(": TrueCol == null\n");
 	return false;
 	}
-
-    // removed as wpixels is now in manp.h and we don't want circular includes
-/*
-    if ((flags & USEWPIXELS)) {
-	if (wpixels.size() < (size_t)width * (size_t)height) {
-	    OutputDebugStringA(where); OutputDebugStringA(": wpixels too small\n");
-	    return false;
-	    }
-	}
-*/
     return true;
     }
 #endif
@@ -87,13 +78,7 @@ void	CPlot::InitPlot(long thresholdIn, CTrueCol *TrueColIn, std::vector <float> 
     {
     threshold = thresholdIn;			// maximun iterations
     TrueCol = TrueColIn;			// palette info
-
-    // in your default constructor CPlot::CPlot() : wpixels(::wpixels) { } it’s already bound to the global
-    // in the other ctor CPlot(std::vector<float>& wp) : wpixels(wp) { } it’s already bound to the right vector
-    // you are already passing the global wpixels everywhere anyway
-    // If you remove that assignment, InitPlot() becomes a pure “set pointers and sizes” call, which is what we want.
-    // This is a really big stability win for a very small edit.
-    wpixels = wpixelsIn;			// floating point iterations for each pixels
+    wpixels = wpixelsIn;			// bind to supplied per-pixel rendering data
     xdots = xdotsIn;
     ydots = ydotsIn; 
     height = heightIn; 
@@ -131,8 +116,6 @@ void	CPlot::GetRGB(DWORD colour, RGBTRIPLE *rgb)
     rgb->rgbtBlue = TrueCol->PalettePtr[c].rgbtRed;
     rgb->rgbtGreen = TrueCol->PalettePtr[c].rgbtGreen;
     rgb->rgbtRed = TrueCol->PalettePtr[c].rgbtBlue;
-
-//    *rgb = TrueCol->PalettePtr[c];
     }
 
 /**************************************************************************
@@ -143,7 +126,6 @@ void	CPlot::PlotPoint(WORD x, WORD y, DWORD colour)
     {
     size_t 	i;
     size_t 	local_width;
-//    DWORD	address;
 
     if (AbortRequested())
 	return;
@@ -187,7 +169,6 @@ void	CPlot::PlotPoint(WORD x, WORD y, DWORD colour)
 	    if (!Dib->DibPixels.empty())
 		memcpy(Dib->DibPixels.data() + i, rgb, 3);
 	    }
-//	memcpy(Dib.DibPixels + i, GetRGB(colour), 3);
 						    // Now do reference
 	i = ((DWORD)y * (DWORD)width) + (DWORD)x;
 
@@ -300,18 +281,21 @@ DWORD CPlot::GetColour(WORD x, WORD y, BYTE &flags)
     if (i >= wpixels->size())
 	return 0L;
 
+    if (i >= gManp->PixelFlags.size())
+	return 0L;
+
     float v = (*wpixels)[i];
 
-    if (v == SPECIALPIXEL)
+    if (gManp->PixelFlags[i] & PIXEL_SPECIAL)
 	{
 	flags |= PIXEL_SPECIAL;
-	return (DWORD)TESS_SPECIAL_COLOUR;  // unique ID for comparisons
+	return (DWORD)TESS_SPECIAL_COLOUR;	// unique ID for comparisons
 	}
 
-    if (v == INSIDEPIXEL)
+    if (gManp->PixelFlags[i] & PIXEL_INSIDE)
 	{
 	flags |= PIXEL_INSIDE;
-	return (DWORD)threshold;  // behaves like max iter
+	return (DWORD)threshold;		// behaves like max iter
 	}
 
     DWORD value = ((DWORD)v & 0x7fffffff);

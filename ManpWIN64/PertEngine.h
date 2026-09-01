@@ -23,7 +23,7 @@
 
 #define	MAXPOWER		20
 #define	MAXFILTER		9
-#define	MAXPOLY			10	// only because we are limited by param[]
+#define	MAXPOLY			8	// only because we are limited by param[]
 #define MAXLINE			250	// maximum length of a line
 
 #define	NOSLOPE			0
@@ -80,7 +80,7 @@ class CPerturbation
     {
     public:
 	CPerturbation();			// default binds to global wpixels
-	CPerturbation(std::vector<float>&);	// explicit
+	CPerturbation(std::vector<float>&);	// bind to supplied wpixels buffer
 	int	initialiseCalculateFrame(CDib *DibIn, int HeightIn, int threshold, BigDouble xZoomPointin, BigDouble yZoomPointin, BigDouble BigWidthIn, int decimals, int OutsideMethodIn, 
 		int InsideMethodIn, HWND hwndIn, int ThreadIn, double paramIn[], double potparamIn[], int PaletteShiftIn, int *PlotTypeIn, int SlopeTypeIn, double lightDirectionDegrees, 
 		double bumpMappingDepth, double bumpMappingStrength, int PaletteStartIn, double LightHeightIn, int PertColourMethodIn, int PalOffset, double IterDiv, bool EnableApproximationIn, BYTE _3dflagIn, double ColourSpeedIn, int NumberThreadsIn);
@@ -92,7 +92,7 @@ class CPerturbation
 	int	BigComplex2ExpComplex(ExpComplex *a, BigComplex b);
 
 	int	SlopeType = NOSLOPE;
-	int	PaletteShift = 0;
+	int	PaletteShift = 0;		// palette movement between animation frames
 
     private:
 	void	LoadPascal(std::vector<long>   &PascalArray, int n);
@@ -156,7 +156,7 @@ class CPerturbation
 	double	bumpMappingStrength = 0.0;
 	double	LightHeight = 0.0;		// height of light for slope calculation
 	int	PertColourMethod = 0;		// Kalles colour method
-	int	PalOffset = 0;			// begin palette here
+	int	PalOffset = 0;			// Kalles palette index offset
 	double	IterDiv = 1.0;			// divide ieration by this amount
 
 	int	ArithType = DOUBLE;		// do we need to use FloatExp: abs(width) < 10^300
@@ -168,11 +168,11 @@ class CPerturbation
 	int	power = 3;
 	int	subtype = 0; 
 	int	biomorph = -1; 
-	int	InsideMethod = 0;			// the number of the inside filter
-	int	OutsideMethod = 0;			// the number of the outside filter
+	int	InsideMethod = 0;		// the number of the inside filter
+	int	OutsideMethod = 0;		// the number of the outside filter
 
 	BigDouble	BigWidth = 0.0, BigCentreX = 0.0, BigCentreY = 0.0;
-	int	SlopeDegree = 2;					// used to tell FwdDiff algorithm the degree of the polymomial for slope calculations
+	int	SlopeDegree = 2;		// used to tell FwdDiff algorithm the degree of the polymomial for slope calculations
     };
 
 

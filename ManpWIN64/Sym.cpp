@@ -311,7 +311,6 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 
     if (calcmode == 'F')
 	 fract_sym = NOSYM;
-	//    fract_sym = NOSYM;					// debug
     if (RotationAngle == 90 || RotationAngle == 270)			// if rotated image by 90 or 270 degrees - then reverse symmetry
 	{
 	switch (fract_sym)

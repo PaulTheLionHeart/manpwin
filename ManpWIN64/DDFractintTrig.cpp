@@ -11,7 +11,7 @@
 #include "pixel.h"
 #include "Fract.h"
 #include "BailoutTemplate.h"
-#include "PixelTemplate.h"
+#include "FilterTemplate.h"
 #include "FractintTrigTemplate.h"
 #include "..\parser\TrigFn.h"
 

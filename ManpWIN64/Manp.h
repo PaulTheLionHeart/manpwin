@@ -22,6 +22,7 @@
 
 #define g_pOtherFunctions (&gManp->OthFn)
 #define	BITSPERPIXEL	24
+
 class CManp
     {
     public:
@@ -70,7 +71,7 @@ class CManp
 	void	ConvertString2Bignum(mpfr_t num, char *s);
 	int	GenOscillatorScript(HWND hwnd, char *filename);
 	int	GenOscMorphScript(HWND hwnd, char *filename);
-	int	GenParameterScript(HWND hwnd, char *filename, int NumVariables);
+	int	GenParameterScript(HWND hwnd, char *filename);
 	int	InitRTJulia(HWND hwnd);
 	void	RTJuliaOrbits(RGBTRIPLE colour, int count);
 	int	DrawJulia(HWND hwnd, POINTS ptCurrent);
@@ -142,7 +143,8 @@ class CManp
 	std::vector<std::unique_ptr<CPerturbation>> PertCalculator;
 	std::vector<std::unique_ptr<CSlope>> Slope;
 	std::vector<int> SlopeProgress;
-	std::vector<float> wpixels {};			// an array of doubles holding slope modified iteration counts
+	std::vector<float> wpixels {};			// per-pixel numeric rendering data used by smoothing, filters, 3D and slope
+	std::vector<BYTE> PixelFlags {};		// classify pixels as normal, inside or special
 
 	ProcessType	OscAnimProc = STANDARD;
 	COscProcess	OscProcess;
@@ -195,7 +197,8 @@ class CManp
 
 	double		AspectRatio;
 	BYTE		RealTimeJuliaFlag = 0;		// Display Julia set in real time
-	int		PaletteStart = 0;
+	DWORD		PrePaletteColour = 0x00FFFFFF;	// colour used for iterations below PaletteStart
+	int		PaletteStart = 0;		// flag to show which iteration is used
 	long		iteration;
 	double		potparam[3] = { 255.0, 820.0, 20.0 };		// potential parameters
 	double		param[20];			// parameters
@@ -286,7 +289,7 @@ class CManp
 	BOOL		DisplayAnimation = FALSE;	// allow system to know that we are currently displaying an animation (BOOL because it is represented by an int and works best in scanf())
 	int		RotationAngle = 0;		// rotate image in degrees	
 	Complex		RotationCentre = 0.0;		// centre of rotation
-	int		PalOffset = 0;			// Start Palette here
+	int		PalOffset = 0;			// Kalles palette index offset
 	int		SlopeType;
 	double		IterDiv = 1.0;			// divide iteration by this amount
 	double		ColourSpeed = 0.0;		// used for colour smoothing
@@ -343,19 +346,16 @@ class CManp
 	PertThreadData		PixelDataArrayZero;
 	SlopeThreadData		SlopeDataArrayZero;
 	std::vector<int>	PertProgress;
-
-
-
+	       
 	// stuff for DwdDiff algorithm
 	double		bump_transfer_factor = 1.0;
 	double		lightDirectionDegrees = 45.0;
 	double		bumpMappingDepth = 50.0;
 	double		bumpMappingStrength = 75.0;
 	double		LightHeight = 2.0;		// height of light for slope calculation
-	int		PaletteShift = 0;		// fractional palette addressing
-	bool		OldPertFormat;			// used to get param values for old format perturbation par files
+	int		PaletteShift = 0;		// palette movement between animation frames
 
-		// these are used to restore Mandelbrot after Julia - logically tied to current fractal - view persistent between calls
+	// these are used to restore Mandelbrot after Julia - logically tied to current fractal - view persistent between calls
 	double		oldhor = 0.0;
 	double		oldvert = 0.0;
 	double		oldwidth = 0.0;

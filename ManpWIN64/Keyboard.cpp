@@ -332,6 +332,8 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	case 'P':
 	    if (GetKeyState(VK_CONTROL) < 0)
 		SendMessage (hwnd, WM_COMMAND, IDM_USEDEFAULTPALETTE, 0L);	// Use the default colour palette as per FRACTINT
+	    else if (GetKeyState(VK_SHIFT) < 0)
+		SendMessage(hwnd, WM_COMMAND, IDM_SET_PRE_PALETTE_START, 0L);	// Select pre-palette colour 
 	    else
 		SendMessage (hwnd, WM_COMMAND, IDM_PARAM_ANIM, 0L);		// Parameter animation  
 	    break;

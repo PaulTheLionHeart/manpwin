@@ -41,6 +41,11 @@
 #define VGA_COLOURS	256
 #define	MAXFORMULASTRINGLENGTH		3600	
 
+// Per-pixel classifications used by Pixel, Perturbation and Slope.
+// These are stored in PixelFlags; wpixels remains available for numeric iteration, filter and Forward Difference values.
+#define PIXEL_NORMAL	0x00
+#define PIXEL_INSIDE	0x01
+#define PIXEL_SPECIAL	0x02
 
 // defines for inside/outside
 #define NONE		0

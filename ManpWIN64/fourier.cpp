@@ -48,14 +48,9 @@ struct	fourierstruct
 
 extern	std::atomic<bool> gStopRequested;	// force early exit
 extern	int	user_data(HWND);
-//extern	char	*FractData(void);
 extern	char	*GenerateMPEGFileName (char *, char *);
 extern	char	*GenerateAnimFileName (char *, char *);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
-
-//extern	HDC	hdcMem;			// load picture into memory
-//extern	std::vector<float> wpixels;	// an array of doubles holding slope modified iteration counts
-//extern	HWND	PixelHwnd;		// pointer to handle for pixel updating
 
 extern	char	PNGName[];		// base name for PNG file sequence
 extern	char	ScriptFileName[];	// base name for script file 

@@ -44,15 +44,25 @@ struct FwdDiffContext
     RGBTRIPLE SpecialColour;
     int PaletteShift;
     WORD *degree;
+
     // --- rendering ---
     CDib* Dib;
     std::vector<float>* wpixels;
+    std::vector<BYTE>* PixelFlags;     // shared per-pixel classification
     CPlot* Plot;
+
+    // --- filters ---
+    int InsideMethod;
+    int OutsideMethod;
+    int biomorph;
+    double *potparam;
+    CTrueCol *TrueCol;
 
     // --- geometry ---
     int xdots;
     int ydots;
     int width;
+    PlotMode mode;
 
     // --- threading ---
     std::vector<std::pair<int, int>>* pixelOrder;
@@ -71,6 +81,11 @@ typedef	struct MySlopeData
     std::vector<std::pair<int, int>>* pixelOrder;
     std::atomic<int>* workIndex;
     int		totalPixels;
+    PlotMode	mode;
+    int		InsideMethod;
+    int		OutsideMethod;
+    int		biomorph;
+    double	*potparam;
     HANDLE	ghMutex;
     } SlopeThreadData, *pSlopeThreadData;
 
@@ -78,28 +93,28 @@ class CSlope
     {
     public:
 	CSlope();                     // default binds to global wpixels
-	CSlope(std::vector<float>&);  // explicit
+	CSlope(std::vector<float>&);  // bind to supplied wpixels buffer
 
 	int	RunSlopeDerivative(HWND GlobalHwnd, int user_data(HWND hwnd), char* StatusBarInfo, int subtype, int NumThreads, int thread, Complex j, double mandel_width, double hor, double vert, 
 								BYTE BigNumFlag, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
 								BYTE juliaflag, int xdots, int ydots, int width, int height, WORD *degreeIn, int precision, double ColourSpeedIn, HANDLE ghMutex, std::vector<std::pair<int, int>> *pixelOrder,
-								std::atomic<int> *workIndex, int totalPixels);
+								std::atomic<int> *workIndex, int totalPixels, PlotMode mode);
 	int	RunSlopeFwdDiff(HWND hwndIn, int user_data(HWND hwnd), char* StatusBarInfo, int subtypeIn, int NumThreadsIn, int threadIn, Complex j, double mandel_width, double hor, double vert, 
 								BYTE BigNumFlag, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double rqlim, long threshold, double paramIn[], CTrueCol *TrueCol, CDib *Dib, 
 								std::vector <float> *wpixels, BYTE juliaflag, int xdots, int ydots, int width, WORD *degreeIn, int precision, double ColourSpeedIn, std::vector<std::pair<int, int>> *pixelOrder,
-								std::atomic<int> *workIndex, int totalPixels);
+								std::atomic<int> *workIndex, int totalPixels, PlotMode mode, int InsideMethodIn, int OutsideMethodIn, int biomorphIn, double *potparamIn);
 
 	RGBTRIPLE GetSmoothedColour(double fIter, double color_speed, CTrueCol &TrueCol, CPlot *Plot);
 
-	void	InitRender(long threshold, CTrueCol *TrueCol, CDib *Dib, /*std::vector <float> *wpixels, */int PaletteShift, double bump_transfer_factor, int PaletteStart, double lightDirectionDegrees, 
+	void	InitRender(long threshold, CTrueCol *TrueCol, CDib *Dib, int PaletteShift, double bump_transfer_factor, int PaletteStart, double lightDirectionDegrees, 
 		double bumpMappingDepth, double bumpMappingStrength, RGBTRIPLE SpecialColourIn);
 	int	RenderSlope(int xdots, int ydots, int PertColourMethod, int PalOffset, double IterDiv, double ColourSpeedIn);
 
 	void	SlopeIsExiting(void);
 	bool	EndSlope;
-	double	param[NUMSLOPEDERIVPARAM];
+	double	param[NUMSLOPEPARAM];
 	int	PaletteStart;
-	int	PaletteShift = 0;
+	int	PaletteShift = 0;		// palette movement between animation frames
 	// Art Matrix Cubic
 	RGBTRIPLE	SpecialColour;
 
@@ -107,12 +122,22 @@ class CSlope
 
 	int	ConvertBignumsDD(BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, dd_real *DDxgap, dd_real *DDygap, dd_real *DDhor, dd_real *DDvert, dd_real *DDWidth);
 	int	ConvertBignumsQD(BigDouble Big_xgap, BigDouble Big_ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, qd_real *QDxgap, qd_real *QDygap, qd_real *QDhor, qd_real *QDvert, qd_real *QDWidth);
-	RGBTRIPLE compute_colour(CTrueCol *TrueCol, Complex j, BYTE juliaflag, Complex c, BigComplex cBig, QDComplex cQD, DDComplex cDD, double rqlim, long threshold, BYTE BigNumFlag, Complex v, bool *Time2Exit, 
-		int &iterations, double &reflectionOut, double &smoothIterations);
+	RGBTRIPLE compute_colour(CTrueCol *TrueCol, CPlot *Plot, Complex j, BYTE juliaflag, Complex c, BigComplex cBig, QDComplex cQD, DDComplex cDD, double rqlim, long threshold, BYTE BigNumFlag, Complex v, bool *Time2Exit,
+		int &iterations, double &smoothIterations);
 	void	Create2DVector(Complex *v, double LightAngle);
 	double	getGradientX(std::vector <float> *wpixels, int index, int width);
 	double	getGradientY(std::vector <float> *wpixels, int index, int width, int height);
 	int	changeBrightnessOfColorScaling(int rgb, double delta, double bump_transfer_factor);
+	bool	SetSlopeCoordinate(int idx, int totalPixels, int xdots, int ydots, PlotMode mode, std::vector<std::pair<int, int>> *pixelOrder, int &iX, int &iY, BYTE ArithType, Complex &c, BigComplex &cBig, 
+		QDComplex &cQD, DDComplex &cDD, double hor, double vert, double mandel_width, double xgap, double ygap, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, BigDouble Big_xgap, BigDouble Big_ygap,
+		dd_real DDhor, dd_real DDvert, dd_real DDWidth, dd_real DDxgap, dd_real DDygap, qd_real QDhor, qd_real QDvert, qd_real QDWidth, qd_real QDxgap, qd_real QDygap);
+	void	InitialiseArtMatrixSlope();
+	bool	PlotArtMatrixSpecialPixel(int iX, int iY, BYTE ArithType, Complex c, BigComplex cBig, QDComplex cQD, DDComplex cDD, Complex j, BYTE juliaflag, long threshold, CPlot *Plot);
+	int	InitialiseSlopeDerivativeWorker(HWND hwndIn, int subtypeIn, int NumThreadsIn, int threadIn, BYTE BigNumFlag, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double mandel_width, 
+		double paramIn[], CTrueCol *TrueCol, CDib *Dib, int xdots, int ydots, int height, WORD *degreeIn, int precisionIn, double ColourSpeedIn, std::atomic<int> *workIndex, int totalPixels, 
+		std::vector<std::pair<int, int>> *pixelOrder, Complex &v, double &xgap, double &ygap, dd_real &DDhor, dd_real &DDvert, dd_real &DDxgap, dd_real &DDygap, dd_real &DDWidth, qd_real &QDhor, qd_real 
+		&QDvert, qd_real &QDxgap, qd_real &QDygap, qd_real &QDWidth, int InsideMethodIn, int OutsideMethodIn, int biomorphIn, double *potparamIn, CPlot *Plot);
+	long	ApplySlopeFilters(int iterations, BYTE ArithType, Complex &FinalZ, DDComplex &FinalZDD, QDComplex &FinalZQD, BigComplex &FinalZBig, long threshold, double rqlim, double min_orbit, long min_index, CTrueCol *TrueCol);
 
 	HWND	hwnd;
 	int	NumThreads;
@@ -132,7 +157,6 @@ class CSlope
 	BigDouble   Big_xgap, Big_ygap;
 
 	// screen ( integer) coordinate 
-	int iX, iY;
 	const int iXmax = 1000;
 	const int iYmax = 1001; // for main antenna
 	// world ( double) coordinate = parameter plane
@@ -141,13 +165,12 @@ class CSlope
 	const double CxMax = 0.8;
 	const double CyMin = -1.5;
 	const double CyMax = 1.5;
-	/* */
+	
 	double PixelWidth   =(CxMax-CxMin)/iXmax;
 	double PixelHeight  =(CyMax-CyMin)/iYmax;
 	// color component ( R or G or B) is coded from 0 to 255 
 	// it is 24 bit color RGB file 
 	const int MaxColorComponentValue = 255;
-//	static RGBTRIPLE color[3];	// 24-bit rgb color
 	int	StripStart;
 	int	StripMult;		// e.g. 4 or 8
 	int	subtype;
@@ -155,6 +178,10 @@ class CSlope
 	CPlot	Plot;
 	int	smoothing = 0;
 	double	ColourSpeed = 0.0;
+	int	InsideMethod;
+	int	OutsideMethod;
+	int	biomorph;
+	double	*potparam;
 
 	// Art Matrix Cubic
 	Complex	t2, t3, a, b, v, a2, aa3;

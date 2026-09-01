@@ -16,8 +16,6 @@
 #define		zerotol 1.e-50    // 1.e-14
 #define		SAFETYMARGIN	4			// Multiply number of digits by a safety margin 
 
-//#define	errorcode -1.e60
-
 extern	int	decimals;
 
 class BigDouble
@@ -96,7 +94,7 @@ class BigDouble
 	bool operator<=(const BigDouble &) const;
 	bool operator!=(const BigDouble &) const;
 
-	// NEW: exact integer constructors
+	// exact integer constructors
 	void MulInt(BigDouble& result, int n) const;
 	void MulInt(BigDouble& result, long n) const;
 
