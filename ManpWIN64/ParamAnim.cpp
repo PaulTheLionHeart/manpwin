@@ -85,7 +85,8 @@ int	CManp::GenParameterScript(HWND hwnd, char *filename)
 	fprintf(out, " -c%s,%s,%s\n", s1.data(), s2.data(), s3.data());
 	}
     else
-	fprintf(out, " -c%24.24f,%24.24f,%24.24g\n", gManp->hor, gManp->vert, gManp->mandel_width);
+	fprintf(out, " -c%.24f,%.24f,%.24g\n", gManp->hor, gManp->vert, gManp->mandel_width);
+//	fprintf(out, " -c%24.24f,%24.24f,%24.24g\n", gManp->hor, gManp->vert, gManp->mandel_width);
 
     fprintf(out, "Parameter Animation: %10.10f %10.10f %d %d %d\n", StartRate, EndRate, frames, ParamNumber, Return2Start);
     fprintf(out, "Palette=\n");
@@ -181,6 +182,18 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			for (i = NumVariables; i < NUMPARAM; i++)
 			    SetDlgItemText(hDlg, ID_FRACVARTX01 + i, "     N/A");
 			break;
+			// IMPORTANT:
+			// ID_FRACPARAM16 is used as the physical edit control for the Bailout
+			// pseudo-parameter in the parameter-animation dialog.
+			//
+			// This does NOT correspond to gManp->param[15].
+			// gManp->param[15] is reserved for PrePaletteColour.
+			//
+			// Logical animation numbering:
+			//   Ordinary Pixel fractals: ParamNumber 10 = Bailout
+			//   Perturbation/Slope:      ParamNumber 15 = Bailout
+			//
+			// The actual bailout value is stored in gManp->rqlim.
 		    case SLOPEFORWARDDIFF:
 		    case SLOPEDERIVATIVE:
 		    case PERTURBATION:
@@ -314,8 +327,8 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    gManp->param[i] = atof(s[i]);
 			    }
 
-			// Parameter row 15 is reserved for Bailout in the animation dialog.
-			// It does not correspond to gManp->param[15].
+			// Bailout pseudo-parameter.  s[15] is only a text buffer for
+			// ID_FRACPARAM16; it is unrelated to gManp->param[15].
 			GetDlgItemText(hDlg, ID_FRACPARAM16, s[15], 100);
 			gManp->rqlim = atof(s[15]);
 			if (gManp->type == OSCILLATORS || gManp->type == FRACTALMAPS || gManp->type == SPROTTMAPS || gManp->type == SURFACES || gManp->type == KNOTS || gManp->type == CURVES)
@@ -328,14 +341,28 @@ INT_PTR CALLBACK ParamAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			    }
 
 			ParamNumber = GetDlgItemInt(hDlg, IDC_PARAM_NUM, &bTrans, TRUE);
+
 			if (gManp->type == SLOPEFORWARDDIFF || gManp->type == SLOPEDERIVATIVE || gManp->type == PERTURBATION)
 			    {
-			    if (ParamNumber < 0 || ParamNumber >= NUMSLOPEPARAM - 1)
+			    // Parameters 0..14 are real parameters.
+			    // Parameter 15 is the Bailout pseudo-parameter.
+			    if (ParamNumber < 0 || ParamNumber >= NUMSLOPEPARAM)
+				ParamNumber = 0;
+			    }
+			else if (gManp->type == OSCILLATORS || gManp->type == FRACTALMAPS || gManp->type == SPROTTMAPS || gManp->type == SURFACES || gManp->type == KNOTS || gManp->type == CURVES)
+			    {
+			    // These families use two genuine groups:
+			    //   0..9   constants
+			    //   10..19 variables
+			    // They do not use a Bailout pseudo-parameter.
+			    if (ParamNumber < 0 || ParamNumber >= 2 * NUMPARAM)
 				ParamNumber = 0;
 			    }
 			else
 			    {
-			    if (ParamNumber < 0 || ParamNumber >= NUMPARAM)
+			    // Ordinary Pixel-style fractals use parameters 0..9.
+			    // Parameter 10 is the Bailout pseudo-parameter.
+			    if (ParamNumber < 0 || ParamNumber > NUMPARAM)
 				ParamNumber = 0;
 			    }
 

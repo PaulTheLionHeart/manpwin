@@ -120,6 +120,13 @@ Older parameter or animation files using the previous layouts may not reproduce
 the same settings. Use <code>Ctrl+T</code> to inspect or adjust the parameter
 values without changing the current fractal location, type, or subtype.
 </li>
+
+<li>
+Parameter animation support depends on the selected fractal family.
+Start Palette animation is supported for perturbation and slope fractals.
+The pre-palette colour is preserved during animation but is not itself an
+animatable parameter.
+</li>
 </ul>
 
 <h2>Rendering & Features</h2>
@@ -127,6 +134,17 @@ values without changing the current fractal location, type, or subtype.
 <ul>
 <li>
   Perturbation rendering does not support all filter and colouring methods.
+</li>
+
+<li>
+  Tierazon filters are not currently supported in perturbation rendering when
+  slope rendering is enabled. They may be used with supported perturbation
+  fractals when slope rendering is disabled.
+</li>
+
+<li>
+  Standalone slope fractals support the standard inside filters, but do not 
+  support Tierazon filters.
 </li>
 
 <li>

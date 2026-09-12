@@ -177,7 +177,6 @@ int	CManp::GenZoomScript(HWND hwnd, char *filename)
 
 char	*AnimData(void)
     {
-//char	s[400];
     static	char	info[MAXDATALINE];
 
     info[0] = '\0';

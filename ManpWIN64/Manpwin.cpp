@@ -1731,9 +1731,9 @@ BOOL	InitNewFractal(HWND hwnd)
 		    gManp->InitFract(gManp->type);
 		    gManp->time_to_reinit = FALSE;
 		    gManp->time_to_load = FALSE;
+		    gManp->param[15] = (double)gManp->PrePaletteColour;
 		    LoadSlopeDerivParams();			// get parameters  and other subtype specific stuff from Slope Derivative database 
 		    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
-		    gManp->param[15] = (double)gManp->PrePaletteColour;
 		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    else
@@ -1750,9 +1750,9 @@ BOOL	InitNewFractal(HWND hwnd)
 		    gManp->InitFract(gManp->type);
 		    gManp->time_to_reinit = FALSE;
 		    gManp->time_to_load = FALSE;
+		    gManp->param[15] = (double)gManp->PrePaletteColour;
 		    LoadSlopeFwdDiffParams();			// get parameters  and other subtype specific stuff from Forward Differencing database 
 		    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
-		    gManp->param[15] = (double)gManp->PrePaletteColour;
 		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
 			return FALSE;
 		    else

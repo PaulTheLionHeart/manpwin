@@ -8,13 +8,41 @@ This repository contains a fully reproducible CMake-based build system supportin
 
 ---
 
-## Version 4.05
+## Version 4.05a
 
-ManpWIN 4.05 is a major perturbation, slope-rendering, and parameter architecture update focused on improving rendering consistency, fractal interoperability, colouring behaviour, and long-term maintainability.
+ManpWIN 4.05a is a maintenance update focused on parameter animation,
+parameter-file persistence, and correct restoration of perturbation and
+slope rendering parameters.
 
 ---
 
-## Recent Improvements (4.05)
+## Recent Improvements (4.05a)
+
+### Parameter Animation
+
+* Fixed parameter animation following the parameter architecture changes introduced in ManpWIN 4.05
+* Fixed Start Palette animation for perturbation and slope rendering
+* Fixed bailout parameter animation for pixel, perturbation, and slope fractals
+* Fixed preservation of the selected pre-palette colour when loading and running parameter animation scripts
+
+### Parameter and PAR File Handling
+
+* Fixed writing of `FDOptions` and `dStrands` to PAR files when used with Tierazon filters
+* Fixed restoration of perturbation and slope runtime parameters when loading PAR files and animation scripts
+* Corrected parameter handling so bailout animation parameters are kept separate from normal fractal parameters and pre-palette colour storage
+
+### User Interface and Documentation
+
+* Improved alignment of parameter-selection controls in the parameter animation dialogue boxes
+* Updated Help documentation covering parameter animation and current filter limitations
+
+---
+
+## Previous Release Highlights (4.05)
+
+ManpWIN 4.05 was a major perturbation, slope-rendering, and parameter architecture
+update focused on improving rendering consistency, fractal interoperability,
+colouring behaviour, and long-term maintainability.
 
 ### Rendering and Colouring
 
@@ -240,6 +268,9 @@ A chronological record of major battles during the ManpWIN modernisation.
 - 🧮 Polynomial expansion — Perturbation Polynomial extended to eighth order
 - 🐉 Power distortion slain — fixed long-standing reference-orbit distortion caused by fractal degree being established too late
 - 🧩 Parameter architecture — expanded perturbation and slope parameters, updated dialogue and animation handling, and simplified parameter-file persistence
+- 🎞 Parameter animation repair — restored normal parameter, Start Palette, and bailout animation after the 4.05 parameter architecture changes
+- 📋 Parameter persistence repair — corrected Tierazon `FDOptions` and `dStrands` PAR handling and restored perturbation/slope runtime state from PAR and animation files
+- 🎨 Pre-palette colour preservation — ensured the selected start colour survives parameter animation and parameter-file loading
 
 ---
 

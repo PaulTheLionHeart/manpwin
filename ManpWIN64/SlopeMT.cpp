@@ -31,6 +31,9 @@
 extern	int	user_data(HWND);
 extern	std::atomic<long> gPixelsDone;
 
+void	ApplySlopeDerivParams();
+void	ApplySlopeFwdDiffParams();
+
 /**************************************************************************
 	Slope engine, pass into thread creation routine
 **************************************************************************/
@@ -46,17 +49,9 @@ DWORD WINAPI SlopeFunction(LPVOID lpParam)
     // preserved in PAR files.  Mirror them into the working gManp values
     // used by the slope renderers and status/reporting code.
     if (gManp->type == SLOPEDERIVATIVE)
-	{
-	gManp->PaletteStart = (int)gManp->param[2];
-	gManp->ColourSpeed = gManp->param[3];
-	}
+	ApplySlopeDerivParams();
     else
-	{
-	gManp->PaletteStart = (int)gManp->param[1];
-	gManp->ColourSpeed = gManp->param[5];
-	}
-
-    gManp->PrePaletteColour = (DWORD)gManp->param[15];
+	ApplySlopeFwdDiffParams();
 
      try
 	{
@@ -294,13 +289,7 @@ void CleanupSlopeThreads(int threadCount)
 
 void RenderForwardDifferenceSlope()
     {
-    gManp->bump_transfer_factor = gManp->param[0];
-    gManp->PaletteStart = (int)gManp->param[1];
-    gManp->lightDirectionDegrees = gManp->param[2];
-    gManp->bumpMappingDepth = gManp->param[3];
-    gManp->bumpMappingStrength = gManp->param[4];
-    gManp->ColourSpeed = gManp->param[5];
-
+    ApplySlopeFwdDiffParams();
     gManp->Slope[0]->InitRender(gManp->threshold, &gManp->TrueCol, &gManp->Dib, gManp->PaletteShift, gManp->bump_transfer_factor, gManp->PaletteStart, 
 		gManp->lightDirectionDegrees, gManp->bumpMappingDepth, gManp->bumpMappingStrength, gManp->Slope[0]->SpecialColour);
     // Non-Kalles Forward Difference path.
@@ -384,9 +373,9 @@ int	EndSlope(void)
     Some simple processing
 **************************************************************************/
 
-int	setup_SlopeDeriv(void)
+int setup_SlopeDeriv(void)
     {
-    if (!gManp->Fractal.SlopeDerivNum)	    // we'd better count how many records we have
+    if (!gManp->Fractal.SlopeDerivNum)
 	{
 	while (SlopeDerivSpecific[gManp->Fractal.SlopeDerivNum].name)
 	    (gManp->Fractal.SlopeDerivNum)++;
@@ -394,9 +383,9 @@ int	setup_SlopeDeriv(void)
     return 0;
     }
 
-int	setup_SlopeFwdDiff(void)
+int setup_SlopeFwdDiff(void)
     {
-    if (!gManp->Fractal.SlopeFwdDiffNum)	    // we'd better count how many records we have
+    if (!gManp->Fractal.SlopeFwdDiffNum)
 	{
 	while (SlopeFwdDiffSpecific[gManp->Fractal.SlopeFwdDiffNum].name)
 	    (gManp->Fractal.SlopeFwdDiffNum)++;
@@ -404,22 +393,46 @@ int	setup_SlopeFwdDiff(void)
     return 0;
     }
 
-void	LoadSlopeDerivParams()
+void ApplySlopeDerivParams()
     {
-    int	i;
+    gManp->PaletteStart = (int)gManp->param[2];
+    gManp->ColourSpeed = gManp->param[3];
+    gManp->PrePaletteColour = (DWORD)gManp->param[15];
+    }
+
+void ApplySlopeFwdDiffParams()
+    {
+    gManp->bump_transfer_factor = gManp->param[0];
+    gManp->PaletteStart = (int)gManp->param[1];
+    gManp->lightDirectionDegrees = gManp->param[2];
+    gManp->bumpMappingDepth = gManp->param[3];
+    gManp->bumpMappingStrength = gManp->param[4];
+    gManp->ColourSpeed = gManp->param[5];
+    gManp->PrePaletteColour = (DWORD)gManp->param[15];
+    }
+
+void LoadSlopeDerivParams()
+    {
+    int i;
 
     for (i = 0; i < SlopeDerivSpecific[gManp->subtype].numparams; i++)
 	gManp->param[i] = SlopeDerivSpecific[gManp->subtype].paramvalue[i];
+
     gManp->rqlim = SlopeDerivSpecific[gManp->subtype].rqlim;
+
+    ApplySlopeDerivParams();
     }
 
-void	LoadSlopeFwdDiffParams()
+void LoadSlopeFwdDiffParams()
     {
-    int	i;
+    int i;
 
-    for (i = 0; i < NUMSLOPEPARAM; i++)
+    for (i = 0; i < NUMSLOPEPARAM - 1; i++)
 	gManp->param[i] = SlopeFwdDiffSpecific[gManp->subtype].paramvalue[i];
+
     gManp->rqlim = SlopeFwdDiffSpecific[gManp->subtype].rqlim;
+
+    ApplySlopeFwdDiffParams();
     }
 
 /**************************************************************************

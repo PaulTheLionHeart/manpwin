@@ -390,7 +390,8 @@ class CManp
 	int	SpecialFractals(HWND hwnd/*, CPixel *Pix*/);
 	void	InitPixelObjects(int threadCount, HWND hwnd);
 	void	CreatePixelObjects(int threadCount);
-
+	void	ApplyAnimatedParam(WORD type, int subtype, int ParamNumber);
+	bool	IsBailoutAnimParam(void);
 
 	RGBTRIPLE   oldColour;				// used to hold original value of palette entry "stolen" for special colour used for Art Matrix Cubic
 	int	SPECIALINDEX;				// points to the Special Colour in the palette - used for Art Matrix Cubic

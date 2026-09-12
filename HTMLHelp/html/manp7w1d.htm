@@ -249,7 +249,7 @@ Supports:
 <h2>Parameter Animation (P)</h2>
 
 <p>
-Animates a selected parameter across a range of values.
+Animates a selected fractal parameter across a range of values.
 </p>
 
 <p>
@@ -267,6 +267,29 @@ Options include:
 <li>Set start and end values</li>
 <li>Enable oscillation (Return)</li>
 </ul>
+
+<p>
+For standard pixel-based fractals, parameters 0 through 9 correspond to the
+fractal parameters displayed in the dialogue box. Bailout is available as an
+additional animation parameter where applicable.
+</p>
+
+<p>
+Perturbation and slope fractals use their extended parameter layouts and also
+provide bailout as an additional animation parameter.
+</p>
+
+<p>
+Start Palette can be animated for perturbation and slope fractals. The selected
+pre-palette colour is preserved throughout the animation but is not itself
+animated.
+</p>
+
+<p>
+Oscillators, fractal maps, surfaces, knots, and curves use their own dynamical
+parameter and variable layouts. These fractal families do not use the bailout
+animation parameter.
+</p>
 
 <hr style="border: 0; height: 1px; background: #333; margin: 30px 0;">
 

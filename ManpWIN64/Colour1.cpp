@@ -491,7 +491,7 @@ INT_PTR CALLBACK SetStartRGBDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM l
 		{
 		case IDOK:
 		    gManp->PrePaletteColour = ((DWORD)color[0] << 16) | ((DWORD)color[1] << 8) | (DWORD)color[2];
-		    if (gManp->type == SLOPEDERIVATIVE || gManp->type == SLOPEFORWARDDIFF)
+		    if (gManp->type == PERTURBATION || gManp->type == SLOPEDERIVATIVE || gManp->type == SLOPEFORWARDDIFF)
 			gManp->param[15] = (double)gManp->PrePaletteColour;
 		    gManp->Plot.RefreshScreen();			// reload screen values
 		    hwndParent = GetParent(hDlg);

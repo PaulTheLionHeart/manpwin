@@ -48,6 +48,11 @@ extern	char	*str_find_ci(char *, char *);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
 extern	DLGPROC	PNGFileOpenDlg(HWND, LPSTR, LPSTR);
 
+// translate params into variables
+extern	void	ApplyPerturbationParams(void);
+extern	void	ApplySlopeDerivParams();
+extern	void	ApplySlopeFwdDiffParams();
+
 extern	int	number;			// used for compression
 
 extern	std::atomic<bool> gStopRequested; // force early exit
@@ -562,115 +567,246 @@ void	CManp::EndScript(int ThisFrame)
     MPEGWrite.cpp to update frames for variable parameter type animations
 -----------------------------------------------------------------------------------*/
 
-void	CManp::UpdateAnimParamValues(void)
+void CManp::ApplyAnimatedParam(WORD type, int subtype, int ParamNumber)
     {
-    static  int	count = 0;
-    if (!ParamAnimation)	// if we got here by mistake, let's get outa here
-	return;
-    if ((type == SLOPEFORWARDDIFF || type == SLOPEDERIVATIVE) && ParamNumber > 10)
+    switch (type)
 	{
-	param[ParamNumber] += divisor;
-	if (ParamNumber == 15)
-	    {
-	    rqlim = param[ParamNumber];
-	    switch (MathType)
+	case PERTURBATION:
+	    switch (ParamNumber)
 		{
-		case DOUBLEDOUBLE:
-		    DDBailout = param[ParamNumber];
+		case 0:
+		    ColourSpeed = param[0];
 		    break;
-		case QUADDOUBLE:
-		    QDBailout = param[ParamNumber];
+		case 1:
+		    lightDirectionDegrees = param[1];
 		    break;
-		case ARBITRARYPREC:
-		    BigBailout = param[ParamNumber];
+		case 2:
+		    bumpMappingDepth = param[2];
 		    break;
-		}
-	    }
-	}
+		case 3:
+		    bumpMappingStrength = param[3];
+		    break;
+		case 4:
+		    bump_transfer_factor = param[4];
+		    break;
+		case 5:
+		    PaletteStart = (int)param[5];
+		    break;
 
-    if (ParamAnimation)
-	{
-	param[ParamNumber] += divisor;
-	if (ParamNumber == 10)
-	    {
-	    rqlim = param[ParamNumber];
-	    switch (MathType)
-		{
-//		case DOUBLEFLOAT:
-//		    rqlim = param[ParamNumber];
-//		    break;
-		case DOUBLEDOUBLE:
-		    DDBailout = param[ParamNumber];
+		case 6:
+		    if (subtype == 57)
+			LightHeight = param[6];
+		    else
+			PertColourMethod = (int)param[6];
 		    break;
-		case QUADDOUBLE:
-		    QDBailout = param[ParamNumber];
+
+		case 7:
+		    if (subtype != 57)
+			IterDiv = param[7];
 		    break;
-		case ARBITRARYPREC:
-		    BigBailout = param[ParamNumber];
+
+		case 8:
+		    if (subtype != 57)
+			PalOffset = (int)param[8];
+		    break;
+
+		case 9:
+		    if (subtype == 0 || subtype == 1 || subtype == 59 || subtype == 60 || subtype == 61 || subtype == 62 || subtype == 63)
+			LightHeight = param[9];
 		    break;
 		}
-	    }
-	}
-    if (type == PERTURBATION && ParamNumber > 10)
-	{
-	switch (ParamNumber)
-	    {
-//	    case 10:	// can't animate Slope Type
-//		break;	// now used for rqlim (bailout)
-	    case 11:
-		lightDirectionDegrees += divisor;
-		break;
-	    case 12:
-		bumpMappingStrength += divisor;
-		break;
-	    case 13:
-		bumpMappingDepth += divisor;
-		break;
-	    case 14:
-		PaletteStart = (int)(StartRate + divisor * count++);
-		break;
-	    case 15:
-		rqlim += divisor;
-		break;
-	    }
+	    break;
+
+	case SLOPEDERIVATIVE:
+	    switch (ParamNumber)
+		{
+		case 2:
+		    PaletteStart = (int)param[2];
+		    break;
+		case 3:
+		    ColourSpeed = param[3];
+		    break;
+		}
+	    break;
+
+	case SLOPEFORWARDDIFF:
+	    switch (ParamNumber)
+		{
+		case 0:
+		    bump_transfer_factor = param[0];
+		    break;
+		case 1:
+		    PaletteStart = (int)param[1];
+		    break;
+		case 2:
+		    lightDirectionDegrees = param[2];
+		    break;
+		case 3:
+		    bumpMappingDepth = param[3];
+		    break;
+		case 4:
+		    bumpMappingStrength = param[4];
+		    break;
+		case 5:
+		    ColourSpeed = param[5];
+		    break;
+		}
+	    break;
+	default:
+	    if (ParamNumber == 10)
+		{
+		rqlim = param[ParamNumber];
+
+		switch (MathType)
+		    {
+		    case DOUBLEDOUBLE:
+			DDBailout = rqlim;
+			break;
+
+		    case QUADDOUBLE:
+			QDBailout = rqlim;
+			break;
+
+		    case ARBITRARYPREC:
+			BigBailout = rqlim;
+			break;
+		    }
+		}
+	    break;
 	}
     }
 
-void	CManp::InitAnimParamValues(void)
+void CManp::InitAnimParamValues(void)
     {
-    if (!ParamAnimation)	// if we got here by mistake, let's get outa here
+    if (!ParamAnimation)
 	return;
-    if (ParamAnimation)
+
+    divisor = (EndRate - StartRate) / frames;
+
+    // Bailout is a pseudo-parameter used only by parameter animation.
+   //
+   // Ordinary Pixel fractals use ParamNumber 10 for bailout.
+   // Perturbation and Slope use ParamNumber 15.
+   //
+   // Neither case represents the corresponding gManp->param[] entry.
+   // In particular, gManp->param[15] is reserved for PrePaletteColour.
+    if (IsBailoutAnimParam())
 	{
-	divisor = (EndRate - StartRate) / frames;
-	if (type == PERTURBATION && ParamNumber > 9)
+	rqlim = StartRate;
+
+	if (rqlim < 1.0)
+	    rqlim = StartRate = 1.0;
+
+	switch (MathType)
 	    {
-	    switch (ParamNumber)
-		{
-		case 10:	// can't animate Slope Type
-		    rqlim = StartRate;
-		    break;	// now used for rqlim (bailout)
-		case 11:	
-		    lightDirectionDegrees = StartRate;
-		    break;
-		case 12:	
-		    bumpMappingStrength = StartRate;
-		    break;
-		case 13:	
-		    bumpMappingDepth = StartRate;
-		    break;
-		case 14:	
-		    PaletteStart = (int)StartRate;
-		    break;
-		case 15:
-		    rqlim = StartRate;
-		    if (rqlim < 1.0)
-			rqlim = StartRate = 1.0;
-		    break;
-		}
+	    case DOUBLEDOUBLE:
+		DDBailout = rqlim;
+		break;
+
+	    case QUADDOUBLE:
+		QDBailout = rqlim;
+		break;
+
+	    case ARBITRARYPREC:
+		BigBailout = rqlim;
+		break;
 	    }
+
+	return;
 	}
+
+    // Genuine fractal parameter.
     param[ParamNumber] = StartRate;
+
+    // param[15] always carries the base fractal's pre-palette colour.
+    // It is not the bailout value, even though ParamNumber 15 is used
+    // as the bailout pseudo-parameter for Perturbation/Slope animation.
+//    PrePaletteColour = (DWORD)param[15];
+
+    // Initialise the corresponding live runtime state for renderers
+    // that mirror some values from param[].
+    if (type == PERTURBATION)
+	ApplyPerturbationParams();
+    else if (type == SLOPEDERIVATIVE)
+	ApplySlopeDerivParams();
+    else if (type == SLOPEFORWARDDIFF)
+	ApplySlopeFwdDiffParams();
+    }
+
+/**************************************************************************
+    Update the parameter being animated for the next frame.
+
+    Most animation parameters are genuine entries in param[].
+    For Perturbation and the two slope renderers, some of those param[]
+    values are also mirrored into named runtime variables such as
+    PaletteStart, ColourSpeed and lightDirectionDegrees.
+
+    Bailout is a pseudo-parameter used only by parameter animation:
+	Ordinary Pixel fractals: ParamNumber 10
+	Perturbation/Slope:      ParamNumber 15
+
+    These do not correspond to the matching gManp->param[] entries.
+    In particular, gManp->param[15] is reserved for PrePaletteColour.
+**************************************************************************/
+
+void CManp::UpdateAnimParamValues(void)
+    {
+    if (!ParamAnimation)
+	return;
+
+    // Bailout is not a genuine param[] entry, so update rqlim directly.
+    if (IsBailoutAnimParam())
+	{
+	rqlim += divisor;
+
+	switch (MathType)
+	    {
+	    case DOUBLEDOUBLE:
+		DDBailout = rqlim;
+		break;
+
+	    case QUADDOUBLE:
+		QDBailout = rqlim;
+		break;
+
+	    case ARBITRARYPREC:
+		BigBailout = rqlim;
+		break;
+	    }
+
+	return;
+	}
+
+    // Genuine fractal parameter: advance only the parameter selected
+    // for animation.
+    param[ParamNumber] += divisor;
+
+    // Some renderers mirror selected param[] values into named runtime
+    // variables. Update only the mirror belonging to this parameter.
+    ApplyAnimatedParam(type, subtype, ParamNumber);
+    }
+
+bool CManp::IsBailoutAnimParam(void)
+    {
+    // Perturbation and Slope use animation slot 15 as the
+    // Bailout pseudo-parameter.  It is NOT gManp->param[15];
+    // param[15] is reserved for PrePaletteColour.
+    if (type == PERTURBATION ||	type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF)
+	return ParamNumber == 15;
+
+    // These fractal families use param[0..19] as two genuine
+    // groups of parameters:
+    //   0..9   constants
+    //   10..19 variables
+    // Therefore ParamNumber 10 is a real parameter and must
+    // never be interpreted as Bailout.
+    if (type == OSCILLATORS || type == FRACTALMAPS || type == SPROTTMAPS || type == SURFACES || type == KNOTS || type == CURVES)
+	return false;
+
+    // Ordinary Pixel-style fractals have up to 10 real params
+    // (0..9).  Animation slot 10 is therefore available as the
+    // Bailout pseudo-parameter.
+    return ParamNumber == 10;
     }
 
 /*-----------------------------------------
@@ -841,7 +977,7 @@ int	CManp::RunScript(HWND hwnd, char *FileName)
 	    }
 	if (WriteMemFrames)				// write frame to memory
 	    {
-	    if (ParamNumber == 10)
+	    if (IsBailoutAnimParam())
 		LoadAnimationFrame(buf, MoreInfo, CurrentFrame, rqlim, ParamAnimation, (OscAnimProc == MORPHING), delay);
 	    else
 		LoadAnimationFrame(buf, MoreInfo, CurrentFrame, param[ParamNumber], ParamAnimation, (OscAnimProc == MORPHING), delay);

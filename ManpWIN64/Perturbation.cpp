@@ -545,6 +545,32 @@ int	setup_Perturbation(void)
     return PerturbationNum;
     }
 
+// translate params into variables
+void ApplyPerturbationParams(void)
+    {
+    gManp->ColourSpeed = gManp->param[0];
+    gManp->lightDirectionDegrees = gManp->param[1];
+    gManp->bumpMappingDepth = gManp->param[2];
+    gManp->bumpMappingStrength = gManp->param[3];
+    gManp->bump_transfer_factor = gManp->param[4];
+    gManp->PaletteStart = (int)gManp->param[5];
+
+    if (gManp->subtype == 57)				// Polynomial has a special parameter layout
+	{
+	// Polynomial does not use the standard Pert colour controls.
+	gManp->LightHeight = gManp->param[6];
+	gManp->PertColourMethod = 0;
+	gManp->IterDiv = 1.0;
+	gManp->PalOffset = 0;
+	}
+    else
+	{
+	gManp->PertColourMethod = (int)gManp->param[6];
+	gManp->IterDiv = gManp->param[7];
+	gManp->PalOffset = (int)gManp->param[8];
+	}
+    }
+
 void	LoadPerturbationParams(void)
     {
     // here is where we can do some specific updates to individual Perturbation fractals
@@ -557,27 +583,7 @@ void	LoadPerturbationParams(void)
     gManp->rqlim = PerturbationSpecific[gManp->subtype].rqlim;
     gManp->EnableApproximation = (PerturbationSpecific[gManp->subtype].EnableApproximation == 1) ? true : false;
     gManp->SlopeType = PerturbationSpecific[gManp->subtype].SlopeType;
-    gManp->ColourSpeed = gManp->param[0];
-    gManp->lightDirectionDegrees = gManp->param[1];
-    gManp->bumpMappingDepth = gManp->param[2];
-    gManp->bumpMappingStrength = gManp->param[3];
-    gManp->bump_transfer_factor = gManp->param[4];
-    gManp->PaletteStart = (int)(gManp->param[5]);
-    if (gManp->subtype == 57)				// Polynomial has a special parameter layout
-	{
-	gManp->LightHeight = gManp->param[6];
-
-	// Polynomial does not use the standard Pert colour controls.
-	gManp->PertColourMethod = 0;
-	gManp->IterDiv = 1.0;
-	gManp->PalOffset = 0;
-	}
-    else
-	{
-	gManp->PertColourMethod = (int)(gManp->param[6]);
-	gManp->IterDiv = gManp->param[7];
-	gManp->PalOffset = (int)(gManp->param[8]);
-	}
+    ApplyPerturbationParams();
     }
 
 /**************************************************************************

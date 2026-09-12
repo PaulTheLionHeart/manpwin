@@ -81,6 +81,10 @@ extern	int	setup_Surface();			// sort the surface database alphabetically
 extern	int	setup_Knot();				// sort the knot database alphabetically
 extern	int	setup_Curve();				// sort the curve database alphabetically
 extern	int	setup_Perturbation(void);		// count how many Perturbation fractals there are
+// translate params into variables
+extern	void	ApplyPerturbationParams(void);
+extern	void	ApplySlopeDerivParams();
+extern	void	ApplySlopeFwdDiffParams();
 
 int	GetParamData(HWND, LPSTR, LPSTR, LPSTR, BOOL);
 void	BasicFractData(StringBuilder& sb, BOOL);
@@ -667,9 +671,24 @@ void	CManp::GetParamsList(char *s)
 	    &gManp->param[0], &gManp->param[1], &gManp->param[2], &gManp->param[3], &gManp->param[4], &gManp->param[5], &gManp->param[6], &gManp->param[7], &gManp->param[8], &gManp->param[9],
 	    &gManp->param[10], &gManp->param[11], &gManp->param[12], &gManp->param[13], &gManp->param[14], &gManp->param[15], &gManp->param[16], &gManp->param[17], &gManp->param[18], &gManp->param[19]);
     else if (type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF || type == PERTURBATION)		// store all 15 parameters as param[15] is used to hold start colour (as a double)
+	{
 	Fractal.NumParam = sscanf(t, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", Fractal.ParamValue[0], Fractal.ParamValue[1], Fractal.ParamValue[2], Fractal.ParamValue[3],
 	    Fractal.ParamValue[4], Fractal.ParamValue[5], Fractal.ParamValue[6], Fractal.ParamValue[7], Fractal.ParamValue[8], Fractal.ParamValue[9], Fractal.ParamValue[10], Fractal.ParamValue[11],
 	    Fractal.ParamValue[12], Fractal.ParamValue[13], Fractal.ParamValue[14], Fractal.ParamValue[15]);
+	// param[15] is transport storage for PrePaletteColour.
+	// Restore it only after the PAR/script parameter list has been read;
+	// during normal new-fractal initialisation this slot may not yet
+	// contain a valid colour.
+	if (Fractal.NumParam > 15)
+	    PrePaletteColour = (DWORD)(*Fractal.ParamValue[15]);
+
+	if (type == PERTURBATION)
+	    ApplyPerturbationParams();
+	else if (type == SLOPEDERIVATIVE)
+	    ApplySlopeDerivParams();
+	else
+	    ApplySlopeFwdDiffParams();
+	}
     else
 	Fractal.NumParam = sscanf(t, "%lf %lf %lf %lf %lf %lf %lf %lf %lf %lf", Fractal.ParamValue[0], Fractal.ParamValue[1], Fractal.ParamValue[2], Fractal.ParamValue[3], 
 	    Fractal.ParamValue[4], Fractal.ParamValue[5], Fractal.ParamValue[6], Fractal.ParamValue[7], Fractal.ParamValue[8], Fractal.ParamValue[9]);
@@ -1247,23 +1266,19 @@ void	BasicFractData(StringBuilder& sb, BOOL CreateAnim)
     if (gManp->InsideMethod)
 	{
 	sb.append(" -DI%03d", gManp->InsideMethod);	// display method
+	}
+    if (gManp->OutsideMethod)
+	{
+	sb.append(" -DO%03d", gManp->OutsideMethod);	// display method
 	if (gManp->OutsideMethod > TIERAZONFILTERS)
 	    {
 	    sb.append(",%f,%d,%d", gManp->dStrands, gManp->nFDOption, gManp->UseCurrentPalette);	// Parameters for the Tierazon filters
 	    }
 	else if (gManp->OutsideMethod == POTENTIAL)
 	    {
-	    sb.append(",%f,%f,%f", gManp->potparam[0], gManp->potparam[1], gManp->potparam[2]);	// Parameters for potential
+	    sb.append(",%f,%f,%f", gManp->potparam[0], gManp->potparam[1], gManp->potparam[2]);		// Parameters for potential
 	    }
 	}
-    if (gManp->OutsideMethod)
-	{
-	sb.append(" -DO%03d", gManp->OutsideMethod);	// display method
-	}
-    //    if (palette_flag && !CreateAnim)
-    //	{
-    //	sb.append(" -a\"%s\"", MAPFile);
-    //	}
     if (gManp->juliaflag)
 	{
 	sb.append(" -J%13.13f,%13.13f", gManp->j.x, gManp->j.y);
@@ -1577,6 +1592,9 @@ void	CManp::setup_defaults(void)
     potparam[0] = 255;
     potparam[1] = 820;
     potparam[2] = 20;
+
+    PrePaletteColour = 0x00FFFFFF;	// colour used for iterations below PaletteStart
+
 
     if (logval)
 	if (threshold >= MAXTHRESHOLD)
