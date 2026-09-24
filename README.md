@@ -8,15 +8,47 @@ This repository contains a fully reproducible CMake-based build system supportin
 
 ---
 
-## Version 4.05a
+## Version 4.05b
 
-ManpWIN 4.05a is a maintenance update focused on parameter animation,
-parameter-file persistence, and correct restoration of perturbation and
-slope rendering parameters.
+ManpWIN 4.05b is a colouring and rendering update focused on expanding
+TieraZon and Flarium filter support, introducing the Clouds orbit-density
+renderer, and improving filter behaviour and rendering status reporting.
 
 ---
 
-## Recent Improvements (4.05a)
+## Recent Improvements (4.05b)
+
+### TieraZon and Flarium Filters
+
+* Fixed TieraZon filter behaviour across pixel-based fractals
+* Added a number of additional filters adapted from Stephen C. Ferguson's Flarium program
+* Fixed incorrect red/blue channel ordering in TieraZon and Flarium filters
+* Repaired several legacy TieraZon and Flarium filters which were not producing correct results
+* Corrected TieraZon filter precedence so TieraZon colouring takes priority over ordinary inside filters when appropriate
+
+### Clouds Orbit-Density Rendering
+
+* Added Clouds, an orbit-density rendering method based on an idea from Flarium
+* Added Clouds support to both ordinary and perturbation rendering
+* Added Linear Greyscale, Log Greyscale, Linear Palette, and Log Palette rendering modes
+* Added a Clouds colour selector to the Fractal Options dialog
+* Added palette colour support to Clouds rendering
+* Automatically disables Bilinear Approximation (BLA) acceleration while Clouds is active so that all orbit visits are preserved in the density calculation
+* Added saving and restoration of Clouds rendering settings in PAR files and animation scripts
+* Added Clouds density-map merge progress reporting to the status bar
+
+### Rendering and Documentation
+
+* Fixed the status-bar pass display which could incorrectly report `Pass 0 of n` during multi-pass rendering
+* Added new Help documentation for TieraZon, Flarium, and Clouds filters
+
+---
+
+## Previous Release Highlights (4.05a)
+
+ManpWIN 4.05a was a maintenance update focused on parameter animation,
+parameter-file persistence, and correct restoration of perturbation and
+slope rendering parameters.
 
 ### Parameter Animation
 
@@ -27,40 +59,9 @@ slope rendering parameters.
 
 ### Parameter and PAR File Handling
 
-* Fixed writing of `FDOptions` and `dStrands` to PAR files when used with Tierazon filters
+* Fixed writing of `FDOptions` and `dStrands` to PAR files when used with TieraZon filters
 * Fixed restoration of perturbation and slope runtime parameters when loading PAR files and animation scripts
 * Corrected parameter handling so bailout animation parameters are kept separate from normal fractal parameters and pre-palette colour storage
-
-### User Interface and Documentation
-
-* Improved alignment of parameter-selection controls in the parameter animation dialogue boxes
-* Updated Help documentation covering parameter animation and current filter limitations
-
----
-
-## Previous Release Highlights (4.05)
-
-ManpWIN 4.05 was a major perturbation, slope-rendering, and parameter architecture
-update focused on improving rendering consistency, fractal interoperability,
-colouring behaviour, and long-term maintainability.
-
-### Rendering and Colouring
-
-* Unified ordinary filtering behaviour across pixel, perturbation, and derivative slope rendering
-* Added filter and biomorph support to derivative slope rendering while retaining slope lighting
-* Fixed several forward-difference slope rendering issues, including subtype 13 calculations, special-colour indexing, and pixel-state handling
-* Corrected palette start, offset, and shift handling, and added configurable pre-palette colouring for iterations below the selected Start Palette value
-
-### Perturbation and Parameters
-
-* Expanded and reorganised perturbation and slope parameter handling, including updated dialogue boxes, parameter animation, and parameter-file save/load support
-* Improved conversion between equivalent pixel and perturbation fractals, including Polynomial fractals
-* Extended Perturbation Polynomial support to eighth-order polynomials
-
-### Stability
-
-* Fixed a long-standing perturbation power distortion caused by reference orbits being generated before the correct fractal degree was established
-* General rendering, stability, and internal architecture improvements
 
 ---
 
@@ -80,6 +81,8 @@ colouring behaviour, and long-term maintainability.
 * Preservation of legacy algorithms with modern execution architecture
 * True colour rendering
 * Support for many fractal types including Mandelbrot, Julia, Burning Ship, and more
+* TieraZon and Flarium orbit-based colouring filters
+* Clouds orbit-density rendering with greyscale and palette-based display modes
 
 ---
 
@@ -144,16 +147,21 @@ C:\vcpkg
 
 ### 1. Clone repository
 
+```bat
 git clone https://github.com/PaulTheLionHeart/manpwin.git
 cd manpwin
+```
 
 ---
 
 ### 2. Configure (CMake + vcpkg)
 
-cmake -B build -S . ^
+```bat
+  cmake -B build -S . ^
   -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake ^
   -DVCPKG_TARGET_TRIPLET=x64-windows-static
+```
+
 
 The `x64-windows-static` triplet is recommended because it produces a self-contained executable without requiring MPFR or other third-party runtime DLLs.
 
@@ -162,27 +170,37 @@ The `x64-windows-static` triplet is recommended because it produces a self-conta
 ### 3. Build
 
 Release:
+```bat
 cmake --build build --config Release
+```
 
 Debug:
+```bat
 cmake --build build --config Debug
+```
 
 ---
 
 ### 4. Run
 
 Release:
+```bat
 build\Release\ManpWIN64.exe
+```
 
 Debug:
+```bat
 build\Debug\ManpWIN64.exe
+```
 
 ---
 
 ### Alternative (recommended)
 
+```bat
 build_release.bat
 build_debug.bat
+```
 
 ---
 
@@ -210,16 +228,16 @@ ManpWIN/
 
 ## 🧯 Troubleshooting
 
-Missing pnglib.lib:
+**Missing pnglib.lib:**  
 Reconfigure CMake and ensure pnglib builds as STATIC.
 
-MPFR / GMP errors:
+**MPFR / GMP errors:**  
 Ensure vcpkg is installed and toolchain is set.
 
-Blank screen:
+**Blank screen:**  
 Ensure .rc files are included.
 
-Debug vs Release mismatch:
+**Debug vs Release mismatch:**  
 Check runtime library consistency.
 
 ---
@@ -257,7 +275,7 @@ A chronological record of major battles during the ManpWIN modernisation.
 - 🧩 Hidden missing `else` — restored correct rebasing when BLA is disabled
 - 🌊 KFR smoothing restored — preserved smoothing values when reading and writing `.KFR` files
 - 📋 Metadata consistency — parameter dialogues now correctly rebuild fractal metadata across all new fractal families
-- 🧮 DD/QD trig repair — fixed transcendental arithmetic issues affecting Tierazon fractals
+- 🧮 DD/QD trig repair — fixed transcendental arithmetic issues affecting TieraZon fractals
 - 🧊 3D rendering restored — corrected effective thread handling in pixel and perturbation modes
 - 🧵 Thread lifecycle cleanup — removed completion races and simplified worker startup/shutdown handling
 - 🐉 CPixel audit — verified strip ownership, symmetry, worklists, arithmetic initialisation, and rendering lifecycle
@@ -269,8 +287,17 @@ A chronological record of major battles during the ManpWIN modernisation.
 - 🐉 Power distortion slain — fixed long-standing reference-orbit distortion caused by fractal degree being established too late
 - 🧩 Parameter architecture — expanded perturbation and slope parameters, updated dialogue and animation handling, and simplified parameter-file persistence
 - 🎞 Parameter animation repair — restored normal parameter, Start Palette, and bailout animation after the 4.05 parameter architecture changes
-- 📋 Parameter persistence repair — corrected Tierazon `FDOptions` and `dStrands` PAR handling and restored perturbation/slope runtime state from PAR and animation files
+- 📋 Parameter persistence repair — corrected TieraZon `FDOptions` and `dStrands` PAR handling and restored perturbation/slope runtime state from PAR and animation files
 - 🎨 Pre-palette colour preservation — ensured the selected start colour survives parameter animation and parameter-file loading
+- 🎨 TieraZon filter repair — corrected colouring behaviour, channel ordering, precedence, and several legacy filters
+- 🧪 Flarium expansion — added additional Stephen C. Ferguson filter algorithms to ManpWIN
+- ☁️ Clouds arrive — introduced orbit-density rendering based on the Flarium Clouds idea
+- 🎨 Clouds colour modes — added linear/logarithmic greyscale and palette rendering
+- 🧮 Perturbation Clouds — extended orbit-density rendering to the perturbation engine
+- 🚀 BLA safety — automatically bypassed Bilinear Approximation when Clouds requires every orbit visit
+- 🧵 Density merge reporting — added progress reporting while per-thread Clouds density maps are combined
+- 📊 Pass display repair — fixed the long-standing `Pass 0 of n` status display
+- 📚 Clouds documentation — added dedicated TieraZon, Flarium, and Clouds Help documentation
 
 ---
 
