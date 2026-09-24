@@ -46,6 +46,33 @@ static	int	PerturbationPtr = 0, PerturbationNum = 0;
 std::atomic<bool> gStopRequested{ false };
 
 /**************************************************************************
+	Initialise thread-local Clouds density map
+**************************************************************************/
+
+void CPerturbation::InitCloudDensity(int xdots, int ydots)
+    {
+    TZfilter.InitCloudDensity(xdots, ydots);
+    }
+
+/**************************************************************************
+	Merge thread-local Clouds density map into final density map
+**************************************************************************/
+
+void CPerturbation::MergeCloudDensity(std::vector<unsigned int>& Destination) const
+    {
+    TZfilter.MergeCloudDensity(Destination);
+    }
+
+/**************************************************************************
+	Release thread-local Clouds density map
+**************************************************************************/
+
+void CPerturbation::CloseCloudDensity()
+    {
+    TZfilter.CloseCloudDensity();
+    }
+
+/**************************************************************************
     Check validity of reference/BLA parameters
 **************************************************************************/
 
@@ -176,7 +203,7 @@ DWORD	WINAPI PertFunction(LPVOID lpParam)
 
     ret = gManp->PertCalculator[ThreadNum]->calculateOneFrame(gManp->rqlim, gManp->PertStatus, gManp->degree, gManp->InsideMethod, gManp->OutsideMethod, gManp->biomorph, gManp->subtype, p->RSRA, p->IsPositive, UserData, gManp->xdots, //*(p->TZfilter),
 	*(p->TrueCol), p->pPertProgress, (gManp->NumberThreads > 0), gManp->ThreadPertDelay, gManp->PertErrorMessage, p->ArithType, p->MaxRefIteration, p->SlopeDegree, p->mode,
-	p->pixelOrder, p->workIndex, p->totalPixels, p->ghMutex);
+	p->pixelOrder, p->workIndex, p->totalPixels, p->ghMutex, gManp->CloudsActive);
     return ret;
     }
 
@@ -341,6 +368,10 @@ int	DoPerturbation()
     tPertRender.start();
 
     gManp->CurrentRenderMode = RENDER_PERT;
+    // Clouds uses one final whole-image density map plus one local map per
+    // perturbation worker. Initialise the final map once before starting threads.
+    if (gManp->CloudsActive)
+	gManp->InitCloudDensity(gManp->xdots, gManp->ydots);
 
     for (i = 0; i < gManp->NumberThreads; i++)
 	{
@@ -379,6 +410,10 @@ int	DoPerturbation()
 	OutputDebugStringA(buf); 
 #endif
 
+	// Each perturbation worker records Clouds orbit hits in its own density map.
+	// Keeping the maps thread-local avoids locking in the iteration loop.
+	if (gManp->CloudsActive)
+	    gManp->PertCalculator[i]->InitCloudDensity(gManp->xdots, gManp->ydots);
 
 	gManp->hThread[i] = CreateThread(
 	    NULL,					// default security attributes
@@ -425,6 +460,55 @@ int	DoPerturbation()
 	if (!gManp->RunAnimation)
 	    gManp->DisplayStatusBarInfo(INCOMPLETE, "");
 	Sleep(gManp->ThreadCompletionDelay);			// polling delay
+	}
+
+    if (gManp->CloudsActive)
+	{
+	// All perturbation workers have finished, so their thread-local
+	// Clouds density maps can now be merged safely.
+	for (int i = 0; i < threadsStarted; i++)
+	    gManp->PertCalculator[i]->MergeCloudDensity(gManp->CloudDensity);
+
+	unsigned int MaxCloudDensity = 0;
+
+	for (size_t i = 0; i < gManp->CloudDensity.size(); i++)
+	    {
+	    if (gManp->CloudDensity[i] > MaxCloudDensity)
+		MaxCloudDensity = gManp->CloudDensity[i];
+	    }
+#ifdef _DEBUG
+	char buf[128];
+	sprintf_s(buf, "Pert Clouds maximum density = %u\n", MaxCloudDensity);
+	OutputDebugStringA(buf);
+#endif
+	if (gManp->CloudDensity.size() == (size_t)gManp->xdots * (size_t)gManp->ydots && MaxCloudDensity > 0)
+	    {
+	    CClouds Clouds;
+	    if (Clouds.RenderCloudDensity(gManp->CloudDensity, MaxCloudDensity, gManp->CloudRenderMode, gManp->threshold, &gManp->TrueCol, 
+			&gManp->wpixels, gManp->xdots, gManp->ydots, gManp->Dib.BitsPerPixel, &gManp->Dib, UserData, gManp->GlobalHwnd) < 0)
+		{
+		// User aborted during Clouds post-processing.
+		for (int i = 0; i < threadsStarted; i++)
+		    gManp->PertCalculator[i]->CloseCloudDensity();
+
+		gManp->CloseCloudDensity();
+
+		if (ghMutex != NULL)
+		    {
+		    CloseHandle(ghMutex);
+		    ghMutex = NULL;
+		    }
+
+		gManp->CurrentRenderMode = NOMULTITHREAD;
+		return -1;
+		}
+	    }
+	// Clouds rendering is complete. Release each worker's local density map.
+	for (int i = 0; i < threadsStarted; i++)
+	    gManp->PertCalculator[i]->CloseCloudDensity();
+
+	// Release the final accumulated whole-image density map.
+	gManp->CloseCloudDensity();
 	}
 
     //  NOW we can safely close handles

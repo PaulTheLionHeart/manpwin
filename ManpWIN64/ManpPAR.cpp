@@ -927,6 +927,21 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 			gManp->AnalyseDistEst(token + 2);
 		    gManp->_3dflag = FALSE;
 		    break;
+		case '{':				// Clouds Tierazon filter
+		    {
+		    gManp->CloudsActive = true;
+		    if (*(token + 2))
+			{
+			int mode = atoi(token + 2);
+			if (mode >= CLOUD_RENDER_LINEAR_GREY && mode <= CLOUD_RENDER_LOG_PALETTE)
+			    gManp->CloudRenderMode = mode;
+			else
+			    gManp->CloudRenderMode = CLOUD_RENDER_LINEAR_PALETTE;
+			}
+		    else
+			gManp->CloudRenderMode = CLOUD_RENDER_LINEAR_PALETTE;
+		    break;
+		    }
 		case '2':				// rotate oscillator in 3D
 		    if (*(token + 2))			// modify 3d parameters?
 			gManp->analyse_3d(token + 2);
@@ -1406,6 +1421,15 @@ void	BasicFractData(StringBuilder& sb, BOOL CreateAnim)
 	else
 	    sb.append(" -o%d", gManp->RotationAngle);
 	}
+    if (gManp->CloudsActive)				// Clouds Tierazon filter
+	{
+	// Save Clouds rendering style:
+	// 0 = Linear Greyscale
+	// 1 = Log Greyscale
+	// 2 = Linear Palette
+	// 3 = Log Palette
+	sb.append(" -{%d", gManp->CloudRenderMode);
+	}
     if (gManp->AutoStereo_value != 75)
 	{
 	sb.append(" -r%d", gManp->AutoStereo_value * stereo_sign);
@@ -1594,7 +1618,7 @@ void	CManp::setup_defaults(void)
     potparam[2] = 20;
 
     PrePaletteColour = 0x00FFFFFF;	// colour used for iterations below PaletteStart
-
+    CloudsActive = false;
 
     if (logval)
 	if (threshold >= MAXTHRESHOLD)

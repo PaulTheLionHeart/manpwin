@@ -527,7 +527,7 @@ int	CPlot::Display3DCircle(CDib *Dib3D, int centrex, int centrey, int radius, BY
 	Point plotting for filter
 ***************************************************************************/
 
-void	CPlot::FilterPoint(WORD x, WORD y, DWORD colour, RGBTRIPLE *FilterRGB)	// 
+void	CPlot::FilterPoint(WORD x, WORD y, DWORD colour, RGBTRIPLE *FilterRGB)	 
     {
     assert(wpixels != nullptr);
     if (AbortRequested())
@@ -560,8 +560,9 @@ void	CPlot::FilterPoint(WORD x, WORD y, DWORD colour, RGBTRIPLE *FilterRGB)	//
 	return;
 	}
 
-//    size_t address = (ComputeWidthBytes((DWORD)xdots, (DWORD)Dib->BitsPerPixel) * (ydots - y - 1));
-    memcpy(Dib->DibPixels.data() + dibOffset, FilterRGB, 3);
+    BYTE *p = Dib->DibPixels.data() + dibOffset;
+    for (int i = 0; i < 3; i++)
+	p[i] = ((BYTE *)FilterRGB)[2 - i];
     const size_t pixelIndex = ((size_t)y * (size_t)xdots) + (size_t)x;
     if (pixelIndex < wpixels->size())
 	(*wpixels)[pixelIndex] = (float)colour;

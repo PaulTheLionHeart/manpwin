@@ -140,6 +140,7 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
      static     WORD	temp_RotationAngle;
      static     long	temp_fillcolor;
      static     int	TempBailoutTest;
+     static	int	CloudMode;
 
      switch (message)
 	  {
@@ -282,6 +283,12 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 
 		CheckRadioButton(hDlg, IDC_NO_OUTSIDE, IDC_TIERAZONCOLOURS, tempParam);
 		CheckRadioButton(hDlg, IDC_CARTESIAN, IDC_CONICAL, IDC_CARTESIAN + gManp->CoordSystem);
+
+		SendDlgItemMessage(hDlg, IDC_CLOUD_COLOUR, CB_ADDSTRING, 0, (LPARAM)"Linear Greyscale");
+		SendDlgItemMessage(hDlg, IDC_CLOUD_COLOUR, CB_ADDSTRING, 0, (LPARAM)"Log Greyscale");
+		SendDlgItemMessage(hDlg, IDC_CLOUD_COLOUR, CB_ADDSTRING, 0, (LPARAM)"Linear Palette");
+		SendDlgItemMessage(hDlg, IDC_CLOUD_COLOUR, CB_ADDSTRING, 0, (LPARAM)"Log Palette");
+		SendDlgItemMessage(hDlg, IDC_CLOUD_COLOUR, CB_SETCURSEL, gManp->CloudRenderMode, 0);
 
 		temp = gManp->calcmode;
 	        switch (gManp->calcmode)
@@ -703,6 +710,11 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 			    gManp->PlotType = NOSYM;
 			    gManp->calcmode = temp;
 			    }
+
+			CloudMode = (int)SendDlgItemMessage(hDlg, IDC_CLOUD_COLOUR, CB_GETCURSEL, 0, 0L);
+			if (CloudMode != CB_ERR)
+			    gManp->CloudRenderMode = CloudMode;
+
 			GetDlgItemText(hDlg, IDM_RADIUS, s, 30);
 			sscanf(s, "%lf", &gManp->f_radius);
 			GetDlgItemText(hDlg, IDM_CENTREX, s, 30);

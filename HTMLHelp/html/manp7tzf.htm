@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TieraZon and Flarium Filters</title>
+
+<style>
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+    max-width: 1000px;
+}
+
+h1 { color: #ffd700; }
+h2 { color: #4fd1ff; }
+h3 { color: #88ff66; }
+h4 { color: #99ddff; font-weight: normal; }
+
+code, pre {
+    background-color: #111;
+    padding: 8px;
+    border-radius: 5px;
+    display: block;
+}
+
+a {
+    color: #66ccff;
+    text-decoration: underline;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>TieraZon and Flarium Filters</h1>
+
+<h2>Overview</h2>
+
+<p>
+ManpWIN includes a collection of colouring filters derived from the
+TieraZon family of fractal programs, together with additional filters
+adapted from Stephen C. Ferguson's Flarium program.
+</p>
+
+<p>
+These filters are selected using the <b>Outside Filter</b> control in the
+Fractal Options dialog. This arrangement is retained for historical
+compatibility with the original TieraZon implementation.
+</p>
+
+<p>
+Unlike most ordinary outside filters, however, many TieraZon filters are
+capable of colouring both points which escape from the fractal and points
+which remain inside it.
+</p>
+
+<p>
+For this reason, when a TieraZon filter is selected it takes precedence over
+ordinary inside-filter colouring.
+</p>
+
+<hr>
+
+<h2>TieraZon Filters</h2>
+
+<p>
+TieraZon filters use information collected while the orbit of each point is
+being calculated.
+</p>
+
+<p>
+Different filters may use properties such as:
+</p>
+
+<ul>
+<li>the real and imaginary components of the orbit;</li>
+<li>the magnitude of the orbit;</li>
+<li>the angle of the orbit;</li>
+<li>iteration history;</li>
+<li>minimum or maximum orbit values;</li>
+<li>relationships between successive orbit positions;</li>
+<li>other mathematical properties accumulated during iteration.</li>
+</ul>
+
+<p>
+The resulting values are then used to determine the final colour of the
+pixel.
+</p>
+
+<p>
+Because different filters examine different properties of the orbit, the same
+fractal can produce very different images simply by changing the selected
+TieraZon filter.
+</p>
+
+<hr>
+
+<h2>Flarium Filters</h2>
+
+<p>
+ManpWIN also includes a number of filters adapted from Flarium, the fractal
+program developed by Stephen C. Ferguson.
+</p>
+
+<p>
+These filters extend the existing TieraZon filter collection and provide
+additional orbit-based colouring methods while retaining the mathematical
+behaviour of the original algorithms as closely as practical.
+</p>
+
+<p>
+A number of older TieraZon and Flarium filters have also been repaired or
+updated so that they work correctly with the current ManpWIN rendering
+system.
+</p>
+
+<p>
+The filters are available from the same <b>Outside Filter</b> selection used
+for the existing TieraZon filters.
+</p>
+
+<hr>
+
+<h2>Inside and Outside Colouring</h2>
+
+<p>
+Most ManpWIN outside filters are applied only to points which escape from the
+fractal.
+</p>
+
+<p>
+TieraZon filters are different. Although they are selected from the
+<b>Outside Filter</b> control, some TieraZon filters calculate colours for
+both escaping points and points which remain inside the fractal.
+</p>
+
+<p>
+When a TieraZon filter is active, its result therefore takes precedence over
+an ordinary inside filter.
+</p>
+
+<p>
+This behaviour is intentional and preserves the way these filters are
+designed to operate.
+</p>
+
+<hr>
+
+<h2>Clouds</h2>
+
+<p>
+Clouds is a special orbit-density rendering method based on an idea from
+Flarium.
+</p>
+
+<p>
+Clouds is not a separate fractal type. It is implemented as a TieraZon-style
+filter and uses the orbit generated while calculating the selected fractal.
+</p>
+
+<p>
+Unlike normal fractal colouring, Clouds does not colour each starting pixel
+according to the final result of its own orbit.
+</p>
+
+<p>
+Instead, Clouds paints the places visited by all the calculated orbits.
+</p>
+
+<h3>Orbit Density</h3>
+
+<p>
+Whenever an orbit point falls within the current image, the density count for
+the corresponding screen pixel is increased.
+</p>
+
+<p>
+As more and more fractal points are calculated, frequently visited areas
+accumulate larger density values while less frequently visited areas retain
+smaller values.
+</p>
+
+<p>
+The final image is therefore based on the density of orbit visits rather than
+on conventional escape-time colouring.
+</p>
+
+<p>
+This can reveal structures and flow patterns which may not be visible using
+ordinary colouring methods.
+</p>
+
+<hr>
+
+<h3>Multithreaded Calculation</h3>
+
+<p>
+ManpWIN performs fractal calculations using multiple worker threads.
+</p>
+
+<p>
+For Clouds rendering, each worker maintains its own local density map while
+calculating its assigned pixels.
+</p>
+
+<p>
+When the fractal calculation is complete, these individual density maps are
+merged into a single image-wide density map.
+</p>
+
+<p>
+The final Clouds image is then generated from the accumulated density values.
+</p>
+
+<p>
+For large images, the density merge may take noticeably longer than the final
+colour-rendering stage. Progress is displayed in the ManpWIN status bar while
+the density maps are being merged.
+</p>
+
+<hr>
+
+<h3>Clouds Colour</h3>
+
+<p>
+The <b>Clouds colour</b> control in the Fractal Options dialog determines how
+the accumulated density values are converted into the final image.
+</p>
+
+<p>
+Four rendering modes are available:
+</p>
+
+<ul>
+<li>
+<b>Linear Greyscale</b> - density values are mapped directly to shades of
+grey.
+</li>
+
+<li>
+<b>Log Greyscale</b> - logarithmic scaling is applied to the density values
+before they are mapped to shades of grey.
+</li>
+
+<li>
+<b>Linear Palette</b> - density values are mapped directly through the
+current ManpWIN palette.
+</li>
+
+<li>
+<b>Log Palette</b> - logarithmic scaling is applied to the density values
+before they are mapped through the current palette.
+</li>
+</ul>
+
+<p>
+The default setting is <b>Linear Palette</b>.
+</p>
+
+<p>
+Linear rendering tends to emphasise the highest-density parts of the image,
+while logarithmic rendering can reveal weaker density structures which might
+otherwise be difficult to see.
+</p>
+
+<hr>
+
+<h3>Ordinary and Perturbation Rendering</h3>
+
+<p>
+Clouds can be used with both ordinary fractal calculation and perturbation
+rendering.
+</p>
+
+<p>
+When perturbation is being used, the orbit points generated during the
+perturbation calculation are accumulated into the same type of density map
+used by ordinary rendering.
+</p>
+
+<p>
+The final image is therefore produced using the same Clouds density-rendering
+process in both calculation modes.
+</p>
+
+<hr>
+
+<h3>BLA and Clouds</h3>
+
+<p>
+BLA (<b>Bilinear Approximation</b>) is an acceleration technique used with
+perturbation calculations. It approximates groups of orbit iterations so that
+very deep zooms, particularly those requiring high iteration counts, can be
+calculated much more quickly.
+</p>
+
+<p>
+BLA acceleration is automatically disabled when Clouds is active.
+</p>
+
+<p>
+Clouds requires every orbit position because every visited point may contribute
+to the density image.
+</p>
+
+<p>
+Because BLA can skip groups of individual orbit iterations, using it with
+Clouds would mean that some orbit visits were never recorded and the resulting
+density map would be incomplete.
+</p>
+
+<p>
+For this reason ManpWIN automatically bypasses BLA while rendering Clouds.
+</p>
+
+<hr>
+
+<h3>Performance and Memory</h3>
+
+<p>
+Clouds may require more processing time and memory than conventional
+escape-time colouring.
+</p>
+
+<p>
+In addition to calculating the fractal, ManpWIN must maintain density data for
+the image and merge the local density maps produced by the worker threads.
+</p>
+
+<p>
+The difference is most noticeable with large images or calculations involving
+large numbers of iterations.
+</p>
+
+<hr>
+
+<h3>PAR Files and Animations</h3>
+
+<p>
+Clouds rendering settings are preserved in PAR files and animations.
+</p>
+
+<p>
+When a Clouds PAR entry is loaded, ManpWIN restores the Clouds rendering mode
+along with the other fractal settings.
+</p>
+
+<p>
+Clouds can therefore be used in normal ManpWIN animations, including zoom
+animations.
+</p>
+
+<p>
+Each animation frame is rendered from the orbit density calculated for that
+frame.
+</p>
+
+<p>
+Because the distribution and concentration of orbit visits can change as the
+view changes, the apparent brightness and structure of Clouds may also vary
+from frame to frame during an animation.
+</p>
+
+<hr>
+
+<h2>Using TieraZon and Clouds Filters</h2>
+
+<p>
+TieraZon and Flarium filters are selected from the <b>Outside Filter</b>
+control in the Fractal Options dialog.
+</p>
+
+<p>
+The Fractal Options dialog can be opened using the <b>X</b> key.
+</p>
+
+<p>
+For Clouds, select the appropriate Clouds filter and then choose the required
+rendering method from the <b>Clouds colour</b> control before pressing
+<b>OK</b>.
+</p>
+
+<p>
+The <b>Clouds colour</b> control affects only Clouds rendering and has no
+effect on any other filter.
+</p>
+
+<p>
+As with other ManpWIN colouring methods, the appearance of the result can
+depend strongly on the selected fractal, viewing area, iteration limit,
+palette, and other rendering parameters.
+</p>
+
+<hr>
+
+<h2>Notes</h2>
+
+<p>
+Not every TieraZon or Flarium filter is equally suitable for every fractal.
+Some filters depend on particular orbit characteristics and may produce very
+different results when used with different fractal types.
+</p>
+
+<p>
+Clouds is fundamentally different from conventional pixel colouring because
+the final colour of a screen location depends on visits made by many different
+orbits rather than only on the orbit which started at that pixel.
+</p>
+
+<hr>
+
+<footer>
+  ManpWIN Help &copy; September 2026
+</footer>
+
+</body>
+</html>
+

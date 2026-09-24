@@ -187,6 +187,7 @@ int	SetupTierazonColours(void)
 			//		    strcpy(lsys_type, lptr[lsys_ptr]);
 			gManp->FilterType = FilterPtr = index;
 			gManp->OutsideMethod = FilterPtr + TIERAZONFILTERS;
+			gManp->CloudsActive = (gManp->FilterType == 75);    // Tierazon filter 75 - Clouds - change this number if the order of the filters changes
 			gManp->oldcalcmode = gManp->calcmode;
 			// these plotting modes get the iteration count lost in RGB filters
 			if (gManp->calcmode == 'G' || gManp->calcmode == 'T' || gManp->calcmode == 'B' && TierazonFilter[gManp->FilterType].calctype != ' ')

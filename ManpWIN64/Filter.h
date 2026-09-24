@@ -6,8 +6,10 @@
 
 #pragma once
 
+#include <vector>
 #include "Complex.h"
 #include "colour.h"
+#include "Clouds.h"
 
 #define	MAXFDOPTIONS	20
 #define	MAXTEMP		50000
@@ -37,6 +39,9 @@ class CTZfilter
 	int	EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol);
 	void	ColourMethods(Complex z, Complex q, CTrueCol *TrueCol, int ColourMethod);
 	void	FDimension(int FilterType, long *iteration);
+	void	InitCloudDensity(int xdots, int ydots);
+	void	CloseCloudDensity();
+	void	MergeCloudDensity(std::vector<unsigned int>& Destination) const;
 
 	RGBTRIPLE FilterRGB;
 	int	method;
@@ -60,12 +65,14 @@ class CTZfilter
 	double	dStrands_LO_cy, dStrands_HI_cy, dif_test, m_lower, m_upper, dt;
 	double	dFactor = 0.80, dzx, dzy, rj, gj, bj, xsav, ysav, dFactor_2;
 	double	dStrands = 0.08;		// for Tierazon filters
+	double	dBailout;			// some Flarium filtera use bailout squared (rqlim * rqlim) (is this true???)
+	double	rr;				// filter’s main accumulated result
 
 	Complex q;
 	long	threshold;
 	long	*iteration;
 	BOOL	UseCurrentPalette;
-	int	FilterType;		// Note that FilterType = method - TIERAZONFILTERS
+	int	FilterType;			// Note that FilterType = method - TIERAZONFILTERS
 
 	int	nGrn = 2;
 	int	nBlu = 2;
@@ -73,5 +80,19 @@ class CTZfilter
 	int	nGrnStart = 58;
 	int	nBluStart = 27;
 	int	nRedStart = 143;
+
+	// variables needed for Flarium filters
+	BOOL    bPositiveX;
+	BOOL    bPositiveY;
+	int     jrw;
+	int     nFF;
+	Complex z1;
+	int     i3;
+	double  x_rmin;
+	double  x_rmax;
+	double  y_rmin;
+	double  y_rmax;
+
+	CClouds ThreadCloudDensity;		// Clouds filter - one density map for each worker thread
     };
 

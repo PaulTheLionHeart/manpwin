@@ -112,7 +112,7 @@ int CPerturbation::initialiseCalculateFrame(CDib *DibIn, int HeightIn, int thres
 
 int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int powerin, int InsideMethodIn, int OutsideMethodIn, int biomorphin, int subtypein, Complex rsrAin, bool rsrSignIn, int user_data(HWND hwnd), int xdotsIn, 
 	CTrueCol &TrueCol, int *pPertProgress, bool Multi, int delay, char *PertErrorMessage, int ArithTypeIn, int MaxRefIterationIn, int SlopeDegreeIn, PlotMode mode,
-	std::vector<std::pair<int, int>> *pixelOrder, std::atomic<int> *workIndex, int totalPixels, HANDLE ghMutex)
+	std::vector<std::pair<int, int>> *pixelOrder, std::atomic<int> *workIndex, int totalPixels, HANDLE ghMutex, bool CloudsActiveIn)
     {
     BigComplex	BigDelta;
     Complex	delta;
@@ -142,6 +142,7 @@ int CPerturbation::calculateOneFrame(double bailout, char* StatusBarInfo, int po
     SlopeDegree = SlopeDegreeIn;
     MaxRefIteration = MaxRefIterationIn;
     ArithType = ArithTypeIn;
+    CloudsActive = CloudsActiveIn;
 
     if (SlopeType == DERIVSLOPE)
 	{

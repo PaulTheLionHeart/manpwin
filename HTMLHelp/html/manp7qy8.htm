@@ -95,15 +95,59 @@ improvements to performance, precision, and fractal exploration capabilities.
 
 <h2>Latest Release (September 2026)</h2>
 
-<h2>ManpWIN 4.05a</h2>
+<h2>ManpWIN 4.05b</h2>
+
+<p>
+ManpWIN 4.05b is a colouring and rendering update focused on expanding
+TieraZon and Flarium filter support, introducing the new Clouds orbit-density
+renderer, and improving filter behaviour and rendering status reporting.
+</p>
+
+<h3>Recent Improvements</h3>
+
+<ul>
+
+<li>Fixed TieraZon filter behaviour across pixel-based fractals.</li>
+
+<li>Added a number of additional filters adapted from Stephen C. Ferguson's Flarium program.</li>
+
+<li>Fixed incorrect red/blue channel ordering in TieraZon and Flarium filters.</li>
+
+<li>Repaired several legacy TieraZon and Flarium filters which were not producing correct results.</li>
+
+<li>Corrected TieraZon filter precedence so TieraZon colouring takes priority over ordinary inside filters when appropriate.</li>
+
+<li>Added Clouds, an orbit-density rendering method based on an idea from Flarium.</li>
+
+<li>Added Clouds support to both ordinary and perturbation rendering.</li>
+
+<li>Added four Clouds rendering modes: Linear Greyscale, Log Greyscale, Linear Palette, and Log Palette.</li>
+
+<li>Added a Clouds colour selector to the Fractal Options dialog.</li>
+
+<li>Added palette colour support to Clouds rendering.</li>
+
+<li>Automatically disables BLA acceleration while Clouds is active so that all orbit visits are preserved in the density calculation.</li>
+
+<li>Added saving and restoration of Clouds rendering settings in PAR files and animation scripts.</li>
+
+<li>Added Clouds density-map merge progress reporting to the status bar.</li>
+
+<li>Fixed the status-bar pass display which could incorrectly report <code>Pass 0 of n</code> during multi-pass rendering.</li>
+
+<li>Added new Help documentation for TieraZon, Flarium, and Clouds filters.</li>
+
+</ul>
+
+<h2>Previous Releases</h2>
+
+<p><b>ManpWIN 4.05a</b></p>
 
 <p>
 ManpWIN 4.05a is a maintenance update focused on parameter animation,
 parameter-file persistence, and correct restoration of perturbation and
 slope rendering parameters.
 </p>
-
-<h3>Recent Improvements</h3>
 
 <ul>
 
@@ -122,8 +166,6 @@ slope rendering parameters.
 <li>Corrected parameter-animation handling so bailout pseudo-parameters are not confused with normal fractal parameters or the <code>param[15]</code> pre-palette colour transport slot.</li>
 
 </ul>
-
-<h2>Previous Releases</h2>
 
 <p><b>ManpWIN 4.05</b></p>
 

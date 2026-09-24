@@ -197,6 +197,7 @@ struct workliststuff		// work list entry for std escape time engines
 #define	INFORMATION	3
 #define	CALCULATINGREF	4
 #define	CLOSINGTHREADS	5
+#define MERGINGCLOUDDENSITY 6
 
 struct FNCT_LIST
     {

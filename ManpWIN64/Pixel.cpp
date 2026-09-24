@@ -382,7 +382,15 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
 	if (ProcessOrbitFeatures(hooper, close, magnitude, min_orbit, min_index, tantable))
 	    break;
 
-	CheckPeriodicity(saved, DDSaved, QDSaved, BigSaved);
+	// Tierazon FD / standard-deviation filters need the full orbit history.
+	// Periodicity detection can terminate interior points early, leaving the
+	// FD sample arrays only partially populated and causing speckled results.
+	if (TZfilter.method != 127 && TZfilter.method != 128 && TZfilter.method != 133 && TZfilter.method != 134 &&
+	    TZfilter.method != 135 && TZfilter.method != 136 && TZfilter.method != 137 && TZfilter.method != 138 &&
+	    TZfilter.method != 148 && TZfilter.method != 149)
+	    {
+	    CheckPeriodicity(saved, DDSaved, QDSaved, BigSaved);
+	    }
 	}
 
     // --- periodicity state update ---
@@ -804,6 +812,14 @@ bool	CPixel::ProcessOrbitFeatures(int& hooper, double close, double& magnitude, 
 
     if (MathType == DOUBLEFLOAT)		// Step 1 — Double(fully wired)
 	{
+	// Clouds is different from the normal Tierazon outside filters.
+	// It is an orbit-density collector and must see every orbit point,
+	// even when an inside filter such as BOF60/BOF61 is also active.
+	// Process Clouds independently here, then let the normal feature
+	// chain continue below.
+	if (gManp->CloudsActive)
+	    TZfilter.DoTierazonFilter(z, &iteration);
+
 	// StarTrail
 	if (OutsideMethod == STARTRAIL)
 	    {
@@ -829,7 +845,19 @@ bool	CPixel::ProcessOrbitFeatures(int& hooper, double close, double& magnitude, 
 		}
 	    }
 
-	// BOF60 / BOF61
+	// Tierazon
+	// Ordinary Tierazon filters remain mutually exclusive with the
+	// preceding feature branches.  Clouds was already processed above.
+	else if (OutsideMethod >= TIERAZONFILTERS && !gManp->CloudsActive)
+	    {
+	    TZfilter.DoTierazonFilter(z, &iteration);
+	    // Some Tierazon filters terminate the orbit by setting the iteration
+	    // count to the threshold.  The main ManpWIN loop uses FloatIteration,
+	    // so honour the filter's explicit termination request here.
+	    if ((TZfilter.method == 110 || TZfilter.method == 145) &&iteration >= threshold)
+		return true;
+	    }
+	// BOF60 / BOF61 are used only when no Tierazon filter has taken precedence.
 	else if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	    {
 	    magnitude = z.CSumSqr();
@@ -840,16 +868,18 @@ bool	CPixel::ProcessOrbitFeatures(int& hooper, double close, double& magnitude, 
 		min_index = (long)iteration + 1L;
 		}
 	    }
-
-	// Tierazon
-	else if (OutsideMethod >= TIERAZONFILTERS)
-	    {
-	    TZfilter.DoTierazonFilter(z, &iteration);
-	    }
 	}
     //  Step 2 — DD
     else if (MathType == DOUBLEDOUBLE)		    //  Step 2 — DD
 	{
+	if (gManp->CloudsActive)
+	    {
+	    DDTemp = zDD;
+	    tempComplex.x = to_double(DDTemp.x);
+	    tempComplex.y = to_double(DDTemp.y);
+	    TZfilter.DoTierazonFilter(tempComplex, &iteration);
+	    }
+
 	// EPSCROSS
 	if (OutsideMethod == EPSCROSS)
 	    {
@@ -868,6 +898,19 @@ bool	CPixel::ProcessOrbitFeatures(int& hooper, double close, double& magnitude, 
 		}
 	    }
 
+	// Tierazon
+	else if (OutsideMethod >= TIERAZONFILTERS && !gManp->CloudsActive)
+	    {
+	    DDTemp = zDD;
+	    tempComplex.x = to_double(DDTemp.x);
+	    tempComplex.y = to_double(DDTemp.y);
+	    TZfilter.DoTierazonFilter(tempComplex, &iteration);
+	    // Some Tierazon filters terminate the orbit by setting the iteration
+	    // count to the threshold.  The main ManpWIN loop uses FloatIteration,
+	    // so honour the filter's explicit termination request here.
+	    if ((TZfilter.method == 110 || TZfilter.method == 145) && iteration >= threshold)
+		return true;
+	    }
 	// BOF60 / BOF61
 	else if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	    {
@@ -879,18 +922,17 @@ bool	CPixel::ProcessOrbitFeatures(int& hooper, double close, double& magnitude, 
 		min_index = (long)iteration + 1L;
 		}
 	    }
-
-	// Tierazon
-	else if (OutsideMethod >= TIERAZONFILTERS)
-	    {
-	    DDTemp = zDD;
-	    tempComplex.x = to_double(DDTemp.x);
-	    tempComplex.y = to_double(DDTemp.y);
-	    TZfilter.DoTierazonFilter(tempComplex, &iteration);
-	    }
 	}
     else if (MathType == QUADDOUBLE)			// Step 3 — QD
 	{
+	if (gManp->CloudsActive)
+	    {
+	    QDTemp = zQD;
+	    tempComplex.x = to_double(QDTemp.x);
+	    tempComplex.y = to_double(QDTemp.y);
+	    TZfilter.DoTierazonFilter(tempComplex, &iteration);
+	    }
+
 	if (OutsideMethod == EPSCROSS)
 	    {
 	    hooper = 0;
@@ -907,6 +949,18 @@ bool	CPixel::ProcessOrbitFeatures(int& hooper, double close, double& magnitude, 
 		return true;
 		}
 	    }
+	else if (OutsideMethod >= TIERAZONFILTERS && !gManp->CloudsActive)
+	    {
+	    QDTemp = zQD;
+	    tempComplex.x = to_double(QDTemp.x);
+	    tempComplex.y = to_double(QDTemp.y);
+	    TZfilter.DoTierazonFilter(tempComplex, &iteration);
+	    // Some Tierazon filters terminate the orbit by setting the iteration
+	    // count to the threshold.  The main ManpWIN loop uses FloatIteration,
+	    // so honour the filter's explicit termination request here.
+	    if ((TZfilter.method == 110 || TZfilter.method == 145) && iteration >= threshold)
+		return true;
+	    }
 	else if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	    {
 	    magnitude = zQD.CSumSqr();
@@ -917,16 +971,14 @@ bool	CPixel::ProcessOrbitFeatures(int& hooper, double close, double& magnitude, 
 		min_index = (long)iteration + 1L;
 		}
 	    }
-	else if (OutsideMethod >= TIERAZONFILTERS)
-	    {
-	    QDTemp = zQD;
-	    tempComplex.x = to_double(QDTemp.x);
-	    tempComplex.y = to_double(QDTemp.y);
-	    TZfilter.DoTierazonFilter(tempComplex, &iteration);
-	    }
 	}
     else if (MathType == ARBITRARYPREC)	    // Step 4 — Big
 	{
+	if (gManp->CloudsActive)
+	    {
+	    tempComplex = zBig.CBig2Double();
+	    TZfilter.DoTierazonFilter(tempComplex, &iteration);
+	    }
 	if (OutsideMethod == EPSCROSS)
 	    {
 	    hooper = 0;
@@ -945,6 +997,16 @@ bool	CPixel::ProcessOrbitFeatures(int& hooper, double close, double& magnitude, 
 		return true;
 		}
 	    }
+	else if (OutsideMethod >= TIERAZONFILTERS && !gManp->CloudsActive)
+	    {
+	    tempComplex = zBig.CBig2Double();
+	    TZfilter.DoTierazonFilter(tempComplex, &iteration);
+	    // Some Tierazon filters terminate the orbit by setting the iteration
+	    // count to the threshold.  The main ManpWIN loop uses FloatIteration,
+	    // so honour the filter's explicit termination request here.
+	    if ((TZfilter.method == 110 || TZfilter.method == 145) && iteration >= threshold)
+		return true;
+	    }
 	else if (InsideMethod == BOF60 || InsideMethod == BOF61)
 	    {
 	    magnitude = zBig.CSumSqr();
@@ -954,11 +1016,6 @@ bool	CPixel::ProcessOrbitFeatures(int& hooper, double close, double& magnitude, 
 		min_orbit = magnitude;
 		min_index = (long)iteration + 1L;
 		}
-	    }
-	else if (OutsideMethod >= TIERAZONFILTERS)
-	    {
-	    tempComplex = zBig.CBig2Double();
-	    TZfilter.DoTierazonFilter(tempComplex, &iteration);
 	    }
 	}
     return false;

@@ -147,7 +147,11 @@ int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTr
 		bailout, special, logval, logtable, potentialColours, &TrueCol, potparam);
 	    }
 
-	if (iteration == MaxIteration)
+
+	// Tierazon filters provide both inside and outside colouring.
+	// Therefore an ordinary inside filter must not overwrite the
+	// Tierazon result for points which remain inside the fractal.
+	if (iteration == MaxIteration && OutsideMethod < TIERAZONFILTERS)
 	    index = DoInsideFilterT(iteration, z, InsideMethod, MaxIteration, min_orbit, min_index);
 	}
 
@@ -289,7 +293,10 @@ int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, i
 		bailout, special, logval, logtable, potentialColours, &TrueCol, potparam);
 	    }
 
-	if (iteration == MaxIteration)
+	// Tierazon filters provide both inside and outside colouring.
+	// Therefore an ordinary inside filter must not overwrite the
+	// Tierazon result for points which remain inside the fractal.
+	if (iteration == MaxIteration && OutsideMethod < TIERAZONFILTERS)
 	    index = DoInsideFilterT(iteration, z, InsideMethod, MaxIteration, min_orbit, min_index);
 	}
 

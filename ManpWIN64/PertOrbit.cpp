@@ -104,7 +104,11 @@ int	CPerturbation::iterateFractalWithPerturbationBLA(const std::vector<Complex> 
 	iterations++;
 	if (ArithType == DOUBLE)
 	    {
-	    if (EnableApproximation)
+	    // Clouds records every individual orbit point in the density map.
+	    // BLA skips groups of iterations, so skipped orbit points would never
+	    // reach the Tierazon Clouds filter and the density image would be incomplete.
+	    // Clouds therefore uses plain perturbation rather than BLA.
+	    if (EnableApproximation && !CloudsActive)
 		{
 		DeltaNormSquared = dz.CSumSqr();
 		const BLA *bPtr = nullptr;

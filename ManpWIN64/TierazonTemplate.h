@@ -1028,12 +1028,11 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	case 101:					// M-Set Method
 	case 118:					// N - Set Method
 	    {
-	    z->x = q->x + sqr.x - sqr.y;
-	    z->y = q->y + real_imag + real_imag;
-
 	    sqr.x = z->x * z->x;
 	    sqr.y = z->y * z->y;
 	    real_imag = z->x * z->y;
+	    z->x = q->x + sqr.x - sqr.y;
+	    z->y = q->y + real_imag + real_imag;
 
 	    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim);
 	    }

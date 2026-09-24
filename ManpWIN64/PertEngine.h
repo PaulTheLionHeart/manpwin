@@ -86,10 +86,15 @@ class CPerturbation
 		double bumpMappingDepth, double bumpMappingStrength, int PaletteStartIn, double LightHeightIn, int PertColourMethodIn, int PalOffset, double IterDiv, bool EnableApproximationIn, BYTE _3dflagIn, double ColourSpeedIn, int NumberThreadsIn);
 	int	calculateOneFrame(double bailout, char* StatusBarInfo, int powerin, int InsideMethodIn, int OutsideMethodIn, int biomorphin, int subtypein, Complex rsrAin, bool rsrSignIn, int user_data(HWND hwnd), int xdotsIn, 
 		CTrueCol &TrueCol, int *pPertProgress, bool Multi, int delay, char *PertErrorMessage, int ArithTypeIn, int MaxRefIteration, int SlopeDegreeIn, PlotMode mode,
-		std::vector<std::pair<int, int>> *pixelOrder, std::atomic<int> *workIndex, int totalPixels, HANDLE ghMutex);
+		std::vector<std::pair<int, int>> *pixelOrder, std::atomic<int> *workIndex, int totalPixels, HANDLE ghMutex, bool CloudsActiveIn);
 	void	AttachSharedTables(const std::vector<Complex>* xs, const std::vector<ExpComplex>* exs, const BLAS* bla);
 
 	int	BigComplex2ExpComplex(ExpComplex *a, BigComplex b);
+	
+	// clouds stuff
+	void	InitCloudDensity(int xdots, int ydots);
+	void	MergeCloudDensity(std::vector<unsigned int>& Destination) const;
+	void	CloseCloudDensity();
 
 	int	SlopeType = NOSLOPE;
 	int	PaletteShift = 0;		// palette movement between animation frames
@@ -173,6 +178,8 @@ class CPerturbation
 
 	BigDouble	BigWidth = 0.0, BigCentreX = 0.0, BigCentreY = 0.0;
 	int	SlopeDegree = 2;		// used to tell FwdDiff algorithm the degree of the polymomial for slope calculations
+
+	bool	CloudsActive = false;		// Clouds is a special case of Tierazon filters
     };
 
 

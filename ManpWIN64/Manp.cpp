@@ -99,6 +99,25 @@ void CManp::DebugNumParam(const char* where)
 #endif
 
 /**************************************************************************
+    Initialise final Clouds density map
+**************************************************************************/
+
+void CManp::InitCloudDensity(int xdots, int ydots)
+    {
+    const size_t pixelCount = (size_t)xdots * (size_t)ydots;
+    CloudDensity.assign(pixelCount, 0);
+    }
+
+/**************************************************************************
+    Release final Clouds density map
+**************************************************************************/
+
+void CManp::CloseCloudDensity()
+    {
+    CloudDensity.clear();
+    }
+
+/**************************************************************************
 	Main Fractal Loop - called from WinMain()
 **************************************************************************/
 
@@ -348,6 +367,12 @@ void	CManp::DisplayStatusBarInfo (int complete, char *text)
 	    case 'S':
 	    case 'V':
 	    case 'H':
+		curpass = totpasses;
+		for (int i = 0; i < NumberThreads; i++)
+		    {
+		    if (PixelCurPass[i] < curpass)
+			curpass = PixelCurPass[i];
+		    }
 		SAFE_SPRINTF(PassStr, "Pass %d of %d", curpass, totpasses);
 		break;
 	    default: 
@@ -359,80 +384,81 @@ void	CManp::DisplayStatusBarInfo (int complete, char *text)
 		- (double)(FrameStart.time) - (double)(FrameStart.millitm) / 1000.0;
 
     GenPositionStr(PositionStr);
-    if (complete == INFORMATION)				// information
+    switch (complete)
 	{
-	if (OscProcess.DisplayAxisImages)
-	    {
-	    strcpy(szStatus, text);
-	    StatusColour = 0x00FFFF00;				// colour of status bar
-	    }
-	}
-    else if (complete == COMPLETE)				// image done
-	{
-	StatusColour = 0x0000FF00;				// colour of status bar
-	if (RunAnimation)					// we completed an animation run
-	    RunAnimation = FALSE;
-	else if (IsPAR || IsFrPAR)
-	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Par File <%s> Completed in %s, %s", text, ShowTime(ElapsedTime), PositionStr);
-	else if (IsKFR)
-	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "KFR File <%s> Completed in %s, %s", text, ShowTime(ElapsedTime), PositionStr);
-	else if (type == LYAPUNOV)
-	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Image Completed in %s, %s, Lyapunov Sequence='%s'", ShowTime(ElapsedTime), PositionStr, LyapSequence);
-	else
-	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Image Completed in %s, %s", ShowTime(ElapsedTime), PositionStr);
-//	    SAFE_SPRINTF(szStatus, "Image Completed in %s, %s", ShowTime (ElapsedTime), PositionStr);
-	}
-    else if (complete == INCOMPLETE)
-	{
-	SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime (ElapsedTime));
-	if (BigNumFlag)	    // now we have double double and quad double...
-	    {
-	    if (precision <= DDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
-		SAFE_SPRINTF(PrecisionStr, "DD Prec: %d", precision);
-	    else if (precision <= QDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
-		SAFE_SPRINTF(PrecisionStr, "QD Prec: %d", precision);
-	    else
-		{ 
-//		if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
-//		    SAFE_SPRINTF(PrecisionStr, "QD Prec: %d", precision);
-//		else
-		    SAFE_SPRINTF(PrecisionStr, "Arb Prec: %d", precision);
+	case INFORMATION:					// information
+	    if (OscProcess.DisplayAxisImages)
+		{
+		strcpy(szStatus, text);
+		StatusColour = 0x00FFFF00;			// colour of status bar
 		}
-	    }
-	if (OscAnimProc == MORPHING)
-	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s", PassStr, FinishedStr);
-	else if (type == PERTURBATION)
-	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s", PertStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
-	else if (type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF)
-	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s", SlopeStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
-	else if (type == ANT || type == TOWER)
-	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Progress = %s", AntStatus);
-	else if (type == LYAPUNOV)
-	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s, Lyapunov Sequence='%s'", PassStr, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr, LyapSequence);
-	else
-	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s", PassStr, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
-	if (str_find_ci(szStatus, "Ref=") != 0)
+	    break;
+	case COMPLETE:						// image done
+	    StatusColour = 0x0000FF00;				// colour of status bar
+	    if (RunAnimation)					// we completed an animation run
+		RunAnimation = FALSE;
+	    else if (IsPAR || IsFrPAR)
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Par File <%s> Completed in %s, %s", text, ShowTime(ElapsedTime), PositionStr);
+	    else if (IsKFR)
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "KFR File <%s> Completed in %s, %s", text, ShowTime(ElapsedTime), PositionStr);
+	    else if (type == LYAPUNOV)
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Image Completed in %s, %s, Lyapunov Sequence='%s'", ShowTime(ElapsedTime), PositionStr, LyapSequence);
+	    else
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Image Completed in %s, %s", ShowTime(ElapsedTime), PositionStr);
+	    break;
+	case INCOMPLETE:
+	    SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime (ElapsedTime));
+	    if (BigNumFlag)	    // now we have double double and quad double...
+		{
+		if (precision <= DDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+		    SAFE_SPRINTF(PrecisionStr, "DD Prec: %d", precision);
+		else if (precision <= QDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+		    SAFE_SPRINTF(PrecisionStr, "QD Prec: %d", precision);
+		else
+		    { 
+//		    if (fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
+//			SAFE_SPRINTF(PrecisionStr, "QD Prec: %d", precision);
+//		    else
+			SAFE_SPRINTF(PrecisionStr, "Arb Prec: %d", precision);
+		    }
+		}
+	    if (OscAnimProc == MORPHING)
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s", PassStr, FinishedStr);
+	    else if (type == PERTURBATION)
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s", PertStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
+	    else if (type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF)
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s", SlopeStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
+	    else if (type == ANT || type == TOWER)
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Progress = %s", AntStatus);
+	    else if (type == LYAPUNOV)
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s, Lyapunov Sequence='%s'", PassStr, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr, LyapSequence);
+	    else
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s", PassStr, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
+	    if (str_find_ci(szStatus, "Ref=") != 0)
+		StatusColour = 0x00FFFF80;
+	    else
+		StatusColour = 0x0000FFFF;
+	    break;
+	case MERGINGCLOUDDENSITY:
+	    SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime(ElapsedTime));
+	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s", text, FinishedStr);
 	    StatusColour = 0x00FFFF80;
-	else
-	    StatusColour = 0x0000FFFF;
-	}
-    else if (complete == CALCULATINGREF)
-	{
-	SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime(ElapsedTime));
-	SAFE_SPRINTF(PrecisionStr, "Arb Prec: %d", precision);
-	_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s", PertStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
-	StatusColour = 0x00FFFF80;
-	}
-    else if (complete == CLOSINGTHREADS)			// so the user knows what's happening
-	{
-	SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime(ElapsedTime));
-	_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Waiting For Render Threads To Close..., %s", FinishedStr);
-	StatusColour = 0x80FFFF80;
-	}
-    else							// initialising
-	{
-	_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Initialising fractal variables");
-	StatusColour = 0x006060FF;
+	    break;
+	case CALCULATINGREF:
+	    SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime(ElapsedTime));
+	    SAFE_SPRINTF(PrecisionStr, "Arb Prec: %d", precision);
+	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s", PertStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
+	    StatusColour = 0x00FFFF80;
+	    break;
+	case CLOSINGTHREADS:				// so the user knows what's happening
+	    SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime(ElapsedTime));
+	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Waiting For Render Threads To Close..., %s", FinishedStr);
+	    StatusColour = 0x80FFFF80;
+	    break;
+	default:							// initialising
+	    _snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Initialising fractal variables");
+	    StatusColour = 0x006060FF;
+	    break;
 	}
     }
 

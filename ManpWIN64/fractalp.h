@@ -135,7 +135,7 @@ extern	struct	PerturbationSpecificStuff	PerturbationSpecific[];	// default value
 						// Bit 9: functions are specified in Fractals.cpp and used in CPixel (first step towards multi-threading)
 
 #define	BOUNDARY	0			// Oscillator: plot lines, Fractal map: special colouring, Surfaces, Knots, Curves: Hide Background
-#define	BLOCKANIM	32			// used for 2D or less to preventanimating non-existent dimensions
+#define	BLOCKANIM	32			// used for 2D or less to prevent animating non-existent dimensions
 #define	AVERAGE		64			// used in oscillators and a few surfaces
 #define	PERSPECTIVE	128			// used in surfaces
 #define	FUNCTIONINPIXEL	256			// functions are specified in Functions.cpp and used in CPixel (first step towards multi-threading)

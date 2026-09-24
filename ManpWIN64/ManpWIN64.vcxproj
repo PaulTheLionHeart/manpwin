@@ -173,6 +173,7 @@
     <ClCompile Include="CalcMode.cpp" />
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="Clipbord.cpp" />
+    <ClCompile Include="Clouds.cpp" />
     <ClCompile Include="Colour.cpp" />
     <ClCompile Include="Colour1.cpp" />
     <ClCompile Include="ColourMethod.cpp" />
@@ -317,6 +318,7 @@
     <ClInclude Include="BigDouble.h" />
     <ClInclude Include="BigMatrix.h" />
     <ClInclude Include="BigTrig.h" />
+    <ClInclude Include="Clouds.h" />
     <ClInclude Include="colour.h" />
     <ClInclude Include="Complex.h" />
     <ClInclude Include="DDComplex.h" />
@@ -352,7 +354,7 @@
     <ClInclude Include="PertEngine.h" />
     <ClInclude Include="PerturbationMaths.h" />
     <ClInclude Include="Pixel.h" />
-    <ClInclude Include="PixelTemplate.h" />
+    <ClInclude Include="FilterTemplate.h" />
     <ClInclude Include="Plot.h" />
     <ClInclude Include="Plotmode.h" />
     <ClInclude Include="Polygon.h" />
@@ -365,7 +367,6 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Slope.h" />
     <ClInclude Include="SafeStrings.h" />
-    <ClInclude Include="SymPlot.h" />
     <ClInclude Include="Tetration.h" />
     <ClInclude Include="TierazonTemplate.h" />
     <ClInclude Include="Timer.h" />

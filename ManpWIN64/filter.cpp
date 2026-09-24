@@ -19,6 +19,34 @@
 #include "colour.h"
 
 /////////////////////////////////////////////////////
+// Initialise thread-local Clouds density map
+/////////////////////////////////////////////////////
+
+void CTZfilter::InitCloudDensity(int xdots, int ydots)
+    {
+    const size_t pixelCount = (size_t)xdots * (size_t)ydots;
+    ThreadCloudDensity.Init(xdots, ydots, gManp->hor, gManp->vert, gManp->mandel_width, gManp->AspectRatio);
+    }
+
+/////////////////////////////////////////////////////
+// Release thread-local Clouds density map
+/////////////////////////////////////////////////////
+
+void CTZfilter::CloseCloudDensity()
+    {
+    ThreadCloudDensity.Close();
+    }
+
+/////////////////////////////////////////////////////
+// Merge thread-local Clouds density map into final density map
+/////////////////////////////////////////////////////
+
+void CTZfilter::MergeCloudDensity(std::vector<unsigned int>& Destination) const
+    {
+    ThreadCloudDensity.AddDensityTo(Destination);
+    }
+
+/////////////////////////////////////////////////////
 // Initialise filter variables
 /////////////////////////////////////////////////////
 
@@ -31,10 +59,21 @@ void	CTZfilter::LoadFilterQ(Complex qIn)
     n_color_z = 0;
 
     rj = gj = bj = 0;
+    rr = 0.0;
 
     dt = 0;
     xtot = ytot = ztot = xavg = yavg = zavg = 0;
     zsav = xsav = ysav = d_color_x = d_color_y = d_color_z = 0.0;
+
+    bPositiveX = FALSE;
+    bPositiveY = FALSE;
+    jrw = 0;
+    z1 = 0.0;
+    nFF = 1;
+    i3 = 0;
+
+    x_rmin = x_rmax = 0.0;
+    y_rmin = y_rmax = 0.0;
 
     dStrands_HI = limit + dStrands;
     dStrands_LO = limit - dStrands;
@@ -55,6 +94,12 @@ void	CTZfilter::LoadFilterQ(Complex qIn)
     iteration_x = 0;
     iteration_y = 0;
     iteration_z = 0;
+
+    for (int i = 0; i < MAXTEMP; i++)
+	{
+	pXTemp[i] = 0.0;
+	pYTemp[i] = 0.0;
+	}
 
     m_lower = 0;
     m_upper = 256;
@@ -77,9 +122,16 @@ void	CTZfilter::InitFilter(int methodIn, long ThresholdIn, double dStrandsIn, in
     dStrands = dStrandsIn;
     nFDOption = nFDOptionIn;
     UseCurrentPalette = UseCurrentPaletteIn;
-//    FilterRGB = FilterRGBIn;
-    pXTemp[0] = 0.0;
-    pYTemp[0] = 0.0;
+
+    if (method > TIERAZONFILTERS)
+	FilterType = method - TIERAZONFILTERS;
+
+    for (int i = 0; i < MAXTEMP; i++)
+	{
+	pXTemp[i] = 0.0;
+	pYTemp[i] = 0.0;
+	}
+    dBailout = gManp->rqlim/* * gManp->rqlim*/;
     }
 
 //////////////////////////////////////////////////////
@@ -113,7 +165,7 @@ int	CTZfilter::DoTierazonFilter(Complex z, long *iteration)
 	    break;
 
 	case 2:  // Bubbles I
-//	case 8:  // Bubbles II
+	case 8:  // Bubbles II
 	    temp = z.CSumSqr();
 	    if (FilterType == 2)
 		{
@@ -218,15 +270,6 @@ int	CTZfilter::DoTierazonFilter(Complex z, long *iteration)
 
 	    break;
 
-	case 8:  // Bubbles II
-	    n_color_z = 0;
-	    if (z.CSumSqr() < dStrands)
-		{
-		zsav = z.CSumSqr();
-		n_color_z = *iteration;
-		}
-	    break;
-
 	case 9:  // Stalks II
 	    d_real = fabs(z.x/z.y);
 	    if (d_real < dStrands)
@@ -244,9 +287,13 @@ int	CTZfilter::DoTierazonFilter(Complex z, long *iteration)
 	    break;
 
 	case 10:  // Rings I
-	case 11:  // Rings II
+	// Tierazon Filter 10 (Rings I) sets iteration to threshold
+	// when it finds the ring to retain.  This is an early-exit
+	// signal, not merely a colour value.  Stop processing the
+	// orbit immediately; otherwise later iterations can overwrite
+	// the selected ring and change the ring display order.
 	    ssq1 = sqrt(z.CSumSqr());
-	    // (ssq1 < dStrands_HI && ssq1 > dStrands_LO && zsav < ssq1)
+//	    if (ssq1 < dStrands_HI && ssq1 > dStrands_LO && zsav < ssq1)
 	    if (ssq1 < dStrands_HI && ssq1 > dStrands_LO)
 		{
 		zsav = ssq1;
@@ -257,6 +304,7 @@ int	CTZfilter::DoTierazonFilter(Complex z, long *iteration)
 		}
 	    break;
 
+	case 11:  // Rings II
 	case 12:  // Rings III
 	    ssq1 = 1/z.CSumSqr();
 	    //if (ssq1 < dStrands_HI && ssq1 > dStrands_LO && zsav < ssq1)
@@ -872,6 +920,293 @@ int	CTZfilter::DoTierazonFilter(Complex z, long *iteration)
 		}     
 	    break;
 
+	case 53:    // Flarium 07, i+=(int)(sin(fabs(dzx_save)*fabs(dzy_save))*10)
+	case 54:    // Flarium 08, i+=(int)(sin(fabs(dzx_save)/fabs(dzy_save))*10)
+	    xsav += z.x;
+	    ysav += z.y;
+	    break;
+
+	case 55:    // Flarium 13, i=(int)((fabs(atan(z.real()/z.imag()))+fabs(atan(dzx_save/dzy_save)))*100)",
+	    xsav = z.x;
+	    ysav = z.y;
+	    break;
+
+	case 56: // Flarium 16, Delta Slope, On Change;, ...J+=FF; plus atan method
+	// Deliberate fall-through into Flarium 17.
+	case 57: // Flarium 17, Delta Slope, On Change;, ...J+=FF
+	    if (xsav == 0.0)
+		{
+		bPositiveX = FALSE;
+		bPositiveY = FALSE;
+		}
+
+	    if (fabs(z.x) >= xsav)
+		{
+		// Count positive X slope change.
+		if (!bPositiveX)
+		    {
+		    jrw += nFF;
+		    bPositiveX = TRUE;
+		    }
+		}
+	    else
+		{
+		// Count negative X slope change.
+		if (bPositiveX)
+		    {
+		    jrw += nFF;
+		    bPositiveX = FALSE;
+		    }
+		}
+
+	    if (fabs(z.y) >= ysav)
+		{
+		// Count positive Y slope change.
+		if (!bPositiveY)
+		    {
+		    jrw += nFF;
+		    bPositiveY = TRUE;
+		    }
+		}
+	    else
+		{
+		// Count negative Y slope change.
+		if (bPositiveY)
+		    {
+		    jrw += nFF;
+		    bPositiveY = FALSE;
+		    }
+		}
+
+	    xsav = fabs(z.x);
+	    ysav = fabs(z.y);
+	    break;
+
+	case 58: // Flarium 18, Delta Slope, No Change;, ...J+=FF
+	    if (xsav == 0.0)
+		{
+		bPositiveX = FALSE;
+		bPositiveY = FALSE;
+
+		z1 = z;
+
+		// Flarium used dzx_save = 99 merely as an
+		// initialisation sentinel.
+		xsav = 99.0;
+
+		jrw = threshold / 4;
+		break;
+		}
+
+	    if (fabs(z.x) >= fabs(z1.x) ||
+		fabs(z.y) >= fabs(z1.y))
+		{
+		// Positive slope, no direction change.
+		if (!bPositiveX)
+		    {
+		    bPositiveX = TRUE;
+
+		    if (jrw - nFF > 0)
+			jrw -= nFF;
+		    }
+		else
+		    {
+		    if (jrw + nFF * 2 < threshold)
+			jrw += nFF * 2;
+		    }
+		}
+	    else
+		{
+		// Negative slope, no direction change.
+		if (bPositiveX)
+		    {
+		    bPositiveX = FALSE;
+
+		    if (jrw - nFF > 0)
+			jrw -= nFF;
+		    }
+		else
+		    {
+		    if (jrw + nFF * 2 < threshold)
+			jrw += nFF * 2;
+		    }
+		}
+
+	    z1 = z;
+	    break;
+
+	case 59:    // Flarium 30, (atan(fabs(x_rmax * x_rmin)/fabs(y_rmax * y_rmin)) * 40)
+	    if (*iteration <= 1)
+		{
+		x_rmin = z.x;
+		x_rmax = z.x;
+		y_rmin = z.y;
+		y_rmax = z.y;
+		}
+	    else
+		{
+		if (x_rmin > z.x)
+		    x_rmin = z.x;
+		if (x_rmax < z.x)
+		    x_rmax = z.x;
+
+		if (y_rmin > z.y)
+		    y_rmin = z.y;
+		if (y_rmax < z.y)
+		    y_rmax = z.y;
+		}
+	    break;
+
+	case 60:    // Flarium 31, if (fabs(dzx) <= dStrands || fabs(dzy) <= dStrands) rr=ri
+	    if ((fabs(z.x) <= dStrands_HI && fabs(z.x) > dStrands_LO) ||
+		(fabs(z.y) <= dStrands_HI && fabs(z.y) > dStrands_LO))
+		{
+		rr += log(z.x * z.x + z.y * z.y) * 13.0;   // Don't mess with this :-)
+		}
+
+	    if (fabs(z.x) < dStrands || fabs(z.y) < dStrands)
+		{
+		i3++;
+		}
+	    break;
+
+	case 61:    // Flarium 32, if (dzx*dzx+dzy*dzy < limit) rr+=3
+	    if (z.x * z.x + z.y * z.y < limit)
+		i3++;
+	    break;
+
+	case 62:    // Flarium 33, Combination Filters 1,2, && 3
+	    {
+	    double dx = z.x;
+	    double dy = z.y;
+
+	    if (dx < dStrands && dx > -dStrands)
+		{
+		if (dx < 0.0)
+		    dx = -dStrands;
+		else
+		    dx = dStrands;
+		}
+
+	    if (dy < dStrands && dy > -dStrands)
+		{
+		if (dy < 0.0)
+		    dy = -dStrands;
+		else
+		    dy = dStrands;
+		}
+
+	    xsav += log(fabs(dx));
+	    ysav += log(fabs(dy));
+
+	    if ((fabs(dx) <= dStrands_HI && fabs(dx) > dStrands_LO) ||
+		(fabs(dy) <= dStrands_HI && fabs(dy) > dStrands_LO))
+		{
+		rr += log(dx * dx + dy * dy) * 13.0;       // Don't mess with this either :-)
+		}
+
+	    if (dx * dx + dy * dy < limit)
+		i3++;
+	    }
+	    break;
+
+	case 63:    // Flarium 34, if (fabs(dzx) > dStrands || fabs(dzy) > dStrands)",
+	    rr += log(z.x * z.x + z.y * z.y) * 10.0;
+
+	    if (fabs(z.x) > dStrands || fabs(z.y) > dStrands)
+		rr += nFF;
+	    break;
+
+	case 64:    // Flarium 35, if (fabs(dzx) > dStrands &&&& fabs(dzy) > dStrands)
+	    if (fabs(z.x) < limit || fabs(z.y) < limit)
+		{
+		rr += log(z.x * z.x + z.y * z.y) * 10.0;
+		}
+	    else
+		{
+		*iteration += nFF;
+		}
+	    break;
+
+	case 65:    // Flarium 36, if (fabs(dzx) > limit || fabs(dzy) > limit)",
+	    rr += log(z.x * z.x + z.y * z.y) * 10.0;
+
+	    if (fabs(z.x) > limit || fabs(z.y) > limit)
+		*iteration += nFF;
+	    break;
+
+	case 66:    // Flarium 37, if (fabs(dzx) < limit || fabs(dzy) < limit)",
+	    if (fabs(z.x) < limit || fabs(z.y) < limit)
+		rr += log(z.x * z.x + z.y * z.y) * 10.0;
+	    else
+		*iteration += nFF;
+	    break;
+
+	case 67:    // Flarium 38, if (fabs(1/dzx*dzy) > limit)",
+	    rr += log(z.x * z.x + z.y * z.y) * 10.0;
+
+	    if (fabs((1.0 / z.x) * z.y) > limit)
+		*iteration += nFF;
+	    break;
+
+	case 68:    // Flarium 39, if (fabs(dzx) > limit || fabs(dzy) > limit)
+	    rr += log(z.x * z.x + z.y * z.y) * 10.0;
+
+	    if (fabs(z.x) > limit || fabs(z.y) > limit)
+		*iteration += nFF;
+
+	    xsav = z.x;
+	    ysav = z.y;
+	    break;
+
+	case 69:    // Flarium 40, ri = rr + atan(fabs(dzx_save/dzy_save)) * 30
+	    rr += log(z.x * z.x + z.y * z.y) * 2.0;
+
+	    if (fabs(z.x) > limit || fabs(z.y) > limit)
+		*iteration += nFF;
+
+	    xsav = z.x;
+	    ysav = z.y;
+	    break;
+
+	case 70:    // Flarium 41, rr+=log(dzx*dzx+dzy*dzy)*nBay100
+	    rr += log(z.x * z.x + z.y * z.y) * dFactor;
+	    xsav = z.x;
+	    ysav = z.y;
+	    break;
+
+	case 71:    // Flarium 46, i = (int)rr; rr+=log(dzx*dzx+dzy*dzy)*(1+nBay100)
+	    rr += log(z.x * z.x + z.y * z.y) * (1 + dFactor);
+	    break;
+
+	case 72:    // Flarium 47, i = (int)(rr + atan(fabs(dzx_save/dzy_save)) * (10+nBay1000))",
+	    rr += log(z.x*z.x + z.y*z.y) * (1.0 + dFactor);
+	    xsav = z.x;
+	    ysav = z.y;
+	    break;
+
+	case 73:    // Flarium 48, if (fabs(dzx) < z.squares() || fabs(dzy) < z.squares())  rr+=nFF",
+	    {
+	    double mag = sqrt(z.x * z.x + z.y * z.y);
+
+	    if (fabs(z.x) < mag || fabs(z.y) < mag)
+		rr += dFactor;
+	    }
+	    break;
+
+	case 74:    // Flarium 49, rr += atan(fabs(dzy/dzx))*atan(fabs(dzx/dzy))*2",
+	    if (fabs(z.x) < dStrands || fabs(z.y) < dStrands)
+		rr += atan(fabs(z.y / z.x)) * atan(fabs(z.x / z.y)) * 2.0;
+	    break;
+
+
+
+
+
+	case 75:	// a special filter based on Flarium clouds
+	    ThreadCloudDensity.AddPoint(z.x, z.y);
+	    break;
+
 	default:  // last z values (gradients)
 	    // Case 15, 16, 17
 	    xsav = z.x;
@@ -887,7 +1222,7 @@ int	CTZfilter::DoTierazonFilter(Complex z, long *iteration)
 
 int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
     {
-    static  int nCount = 0;
+//    static  int nCount = 0;
 
     rj = gj = bj = j = *iteration;
 
@@ -923,7 +1258,10 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 		rj = gj = bj = ztot*dFactor;
 		}
 	    else
+		{
 		j = 0;
+		rj = gj = bj = 0;
+		}
 
 	    if (xtot || ytot)
 		{      
@@ -947,7 +1285,10 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 		bj = *iteration;
 		}
 	    else
-		j = 0;
+		{
+		j = *iteration = 0;
+		rj = gj = bj = 0;
+		}
 
 	    break;
 
@@ -959,7 +1300,10 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 		*iteration = *iteration + (int)ztot;
 		}
 	    else
-		j = 0;
+		{
+		j = *iteration = 0;
+		rj = gj = bj = 0;
+		}
 
 	    rj = gj = bj = *iteration;
 	    break;
@@ -971,7 +1315,10 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 		    *iteration = (int)((*iteration - log (log (z.CSumSqr())) / log (2.0))*50*dFactor);
 		}
 	    else
-		j = 0;
+		{
+		j = *iteration = 0;
+		rj = gj = bj = 0;
+		}
 
 	    if (*iteration < 0)
 		*iteration = 0;
@@ -993,21 +1340,24 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 
 	    break;
 
-	case 8:   // Bubbles II
-//	    if (n_color_z)
+	case 8:
+	    if (ztot)
 		{
-		ztot = (dStrands - zsav)*1000*dFactor;
-		if (*iteration < threshold)
-		    *iteration = (int)((double)*iteration + ztot)/2;
-//		    iteration = (int)ztot;
-		else
-//		    iteration += (int)((double)iteration + ztot)/2;	// orig???
-		    *iteration -= (int)((double)*iteration + ztot)/2;
+		rj = gj = bj = ztot * dFactor * 2.0;
 		}
-	    if (*iteration > threshold)
-		*iteration = threshold;
-	    if (*iteration < 0)
-		*iteration = 0;
+	    else
+		{
+		j = 0;
+		rj = gj = bj = 0;
+		}
+
+	    if (xtot || ytot)
+		{
+		d = (int)sqrt(xtot * xtot + ytot * ytot);
+		gj = d + xtot * dFactor;
+		bj = d + ytot * dFactor;
+		}
+
 	    break;
 
 	case 10:   // Rings I
@@ -1401,7 +1751,10 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 	    if (iteration_x || iteration_y)
 		j = *iteration;
 	    else
-		j = 0;
+		{
+		j = *iteration = 0;
+		rj = gj = bj = 0;
+		}
 
 	    break;
 
@@ -1410,14 +1763,20 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 	    if (iteration_z)
 		j = *iteration;
 	    else
-		j = 0;
+		{
+		j = *iteration = 0;
+		rj = gj = bj = 0;
+		}
 	    break;
 
 	case 37:
 	    if (iteration_z)
 		j = *iteration;
 	    else
-		j = 0;
+		{
+		j = *iteration = 0;
+		rj = gj = bj = 0;
+		}
 	    break;
 
 	case 38:
@@ -1469,7 +1828,10 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 	    if (iteration_z)
 		j = *iteration;
 	    else
-		j = 0;
+		{
+		j = *iteration = 0;
+		rj = gj = bj = 0;
+		}
 	    break;
 
 	case 50:
@@ -1504,7 +1866,10 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 		bj = d;
 		}
 	    else
-		j = 0;
+		{
+		j = *iteration = 0;
+		rj = gj = bj = 0;
+		}
 
 	    if (iteration_z)
 		{
@@ -1513,6 +1878,8 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 		gj += ztot;
 		bj += ztot;
 		}
+
+	    std::swap(rj, bj);
 	    break;
 
 	case 52:
@@ -1589,8 +1956,236 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 		    }
 		}
 	    else
+		{
 		j = 0;
+		rj = gj = bj = 0;
+		}
 
+	    std::swap(rj, bj);
+	    break;
+
+    	case 53:    // Flarium 07, i+=(int)(sin(fabs(dzx_save)*fabs(dzy_save))*10)
+	    {
+	    j += (int)(sin(fabs(xsav) * fabs(ysav)) * 10.0);
+	    rj += sin(fabs(xsav) * fabs(ysav)) * 10.0;
+
+	    gj += sin(fabs(xsav)) * 10.0;
+	    bj += sin(fabs(ysav)) * 10.0;
+	    }
+	    break;
+	case 54:    // Flarium 08, i+=(int)(sin(fabs(dzx_save)/fabs(dzy_save))*10)
+	    {
+	    double ratio = fabs(xsav) / fabs(ysav);
+
+	    j += (int)(sin(ratio) * 10.0);
+	    rj += sin(ratio) * 10.0;
+
+	    gj += cos(ratio) * 10.0;
+	    bj += acos(ratio) * 10.0;
+	    }
+	    break;
+
+	case 55:    // Flarium 13, i=(int)((fabs(atan(z.real()/z.imag()))+fabs(atan(dzx_save/dzy_save)))*100)",
+	    {
+	    double a = fabs(atan(z.x / z.y));
+	    double b = fabs(atan(xsav / ysav));
+
+	    j = (int)((a + b) * 100.0);
+	    rj = (a + b) * 100.0;
+
+	    gj = fabs(a * a) * 500.0 * dFactor_2;
+	    bj = fabs(b * b) * 500.0 * dFactor_2;
+	    }
+	    break;
+
+	case 56:    // Flarium 16, Delta Slope, On Change;, ...J+=FF; plus atan method
+	    {
+	    j += jrw;
+	    j = abs(j);
+
+	    rj += jrw;
+	    rj = fabs(rj);
+
+	    double dzxLocal = fabs(atan(z.x / z.y));
+	    double dzyLocal = fabs(atan(xsav / ysav));
+
+	    j += (int)((dzxLocal + dzyLocal) * 100.0);
+
+	    rj += (dzxLocal + dzyLocal) * 100.0;
+	    gj += fabs(dzxLocal) * 200.0;
+	    bj += fabs(dzyLocal) * 200.0;
+	    }
+	    break;
+
+	case 57:    // Flarium 17, Delta Slope, On Change;, ...J+=FF
+	    j += jrw;
+	    j = abs(j);
+
+	    rj += jrw;
+	    rj = fabs(rj);
+
+	    gj = bj = rj;
+	    break;
+
+	case 58:    // Flarium 18, Delta Slope, No Change;, ...J+=FF
+	    j += jrw;
+	    j = abs(j);
+
+	    rj += jrw;
+	    rj = fabs(rj);
+
+	    gj = bj = rj;
+	    break;
+
+	case 59:    // Flarium 30, (atan(fabs(x_rmax * x_rmin)/fabs(y_rmax * y_rmin)) * 40)
+	    {
+	    double denom = fabs(y_rmax * y_rmin);
+
+	    if (denom != 0.0)
+		{
+		double value =
+		    atan(fabs(x_rmax * x_rmin) / denom) * 40.0;
+
+		j += (int)value;
+		rj += value;
+		}
+
+	    gj = bj = rj;
+	    }
+	    break;
+
+	case 60:    // Flarium 31, if (fabs(dzx) <= dStrands || fabs(dzy) <= dStrands) rr=ri
+	    if (j >= threshold - 1)
+		j += i3;
+	    else
+		j += (int)rr;
+
+	    if (rj >= threshold - 1)
+		rj += i3;
+	    else
+		rj += rr;
+
+	    gj = bj = rj;
+	    break;
+
+	case 61:    // Flarium 32, if (dzx*dzx+dzy*dzy < limit) rr+=3
+	    j += i3;
+	    rj += i3;
+	    gj = bj = rj;
+	    break;
+
+	case 62:    // Flarium 33, Combination Filters 1,2, && 3
+	    if (rr != 0.0 && i3 != 0)
+		{
+		j += (int)(fabs(ysav - xsav) + fabs(rr + i3));
+		rj += fabs(ysav - xsav) + fabs(rr + i3);
+		}
+	    else if (rr != 0.0)
+		{
+		j += (int)(fabs(ysav - xsav) + fabs(rr));
+		rj += fabs(ysav - xsav) + fabs(rr);
+		}
+	    else if (i3 != 0)
+		{
+		j += (int)fabs(ysav - xsav) + i3;
+		rj += fabs(ysav - xsav) + i3;
+		}
+	    else
+		{
+		j += (int)fabs(ysav - xsav);
+		rj += fabs(ysav - xsav);
+		}
+
+	    gj = bj = rj;
+	    break;
+
+	case 63:    // Flarium 34, if (fabs(dzx) > dStrands || fabs(dzy) > dStrands)",
+	    rr = (double)((int)rr % (threshold / 2));
+
+	    if ((int)(z.x * 2) % 2 == 0 ||
+		(int)(z.y * 2) % 2 == 0)
+		j += (int)rr;
+	    else
+		j += (int)rr + (threshold / 2);
+
+	    if ((int)(z.x * 2) % 2 == 0 ||
+		(int)(z.y * 2) % 2 == 0)
+		rj += rr;
+	    else
+		rj += rr + (threshold / 2);
+
+	    gj = bj = rj;
+	    break;
+
+	case 64:    // Flarium 35, if (fabs(dzx) > dStrands &&&& fabs(dzy) > dStrands)
+	    rr = (double)((int)rr % (threshold / 2));
+
+	    if ((int)(z.x * 2.0) % 2 == 0 ||
+		(int)(z.y * 2.0) % 2 == 0)
+		{
+		j += (int)rr;
+		rj += rr;
+		}
+	    else
+		{
+		j += (int)rr + threshold / 2;
+		rj += rr + threshold / 2;
+		}
+
+	    gj = bj = rj;
+	    break;
+
+	case 65:    // Flarium 36, if (fabs(dzx) > limit || fabs(dzy) > limit)",
+	case 66:    // Flarium 37, if (fabs(dzx) < limit || fabs(dzy) < limit)",
+	case 67:    // Flarium 38, if (fabs(1/dzx*dzy) > limit)",
+	    j += (int)rr;
+	    rj += rr;
+	    gj = bj = rj;
+	    break;
+
+	case 68:    // Flarium 39, if (fabs(dzx) > limit || fabs(dzy) > limit)
+	    {
+	    double value = atan(xsav / ysav) * 80.0;
+
+	    j += (int)value;
+	    rj += value;
+	    gj = bj = rj;
+	    }
+	    break;
+
+	case 69:    // Flarium 40, ri = rr + atan(fabs(dzx_save/dzy_save)) * 30
+	    {
+	    double value =
+		rr + atan(fabs(xsav / ysav)) * 30.0;
+
+	    j += (int)value;
+	    rj += value;
+	    gj = bj = rj;
+	    }
+	    break;
+
+	case 70:    // Flarium 41, rr+=log(dzx*dzx+dzy*dzy)*nBay100
+	case 71:    // Flarium 46, i = (int)rr; rr+=log(dzx*dzx+dzy*dzy)*(1+nBay100)
+	case 73:    // Flarium 48, if (fabs(dzx) < z.squares() || fabs(dzy) < z.squares())  rr+=nFF",
+	    j += (int)rr;
+	    rj += rr;
+	    gj = bj = rj;
+	    break;
+
+	case 72:    // Flarium 47, i = (int)(rr + atan(fabs(dzx_save/dzy_save)) * (10+nBay1000))",
+	    {
+	    double t = rr + atan(fabs(xsav / ysav)) * (10.0 + dFactor_2);
+
+	    j += (int)t;
+	    rj += t;
+	    gj = bj = rj;
+	    }
+	    break;
+
+	case 74:    // Flarium 49, rr += atan(fabs(dzy/dzx))*atan(fabs(dzx/dzy))*2",
+	    j += (int)(rr * 10.0 * dFactor);
+	    rj += rr * 10.0 * dFactor;
+	    gj = bj = rj;
 	    break;
 
 	default:
@@ -1610,6 +2205,10 @@ int	CTZfilter::EndTierazonFilter(Complex z, long *iteration, CTrueCol *TrueCol)
 	case 48:
 	case 49:
 	    FDimension(FilterType, iteration);
+	    // FDimension colours were historically produced for the
+	    // old BGR plotting convention.  FilterPoint now writes
+	    // logical RGB correctly, so restore the FD red/blue order here.
+	    std::swap(rj, bj);	    
 	    break;
 
 	default:						// Note that FilterType = method - TIERAZONFILTERS

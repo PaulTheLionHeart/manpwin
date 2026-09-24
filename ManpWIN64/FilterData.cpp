@@ -43,7 +43,7 @@ struct TierazonFilterStuff TierazonFilter[]=
 	},
 	{
 	"08.) 10*pow((1-temp/dStrands),n_color); [bubbles II]", 
-	' ', FALSE,
+	'2', TRUE,
 	},
 	{
 	"09.) 100*pow((1-d_real/dStrands),n_color); [stalks II]", 
@@ -79,7 +79,7 @@ struct TierazonFilterStuff TierazonFilter[]=
 	},
 	{
 	"17.) atan & stalks II",
-	' ', FALSE,
+	'2', TRUE,
 	},
 	{
 	"18.) atan & bubbles III",
@@ -111,7 +111,7 @@ struct TierazonFilterStuff TierazonFilter[]=
 	},
 	{
 	"25.) sine & bubbles, flower petals I modulas 2, factor 2", 
-	' ', FALSE,
+	'2', TRUE,
 	},
 	{
 	"26.) atan & bubbles VI, factor 2",
@@ -221,6 +221,103 @@ struct TierazonFilterStuff TierazonFilter[]=
 	"52.) Stalk && Bubbles II",
 	'2', TRUE,
 	},
+	{
+	"53.) Flarium 07, i+=(int)(sin(fabs(dzx_save)*fabs(dzy_save))*10)",
+	'2', TRUE,
+	},
+	{
+	"54.) Flarium 08, i+=(int)(sin(fabs(dzx_save)/fabs(dzy_save))*10)",
+	'2', TRUE,
+	},
+	{
+	"55.) Flarium 13, i=(int)((fabs(atan(z.real()/z.imag()))+fabs(atan(dzx_save/dzy_save)))*100)",
+	    '2', TRUE,
+	},
+	{
+	"56.) Flarium 16, Delta Slope, On Change;, ...J+=FF; plus atan method",
+	    '2', TRUE,
+	},
+	{
+	"57.) Flarium 17, Delta Slope, On Change;, ...J+=FF",
+	'2', TRUE,
+	},
+	{
+	"58.) Flarium 18, Delta Slope, No Change;, ...J+=FF",
+	'2', TRUE,
+	},
+	{
+	"59.) Flarium 30, (atan(fabs(x_rmax * x_rmin)/fabs(y_rmax * y_rmin)) * 40)",
+	'2', TRUE,
+	},
+	{
+	"60.) Flarium 31, if (fabs(dzx) <= dStrands || fabs(dzy) <= dStrands) rr=ri",
+	'2', TRUE,
+	},
+	{
+	"61.) Flarium 32, if (dzx*dzx+dzy*dzy < limit) rr+=3",
+	'2', TRUE,
+	},
+	{
+	"62.) Flarium 33, Combination Filters 1,2, && 3",
+	'2', TRUE,
+	},
+	{
+	"63.) Flarium 34, if (fabs(dzx) > dStrands || fabs(dzy) > dStrands)",
+	'2', TRUE,
+	},
+	{
+	"64.) Flarium 35, if (fabs(dzx) > dStrands &&&& fabs(dzy) > dStrands)",
+	'2', TRUE,
+	},
+	{
+	"65.) Flarium 36, if (fabs(dzx) > limit || fabs(dzy) > limit)",
+	'2', TRUE,
+	},
+	{
+	"66.) Flarium 37, if (fabs(dzx) < limit || fabs(dzy) < limit)",
+	'2', TRUE,
+	},
+	{
+	"67.) Flarium 38, if (fabs(1/dzx*dzy) > limit)",
+	'2', TRUE,
+	},
+	{
+	"68.) Flarium 39, if (fabs(dzx) > limit || fabs(dzy) > limit)",
+	'2', TRUE,
+	},
+	{
+	"69.) Flarium 40, ri = rr + atan(fabs(dzx_save/dzy_save)) * 30",
+	'2', TRUE,
+	},
+	{
+	"70.) Flarium 41, rr+=log(dzx*dzx+dzy*dzy)*nBay100",
+	    '2', TRUE,
+	},
+	{
+	"71.) Flarium 46, i = (int)rr; rr+=log(dzx*dzx+dzy*dzy)*(1+nBay100)",
+	'2', TRUE,
+	},
+	{
+	"72.) Flarium 47, i = (int)(rr + atan(fabs(dzx_save/dzy_save)) * (10+nBay1000))",
+	'2', TRUE,
+	},
+	{
+	"73.) Flarium 48, if (fabs(dzx) < z.squares() || fabs(dzy) < z.squares())  rr+=nFF",
+	'2', TRUE,
+	},
+	{
+	"74.) Flarium 49, rr += atan(fabs(dzy/dzx))*atan(fabs(dzx/dzy))*2",
+	'2', TRUE,
+	},
+	{
+	"75.) Flarium 69, Clouds",	// Special orbit-density Clouds filter from Flarium
+	'2', TRUE,
+	},
+
+
+
+
+
 	NULL, NULL, NULL
     };
 

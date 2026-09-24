@@ -139,6 +139,13 @@ class CManp
 	int	AnimateSuspend(void);
 	void	DebugNumParam(const char* where);
 
+	// cloud filter stuff
+	void	InitCloudDensity(int xdots, int ydots);
+	void	CloseCloudDensity();
+	int	CloudRenderMode = CLOUD_RENDER_LINEAR_PALETTE;
+	std::vector<unsigned int> CloudDensity;		// final whole-image Clouds orbit-density map
+	bool	CloudsActive = false;			// TRUE when Tierazon Clouds filter is selected
+
 	std::vector<std::unique_ptr<CPixel>> Pixel;
 	std::vector<std::unique_ptr<CPerturbation>> PertCalculator;
 	std::vector<std::unique_ptr<CSlope>> Slope;

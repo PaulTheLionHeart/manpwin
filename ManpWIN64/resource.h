@@ -216,6 +216,7 @@
 #define IDC_SPIRAL                              607
 #define IDC_FWDDIFF                             608
 #define IDC_COPY                                900
+#define IDC_COMBO1                              1000
 #define IDC_FULLSCREEN                          1000
 #define IDC_HUE4                                1000
 #define IDC_NEWTONFLOWER                        1000
@@ -291,6 +292,7 @@
 #define IDC_DIM_Y                               1008
 #define IDC_ICONS                               1008
 #define IDC_RETURN                              1008
+#define IDC_CLOUD_COLOUR			1008
 #define IDC_SHOWCENTRE                          1008
 #define IDC_THREADENDINGDELAY                   1008
 #define IDC_USEBLA                              1008
