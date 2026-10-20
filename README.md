@@ -8,15 +8,62 @@ This repository contains a fully reproducible CMake-based build system supportin
 
 ---
 
-## Version 4.05b
+## Version 4.06
 
-ManpWIN 4.05b is a colouring and rendering update focused on expanding
-TieraZon and Flarium filter support, introducing the Clouds orbit-density
-renderer, and improving filter behaviour and rendering status reporting.
+ManpWIN 4.06 is a major feature and compatibility release introducing a new
+Inverse Julia implementation, a substantially expanded fractal transformation
+system, and major improvements to Fractint PAR compatibility, rendering, and
+reliability.
 
 ---
 
-## Recent Improvements (4.05b)
+## Recent Improvements (4.06)
+
+### Inverse Julia
+
+* Added a new Inverse Julia implementation supporting powers from 2 through 20
+* Added Breadth First, Depth First, Random Walk, and Random Run generation methods
+* Added Inverse Julia animation across all supported powers
+* Added Real-Time Inverse Julia exploration for Mandelbrot and Power fractals
+* Added support for rotated source views and improved coordinate handling
+* Restores the original Mandelbrot or Power fractal after an Inverse Julia animation
+* Added progress reporting, cancellation, and safeguards against runaway calculations
+* Improved compatibility with Fractint `julia_inverse` and `miim=` parameters
+
+### Fractal Transformations
+
+* Added a dedicated Fractal Transformations system separate from ordinary Fractal Options
+* Added multiple coordinate systems and standard geometric transformations
+* Added Affine transformations with scaling, stretching, shearing, reflection, rotation, and translation
+* Added Möbius, Joukowski, and Twist transformations
+* Improved arbitrary-angle and quarter-turn rotation handling
+* Improved rotated zoom-in and zoom-out behaviour
+* Added transformation persistence in parameter files
+
+### Fractint PAR Compatibility
+
+* Greatly improved Fractint viewport interpretation
+* Added support for six-corner geometry, rotation, skew, stretched axes, and horizontal magnification
+* Improved loading of rotated and transformed Fractint views
+* Restored the historical Fractint default inside colour for imported PAR files
+* Corrected logmap and potential colouring interactions with filters and inside colours
+* Improved symmetry and block plotting for affected Fractint examples
+* Repaired a number of long-standing compatibility problems in individual PAR examples
+* Improved Inverse Julia compatibility for examples including SeaHorse and SeaShell
+
+### Fractal and Rendering Improvements
+
+* Added Magnet 1 and Magnet 2 support including finite-attractor handling
+* Added TieraZon Blob / Convergence bailout behaviour
+* Corrected Frothy Basin colouring so valid palette indices are preserved
+* Increased IFS point-generation density, restoring detail in examples such as Autumn
+* Fixed several long-standing rendering defects affecting legacy fractals
+* Improved status information and rendering progress reporting
+* Improved cancellation and loop protection for long-running calculations
+
+---
+
+## Previous Release Highlights (4.05b)
 
 ### TieraZon and Flarium Filters
 
@@ -41,27 +88,6 @@ renderer, and improving filter behaviour and rendering status reporting.
 
 * Fixed the status-bar pass display which could incorrectly report `Pass 0 of n` during multi-pass rendering
 * Added new Help documentation for TieraZon, Flarium, and Clouds filters
-
----
-
-## Previous Release Highlights (4.05a)
-
-ManpWIN 4.05a was a maintenance update focused on parameter animation,
-parameter-file persistence, and correct restoration of perturbation and
-slope rendering parameters.
-
-### Parameter Animation
-
-* Fixed parameter animation following the parameter architecture changes introduced in ManpWIN 4.05
-* Fixed Start Palette animation for perturbation and slope rendering
-* Fixed bailout parameter animation for pixel, perturbation, and slope fractals
-* Fixed preservation of the selected pre-palette colour when loading and running parameter animation scripts
-
-### Parameter and PAR File Handling
-
-* Fixed writing of `FDOptions` and `dStrands` to PAR files when used with TieraZon filters
-* Fixed restoration of perturbation and slope runtime parameters when loading PAR files and animation scripts
-* Corrected parameter handling so bailout animation parameters are kept separate from normal fractal parameters and pre-palette colour storage
 
 ---
 
@@ -113,6 +139,12 @@ ManpWIN is designed for both visual exploration and mathematical experimentation
 [![Watch Animation](Docs/images/jewels_preview.png)](Docs/videos/Jewels.webm)
 
 👉 [Download animation file (WEBM, ~5 MB)](Docs/videos/Jewels.webm)
+
+### Inverse Julia Animation
+
+[![Watch Inverse Julia Animation](Docs/images/InverseJulia_preview.png)](Docs/videos/InverseJulia.webm)
+
+👉 [Download animation file (WEBM)](Docs/videos/InverseJulia.webm)
 
 ---
 
@@ -298,6 +330,16 @@ A chronological record of major battles during the ManpWIN modernisation.
 - 🧵 Density merge reporting — added progress reporting while per-thread Clouds density maps are combined
 - 📊 Pass display repair — fixed the long-standing `Pass 0 of n` status display
 - 📚 Clouds documentation — added dedicated TieraZon, Flarium, and Clouds Help documentation
+- 🐉 Inverse Julia dragon — built a new Inverse Julia engine from scratch and extended it from quadratic-only behaviour to powers 2–20
+- 🌳 Inverse tree tamed — added Breadth First, Depth First, Random Walk, and Random Run generation methods
+- 🎞 Inverse Julia motion — added higher-power animation and Real-Time Inverse Julia exploration
+- 🧭 Transformation workshop — introduced Affine, Möbius, Joukowski, Twist, coordinate-system transforms, and corrected rotated zoom behaviour
+- 🗺 Fractint cartography — reconstructed six-corner geometry, rotation, skew, stretched axes, and horizontal magnification from legacy PAR files
+- 🐸 Evil Frog palette rescue — traced colour through multiple clamping paths and restored the missing palette range
+- 🌳 Autumn regrown — restored missing IFS foliage by increasing point-generation density
+- 🧮 Newton finally cornered — resolved a long-standing Fractint compatibility problem
+- 🐚 SeaHorse and SeaShell expedition — greatly improved six-corner Inverse Julia compatibility
+- 🎨 Inside colour archaeology — verified the original DOS Fractint source and restored its historical default inside colour
 
 ---
 
@@ -309,10 +351,6 @@ A chronological record of major battles during the ManpWIN modernisation.
 - Prefer incremental commits
 
 ---
-
-## 🏆 Milestone
-
-First stable reproducible CMake build achieved.
 
 ## 🔁 Reproducibility
 
