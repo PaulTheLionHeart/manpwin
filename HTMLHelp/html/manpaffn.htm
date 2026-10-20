@@ -103,6 +103,13 @@ coordinates without treating them as six unrelated numbers.
 
 <hr>
 
+<p>
+Affine parameters transform the coordinates supplied to the fractal calculation
+rather than directly transforming the displayed pixels. As a result, the apparent
+movement, scaling, or distortion of the rendered fractal may be opposite to what
+the coefficient values seem to suggest.
+</p>
+
 <h2>The Identity Transformation</h2>
 
 <p>
@@ -203,6 +210,11 @@ y' = y
 The transformed x coordinate is therefore twice its original value.
 </p>
 
+<p>
+Because the transformed coordinate is sampled by the fractal calculation,
+this makes the rendered image appear approximately half as wide.
+</p>
+
 <h3>Scale x by 0.5</h3>
 
 <pre>
@@ -212,6 +224,10 @@ The transformed x coordinate is therefore twice its original value.
 
 <p>
 The transformed x coordinate is reduced to half its original value.
+</p>
+
+<p>
+This makes the rendered image appear approximately twice as wide.
 </p>
 
 <hr>
@@ -229,12 +245,20 @@ Vertical scaling is controlled primarily by <b>d</b>.
 0    2    0
 </pre>
 
+<p>
+This makes the rendered image appear approximately half as tall.
+</p>
+
 <h3>Scale y by 0.5</h3>
 
 <pre>
 1    0      0
 0    0.5    0
 </pre>
+
+<p>
+This makes the rendered image appear approximately twice as tall.
+</p>
 
 <p>
 Horizontal and vertical scaling may be different. This allows the coordinate
@@ -258,7 +282,8 @@ the same value.
 </pre>
 
 <p>
-Both x and y are multiplied by 1.5.
+Both x and y are multiplied by 1.5. The rendered image therefore appears 
+approximately two-thirds of its original width and height.
 </p>
 
 <hr>
