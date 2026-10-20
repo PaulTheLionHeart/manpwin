@@ -46,7 +46,7 @@ int	CPixel::QDRunManDerFunctions(int subtype, QDComplex *z, QDComplex *q)
 		sqr,
 		real_imag,
 		BailoutTestType,
-		rqlimQD);
+		rqlimQD, &QDOldZ);
 
     return 0;
     }

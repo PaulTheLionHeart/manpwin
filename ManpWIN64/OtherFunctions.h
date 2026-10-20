@@ -11,6 +11,7 @@
 #include <string.h>
 #include <time.h>
 #include <sys/timeb.h>
+#include <deque>
 #include "complex.h"
 #include "Fractype.h"
 #include "ManpWin.h"
@@ -44,6 +45,22 @@
 
 // stuff for Apollonius Fractal
 #define SQRT3    1.732050807568877193
+
+// stuff for Inverse Julia
+#define MAXINVERSEJULIAPOWER 20
+enum InverseJuliaMajorMethod
+    {
+    IJ_BREADTH_FIRST = 0,
+    IJ_DEPTH_FIRST = 1,
+    IJ_RANDOM_WALK = 2,
+    IJ_RANDOM_RUN = 3
+    };
+
+enum InverseJuliaMinorMethod
+    {
+    IJ_LEFT_FIRST = 0,
+    IJ_RIGHT_FIRST = 1
+    };
 
 //////////////////////////////////////////////////////////////////////
 // Class definition
@@ -231,7 +248,7 @@ class COtherFunctions
 	int	CircleSize;
 
 	// stuff for Apollonian Circles
-	int	DoApolloniusIFS();
+//	int	DoApolloniusIFS();
 
 	// stuff for geometry
 	int	DoGeometry();
@@ -248,6 +265,23 @@ class COtherFunctions
 	int	DoHailstone(int xdots, int ydots);
 	void	RenderHailstoneStatistics(HWND hwndIn, class CHailstone& hailstone, int xdots, int ydots);
 	void	RenderPointLabels(HWND hwndIn, class CHailstone& hailstone, double centerX, double centerY, float pixelsPerUnitX, float pixelsPerUnitY, int screenWidth, int screenHeight);
+
+	// stuff for Inverse Julia
+	int	InitInverseJulia();
+	int	InverseJuliaOrbit();
+
+	Complex InverseJuliaCurrent = 0.0;
+	int	InverseJuliaMaxHits = 4;
+	Complex InverseJuliaC;
+	Complex InverseJuliaPoint;
+	int	InverseJuliaRunLength = 1024;
+	int	InverseJuliaPower = 2;
+
+	std::deque<Complex> InverseJuliaQueue;
+
+	InverseJuliaMajorMethod InverseJuliaMajor = IJ_BREADTH_FIRST;
+	InverseJuliaMinorMethod InverseJuliaMinor = IJ_LEFT_FIRST;
+	struct affine InverseJuliaScreen;
 
     };
 

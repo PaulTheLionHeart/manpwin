@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Affine Transformations</title>
+
+<style>
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    max-width: 1000px;
+    margin: 20px;
+}
+
+h1 { color: #ffd700; }
+h2 { color: #4fd1ff; }
+h3 { color: #88ff66; }
+
+code, pre {
+    background-color: #111;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+table {
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+td, th {
+    padding: 6px 16px 6px 0;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    color: #ffffff;
+}
+
+a {
+    color: #66ccff;
+    text-decoration: underline;
+}
+
+footer {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #888888;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Affine Transformations</h1>
+
+<p>
+Affine transformations are ManpWIN's most flexible fractal transformations,
+providing precise control over scaling, stretching, shearing, reflection,
+rotation and translation.
+</p>
+
+<h2>Overview</h2>
+
+<p>
+Affine transformations provide precise geometric control over the coordinates
+used to calculate a fractal. They can be used for scaling, stretching,
+compression, shearing, reflection, rotation, translation, and combinations
+of these operations.
+</p>
+
+<p>
+Press <b>Ctrl+X</b> to open the Fractal Transformations dialog, select
+<b>Affine</b>, then press <b>Parameters...</b>.
+</p>
+
+<p>
+Affine transformations use six values: <b>a, b, c, d, e</b> and <b>f</b>.
+The parameter dialog arranges them in the same form as the transformation:
+</p>
+
+<pre>
+a    b    e
+c    d    f
+</pre>
+
+<p>
+The corresponding equations are:
+</p>
+
+<pre>
+x' = a*x + b*y + e
+y' = c*x + d*y + f
+</pre>
+
+<p>
+This layout makes it possible to see how the six parameters affect the
+coordinates without treating them as six unrelated numbers.
+</p>
+
+<hr>
+
+<h2>The Identity Transformation</h2>
+
+<p>
+The default Affine transformation is:
+</p>
+
+<pre>
+1    0    0
+0    1    0
+</pre>
+
+<p>
+This leaves the coordinates unchanged:
+</p>
+
+<pre>
+x' = x
+y' = y
+</pre>
+
+<p>
+When experimenting with Affine transformations, this is a useful starting
+point. Change one or two values at a time and observe the result.
+</p>
+
+<hr>
+
+<h2>What the Parameters Do</h2>
+
+<table>
+<tr>
+<th>Parameter</th>
+<th>Main Effect</th>
+</tr>
+
+<tr>
+<td><b>a</b></td>
+<td>Horizontal scaling contribution from x</td>
+</tr>
+
+<tr>
+<td><b>b</b></td>
+<td>Horizontal shear contribution from y</td>
+</tr>
+
+<tr>
+<td><b>c</b></td>
+<td>Vertical shear contribution from x</td>
+</tr>
+
+<tr>
+<td><b>d</b></td>
+<td>Vertical scaling contribution from y</td>
+</tr>
+
+<tr>
+<td><b>e</b></td>
+<td>Horizontal translation of the transformed coordinate</td>
+</tr>
+
+<tr>
+<td><b>f</b></td>
+<td>Vertical translation of the transformed coordinate</td>
+</tr>
+</table>
+
+<p>
+The parameters may also be combined. For example, the same transformation
+can simultaneously scale, shear, rotate and translate the coordinates.
+</p>
+
+<hr>
+
+<h2>Horizontal Scaling</h2>
+
+<p>
+To change the horizontal coordinate scale, change <b>a</b> while leaving
+the other principal values unchanged.
+</p>
+
+<h3>Scale x by 2</h3>
+
+<pre>
+2    0    0
+0    1    0
+</pre>
+
+<p>
+This produces:
+</p>
+
+<pre>
+x' = 2*x
+y' = y
+</pre>
+
+<p>
+The transformed x coordinate is therefore twice its original value.
+</p>
+
+<h3>Scale x by 0.5</h3>
+
+<pre>
+0.5    0    0
+0      1    0
+</pre>
+
+<p>
+The transformed x coordinate is reduced to half its original value.
+</p>
+
+<hr>
+
+<h2>Vertical Scaling</h2>
+
+<p>
+Vertical scaling is controlled primarily by <b>d</b>.
+</p>
+
+<h3>Scale y by 2</h3>
+
+<pre>
+1    0    0
+0    2    0
+</pre>
+
+<h3>Scale y by 0.5</h3>
+
+<pre>
+1    0      0
+0    0.5    0
+</pre>
+
+<p>
+Horizontal and vertical scaling may be different. This allows the coordinate
+system to be stretched or compressed independently in either direction.
+</p>
+
+<hr>
+
+<h2>Uniform Scaling</h2>
+
+<p>
+To scale both coordinates by the same amount, give <b>a</b> and <b>d</b>
+the same value.
+</p>
+
+<h3>Scale both coordinates by 1.5</h3>
+
+<pre>
+1.5    0      0
+0      1.5    0
+</pre>
+
+<p>
+Both x and y are multiplied by 1.5.
+</p>
+
+<hr>
+
+<h2>Horizontal Shear</h2>
+
+<p>
+A horizontal shear is produced by changing <b>b</b>:
+</p>
+
+<pre>
+x' = x + b*y
+y' = y
+</pre>
+
+<p>
+The approximate shear angle is:
+</p>
+
+<pre>
+angle = atan(b)
+</pre>
+
+<p>
+Some useful values are:
+</p>
+
+<table>
+<tr>
+<th>Shear Angle</th>
+<th>b</th>
+</tr>
+<tr>
+<td>15&deg;</td>
+<td>0.268</td>
+</tr>
+<tr>
+<td>30&deg;</td>
+<td>0.577</td>
+</tr>
+<tr>
+<td>45&deg;</td>
+<td>1.000</td>
+</tr>
+</table>
+
+<h3>Approximately 30&deg; horizontal shear</h3>
+
+<pre>
+1    0.577    0
+0    1        0
+</pre>
+
+<p>
+This means that the x coordinate is progressively displaced according to
+the value of y.
+</p>
+
+<hr>
+
+<h2>Vertical Shear</h2>
+
+<p>
+A vertical shear is produced by changing <b>c</b>:
+</p>
+
+<pre>
+x' = x
+y' = c*x + y
+</pre>
+
+<p>
+The same angle relationship applies:
+</p>
+
+<pre>
+angle = atan(c)
+</pre>
+
+<h3>Approximately 30&deg; vertical shear</h3>
+
+<pre>
+1        0    0
+0.577    1    0
+</pre>
+
+<p>
+The y coordinate is progressively displaced according to the value of x.
+</p>
+
+<hr>
+
+<h2>Rotation</h2>
+
+<p>
+Affine transformation can also rotate coordinates. For a rotation by an
+angle &theta; around the origin:
+</p>
+
+<pre>
+a =  cos(theta)
+b = -sin(theta)
+c =  sin(theta)
+d =  cos(theta)
+</pre>
+
+<h3>30&deg; Rotation</h3>
+
+<pre>
+ 0.866025    -0.500000    0
+ 0.500000     0.866025    0
+</pre>
+
+<h3>45&deg; Rotation</h3>
+
+<pre>
+ 0.707107    -0.707107    0
+ 0.707107     0.707107    0
+</pre>
+
+<h3>90&deg; Rotation</h3>
+
+<pre>
+0    -1    0
+1     0    0
+</pre>
+
+<p>
+These examples rotate about the coordinate origin (0,0).
+</p>
+
+<p>
+For ordinary view rotation around the centre of the current image, use the
+rotation controls in the main Fractal Transformations dialog rather than
+constructing an Affine rotation manually.
+</p>
+
+<hr>
+
+<h2>Rotation Around Another Point</h2>
+
+<p>
+Affine rotation may also be performed around a selected point
+(<i>cx</i>, <i>cy</i>). First calculate the rotation coefficients:
+</p>
+
+<pre>
+a =  cos(theta)
+b = -sin(theta)
+c =  sin(theta)
+d =  cos(theta)
+</pre>
+
+<p>
+Then calculate:
+</p>
+
+<pre>
+e = cx - a*cx - b*cy
+f = cy - c*cx - d*cy
+</pre>
+
+<p>
+The point (<i>cx</i>, <i>cy</i>) then remains fixed while the surrounding
+coordinates rotate around it.
+</p>
+
+<hr>
+
+<h2>Reflection</h2>
+
+<p>
+Negative scaling values can be used to reflect coordinates.
+</p>
+
+<h3>Reflect x</h3>
+
+<pre>
+-1    0    0
+ 0    1    0
+</pre>
+
+<p>
+This changes x to -x while leaving y unchanged.
+</p>
+
+<h3>Reflect y</h3>
+
+<pre>
+1     0    0
+0    -1    0
+</pre>
+
+<p>
+This changes y to -y while leaving x unchanged.
+</p>
+
+<h3>Reflect both coordinates</h3>
+
+<pre>
+-1     0    0
+ 0    -1    0
+</pre>
+
+<p>
+This is equivalent to a 180&deg; rotation about the origin.
+</p>
+
+<hr>
+
+<h2>Translation</h2>
+
+<p>
+The <b>e</b> and <b>f</b> parameters add fixed amounts to the transformed
+coordinates.
+</p>
+
+<h3>Add 0.5 to x</h3>
+
+<pre>
+1    0    0.5
+0    1    0
+</pre>
+
+<h3>Add 0.25 to y</h3>
+
+<pre>
+1    0    0
+0    1    0.25
+</pre>
+
+<h3>Add 0.5 to x and 0.25 to y</h3>
+
+<pre>
+1    0    0.5
+0    1    0.25
+</pre>
+
+<p>
+These values alter the coordinates supplied to the fractal calculation.
+The apparent movement of the rendered fractal may therefore be opposite to
+the direction suggested by the sign of the translation.
+</p>
+
+<hr>
+
+<h2>Combining Transformations</h2>
+
+<p>
+The real power of Affine transformation comes from combining several effects
+in the same six parameters.
+</p>
+
+<p>
+For example:
+</p>
+
+<pre>
+1.5    0.577    0
+0      1        0
+</pre>
+
+<p>
+combines a 1.5 times horizontal coordinate scale with an approximately
+30&deg; horizontal shear.
+</p>
+
+<p>
+Similarly:
+</p>
+
+<pre>
+0.707107    -0.707107    0.5
+0.707107     0.707107    0.25
+</pre>
+
+<p>
+combines a 45&deg; rotation about the origin with translation of the transformed
+coordinates.
+</p>
+
+<hr>
+
+<h2>Invertibility</h2>
+
+<p>
+An Affine transformation can be reversed provided that:
+</p>
+
+<pre>
+a*d - b*c != 0
+</pre>
+
+<p>
+The quantity <code>a*d - b*c</code> is the determinant of the transformation.
+If it is zero, the transformation collapses the two-dimensional coordinate
+plane onto a line or point and cannot be uniquely reversed.
+</p>
+
+<p>
+For normal exploration, avoid parameter combinations that produce a zero
+determinant.
+</p>
+
+<hr>
+
+<h2>Practical Tips</h2>
+
+<ul>
+<li>Begin with the identity values: <code>1 0 0 / 0 1 0</code>.</li>
+<li>Change one value at a time while learning what the parameters do.</li>
+<li>Use small shear values initially; even values below 1 can produce strong effects.</li>
+<li>Remember that 0.577 corresponds to approximately 30&deg; shear.</li>
+<li>Use equal values for a and d when uniform coordinate scaling is required.</li>
+<li>Use the main rotation controls when ordinary view rotation is all that is needed.</li>
+<li>More complex effects can be built by combining scaling, shear, rotation and translation.</li>
+</ul>
+
+<hr>
+
+<h2>Related Topics</h2>
+
+<ul>
+<li><a href="manptran.htm">Fractal Transformations</a></li>
+<li><a href="manp7yr4.htm">Keyboard Commands</a></li>
+</ul>
+
+<hr>
+
+<footer>
+ManpWIN Help &copy; October 2026
+</footer>
+
+</body>
+</html>

@@ -1,8 +1,9 @@
-//////////////////////////////////////////////////////////////////////
-//
-// DDTrigFn.cpp: Function list. Double-double version
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    DDTrigFn.cpp - Function list. Double-double version
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #pragma once
 
 #include <Windows.h>

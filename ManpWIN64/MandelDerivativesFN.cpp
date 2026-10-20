@@ -37,6 +37,6 @@ int	CPixel::RunManDerFunctions(int subtype, Complex *z, Complex *q, BYTE *Specia
 		sqr,
 		real_imag,
 		BailoutTestType,
-		rqlim);
+		rqlim, &OldZ);
     return 0;
     }

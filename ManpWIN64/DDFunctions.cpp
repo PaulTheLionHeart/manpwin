@@ -306,7 +306,7 @@ int	CPixel::DDRunFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	case CUBIC:					// Art Matrix Cubic
 	    return FunctionsDispatch<DDComplex, dd_real, WORD>(this, type, z, q, degree, sqrDD, realimagDD,
-		aDD, a2DD, aa3DD, bDD, vDD, tempDD, param, SpecialFlag, iteration, SPECIALINDEX, subtype, BailoutTestType, rqlim);
+		aDD, a2DD, aa3DD, bDD, vDD, tempDD, param, SpecialFlag, iteration, SPECIALINDEX, subtype, BailoutTestType, rqlim, &DDOldZ);
 
 	case SPECIALNEWT:				// Art Matrix Newton
 	    return Iter_SPECIALNEWT<DDComplex>(z, q, aDD, bDD, lm5DD, lp5DD, vDD, param, phaseflag, special);
@@ -317,7 +317,7 @@ int	CPixel::DDRunFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
     sin(x+iy)  = sin(x)cosh(y) + icos(x)sinh(y)
 ***************************************************************************/
 	case SINFRACTAL:				// Sine
-	    return Iter_SINFRACTAL<DDComplex>(this, z, q, param, BailoutTestType, rqlim);
+	    return Iter_SINFRACTAL<DDComplex>(this, z, q, param, BailoutTestType, rqlim, &DDOldZ);
 
 	case MATEIN:					// Art Matriuc Matein fractal
 	    return Iter_MATEIN<DDComplex>(z, q, ozDD, tempDD, distance, absolute, param, epsilon, escape, phaseflag);
@@ -326,13 +326,13 @@ int	CPixel::DDRunFunctions(WORD type, DDComplex *z, DDComplex *q, BYTE *SpecialF
 	    return Iter_EXP_FRACTAL<DDComplex>(z, q, param, degree, subtype, rqlim);
 
 	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
-	    return Iter_REDSHIFTRIDER<DDComplex, double>(this, z, q, aDD, param, degree, BailoutTestType, rqlim);
+	    return Iter_REDSHIFTRIDER<DDComplex, double>(this, z, q, aDD, param, degree, BailoutTestType, rqlim, &DDOldZ);
 
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
-	    return Iter_TALIS<DDComplex>(this, z, q, aDD, param, degree, BailoutTestType, rqlim);
+	    return Iter_TALIS<DDComplex>(this, z, q, aDD, param, degree, BailoutTestType, rqlim, &DDOldZ);
 
 	case POLYNOMIAL:				// Polynomial
-	    return Iter_POLYNOMIAL<DDComplex>(this, z, q, param, BailoutTestType, rqlim);
+	    return Iter_POLYNOMIAL<DDComplex>(this, z, q, param, BailoutTestType, rqlim, &DDOldZ);
 
 	case RATIONALMAP:				// Art Matrix Rational Map
 	    return Iter_RATIONALMAP<DDComplex, dd_real>(this, z, q, aDD, bDD, param, derDD, escapeDD, epsilonDD,

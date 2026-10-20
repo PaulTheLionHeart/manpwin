@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Fractal Options</title>
+<title>Setup Options Menu</title>
 
 <style>
 body {
@@ -20,9 +20,8 @@ h1 {
     font-size: 32px;
 }
 
-h2 {
-    color: ##4fd1ff;
-    margin-top: 20px;
+h2 { 
+    color: #4fd1ff; 
 }
 
 h3 {
@@ -71,17 +70,14 @@ footer {
 <p>This menu provides controls for rendering, display, and configuration.</p>
 <p><i>Keyboard shortcuts are shown in brackets.</i></p>
 
-
 <h3>3D Plot (3)</h3>
 <p>Displays the current fractal in three dimensions.</p>
-
 
 <h3>Julia Fractal (Space)</h3>
 <p>
 Generates the Julia set using the seed value at the centre of the current fractal.
 Not all fractals support a Julia interpretation.
 </p>
-
 
 <h3>Real Time Julia (Ctrl+Space)</h3>
 <p>
@@ -90,10 +86,14 @@ the Mandelbrot set. Selecting this option generates a full-screen Julia image at
 current cursor location.
 </p>
 
-
+<h3>Real Time Inverse Julia (0)</h3>
+<p>
+Toggles Real-Time Inverse Julia on or off. The Inverse Julia image follows
+the mouse cursor as it moves across the source Mandelbrot or Power fractal.
+This feature is available only for Mandelbrot and Power fractals.
+</p>
 <h3>Set Real Time Julia Thumbnail Size (Shift+Space)</h3>
 <p>Adjusts the size of the real-time Julia preview window.</p>
-
 
 <h3>Random Dot Stereogram (R)</h3>
 <p>
@@ -101,12 +101,10 @@ Creates a stereogram image that produces a 3D effect when viewed using relaxed o
 cross-eyed viewing techniques.
 </p>
 
-
 <h3>Toggle Random Dot Stereogram Guide Spots (Shift+R)</h3>
 <p>
 Toggles guide markers to assist in viewing stereograms.
 </p>
-
 
 <h3>Stereo Pairs (Z)</h3>
 <p>
@@ -114,28 +112,23 @@ Displays two side-by-side images that can be combined by the viewer to produce a
 stereoscopic 3D effect.
 </p>
 
-
 <h3>Add Images (Y)</h3>
 <p>
 Adds overlay images such as spirals or guides to the current fractal.
 </p>
-
 
 <h3>Zoom Along Edge (E)</h3>
 <p>
 Controls zoom behaviour. When enabled, the zoom box follows the cursor edge.
 </p>
 
-
 <h3>Change Image Size (Shift+Z)</h3>
 <p>
 Allows the fractal image size to be set to a custom resolution.
 </p>
 
-
 <h3>Start</h3>
 <p>Begins or restarts the image calculation.</p>
-
 
 <h3>Setup Folder Paths</h3>
 <p>
@@ -144,42 +137,50 @@ directories or the default user data area, helping to avoid issues with Windows
 User Account Control (UAC).
 </p>
 
-
 <h3>Use Default (Fractint) Palette (Ctrl+P)</h3>
 <p>
 Switches to the default Fractint colour palette.
 </p>
-
 
 <h3>Display Location (B)</h3>
 <p>
 Displays the current cursor position in the complex plane within the caption bar.
 </p>
 
-
 <h3>Generate Statistics File for MPEG Generation</h3>
 <p>
 Creates a statistics file used for generating MPEG animations.
 </p>
-
 
 <h3>Setup Multi-threading for Perturbation and Slope (Ctrl+M)</h3>
 <p>
 Configures the number of threads used for advanced rendering modes.
 </p>
 
-
 <h3>Setup Stereo Pair (Shift+D)</h3>
 <p>
 Adjusts stereo image size and depth for comfortable viewing.
 </p>
-
 
 <h3>Toggle Display Palette (Shift+T)</h3>
 <p>
 Shows or hides the current colour palette display.
 </p>
 
+<h3>Hailstone Toggle Axes (Ctrl+H)</h3>
+<p>
+Shows or hides the axes in the display.
+</p>
+
+<h3>Hailstone Toggle Labels (Ctrl+L)</h3>
+<p>
+Shows or hides the labels in the display.
+</p>
+
+<h3>Hailstone Toggle Dots (Ctrl+G)</h3>
+<p>
+Shows or hides the dots in the display.
+</p>
 
 <hr>
 
@@ -190,7 +191,7 @@ depending on the rendering mode (standard, perturbation, or slope).
 
 <hr>
 <footer>
-    ManpWIN Help &copy; March 2026
+    ManpWIN Help &copy; October 2026
 </footer>
 
 </body>

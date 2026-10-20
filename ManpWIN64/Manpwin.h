@@ -61,7 +61,6 @@
 #define ATAN		15
 #define PERT1		16
 #define PERT2		17
-#define POTENTIAL	18
 #define EPSCROSS	90
 #define STARTRAIL	91
 #define PERIOD		92
@@ -199,12 +198,192 @@ struct workliststuff		// work list entry for std escape time engines
 #define	CLOSINGTHREADS	5
 #define MERGINGCLOUDDENSITY 6
 
+// affine structure used by Lorenz (as opposed to affine transformation - see below)
+struct affine	// legacy Lorenz/Fractint screen conversion
+    {
+    // weird order so a,b,e and c,d,f are vectors
+    double a;
+    double b;
+    double e;
+    double c;
+    double d;
+    double f;
+    };
+
+
 struct FNCT_LIST
     {
     char *s;
     void(**ptr)(void);
     };
 
-enum	ProcessType { STANDARD, INITANIM, RUNANIM, EVOLUTION, MORPHING };
+enum	ProcessType	{ STANDARD, INITANIM, RUNANIM, EVOLUTION, MORPHING };
 enum	AxisDisplayType { OFF, DISPLAYALL, DISPLAYSINGLE };
+
+// lots of transformation parameters
+enum TRANSFORMTYPE
+    {
+    TRANSFORM_NONE = 0,
+
+    // Standard transformations
+    TRANSFORM_INVERSION,
+    TRANSFORM_COMPLEX_LOG,
+    TRANSFORM_FOLD_X,
+    TRANSFORM_FOLD_Y,
+    TRANSFORM_FOLD_XY,
+    TRANSFORM_FOLD_DIAGONAL,
+    TRANSFORM_FOLD_DIAGONALS,
+    TRANSFORM_RADIAL_BULGE,
+    TRANSFORM_RADIAL_PINCH,
+    TRANSFORM_CIRCLE_FOLD,
+    TRANSFORM_RADIAL_CLAMP,
+    TRANSFORM_RADIAL_COMPRESS,
+    TRANSFORM_COMPLEX_EXP,          // 13
+    TRANSFORM_COMPLEX_SIN,          // 14
+
+    // Special transformations
+    TRANSFORM_AFFINE,               // 15
+    TRANSFORM_MOBIUS,               // 16
+    TRANSFORM_JOUKOWSKI,            // 17
+    TRANSFORM_TWIST,                // 18
+
+    // 19 reserved for future named transformation
+
+    TRANSFORM_POWER_BASE = 20
+    };
+
+const int FIRST_TRANSFORM_POWER = 2;
+
+/**************************************************************************
+    Transformation PAR file errors
+**************************************************************************/
+
+enum TRANSFORMPARERROR
+    {
+    TRANSFORMPAR_OK = 0,
+    TRANSFORMPAR_NO_TYPE = -1,
+    TRANSFORMPAR_NORMAL = -2,
+    TRANSFORMPAR_AFFINE = -3,
+    TRANSFORMPAR_MOBIUS = -4,
+    TRANSFORMPAR_JOUKOWSKI = -5,
+    TRANSFORMPAR_TWIST = -6
+    };
+
+enum TRANSFORMDLGMODE
+    {
+    TRANSFORMDLG_NORMAL = 0,
+    TRANSFORMDLG_ANIMATION,
+    };
+
+/**************************************************************************
+    Affine transformation parameters
+    Initialised with identity coefficients
+**************************************************************************/
+
+struct AffineTransformParams	// generic six-coefficient double affine transform
+    {
+    double a = 1.0;
+    double b = 0.0;
+    double e = 0.0;
+    double c = 0.0;
+    double d = 1.0;
+    double f = 0.0;
+    };
+
+/**************************************************************************
+    View affine transformation parameters
+
+    Used for view geometry such as arbitrary rotation, skew and
+    magnification.  These parameters are not part of the user-selected
+    fractal transformation and are not edited by the affine transform
+    dialogue.
+**************************************************************************/
+
+template<typename TReal>
+struct ViewAffineParamsT    // ManpWIN view geometry, templated for double/DD/QD/Big
+    {
+    TReal a = 1.0;
+    TReal b = 0.0;
+    TReal e = 0.0;
+    TReal c = 0.0;
+    TReal d = 1.0;
+    TReal f = 0.0;
+    };
+
+/**************************************************************************
+    Mobius transformation parameters
+    Initialised with identity coefficients
+**************************************************************************/
+
+struct MobiusTransformParams
+    {
+    double aReal = 1.0;
+    double aImag = 0.0;
+
+    double bReal = 0.0;
+    double bImag = 0.0;
+
+    double cReal = 0.0;
+    double cImag = 0.0;
+
+    double dReal = 1.0;
+    double dImag = 0.0;
+    };
+
+/**************************************************************************
+    Joukowski transformation parameters
+**************************************************************************/
+
+struct JoukowskiTransformParams
+    {
+    double kReal = 1.0;
+    double kImag = 0.0;
+    };
+
+/**************************************************************************
+    Twist transformation parameters
+**************************************************************************/
+
+struct TwistTransformParams
+    {
+    double Strength = 1.0;
+    double Radius = 1.0;
+    double CentreX = 0.0;
+    double CentreY = 0.0;
+    };
+
+/**************************************************************************
+    Return the integer power represented by a power transformation
+**************************************************************************/
+
+inline int GetTransformPower(TRANSFORMTYPE TransformType)
+    {
+    return (int)TransformType - (int)TRANSFORM_POWER_BASE + FIRST_TRANSFORM_POWER;
+    }
+
+/**************************************************************************
+    Return the transformation type represented by an integer power
+**************************************************************************/
+
+inline TRANSFORMTYPE MakePowerTransformType(int Power)
+    {
+    return (TRANSFORMTYPE) ((int)TRANSFORM_POWER_BASE + Power - FIRST_TRANSFORM_POWER);
+    }
+
+/**************************************************************************
+    What kind of Julia animation do we want?
+**************************************************************************/
+
+enum JULIA_ANIM_FRACTAL
+    {
+    JULIA_ANIM_NORMAL,
+    JULIA_ANIM_INVERSE
+    };
+
+enum REALTIMEJULIAMODE
+    {
+    RTJ_OFF = 0,
+    RTJ_JULIA,
+    RTJ_INVERSE_JULIA
+    };
 

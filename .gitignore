@@ -34,3 +34,5 @@ cmake_install.cmake
 
 # vcpkg artifacts (local)
 vcpkg_installed/
+
+HTMLHelp/ManpWIN.chw

@@ -1,3 +1,9 @@
+/*
+    EXTERNS.H - list of trig function names
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #ifndef EXTERNS_H
 #define EXTERNS_H
 

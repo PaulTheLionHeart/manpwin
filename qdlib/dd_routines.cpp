@@ -536,7 +536,15 @@ dd_real cos(const dd_real &a) {
   }
 
   // approximately reduce modulo 2*pi
-  dd_real z = nint(a / dd_real::_2pi);
+
+  dd_real numerator = a;
+  dd_real divisor = dd_real::_2pi;
+
+  dd_real ratio = numerator / divisor;
+  dd_real z = nint(ratio);
+
+
+//  dd_real z = nint(a / dd_real::_2pi);
   dd_real r = a - z * dd_real::_2pi;
 
   // approximately reduce modulo pi/2 and then modulo pi/16

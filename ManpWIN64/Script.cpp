@@ -87,7 +87,8 @@ static	int	StartIter, EndIter, CurrentFrame, frames, ParamNumber;
 static	BOOL	ParamAnimation = FALSE;
 static	BOOL	OscillatorAnimation = FALSE;
 static	BOOL	JuliaSetAnimation = FALSE;
-static	BOOL	InversionSetAnimation = FALSE;
+static	BOOL	InverseJuliaSetAnimation = FALSE;
+static	BOOL	TransformationSetAnimation = FALSE;
 static	double	divisor;
 
 	char	SaveFileOrig[MAXLINE];				// SaveAs filename base name
@@ -268,7 +269,8 @@ int	CManp::InitScript(HWND hwnd, char *FileName, int *TotalFrames)
     OscillatorAnimation = FALSE;
     ParamAnimation = FALSE;
     JuliaSetAnimation = FALSE;
-    InversionSetAnimation = FALSE;
+    InverseJuliaSetAnimation = FALSE;
+    TransformationSetAnimation = FALSE;
 //    EndIter =  threshold;
     if ((fp = fopen(FileName, "r")) == NULL)
 	{
@@ -350,10 +352,15 @@ int	CManp::InitScript(HWND hwnd, char *FileName, int *TotalFrames)
 	    p = buf.data() + 20;
 	    JuliaSetAnimation = TRUE;
 	    }
-	if (strncmp(buf.data(), "Inversion Animation:", 20) == 0)
+	if (strncmp(buf.data(), "InverseJulia Set Animation:", 27) == 0)
 	    {
-	    p = buf.data() + 20;
-	    InversionSetAnimation = TRUE;
+	    p = buf.data() + 27;
+	    InverseJuliaSetAnimation = TRUE;
+	    }
+	if (strncmp(buf.data(), "Transformation Animation:", 25) == 0)
+	    {
+	    p = buf.data() + 25;
+	    TransformationSetAnimation = TRUE;
 	    }
 	sscanf(p, "%d %d %d %d", &EndIter, &frames, (int *)&TrueCol.ScriptPaletteFlag, &PaletteShift);
 	PalIter = EndIter;
@@ -919,7 +926,8 @@ int	CManp::RunScript(HWND hwnd, char *FileName)
 	    ptr++;
 	*ptr = '\0';
 
-	if (type == SCREENFORMULA && JuliaSetAnimation)			// update julia values
+	// update julia values
+	if ((type == INVERSEJULIA && InverseJuliaSetAnimation) || (type == SCREENFORMULA && JuliaSetAnimation))
 	    {
 	    param[0] = j.x;
 	    param[1] = j.y;
@@ -994,6 +1002,20 @@ int	CManp::RunScript(HWND hwnd, char *FileName)
 //    frames = CurrentFrame;
     frames = (int)ANIM.size();
     EndScript(frames);
+
+/**************************************************************************
+	Restore source fractal after Inverse Julia animation.
+
+	The script changes the active type to INVERSEJULIA while rendering.
+	Return to the Mandelbrot or Power fractal that generated the animation.
+**************************************************************************/
+
+    if (JuliaAnimReturnType == MANDELFP || JuliaAnimReturnType == POWER)
+	{
+	type = JuliaAnimReturnType;
+	JuliaAnimReturnType = -1;
+	}
+
     AnimFirstFrame = StartFrame;
     AnimLastFrame = (int)ANIM.size() - 1;
     CurrentFrame = AnimFirstFrame;

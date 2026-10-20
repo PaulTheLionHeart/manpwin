@@ -50,7 +50,7 @@ int	CPixel::BigRunManDerFunctions(int subtype, BigComplex *zBig, BigComplex *qBi
 		sqrBig,
 		realimagBig,
 		BailoutTestType,
-		rqlimBig);
+		rqlimBig, &BigOldZ);
 
     return 0;
     }

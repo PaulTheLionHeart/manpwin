@@ -51,6 +51,10 @@
 			<param name="Local" value="html/manp7yr4.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
+    			<param name="Name" value="Fractal Transformations">
+    			<param name="Local" value="html/manpaffn.htm">
+    			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Zooming In and Out">
 			<param name="Local" value="html/manp7sfk.htm">
 			</OBJECT>
@@ -85,7 +89,7 @@
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Options Menu">
-			<param name="Local" value="html/manp7opt.htm">
+			<param name="Local" value="html/manp7w1c.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Animation Menu">

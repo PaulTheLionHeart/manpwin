@@ -254,7 +254,7 @@ int Init_RATIONALMAP(TComplex* z, TComplex* q, double* param, bool juliaflag, ch
 
 template<typename TComplex, typename TReal, typename TDegree>
 inline int FunctionsDispatch(CPixel* self, WORD type, TComplex* z, TComplex* q, TDegree* degree, TComplex& sqr, TReal& real_imag, TComplex& a, TComplex& a2, TComplex& aa3,
-	TComplex& b, TComplex& v, TComplex& temp, double* param, BYTE* SpecialFlag, long* iteration, int &SPECIALINDEX, char subtype, int bailout_type, TReal rqlim)
+	TComplex& b, TComplex& v, TComplex& temp, double* param, BYTE* SpecialFlag, long* iteration, int &SPECIALINDEX, char subtype, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     switch (type)
 	{
@@ -269,7 +269,7 @@ inline int FunctionsDispatch(CPixel* self, WORD type, TComplex* z, TComplex* q, 
 	    z->x = q->x + sqr.x - sqr.y;
 	    z->y = q->y + real_imag + real_imag;
 
-	    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim);
+	    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ);
 
 	case POWER:					// Power
 	case JULIA4FP:
@@ -292,7 +292,7 @@ inline int FunctionsDispatch(CPixel* self, WORD type, TComplex* z, TComplex* q, 
 		    break;
 		}
 
-	    return DoBailout<TComplex>(bailout_type, z, rqlim);
+	    return DoBailout<TComplex>(bailout_type, z, rqlim, oldZ);
 	    }
 
 	case BURNINGSHIP:				// Burning Ship
@@ -301,7 +301,7 @@ inline int FunctionsDispatch(CPixel* self, WORD type, TComplex* z, TComplex* q, 
 	    real_imag = fabs(z->x * z->y);
 	    z->x = sqr.x - sqr.y + q->x;
 	    z->y = real_imag + real_imag - q->y;
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	    z->x = fabs(z->x);
@@ -320,7 +320,7 @@ inline int FunctionsDispatch(CPixel* self, WORD type, TComplex* z, TComplex* q, 
 		    *z = z->CPolynomial(*degree) + *q;
 		    break;
 		}
-	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
 
 	case CUBIC:					// Art Matrix Cubic
 	    {
@@ -453,7 +453,7 @@ BOOL Iter_MATEIN(TComplex* z, TComplex* q, TComplex& oz, TComplex& temp, double&
     sin(x+iy)  = sin(x)cosh(y) + icos(x)sinh(y)
 ***************************************************************************/
 template<typename TComplex, typename TReal>					// Sine
-bool Iter_SINFRACTAL(CPixel* self, TComplex* z, TComplex* q, double* param, int bailout_type, TReal rqlim)
+bool Iter_SINFRACTAL(CPixel* self, TComplex* z, TComplex* q, double* param, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     if (param[2] == 0.0)
 	*z = (*q) * z->CSin();
@@ -463,7 +463,7 @@ bool Iter_SINFRACTAL(CPixel* self, TComplex* z, TComplex* q, double* param, int 
     z->x += param[0];
     z->y += param[1];
 
-    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
+    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
     }
 
 template<typename TComplex>					// Exponential
@@ -513,7 +513,7 @@ BOOL Iter_EXP_FRACTAL(TComplex* z, TComplex* q, double* param, WORD* degree, int
 
 
 template<typename TComplex, typename TReal>
-bool Iter_REDSHIFTRIDER(CPixel* self, TComplex* z, TComplex* q, TComplex& a, double* param, WORD* degree, int bailout_type, TReal rqlim)
+bool Iter_REDSHIFTRIDER(CPixel* self, TComplex* z, TComplex* q, TComplex& a, double* param, WORD* degree, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     TComplex term =
 	((param[5] == 1.0) ? TComplex(1.0) : TComplex(-1.0))
@@ -522,11 +522,11 @@ bool Iter_REDSHIFTRIDER(CPixel* self, TComplex* z, TComplex* q, TComplex& a, dou
     *z = a * (*z) * (*z) + term;
     *z = (*z) + (*q);
 
-    return DoBailout<TComplex>(bailout_type, z, rqlim);
+    return DoBailout<TComplex>(bailout_type, z, rqlim, oldZ);
     }
 
 template<typename TComplex, typename TReal>					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
-bool Iter_TALIS(CPixel* self, TComplex* z, TComplex* q, TComplex& a, double* param, WORD* degree, int bailout_type, TReal rqlim)
+bool Iter_TALIS(CPixel* self, TComplex* z, TComplex* q, TComplex& a, double* param, WORD* degree, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     double m = param[1];
 
@@ -534,11 +534,11 @@ bool Iter_TALIS(CPixel* self, TComplex* z, TComplex* q, TComplex& a, double* par
 
     *z = (a * (*z)) / (TComplex(m) + a) + (*q);
 
-    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
+    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
     }
 
 template<typename TComplex, typename TReal>					// Polynomial
-bool Iter_POLYNOMIAL(CPixel* self, TComplex* z, TComplex* q, double* param, int bailout_type, TReal rqlim)
+bool Iter_POLYNOMIAL(CPixel* self, TComplex* z, TComplex* q, double* param, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     TComplex InitialZ = *z;
     TComplex FinalZ = TComplex(0.0);
@@ -558,7 +558,7 @@ bool Iter_POLYNOMIAL(CPixel* self, TComplex* z, TComplex* q, double* param, int 
 
     *z = FinalZ + *q;
 
-    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
+    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
     }
 
 template<typename TComplex, typename  TReal>					// Art Matrix Rational Map

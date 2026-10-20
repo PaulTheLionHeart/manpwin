@@ -269,6 +269,8 @@ int	CManp::SpecialFractals(HWND hwnd/*, CPixel *Pix*/)
 	case FPHOPALONG:
 	case KAMFP:
 	case MANDELCLOUD:
+	case INVERSEJULIA:
+	case INVERSEJULIAFP:
 	case MOUNTAIN:
 	case FFT:
 	case BUDDHABROT:
@@ -368,7 +370,7 @@ void	CManp::DisplayStatusBarInfo (int complete, char *text)
 	    case 'V':
 	    case 'H':
 		curpass = totpasses;
-		for (int i = 0; i < NumberThreads; i++)
+		for (size_t i = 0; i < PixelCurPass.size(); i++) 
 		    {
 		    if (PixelCurPass[i] < curpass)
 			curpass = PixelCurPass[i];
@@ -424,6 +426,8 @@ void	CManp::DisplayStatusBarInfo (int complete, char *text)
 		}
 	    if (OscAnimProc == MORPHING)
 		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s", PassStr, FinishedStr);
+	    else if (type == INVERSEJULIA || type == INVERSEJULIAFP)
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s", InvJuliaStatus, FinishedStr);
 	    else if (type == PERTURBATION)
 		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s", PertStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
 	    else if (type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF)
@@ -771,14 +775,14 @@ void CManp::InitPixelObjects(int threadCount, HWND hwnd)
 	    Pixel[i]->ManageBignumPrecision(decimals);
 
 	Pixel[i]->InitFractalDefinition(type, subtype, &degree, rqlim, threshold, BailoutTestType, param, potparam, &Fractal);
-	Pixel[i]->InitControlFlags(calcmode, juliaflag, invert, phaseflag, pairflag, _3dflag, period_level, distest, InsideMethod, OutsideMethod, biomorph, nFDOption, SpecialFlag);
+	Pixel[i]->InitControlFlags(calcmode, juliaflag, TransformType, phaseflag, pairflag, _3dflag, period_level, distest, InsideMethod, OutsideMethod, biomorph, nFDOption, SpecialFlag);
 	Pixel[i]->InitViewport(hor, vert, mandel_width, BigHor, BigVert, BigWidth, AspectRatio, xdots, ydots, RotationAngle, RotationCentre, j);
 	Pixel[i]->InitArithmetic(BigNumFlag, precision);
 	Pixel[i]->InitRendering(&Dib, width, PlotType, &TrueCol, colors, UseCurrentPalette, &AutoStereo_value, &symmetry);
 	Pixel[i]->GeneralInit();
 	Pixel[i]->InitBailout();
 	Pixel[i]->InitRuntimeControl(&time_to_zoom, &time_to_restart, &time_to_reinit, &time_to_quit, &blockindex, &totpasses, &PixelCurPass[i]);
-	Pixel[i]->InitColourProcessing(special, colours, decomp, logval, logtable, LyapSequence, ColourSpeed, PaletteStart, PaletteShift);
+	Pixel[i]->InitColourProcessing(special, colours, decomp, logval, logtable.data(), LyapSequence, ColourSpeed, PaletteStart, PaletteShift);
 	Pixel[i]->InitVisualEffects(ExpandStarTrailColours, ShowOrbits, OrbitColour);
 	Pixel[i]->InitOutput(hwnd, fillcolor);
 	Pixel[i]->InitFilters(dStrands);
@@ -817,6 +821,12 @@ int	CManp::RunEscapeTimeEngine(HWND hwnd)
 	threadCount = MAXTHREADS;
 
     WaitForAllThreadsToFinish();
+
+    // Build the logarithmic colour table before pixel objects
+    // receive pointers to its underlying storage.
+    if (logval)
+	init_log(hwnd);								// log colour distribution
+
     CreatePixelObjects(threadCount);
     InitThreadArrays(threadCount);
     InitPixelObjects(threadCount, hwnd);					// okay, we have to get the globals into the Pixel object somehow
@@ -833,11 +843,9 @@ int	CManp::RunEscapeTimeEngine(HWND hwnd)
 
     if (Pixel.size() > 0 && Pixel[0] != nullptr)
 	{
-	if (logval)
-	    init_log(hwnd);							// log colour distribution
 	if (_3dflag)
 	    Pixel[0]->init3d(xdots, ydots, x_rot, y_rot, z_rot, sclx, scly, sclz, threshold, hor, vert);				// init 3D parameters 
-	InitPixelFractal(threadCount);							// Initialise Manp engine
+	InitPixelFractal(threadCount);						// Initialise Manp engine
 	}
     else
 	{

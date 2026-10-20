@@ -17,6 +17,8 @@
 #include "anim.h"
 #include "pertengine.h"
 #include "OtherFunctions.h"
+#include "SafeStrings.h"
+//#include "FractalMathsTemplate.h"
 
 #pragma once
 
@@ -48,9 +50,10 @@ class CManp
 	int	CardioidInversionScript(HWND hwnd, char *filename);
 	int	CircleInversionScript(HWND hwnd, char *filename);
 	int	GenInversionScript(HWND hwnd, char *filename);
-	int	CardioidJuliaScript(HWND hwnd, char *filename, int PaletteShift);
-	int	CircleJuliaScript(HWND hwnd, char *filename, int PaletteShift);
-	int	GenJuliaScript(HWND hwnd, char *filename, int PaletteShift);
+	int	CardioidJuliaScript(HWND hwnd, char *filename, int PaletteShift, JULIA_ANIM_FRACTAL JuliaAnimFractal);
+	int	CircleJuliaScript(HWND hwnd, char *filename, int PaletteShift, JULIA_ANIM_FRACTAL JuliaAnimFractal);
+	int	GenJuliaScript(HWND hwnd, char *filename, int PaletteShift, JULIA_ANIM_FRACTAL JuliaAnimFractal);
+	char	*BuildJuliaAnimData(JULIA_ANIM_FRACTAL JuliaAnimFractal);
 	int	GenFourierScript(HWND hwnd, char *filename);
 	int	displayCurve(HWND hwnd, int JuliaAnimType);
 	int	ZoomOut(HWND hwnd, RECT *Rect);
@@ -84,6 +87,8 @@ class CManp
 	void	AnalyseRotation(char *s);
 	void	AnalyseMethod(char *s);
 	void	analyse_inside(char *s);
+	int	ProcessMIIM(char *MIIMData);
+	int	FindSymmetry(char *s);
 	void	get_julia_loc(char *s);
 	int	ProcessLocation(char *real, char *imag, char *zoom);
 	int	FindKallesType(int power, int FractType);
@@ -91,7 +96,7 @@ class CManp
 	int	ProcessColours(char *value);
 	void	GetParamsList(char *s);
 	void	GetBailout(char *s);
-	int	ProcessInvert(char *s);
+	int	ProcessTransformation(char *s);
 	void	AnalyseFwdDiff(char *s);
 	int	ProcessCorners(char *s, BOOL CentreFlag);
 	int	ProcessParams(char *s);
@@ -110,6 +115,16 @@ class CManp
 	void	InitFract(int type);
 	void	RebuildFractalMetadata(WORD type, int subtype);
 	void	ErrorHandler(LPTSTR lpszFunction);
+	void	AppendRotationParameter(StringBuilder& sb);
+	int	DrawJuliaOther(HWND hwnd);
+	int	DrawJuliaPixel(HWND hwnd, POINTS ptCurrent);
+
+	// some transformation stuff
+	void	AppendTransformationParams(StringBuilder& sb);
+	void	SetFractintAffineParams(double CentreX, double CentreY, double Xmagfactor, double Rotation, double Skew);
+	void	SetViewAffineRotation();
+	int	ProcessInvert(char *s);
+	void	SetFractintViewAffine(double Xmagfactor, double Rotation, double Skew);
 
 	// script stuff
 	int	GenerateFractalFrame(HWND hwnd, char *FileName, int TotalFrames, int ThisFrame);
@@ -138,6 +153,8 @@ class CManp
 	void	StepFrame(void);
 	int	AnimateSuspend(void);
 	void	DebugNumParam(const char* where);
+	void	UpdateFractintIJZoomIn(HWND hwnd, const RECT& Rect);
+	void	UpdateFractintIJZoomOut(HWND hwnd, const RECT& Rect);
 
 	// cloud filter stuff
 	void	InitCloudDensity(int xdots, int ydots);
@@ -189,7 +206,11 @@ class CManp
 	BigDouble	BigBailout;
 	dd_real		DDBailout;
 	qd_real		QDBailout;
-//	double		closenuff;			// periodicity bailout
+
+	// True when a Fractint PAR supplies six viewing corners.
+	// Allows Inverse Julia to preserve rotation, skew and stretching.
+	bool		FractintSixCorners = false;
+
 	double		xxmin, xxmax, yymin, yymax;	// selected screen corners 
 	double		xx3rd, yy3rd;
 
@@ -197,22 +218,25 @@ class CManp
 
 	enum MATH_TYPE	MathType = DOUBLEFLOAT;
 	int		precision = 0;
-//	int		decimals = 10;
 	BYTE		BigNumFlag = FALSE;		// True if bignum used
 	int		OldPrecision = 0;
 	int		dec;
 
 	double		AspectRatio;
-	BYTE		RealTimeJuliaFlag = 0;		// Display Julia set in real time
+	double		HorStretchFactor = 1.0;		// Horizontal coordinate scaling (Fractint par files)
+	int		JuliaAnimReturnType = -1;
+	BYTE		RealTimeJuliaFlag = RTJ_OFF;	// Real Time Julia display mode
 	DWORD		PrePaletteColour = 0x00FFFFFF;	// colour used for iterations below PaletteStart
 	int		PaletteStart = 0;		// flag to show which iteration is used
 	long		iteration;
 	double		potparam[3] = { 255.0, 820.0, 20.0 };		// potential parameters
+	BOOL		PotentialFlag = FALSE;		// do we have potential (can be true even with outher filters)
+	int		FractintSymmetry = -1;		// symmetry from Fractint par file that overrides normal symmetry
 	double		param[20];			// parameters
 	int		PlotType;
 	int		distest = 0, distestwidth = 71;
 	int		finished = FALSE;		// all passes complete 
-	BYTE		*logtable = NULL;		// log value table for col comp 
+	std::vector<BYTE> logtable;			// log value table for colour compression
 	WORD		special = 2;			// special colour, phase etc
 	WORD		degree;				// power
 	RGBTRIPLE OrbitColour = { 255,255,255 };	// Indexed colour for the orbit displays in Julia sets
@@ -225,7 +249,7 @@ class CManp
 	BYTE		exitflag;			// exit on completion
 	BOOL		UseFractintPalette = TRUE;	// standard VGA palette
 	int		logval;				// log colour map starting value
-	int		logflag;			// log colour map required or in error
+	int		logflag;			// log colour map required
 	int		screenx, screeny;
 	int		caption;			// size of windows caption and scroll bars
 	int		scroll_width;			// size of horizontal scroll bars
@@ -253,7 +277,20 @@ class CManp
 	RECT 		r;
 	PAINTSTRUCT 	ps;
 	BOOL		bTrack = FALSE;			// TRUE if user is selecting a region
-	BOOL		invert = FALSE;			// invert fractal
+	InverseJuliaMajorMethod	InverseJuliaMajorPAR = IJ_BREADTH_FIRST;
+	InverseJuliaMinorMethod	InverseJuliaMinorPAR = IJ_LEFT_FIRST;
+
+	// some transformation stuff
+	TRANSFORMTYPE	TransformType = TRANSFORM_NONE;	// transformation such as invert, complex log etc
+	AffineTransformParams	    AffineParams;	// user selected params for Affine transformations
+	ViewAffineParamsT<double>   ViewAffineParams;	// affine transformation of the view (for each arithmetic type)
+	ViewAffineParamsT<dd_real>  DDViewAffineParams;
+	ViewAffineParamsT<qd_real>  QDViewAffineParams;
+	ViewAffineParamsT<BigDouble> BigViewAffineParams;
+	MobiusTransformParams	    MobiusParams;	// user selected params for Mobius transformations
+	JoukowskiTransformParams    JoukowskiParams;	// user selected params for Joukowski transformations
+	TwistTransformParams	    TwistParams;	// user selected params for Twist/twirl transformations
+
 	RECT 		WARect;				// this is the usable screen taking taskbar into account
 	long		fillcolor = -1;			// tesseral fillcolor: -1=normal 0 means don't fill
 	int		colors = 256; 			// maximum colors available
@@ -296,6 +333,9 @@ class CManp
 	BOOL		DisplayAnimation = FALSE;	// allow system to know that we are currently displaying an animation (BOOL because it is represented by an int and works best in scanf())
 	int		RotationAngle = 0;		// rotate image in degrees	
 	Complex		RotationCentre = 0.0;		// centre of rotation
+	BigComplex	BigRotationCentre;
+	double		FractintXmagfactor = 1.0;
+	double		FractintSkew = 0.0;
 	int		PalOffset = 0;			// Kalles palette index offset
 	int		SlopeType;
 	double		IterDiv = 1.0;			// divide iteration by this amount
@@ -315,6 +355,7 @@ class CManp
 	POINT		ptSize;				// Stores DIB dimensions
 	int		NumberThreads = 1;		// set the default to 1. Multi=threading is for experimentation only
 	char		PertStatus[MAXLINE];
+	char		InvJuliaStatus[MAXLINE];
 	char		PertErrorMessage[MAXLINE];
 	char		SlopeStatus[MAXLINE];
 	char		SlopeErrorMessage[MAXLINE];

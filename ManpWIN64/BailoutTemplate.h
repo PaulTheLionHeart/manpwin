@@ -7,11 +7,12 @@
 #pragma once
 
 template<typename TComplex, typename TReal>
-inline bool BailoutCore(int type, TComplex* z, const TComplex* sqr, TReal rqlim)
+inline bool BailoutCore(int type, TComplex* z, const TComplex* sqr, TReal rqlim, TComplex* oldZ)
     {
     // “If I don’t have sqr — compute it”
     auto sx = sqr ? sqr->x : (z->x * z->x);
     auto sy = sqr ? sqr->y : (z->y * z->y);
+    TReal convergenceLimitSquared = TReal(1.0e-20);
 
     switch (type)
 	{
@@ -33,14 +34,29 @@ inline bool BailoutCore(int type, TComplex* z, const TComplex* sqr, TReal rqlim)
 	    return (manr * manr >= rqlim);
 	    }
 
+	case CONVERGE:
+	    {
+	    if (sx + sy >= rqlim)
+		return true;
+
+	    if (oldZ == nullptr)
+		return false;
+
+	    auto dx = z->x - oldZ->x;
+	    auto dy = z->y - oldZ->y;
+
+	    return (dx * dx + dy * dy <= convergenceLimitSquared);
+	    }
+
+
 	default:
 	    return (sx + sy >= rqlim);
 	}
     }
 
 template<typename TComplex, typename TReal>
-inline bool DoBailout(int type, TComplex* z, TReal rqlim)
+inline bool DoBailout(int type, TComplex* z, TReal rqlim, TComplex* oldZ)
     {
-    return BailoutCore<TComplex, TReal>(type, z, (TComplex*)nullptr, rqlim);
+    return BailoutCore<TComplex, TReal>(type, z, (TComplex*)nullptr, rqlim, oldZ);
     }
 

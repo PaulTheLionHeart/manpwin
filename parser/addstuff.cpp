@@ -1,10 +1,14 @@
-  /* see Fractint.c for a description of the "include"  hierarchy */
-//#include "port.h"
+/*
+    Addstuff.cpp - function definitions formula parser
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include "prototyp.h"
 #include "..\ManpWIN64\Manp.h"
 
 
-/* start of string literals cleanup */
+// start of string literals cleanup 
 
 char s_real[] =		"real";
 char s_imag[] =		"imag";

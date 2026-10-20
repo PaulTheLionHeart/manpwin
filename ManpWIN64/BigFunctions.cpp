@@ -217,7 +217,7 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	    mpfr_add(zBig->x.x, qBig->x.x, t.x, MPFR_RNDN);
 	    mpfr_add(t.x, realimagBig.x, qBig->y.x, MPFR_RNDN);
 	    mpfr_add(zBig->y.x, realimagBig.x, t.x, MPFR_RNDN);
-	    return BailoutCore(BailoutTestType, zBig, &sqrBig, rqlim);
+	    return BailoutCore(BailoutTestType, zBig, &sqrBig, rqlim, &BigOldZ);
 	    }
 
 	case POWER:					// Power
@@ -229,7 +229,7 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	case CUBIC:					// Art Matrix Cubic
 	    return FunctionsDispatch<BigComplex, BigDouble, WORD>(this, type, zBig, qBig, degree, sqrBig, realimagBig,
-		aBig, a2Big, aa3Big, bBig, vBig, tempBig, param, SpecialFlag, iteration, SPECIALINDEX, subtype, BailoutTestType, rqlim);
+		aBig, a2Big, aa3Big, bBig, vBig, tempBig, param, SpecialFlag, iteration, SPECIALINDEX, subtype, BailoutTestType, rqlim, &BigOldZ);
 
 	case SPECIALNEWT:				// Art Matrix Newton
 	    return Iter_SPECIALNEWT<BigComplex>(zBig, qBig, aBig, bBig, lm5Big, lp5Big, vBig, param, phaseflag, special);
@@ -238,19 +238,19 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 	    return Iter_MATEIN<BigComplex>(zBig, qBig, ozBig, tempBig, distance, absolute, param, epsilon, escape, phaseflag);
 	
 	case SINFRACTAL:				// Sine
-	    return Iter_SINFRACTAL<BigComplex>(this, zBig, qBig, param, BailoutTestType, rqlim);
+	    return Iter_SINFRACTAL<BigComplex>(this, zBig, qBig, param, BailoutTestType, rqlim, &BigOldZ);
 
 	case EXPFRACTAL:				// Exponential
 	    return Iter_EXP_FRACTAL<BigComplex>(zBig, qBig, param, degree, subtype, rqlim);
 
 	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
-	    return Iter_REDSHIFTRIDER<BigComplex, BigDouble>(this, zBig, qBig, aBig, param, degree, BailoutTestType, rqlim);
+	    return Iter_REDSHIFTRIDER<BigComplex, BigDouble>(this, zBig, qBig, aBig, param, degree, BailoutTestType, rqlim, &BigOldZ);
 
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
-	    return Iter_TALIS<BigComplex>(this, zBig, qBig, aBig, param, degree, BailoutTestType, rqlim);
+	    return Iter_TALIS<BigComplex>(this, zBig, qBig, aBig, param, degree, BailoutTestType, rqlim, &BigOldZ);
 
 	case POLYNOMIAL:				// Polynomial
-	    return Iter_POLYNOMIAL<BigComplex>(this, zBig, qBig, param, BailoutTestType, rqlim);
+	    return Iter_POLYNOMIAL<BigComplex>(this, zBig, qBig, param, BailoutTestType, rqlim, &BigOldZ);
 
 	case RATIONALMAP:				// Art Matrix Rational Map
 	    return Iter_RATIONALMAP<BigComplex, BigDouble>(this, zBig, qBig, aBig, bBig, param, derBig, escapeBig, epsilonBig,

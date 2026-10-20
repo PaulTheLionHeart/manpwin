@@ -37,7 +37,7 @@ int	CPixel::QDRunTierazonFunctions(int subtype, QDComplex *z, QDComplex *q, QDCo
     QDComplex   a, b, t, z1, z3, zd, zt;
     static	double	    d;
 
-    return TierazonIter<QDComplex, qd_real>(subtype, z, q, z2, &z4QD, sqrQD, realimagQD, SpecialFlag, iteration, caa3QD, cbQD, c1QD, c2QD, bQD, rqlim, degree, threshold, BailoutTestType);
+    return TierazonIter<QDComplex, qd_real>(subtype, z, q, z2, &z4QD, sqrQD, realimagQD, SpecialFlag, iteration, caa3QD, cbQD, c1QD, c2QD, bQD, rqlim, degree, threshold, BailoutTestType, &QDOldZ);
     return 0;
     }
 

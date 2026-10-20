@@ -1,3 +1,9 @@
+/*
+    ParserCtx.cpp - definitions formula parser helpers
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 // VM CONTRACT (legacy-compatible)
 // 1) Parser builds opcode array f[] and Store[]/Load[] tables.
 // 2) FormPerPixel() MUST reset: overflow=0; LodPtr=StoPtr=OpPtr=jump_index=0;
@@ -35,7 +41,19 @@ void CParser::InitContextFromGlobals()
     m_ctx.v_count = Max_Args;   // or Max_Args, but vsp is the real “used” size
 
     // function dispatch table built by ParseStr()
-    m_ctx.f = ::f;
+//    m_ctx.f = ::f;
+
+    m_ctx.f_storage.clear();
+
+    if (::f && ::LastOp > 0)
+	{
+	m_ctx.f_storage.assign(::f, ::f + ::LastOp);
+	m_ctx.f = m_ctx.f_storage.data();
+	}
+    else
+	{
+	m_ctx.f = nullptr;
+	}
 
     // program length
     m_ctx.LastOp = ::LastOp;
@@ -153,7 +171,18 @@ int CParser::RunVmIter()
 	if (AbortRequested())
 	    return RENDER_ABORTED;
 
+	assert(m_ctx.f != nullptr);
+	assert(m_ctx.OpPtr >= 0);
+	assert(m_ctx.OpPtr < (int)m_ctx.LastOp);
+	
 	void(*fn)(void) = m_ctx.f[m_ctx.OpPtr];
+#ifdef _DEBUG
+	if (fn == (void(*)(void))0xdddddddddddddddd)
+	    {
+	    OutputDebugStringA("[PARSER VM] dead function pointer in VM table\n");
+	    __debugbreak();
+	    }
+#endif
 	if (fn) fn();
 
 	// SAFE VM guards (correct direction)

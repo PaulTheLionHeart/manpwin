@@ -55,7 +55,7 @@ struct TrigCaller<QDComplex>
 
 template<typename TComplex, typename TReal>
 void InitFractintTrigFunctionsT(WORD type, TComplex *z, TComplex *q,    // explicitly pass what you need:
-    bool juliaflag, bool invert, TComplex c,
+    bool juliaflag, TComplex c,
     TReal& qc, TReal& qci, TReal& qcj, TReal& qck,			// These are for quaternions and hypercomplex
     TComplex& t, TComplex& temp, TComplex& temp1, 
     TComplex& temp2, TComplex& temp4, TComplex& sqr, int Fn2Index, double* param)
@@ -292,7 +292,7 @@ struct HyperTrigCaller<QDComplex>
 
 template<typename TComplex, typename TReal>
 int FractintTrigIterT(int type, TComplex* z, TComplex* q, TComplex& temp, TComplex& temp1, TComplex& temp2, TComplex& temp3, TComplex& sqr,
-	TReal& qc, TReal& qci, TReal& qcj, TReal& qck, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType)
+	TReal& qc, TReal& qci, TReal& qcj, TReal& qck, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType, TComplex* oldZ)
     {
     CTrigFn TrigFn;
 
@@ -343,7 +343,7 @@ int FractintTrigIterT(int type, TComplex* z, TComplex* q, TComplex& temp, TCompl
 
 	    *z = temp2;
 
-	    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+	    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
 	    }
 
 	case FNPLUSFNPIXFP:
@@ -354,7 +354,7 @@ int FractintTrigIterT(int type, TComplex* z, TComplex* q, TComplex& temp, TCompl
 	    temp3 += temp1;
 	    *z = temp3;
 
-	    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+	    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
 	    }
 
 	case TRIGSQRFP:
@@ -370,7 +370,7 @@ int FractintTrigIterT(int type, TComplex* z, TComplex* q, TComplex& temp, TCompl
 
 	    *z = temp3;
 
-	    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+	    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
 	    }
 
 	case TRIGXTRIGFP:
@@ -382,7 +382,7 @@ int FractintTrigIterT(int type, TComplex* z, TComplex* q, TComplex& temp, TCompl
 	    temp3 = (*z) * temp1;
 	    *z = temp3;
 
-	    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+	    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
 	    }
 
 	case ZXTRIGPLUSZFP:
@@ -392,15 +392,15 @@ int FractintTrigIterT(int type, TComplex* z, TComplex* q, TComplex& temp, TCompl
 		{
 		if (temp2.x == TReal(1))
 		    return ScottZXTrigPlusZfpFractalT<TComplex, TReal>(
-			z, temp1, temp3, Fn1Index, rqlim, BailoutTestType);
+			z, temp1, temp3, Fn1Index, rqlim, BailoutTestType, oldZ);
 
 		else if (temp2.x == TReal(-1))
 		    return SkinnerZXTrigSubZfpFractalT<TComplex, TReal>(
-			z, temp, temp1, temp3, Fn1Index, rqlim, BailoutTestType);
+			z, temp, temp1, temp3, Fn1Index, rqlim, BailoutTestType, oldZ);
 		}
 
 	    return ZXTrigPlusZfpFractalT<TComplex, TReal>(
-		z, q, temp, temp1, temp2, temp3, Fn1Index, rqlim, BailoutTestType);
+		z, q, temp, temp1, temp2, temp3, Fn1Index, rqlim, BailoutTestType, oldZ);
 	    }
 
 
@@ -409,25 +409,48 @@ int FractintTrigIterT(int type, TComplex* z, TComplex* q, TComplex& temp, TCompl
     }
 
 template<typename TComplex, typename TReal>
-int TrigPlusTrigFractalT(TComplex* z, TComplex& temp1, TComplex& temp2, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType)
+int TrigPlusTrigFractalT(TComplex* z, TComplex& temp, TComplex& temp1, TComplex& temp2, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType, TComplex* oldZ)
+	{
+	CTrigFn TrigFn;
+
+	// z = temp * fn1(z) + temp2 * fn2(z)
+	TrigCaller<TComplex>::Call(TrigFn, z, &temp1, Fn1Index);
+	temp1 = temp * temp1;
+
+	TrigCaller<TComplex>::Call(TrigFn, z, z, Fn2Index);
+
+	*z = (*z) * temp2;
+	*z = temp1 + *z;
+
+	return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
+	}
+
+/***************************************************************************
+    Scott Taylor's fn+fn variant.
+
+    Fractint selects this when both complex coefficients are (1, 0).
+
+	z(n+1) = fn1(z(n)) + fn2(z(n))
+
+    Both functions are evaluated independently from the original z.
+***************************************************************************/
+
+template<typename TComplex, typename TReal>
+int ScottTrigPlusTrigFractalT(TComplex* z, TComplex& temp1, TComplex& temp4, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType, TComplex* oldZ)
     {
     CTrigFn TrigFn;
 
-    // trig0(z)
     TrigCaller<TComplex>::Call(TrigFn, z, &temp1, Fn1Index);
-    temp1 = temp2 * temp1;
+    TrigCaller<TComplex>::Call(TrigFn, z, &temp4, Fn2Index);
 
-    // trig1(z)
-    TrigCaller<TComplex>::Call(TrigFn, z, z, Fn2Index);
+    *z = temp1 + temp4;
 
-    *z = (*z) * temp2;
-    *z = temp1 + *z;
-
-    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+    return DoBailout<TComplex, TReal>(
+	BailoutTestType, z, rqlim, oldZ);
     }
 
 template<typename TComplex, typename TReal>
-int MandelTrigFractalT(TComplex* z, TComplex& temp1, TComplex& temp3, TComplex& t, int Fn1Index, TReal rqlim)
+int MandelTrigFractalT(TComplex* z, TComplex& temp1, TComplex& temp3, TComplex& t, int Fn1Index, TReal rqlim, TReal ComponentLimit)
     {
     CTrigFn TrigFn;
 
@@ -435,7 +458,7 @@ int MandelTrigFractalT(TComplex* z, TComplex& temp1, TComplex& temp3, TComplex& 
 
     if (strcmp(Fn1, "sin") == 0 || strcmp(Fn1, "cos") == 0)
 	{
-	if (fabs(z->y) >= rqlim)
+	if (fabs(z->y) >= ComponentLimit)
 	    return 1;
 
 	TrigCaller<TComplex>::Call(TrigFn, z, &temp1, Fn1Index);
@@ -466,7 +489,7 @@ int MandelTrigFractalT(TComplex* z, TComplex& temp1, TComplex& temp3, TComplex& 
 	}
     else if (strcmp(Fn1, "sinh") == 0 || strcmp(Fn1, "cosh") == 0)
 	{
-	if (fabs(z->x) >= rqlim)
+	if (fabs(z->x) >= ComponentLimit)
 	    return 1;
 
 	TrigCaller<TComplex>::Call(TrigFn, z, &temp1, Fn1Index);
@@ -476,7 +499,7 @@ int MandelTrigFractalT(TComplex* z, TComplex& temp1, TComplex& temp3, TComplex& 
 	}
     else
 	{
-	if (fabs(z->y) >= rqlim)
+	if (fabs(z->x) >= ComponentLimit || fabs(z->y) >= ComponentLimit)
 	    return 1;
 
 	TrigCaller<TComplex>::Call(TrigFn, z, &temp1, Fn1Index);
@@ -489,7 +512,7 @@ int MandelTrigFractalT(TComplex* z, TComplex& temp1, TComplex& temp3, TComplex& 
     }
 
 template<typename TComplex, typename TReal>
-int ManTrigPlusExpFractalT(TComplex* z, TComplex& temp1, TComplex& t, int Fn1Index, TReal rqlim, int BailoutTestType)
+int ManTrigPlusExpFractalT(TComplex* z, TComplex& temp1, TComplex& t, int Fn1Index, TReal rqlim, int BailoutTestType, TComplex* oldZ)
     {
     CTrigFn TrigFn;
 
@@ -507,11 +530,11 @@ int ManTrigPlusExpFractalT(TComplex* z, TComplex& temp1, TComplex& t, int Fn1Ind
 
     *z = temp1;
 
-    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
     }
 
 template<typename TComplex, typename TReal>
-int ManTrigPlusZSqrFractalT(TComplex* z, TComplex& temp1, TComplex& sqr, TComplex& t, int Fn1Index, TReal rqlim, int BailoutTestType)
+int ManTrigPlusZSqrFractalT(TComplex* z, TComplex& temp1, TComplex& sqr, TComplex& t, int Fn1Index, TReal rqlim, int BailoutTestType, TComplex* oldZ)
     {
     CTrigFn TrigFn;
 
@@ -525,11 +548,11 @@ int ManTrigPlusZSqrFractalT(TComplex* z, TComplex& temp1, TComplex& sqr, TComple
 
     *z = temp1;
 
-    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
     }
 
 template<typename TComplex, typename TReal>
-int FnFnPlusFractalT(TComplex* z, TComplex& t, TComplex& temp2, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType)
+int FnFnPlusFractalT(TComplex* z, TComplex& t, TComplex& temp2, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType, TComplex* oldZ)
     {
     CTrigFn TrigFn;
 
@@ -544,11 +567,11 @@ int FnFnPlusFractalT(TComplex* z, TComplex& t, TComplex& temp2, int Fn1Index, in
 	*z = t + *z;
 	}
 
-    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
     }
 
 template<typename TComplex, typename TReal>
-int FnFnMulFractalT(TComplex* z, TComplex& t, TComplex& temp2, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType)
+int FnFnMulFractalT(TComplex* z, TComplex& t, TComplex& temp2, int Fn1Index, int Fn2Index, TReal rqlim, int BailoutTestType, TComplex* oldZ)
     {
     CTrigFn TrigFn;
 
@@ -563,22 +586,22 @@ int FnFnMulFractalT(TComplex* z, TComplex& t, TComplex& temp2, int Fn1Index, int
 	*z = t * *z;
 	}
 
-    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
     }
 
 template<typename TComplex, typename TReal>
-int SqrTrigFractalT(TComplex* z, TComplex& temp1, int Fn1Index, TReal rqlim, int BailoutTestType)
+int SqrTrigFractalT(TComplex* z, TComplex& temp1, int Fn1Index, TReal rqlim, int BailoutTestType, TComplex* oldZ)
     {
     CTrigFn TrigFn;
 
     TrigCaller<TComplex>::Call(TrigFn, z, &temp1, Fn1Index);
     *z = temp1.CSqr();
 
-    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
     }
 
 template<typename TComplex, typename TReal>
-int Sqr1OverTrigFractalT(TComplex* z, int Fn1Index, TReal rqlim, int BailoutTestType)
+int Sqr1OverTrigFractalT(TComplex* z, int Fn1Index, TReal rqlim, int BailoutTestType, TComplex* oldZ)
     {
     CTrigFn TrigFn;
 
@@ -586,11 +609,11 @@ int Sqr1OverTrigFractalT(TComplex* z, int Fn1Index, TReal rqlim, int BailoutTest
     *z = z->CInvert();
     *z = z->CSqr();
 
-    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
     }
 
 template<typename TComplex, typename TReal>
-int NumFractalT(TComplex* z, TComplex* q, int Fn1Index, TReal rqlim, int BailoutTestType, double* param)
+int NumFractalT(TComplex* z, TComplex* q, int Fn1Index, TReal rqlim, int BailoutTestType, double* param, TComplex* oldZ)
     {
     CTrigFn TrigFn;
 
@@ -605,7 +628,7 @@ int NumFractalT(TComplex* z, TComplex* q, int Fn1Index, TReal rqlim, int Bailout
     z->x += param[0];
     z->y += param[1];
 
-    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
     }
        	  
 // =====================================
@@ -614,7 +637,7 @@ int NumFractalT(TComplex* z, TComplex* q, int Fn1Index, TReal rqlim, int Bailout
 
 // General ZXTrigPlusZ
 template<typename TComplex, typename TReal>
-int ZXTrigPlusZfpFractalT(TComplex* z, TComplex* q, TComplex& temp, TComplex& temp1, TComplex& temp2, TComplex& temp3, int Fn1Index, TReal rqlim, int BailoutTestType)
+int ZXTrigPlusZfpFractalT(TComplex* z, TComplex* q, TComplex& temp, TComplex& temp1, TComplex& temp2, TComplex& temp3, int Fn1Index, TReal rqlim, int BailoutTestType, TComplex* oldZ)
     {
     CTrigFn TrigFn;
 
@@ -627,12 +650,12 @@ int ZXTrigPlusZfpFractalT(TComplex* z, TComplex* q, TComplex& temp, TComplex& te
 
     *z = temp1 + temp3;
 
-    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
     }
 
 // Scott variant
 template<typename TComplex, typename TReal>
-int ScottZXTrigPlusZfpFractalT(TComplex* z, TComplex& temp1, TComplex& temp3, int Fn1Index, TReal rqlim, int BailoutTestType)
+int ScottZXTrigPlusZfpFractalT(TComplex* z, TComplex& temp1, TComplex& temp3, int Fn1Index, TReal rqlim, int BailoutTestType, TComplex* oldZ)
     {
     CTrigFn TrigFn;
 
@@ -641,12 +664,12 @@ int ScottZXTrigPlusZfpFractalT(TComplex* z, TComplex& temp1, TComplex& temp3, in
     temp3 = (*z) * temp1;
     *z = (*z) + temp3;
 
-    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
     }
 
 // Skinner variant
 template<typename TComplex, typename TReal>
-int SkinnerZXTrigSubZfpFractalT(TComplex* z, TComplex& temp, TComplex& temp1, TComplex& temp3, int Fn1Index, TReal rqlim, int BailoutTestType)
+int SkinnerZXTrigSubZfpFractalT(TComplex* z, TComplex& temp, TComplex& temp1, TComplex& temp3, int Fn1Index, TReal rqlim, int BailoutTestType, TComplex* oldZ)
     {
     CTrigFn TrigFn;
 
@@ -656,7 +679,7 @@ int SkinnerZXTrigSubZfpFractalT(TComplex* z, TComplex& temp, TComplex& temp1, TC
 
     *z = temp - (*z);
 
-    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim);
+    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
     }
 
 

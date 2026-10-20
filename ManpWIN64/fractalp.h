@@ -28,7 +28,7 @@ struct fractalspecificstuff			// ManpWIN version
    double   vert;				// default vertical corner
    double   width;				// default YMIN corner 
    int	    BailoutType;			// bailout schemes for slope using fwd diff: ESCAPING, CONVERGING, MAGNET etc
-   int	    juliaflag;				// JULIAFP if julia, or anything else otherwise (only used in reading Fractint Par files)
+   int	    juliatype;				// Legacy Fractint Julia type identifier. JULIAFP selects Julia-style initialisation
    int	    SlopeDegree;			// Default degree for Slope using Fwd Diff slope calcs - if = -1, then degree is taken from param[]
    int	    numparams;				// Number of parameters 
    int	    numfn;				// number of functions 

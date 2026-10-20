@@ -1030,7 +1030,7 @@ struct fractalspecificstuff fractalspecific[]=
    "magnet1m", realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
 //   -4.0, 4.0, -3.0, 3.0, 0, MAGNET1J,NOFRACTAL,NOFRACTAL, XAXIS_NOPARM,
 //   Magnet1Fractal,mandelfp_per_pixel,MandelfpSetup,StandardFractal,100.0,
-   -3.7,  -3.0,  6.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   -3.7,  -3.0,  6.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 100.0,
 //   init_mandel_df, Magnet1Fractal, "SelectFracParams", SelectFracParams, STDBAILOUT	// replaced with tierazon fractal
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
@@ -1039,7 +1039,7 @@ struct fractalspecificstuff fractalspecific[]=
    "magnet1j", realparm, imagparm,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
 //   -8.0,  8.0, -6.0,  6.0, 0, NOFRACTAL,MAGNET1M,NOFRACTAL, XAXIS_NOIMAG,
 //   Magnet1Fractal,juliafp_per_pixel,JuliafpSetup,StandardFractal,100.0,
-   -2.7,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   -2.7,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 100.0,
 //   init_mandel_df, do_mandel_df, "ParamDlg", ParamDlg, STDBAILOUT
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
@@ -1048,7 +1048,7 @@ struct fractalspecificstuff fractalspecific[]=
    "magnet2m", realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
 //   -1.5,3.7, -1.95,1.95,   0, MAGNET2J,NOFRACTAL,NOFRACTAL, XAXIS_NOPARM,
 //   Magnet2Fractal,mandelfp_per_pixel,MandelfpSetup,StandardFractal,100.0,
-   -2.7,  -2.0,  4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   -2.7,  -2.0,  4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 100.0,
 //   init_mandel_df, Magnet2Fractal, "SelectFracParams", SelectFracParams, STDBAILOUT	// replaced with tierazon fractal
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
@@ -1057,7 +1057,7 @@ struct fractalspecificstuff fractalspecific[]=
    "magnet2j", realparm, imagparm,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
 //   -8.0,  8.0, -6.0,  6.0, 0, NOFRACTAL,MAGNET2M,NOFRACTAL, XAXIS_NOIMAG,
 //   Magnet2Fractal,juliafp_per_pixel,JuliafpSetup,StandardFractal,100.0,
-   -2.7,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   -2.7,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 100.0,
 //   init_mandel_df, do_mandel_df, "ParamDlg", ParamDlg, STDBAILOUT
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
@@ -1455,20 +1455,20 @@ struct fractalspecificstuff fractalspecific[]=
 
    {
    t_julia_inverse+1, realparm, imagparm,
-   "Max Hits per Pixel", ES,ES,ES, ES, ES, ES, ES, -0.11, 0.6557, 4, 1024,0,0,0,0,0,0,
+   "Max Hits per Pixel", "Mode: 0 breadth, 1 depth, 2 random walk, 3 random run","branch order: 0 left, 1 right", "Random Run Length - default 1024", "Power (2=Quadratic, 3=Cubic, 4=Quartic)", ES, ES, ES, -0.11, 0.6557, 4, 0,0,1024,2,0,0,0,
 //   -2.0,  2.0, -1.5, 1.5, 24, NOFRACTAL, MANDEL, INVERSEJULIAFP,  NOSYM,
 //   Linverse_julia_orbit, NULL, orbit3dlongsetup, inverse_julia_per_image, NOBAILOUT,
-   -2.7, -2.0, 4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, do_mandel_df, "ParamDlg", ParamDlg, STDBAILOUT
+   -2.7, -1.5, 3.0, 0, JULIAFP, NOFRACTAL, 7, 0, NULL, NULL, OTHERFNINPIXEL, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
    {
    t_julia_inverse, realparm, imagparm,
-   "Max Hits per Pixel", ES,ES,ES, ES, ES, ES, ES, -0.11, 0.6557, 4, 1024,0,0,0,0,0,0,
+   "Max Hits per Pixel", "Mode: 0 breadth, 1 depth, 2 random walk, 3 random run","branch order: 0 left, 1 right", "Random Run Length - default 1024", "Power (2=Quadratic, 3=Cubic, 4=Quartic)", ES, ES, ES, -0.11, 0.6557, 4, 0,0,1024,2,0,0,0,
 //   -2.0,  2.0, -1.5, 1.5,  0, NOFRACTAL, MANDEL, INVERSEJULIA,  NOSYM,
 //   Minverse_julia_orbit, NULL, orbit3dfloatsetup, inverse_julia_per_image, NOBAILOUT,
-   -2.7, -2.0, 4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, do_mandel_df, "ParamDlg", ParamDlg, STDBAILOUT
+   -2.7, -1.5, 3.0, 0, JULIAFP, NOFRACTAL, 7, 0, NULL, NULL, OTHERFNINPIXEL, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 #endif
 
@@ -1536,18 +1536,18 @@ struct fractalspecificstuff fractalspecific[]=
    },
 
    {
-   t_frothybasin+1, frothattractor, frothshade, ES, ES,ES,ES, ES, ES, ES, ES, 3, 0, 0, 0,0,0,0,0,0,0,
+   t_frothybasin+1, frothattractor, frothshade, "A (imaginary part of C)", ES,ES,ES, ES, ES, ES, ES, 3, 0, 1.028713768218725, 0,0,0,0,0,0,0,
 //   -3, 3, -2.5, 2, 28, NOFRACTAL, NOFRACTAL, FROTHFP, NOSYM,
 //   NULL, NULL, froth_setup, calcfroth, FROTHBAILOUT,
-   -4.0,  -2.5,  5.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, NOSYM, 4.0,
+   -4.0,  -2.5,  5.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL, NOSYM, 4.0,
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
    {
-   t_frothybasin, frothattractor, frothshade, ES, ES,ES,ES, ES, ES, ES, ES, 3, 0, 0, 0,0,0,0,0,0,0,
+   t_frothybasin, frothattractor, frothshade, "A (imaginary part of C)", ES,ES,ES, ES, ES, ES, ES, 3, 0, 1.028713768218725, 0,0,0,0,0,0,0,
    //   -3, 3, -2.5, 2, 28, NOFRACTAL, NOFRACTAL, FROTHFP, NOSYM,
    //   NULL, NULL, froth_setup, calcfroth, FROTHBAILOUT,
-      -4.0,  -2.5,  5.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, NOSYM, 4.0,
+      -4.0,  -2.5,  5.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL, NOSYM, 4.0,
       NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 

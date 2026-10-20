@@ -73,7 +73,7 @@ typedef short(*TPREFIX)[2][maxyblk][maxxblk];
 
 enum BAILOUTTEST
     {
-    BAIL_MOD, BAIL_REAL, BAIL_IMAG, BAIL_OR, BAIL_AND, MANH, MANR
+    BAIL_MOD, BAIL_REAL, BAIL_IMAG, BAIL_OR, BAIL_AND, MANH, MANR, CONVERGE
     };
 
 #define calcadot(h,c,x,y) { if ((c = calc_frac(h, y, x, user_data)) == -1) return(-1); }
@@ -129,10 +129,10 @@ class CPixel
 	void	InitialisePixelRuntime(Complex& saved, DDComplex& DDSaved, QDComplex& QDSaved, BigComplex& BigSaved, int& hooper, double& close, double& magnitude, double& min_orbit, long& min_index);
 
 	int	StandardCalculationMode(HWND hwnd, int user_data(HWND hwnd));
-	int	FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[], WORD degree, WORD type,
+	int	FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, TRANSFORMTYPE TransformType, int CoordSystem, double param[], WORD degree, WORD type,
 		int subtype, BYTE calcmode, int RotationAngle, CFract *Fractal, double hor, double vert, double mandel_width, BYTE BigNumFlag, BigDouble *Big_xxmin,
 		BigDouble *Big_xxmax, BigDouble *Big_yymin, BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio, double *xxmin,
-		double *xxmax, double *yymin, double *yymax, WORD special, BYTE juliaflag);
+		double *xxmax, double *yymin, double *yymax, WORD special, BYTE juliaflag, int FractintSymmetry);
 
 	CParser m_parser;
 
@@ -146,7 +146,7 @@ class CPixel
 	void DebugDump(const char* tag) const;
 
 	void	InitFractalDefinition(WORD typeIn, int subtypeIn, WORD *degreeIn, double rqlimIn, long thresholdIn, int BailoutTestTypeIn, double paramIn[], double potparamIn[], CFract *FractalIn);
-	void	InitControlFlags(BYTE calcmodeIn, BYTE juliaflagIn, BOOL invertIn, BYTE phaseflagIn, BYTE pairflagIn, BYTE _3dflagIn, int period_levelIn, //int reset_periodIn,
+	void	InitControlFlags(BYTE calcmodeIn, BYTE juliaflagIn, TRANSFORMTYPE transformIn, BYTE phaseflagIn, BYTE pairflagIn, BYTE _3dflagIn, int period_levelIn, //int reset_periodIn,
 		int distestIn, int InsideMethodIn, int OutsideMethodIn, int biomorphIn, int nFDOptionIn, BYTE SpecialFlagIn);
 	void	InitViewport(double horIn, double vertIn, double mandel_widthIn, BigDouble BigHorIn, BigDouble BigVertIn, BigDouble BigWidthIn, double ScreenRatioIn,
 		int xdotsIn, int ydotsIn, int RotationAngleIn, Complex RotationCentreIn, Complex jIn);
@@ -198,6 +198,8 @@ class CPixel
 	int	subtype;		// B=basin, S=stripe, N=normal
 	WORD	*degree;		// polynomial degree
 	double	rqlim;			// bailout
+	double	BailoutComponentLimit;	// sqrt(rqlim)
+
 	BYTE	SpecialFlag;
 	double	dem_delta, dem_width;	// distance estimator variables
 	int	biomorph;
@@ -207,7 +209,8 @@ class CPixel
 	int	RotationAngle;		// in degrees
 	int	period_level;		// 0 for no periodicity checking
 	int	distest;
-	BOOL	invert;			// invert fractal
+	TRANSFORMTYPE TransformType;	// transfomration such as invert fractal
+
 	BYTE	phaseflag;		// 3 phases for type SPECIALNEWT fractals
 	double	closenuff;		// periodicity bailout
 	BYTE	juliaflag;		// Julia implementation of fractal
@@ -315,7 +318,7 @@ class CPixel
 	short	num_worklist;				// resume worklist for standard engine 
 	int	xsym_split(int xaxis_row, int xaxis_between/*, int *symmetry*/);
 	int	ysym_split(int xaxis_row, int xaxis_between/*, int *symmetry*/);
-	void	setsymmetry(int sym, /*int thread, */int uselist, BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[],
+	void	setsymmetry(int sym, /*int thread, */int uselist, BYTE _3dflag, int decomp, BYTE pairflag, int method, TRANSFORMTYPE TransformType, int CoordSystem, double param[],
 		WORD degree, WORD type, int subtype, BYTE calcmode, int RotationAngle, CFract *Fractal, double hor, double vert, double mandel_width, double *xxmax,
 		double *xxmin, double *yymin, double *yymax, WORD special, BYTE juliaflag, BYTE BigNumFlag, BigDouble *Big_xxmin, BigDouble *Big_xxmax,
 		BigDouble *Big_yymin, BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio);
@@ -365,17 +368,19 @@ class CPixel
 	int	BigInitTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *qBig);
 	int	BigRunTierazonFunctions(int subtype, BigComplex *zBig, BigComplex *qBig, BYTE *SpecialFlag, long *iteration);
 	int	BigDecomposition(BigDouble z_real, BigDouble z_imag);
+	bool	CheckMagnetFiniteAttractor();
 
 	// code specific to Pixel.cpp
 	void	InitTierazonFiltersDouble();
 	void	InitTierazonFiltersDD();
 	void	InitTierazonFiltersQD();
 	void	InitTierazonFiltersBig();
+/*
 	void	SetupDoubleJulia();
 	void	SetupDDJulia();
 	void	SetupQDJulia();
 	void	SetupBigJulia();
-
+*/
 
 	int	savedand, savedincr;
 	long	real_iteration;

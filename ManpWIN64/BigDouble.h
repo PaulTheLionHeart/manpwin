@@ -37,6 +37,34 @@ class BigDouble
 	    mpfr_set(x, Big.x, MPFR_RNDN);
 	    }
 
+	BigDouble(const int value)
+	    {
+	    bitcount = decimals * SAFETYMARGIN;
+	    mpfr_init2(x, bitcount);
+	    mpfr_set_si(x, (long)value, MPFR_RNDN);
+	    }
+
+	BigDouble(const long value)
+	    {
+	    bitcount = decimals * SAFETYMARGIN;
+	    mpfr_init2(x, bitcount);
+	    mpfr_set_si(x, value, MPFR_RNDN);
+	    }
+
+	BigDouble(const unsigned int value)
+	    {
+	    bitcount = decimals * SAFETYMARGIN;
+	    mpfr_init2(x, bitcount);
+	    mpfr_set_ui(x, (unsigned long)value, MPFR_RNDN);
+	    }
+
+	BigDouble(const unsigned long value)
+	    {
+	    bitcount = decimals * SAFETYMARGIN;
+	    mpfr_init2(x, bitcount);
+	    mpfr_set_ui(x, value, MPFR_RNDN);
+	    }
+
 	BigDouble & operator =(const BigDouble &);	// Assignment Operator
 	BigDouble & operator =(const double &);		// Assignment to a double Operator
 	BigDouble & operator+=(const BigDouble &);

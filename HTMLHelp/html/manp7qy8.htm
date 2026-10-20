@@ -93,17 +93,78 @@ ManpWIN has undergone continuous development over many years, with ongoing
 improvements to performance, precision, and fractal exploration capabilities.
 </p>
 
-<h2>Latest Release (September 2026)</h2>
+<h2>Latest Release (October 2026)</h2>
 
-<h2>ManpWIN 4.05b</h2>
+<h2>ManpWIN 4.06</h2>
+
+<p>
+ManpWIN 4.06 expands fractal exploration with new fractal types, a broader
+transformation system, and major improvements to Fractint PAR compatibility,
+animation, rendering, and reliability.
+</p>
+
+<h3>New Fractals and Capabilities</h3>
+<ul>
+<li>Added Inverse Julia rendering for powers 2 through 20, with Breadth First,
+Depth First, Random Walk, and Random Run methods.</li>
+<li>Added Inverse Julia animation across supported powers and real-time Inverse
+Julia exploration, including improved zoom and rotation handling.</li>
+<li>Restored the original Mandelbrot or Power fractal selection after an Inverse
+Julia animation.</li>
+<li>Added Magnet 1 and Magnet 2, including finite-attractor handling.</li>
+<li>Added TieraZon blob (convergence) behaviour.</li>
+</ul>
+
+<h3>Fractal Transformations</h3>
+<ul>
+<li>Separated Fractal Options from Fractal Transformations.</li>
+<li>Added standard and non-standard transformations, including Affine and
+M&ouml;bius, with animation and parameter-file support.</li>
+<li>Improved rotation handling in double-double, quad-double, and arbitrary
+precision modes.</li>
+<li>Corrected rotated zoom-in/zoom-out behaviour and quarter-turn handling.</li>
+</ul>
+
+<h3>Fractint PAR Compatibility</h3>
+<ul>
+<li>Improved Fractint viewport interpretation, including six-corner geometry,
+rotation, skew, horizontal magnification, and rotated centres.</li>
+<li>Improved loading of Fractint Inverse Julia parameters and views, including
+SeaHorse and SeaShell.</li>
+<li>Corrected logmap and potential colouring behaviour, including interactions
+with filters and inside colours.</li>
+<li>Improved Fractint parameter defaults and restored the historical default
+inside colour for imported PAR files.</li>
+<li>Repaired or improved handling for several legacy examples, including
+Barnsley M1, Rich8z3, Reach, Blue, and Newton.</li>
+<li>Improved symmetry and block plotting for affected Fractint PAR examples.</li>
+</ul>
+
+<h3>Rendering, Reliability, and Usability</h3>
+<ul>
+<li>Corrected Frothy Basin colouring so valid palette indices beyond the
+iteration threshold are retained.</li>
+<li>Increased IFS point-generation density to restore detail in examples such
+as Autumn.</li>
+<li>Corrected Fractint fn+fn rendering by fixing bailout selection
+and improving compatibility with the original Fractint calculations.</li>
+<li>Fixed the Convergence bailout dialogue resource ID to restore
+correct radio-button selection and prevent incorrect bailout settings.</li>
+<li>Fixed Hailstone toggles and corrected MandelFn/Stripes bailout behaviour.</li>
+<li>Improved status information, including Inverse Julia progress reporting,
+cancellation support, and a 3D projection status-display correction.</li>
+<li>Added safeguards against unbounded Inverse Julia iteration.</li>
+</ul>
+
+<h2>Previous Releases</h2>
+
+<p><b>ManpWIN 4.05b</b></p>
 
 <p>
 ManpWIN 4.05b is a colouring and rendering update focused on expanding
 TieraZon and Flarium filter support, introducing the new Clouds orbit-density
 renderer, and improving filter behaviour and rendering status reporting.
 </p>
-
-<h3>Recent Improvements</h3>
 
 <ul>
 
@@ -138,8 +199,6 @@ renderer, and improving filter behaviour and rendering status reporting.
 <li>Added new Help documentation for TieraZon, Flarium, and Clouds filters.</li>
 
 </ul>
-
-<h2>Previous Releases</h2>
 
 <p><b>ManpWIN 4.05a</b></p>
 
@@ -495,7 +554,7 @@ A detailed development history is maintained by the project owner and can be pro
 <hr>
 
 <footer>
-  ManpWIN Help &copy; September 2026
+  ManpWIN Help &copy; October 2026
 </footer>
 </body>
 </html>

@@ -306,7 +306,7 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	case CUBIC:					// Art Matrix Cubic
 	    return FunctionsDispatch<QDComplex, qd_real, WORD>(this, type, z, q, degree, sqrQD, realimagQD,
-		aQD, a2QD, aa3QD, bQD, vQD, tempQD, param, SpecialFlag, iteration, SPECIALINDEX, subtype, BailoutTestType, rqlim);
+		aQD, a2QD, aa3QD, bQD, vQD, tempQD, param, SpecialFlag, iteration, SPECIALINDEX, subtype, BailoutTestType, rqlim, &QDOldZ);
 
 	case SPECIALNEWT:				// Art Matrix Newton
 	    return Iter_SPECIALNEWT<QDComplex>(z, q, aQD, bQD, lm5QD, lp5QD, vQD, param, phaseflag, special);
@@ -317,7 +317,7 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
     sin(x+iy)  = sin(x)cosh(y) + icos(x)sinh(y)
 ***************************************************************************/
 	case SINFRACTAL:				// Sine
-	    return Iter_SINFRACTAL<QDComplex>(this, z, q, param, BailoutTestType, rqlim);
+	    return Iter_SINFRACTAL<QDComplex>(this, z, q, param, BailoutTestType, rqlim, &QDOldZ);
 
 	case MATEIN:					// Art Matriuc Matein fractal
 	    return Iter_MATEIN<QDComplex>(z, q, ozQD, tempQD, distance, absolute, param, epsilon, escape, phaseflag);
@@ -326,13 +326,13 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 	    return Iter_EXP_FRACTAL<QDComplex>(z, q, param, degree, subtype, rqlim);
 	    
 	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
-	    return Iter_REDSHIFTRIDER<QDComplex, double>(this, z, q, aQD, param, degree, BailoutTestType, rqlim);
+	    return Iter_REDSHIFTRIDER<QDComplex, double>(this, z, q, aQD, param, degree, BailoutTestType, rqlim, &QDOldZ);
 
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
-	    return Iter_TALIS<QDComplex>(this, z, q, aQD, param, degree, BailoutTestType, rqlim);
+	    return Iter_TALIS<QDComplex>(this, z, q, aQD, param, degree, BailoutTestType, rqlim, &QDOldZ);
 
 	case POLYNOMIAL:				// Polynomial
-	    return Iter_POLYNOMIAL<QDComplex>(this, z, q, param, BailoutTestType, rqlim);
+	    return Iter_POLYNOMIAL<QDComplex>(this, z, q, param, BailoutTestType, rqlim, &QDOldZ);
 
 	case RATIONALMAP:				// Art Matrix Rational Map
 	    return Iter_RATIONALMAP<QDComplex, qd_real>(this, z, q, aQD, bQD, param, derQD, escapeQD, epsilonQD,

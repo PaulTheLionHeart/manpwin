@@ -26,45 +26,50 @@ extern 	void	InitTrueColourPalette(BYTE);
 extern	int	mainview(HWND, BOOL);
 
 /**************************************************************************
-	Setup log table
+    Initialise logarithmic colour mapping table
+
+    The vector owns its memory. No manual allocation or deletion is needed.
 **************************************************************************/
 
-void	CManp::init_log(HWND hwnd)
+void CManp::init_log(HWND hwnd)
     {
-    long	lf, prev, limit, LocalThreshold;
-    double	m;
-    int		i;
+    long lf, prev, limit, LocalThreshold;
+    double m;
+    int i;
 
-    LocalThreshold = (threshold >= MAXTHRESHOLD) ? MAXTHRESHOLD - 1 : threshold;
-    if (gManp->logflag == NULL)
-	{
-	if ((gManp->logtable = new BYTE [MAXTHRESHOLD + 2]) == NULL)
-	    {
-	    MessageBox (hwnd, "Can't allocate log palette memory. Using windows default", "Error", MB_ICONEXCLAMATION | MB_OK);
-	    MessageBeep (0);
-	    gManp->logflag = ERROR;				// don't use if no memory
-	    return;					// no point in setting up table
-	    }
-	gManp->logflag = TRUE;
-	}
+    LocalThreshold = (threshold >= MAXTHRESHOLD)
+	? MAXTHRESHOLD - 1 : threshold;
+
+    // Allocate and initialise the logarithmic colour table.
+    logtable.resize(MAXTHRESHOLD + 2);
+
+    logflag = TRUE;
+
     lf = logval;
-    m = log((double) (LocalThreshold - lf)) / ((double) (colours - ((lf) ? 2 : 1)));
+    m = log((double)(LocalThreshold - lf)) /
+	((double)(colours - ((lf) ? 2 : 1)));
+
     for (prev = 1; prev <= lf; ++prev)
-	*(gManp->logtable + prev) = 1;
+	logtable[prev] = 1;
+
     for (i = ((lf) ? 2 : 1); i < colours; ++i)
-	{ 
-	limit = lf + (int) exp((double) i * m);
+	{
+	limit = lf + (int)exp((double)i * m);
+
 	if (limit > LocalThreshold || i == colours - 1)
 	    limit = LocalThreshold;
+
 	while (prev <= limit)
-	    *(gManp->logtable + prev++) = i;
+	    logtable[prev++] = i;
 	}
-    *gManp->logtable = 0;
-    for (i = 1; i < LocalThreshold; ++i)		// spread top include unused colours
-	if (*(gManp->logtable + i) > *(gManp->logtable + i - 1))
-	    *(gManp->logtable + i) = *(gManp->logtable + i - 1) + 1;
-//    for (i = threshold; i < MAXTHRESHOLD - 1; ++i)		// init the rest
-//	*(logtable + i) = colours - 1;
+
+    logtable[0] = 0;
+
+    for (i = 1; i < LocalThreshold; ++i)
+	{
+	if (logtable[i] > logtable[i - 1])
+	    logtable[i] = logtable[i - 1] + 1;
+	}
     }
 
 /**************************************************************************
@@ -265,24 +270,44 @@ void	CManp::analyse_3d(char *s)
     }
 
 /**************************************************************************
-	Get 3D parameters
+Get Rotation parameters
 **************************************************************************/
 
-void	CManp::AnalyseRotation(char *s)
+void CManp::AnalyseRotation(char *s)
     {
-    char	*t;
-    int		r;
+    char    *t;
+    char    sx[SIZEOF_BF_VARS];
+    char    sy[SIZEOF_BF_VARS];
+    int     r;
 
     t = s;
+
     while (*s)
 	{
-	if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-')
+	if (!isdigit(*s) && *s != '.' && *s != '+' && *s != '-' && *s != 'e' && *s != 'E')
 	    *s = ' ';
 	s++;
 	}
-    r = sscanf(t, "%d %lf %lf", &RotationAngle, &RotationCentre.x, &RotationCentre.y);
-    }
 
+    r = sscanf(t, "%d %s %s", &RotationAngle, sx, sy);
+
+    if (r != 3)
+	return;
+
+    if (BigNumFlag)
+	{
+	ConvertString2Bignum(BigRotationCentre.x.x, sx);
+	ConvertString2Bignum(BigRotationCentre.y.x, sy);
+	}
+    else
+	{
+	RotationCentre.x = strtod(sx, nullptr);
+	RotationCentre.y = strtod(sy, nullptr);
+
+	BigRotationCentre.x = RotationCentre.x;
+	BigRotationCentre.y = RotationCentre.y;
+	}
+    }
 
 /**************************************************************************
 	Get filter parameters
@@ -308,10 +333,7 @@ void	CManp::AnalyseMethod(char *s)
 	InsideMethod = method;
     else
 	OutsideMethod = method;
-    if (method == POTENTIAL)
-	r = sscanf(t+3, "%lf %lf %lf", &potparam[0], &potparam[1], &potparam[2]);
-    else
-	r = sscanf(t+3, "%lf %d %d", &dStrands, &nFDOption, &UseCurrentPalette);
+    r = sscanf(t+3, "%lf %d %d", &dStrands, &nFDOption, &UseCurrentPalette);
     }
 
 /**************************************************************************
@@ -368,13 +390,14 @@ void	CManp::get_julia_loc(char *s)
     }
 
 /**************************************************************************
-	Process Invert paramemters
+    Process fractal transformation parameters
 **************************************************************************/
 
-int	CManp::ProcessInvert(char *s)
+int CManp::ProcessTransformation(char *s)
     {
-    char	*t;
-    int		count;
+    char    *t;
+    int     count;
+    int     TransformValue;
 
     t = s;
     while (*s && *s != ' ')
@@ -384,11 +407,80 @@ int	CManp::ProcessInvert(char *s)
 	s++;
 	}
 
-    count = sscanf(t, "%lf %lf %lf", &f_radius, &f_xcenter, &f_ycenter);    // inversion radius, center 
-    if (f_radius)
-	invert = TRUE;
-    return 0;
-    }
+    count = sscanf(t, "%d", &TransformValue);
 
+    if (count != 1)
+	return TRANSFORMPAR_NO_TYPE;
+
+    TransformType = (TRANSFORMTYPE)TransformValue;
+
+    switch (TransformType)
+	{
+	case TRANSFORM_AFFINE:
+	    count = sscanf(t, "%d %lf %lf %lf %lf %lf %lf",
+		&TransformValue,
+		&AffineParams.a,
+		&AffineParams.b,
+		&AffineParams.e,
+		&AffineParams.c,
+		&AffineParams.d,
+		&AffineParams.f);
+
+	    if (count != 7)
+		return TRANSFORMPAR_AFFINE;
+	    break;
+
+	case TRANSFORM_MOBIUS:
+	    count = sscanf(t, "%d %lf %lf %lf %lf %lf %lf %lf %lf",
+		&TransformValue,
+		&MobiusParams.aReal,
+		&MobiusParams.aImag,
+		&MobiusParams.bReal,
+		&MobiusParams.bImag,
+		&MobiusParams.cReal,
+		&MobiusParams.cImag,
+		&MobiusParams.dReal,
+		&MobiusParams.dImag);
+
+	    if (count != 9)
+		return TRANSFORMPAR_MOBIUS;
+	    break;
+
+	case TRANSFORM_JOUKOWSKI:
+	    count = sscanf(t, "%d %lf %lf",
+		&TransformValue,
+		&JoukowskiParams.kReal,
+		&JoukowskiParams.kImag);
+
+	    if (count != 3)
+		return TRANSFORMPAR_JOUKOWSKI;
+	    break;
+
+	case TRANSFORM_TWIST:
+	    count = sscanf(t, "%d %lf %lf %lf %lf",
+		&TransformValue,
+		&TwistParams.Strength,
+		&TwistParams.Radius,
+		&TwistParams.CentreX,
+		&TwistParams.CentreY);
+
+	    if (count != 5)
+		return TRANSFORMPAR_TWIST;
+	    break;
+
+	default:
+	    count = sscanf(t, "%d %lf %lf %lf",
+		&TransformValue,
+		&f_radius,
+		&f_xcenter,
+		&f_ycenter);
+
+	    if (count != 4)
+		return TRANSFORMPAR_NORMAL;
+	    break;
+	}
+
+    return TRANSFORMPAR_OK;
+    }
 
 

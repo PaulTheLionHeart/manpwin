@@ -361,7 +361,7 @@
 </OBJECT>
 <LI> <OBJECT type="text/sitemap">
     <param name="Name" value="Coordinate System">
-    <param name="Local" value="html\manp7opt.htm">
+    <param name="Local" value="html\manptran.htm">
 </OBJECT>
 <LI> <OBJECT type="text/sitemap">
     <param name="Name" value="Coordinate Systems">
@@ -1249,7 +1249,7 @@
 </OBJECT>
 <LI> <OBJECT type="text/sitemap">
     <param name="Name" value="Options Menu">
-    <param name="Local" value="html\manp7yr4.htm">
+    <param name="Local" value="html\manp7w1c.htm">
 </OBJECT>
 <LI> <OBJECT type="text/sitemap">
     <param name="Name" value="Orbit Colour">
@@ -1589,7 +1589,7 @@
 </OBJECT>
 <LI> <OBJECT type="text/sitemap">
     <param name="Name" value="Rotation">
-    <param name="Local" value="html\manp7opt.htm">
+    <param name="Local" value="html\manptran.htm">
 </OBJECT>
 <LI> <OBJECT type="text/sitemap">
     <param name="Name" value="Rotation">
@@ -1922,5 +1922,126 @@
 <LI> <OBJECT type="text/sitemap">
     <param name="Name" value="Zooming Out">
     <param name="Local" value="html\manp7sfk.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Affine Transformations">
+    <param name="Local" value="html\manpaffn.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractal Transformations">
+    <param name="Local" value="html\manpaffn.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Inverse Julia">
+    <param name="Local" value="html\manpinvj.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Real-Time Inverse Julia">
+    <param name="Local" value="html\manpinvj.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Breadth First">
+    <param name="Local" value="html\manpinvj.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Depth First">
+    <param name="Local" value="html\manpinvj.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Random Walk">
+    <param name="Local" value="html\manpinvj.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Random Run">
+    <param name="Local" value="html\manpinvj.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Shear">
+    <param name="Local" value="html\manpaffn.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Skew">
+    <param name="Local" value="html\manpaffn.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Stretching">
+    <param name="Local" value="html\manpaffn.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Reflection">
+    <param name="Local" value="html\manpaffn.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Translation">
+    <param name="Local" value="html\manpaffn.htm">
+</OBJECT>
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Clouds">
+    <param name="Local" value="html\manp7tzf.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Flarium Filters">
+    <param name="Local" value="html\manp7tzf.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="TieraZon Filters">
+    <param name="Local" value="html\manp7tzf.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Start Palette">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Pre-palette Colour">
+    <param name="Local" value="html\manp7col.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Status Information">
+    <param name="Local" value="html\manpstat.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Kalles Fraktaler">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Fractint PAR Files">
+    <param name="Local" value="html\manp7vn4.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Convergence">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="TieraZon Blob">
+    <param name="Local" value="html\manp7opt.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Mobius Transformation">
+    <param name="Local" value="html\manptran.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Joukowski Transformation">
+    <param name="Local" value="html\manptran.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Twist Transformation">
+    <param name="Local" value="html\manptran.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Inverse Julia Animation">
+    <param name="Local" value="html\manpinvj.htm">
 </OBJECT>
 </UL>

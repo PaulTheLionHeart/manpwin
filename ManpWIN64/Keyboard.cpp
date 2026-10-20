@@ -200,6 +200,10 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	    SendMessage (hwnd, WM_COMMAND, IDM_FRACTLOC, 0L);
 	    break;
     	
+	case '0':
+	    SendMessage(hwnd, WM_COMMAND, IDM_REALTIMEINVJULIA, 0L);		// real time inverse Julia
+	    break;
+
 	case '1':								// Toggle Random Colour Generation
 	    gManp->TrueCol.ToggleRandomColour();
 	    SendMessage (hwnd, WM_COMMAND, IDM_COLOUR_PAL, 0L);
@@ -279,13 +283,16 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 
 	case 'I':
 	    if (GetKeyState(VK_SHIFT) < 0)
-		SendMessage (hwnd, WM_COMMAND, IDM_INVERSION_ANIM, 0L);		// Inversion Animation
+		SendMessage (hwnd, WM_COMMAND, IDM_TRANSFORMATION_ANIM, 0L);	// Transformation Animation
 	    else
 		SendMessage (hwnd, WM_COMMAND, IDM_OPEN_SCI, 0L);		// open SCI file
 	    break;
     	
-	case 'J':								// Julia animation  
-	    SendMessage(hwnd, WM_COMMAND, IDM_JULIA_ANIM, 0L);
+	case 'J':						
+	    if (GetKeyState(VK_SHIFT) < 0)
+		SendMessage(hwnd, WM_COMMAND, IDM_INVJULIA_ANIM, 0L);		// Inverse Julia animation 
+	    else
+		SendMessage(hwnd, WM_COMMAND, IDM_JULIA_ANIM, 0L);		// Julia animation  
 	    break;
 
 	case 'K':								// Save/Load Kalles parameter file  
@@ -366,7 +373,7 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	    break;
     	
 	case 'T':								// Fractal Type  
-	    gManp->time_to_break = (gManp->type == FOURIER);					// make sure that the fourier loop ends
+	    gManp->time_to_break = (gManp->type == FOURIER);			// make sure that the fourier loop ends
 	    if (gManp->OscAnimProc != STANDARD)
 		{
 		gManp->time_to_break = TRUE;
@@ -396,8 +403,11 @@ void	ProcessKeys(HWND hwnd, WPARAM wParam)
 	    SendMessage(hwnd, WM_COMMAND, IDM_TOGGLEPERT, 0L);
 	    break;
 
-	case 'X':  								// Fractal Options 
-	    SendMessage(hwnd, WM_COMMAND, IDM_FRACOPTIONS, 0L);
+	case 'X':  					 
+	    if (GetKeyState(VK_CONTROL) < 0)
+		SendMessage(hwnd, WM_COMMAND, IDM_FRACTTRANSFORMS, 0L);
+	    else
+		SendMessage(hwnd, WM_COMMAND, IDM_FRACOPTIONS, 0L);		// Fractal Options
 	    break;
 
 	case 'Y':								// Add spiral flag  

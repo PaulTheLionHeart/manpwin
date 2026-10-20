@@ -442,7 +442,7 @@ int RunSlopeFwdDiffT(int user_data(HWND), Complex j, TReal mandel_width, TReal h
 		int potentialColours = ctx.TrueCol->ColoursInPALFile;
 		BYTE *logtable = NULL;
 
-		FilterIndex = DoOutsideFilterT<TComplex, TReal>((long)iterations, z, ctx.OutsideMethod, hooper, threshold, paletteColours, decomp, ctx.biomorph, rqlim, special, logval, logtable, potentialColours, ctx.TrueCol, ctx.potparam);
+		FilterIndex = DoOutsideFilterT<TComplex, TReal>((long)iterations, z, ctx.OutsideMethod, hooper, threshold, paletteColours, decomp, ctx.biomorph, rqlim, special, logval, logtable, ctx.TrueCol);
 		}
 
 	    index = ((DWORD)y * (DWORD)ctx.width) + (DWORD)x;

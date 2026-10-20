@@ -100,9 +100,13 @@ fractal type and rendering mode.
 <h2>Compatibility</h2>
 
 <ul>
+
 <li>
-Not all FRACTINT parameter (.par) files are fully compatible. Certain features such
-as rotation and skew may not be interpreted.
+ManpWIN provides substantial compatibility with FRACTINT parameter (.par) files,
+including rotation, skew, stretched axes and six-corner view geometry. However,
+some images may still differ slightly from the original DOS FRACTINT rendering
+because ManpWIN does not reproduce all of FRACTINT's original integer arithmetic,
+quantisation and historical rendering behaviour exactly.
 </li>
 
 <li>
@@ -162,6 +166,18 @@ animatable parameter.
 </li>
 
 <li>
+  Zooming into an Inverse Julia image may not always preserve the same level of fine
+  detail as generating the Inverse Julia set directly at the new location. This is
+  a known limitation of the current Inverse Julia point-sampling method.
+</li>
+
+<li>
+  Inverse Julia is currently supported only for Mandelbrot and Power fractals.
+  This differs from ordinary Julia mode, which is available for many
+  pixel-based fractal types.
+</li>
+
+<li>
   Certain advanced combinations of features (e.g. high precision + slope + complex
   formulas) may result in reduced performance.
 </li>
@@ -184,6 +200,12 @@ animatable parameter.
 <li>
 Most pixel-based fractals support multi-threaded rendering, where the image is
 divided into regions and processed in parallel.
+</li>
+
+<li>
+For fractals using vertical symmetry, single-threaded rendering is recommended.
+Use <b>Ctrl+M</b> to set the thread count to 1 before rendering, then restore
+your normal multi-threading setting afterwards.
 </li>
 
 <li>
@@ -281,7 +303,7 @@ These limitations reflect the advanced and evolving nature of high-precision
 <hr>
 
 <footer>
-  ManpWIN Help &copy; September 2026
+  ManpWIN Help &copy; October 2026
 </footer>
 
 </body>

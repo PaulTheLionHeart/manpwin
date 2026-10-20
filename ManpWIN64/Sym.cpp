@@ -100,10 +100,10 @@ int	CPixel::ysym_split(int yaxis_col, int yaxis_between/*, int *symmetry*/)
 	Calculate and assign best symmetry 
 **************************************************************************/
 
-int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[], WORD degree, WORD type,
+int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, TRANSFORMTYPE TransformType, int CoordSystem, double param[], WORD degree, WORD type,
     int subtype, BYTE calcmode, int RotationAngle, CFract *Fractal, double hor, double vert, double mandel_width, BYTE BigNumFlag, BigDouble *Big_xxmin,
     BigDouble *Big_xxmax, BigDouble *Big_yymin, BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio, double *xxmin, 
-    double *xxmax, double *yymin, double *yymax, WORD special, BYTE juliaflag)
+    double *xxmax, double *yymin, double *yymax, WORD special, BYTE juliaflag, int FractintSymmetry)
 
     {
     int	fract_sym = NOSYM;
@@ -111,7 +111,7 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
     //worksym = worksymIn; /yystart = yystartIn; yystop = yystopIn;
     *symmetry = 1;							// symmetry flag
 
-    if (_3dflag || decomp > 0 || pairflag || method > 0 || invert)
+    if (_3dflag || decomp > 0 || pairflag || method > 0 || TransformType != TRANSFORM_NONE)
 	fract_sym = NOSYM;
     else if (CoordSystem != CARTESIAN)
 	fract_sym = NOSYM;
@@ -325,6 +325,9 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 	}
     else if (RotationAngle != 0)					// if rotated image by intermediate angle
 	fract_sym = NOSYM;
+    // Apply Fractint PAR symmetry, if specified.
+    if (FractintSymmetry != -1)
+	fract_sym = FractintSymmetry;
     // --- FINAL RULE: disable X-mirroring symmetries when strip-threading ---
     // X-mirroring symmetries cause cross-strip writes (tearing) under vertical-strip threading.
     // Y mirroring (XAXIS) is safe because it stays in the same strip (x unchanged).
@@ -345,7 +348,7 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
 
 
 //    if (type != FORMULA)
-	setsymmetry(fract_sym, /*thread, */1, _3dflag, decomp, pairflag, method, invert, CoordSystem, param, degree, type, subtype, calcmode, RotationAngle, Fractal, hor,
+	setsymmetry(fract_sym, /*thread, */1, _3dflag, decomp, pairflag, method, TransformType, CoordSystem, param, degree, type, subtype, calcmode, RotationAngle, Fractal, hor,
 	    vert, mandel_width, xxmax, xxmin, yymin, yymax, special, juliaflag, BigNumFlag, Big_xxmin, Big_xxmax, Big_yymin, Big_yymax, BigHor, BigVert, BigWidth, 
 	    ScreenRatio /*ixstop, xxstop, iystop, yystop*/);
 
@@ -356,7 +359,7 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, BO
     Set up proper symmetrical plot functions
 **************************************************************************/
 
-void	CPixel::setsymmetry(int sym, int uselist, BYTE _3dflag, int decomp, BYTE pairflag, int method, BOOL invert, int CoordSystem, double param[],
+void	CPixel::setsymmetry(int sym, int uselist, BYTE _3dflag, int decomp, BYTE pairflag, int method, TRANSFORMTYPE TransformType, int CoordSystem, double param[],
 	WORD degree, WORD type, int subtype, BYTE calcmode, int RotationAngle, CFract *Fractal, double hor, double vert, double mandel_width, double *xxmax, double *xxmin,
 	double *yymin, double *yymax, WORD special, BYTE juliaflag, BYTE BigNumFlag, BigDouble *Big_xxmin, BigDouble *Big_xxmax, BigDouble *Big_yymin,
 	BigDouble *Big_yymax, BigDouble BigHor, BigDouble BigVert, BigDouble BigWidth, double ScreenRatio)

@@ -46,6 +46,6 @@ int	CPixel::DDRunManDerFunctions(int subtype, DDComplex *z, DDComplex *q, BYTE *
 		sqr,
 		real_imag,
 		BailoutTestType,
-		rqlimDD);
+		rqlimDD, &DDOldZ);
     return 0;
     }

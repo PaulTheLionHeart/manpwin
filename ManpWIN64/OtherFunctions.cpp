@@ -72,6 +72,10 @@ int	COtherFunctions::InitOtherFunctions(WORD typeIn, int subtypeIn, HWND hwndIn,
 	case GEOMETRY:
 	case MALTHUS:
 	    break;		// nothing to do here
+	case INVERSEJULIA:
+	case INVERSEJULIAFP:
+	    InitInverseJulia();
+	    break;
 	}
     return 0;
     }
@@ -980,7 +984,9 @@ int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *itera
 	    DoMalthus();
 	    return 0;
 
-
+	case INVERSEJULIA:
+	case INVERSEJULIAFP:
+	    return InverseJuliaOrbit();
 
 
 

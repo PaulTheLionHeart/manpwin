@@ -1,7 +1,13 @@
-/* Parser.cpp (C) 1990, Mark C. Peterson, CompuServe [70441,3353]
-   All rights reserved.
+/*
+    Parser.cpp - The big one - fractal function parser
 
-   Code may be used in any program provided the author is credited
+    Parser.cpp (C) 1990, Mark C. Peterson, CompuServe [70441,3353] All rights reserved.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
+/*
+    Code may be used in any program provided the author is credited
     either during program execution or in the documentation.  Source
     code may be distributed only in combination with public domain or
     shareware source code.  Source code may be modified provided the
@@ -17,12 +23,11 @@
     (203) 276-9721
 */
 
+/*  Chuck Ebbert (CompuServe [76306,1226] ) changed code marked 'CAE fp' 
+    for fast 387 floating-point math.  See PARSERA.ASM and PARSERFP.C (13 Dec 1992.)  
 
-/*      Chuck Ebbert (CompuServe [76306,1226] ) changed code marked 'CAE fp'    */
-/*   for fast 387 floating-point math.  See PARSERA.ASM and PARSERFP.C */
-/*   (13 Dec 1992.)  */
-/* */
-/*   Modified 12 July 1993 by CAE to fix crash when formula not found.  */
+    Modified 12 July 1993 by CAE to fix crash when formula not found.  
+*/
 
 #include <string.h>
 #include <ctype.h>
@@ -43,9 +48,6 @@
 double x1, y1, x2, y2;
 #endif
 
-//extern	MATH_TYPE MathType;
-/* moved _LCMPLX and union ARg to mpmath.h -6-20-90 TIW */
-
 #define MAXLSYS		800		// Max LSystem in file (Make sure to change this value in lsys.cpp)
 #define MAX_OPS		250
 #define MAX_ARGS	100
@@ -53,10 +55,7 @@ double x1, y1, x2, y2;
 #define	MAX_TOKEN_LEN	120
 #define MAX_FORMULA_LEN	4096
 
-//#define rand15() (rand()&0x7FFF)
-
 #define stopmsg pstopmsg
-//HWND	GlobalHwnd;			// to allow passing of hwnd 
 extern	char	lsys_type[];
 
 void	insertFunctionNames(char *FormStr, CFract Fractal);		// insert function names in place of literal "fn1", "fn2"
@@ -84,13 +83,6 @@ int	MaxFormNameChoices = MAXLSYS;
 void	*typespecific_workarea = NULL;
 
 unsigned long number_of_ops, number_of_loads, number_of_stores, number_of_jumps;
-
-/*
-struct PEND_OP {
-   void (*f)(void);
-   int p;
-};
-*/
 
 JUMP_CONTROL_ST jump_control[MAX_JUMPS];
 
@@ -239,20 +231,16 @@ struct const_list_st
 
 static void parser_allocate(void);
 
-//struct Arg *Arg1, *Arg2;
-// PB 910417 removed unused "a" array
-
-// CAE fp  made some of the following non-static for PARSERA.ASM
-// Some of these variables should be renamed for safety
-// struct Arg /*s[20], */**Store, **Load;		// static CAE fp
-// parser.cpp
-
 thread_local	int StoPtr, LodPtr, OpPtr;					// static CAE fp
 unsigned int LastOp;						// CAE fp made non-static
 std::vector<ConstArg> v_storage;
 ConstArg* v = nullptr;
-//struct ConstArg *v = (struct ConstArg *)0;			// was static CAE fp
-void (**f)(void) = (void(far * far *)(void))0;			// static CAE fp
+
+using VmFn = void(*)(void);
+
+std::vector<VmFn> f_storage;
+VmFn* f = nullptr;
+//void (**f)(void) = (void(far * far *)(void))0;			// static CAE fp
 
 std::vector<unsigned short> gStoreIdx;
 std::vector<unsigned short> gLoadIdx;
@@ -262,7 +250,6 @@ unsigned gLoadCap = 0;
 static	int var_count;
 static	int complx_count;
 static	int real_count;
-
 
 	short int ismand = 1;
 	unsigned int posp, vsp;
@@ -484,24 +471,11 @@ struct ConstArg far *isconst(char *Str, int Len)
     return(&v[vsp++]);
     }
 
-/*
-struct FNCT_LIST 
-    {
-    char *s;              // TIW 03-31-91 added far
-    void (**ptr)(void);
-    };
-*/
-
 // TIW 03-30-91 START
 void(*StkTrig0)(void) = ParserStkSin;
 void(*StkTrig1)(void) = ParserStkSqr;
 void(*StkTrig2)(void) = ParserStkSinh;
 void(*StkTrig3)(void) = ParserStkCosh;
-
-//void (*StkTrig0)(void) = dStkSin;
-//void (*StkTrig1)(void) = dStkSqr;
-//void (*StkTrig2)(void) = dStkSinh;
-//void (*StkTrig3)(void) = dStkCosh;
 
 char  * JumpList[] = 
     {
@@ -704,15 +678,6 @@ SymStr[] =
     {"",              0}
     };
 
-//extern	char	FormulaString[];	// used to hold the full formula
-/*
-static void InitParserOps()
-    {
-    StkNeg = ParserStkNeg;
-    }
-
-    */
-
 static int ParseStr(char *Str, int pass) 
     {
     struct ConstArg *c;
@@ -728,11 +693,8 @@ static int ParseStr(char *Str, int pass)
     uses_jump = 0;
     memset(jump_control, 0, sizeof(jump_control));
 
-//    jump_index = 0;
     if(pass == 0)
 	o = (struct PEND_OP far *) ((char far *)typespecific_workarea + total_formula_mem-sizeof(struct PEND_OP) * Max_Ops);
-//    else if(used_extra == 1)
-//	o = (struct PEND_OP far *) ((char far *)typespecific_workarea + total_formula_mem-sizeof(struct PEND_OP) * Max_Ops);
     else
 	o = (struct PEND_OP far *)malloc(sizeof(struct PEND_OP) * (long)Max_Ops * 16L);
     if( !o || !typespecific_workarea) 
@@ -743,7 +705,6 @@ static int ParseStr(char *Str, int pass)
     // after o is allocated/assigned
     for (int i = 0; i < (int)Max_Ops; ++i)
 	{
-//	o[i].op = OpCode::LEGACY;  // default: dispatch by o[i].f
 	// (optional but helpful for debugging)
 	o[i].f = nullptr;
 	o[i].p = 0;
@@ -2087,10 +2048,9 @@ int frm_check_name_and_sym (FILE * open_file, int report_bad_sym)
 	    {
 	    const char* err = ParseErrs(PE_INVALID_SYM_USING_NOSYM);
 	    size_t needed = strlen(err) + strlen(sym_buf) + 6 + 1;
-	    char* msgbuf = new char[needed];
-	    _snprintf_s(msgbuf, needed, _TRUNCATE, "%s:\n   %s", err, sym_buf);
-	    stopmsg(8, msgbuf);
-	    delete[] msgbuf;
+	    std::vector<char> msgbuf(needed);
+	    _snprintf_s(msgbuf.data(), msgbuf.size(), _TRUNCATE, "%s:\n   %s", err, sym_buf);
+	    stopmsg(8, msgbuf.data());
 	    }
 	}
     if (c != '{') 
@@ -2598,8 +2558,6 @@ void count_lists()
 	real_count++;
 	}
     }
-
-
 
 /*frm_prescan() takes an open file with the file pointer positioned at
   the beginning of the relevant formula, and parses the formula, token
@@ -3485,7 +3443,7 @@ int frm_prescan (FILE * open_file)
 
 void	insertFunctionNames(char *FormStr, CFract Fractal)		// insert function names in place of literal "fn1", "fn2"
     {
-    char	*tok, *p, *q, *buffer;
+    char	*tok, *p, *q;
     const char	*fn1ptr, *fn2ptr;
     int		i;
     size_t	FnLen1, FnLen2, FormStrLen;
@@ -3493,9 +3451,9 @@ void	insertFunctionNames(char *FormStr, CFract Fractal)		// insert function name
     FnLen1 = strlen(Fractal.Fn1);
     FnLen2 = strlen(Fractal.Fn2);
     FormStrLen = strlen(FormStr) + 50;					// additional 50 chars to allow for additional length of function names
-    buffer = new char[FormStrLen];
+    std::vector<char> buffer(FormStrLen);
     p = FormStr;
-    q = buffer;
+    q = buffer.data();
     while (tok = str_find_ci(p, "fn1"))
 	{
 	fn1ptr = Fractal.Fn1;
@@ -3506,9 +3464,9 @@ void	insertFunctionNames(char *FormStr, CFract Fractal)		// insert function name
 	p = tok;							// go past the chars "fn1"
 	}
     strcpy(q, p);							// copy the rest
-    strcpy(FormStr, buffer);
+    strcpy(FormStr, buffer.data());
     p = FormStr;
-    q = buffer;
+    q = buffer.data();
     while (tok = str_find_ci(p, "fn2"))
 	{
 	fn2ptr = Fractal.Fn2;
@@ -3519,8 +3477,7 @@ void	insertFunctionNames(char *FormStr, CFract Fractal)		// insert function name
 	p = tok;							// go past the chars "fn2"
 	}
     strcpy(q, p);							// copy the rest
-    strcpy(FormStr, buffer);
-    if (buffer) { delete[] buffer; buffer = NULL; }
+    strcpy(FormStr, buffer.data());
     }
 
 /**************************************************************************

@@ -70,11 +70,6 @@ void	PertSetupArithType(int &ArithType, int subtype, long MaxIteration, int prec
 	if (ArithType == EXP_UNSUPPORTED || ArithType == DBL_UNSUPPORTED)
 	    gManp->EnableApproximation = false;		// we don't support these fractals with BLA
 	}
-#ifdef _DEBUG
-    char	buf[256];
-    SAFE_SPRINTF(buf, "PertSetupArithType: precision = %d, ArithType = %d\n", precision, ArithType);
-    OutputDebugStringA(buf);
-#endif
     }
 
 //////////////////////////////////////////////////////////////////////
@@ -682,23 +677,6 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
     EnsureReferenceBufferSize(ArithType, maxIteration);
     zBig = 0.0;
 
-#ifdef _DEBUG
-    {
-    char cx[256];
-    char cy[256];
-
-    mpfr_snprintf(cx, sizeof(cx), "%.80Re", centre.x.x);
-    mpfr_snprintf(cy, sizeof(cy), "%.80Re", centre.y.x);
-
-    char buf[700];
-    _snprintf_s(buf, sizeof(buf), _TRUNCATE,
-	"PERT REF CENTRE: x=%s y=%s\n",
-	cx, cy);
-
-    OutputDebugStringA(buf);
-    }
-#endif
-
     for (int i = 0; i <= maxIteration; i++)
 	{
 	if (AbortRequested())
@@ -782,13 +760,6 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
     double refSeconds = tRef.stop_ms();
     auto s = FormatElapsed(refSeconds);
 
-#ifdef _DEBUG
-    {
-    char    buf[256];
-    SAFE_SPRINTF(buf, "Reference build: %s, MaxIter = %d, MaxRefIter = %d\n", s.c_str(), maxIteration, gManp->MaxRefIteration);
-    OutputDebugStringA(buf);
-    }
-#endif
     scratch.Clear();			// close temp variables for reference creation
 
     // ----------------------------------------------------------------
@@ -817,16 +788,6 @@ int	ReferenceZoomPoint(BigComplex& centre, int maxIteration, int user_data(HWND 
 	    gManp->Bla.init(M, gManp->XSubN, blaSize, power, subtype, maxIteration, gManp->param);
 	    }
 	}
-
-#ifdef _DEBUG
-    {
-    char    buf[256];
-    double blaSeconds = tBla.stop_ms();
-    s = FormatElapsed(blaSeconds);
-    SAFE_SPRINTF(buf, "BLA build: %s\n", s.c_str());
-    OutputDebugStringA(buf);
-    }
-#endif
     return 0;
     }
 

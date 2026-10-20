@@ -63,6 +63,26 @@ inline void Init_Newton(CPixel* self, TComplex* z, TComplex* q, double* param, W
 	*z = (*q) / TReal(3);
     }
 
+/**************************************************************************
+    Initialise Fractint Magnet 1 and Magnet 2.
+
+    Mandelbrot: z = 0, c = pixel coordinate.
+    Julia:      preserve the Julia starting point.
+
+    The Magnet recurrence uses c directly; no additional
+    initialisation coefficients are required.
+**************************************************************************/
+
+template <typename TComplex, typename TReal>
+inline void Init_MagnetFractal(CPixel* self, TComplex* z, TComplex* q, double* param, bool juliaflag)
+    {
+    if (!juliaflag)
+	{
+	z->x = TReal(param[0]);
+	z->y = TReal(param[1]);
+	}
+    }
+
 template <typename TComplex, typename TReal>
 inline void Init_ComplexMarksMand(CPixel* self, TComplex* z, TComplex* q, double* param, bool juliaflag, TComplex* MarkCoeff)
     {
@@ -92,13 +112,13 @@ inline void Init_Spider(CPixel* self, TComplex* z, TComplex* q, double* param, b
     }
 
 template <typename TComplex, typename TReal>
-inline void Init_Manowar(CPixel* self, TComplex* z, TComplex* q, TComplex* c, double* param, bool juliaflag, bool invert, TComplex& t, TComplex& temp, TComplex& temp1)
+inline void Init_Manowar(CPixel* self, TComplex* z, TComplex* q, TComplex& c, double* param, bool juliaflag, TComplex& t, TComplex& temp, TComplex& temp1)
     {
     // No periodicity
     // (you already handle this globally, so nothing needed here)
 
-    t = (invert) ? InvertZ2<TComplex, TReal>(*c, TReal(self->f_xcenter), TReal(self->f_ycenter), TReal(self->f_radius)) : *c;
-
+    t = TransformPointT<TComplex, TReal>(c, self->TransformType, double(self->f_radius), double(self->f_xcenter), double(self->f_ycenter));
+    
     if (juliaflag)
 	{
 	*z = t;
@@ -152,9 +172,9 @@ inline void Init_Lambda(CPixel* self, TComplex* z, TComplex* q, double* param, b
     }
 
 template <typename TComplex, typename TReal>
-inline void Init_ZPowerGroup(CPixel* self, TComplex* z, TComplex* q, TComplex& c, double* param, bool juliaflag, bool invert, TComplex& t, TComplex& temp, TComplex& temp1, TComplex& temp2)
+inline void Init_ZPowerGroup(CPixel* self, TComplex* z, TComplex* q, TComplex& c, double* param, bool juliaflag, TComplex& t, TComplex& temp, TComplex& temp1, TComplex& temp2)
     {
-    t = (invert) ? InvertZ2<TComplex, TReal>(c, TReal(self->f_xcenter), TReal(self->f_ycenter), TReal(self->f_radius)) : c;
+    t = TransformPointT<TComplex, TReal>(c, self->TransformType, double(self->f_radius), double(self->f_xcenter), double(self->f_ycenter));
 
     temp.x = TReal(param[0]);
     temp.y = TReal(param[1]);
@@ -178,9 +198,9 @@ inline void Init_ZPowerGroup(CPixel* self, TComplex* z, TComplex* q, TComplex& c
     }
 
 template <typename TComplex, typename TReal>
-inline void Init_Marks(CPixel* self, TComplex* z, TComplex* q, TComplex& c, double* param, bool juliaflag, bool invert, TComplex& t, TComplex& MarkCoeff)
+inline void Init_Marks(CPixel* self, TComplex* z, TComplex* q, TComplex& c, double* param, bool juliaflag, TComplex& t, TComplex& MarkCoeff)
     {
-    t = (invert) ? InvertZ2<TComplex, TReal>(c, TReal(self->f_xcenter), TReal(self->f_ycenter), TReal(self->f_radius)) : c;
+    t = TransformPointT<TComplex, TReal>(c, self->TransformType, double(self->f_radius), double(self->f_xcenter), double(self->f_ycenter));
 
     if (juliaflag)
 	{
@@ -206,9 +226,9 @@ inline void Init_Marks(CPixel* self, TComplex* z, TComplex* q, TComplex& c, doub
     }
 
 template <typename TComplex, typename TReal>
-inline void Init_Quat(CPixel* self, TComplex* z, TComplex* q, TComplex& c, double* param, bool juliaflag, bool invert, TComplex& t, TReal& qc, TReal& qci, TReal& qcj, TReal& qck)
+inline void Init_Quat(CPixel* self, TComplex* z, TComplex* q, TComplex& c, double* param, bool juliaflag, TComplex& t, TReal& qc, TReal& qci, TReal& qcj, TReal& qck)
     {
-    t = (invert) ? InvertZ2<TComplex, TReal>(c, TReal(self->f_xcenter), TReal(self->f_ycenter), TReal(self->f_radius)) : c;
+    t = TransformPointT<TComplex, TReal>(c, self->TransformType, double(self->f_radius), double(self->f_xcenter), double(self->f_ycenter));
 
     if (juliaflag)
 	{
@@ -241,7 +261,7 @@ inline int Iter_Newton(CPixel* self, TComplex* z, TComplex* q, TComplex& z1, TCo
     color = *iteration;
     z2 = *z;
     z1 = z->CPolynomial(*degree - 1);
-    *z = *z - (z1 * *z - *q - TReal(1)) / (z1 * TReal(*degree));
+    *z = *z - (z1 * *z - TReal(1)) / (z1 * TReal(*degree));
     zd = *z - z2;
 
     TReal d = zd.CSumSqr();
@@ -278,7 +298,7 @@ inline int Iter_Newton(CPixel* self, TComplex* z, TComplex* q, TComplex& z1, TCo
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_ComplexMarksMandelbrot(CPixel* self, TComplex* z, TComplex* q, TComplex& sqr, TReal& realimag, TComplex& coefficient, int bailout_type, TReal rqlim)
+inline int Iter_ComplexMarksMandelbrot(CPixel* self, TComplex* z, TComplex* q, TComplex& sqr, TReal& realimag, TComplex& coefficient, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     sqr.x = z->x * z->x;
     sqr.y = z->y * z->y;
@@ -290,11 +310,11 @@ inline int Iter_ComplexMarksMandelbrot(CPixel* self, TComplex* z, TComplex* q, T
 
     *z = coefficient * (*z) + (*q) *coefficient;
 
-    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim);
+    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ);
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_Spider(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, int bailout_type, TReal rqlim)
+inline int Iter_Spider(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     TComplex sqr;
     TReal realimag;
@@ -310,25 +330,26 @@ inline int Iter_Spider(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, i
     temp.x = temp.x / TReal(2) + z->x;
     temp.y = temp.y / TReal(2) + z->y;
 
-    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim);
+    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ);
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_ManOWar(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, TComplex& temp1, TComplex& temp3, double* param, int bailout_type, TReal rqlim)
+inline int Iter_ManOWar(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, TComplex& temp1, TComplex& temp3, double* param, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     TComplex sqr;
 
     sqr.x = z->x * z->x;
     sqr.y = z->y * z->y;
 
-    temp3.x = sqr.x - sqr.y + temp.x + temp1.x + param[0];
-    temp3.y = (z->x * z->y + z->x * z->y) + temp.y + temp1.y + param[1];
-
+    // Julia: temp already contains the Julia constant.
+    // Mandelbrot: retain the additional parameter perturbation.
+    temp3.x = sqr.x - sqr.y + temp.x + temp1.x + (self->juliaflag ? 0.0 : param[0]);
+    temp3.y = 2.0 * z->x * z->y + temp.y + temp1.y + (self->juliaflag ? 0.0 : param[1]);
     temp1 = *z;
 
     *z = temp3;
 
-    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim);
+    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ);
     }
 
 inline double RealToDouble(double x)
@@ -408,7 +429,7 @@ inline int Iter_ComplexNewton(CPixel* self, TComplex* z, TComplex* q, TComplex& 
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_Lambda(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, int bailout_type, TReal rqlim)
+inline int Iter_Lambda(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     TComplex sqr;
 
@@ -431,31 +452,31 @@ inline int Iter_Lambda(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, i
     sqr.x = z->x * z->x;
     sqr.y = z->y * z->y;
 
-    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim);
+    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ);
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_ZPower(CPixel* self, TComplex* z, TComplex* q, TComplex& temp2, int bailout_type, TReal rqlim)
+inline int Iter_ZPower(CPixel* self, TComplex* z, TComplex* q, TComplex& temp2, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     *z = (*z) ^ temp2;
     *z = (*z) + (*q);
 
-    return DoBailout(bailout_type, z, rqlim);
+    return DoBailout(bailout_type, z, rqlim, oldZ);
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_ZtoZPlusZPower(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, double* param, int bailout_type, TReal rqlim)
+inline int Iter_ZtoZPlusZPower(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, double* param, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     temp = z->CPolynomial((int)param[2]);
 
     *z = (*z) ^ (*z);
     *z = temp + (*z) + (*q);
 
-    return DoBailout(bailout_type, z, rqlim);
+    return DoBailout(bailout_type, z, rqlim, oldZ);
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_MarksMandel(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, TComplex& temp1, TComplex& coefficient, TComplex& t, int bailout_type, TReal rqlim)
+inline int Iter_MarksMandel(CPixel* self, TComplex* z, TComplex* q, TComplex& temp, TComplex& temp1, TComplex& coefficient, TComplex& t, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     TComplex sqr;
 
@@ -472,7 +493,7 @@ inline int Iter_MarksMandel(CPixel* self, TComplex* z, TComplex* q, TComplex& te
 
     *z = temp1;
 
-    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim);
+    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ);
     }
 
 template <typename TComplex, typename TReal>
@@ -502,10 +523,80 @@ inline int Iter_Quat(CPixel* self, TComplex* z, TComplex& temp, TReal qc, TReal 
     }
 
 template <typename TComplex, typename TReal>
-inline int Iter_Tetrate(CPixel* self, TComplex* z, TComplex* q, int bailout_type, TReal rqlim)
+inline int Iter_Tetrate(CPixel* self, TComplex* z, TComplex* q, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     *z = (*q) ^ (*z);
-    return DoBailout(bailout_type, z, rqlim);
+    return DoBailout(bailout_type, z, rqlim, oldZ);
     }
 
+/**************************************************************************
+    Fractint Magnet 1 iteration.
+
+    z = ((z^2 + c - 1) / (2z + c - 2))^2
+
+    c is the pixel coordinate for Mandelbrot, or the Julia constant.
+    Preserve Fractint's denominator check before division.
+**************************************************************************/
+
+template <typename TComplex, typename TReal>
+inline int Iter_Magnet1(CPixel* self, TComplex* z, TComplex* q, int bailout_type, TReal rqlim, TComplex* oldZ)
+    {
+    TComplex top = z->CSqr() + *q - TReal(1.0);
+    TComplex bot = (*z) * TReal(2.0) + *q - TReal(2.0);
+
+    TReal div = bot.CSumSqr();
+
+    // Fractint exits if the denominator is too small.
+    if (div < TReal(FLT_MIN))
+	return 1;
+
+    TComplex temp = top / bot;
+    *z = temp.CSqr();
+
+    TComplex sqr;
+    sqr.x = z->x * z->x;
+    sqr.y = z->y * z->y;
+
+    return BailoutCore<TComplex>(
+	bailout_type, z, &sqr, rqlim, oldZ);
+    }
+
+/**************************************************************************
+    Fractint Magnet 2 iteration.
+
+    z = ((z^3 + 3(c-1)z + (c-1)(c-2)) /
+	 (3z^2 + 3(c-2)z + (c-1)(c-2)+1))^2
+
+    c is the pixel coordinate for Mandelbrot, or the Julia constant.
+    Preserve Fractint's denominator check before division.
+**************************************************************************/
+
+template <typename TComplex, typename TReal>
+inline int Iter_Magnet2(CPixel* self, TComplex* z, TComplex* q, int bailout_type, TReal rqlim, TComplex* oldZ)
+    {
+    TComplex cm1 = *q - TReal(1.0);
+    TComplex cm2 = *q - TReal(2.0);
+    TComplex cm1cm2 = cm1 * cm2;
+
+    TComplex z2 = z->CSqr();
+
+    TComplex top = (*z) * z2 + cm1 * (*z) * 3.0 + cm1cm2;
+    TComplex bot = z2 * 3.0 + cm2 * (*z) * 3.0 + cm1cm2 + TReal(1.0);
+
+    TReal div = bot.CSumSqr();
+
+    // Fractint exits if the denominator is too small.
+    if (div < TReal(FLT_MIN))
+	return 1;
+
+    TComplex temp = top / bot;
+    *z = temp.CSqr();
+
+    TComplex sqr;
+    sqr.x = z->x * z->x;
+    sqr.y = z->y * z->y;
+
+    return BailoutCore<TComplex>(
+	bailout_type, z, &sqr, rqlim, oldZ);
+    }
 

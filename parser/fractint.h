@@ -1,12 +1,12 @@
-/* FRACTINT.H - common structures and values for the FRACTINT routines */
+/*
+    FRACTINT.H - common structures and values for the FRACTINT routines
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #ifndef FRACTINT_H
 #define FRACTINT_H
-/*
-#ifndef WIN32
-typedef BYTE unsigned char;
-#endif
-*/
+
 #ifndef WIN32
 #define WIN32
 #endif

@@ -62,7 +62,7 @@ inline void MandelDerivInit(int subtype, bool juliaflag, TComplex* z, TComplex* 
 // Mandelbrot Derivative Template Dispatcher (Tierazon style)
 // ---------------------------------------------------------------------
 template<typename TComplex, typename TReal>
-inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex* q, WORD* degree, TComplex& sqr, TReal& real_imag, int bailout_type, TReal rqlim)
+inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex* q, WORD* degree, TComplex& sqr, TReal& real_imag, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
     TComplex sqrsqr;
     TReal RealImagSqr;
@@ -93,7 +93,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->x = sqr.x - sqr.y + q->x;
 	    z->y = -real_imag - real_imag + q->y;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 1:						// Burning Ship
@@ -106,7 +106,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->x = sqr.x - sqr.y + q->x;
 	    z->y = real_imag + real_imag - q->y;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 2:						// Burning Ship of Higher Degree
@@ -117,7 +117,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    *z = z->CPolynomial(*degree);
 	    *z = *z + *q;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
 	    }
 
 /**************************************************************************
@@ -144,7 +144,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->x = sqr.x - sqr.y + q->x;
 	    z->y = real_imag + real_imag + q->y;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 4:						// Buffalo (works according to Kalles Fraktaller)
@@ -169,7 +169,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 		z->y = fabs(z->y) - q->y;
 		}
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 5:						// Perpendicular Buffalo - (according to Kalles Fraktaller)
@@ -180,7 +180,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = z->x * fabs(z->y) * -2.0 - q->y;
 	    z->x = fabs(sqr.x - sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 6:						// Mandelbar (Tricorn)
@@ -201,7 +201,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 		z->y = (gManp->param[3] == 1.0 ? z->y : -z->y) + q->y;
 		}
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 7:						// Celtic
@@ -221,7 +221,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 		*z = *z + *q;
 		}
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 8:						// Mandelbar Celtic
@@ -232,7 +232,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = z->x * z->y * -2.0 + q->y;
 	    z->x = fabs(sqr.x - sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 9:						// Perpendicular Celtic
@@ -243,7 +243,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = fabs(z->x) * z->y * -2.0 + q->y;
 	    z->x = fabs(sqr.x - sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 10:					// Cubic Flying Squirrel (Buffalo Imaginary)
@@ -254,7 +254,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = fabs(((sqr.x * 3.0) - sqr.y) * z->y) - q->y;
 	    z->x = ((sqr.x - (sqr.y * 3.0)) * z->x) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 11:					// Heart Mandelbrot
@@ -265,7 +265,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = fabs(z->x) * z->y * 2.0 - q->y;
 	    z->x = sqr.x - sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 12:					// Celtic Heart
@@ -276,7 +276,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = fabs(z->x) * z->y * 2.0 - q->y;
 	    z->x = fabs(sqr.x - sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 13:					// Partial Cubic Burning Ship Real
@@ -287,7 +287,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = ((sqr.x * 3.0) - sqr.y) * z->y + q->y;
 	    z->x = (sqr.x - (sqr.y * 3.0)) * fabs(z->x) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 14:					// Partial Cubic Burning Ship Imaginary
@@ -298,7 +298,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = ((sqr.x * 3.0) - sqr.y) * fabs(z->y) + q->y;
 	    z->x = (sqr.x - (sqr.y * 3.0)) * z->x + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 15:					// Partial Cubic Buffalo Real (Celtic)
@@ -309,7 +309,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = ((sqr.x * 3.0) - sqr.y) * z->y + q->y;
 	    z->x = fabs((sqr.x - (sqr.y * 3.0)) * z->x) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 16:					// Cubic Quasi Burning Ship (Buffalo Burning Ship Hybrid)
@@ -320,7 +320,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = -fabs(((sqr.x * 3.0) - sqr.y) * z->y) + q->y;
 	    z->x = (sqr.x - (sqr.y * 3.0)) * fabs(z->x) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 17:					// Cubic Quasi Perpendicular
@@ -331,7 +331,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = -fabs((sqr.x * 3.0) - sqr.y) * z->y + q->y;
 	    z->x = (sqr.x - (sqr.y * 3.0)) * fabs(z->x) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 18:					// Cubic Quasi Heart
@@ -342,7 +342,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = fabs((sqr.x * 3.0) - sqr.y) * z->y + q->y;
 	    z->x = (sqr.x - (sqr.y * 3.0)) * fabs(z->x) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
     /****************************************************************
@@ -361,7 +361,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * z->x * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 20:					// Mandelbar 4th Order
@@ -372,7 +372,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = -4.0 * z->x * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
     /****************************************************************
@@ -387,7 +387,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * fabs(z->x * z->y) * (sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 22:					// Burning Ship 4th Partial Imag
@@ -398,7 +398,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * z->x * fabs(z->y) * (sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 23:					// Burning Ship 4th Partial Real
@@ -409,7 +409,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * fabs(z->x) * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 24:					// Burning Ship 4th Partial Real Mbar
@@ -420,7 +420,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = -4.0 * fabs(z->x) * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 25:					// Celtic Burning Ship 4th
@@ -431,7 +431,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * fabs(z->x * z->y) * (sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 26:					// Celtic Burning Ship 4th Partial Imag
@@ -442,7 +442,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * z->x * fabs(z->y) * (sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 27:					// Celtic Burning Ship 4th Partial Real
@@ -453,7 +453,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * fabs(z->x) * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 28:					// Celtic Burning Ship 4th Partial Real Mbar
@@ -464,7 +464,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = -4.0 * fabs(z->x) * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 29:					// Buffalo 4th Order
@@ -475,7 +475,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * fabs(z->x * z->y * (sqr.x - sqr.y)) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 30:					// Buffalo 4th Partial Imag
@@ -486,7 +486,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * fabs(z->x * z->y * (sqr.x - sqr.y)) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 31:					// Celtic (Buffalo 4th Partial Real)
@@ -497,7 +497,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * z->x * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 32:					// Celtic 4th Mbar
@@ -508,7 +508,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = -4.0 * z->x * z->y * (sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
    /**************************************************************************
@@ -522,7 +522,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = -4.0 * z->x * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 34:					// False Quasi Heart 4th
@@ -533,7 +533,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * z->x * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 35:					// Celtic False Quasi Perpendicular 4th
@@ -544,7 +544,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = -4.0 * z->x * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 36:					// Celtic False Quasi Heart 4th
@@ -555,7 +555,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * z->x * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 37:					// Imag Quasi Perpendicular / Heart 4th
@@ -566,7 +566,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * z->x * fabs(z->y) * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 38:					// Real Quasi Perpendicular 4th
@@ -577,7 +577,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = -4.0 * fabs(z->x) * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 39:					// Real Quasi Heart 4th
@@ -588,7 +588,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * fabs(z->x) * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 40:					// Celtic Imag Quasi Perpendicular / Heart 4th
@@ -599,7 +599,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * z->x * fabs(z->y) * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 41:					// Celtic Real Quasi Perpendicular 4th
@@ -610,7 +610,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = -4.0 * fabs(z->x) * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 42:					// Celtic Real Quasi Heart 4th
@@ -621,7 +621,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = 4.0 * fabs(z->x) * z->y * fabs(sqr.x - sqr.y) + q->y;
 	    z->x = fabs(sqr.x * sqr.x + sqr.y * sqr.y - 6.0 * sqr.x * sqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
    /****************************************************************
@@ -639,7 +639,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = z->x * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 44:					// Mandelbar 5th (Vertical)
@@ -654,7 +654,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = -z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = z->x * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 45:					// Mandelbar 5th (horizontal)
@@ -669,7 +669,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = -z->x * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 46:					// Burning Ship 5th
@@ -684,7 +684,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = fabs(z->y) * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x) * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 47:					// Buffalo 5th
@@ -699,7 +699,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = fabs(z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y)) + q->y;
 	    z->x = fabs(z->x * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y)) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 48:					// Burning Ship 5th Partial
@@ -714,7 +714,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x) * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 	    }
 
 	case 49:					// Burning Ship 5th Partial Mbar
@@ -725,7 +725,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = -z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x) * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 
 	case 50:					// Celtic 5th (Buffalo 5th Partial)
 	    sqr.x = z->x * z->x;
@@ -735,7 +735,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y)) + q->x;
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 
 	case 51:					// Celtic 5th Mbar
 	    sqr.x = z->x * z->x;
@@ -745,7 +745,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = -z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y)) + q->x;
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 
 	case 52:					// Quazi Burning Ship 5th (BS/Buffalo Hybrid)
 	    sqr.x = z->x * z->x;
@@ -755,7 +755,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = -fabs(z->y * (5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y)) + q->y;
 	    z->x = fabs(z->x) * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 
 	case 53:					// Quazi Perpendicular 5th
 	    sqr.x = z->x * z->x;
@@ -765,7 +765,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = -z->y * fabs(5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x) * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 
 	case 54:					// Quazi Heart 5th
 	    sqr.x = z->x * z->x;
@@ -775,7 +775,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    RealImagSqr = sqr.x * sqr.y;
 	    z->y = z->y * fabs(5.0 * sqrsqr.x - 10.0 * RealImagSqr + sqrsqr.y) + q->y;
 	    z->x = fabs(z->x) * (sqrsqr.x - 10.0 * RealImagSqr + 5.0 * sqrsqr.y) + q->x;
-	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ));
 
 	case 55:					// SimonBrot
 /**************************************************************************
@@ -796,7 +796,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    tempz.x = z->x * zabs.x - z->y * zabs.y;
 	    sqrtz = (*degree % 2 == 1) ? z->CSqrt() : TComplex(1.0);		// use square root power if degree is odd
 	    *z = tempz.CPolynomial(*degree / 2) * sqrtz + *q;
-	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
 	    }
 
 	case 56:					// SimonBrot2
@@ -813,7 +813,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    tempz = zabs;
 	    sqrtz = (*degree % 2 == 1) ? z->CSqrt() : TComplex(1.0);		// use square root power if degree is odd
 	    *z = z->CPolynomial(*degree / 2) * sqrtz * tempz + *q;
-	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
 	    }
 
 	case 57:					// Kung Fu Panda
@@ -829,7 +829,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    t2.x = fabs(t1.x);
 	    t2.y = fabs(t1.y);
 	    *z = t2 * t2 - *q;
-	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
 	    }
 
 	case 58:					// HPDZ Buffalo
@@ -848,7 +848,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    *z = w * w - w;
 	    z->x += q->x;
 	    z->y -= q->y;
-	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
 	    }
 
 	case 59:					// SzegediButterfly 1
@@ -870,7 +870,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 	    z->y = sqr.x - ty;
 	    *z += *q;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
 	    }
 
 	case 60:					// SzegediButterfly 2
@@ -889,7 +889,7 @@ inline int MandelDerivDispatch(CPixel* self, int subtype, TComplex* z, TComplex*
 
 	    *z += *q;
 
-	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim));
+	    return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
 	    }
 
 

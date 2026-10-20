@@ -12,7 +12,7 @@
 #include "Fract.h"
 #include "BailoutTemplate.h"
 #include "FractintTrigTemplate.h"
-#include "FilterTemplate.h"
+#include "FractalMathsTemplate.h"
 #include "..\parser\TrigFn.h"
 
 /**************************************************************************
@@ -27,9 +27,9 @@ int	CPixel::QDInitFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q)
 	{
 	case HYPERCMPLXFP:
 	case HYPERCMPLXJFP:
-	    tQD = (invert) ? Invertz2T<QDComplex, qd_real>(cQD, f_radius, f_xcenter, f_ycenter) : cQD;
+	    tQD = TransformPointT<QDComplex, qd_real>(cQD, TransformType, f_radius, f_xcenter, f_ycenter);
 	    QDInitFunctions(MANDELFP, z, q);
-	    InitFractintTrigFunctionsT<QDComplex, qd_real>(type, z, q, juliaflag, invert, cQD, qcQD, qciQD, qcjQD, qckQD, tQD, tempQD, temp1QD, temp2QD, temp4QD, sqrQD, Fn2Index, param);
+	    InitFractintTrigFunctionsT<QDComplex, qd_real>(type, z, q, juliaflag, cQD, qcQD, qciQD, qcjQD, qckQD, tQD, tempQD, temp1QD, temp2QD, temp4QD, sqrQD, Fn2Index, param);
 	    break;
 
 	case MARKSMANDELPWRFP:
@@ -67,8 +67,8 @@ int	CPixel::QDInitFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q)
 	case FPLAMBDAFNFN:
 	case FPMANLAMFNFN:				// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
 	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
-	    tQD = (invert) ? Invertz2T<QDComplex, qd_real>(cQD, f_radius, f_xcenter, f_ycenter) : cQD;
-	    InitFractintTrigFunctionsT<QDComplex, qd_real>(type, z, q, juliaflag, invert, cQD, qcQD, qciQD, qcjQD, qckQD, tQD, tempQD, temp1QD, temp2QD, temp4QD, sqrQD, Fn2Index, param);
+	    tQD = TransformPointT<QDComplex, qd_real>(cQD, TransformType, f_radius, f_xcenter, f_ycenter);
+	    InitFractintTrigFunctionsT<QDComplex, qd_real>(type, z, q, juliaflag, cQD, qcQD, qciQD, qcjQD, qckQD, tQD, tempQD, temp1QD, temp2QD, temp4QD, sqrQD, Fn2Index, param);
 	    break;
 
 //	case FORMULA:
@@ -107,50 +107,58 @@ int	CPixel::QDRunFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q, BY
 	qd_real rqlimQD = rqlim;
 
 	return FractintTrigIterT<QDComplex, qd_real>(type, z, q, tempQD, temp1QD, temp2QD, temp3QD, sqrQD, qcQD, qciQD, qcjQD, qckQD,
-	    Fn1Index, Fn2Index, rqlimQD, BailoutTestType);
+	    Fn1Index, Fn2Index, rqlimQD, BailoutTestType, &QDOldZ);
 	}
 
 	case TRIGPLUSTRIGFP:
 	case TRIGPLUSTRIG:
-	    return TrigPlusTrigFractalT<QDComplex, qd_real>(z, temp1QD, temp2QD, Fn1Index, Fn2Index, rqlim, BailoutTestType);
+	    {
+	    // Fractint's Scott Taylor special case.
+	    if (param[0] == 1.0 && param[1] == 0.0 && param[2] == 1.0 && param[3] == 0.0)
+		{
+		return ScottTrigPlusTrigFractalT<QDComplex, qd_real>(z, temp1QD, temp4QD, Fn1Index, Fn2Index, rqlim, BailoutTestType, &QDOldZ);
+		}
+
+	    return TrigPlusTrigFractalT<QDComplex, qd_real>(z, tempQD, temp1QD, temp2QD, Fn1Index, Fn2Index, rqlim, BailoutTestType, &QDOldZ);
+	    }
 
 	case MANDELTRIGFP:
 	case LAMBDATRIG:
 	case LAMBDATRIGFP:
 	case MANDELTRIG:
-	    return MandelTrigFractalT<QDComplex, qd_real>(z, temp1QD, temp3QD, tQD, Fn1Index, rqlim);
+	    return MandelTrigFractalT<QDComplex, qd_real>(z, temp1QD, temp3QD, tQD, Fn1Index, rqlim, BailoutComponentLimit);
 
 	case FPMANTRIGPLUSEXP:
-	    return ManTrigPlusExpFractalT<QDComplex, qd_real>(z, temp1QD, tQD, Fn1Index, rqlim, BailoutTestType);
+	    return ManTrigPlusExpFractalT<QDComplex, qd_real>(z, temp1QD, tQD, Fn1Index, rqlim, BailoutTestType, &QDOldZ);
 
 	case FPMANTRIGPLUSZSQRD:
 	case FPJULTRIGPLUSZSQRD:
 	case LMANTRIGPLUSZSQRD:
 	case LJULTRIGPLUSZSQRD:
-	    return ManTrigPlusZSqrFractalT<QDComplex, qd_real>(z, temp1QD, sqrQD, tQD, Fn1Index, rqlim, BailoutTestType);
+	    return ManTrigPlusZSqrFractalT<QDComplex, qd_real>(z, temp1QD, sqrQD, tQD, Fn1Index, rqlim, BailoutTestType, &QDOldZ);
 
 	case LJULFNFN:
 	case FPJULFNFN:
 	case FPMANFNFN:
 	case LMANFNFN:
-	    return FnFnPlusFractalT<QDComplex, qd_real>(z, tQD, temp2QD, Fn1Index, Fn2Index, rqlim, BailoutTestType);
+	    return FnFnPlusFractalT<QDComplex, qd_real>(z, tQD, temp2QD, Fn1Index, Fn2Index, rqlim, BailoutTestType, &QDOldZ);
 
 	case LLAMBDAFNFN:
 	case FPLAMBDAFNFN:
 	case LMANLAMFNFN:
 	case FPMANLAMFNFN:
-	    return FnFnMulFractalT<QDComplex, qd_real>(z, tQD, temp2QD, Fn1Index, Fn2Index, rqlim, BailoutTestType);
+	    return FnFnMulFractalT<QDComplex, qd_real>(z, tQD, temp2QD, Fn1Index, Fn2Index, rqlim, BailoutTestType, &QDOldZ);
 
 	case SQRTRIGFP:
 	case SQRTRIG:
-	    return SqrTrigFractalT<QDComplex, qd_real>(z, temp1QD, Fn1Index, rqlim, BailoutTestType);
+	    return SqrTrigFractalT<QDComplex, qd_real>(z, temp1QD, Fn1Index, rqlim, BailoutTestType, &QDOldZ);
 
 	case SQR1OVERTRIGFP:
 	case SQR1OVERTRIG:
-	    return Sqr1OverTrigFractalT<QDComplex, qd_real>(z, Fn1Index, rqlim, BailoutTestType);
+	    return Sqr1OverTrigFractalT<QDComplex, qd_real>(z, Fn1Index, rqlim, BailoutTestType, &QDOldZ);
 
 	case NUMFRACTAL:
-	    return NumFractalT<QDComplex, qd_real>(z, q, Fn1Index, rqlim, BailoutTestType, param);
+	    return NumFractalT<QDComplex, qd_real>(z, q, Fn1Index, rqlim, BailoutTestType, param, &QDOldZ);
 
 
 

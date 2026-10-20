@@ -4,20 +4,21 @@
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
 */
 
-#include	<math.h>
-#include	"manp.h"
-#include	"colour.h"
-#include	"Fract.h"
-#include	"fractype.h"
-#include	"fractalp.h"
-#include	"filter.h"
-#include	"complex.h"
-#include	"dib.h"
-#include	"Slope.h"
-#include	"OscProcess.h"
-#include	"pixel.h"
-#include	"Potential.h"
-#include	"FilterTemplate.h"
+#include <math.h>
+#include "manp.h"
+#include "colour.h"
+#include "Fract.h"
+#include "fractype.h"
+#include "fractalp.h"
+#include "filter.h"
+#include "complex.h"
+#include "dib.h"
+#include "Slope.h"
+#include "OscProcess.h"
+#include "pixel.h"
+#include "Potential.h"
+#include "FilterTemplate.h"
+#include "FractalMathsTemplate.h"
 
 /**************************************************************************
     Small wrappers needed for formula
@@ -260,65 +261,6 @@ void CPixel::InitTierazonFiltersBig()
 	}
     }
 
-void CPixel::SetupDoubleJulia()
-    {
-    if (juliaflag)
-	{
-	q = j;
-	z = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
-	}
-    else
-	{
-	q = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
-	z = 0;
-	}
-    }
-
-void CPixel::SetupDDJulia()
-    {
-    if (juliaflag)
-	{
-	qDD.x = j.x;
-	qDD.y = j.y;
-	zDD = (invert) ? Invertz2T<DDComplex, dd_real>(cDD, f_radius, f_xcenter, f_ycenter) : cDD;
-	}
-    else
-	{
-	qDD = (invert) ? Invertz2T<DDComplex, dd_real>(cDD, f_radius, f_xcenter, f_ycenter) : cDD;
-	zDD = 0.0;
-	}
-    }
-
-void CPixel::SetupQDJulia()
-    {
-    if (juliaflag)
-	{
-	qQD.x = j.x;
-	qQD.y = j.y;
-	zQD = (invert) ? Invertz2T<QDComplex, qd_real>(cQD, f_radius, f_xcenter, f_ycenter) : cQD;
-	}
-    else
-	{
-	qQD = (invert) ? Invertz2T<QDComplex, qd_real>(cQD, f_radius, f_xcenter, f_ycenter) : cQD;
-	zQD = 0.0;
-	}
-    }
-
-void CPixel::SetupBigJulia()
-    {
-    if (juliaflag)
-	{
-	qBig.x = j.x;
-	qBig.y = j.y;
-	zBig = (invert) ? Invertz2T<BigComplex, BigDouble>(cBig, f_radius, f_xcenter, f_ycenter) : cBig;
-	}
-    else
-	{
-	qBig = (invert) ? Invertz2T<BigComplex, BigDouble>(cBig, f_radius, f_xcenter, f_ycenter) : cBig;
-	zBig = 0.0;
-	}
-    }
-
 /**************************************************************************
     Run fractal engine per pixel
 **************************************************************************/
@@ -351,7 +293,8 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
 
     for EVER
 	{
-	SaveOrbitHistory();				// for Forward differencing and Smoothing processing
+	if (calcmode == 'F' || BailoutTestType == CONVERGE)
+	    SaveOrbitHistory();				// for Forward differencing, Smoothing processing and bailout convergence
 
 	// --- iteration limit ---
 	if (FloatIteration >= threshold)
@@ -365,6 +308,12 @@ long	CPixel::dofract(HWND hwnd, int row, int col)
 	    result = RunDistanceEstimatorIteration();
 	else						// the usual case
 	    result = RunStandardIteration();		// arithmetic-specific fractal step
+
+	if (type == MAGNET1 || type == MAGNET2 || type == MAGNET1M || type == MAGNET2M || type == MAGNET1J || type == MAGNET2J)
+	    {
+	    if (CheckMagnetFiniteAttractor())
+		break;
+	    }
 
 	if (result == PIXEL_BLUE)
 	    return BLUE;
@@ -472,8 +421,10 @@ void	CPixel::InitialisePixelRuntime(Complex& saved, DDComplex& DDSaved, QDComple
 	dem_color = -1;
 	}
 
-    if (OutsideMethod == POTENTIAL)
-	rqlim = (potparam[2] > 0) ? potparam[2] : 4.0;
+    // Potential may explicitly override the normal fractal bailout.
+    // A zero parameter means retain the existing bailout.
+    if (gManp->PotentialFlag && potparam[2] > 0.0)
+	rqlim = potparam[2];
     return;
     }
 
@@ -492,7 +443,8 @@ int CPixel::InitialisePixelFractal(double (&tantable)[16])
 		tantable[i] = 0.0;
 	    }
 
-	SetupDoubleJulia();
+	SetupJuliaT<Complex, double>(c, z, q, j, juliaflag, TransformType, f_radius, f_xcenter, f_ycenter);
+//	SetupDoubleJulia();
 	InitTierazonFiltersDouble();
 
 	if (InitFractal(&z, &q) < 0)
@@ -505,7 +457,8 @@ int CPixel::InitialisePixelFractal(double (&tantable)[16])
 	if (cBig.y.BigDouble2DD(&cDD.y) < 0)
 	    return PIXEL_ZERO;
 
-	SetupDDJulia();
+	SetupJuliaT<DDComplex, dd_real>(cDD, zDD, qDD, j, juliaflag, TransformType, f_radius, f_xcenter, f_ycenter);
+//	SetupDDJulia();
 	InitTierazonFiltersDD();
 	DDInitFractal(&zDD, &qDD);
 	}
@@ -516,13 +469,15 @@ int CPixel::InitialisePixelFractal(double (&tantable)[16])
 	if (cBig.y.BigDouble2QD(&cQD.y) < 0)
 	    return PIXEL_ZERO;
 
-	SetupQDJulia();
+	SetupJuliaT<QDComplex, qd_real>(cQD, zQD, qQD, j, juliaflag, TransformType, f_radius, f_xcenter, f_ycenter);
+//	SetupQDJulia();
 	InitTierazonFiltersQD();
 	QDInitFractal(&zQD, &qQD);
 	}
     else
 	{
-	SetupBigJulia();
+	SetupJuliaT<BigComplex, BigDouble>(cBig, zBig, qBig, j, juliaflag, TransformType, f_radius, f_xcenter, f_ycenter);
+//	SetupBigJulia();
 	InitTierazonFiltersBig();
 
 	if (BigInitFractal() < 0)
@@ -611,22 +566,19 @@ int CPixel::RunDistanceEstimatorIteration()
 
 void CPixel::SaveOrbitHistory()
     {
-    if (calcmode == 'F')
+    switch (MathType)
 	{
-	switch (MathType)
-	    {
-	    case DOUBLEFLOAT:
-		OlderZ = OldZ; OldZ = z; break;
+	case DOUBLEFLOAT:
+	    OlderZ = OldZ; OldZ = z; break;
 
-	    case DOUBLEDOUBLE:
-		DDOlderZ = DDOldZ; DDOldZ = zDD; break;
+	case DOUBLEDOUBLE:
+	    DDOlderZ = DDOldZ; DDOldZ = zDD; break;
 
-	    case QUADDOUBLE:
-		QDOlderZ = QDOldZ; QDOldZ = zQD;  break;
+	case QUADDOUBLE:
+	    QDOlderZ = QDOldZ; QDOldZ = zQD;  break;
 
-	    case ARBITRARYPREC:
-		BigOlderZ = BigOldZ; BigOldZ = zBig; break;
-	    }
+	case ARBITRARYPREC:
+	    BigOlderZ = BigOldZ; BigOldZ = zBig; break;
 	}
     }
 
@@ -1130,36 +1082,65 @@ long CPixel::ApplyFinalColour(long iteration, int hooper, double min_orbit, long
     {
     Complex	tempComplex;
 
+    // Independent Fractint continuous potential colouring.
+// Potential takes precedence over normal inside/outside filters.
+    if (gManp->PotentialFlag)
+	{
+	CPotential Pot;
+	double magnitude = 0.0;
+
+	switch (MathType)
+	    {
+	    case DOUBLEFLOAT:
+		magnitude = z.CSumSqr();
+		break;
+
+	    case DOUBLEDOUBLE:
+		magnitude = zDD.CSumSqr();
+		break;
+
+	    case QUADDOUBLE:
+		magnitude = zQD.CSumSqr();
+		break;
+
+	    case ARBITRARYPREC:
+		magnitude = zBig.CBig2Double().CSumSqr();
+		break;
+	    }
+
+	return Pot.potential(magnitude, iteration, threshold, TrueCol, potentialColours, potparam);
+	}
+
+    // Frothy Basin returns a final palette index, not an iteration count.
+    // Do not apply ordinary escape-time inside/outside colouring.
+    if (type == FROTH || type == FROTHFP)
+	return iteration;
     if (iteration < threshold)
 	{
 	switch (MathType)
 	    {
 	    case DOUBLEFLOAT:
-		iteration = DoOutsideFilterT<Complex, double>(iteration, z, OutsideMethod, hooper, threshold, paletteColours, decomp, biomorph,
-		    rqlim, special, logval, logtable, potentialColours, TrueCol, potparam);
+		iteration = DoOutsideFilterT<Complex, double>(iteration, z, OutsideMethod, hooper, threshold, paletteColours, decomp, biomorph, rqlim, special, logval, logtable, TrueCol);
 		break;
 
 	    case DOUBLEDOUBLE:
 		tempComplex.x = to_double(zDD.x);
 		tempComplex.y = to_double(zDD.y);
 
-		iteration = DoOutsideFilterT<Complex, double>(iteration, tempComplex, OutsideMethod, hooper, threshold, paletteColours, decomp, biomorph,
-		    rqlim, special, logval, logtable, potentialColours, TrueCol, potparam);
+		iteration = DoOutsideFilterT<Complex, double>(iteration, tempComplex, OutsideMethod, hooper, threshold, paletteColours, decomp, biomorph, rqlim, special, logval, logtable, TrueCol);
 		break;
 
 	    case QUADDOUBLE:
 		tempComplex.x = to_double(zQD.x);
 		tempComplex.y = to_double(zQD.y);
 
-		iteration = DoOutsideFilterT<Complex, double>(iteration, tempComplex, OutsideMethod, hooper, threshold, paletteColours, decomp, biomorph,
-		    rqlim, special, logval, logtable, potentialColours, TrueCol, potparam);
+		iteration = DoOutsideFilterT<Complex, double>(iteration, tempComplex, OutsideMethod, hooper, threshold, paletteColours, decomp, biomorph, rqlim, special, logval, logtable, TrueCol);
 		break;
 
 	    case ARBITRARYPREC:
 		tempComplex = zBig.CBig2Double();
 
-		iteration = DoOutsideFilterT<Complex, double>(iteration, tempComplex, OutsideMethod, hooper, threshold, paletteColours, decomp, biomorph,
-		    rqlim, special, logval, logtable, potentialColours, TrueCol, potparam);
+		iteration = DoOutsideFilterT<Complex, double>(iteration, tempComplex, OutsideMethod, hooper, threshold, paletteColours, decomp, biomorph, rqlim, special, logval, logtable, TrueCol);
 		break;
 	    }
 	}
@@ -1195,9 +1176,11 @@ long	CPixel::calc_frac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
     {
     if (pairflag)							// half size screens: only do every second row / col
 	if (row % pairflag || col % pairflag)
-	    if (row != (int)ydots - 1)				// must trigger for last line
+	    if (row != (int)ydots - 1)					// must trigger for last line
 		return(threshold);
 
+    // Use the exact fast path for normal and right-angle rotations.
+    // Arbitrary angles are handled by the general affine transformation.
     if (RotationAngle == 0 || RotationAngle == 90 || RotationAngle == 180 || RotationAngle == 270)
 	{
 	// --- handle row change ---
@@ -1206,29 +1189,36 @@ long	CPixel::calc_frac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 	    if (pairflag && row)
 		draw_right_image((short)(oldrow));
 	    }
-
 	if (BigNumFlag)
 	    {
-	    ComputeRotatedCoordsT(row, col, oldrow, oldcol, RotationAngle, cBig.x, cBig.y, Big_xgap, Big_ygap, Big_yymax, BigHor);
+	    ComputeRotatedCoordsT(row, col, oldrow, oldcol, RotationAngle, cBig.x, cBig.y, Big_xgap, Big_ygap, Big_yymax, BigHor, gManp->BigRotationCentre.x, gManp->BigRotationCentre.y);
 	    }
 	else
 	    {
-	    ComputeRotatedCoordsT(row, col, oldrow, oldcol, RotationAngle, c.x, c.y, xgap, ygap, yymax, hor);
+	    ComputeRotatedCoordsT(row, col, oldrow, oldcol, RotationAngle, c.x, c.y, xgap, ygap, yymax, hor, gManp->RotationCentre.x, gManp->RotationCentre.y);
 	    }
 	}
-    else
+    else								// General affine rotation for non-cardinal angles.
 	{
 	if (BigNumFlag)
 	    {
-	    BigDouble  zero = 0.0;
+	    BigComplex Point;
 	    BigDouble brow(row);
 	    BigDouble bcol(col);
-	    BigMat.DoTransformation(&cBig.x, &cBig.y, &zero, Big_xgap * bcol + BigHor, Big_yymax - Big_xgap * brow, 0.0);
+
+	    Point.x = bcol * Big_xgap + BigHor;
+	    Point.y = Big_yymax - brow * Big_ygap;
+
+	    cBig = AffineTransformT<BigComplex, BigDouble>(Point, gManp->BigViewAffineParams);
 	    }
 	else
 	    {
-	    double  zero = 0.0;
-	    Mat.DoTransformation(&(c.x), &(c.y), &zero, col * xgap + hor, yymax - row * ygap, 0.0);
+	    Complex Point;
+
+	    Point.x = col * xgap + hor;
+	    Point.y = yymax - row * ygap;
+
+	    c = AffineTransformT<Complex, double>(Point, gManp->ViewAffineParams);
 	    }
 	}
 
@@ -1246,7 +1236,9 @@ long	CPixel::calc_frac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 
     reset_period = 0;
 
-    if (color > threshold && decomp <= threshold)	// for small thresholds, we can still have higher decomp levels
+    // Limit ordinary iteration colours to threshold, except for decomposition
+    // and Frothy Basin, which can produce valid palette indices above threshold.
+    if (type != FROTH && type != FROTHFP && color > threshold && decomp <= threshold)	
 	color = threshold;
     if (calcmode == 'B')
 	{

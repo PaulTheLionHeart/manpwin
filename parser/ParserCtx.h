@@ -1,3 +1,11 @@
+/*
+    ParserCtx.h - definitions formula parser helpers
+
+    Parser.cpp (C) 1990, Mark C. Peterson, CompuServe [70441,3353] All rights reserved.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
@@ -28,8 +36,6 @@
 #ifndef RENDER_ABORTED
 #define RENDER_ABORTED -1
 #endif
-
-
 
 struct Arg;
 struct ConstArg;
@@ -68,7 +74,11 @@ struct ParserExecContext
 
     // ===== Program definition =====
     unsigned int LastOp = 0;
-    void(**f)(void) = nullptr;
+
+    using VmFn = void(*)(void);
+
+    std::vector<VmFn> f_storage;
+    VmFn* f = nullptr;
 
     std::vector<ConstArg> v_storage;
     ConstArg* v = nullptr;
@@ -123,14 +133,8 @@ public:
     int	DDFormula(DDComplex *zIn, DDComplex *cIn);
     int	QDFormula(QDComplex *zIn, QDComplex *cIn);
 
-
-
-
 private:
-    void ExecOpWithContext(ParserExecContext& ctx, void(*op)(void));
     void ResetVmRegsForInit();
-    void ExecOpWithContext(void(*fn)());
-    void RebuildLoadStorePointers();
 
     int m_InitOpPtr = 0;
     int m_InitLodPtr = 0;
@@ -168,7 +172,6 @@ extern	struct	ConstArg *v;						// was static CAE fp
 extern	void ( **f)(void);
 extern  JUMP_CONTROL_ST jump_control[];
 extern	unsigned Max_Args;
-// ParserCtx.h
 extern std::vector<uint16_t> gLoadIdx;
 extern std::vector<uint16_t> gStoreIdx;
 extern unsigned gLoadCap;

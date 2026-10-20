@@ -1,3 +1,9 @@
+/*
+    FormulaFnTemplate.h - Template for arguments used in formula parser.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <cmath>
 #include "ParserTemplate.h"
 #include "ParserCtx.h"

@@ -46,6 +46,15 @@ int	CPixel::BigInitFractintFunctions(WORD type, BigComplex *z, BigComplex *q)
 	    }
 	    break;
 
+	case MAGNET1:
+	case MAGNET1M:
+	case MAGNET1J:
+	case MAGNET2:
+	case MAGNET2M:
+	case MAGNET2J:
+	    Init_MagnetFractal<BigComplex, BigDouble>(this, z, q, param, juliaflag);
+	    break;
+
 	case COMPLEXMARKSMAND:					// Complex Mark's Mandelbrot
 	    Init_ComplexMarksMand<BigComplex, BigDouble>(this, z, q, param, juliaflag, &CoefficientBig);
 	    break;
@@ -59,7 +68,7 @@ int	CPixel::BigInitFractintFunctions(WORD type, BigComplex *z, BigComplex *q)
 	case MANOWARJ:					// to handle fractint par files
 	case MANOWAR:					// to handle fractint par files
 	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
-	    Init_Manowar<BigComplex, BigDouble>(this, z, q, &cBig, param, juliaflag, invert, tBig, tempBig, temp1Big);
+	    Init_Manowar<BigComplex, BigDouble>(this, z, q, cBig, param, juliaflag, tBig, tempBig, temp1Big);
 	    break;
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
@@ -114,19 +123,19 @@ int	CPixel::BigInitFractintFunctions(WORD type, BigComplex *z, BigComplex *q)
 	case FPMANZTOZPLUSZPWR:
 	case FPJULZTOZPLUSZPWR:
 	case TETRATEFP:					// Tetrate(XAXIS) { c=z=pixel: z=c^z, |z|<=(P1+3)
-	    Init_ZPowerGroup<BigComplex, BigDouble>(this, z, q, cBig, param, juliaflag, invert, tBig, tempBig, temp1Big, temp2Big);
+	    Init_ZPowerGroup<BigComplex, BigDouble>(this, z, q, cBig, param, juliaflag, tBig, tempBig, temp1Big, temp2Big);
 	    break;
 
 	case MARKSMANDELFP:
 	case MARKSMANDEL:
 	case MARKSJULIAFP:
 	case MARKSJULIA:
-	    Init_Marks<BigComplex, BigDouble>(this, z, q, cBig, param, juliaflag, invert, tBig, CoefficientBig);
+	    Init_Marks<BigComplex, BigDouble>(this, z, q, cBig, param, juliaflag, tBig, CoefficientBig);
 	    break;
 
 	case QUATFP:
 	case QUATJULFP:
-	    Init_Quat<BigComplex, BigDouble>(this, z, q, cBig, param, juliaflag, invert, tBig, qcBig, qciBig, qcjBig, qckBig);
+	    Init_Quat<BigComplex, BigDouble>(this, z, q, cBig, param, juliaflag, tBig, qcBig, qciBig, qcjBig, qckBig);
 	    break;
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
@@ -137,24 +146,12 @@ int	CPixel::BigInitFractintFunctions(WORD type, BigComplex *z, BigComplex *q)
 
 	case VL:					// Beauty of Fractals pp. 125 - 127
 	    break;
-#endif
 
-	case MAGNET1M:
-	case MAGNET1J:
-	    BigInitTierazonFunctions(102, z, q);
-	    break;
-
-	case MAGNET2M:
-	case MAGNET2J:
-	    BigInitTierazonFunctions(103, z, q);
-	    break;
-
-#ifdef ALLOWALLFRACTINTFUNCTIONS
 	case LYAPUNOV:
-	break;
+	    break;
 
 	case FROTH:
-	break;
+	    break;
 #endif
 
 	}
@@ -179,36 +176,46 @@ int	CPixel::BigRunFractintFunctions(WORD type, BigComplex *z, BigComplex *q, BYT
 	    return Iter_Newton<BigComplex, BigDouble>(this, z, q, z1, z2, zd, iteration, degree, subtype, rootsBig, threshBig, color, threshold);
 
 	case COMPLEXMARKSMAND:					// Complex Mark's Mandelbrot
-	    return Iter_ComplexMarksMandelbrot<BigComplex, BigDouble>(this, z, q, sqrBig, realimagBig, CoefficientBig, BailoutTestType, rqlim);
+	    return Iter_ComplexMarksMandelbrot<BigComplex, BigDouble>(this, z, q, sqrBig, realimagBig, CoefficientBig, BailoutTestType, rqlim, &BigOldZ);
 
 	case SPIDERFP:						// Spider(XAXIS) { c=z=pixel: z=z*z+c; c=c/2+z, |z|<=4 }
-	    return Iter_Spider<BigComplex, BigDouble>(this, z, q, tempBig, BailoutTestType, rqlim);
+	    return Iter_Spider<BigComplex, BigDouble>(this, z, q, tempBig, BailoutTestType, rqlim, &BigOldZ);
 
 	case MANOWARFP:						// From Art Matrix via Lee Skinner
 	case MANOWARJFP:					// to handle fractint par files
 	case MANOWARJ:						// to handle fractint par files
 	case MANOWAR:						// to handle fractint par files
-	    return Iter_ManOWar<BigComplex, BigDouble>(this, z, q, tempBig, temp1Big, temp3Big, param, BailoutTestType, rqlim);
+	    return Iter_ManOWar<BigComplex, BigDouble>(this, z, q, tempBig, temp1Big, temp3Big, param, BailoutTestType, rqlim, &BigOldZ);
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
 	case BARNSLEYM1:					// Barnsley's Mandelbrot type M1 from "Fractals Everywhere" by Michael Barnsley, p. 322
 	case BARNSLEYJ1:
 	case BARNSLEYM1FP:
 	case BARNSLEYJ1FP:
-	    return DoBailout(bailout_type, z, rqlim);
+	    return DoBailout(bailout_type, z, rqlim, &BigOldZ);
 
 	case BARNSLEYM2:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 331, example 4.2
 	case BARNSLEYJ2:
 	case BARNSLEYM2FP:
 	case BARNSLEYJ2FP:
-	    return DoBailout(bailout_type, z, rqlim);
+	    return DoBailout(bailout_type, z, rqlim, &BigOldZ);
 
 	case BARNSLEYM3:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 292, example 4.1 
 	case BARNSLEYJ3:
 	case BARNSLEYM3FP:
 	case BARNSLEYJ3FP:
-	    return DoBailout(bailout_type, z, rqlim);
+	    return DoBailout(bailout_type, z, rqlim, &BigOldZ);
 #endif
+
+	case MAGNET1:
+	case MAGNET1M:
+	case MAGNET1J:
+	    return Iter_Magnet1<BigComplex, BigDouble>(this, z, q, BailoutTestType, rqlim, &BigOldZ);
+
+	case MAGNET2:
+	case MAGNET2M:
+	case MAGNET2J:
+	    return Iter_Magnet2<BigComplex, BigDouble>(this, z, q, BailoutTestType, rqlim, &BigOldZ);
 
 	case COMPLEXNEWTON:
 	case COMPLEXBASIN:
@@ -222,7 +229,7 @@ int	CPixel::BigRunFractintFunctions(WORD type, BigComplex *z, BigComplex *q, BYT
 	case MANDELLAMBDA:
 	case LAMBDAFP:
 	case LAMBDA:
-	    return Iter_Lambda<BigComplex, BigDouble>(this, z, q, tempBig, BailoutTestType, rqlim);
+	    return Iter_Lambda<BigComplex, BigDouble>(this, z, q, tempBig, BailoutTestType, rqlim, &BigOldZ);
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
 	case PHOENIXFP:
@@ -241,18 +248,18 @@ int	CPixel::BigRunFractintFunctions(WORD type, BigComplex *z, BigComplex *q, BYT
 	case LJULIAZPOWER:
 	case LMANDELZPOWER:
 	case FPMANDELZPOWER:
-	    return Iter_ZPower<BigComplex, BigDouble>(this, z, q, temp2Big, BailoutTestType, rqlim);
+	    return Iter_ZPower<BigComplex, BigDouble>(this, z, q, temp2Big, BailoutTestType, rqlim, &BigOldZ);
 
 	case FPMANZTOZPLUSZPWR:
 	case FPJULZTOZPLUSZPWR:
-	    return Iter_ZtoZPlusZPower<BigComplex, BigDouble>(this, z, q, tempBig, param, BailoutTestType, rqlim);
+	    return Iter_ZtoZPlusZPower<BigComplex, BigDouble>(this, z, q, tempBig, param, BailoutTestType, rqlim, &BigOldZ);
 
 	case MARKSMANDELFP:				// Mark Peterson's variation of "lambda" function
 	case MARKSMANDEL:
 	case MARKSJULIAFP:
 	case MARKSJULIA:
 	    // Z1 = (C^(exp-1) * Z**2) + C
-	    return Iter_MarksMandel<BigComplex, BigDouble>(this, z, q, tempBig, temp1Big, CoefficientBig, tBig, BailoutTestType, rqlim);
+	    return Iter_MarksMandel<BigComplex, BigDouble>(this, z, q, tempBig, temp1Big, CoefficientBig, tBig, BailoutTestType, rqlim, &BigOldZ);
 
 	case QUATFP:
 	case QUATJULFP:
@@ -265,7 +272,7 @@ int	CPixel::BigRunFractintFunctions(WORD type, BigComplex *z, BigComplex *q, BYT
 #endif
 
 	case TETRATEFP:					// Tetrate(XAXIS) { c=z=pixel: z=c^z, |z|<=(P1+3)
-	    return Iter_Tetrate<BigComplex, BigDouble>(this, z, q, BailoutTestType, rqlim);
+	    return Iter_Tetrate<BigComplex, BigDouble>(this, z, q, BailoutTestType, rqlim, &BigOldZ);
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
 
@@ -273,18 +280,8 @@ int	CPixel::BigRunFractintFunctions(WORD type, BigComplex *z, BigComplex *q, BYT
 	    return(0);
 
 	case VL:					// Beauty of Fractals pp. 125 - 127
-	    return DoBailout(bailout_type, z, rqlim);
-#endif
+	    return DoBailout(bailout_type, z, rqlim, &BigOldZ);
 
-	case MAGNET1M:
-	case MAGNET1J:
-	    return (BigRunTierazonFunctions(102, z, q, SpecialFlag, iteration));
-
-	case MAGNET2M:
-	case MAGNET2J:
-	    return (BigRunTierazonFunctions(103, z, q, SpecialFlag, iteration));
-
-#ifdef ALLOWALLFRACTINTFUNCTIONS
 	case LYAPUNOV:
 	    return TRUE;
 

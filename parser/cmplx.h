@@ -1,4 +1,9 @@
-// Hyper (4D) complex number defs
+/*
+    CMPLX.H - Hyper (4D) complex number defs
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #ifndef _CMPLX_DEFINED
 #define _CMPLX_DEFINED
 

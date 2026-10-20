@@ -404,11 +404,6 @@ int	DoPerturbation()
 	gManp->pDataArray[i]->workIndex = &workIndex;
 	gManp->pDataArray[i]->totalPixels = totalPixels;
 	gManp->pDataArray[i]->mode = mode;
-#ifdef _DEBUG
-	char buf[80];
-	sprintf_s(buf, "Pert thread %d started\n", i);
-	OutputDebugStringA(buf); 
-#endif
 
 	// Each perturbation worker records Clouds orbit hits in its own density map.
 	// Keeping the maps thread-local avoids locking in the iteration loop.
@@ -442,9 +437,6 @@ int	DoPerturbation()
 	if (user_data(gManp->GlobalHwnd) == -1)		// user pressed a key?
 	    {
 	    gStopRequested.store(true, std::memory_order_relaxed);
-#ifdef _DEBUG
-	    OutputDebugStringA("[AbortRequested] keypress detected\n");
-#endif
 	    }
 	flag = 1;
 	gManp->curpass = 100;
@@ -518,21 +510,9 @@ int	DoPerturbation()
 	    {
 	    CloseHandle(gManp->hThread[i]);
 	    gManp->hThread[i] = NULL;
-//	    char    buf[256];
-//	    sprintf_s(buf, "Pert thread %d finished\n", i);
-//	    OutputDebugStringA(buf);
 	    }
 	}
 
-#ifdef _DEBUG
-    {
-    char    buf[256];
-    double pertSeconds = tPertRender.stop_ms();
-    auto s = FormatElapsed(pertSeconds);
-    SAFE_SPRINTF(buf, "Pert Render: %s\n", s.c_str());
-    OutputDebugStringA(buf);
-    }
-#endif
     gManp->CurrentRenderMode = NOMULTITHREAD;
 
     /*
@@ -568,16 +548,6 @@ int	DoPerturbation()
 	CloseHandle(ghMutex);
 	ghMutex = NULL;
 	}
-
-#ifdef _DEBUG
-    {
-    char    buf[256];
-    double slopeSeconds = tCalcSlope.stop_ms();
-    auto s = FormatElapsed(slopeSeconds);
-    SAFE_SPRINTF(buf, "fwd diff slope (if used): %s\n", s.c_str());
-    OutputDebugStringA(buf);
-    }
-#endif
     return 0;
     }
 

@@ -1,5 +1,5 @@
 /*
-   FRACTINTFILTERS.CPP - Filter types in FRACTINT.EXE - used in reading fracctint PAR files
+   FRACTINTFILTERS.CPP - Filter types in FRACTINT.EXE - used in reading fractint PAR files
 
    Written in Microsoft Visual C++ by Paul de Leeuw.
 */

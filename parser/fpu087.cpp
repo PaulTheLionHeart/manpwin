@@ -1,9 +1,10 @@
-/* Fpu087.cpp
- * This file contains routines to replace fpu087.asm.
- *
- * This file Copyright 1991 Ken Shirriff.  It may be used according to the
- * fractint license conditions, blah blah blah.
- */
+/*
+    Fpu087.cpp - This file contains routines to replace fpu087.asm
+
+    This file Copyright 1991 Ken Shirriff.  It may be used according to the fractint license conditions, blah blah blah.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
 
 #include "..\ManpWIN64\Complex.h"
 

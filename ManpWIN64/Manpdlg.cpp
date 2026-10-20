@@ -117,18 +117,800 @@ INT_PTR CALLBACK Param3D (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
       }
 
 /**************************************************************************
+    Dialog Control for Affine Transformation Parameters
+**************************************************************************/
+
+INT_PTR CALLBACK AffineParamDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+    char s[100];
+
+    switch (message)
+	{
+	case WM_INITDIALOG:
+	    SAFE_SPRINTF(s, "%.15g", gManp->AffineParams.a);
+	    SetDlgItemText(hDlg, IDC_AFFINE_A, s);
+
+	    SAFE_SPRINTF(s, "%.15g", gManp->AffineParams.b);
+	    SetDlgItemText(hDlg, IDC_AFFINE_B, s);
+
+	    SAFE_SPRINTF(s, "%.15g", gManp->AffineParams.e);
+	    SetDlgItemText(hDlg, IDC_AFFINE_E, s);
+
+	    SAFE_SPRINTF(s, "%.15g", gManp->AffineParams.c);
+	    SetDlgItemText(hDlg, IDC_AFFINE_C, s);
+
+	    SAFE_SPRINTF(s, "%.15g", gManp->AffineParams.d);
+	    SetDlgItemText(hDlg, IDC_AFFINE_D, s);
+
+	    SAFE_SPRINTF(s, "%.15g", gManp->AffineParams.f);
+	    SetDlgItemText(hDlg, IDC_AFFINE_F, s);
+
+	    return TRUE;
+
+	case WM_COMMAND:
+	    switch (LOWORD(wParam))
+		{
+		case IDOK:
+		    GetDlgItemText(hDlg, IDC_AFFINE_A, s, sizeof(s));
+		    sscanf(s, "%lf", &gManp->AffineParams.a);
+
+		    GetDlgItemText(hDlg, IDC_AFFINE_B, s, sizeof(s));
+		    sscanf(s, "%lf", &gManp->AffineParams.b);
+
+		    GetDlgItemText(hDlg, IDC_AFFINE_E, s, sizeof(s));
+		    sscanf(s, "%lf", &gManp->AffineParams.e);
+
+		    GetDlgItemText(hDlg, IDC_AFFINE_C, s, sizeof(s));
+		    sscanf(s, "%lf", &gManp->AffineParams.c);
+
+		    GetDlgItemText(hDlg, IDC_AFFINE_D, s, sizeof(s));
+		    sscanf(s, "%lf", &gManp->AffineParams.d);
+
+		    GetDlgItemText(hDlg, IDC_AFFINE_F, s, sizeof(s));
+		    sscanf(s, "%lf", &gManp->AffineParams.f);
+
+		    EndDialog(hDlg, TRUE);
+		    return TRUE;
+
+		case IDCANCEL:
+		    EndDialog(hDlg, FALSE);
+		    return TRUE;
+		}
+	    break;
+	}
+
+    return FALSE;
+    }
+
+/**************************************************************************
+    Dialog Control for Mobius Transformation Parameters
+**************************************************************************/
+
+INT_PTR CALLBACK MobiusParamDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+    static MobiusTransformParams TempParams;
+    char s[100];
+
+    switch (message)
+	{
+	case WM_INITDIALOG:
+	    TempParams = gManp->MobiusParams;
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.aReal);
+	    SetDlgItemText(hDlg, IDC_MOBIUS_A_REAL, s);
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.aImag);
+	    SetDlgItemText(hDlg, IDC_MOBIUS_A_IMAG, s);
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.bReal);
+	    SetDlgItemText(hDlg, IDC_MOBIUS_B_REAL, s);
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.bImag);
+	    SetDlgItemText(hDlg, IDC_MOBIUS_B_IMAG, s);
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.cReal);
+	    SetDlgItemText(hDlg, IDC_MOBIUS_C_REAL, s);
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.cImag);
+	    SetDlgItemText(hDlg, IDC_MOBIUS_C_IMAG, s);
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.dReal);
+	    SetDlgItemText(hDlg, IDC_MOBIUS_D_REAL, s);
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.dImag);
+	    SetDlgItemText(hDlg, IDC_MOBIUS_D_IMAG, s);
+
+	    return TRUE;
+
+	case WM_COMMAND:
+	    switch ((int)LOWORD(wParam))
+		{
+		case IDOK:
+		    GetDlgItemText(hDlg, IDC_MOBIUS_A_REAL, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.aReal);
+
+		    GetDlgItemText(hDlg, IDC_MOBIUS_A_IMAG, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.aImag);
+
+		    GetDlgItemText(hDlg, IDC_MOBIUS_B_REAL, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.bReal);
+
+		    GetDlgItemText(hDlg, IDC_MOBIUS_B_IMAG, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.bImag);
+
+		    GetDlgItemText(hDlg, IDC_MOBIUS_C_REAL, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.cReal);
+
+		    GetDlgItemText(hDlg, IDC_MOBIUS_C_IMAG, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.cImag);
+
+		    GetDlgItemText(hDlg, IDC_MOBIUS_D_REAL, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.dReal);
+
+		    GetDlgItemText(hDlg, IDC_MOBIUS_D_IMAG, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.dImag);
+
+		    gManp->MobiusParams = TempParams;
+
+		    EndDialog(hDlg, TRUE);
+		    return TRUE;
+
+		case IDCANCEL:
+		    EndDialog(hDlg, FALSE);
+		    return TRUE;
+		}
+	    break;
+	}
+
+    return FALSE;
+    }
+
+/**************************************************************************
+Dialog Control for Joukowski Transformation Parameters
+**************************************************************************/
+
+INT_PTR CALLBACK JoukowskiParamDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+    static JoukowskiTransformParams TempParams;
+    char s[100];
+
+    switch (message)
+	{
+	case WM_INITDIALOG:
+	    TempParams = gManp->JoukowskiParams;
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.kReal);
+	    SetDlgItemText(hDlg, IDC_JOUKOWSKI_K_REAL, s);
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.kImag);
+	    SetDlgItemText(hDlg, IDC_JOUKOWSKI_K_IMAG, s);
+
+	    return TRUE;
+
+	case WM_COMMAND:
+	    switch ((int)LOWORD(wParam))
+		{
+		case IDOK:
+		    GetDlgItemText(hDlg, IDC_JOUKOWSKI_K_REAL, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.kReal);
+
+		    GetDlgItemText(hDlg, IDC_JOUKOWSKI_K_IMAG, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.kImag);
+
+		    gManp->JoukowskiParams = TempParams;
+
+		    EndDialog(hDlg, TRUE);
+		    return TRUE;
+
+		case IDCANCEL:
+		    EndDialog(hDlg, FALSE);
+		    return TRUE;
+		}
+	    break;
+	}
+
+    return FALSE;
+    }
+
+/**************************************************************************
+Dialog Control for Twist Transformation Parameters
+**************************************************************************/
+
+INT_PTR CALLBACK TwistParamDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+    static TwistTransformParams TempParams;
+    char s[100];
+
+    switch (message)
+	{
+	case WM_INITDIALOG:
+	    TempParams = gManp->TwistParams;
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.Strength);
+	    SetDlgItemText(hDlg, IDC_TWIST_STRENGTH, s);
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.Radius);
+	    SetDlgItemText(hDlg, IDC_TWIST_RADIUS, s);
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.CentreX);
+	    SetDlgItemText(hDlg, IDC_TWIST_CENTREX, s);
+
+	    SAFE_SPRINTF(s, "%.15g", TempParams.CentreY);
+	    SetDlgItemText(hDlg, IDC_TWIST_CENTREY, s);
+
+	    return TRUE;
+
+	case WM_COMMAND:
+	    switch ((int)LOWORD(wParam))
+		{
+		case IDOK:
+		    GetDlgItemText(hDlg, IDC_TWIST_STRENGTH, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.Strength);
+
+		    GetDlgItemText(hDlg, IDC_TWIST_RADIUS, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.Radius);
+
+		    GetDlgItemText(hDlg, IDC_TWIST_CENTREX, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.CentreX);
+
+		    GetDlgItemText(hDlg, IDC_TWIST_CENTREY, s, sizeof(s));
+		    sscanf(s, "%lf", &TempParams.CentreY);
+
+		    gManp->TwistParams = TempParams;
+
+		    EndDialog(hDlg, TRUE);
+		    return TRUE;
+
+		case IDCANCEL:
+		    EndDialog(hDlg, FALSE);
+		    return TRUE;
+		}
+	    break;
+	}
+
+    return FALSE;
+    }
+
+/**************************************************************************
+    Enable transformation-specific parameter controls
+**************************************************************************/
+
+static void SetTransformParameterControls(HWND hDlg, TRANSFORMTYPE TransformType)
+    {
+    BOOL ExtendedTransform = TransformType == TRANSFORM_AFFINE || TransformType == TRANSFORM_MOBIUS || TransformType == TRANSFORM_JOUKOWSKI || TransformType == TRANSFORM_TWIST;
+
+    EnableWindow(GetDlgItem(hDlg, IDC_TRANSFORM_POWER_VALUE), TransformType >= TRANSFORM_POWER_BASE);
+    EnableWindow(GetDlgItem(hDlg, IDC_TRANSFORM_PARAMS), ExtendedTransform);
+    EnableWindow(GetDlgItem(hDlg, IDM_RADIUS), !ExtendedTransform);
+    EnableWindow(GetDlgItem(hDlg, IDM_CENTREX), !ExtendedTransform);
+    EnableWindow(GetDlgItem(hDlg, IDM_CENTREY), !ExtendedTransform);
+    }
+
+/**************************************************************************
+    Set affine transformation for arbitrary view rotation
+**************************************************************************/
+
+void CManp::SetViewAffineRotation()
+    {
+    double Angle = RotationAngle * PI / 180.0;
+    double SinAngle = sin(Angle);
+    double CosAngle = cos(Angle);
+
+    if (BigNumFlag)
+	{
+	BigComplex Centre;
+
+	Centre.x = BigHor + (BigWidth * AspectRatio) / 2.0;
+	Centre.y = BigVert + BigWidth / 2.0;
+
+	BigRotationCentre = Centre;
+
+	BigViewAffineParams.a.ChangePrecision(decimals);
+	BigViewAffineParams.b.ChangePrecision(decimals);
+	BigViewAffineParams.c.ChangePrecision(decimals);
+	BigViewAffineParams.d.ChangePrecision(decimals);
+	BigViewAffineParams.e.ChangePrecision(decimals);
+	BigViewAffineParams.f.ChangePrecision(decimals);
+
+	BigViewAffineParams.a = CosAngle;
+	BigViewAffineParams.b = SinAngle;
+	BigViewAffineParams.c = -SinAngle;
+	BigViewAffineParams.d = CosAngle;
+
+	BigViewAffineParams.e = Centre.x - BigViewAffineParams.a * Centre.x - BigViewAffineParams.b * Centre.y;
+	BigViewAffineParams.f = Centre.y - BigViewAffineParams.c * Centre.x - BigViewAffineParams.d * Centre.y;
+	}
+    else
+	{
+	RotationCentre.x = hor + (mandel_width * AspectRatio) / 2.0;
+	RotationCentre.y = vert + mandel_width / 2.0;
+
+	ViewAffineParams.a = CosAngle;
+	ViewAffineParams.b = SinAngle;
+	ViewAffineParams.c = -SinAngle;
+	ViewAffineParams.d = CosAngle;
+
+	ViewAffineParams.e = RotationCentre.x - ViewAffineParams.a * RotationCentre.x - ViewAffineParams.b * RotationCentre.y;
+	ViewAffineParams.f = RotationCentre.y - ViewAffineParams.c * RotationCentre.x - ViewAffineParams.d * RotationCentre.y;
+	}
+    }
+
+/**************************************************************************
+    Dialog Control for Fractal Transformations
+**************************************************************************/
+
+INT_PTR CALLBACK TransformationDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+    BOOL		bTrans;
+    static	int	temp_RotationAngle;
+    static	UINT	tempParam;
+    static TRANSFORMTYPE tempTransformType;
+    char		s[100];
+    static	int	OrigRotationAngle;
+    static	int	tempTransformPower = 2;
+    static TRANSFORMDLGMODE DialogMode;
+    static	BOOL	ExtendedTransform;
+
+    const int DisabledForAnimation[] =
+	{
+	IDC_TRANSFORM_NONE,	// no point if we're not selecting a transform
+	IDC_CARTESIAN,
+	IDC_SPHERICAL,
+	IDC_CYLINDRICAL,
+	IDC_PARABOLIC,
+	IDC_PARABOLOIDAL,
+	IDC_ELLIPTICAL,
+	IDC_BIPOLAR,
+	IDC_TOROIDAL,
+	IDC_PROLATE_SPHEROIDAL,
+	IDC_OBLATE_SPHEROIDAL,
+	IDC_BISPHERICAL,
+	IDC_CONICAL,
+	IDC_NORMAL,
+	IDC_90DEGREES,
+	IDC_180DEGREES,
+	IDC_270DEGREES,
+	IDC_OTHER_DEGREES,
+	IDM_ROTDEG
+	};
+
+    switch (message)
+	{
+	case WM_INITDIALOG:
+	    // lParam selects normal transformation setup or animation setup mode.
+	    DialogMode = (TRANSFORMDLGMODE)lParam;
+	    for (int id : DisabledForAnimation)
+		EnableWindow(GetDlgItem(hDlg, id), DialogMode != TRANSFORMDLG_ANIMATION);
+
+	    EnableWindow(GetDlgItem(hDlg, IDC_TRANSFORM_PARAMS), tempTransformType == TRANSFORM_AFFINE || tempTransformType == TRANSFORM_MOBIUS || tempTransformType == TRANSFORM_JOUKOWSKI || tempTransformType == TRANSFORM_TWIST);
+	    SetDlgItemInt(hDlg, IDM_ROTDEG, gManp->RotationAngle, TRUE);
+	    CheckRadioButton(hDlg, IDC_CARTESIAN, IDC_CONICAL, IDC_CARTESIAN + gManp->CoordSystem);
+	    temp_RotationAngle = gManp->RotationAngle % 360;
+	    switch (gManp->RotationAngle)
+		{
+		case NORMAL:
+		    tempParam = IDC_NORMAL;
+		    break;
+		case 90:
+		    tempParam = IDC_90DEGREES;
+		    break;
+		case 180:
+		    tempParam = IDC_180DEGREES;
+		    break;
+		case 270:
+		    tempParam = IDC_270DEGREES;
+		    break;
+		default:
+		    tempParam = IDC_OTHER_DEGREES;
+		    temp_RotationAngle = GetDlgItemInt(hDlg, IDC_OTHER_DEGREES, &bTrans, TRUE);
+		}
+	    CheckRadioButton(hDlg, IDC_NORMAL, IDC_OTHER_DEGREES, tempParam);
+	    SAFE_SPRINTF(s, "%7.7f", gManp->f_radius);
+	    SetDlgItemText(hDlg, IDM_RADIUS, s);
+	    SAFE_SPRINTF(s, "%7.7f", gManp->f_xcenter);
+	    SetDlgItemText(hDlg, IDM_CENTREX, s);
+	    SAFE_SPRINTF(s, "%7.7f", gManp->f_ycenter);
+	    SetDlgItemText(hDlg, IDM_CENTREY, s);
+	    tempTransformType = gManp->TransformType;
+	    EnableWindow(GetDlgItem(hDlg, IDC_TRANSFORM_POWER_VALUE), tempTransformType >= TRANSFORM_POWER_BASE);
+
+	    ExtendedTransform = tempTransformType == TRANSFORM_AFFINE || tempTransformType == TRANSFORM_MOBIUS || tempTransformType == TRANSFORM_JOUKOWSKI || tempTransformType == TRANSFORM_TWIST;
+
+	    EnableWindow(GetDlgItem(hDlg, IDM_RADIUS), !ExtendedTransform);
+	    EnableWindow(GetDlgItem(hDlg, IDM_CENTREX), !ExtendedTransform);
+	    EnableWindow(GetDlgItem(hDlg, IDM_CENTREY), !ExtendedTransform);
+
+	    if (tempTransformType >= TRANSFORM_POWER_BASE)
+		tempTransformPower = GetTransformPower(tempTransformType);
+	    else
+		tempTransformPower = 2;
+	    SetDlgItemInt(hDlg, IDC_TRANSFORM_POWER_VALUE, tempTransformPower, FALSE);
+
+	    switch (tempTransformType)
+		{
+		case TRANSFORM_INVERSION:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_INVERSION);
+		    break;
+
+		case TRANSFORM_COMPLEX_LOG:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_COMPLEXLOG);
+		    break;
+
+		case TRANSFORM_NONE:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_NONE);
+			break;
+
+		case TRANSFORM_FOLD_X:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_FOLDX);
+		    break;
+
+		case TRANSFORM_FOLD_Y:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_FOLDY);
+		    break;
+
+		case TRANSFORM_FOLD_XY:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_FOLDXY);
+		    break;
+
+		case TRANSFORM_FOLD_DIAGONAL:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_FOLD_DIAG);
+		    break;
+
+		case TRANSFORM_FOLD_DIAGONALS:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_FOLD_DIAGS);
+		    break;
+
+		case TRANSFORM_RADIAL_BULGE:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_RADIAL_BULGE);
+		    break;
+
+		case TRANSFORM_RADIAL_PINCH:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_RADIAL_PINCH);
+		    break;
+
+		case TRANSFORM_CIRCLE_FOLD:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_CIRCLE_FOLD);
+		    break;
+
+		case TRANSFORM_RADIAL_CLAMP:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_RADIAL_CLAMP);
+		    break;
+
+		case TRANSFORM_RADIAL_COMPRESS:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_RADIAL_COMPRESS);
+		    break;
+
+		case TRANSFORM_AFFINE:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_AFFINE);
+		    break;
+
+		case TRANSFORM_MOBIUS:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_MOBIUS);
+		    break;
+
+		case TRANSFORM_JOUKOWSKI:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_JOUKOWSKI);
+		    break;
+
+		case TRANSFORM_TWIST:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_TWIST);
+		    break;
+
+		case TRANSFORM_COMPLEX_EXP:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_COMPLEXEXP);
+		    break;
+
+		case TRANSFORM_COMPLEX_SIN:
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_COMPLEXSIN);
+		    break;
+
+		default:
+		    if (tempTransformType >= TRANSFORM_POWER_BASE)
+			{
+			CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_POWER);
+			tempTransformPower = GetTransformPower(tempTransformType);
+			}
+		    break;
+		}
+
+	    return  TRUE;
+
+	case WM_COMMAND:
+	    switch ((int)LOWORD(wParam))
+		//	        switch (wParam)
+		{
+		case IDC_CARTESIAN:
+		    gManp->CoordSystem = CARTESIAN;
+		    break;
+		case IDC_SPHERICAL:
+		    gManp->CoordSystem = SPHERICAL;
+		    break;
+		case IDC_CYLINDRICAL:
+		    gManp->CoordSystem = CYLINDRICAL;
+		    break;
+		case IDC_PARABOLIC:
+		    gManp->CoordSystem = PARABOLIC;
+		    break;
+		case IDC_PARABOLOIDAL:
+		    gManp->CoordSystem = PARABOLOIDAL;
+		    break;
+		case IDC_ELLIPTICAL:
+		    gManp->CoordSystem = ELLIPTICAL;
+		    break;
+		case IDC_BIPOLAR:
+		    gManp->CoordSystem = BIPOLAR;
+		    break;
+		case IDC_TOROIDAL:
+		    gManp->CoordSystem = TOROIDAL;
+		    break;
+		case IDC_PROLATE_SPHEROIDAL:
+		    gManp->CoordSystem = PROLATE_SPHERE;
+		    break;
+		case IDC_OBLATE_SPHEROIDAL:
+		    gManp->CoordSystem = OBLATE_SPHERE;
+		    break;
+		case IDC_BISPHERICAL:
+		    gManp->CoordSystem = BISPHERICAL;
+		    break;
+		case IDC_CONICAL:
+		    gManp->CoordSystem = CONICAL;
+		    break;
+
+		case IDC_TRANSFORM_NONE:
+		    tempTransformType = TRANSFORM_NONE;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_NONE);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_INVERSION:
+		    tempTransformType = TRANSFORM_INVERSION;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_INVERSION);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_COMPLEXLOG:
+		    tempTransformType = TRANSFORM_COMPLEX_LOG;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_COMPLEXLOG);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_FOLDX:
+		    tempTransformType = TRANSFORM_FOLD_X;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_FOLDX);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_FOLDY:
+		    tempTransformType = TRANSFORM_FOLD_Y;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_FOLDY);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_FOLDXY:
+		    tempTransformType = TRANSFORM_FOLD_XY;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_FOLDXY);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_FOLD_DIAG:
+		    tempTransformType = TRANSFORM_FOLD_DIAGONAL;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_FOLD_DIAG);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_FOLD_DIAGS:
+		    tempTransformType = TRANSFORM_FOLD_DIAGONALS;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_FOLD_DIAGS);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_RADIAL_BULGE:
+		    tempTransformType = TRANSFORM_RADIAL_BULGE;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_RADIAL_BULGE);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_RADIAL_PINCH:
+		    tempTransformType = TRANSFORM_RADIAL_PINCH;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_RADIAL_PINCH);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_CIRCLE_FOLD:
+		    tempTransformType = TRANSFORM_CIRCLE_FOLD;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_CIRCLE_FOLD);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_RADIAL_CLAMP:
+		    tempTransformType = TRANSFORM_RADIAL_CLAMP;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_RADIAL_CLAMP);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_RADIAL_COMPRESS:
+		    tempTransformType = TRANSFORM_RADIAL_COMPRESS;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_RADIAL_COMPRESS);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_AFFINE:
+		    tempTransformType = TRANSFORM_AFFINE;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_AFFINE);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_MOBIUS:
+		    tempTransformType = TRANSFORM_MOBIUS;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_MOBIUS);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_JOUKOWSKI:
+		    tempTransformType = TRANSFORM_JOUKOWSKI;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_JOUKOWSKI);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_TWIST:
+		    tempTransformType = TRANSFORM_TWIST;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_TWIST);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_COMPLEXEXP:
+		    tempTransformType = TRANSFORM_COMPLEX_EXP;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_COMPLEXEXP);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_COMPLEXSIN:
+		    tempTransformType = TRANSFORM_COMPLEX_SIN;
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_COMPLEXSIN);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_POWER:
+		    tempTransformType = MakePowerTransformType(tempTransformPower);
+		    CheckRadioButton(hDlg, IDC_TRANSFORM_NONE, IDC_TRANSFORM_POWER, IDC_TRANSFORM_POWER);
+		    SetTransformParameterControls(hDlg, tempTransformType);
+		    return TRUE;
+
+		case IDC_TRANSFORM_PARAMS:
+		    if (tempTransformType == TRANSFORM_AFFINE)
+			{
+			DialogBox((HINSTANCE)GetWindowLongPtr(hDlg, GWLP_HINSTANCE), "AFFINEPARAMDLG", hDlg, AffineParamDlg);
+			}
+		    else if (tempTransformType == TRANSFORM_MOBIUS)
+			{
+			DialogBox((HINSTANCE)GetWindowLongPtr(hDlg, GWLP_HINSTANCE), "MOBIUSPARAMDLG", hDlg, MobiusParamDlg);
+			}
+		    else if (tempTransformType == TRANSFORM_JOUKOWSKI)
+			{
+			DialogBox((HINSTANCE)GetWindowLongPtr(hDlg, GWLP_HINSTANCE), "JOUKOWSKIPARAMDLG", hDlg, JoukowskiParamDlg);
+			}
+		    else if (tempTransformType == TRANSFORM_TWIST)
+			{
+			DialogBox((HINSTANCE)GetWindowLongPtr(hDlg, GWLP_HINSTANCE), "TWISTPARAMDLG", hDlg, TwistParamDlg);
+			}
+
+		    return TRUE;
+
+		case IDC_NORMAL:
+		case IDC_90DEGREES:
+		case IDC_180DEGREES:
+		case IDC_270DEGREES:
+		case IDC_OTHER_DEGREES:
+		    switch ((int)LOWORD(wParam))
+			{
+			case IDC_NORMAL:
+			    temp_RotationAngle = NORMAL;
+			    break;
+			case IDC_90DEGREES:
+			    temp_RotationAngle = 90;
+			    break;
+			case IDC_180DEGREES:
+			    temp_RotationAngle = 180;
+			    break;
+			case IDC_270DEGREES:
+			    temp_RotationAngle = 270;
+			    break;
+			default:
+			    temp_RotationAngle = GetDlgItemInt(hDlg, IDM_ROTDEG, &bTrans, TRUE);
+			}
+		    SetDlgItemInt(hDlg, IDM_ROTDEG, temp_RotationAngle, TRUE);
+		    CheckRadioButton(hDlg, IDC_NORMAL, IDC_OTHER_DEGREES, (int)LOWORD(wParam));
+		    return TRUE;
+
+		case IDM_ROTDEG:
+		    temp_RotationAngle = GetDlgItemInt(hDlg, IDM_ROTDEG, &bTrans, TRUE);
+		    CheckRadioButton(hDlg, IDC_NORMAL, IDC_OTHER_DEGREES, IDC_OTHER_DEGREES);
+		    return  TRUE;
+
+		case IDOK:
+		    {
+		    GetDlgItemText(hDlg, IDM_RADIUS, s, 30);
+		    sscanf(s, "%lf", &gManp->f_radius);
+
+		    GetDlgItemText(hDlg, IDM_CENTREX, s, 30);
+		    sscanf(s, "%lf", &gManp->f_xcenter);
+
+		    GetDlgItemText(hDlg, IDM_CENTREY, s, 30);
+		    sscanf(s, "%lf", &gManp->f_ycenter);
+
+		    if (tempTransformType >= TRANSFORM_POWER_BASE)
+			{
+			UINT Power = GetDlgItemInt(hDlg, IDC_TRANSFORM_POWER_VALUE, &bTrans, FALSE);
+
+			if (!bTrans || Power < 2)
+			    {
+			    MessageBox(hDlg, "Transformation power must be an integer of 2 or greater.", "Transformations", MB_OK | MB_ICONEXCLAMATION);
+			    SetFocus(GetDlgItem(hDlg, IDC_TRANSFORM_POWER_VALUE));
+			    return TRUE;
+			    }
+
+			tempTransformPower = (int)Power;
+			tempTransformType = MakePowerTransformType(tempTransformPower);
+			}
+
+		    gManp->TransformType = tempTransformType;
+
+		    if (DialogMode == TRANSFORMDLG_ANIMATION && tempTransformType == TRANSFORM_NONE)
+			{
+			MessageBox(hDlg, "Please select a transformation to animate.", "Transformation Animation", MB_OK | MB_ICONEXCLAMATION);
+			return TRUE;
+			}
+
+		    gManp->RotationAngle = temp_RotationAngle % 360;
+
+		    if (temp_RotationAngle < 0)
+			gManp->RotationAngle = -(-temp_RotationAngle % 360);
+		    else
+			gManp->RotationAngle = temp_RotationAngle % 360;
+
+		    if (gManp->RotationAngle != NORMAL)
+			{
+			if (gManp->BigNumFlag)
+			    {
+			    gManp->BigRotationCentre.x = gManp->BigHor + (gManp->BigWidth * gManp->AspectRatio) / 2.0;
+			    gManp->BigRotationCentre.y = gManp->BigVert + gManp->BigWidth / 2.0;
+			    }
+			else
+			    {
+			    gManp->RotationCentre.x = gManp->hor + (gManp->mandel_width * gManp->AspectRatio) / 2.0;
+			    gManp->RotationCentre.y = gManp->vert + gManp->mandel_width / 2.0;
+			    gManp->BigRotationCentre = gManp->RotationCentre;
+			    }
+
+			gManp->SetViewAffineRotation();
+			}
+
+		    OrigRotationAngle = gManp->RotationAngle;
+
+		    EndDialog(hDlg, TRUE);
+		    return TRUE;
+		    }
+
+		case IDCANCEL:
+		    EndDialog(hDlg, FALSE);
+		    return FALSE;
+		}
+	    break;
+	  }
+
+    return FALSE;
+    }
+
+/**************************************************************************
 	Dialog Control for Fractal Parameters
 **************************************************************************/
 
 INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
      {
      HWND		hCtrl ;
-//     static	HANDLE	hCursor;
-//     short		nCtrlID, filterSum, i, divisor; 
      char		s[100];
      BOOL		bTrans ;
-     CMatrix		Mat;			// transformation and rotation matrix
-     static	int	temp_logval, temp_inside, temp_biomorph, temp_decomp, temp_3Dthreshold, OrigRotationAngle;
+     static	int	temp_logval, /*temp_inside, */temp_biomorph, temp_decomp, temp_3Dthreshold/*, OrigRotationAngle*/;
      static	long	temp_threshold;
      static	short	temp_blockindex;
      static     char	temp;
@@ -137,7 +919,6 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
      static     UINT	tempParam;
      static     WORD	temp_special;
      static     long	temp_OrbitColour;
-     static     WORD	temp_RotationAngle;
      static     long	temp_fillcolor;
      static     int	TempBailoutTest;
      static	int	CloudMode;
@@ -145,11 +926,9 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
      switch (message)
 	  {
 	  case WM_INITDIALOG:
-//		dStrands = 0.08;
 		SetDlgItemInt(hDlg, IDM_THRESHOLD, gManp->threshold, TRUE);
 		SAFE_SPRINTF(s, "%02X%02X%02X", gManp->OrbitColour.rgbtRed, gManp->OrbitColour.rgbtGreen, gManp->OrbitColour.rgbtBlue);
 		SetDlgItemText(hDlg, IDC_ORBITCOL, s);
-		SetDlgItemInt(hDlg, IDM_ROTDEG, gManp->RotationAngle, TRUE);
 		SetDlgItemInt(hDlg, IDM_THRESH_OFF, gManp->Offset3D, TRUE);
 		SetDlgItemInt(hDlg, IDM_BLKINDEX, gManp->blockindex, TRUE);
 		SetDlgItemInt(hDlg, IDM_LOGVAL, gManp->logval, TRUE);
@@ -162,12 +941,7 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		SetDlgItemInt(hDlg, IDM_BAILOUT, (int)gManp->potparam[2], TRUE);
 		SetDlgItemInt(hDlg, IDC_DISTEST, gManp->distest, TRUE);
 		SetDlgItemInt(hDlg, IDC_DISTESTWIDTH, gManp->distestwidth, TRUE);
-		SAFE_SPRINTF(s, "%7.7f", gManp->f_radius);
-		SetDlgItemText(hDlg, IDM_RADIUS, s);
-		SAFE_SPRINTF(s, "%7.7f", gManp->f_xcenter);
-		SetDlgItemText(hDlg, IDM_CENTREX, s);
-		SAFE_SPRINTF(s, "%7.7f", gManp->f_ycenter);
-		SetDlgItemText(hDlg, IDM_CENTREY, s);
+
 		SAFE_SPRINTF(s, "%2.2f", gManp->dStrands);
 		SetDlgItemText(hDlg, IDM_STALKS, s);
 		SAFE_SPRINTF(s, "%06X", gManp->BackgroundColour);
@@ -209,9 +983,12 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    case MANR:
 			tempParam = IDC_MANR;
 			break;
+		    case CONVERGE:
+			tempParam = IDC_BAIL_CONVERGE;
+			break;
 		    }
 
-		CheckRadioButton(hDlg, IDC_BAIL_MOD, IDC_MANR, tempParam);
+		CheckRadioButton(hDlg, IDC_BAIL_MOD, IDC_BAIL_CONVERGE, tempParam);
 
 		tempInsideMethod = gManp->InsideMethod;
 	        switch (tempInsideMethod)
@@ -264,9 +1041,6 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    case ATAN:
 			tempParam = IDC_ATAN;
 			break;
-		    case POTENTIAL:
-			tempParam = IDC_POTENTIAL;
-			break;
 		    case EPSCROSS:
 			tempParam = IDC_EPSCR;
 			break;
@@ -282,7 +1056,7 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    }
 
 		CheckRadioButton(hDlg, IDC_NO_OUTSIDE, IDC_TIERAZONCOLOURS, tempParam);
-		CheckRadioButton(hDlg, IDC_CARTESIAN, IDC_CONICAL, IDC_CARTESIAN + gManp->CoordSystem);
+//		CheckRadioButton(hDlg, IDC_CARTESIAN, IDC_CONICAL, IDC_CARTESIAN + gManp->CoordSystem);
 
 		SendDlgItemMessage(hDlg, IDC_CLOUD_COLOUR, CB_ADDSTRING, 0, (LPARAM)"Linear Greyscale");
 		SendDlgItemMessage(hDlg, IDC_CLOUD_COLOUR, CB_ADDSTRING, 0, (LPARAM)"Log Greyscale");
@@ -326,88 +1100,18 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    }
 		CheckRadioButton(hDlg, IDC_GUESS, IDC_FWDDIFF, tempParam);
 
-		temp_RotationAngle = gManp->RotationAngle % 360;
-	        switch (gManp->RotationAngle)
-		    {
-		    case NORMAL:
-			tempParam = IDC_NORMAL;
-			break;
-		    case 90:
-			tempParam = IDC_90DEGREES;
-			break;
-		    case 180:
-			tempParam = IDC_180DEGREES;
-			break;
-		    case 270:
-			tempParam = IDC_270DEGREES;
-			break;
-		    default:
-			tempParam = IDM_ROTDEG;
-			temp_RotationAngle = GetDlgItemInt(hDlg, IDM_ROTDEG, &bTrans, TRUE);
-		    }
-		CheckRadioButton(hDlg, IDC_NORMAL, IDC_OTHER_DEGREES, tempParam);
-
 		hCtrl = GetDlgItem (hDlg, IDC_STRETCHPALETTE);
 		SendMessage(hCtrl, BM_SETCHECK, gManp->TrueCol.Stretch, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_EXPANDSTARCOLS);
 		SendMessage(hCtrl, BM_SETCHECK, gManp->ExpandStarTrailColours, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_USEPALETTE);
 		SendMessage(hCtrl, BM_SETCHECK, gManp->UseCurrentPalette, 0L);
-		hCtrl = GetDlgItem (hDlg, IDC_INVERTFRACT);
-		SendMessage(hCtrl, BM_SETCHECK, gManp->invert, 0L);
 		SetFocus(GetDlgItem(hDlg, tempParam));
 	        return  TRUE ;
 
 	  case WM_COMMAND:
 	        switch ((int) LOWORD(wParam))
-//	        switch (wParam)
 		    {
-/*
-		    case IDM_THRESHOLD:
-			temp_threshold = GetDlgItemInt(hDlg, IDM_THRESHOLD, &bTrans, TRUE);
-			if (temp_threshold > MAXTHRESHOLD)
-			    temp_threshold = MAXTHRESHOLD;
-			if (temp_threshold < 1)
-			    temp_threshold = 1;
-		        return TRUE ;
-*/
-
-		    case IDC_CARTESIAN:
-			gManp->CoordSystem = CARTESIAN;
-			break;
-		    case IDC_SPHERICAL:
-			gManp->CoordSystem = SPHERICAL;
-			break;
-		    case IDC_CYLINDRICAL:
-			gManp->CoordSystem = CYLINDRICAL;
-			break;
-		    case IDC_PARABOLIC:
-			gManp->CoordSystem = PARABOLIC;
-			break;
-		    case IDC_PARABOLOIDAL:
-			gManp->CoordSystem = PARABOLOIDAL;
-			break;
-		    case IDC_ELLIPTICAL:
-			gManp->CoordSystem = ELLIPTICAL;
-			break;
-		    case IDC_BIPOLAR:
-			gManp->CoordSystem = BIPOLAR;
-			break;
-		    case IDC_TOROIDAL:
-			gManp->CoordSystem = TOROIDAL;
-			break;
-		    case IDC_PROLATE_SPHEROIDAL:
-			gManp->CoordSystem = PROLATE_SPHERE;
-			break;
-		    case IDC_OBLATE_SPHEROIDAL:
-			gManp->CoordSystem = OBLATE_SPHERE;
-			break;
-		    case IDC_BISPHERICAL:
-			gManp->CoordSystem = BISPHERICAL;
-			break;
-		    case IDC_CONICAL:
-			gManp->CoordSystem = CONICAL;
-			break;
 		    case IDC_USEPALETTE:
 			hCtrl = GetDlgItem (hDlg, IDC_USEPALETTE) ;
 			gManp->UseCurrentPalette = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
@@ -421,11 +1125,6 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    case IDC_STRETCHPALETTE:
 			hCtrl = GetDlgItem (hDlg, IDC_STRETCHPALETTE) ;
 			gManp->TrueCol.Stretch = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
-		        return  TRUE ;
-
-		    case IDC_INVERTFRACT:
-			hCtrl = GetDlgItem (hDlg, IDC_INVERTFRACT) ;
-			gManp->invert = (BOOL)SendMessage(hCtrl, BM_GETCHECK, 0, 0L);
 		        return  TRUE ;
 
 		    case IDM_THRESH_OFF:
@@ -522,6 +1221,7 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    case IDC_BAIL_AND:
 		    case IDC_MANH:
 		    case IDC_MANR:
+		    case IDC_BAIL_CONVERGE:
 			switch ((int)LOWORD(wParam))
 			    {
 			    case IDC_BAIL_MOD:
@@ -545,9 +1245,12 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 			    case IDC_MANR:
 				TempBailoutTest = MANR;
 				break;
+			    case IDC_BAIL_CONVERGE:
+				TempBailoutTest = CONVERGE;
+				break;
 			    }
 
-			CheckRadioButton(hDlg, IDC_BAIL_MOD, IDC_MANR, (int)LOWORD(wParam));
+			CheckRadioButton(hDlg, IDC_BAIL_MOD, IDC_BAIL_CONVERGE, (int)LOWORD(wParam));
 			return TRUE;
 
 		    case IDC_NO_INSIDE:
@@ -581,7 +1284,6 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 		    case IDC_PERT1:
 		    case IDC_PERT2:
 		    case IDC_EPSCR:
-		    case IDC_POTENTIAL:
 		    case IDC_STARTRAILS:
 		    case IDC_TIERAZONFILTERS:
 		    case IDC_TIERAZONCOLOURS:
@@ -614,9 +1316,6 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 			    case IDC_EPSCR:
 				tempOutsideMethod = EPSCROSS;
 				break;
-			    case IDC_POTENTIAL:
-				tempOutsideMethod = POTENTIAL;
-				break;
 			    case IDC_STARTRAILS:
 				tempOutsideMethod = STARTRAIL;
 				break;
@@ -630,36 +1329,6 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 			CheckRadioButton(hDlg, IDC_NO_OUTSIDE, IDC_TIERAZONCOLOURS, (int)LOWORD(wParam));
 			return TRUE;
 
-		    case IDC_NORMAL:
-		    case IDC_90DEGREES:
-		    case IDC_180DEGREES:
-		    case IDC_270DEGREES:
-		    case IDC_OTHER_DEGREES:
-			switch ((int) LOWORD(wParam))
-			    {
-			    case IDC_NORMAL:
-				temp_RotationAngle = NORMAL;
-				break;
-			    case IDC_90DEGREES:
-				temp_RotationAngle = 90;
-				break;
-			    case IDC_180DEGREES:
-				temp_RotationAngle = 180;
-				break;
-			    case IDC_270DEGREES:
-				temp_RotationAngle = 270;
-				break;
-			    default:
-				temp_RotationAngle = GetDlgItemInt(hDlg, IDM_ROTDEG, &bTrans, TRUE);
-			    }
-			SetDlgItemInt(hDlg, IDM_ROTDEG, temp_RotationAngle, TRUE);
-			CheckRadioButton(hDlg, IDC_NORMAL, IDC_OTHER_DEGREES, (int) LOWORD(wParam));
-			return TRUE;
-		    case IDM_ROTDEG:
-			temp_RotationAngle = GetDlgItemInt(hDlg, IDM_ROTDEG, &bTrans, TRUE);
-			CheckRadioButton(hDlg, IDC_NORMAL, IDC_OTHER_DEGREES, IDC_OTHER_DEGREES);
-			return  TRUE ;
-
 		    case IDOK:
 			if (gManp->logval == 0 && temp_logval != 0)
 			     gManp->init_log(hDlg);			// don't forget to initialise loglist
@@ -670,20 +1339,13 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 			gManp->blockindex = temp_blockindex;
 			gManp->fillcolor = temp_fillcolor;
 			temp_threshold = GetDlgItemInt(hDlg, IDM_THRESHOLD, &bTrans, TRUE);
-//			if (temp_threshold >= MAXTHRESHOLD || temp_threshold < 1)
-//			    temp_threshold = MAXTHRESHOLD - 1;
 			if (temp_threshold < 1 || temp_threshold > MAXTHRESHOLD)
 			    temp_threshold = MAXTHRESHOLD;
 			gManp->threshold = (int)temp_threshold;
 			gManp->Offset3D = temp_3Dthreshold;
-//			if (Offset3D >= MAXTHRESHOLD)
-//			    Offset3D = MAXTHRESHOLD;
-//			inside_colour = temp_inside/* & 0x00ff*/;	// 0 - 255
-//			calcmode = temp;
+
 			if (temp_special < 0)
 			    gManp->special = 0;
-//			else if (temp_special > 255)
-//			    special = 255;
 			else
 			    gManp->special = temp_special;
 			gManp->BailoutTestType = TempBailoutTest;
@@ -692,7 +1354,8 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 			gManp->OrbitColour.rgbtBlue = temp_OrbitColour & 0xff;
 			gManp->OrbitColour.rgbtGreen = (temp_OrbitColour >> 8) & 0xff;
 			gManp->OrbitColour.rgbtRed = (temp_OrbitColour >> 16) & 0xff;
-			if (gManp->InsideMethod == POTENTIAL)
+			gManp->PotentialFlag = (IsDlgButtonChecked(hDlg, IDC_POTENTIAL) == BST_CHECKED);
+			if (gManp->PotentialFlag)
 			    {
 			    gManp->potparam[0] = GetDlgItemInt(hDlg, IDM_MAXCOL, &bTrans, TRUE);
 			    gManp->potparam[1] = GetDlgItemInt(hDlg, IDM_SLOPE, &bTrans, TRUE);
@@ -715,29 +1378,9 @@ INT_PTR CALLBACK FractalDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lPar
 			if (CloudMode != CB_ERR)
 			    gManp->CloudRenderMode = CloudMode;
 
-			GetDlgItemText(hDlg, IDM_RADIUS, s, 30);
-			sscanf(s, "%lf", &gManp->f_radius);
-			GetDlgItemText(hDlg, IDM_CENTREX, s, 30);
-			sscanf(s, "%lf", &gManp->f_xcenter);
-			GetDlgItemText(hDlg, IDM_CENTREY, s, 30);
-			sscanf(s, "%lf", &gManp->f_ycenter);
 			GetDlgItemText(hDlg, IDC_BKGROUNDCOLOUR, s, 10);
 			sscanf(s, "%X", &gManp->BackgroundColour);
 			gManp->cycleflag = FALSE;
-			gManp->RotationAngle = temp_RotationAngle % 360;
-			if (temp_RotationAngle < 0)
-			    gManp->RotationAngle = -(-temp_RotationAngle % 360);
-			else
-			    gManp->RotationAngle = temp_RotationAngle % 360;
-			if (gManp->RotationAngle != NORMAL && gManp->RotationAngle != 90 && gManp->RotationAngle != 180 && gManp->RotationAngle != 270)
-			    {
-			    gManp->z_rot = (double)gManp->RotationAngle;
-			    gManp->RotationCentre.x = gManp->hor + (gManp->mandel_width * gManp->AspectRatio) / 2;
-			    gManp->RotationCentre.y = gManp->vert + gManp->mandel_width / 2;
-			    if (OrigRotationAngle != gManp->RotationAngle)
-				Mat.InitTransformation(gManp->RotationCentre.x, gManp->RotationCentre.y, 0.0, 0.0, 0.0, gManp->z_rot);
-			    }
-			OrigRotationAngle = gManp->RotationAngle;
 			gManp->distest = GetDlgItemInt(hDlg, IDC_DISTEST, &bTrans, TRUE);
 			gManp->distestwidth = GetDlgItemInt(hDlg, IDC_DISTESTWIDTH, &bTrans, TRUE);
 
@@ -1013,12 +1656,12 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		    case NEWTONFLOWER:
 			tempParam = IDC_NEWTONFLOWER;
 			break;
-//		    case MAGNET1:
-//			tempParam = IDC_MAGNET1;
-//			break;
-//		    case MAGNET2:
-//			tempParam = IDC_MAGNET2;
-//			break;
+		    case MAGNET1M:
+			tempParam = IDC_MAGNET1;
+			break;
+		    case MAGNET2M:
+			tempParam = IDC_MAGNET2;
+			break;
 		    case TEDDY:
 			tempParam = IDC_TEDDY;
 			break;
@@ -1252,6 +1895,9 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			break;
 		    case HAILSTONE:
 			tempParam = IDC_HAILSTONE;
+			break;
+		    case INVERSEJULIA:
+			tempParam = IDC_INV_JULIA;
 			break;
 
 		    }
@@ -1488,12 +2134,12 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		    case IDC_NEWTONFLOWER:
 			temp = NEWTONFLOWER;
 			break;
-//		    case IDC_MAGNET1:
-//			temp = MAGNET1;
-//			break;
-//		    case IDC_MAGNET2:
-//			temp = MAGNET2;
-//			break;
+		    case IDC_MAGNET1:
+			temp = MAGNET1M;
+			break;
+		    case IDC_MAGNET2:
+			temp = MAGNET2M;
+			break;
 		    case IDC_TEDDY:
 			temp = TEDDY;
 			break;
@@ -1722,14 +2368,18 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		    case IDC_FRACTINTPOPCORN:
 			temp = FPPOPCORN;
 			break;
-			CheckRadioButton(hDlg, IDC_MANDEL, IDC_TEST, (int) LOWORD(wParam));
-		        return  TRUE ;
 		    case IDC_NUMFRACTAL:
 			temp = NUMFRACTAL;
 			break;
 		    case IDC_HAILSTONE:
 			temp = HAILSTONE;
 			break;
+		    case IDC_INV_JULIA:
+			temp = INVERSEJULIA;
+			break;
+
+		    CheckRadioButton(hDlg, IDC_MANDEL, IDC_TEST, (int)LOWORD(wParam));
+		    return  TRUE;
 
 		    case IDOK:
 			gManp->type = temp;
@@ -1783,9 +2433,7 @@ INT_PTR CALLBACK AboutDlgProc (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 void	Centre2Edge(void) 
     {
     double	centrex, centrey;
-    // local Big num declarations **********************************************************
     BigDouble	Big_centrex, Big_centrey, Big_Scale;
-    // local Big num declarations **********************************************************
 
     if (gManp->BigNumFlag)
 	{

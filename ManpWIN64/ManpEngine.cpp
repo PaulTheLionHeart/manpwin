@@ -23,7 +23,7 @@ int	CPixel::PerformWorklist(int NumberThreadsIn, int ThreadNumber, HANDLE *ghMut
     multiThreaded = (NumberThreads > 1);
     int	flags = USEPALETTE + ((calcmode != 'F' && type != PERTURBATION && type != SLOPEFORWARDDIFF) ? USEWPIXELS : 0);
     Plot.InitPlot(threshold, TrueCol, &gManp->wpixels, xdots, ydots, xdots, ydots, Dib->BitsPerPixel, Dib, flags);
-    if (RotationAngle != NORMAL && RotationAngle != 90 && RotationAngle != 180 && RotationAngle != 270)
+    if (RotationAngle != NORMAL)
 	{
 	double  z_rot = (double)RotationAngle;
 	if (MathType == DOUBLEFLOAT)
@@ -107,8 +107,8 @@ int	CPixel::RunThread(HWND hwnd, int ThreadNumberIn, int StripWidthIn, CSlope *S
 	for (i = 0; i < num_worklist; ++i)
 	    worklist[i] = worklist[i + 1];
 
-	FindSymmetry(_3dflag, decomp, pairflag, OutsideMethod, invert, CoordSystem, param, *degree, type, subtype, calcmode, RotationAngle, Fractal, hor, vert, mandel_width, BigNumFlag, &Big_xxmin, &Big_xxmax, &Big_yymin,
-	    &Big_yymax, BigHor, BigVert, BigWidth, ScreenRatio, &xxmin, &xxmax, &yymin, &yymax, special, juliaflag);
+	FindSymmetry(_3dflag, decomp, pairflag, OutsideMethod, TransformType, CoordSystem, param, *degree, type, subtype, calcmode, RotationAngle, Fractal, hor, vert, mandel_width, BigNumFlag, &Big_xxmin, &Big_xxmax, &Big_yymin,
+	    &Big_yymax, BigHor, BigVert, BigWidth, ScreenRatio, &xxmin, &xxmax, &yymin, &yymax, special, juliaflag, gManp->FractintSymmetry);
 
 	if (pairflag)
 	    init_stereo_pairs(pairflag, AutoStereo_value);			// init stereo pair parameters

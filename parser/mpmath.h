@@ -1,6 +1,8 @@
 /*
- *  REMOVED FORMAL PARAMETERS FROM FUNCTION DEFINITIONS (1/4/92)
- */
+    MPMATH.H - argument structures for formula parser
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
  
 #ifndef MPMATH_H
 #define MPMATH_H
@@ -16,31 +18,26 @@
 #include "..\ManpWIN64\QDComplex.h"
 
  /*** Formula Declarations ***/
-//enum MATH_TYPE { DOUBLEFLOAT, DOUBLEDOUBLE, QUADDOUBLE};
-
- /* the following are declared 4 dimensional as an experiment */
- /* changeing declarations to Complex and _LCMPLX restores the code */
- /* to 2D */
-struct Arg {
+struct Arg 
+    {
     Complex	d;
     DDComplex	dd;
     QDComplex	qd;
     };
 
-struct ConstArg {
+struct ConstArg 
+    {
     char *s;
     int len;
     struct Arg a;
     };
-
-//extern struct Arg *Arg1, *Arg2;
 
 extern void(*dtrig0)(void);
 extern void(*dtrig1)(void);
 
 /* -------------------------------------------------------------------- */
 /*   The following #defines allow the complex transcendental functions  */
-/*   in parser.c to be used here thus avoiding duplicated code.         */
+/*   in parser.cpp to be used here thus avoiding duplicated code.         */
 /* -------------------------------------------------------------------- */
 
 #define  CMPLXtrig0(arg,out) Arg1->d = (arg); dtrig0(); (out)=Arg1->d

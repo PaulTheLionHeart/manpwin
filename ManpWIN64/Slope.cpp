@@ -213,7 +213,7 @@ long CSlope::ApplySlopeFilters(int iterations, BYTE ArithType, Complex &FinalZ, 
 	    {
 	    if (OutsideMethod < TIERAZONFILTERS)
 		{
-		index = DoOutsideFilterT<Complex, double>(iterations, filterZ, OutsideMethod, hooper, threshold, paletteColours, decomp, biomorph, rqlim, special, logval, logtable, potentialColours, TrueCol, potparam);
+		index = DoOutsideFilterT<Complex, double>(iterations, filterZ, OutsideMethod, hooper, threshold, paletteColours, decomp, biomorph, rqlim, special, logval, logtable, TrueCol);
 		}
 	    else
 		index = iterations;		// Tierazon deliberately not supported in Slope

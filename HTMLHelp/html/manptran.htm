@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Fractal Transformations</title>
+
+<style>
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    max-width: 1000px;
+    margin: 20px;
+}
+
+h1 { color: #ffd700; }
+h2 { color: #4fd1ff; }
+h3 { color: #88ff66; }
+
+code, pre {
+    background-color: #111;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+a {
+    color: #66ccff;
+    text-decoration: underline;
+}
+
+footer {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #888888;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Fractal Transformations</h1>
+
+<h2>Overview</h2>
+
+<p>
+Fractal transformations modify the coordinates used when calculating a fractal.
+They can be used to rotate, fold, stretch, distort, remap, or otherwise alter
+the geometry of the image.
+</p>
+
+<p>
+Press <b>Ctrl+X</b> to open the Fractal Transformations dialog.
+</p>
+
+<p>
+Transformations are separate from the normal fractal formula. This makes it
+possible to apply the same transformation to different supported fractals.
+</p>
+
+<hr>
+
+<h2>Coordinate Systems</h2>
+
+<p>
+The transformation dialog provides several coordinate systems:
+</p>
+
+<ul>
+<li>Cartesian</li>
+<li>Spherical</li>
+<li>Cylindrical</li>
+<li>Parabolic</li>
+<li>Paraboloidal</li>
+<li>Elliptical</li>
+<li>Bipolar</li>
+<li>Toroidal</li>
+<li>Prolate Spheroidal</li>
+<li>Oblate Spheroidal</li>
+<li>Bispherical</li>
+<li>Conical</li>
+</ul>
+
+<p>
+These change the coordinate system used when mapping points and can produce
+substantially different forms from the same underlying fractal.
+</p>
+
+<hr>
+
+<h2>View Rotation</h2>
+
+<p>
+The current fractal view may be displayed at 0, 90, 180 or 270 degrees, or
+at an arbitrary angle.
+</p>
+
+<p>
+<b>Rotation:</b> The rotation angle is absolute relative to the standard
+unrotated fractal view. Rotations are not cumulative. For example, changing
+the rotation from 30&deg; to 45&deg; produces a view rotated 45&deg; from the
+standard orientation, not an additional 45&deg; rotation from the current view.
+</p>
+
+<p>
+Arbitrary-angle rotation is performed about the centre of the current view.
+</p>
+
+<hr>
+
+<h2>Standard Transformations</h2>
+
+<p>
+The following transformations are available:
+</p>
+
+<ul>
+<li>Inversion</li>
+<li>Complex Logarithm</li>
+<li>Fold X</li>
+<li>Fold Y</li>
+<li>Fold XY</li>
+<li>Fold Diagonal</li>
+<li>Fold Diagonals</li>
+<li>Radial Bulge</li>
+<li>Radial Pinch</li>
+<li>Circle Fold</li>
+<li>Radial Clamp</li>
+<li>Radial Compress</li>
+<li>Complex Exponential</li>
+<li>Complex Sine</li>
+<li>Power</li>
+</ul>
+
+<p>
+Many of these transformations use a centre position and radius to determine
+where the effect is applied.
+</p>
+
+<hr>
+
+<h2>Power Transformation</h2>
+
+<p>
+The Power transformation raises the transformed coordinate to a selected
+integer power.
+</p>
+
+<p>
+The power must be an integer of 2 or greater.
+</p>
+
+<p>
+Higher powers can produce increasingly strong rotational symmetry and
+distortion.
+</p>
+
+<hr>
+
+<h2>Extended Transformations</h2>
+
+<p>
+Several transformations use their own specialised parameters rather than
+the normal centre and radius controls.
+</p>
+
+<h3>Affine</h3>
+
+<p>
+Affine transformations provide precise control over scaling, stretching,
+shearing, reflection, rotation and translation using six coefficients.
+Because these parameters can be combined in many different ways, Affine
+transformations are described separately.
+</p>
+
+<p>
+<a href="manpaffn.htm">See Affine Transformations</a>
+</p>
+
+<h3>M&ouml;bius</h3>
+
+<p>
+The M&ouml;bius transformation provides a complex-plane mapping controlled by
+its own set of parameters.
+</p>
+
+<h3>Joukowski</h3>
+
+<p>
+The Joukowski transformation provides another specialised complex-plane
+mapping with its own parameters.
+</p>
+
+<h3>Twist</h3>
+
+<p>
+The Twist transformation applies a specialised distortion controlled by its
+own parameters.
+</p>
+
+<hr>
+
+<h2>Choosing a Transformation</h2>
+
+<p>
+Different transformations can produce very different results depending on the
+fractal, location and scale being viewed. Simple transformations such as folds
+and radial effects are useful for quickly experimenting with symmetry and shape.
+</p>
+
+<p>
+Affine transformations are particularly useful when precise geometric control
+is required, such as stretching by a known amount, applying a known shear
+angle, or rotating and translating coordinates in combination.
+</p>
+
+<hr>
+
+<h2>Related Topics</h2>
+
+<ul>
+<li><a href="manpaffn.htm">Affine Transformations</a></li>
+<li><a href="manp7opt.htm">Fractal Options</a></li>
+<li><a href="manp7yr4.htm">Keyboard Commands</a></li>
+<li><a href="manp7vn4.htm">Parameter Files and Command Line Options</a></li>
+</ul>
+
+<hr>
+
+<footer>
+ManpWIN Help &copy; October 2026
+</footer>
+
+</body>
+</html>

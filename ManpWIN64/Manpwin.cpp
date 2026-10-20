@@ -163,6 +163,7 @@ extern	INT_PTR CALLBACK RTJuliaLocDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK PlotTypeDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK FractTypeDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK FractalDlg(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK TransformationDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK FractalTestDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK ColourDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK EditPalDlg(HWND, UINT, WPARAM, LPARAM);
@@ -190,7 +191,7 @@ extern	INT_PTR CALLBACK SetStartRGBDlg(HWND, UINT, WPARAM, LPARAM);
 extern	int		 GetParamData(HWND, LPSTR, LPSTR, LPSTR, BOOL);
 extern	INT_PTR CALLBACK AnimationDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK JuliaAnimDlg(HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK InversionAnimDlg(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK TransformationAnimDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK AnimStartDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK CoordDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK ParamDlg(HWND, UINT, WPARAM, LPARAM);
@@ -419,15 +420,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_UNDO, MF_ENABLED);
 			 break;
 		    case 2:	   // Fractal Dialogs menu
-			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_FRACOPTIONS, MF_ENABLED);
-			 EnableMenuItem ((HMENU)(_int64)wParam, IDC_FRACTYPE, MF_ENABLED);
-			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_3DPARAM, MF_ENABLED);
-			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_FRACTLOC, MF_ENABLED);
-			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_FRACTALCOORDS, MF_ENABLED);
-			 break;
+			EnableMenuItem((HMENU)(_int64)wParam, IDM_FRACOPTIONS, MF_ENABLED);
+			EnableMenuItem((HMENU)(_int64)wParam, IDM_FRACTTRANSFORMS, MF_ENABLED);
+			EnableMenuItem ((HMENU)(_int64)wParam, IDC_FRACTYPE, MF_ENABLED);
+			EnableMenuItem((HMENU)(_int64)wParam, IDM_3DPARAM, MF_ENABLED);
+			EnableMenuItem ((HMENU)(_int64)wParam, IDM_FRACTLOC, MF_ENABLED);
+			EnableMenuItem((HMENU)(_int64)wParam, IDM_FRACTALCOORDS, MF_ENABLED);
+			EnableMenuItem((HMENU)(_int64)wParam, IDM_UPDATE_FRACTAL, MF_ENABLED);
+			EnableMenuItem((HMENU)(_int64)wParam, IDM_TOGGLEPERT, MF_ENABLED);
+			EnableMenuItem((HMENU)(_int64)wParam, IDM_FDOPTIONS, MF_ENABLED);
+			break;
 		    case 3:	   // Fractal Options menu
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_3D, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_JULIA, MF_ENABLED);
+			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_REALTIMEJULIA, MF_ENABLED);
+			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_REALTIMEINVJULIA, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_RDS, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_STEREO, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDC_ADDSPIRAL, MF_ENABLED);
@@ -445,7 +452,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			 break;
 		    case 4:	   // Animation Dialogs menu
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_SETUPANIMATION, MF_ENABLED);
-			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_JULIA_ANIM, MF_ENABLED);
+			 EnableMenuItem((HMENU)(_int64)wParam, IDM_JULIA_ANIM, MF_ENABLED);
+			 EnableMenuItem((HMENU)(_int64)wParam, IDM_INVJULIA_ANIM, MF_ENABLED);
 			 EnableMenuItem ((HMENU)(_int64)wParam, IDM_STOPANIM, MF_ENABLED);
 			 break;
 		    case 5:	   // Colour Options menu
@@ -472,7 +480,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	        CheckMenuItem((HMENU)(_int64)wParam, IDC_ADDSPIRAL, (gManp->addflag ? MF_CHECKED : MF_UNCHECKED));
 		CheckMenuItem((HMENU)(_int64)wParam, IDM_3D, (gManp->_3dflag ? MF_CHECKED : MF_UNCHECKED));
 		CheckMenuItem((HMENU)(_int64)wParam, IDM_JULIA, (gManp->juliaflag ? MF_CHECKED : MF_UNCHECKED));
-		CheckMenuItem((HMENU)(_int64)wParam, IDM_REALTIMEJULIA, (gManp->RealTimeJuliaFlag ? MF_CHECKED : MF_UNCHECKED));
+		CheckMenuItem((HMENU)(_int64)wParam, IDM_REALTIMEJULIA, (gManp->RealTimeJuliaFlag == RTJ_JULIA ? MF_CHECKED : MF_UNCHECKED));
+		CheckMenuItem((HMENU)(_int64)wParam, IDM_REALTIMEINVJULIA, (gManp->RealTimeJuliaFlag == RTJ_INVERSE_JULIA ? MF_CHECKED : MF_UNCHECKED));
 		CheckMenuItem((HMENU)(_int64)wParam, IDM_CYCLE, (gManp->cycleflag ? MF_CHECKED : MF_UNCHECKED));
 		CheckMenuItem((HMENU)(_int64)wParam, IDM_STEREO, (gManp->pairflag ? MF_CHECKED : MF_UNCHECKED));
 		CheckMenuItem((HMENU)(_int64)wParam, IDM_GENMPEGSTATS, ((statname[0] != '-') ? MF_CHECKED : MF_UNCHECKED));
@@ -591,6 +600,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    ClearSelection(hwnd, &Rect, Shape);
 		    if (gManp->ZoomIn(hwnd, &Rect))
 			{
+			if (gManp->FractintSixCorners && (gManp->type == INVERSEJULIA || gManp->type == INVERSEJULIAFP))
+			    gManp->UpdateFractintIJZoomIn(hwnd, Rect);
 			HardStopNow(hwnd, "zoom-in");
 			gManp->time_to_zoom = TRUE;
 			}
@@ -605,6 +616,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		    ClearSelection(hwnd, &Rect, Shape);
 		    if (gManp->ZoomOut(hwnd, &Rect))
 			{
+			if (gManp->FractintSixCorners && (gManp->type == INVERSEJULIA || gManp->type == INVERSEJULIAFP))
+			    gManp->UpdateFractintIJZoomOut(hwnd, Rect);
 			HardStopNow(hwnd, "zoom-out");
 			gManp->time_to_zoom = TRUE;
 			}
@@ -853,7 +866,8 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 
 	case IDM_SETUPANIMATION:
 	case IDM_JULIA_ANIM:
-	case IDM_INVERSION_ANIM:
+	case IDM_INVJULIA_ANIM:
+	case IDM_TRANSFORMATION_ANIM:
 	case IDM_FOURIERANIM:
 	case IDM_PARAM_ANIM:
 	case IDM_OSCILLATOR_ANIMATION:
@@ -926,18 +940,52 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 			    break;
 			}
 		    break;
+
+		case IDM_INVJULIA_ANIM:
 		case IDM_JULIA_ANIM:
-		    if (gManp->type == PERTURBATION || gManp->type == OSCILLATORS || gManp->type == FRACTALMAPS || gManp->type == CURVES || gManp->type == KNOTS || gManp->type == SPROTTMAPS || 
-				gManp->type == SURFACES || gManp->type == BUDDHABROT || gManp->type == CURLICUES || gManp->type == MANDELCLOUD || gManp->type == DYNAMICFP)
+		    if (gManp->type == PERTURBATION || gManp->type == OSCILLATORS || gManp->type == FRACTALMAPS || gManp->type == CURVES || gManp->type == KNOTS || gManp->type == SPROTTMAPS ||
+			gManp->type == SURFACES || gManp->type == BUDDHABROT || gManp->type == CURLICUES || gManp->type == MANDELCLOUD || gManp->type == DYNAMICFP)
 			{
-			_snprintf_s(TempStr, MAX_PATH, _TRUNCATE, "Fractal type %d (%s) cannot be configured for Julia animation!\nChange the fractal type first", gManp->type, fractalspecific[gManp->type].name);
+			if (LOWORD(wParam) == IDM_INVJULIA_ANIM)
+			    _snprintf_s(TempStr, MAX_PATH, _TRUNCATE,
+				"Fractal type %d (%s) cannot be configured for Inverse Julia animation!\nChange the fractal type to Mandelbrot or Power first",
+				gManp->type, fractalspecific[gManp->type].name);
+			else
+			    _snprintf_s(TempStr, MAX_PATH, _TRUNCATE,
+				"Fractal type %d (%s) cannot be configured for Julia animation!\nChange the fractal type first",
+				gManp->type, fractalspecific[gManp->type].name);
+
+			MessageBox(hwnd, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
+			}
+		    else if (LOWORD(wParam) == IDM_INVJULIA_ANIM && gManp->type != MANDELFP && gManp->type != POWER)
+			{
+			_snprintf_s(TempStr, MAX_PATH, _TRUNCATE,
+			    "Fractal type %d (%s) cannot be configured for Inverse Julia animation!\nChange the fractal type to Mandelbrot or Power first",
+			    gManp->type, fractalspecific[gManp->type].name);
+
+			MessageBox(hwnd, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
+			}
+		    else if (LOWORD(wParam) == IDM_INVJULIA_ANIM && gManp->type == POWER && ((int)gManp->param[0] < 2 || (int)gManp->param[0] > MAXINVERSEJULIAPOWER))
+			{
+			_snprintf_s(TempStr, MAX_PATH, _TRUNCATE,
+			    "Power %d is not supported by Inverse Julia animation!\nSelect a power from 2 to %d",
+			    (int)gManp->param[0], MAXINVERSEJULIAPOWER);
+
 			MessageBox(hwnd, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
 			}
 		    else
-			status = (int)DialogBox (hInst, "JuliaAnimDlg", hwnd, JuliaAnimDlg);
+			{
+			JULIA_ANIM_FRACTAL AnimFractal = (LOWORD(wParam) == IDM_INVJULIA_ANIM) ? JULIA_ANIM_INVERSE : JULIA_ANIM_NORMAL;
+			status = (int)DialogBoxParam(hInst, "JuliaAnimDlg", hwnd, JuliaAnimDlg, (LPARAM)AnimFractal);
+			}
 		    break;
-		case IDM_INVERSION_ANIM:
-		    status = (int)DialogBox (hInst, "JuliaAnimDlg", hwnd, InversionAnimDlg);
+
+		case IDM_TRANSFORMATION_ANIM:
+		    // Open the transformation dialog in animation mode.
+		    // Only transformation-specific controls are enabled.
+		    if (DialogBoxParam(hInst, "TransformationDlg", hwnd, TransformationDlg, TRANSFORMDLG_ANIMATION) == FALSE)
+			return 0;
+		    status = (int)DialogBox(hInst, "JuliaAnimDlg", hwnd, TransformationAnimDlg);
 		    break;
 		case IDM_FOURIERANIM:
 		    if (DialogBox (hInst, "FourierTypeDlg", hwnd, FourierTypeDlg) > 0)
@@ -1236,6 +1284,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	case IDC_FRACTYPE:
 	case IDM_UPDATE_FRACTAL:
 	case IDM_FRACOPTIONS:
+	case IDM_FRACTTRANSFORMS:
 	case IDM_TOGGLEPERT:
 	case IDM_FDOPTIONS:
 	case IDM_3D:
@@ -1243,6 +1292,7 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 	case IDM_STEREOPAIRSETUP:
 	case IDM_JULIA:
 	case IDM_REALTIMEJULIA:
+	case IDM_REALTIMEINVJULIA:
 	case IDM_SET_JULIA_SIZE:
 	case IDM_START:
 	case IDM_STEREO:
@@ -1302,25 +1352,44 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		gManp->time_to_reinit = TRUE;
 		break;
 
+	    case IDM_REALTIMEINVJULIA:
 	    case IDM_REALTIMEJULIA:
-		gManp->RealTimeJuliaFlag = !gManp->RealTimeJuliaFlag;
-		if (gManp->RealTimeJuliaFlag)
+		{
+		BYTE RequestedMode = (LOWORD(wParam) == IDM_REALTIMEINVJULIA) ? RTJ_INVERSE_JULIA : RTJ_JULIA;
+
+		if (RequestedMode == RTJ_INVERSE_JULIA && gManp->type != MANDELFP && gManp->type != POWER)
 		    {
-		    if (!gManp->juliaflag)		// doesn't make a lot of sense if we are in julia already
-			{
-			gManp->InitRTJulia(hwnd);
-			FindCursorRealPos(&CursorLocShort);
-			if (gManp->DrawJulia(hwnd, CursorLocShort) < 0)
-			    gManp->RealTimeJuliaFlag = FALSE;
-			}
-		    return 1;			// ensure that we don't splatter initial RT Julia set
+		    _snprintf_s(TempStr, MAX_PATH, _TRUNCATE,
+			"Fractal type %d (%s) cannot be configured for Real Time Inverse Julia!\nChange the fractal type to Mandelbrot or Power first",
+			gManp->type, fractalspecific[gManp->type].name);
+
+		    MessageBox(hwnd, TempStr, "ManpWIN", MB_ICONEXCLAMATION | MB_OK);
+		    break;
 		    }
-		else
+
+		// Selecting the active mode again toggles Real Time Julia off.
+		if (gManp->RealTimeJuliaFlag == RequestedMode)
 		    {
+		    gManp->RealTimeJuliaFlag = RTJ_OFF;
 		    HardStopNow(hwnd, "RTJulia");
 		    gManp->time_to_restart = TRUE;
+		    break;
 		    }
-		break;
+
+		// Start the requested Real Time Julia mode, or switch modes.
+		gManp->RealTimeJuliaFlag = RequestedMode;
+
+		if (!gManp->juliaflag)		// doesn't make a lot of sense if we are in julia already
+		    {
+		    gManp->InitRTJulia(hwnd);
+		    FindCursorRealPos(&CursorLocShort);
+
+		    if (gManp->DrawJulia(hwnd, CursorLocShort) < 0)
+			gManp->RealTimeJuliaFlag = RTJ_OFF;
+		    }
+
+		break;				// ensure that we don't splatter initial RT Julia set
+		}
 
 	    case IDM_STEREOPAIRSETUP:
 		    if (DialogBox(hInst, "StereoPairDlg", hwnd, StereoPairDlg) == FALSE)
@@ -1330,28 +1399,22 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 		    break;
 
 	    case IDM_HAILSTONE_TOGGLE_AXES:
-		g_pOtherFunctions->ShowAxes = !g_pOtherFunctions->ShowAxes;
-		gManp->time_to_reinit = TRUE;
+		if (g_pOtherFunctions)
+		    g_pOtherFunctions->ToggleShowAxes();
 		break;
 
 	    case IDM_HAILSTONE_TOGGLE_LABELS:
-		g_pOtherFunctions->ShowPointLabels = !g_pOtherFunctions->ShowPointLabels;
-		gManp->time_to_reinit = TRUE;
+		if (g_pOtherFunctions)
+		    g_pOtherFunctions->ToggleShowPointLabels();
 		break;
 
 	    case IDM_HAILSTONE_TOGGLE_DOTS:
-		g_pOtherFunctions->ShowDots = !g_pOtherFunctions->ShowDots;
-		gManp->time_to_reinit = TRUE;
+		if (g_pOtherFunctions)
+		    g_pOtherFunctions->ToggleShowDots();
 		break;
 
 	    case IDM_TOGGLE_DISPLAY_PALETTE:
 		gManp->TrueCol.DisplayPaletteFlag = !gManp->TrueCol.DisplayPaletteFlag;
-/*
-		Secondaryhwnd = hwnd;
-		Secondarymessage = message;
-		SecondarywParam = wParam;
-		SecondarylParam = lParam;
-*/
 		DisplayPalette(hwnd, gManp->TrueCol.DisplayPaletteFlag);
 		gManp->DisplayFractal(hwnd);
 		return 0;								// don't break as we don't want to reinit
@@ -1443,6 +1506,20 @@ LRESULT CALLBACK PASCAL	MenuCommand (HWND hwnd, UINT message, WPARAM wParam, LPA
 			    return 0;
 		    gManp->TrueCol.FillPalette(REPEAT, gManp->TrueCol.PalettePtr, gManp->threshold);
 		    HardStopNow(hwnd, "Fractal options changed");
+		    gManp->time_to_reinit = TRUE;
+		    }
+		break;
+		}
+
+	    case IDM_FRACTTRANSFORMS:
+		{
+		// Open the transformation dialog in normal mode with all controls enabled.
+		if (DialogBoxParam(hInst, "TransformationDlg", hwnd, TransformationDlg, TRANSFORMDLG_NORMAL) == FALSE)
+		    return 0;
+		else
+		    {
+		    gManp->TrueCol.FillPalette(REPEAT, gManp->TrueCol.PalettePtr, gManp->threshold);
+		    HardStopNow(hwnd, "Fractal transformations changed");
 		    gManp->time_to_reinit = TRUE;
 		    }
 		break;
@@ -1596,7 +1673,7 @@ BOOL	InitNewFractal(HWND hwnd)
 	{
 	gManp->cycleflag = FALSE;
 	WasFractPar = FALSE;
-	gManp->juliaflag = (fractalspecific[gManp->type].juliaflag == JULIAFP);
+	gManp->juliaflag = (fractalspecific[gManp->type].juliatype == JULIAFP);
 	if (gManp->type != OldType)
 	    {
 	    gManp->xAxis = 0;
@@ -1933,7 +2010,7 @@ BOOL	InitNewFractal(HWND hwnd)
 		break;
 	    case NEWTON:
 	    case NEWTBASIN:
-		gManp->juliaflag = (fractalspecific[gManp->type].juliaflag);		// default view is of julia Newton
+		gManp->juliaflag = (fractalspecific[gManp->type].juliatype);		// default view is of julia Newton
 		// fall through (no break;)
 	    default:
 		gManp->InitFract(gManp->type);
@@ -2282,19 +2359,34 @@ static const char* PertSlopePlotModeName(PlotMode mode)
 	std::vector<char> s1(SIZEOF_BF_VARS);
 	std::vector<char> s2(SIZEOF_BF_VARS);
 	std::vector<char> s3(SIZEOF_BF_VARS);
-	gManp->BigHor.ToString(s1.data(), SIZEOF_BF_VARS, false);
-	gManp->BigVert.ToString(s2.data(), SIZEOF_BF_VARS, false);
+	Big_centrex.ToString(s1.data(), SIZEOF_BF_VARS, false);
+	Big_centrey.ToString(s2.data(), SIZEOF_BF_VARS, false);
 	gManp->BigWidth.SafeSprintf(s3.data(), SIZEOF_BF_VARS, "%.20Re");
-	_snprintf_s(PositionString.data(), SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %s\r\nY = %s\r\nWidth = %s", s1.data(), s2.data(), s3.data());
+	_snprintf_s(PositionString.data(), SIZEOF_BF_VARS * 3, _TRUNCATE, "Centre X = %s\r\nCentre Y = %s\r\nWidth = %s", s1.data(), s2.data(), s3.data());
 	}
     else
 	{
 	centrex = gManp->hor + (gManp->mandel_width * (gManp->AspectRatio / 2.0));
 	centrey = gManp->vert + (gManp->mandel_width / 2.0);
+
 	if (gManp->mandel_width > 0.000001)
-	    _snprintf_s(PositionString.data(), SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %14.14f\r\nY = %14.14f\r\nWidth = %14.14f", centrex, centrey, gManp->mandel_width);
+	    _snprintf_s(PositionString.data(), SIZEOF_BF_VARS * 3, _TRUNCATE,
+		"X = %14.14f\r\n"
+		"Y = %14.14f\r\n"
+		"Width = %14.14f\r\n"
+		"hor = %14.14f\r\n"
+		"vert = %14.14f",
+		centrex, centrey, gManp->mandel_width,
+		gManp->hor, gManp->vert);
 	else
-	    _snprintf_s(PositionString.data(), SIZEOF_BF_VARS * 3, _TRUNCATE, "X = %14.14f\r\nY = %14.14f\r\nWidth = %14e", centrex, centrey, gManp->mandel_width);
+	    _snprintf_s(PositionString.data(), SIZEOF_BF_VARS * 3, _TRUNCATE,
+		"X = %14.14f\r\n"
+		"Y = %14.14f\r\n"
+		"Width = %14e\r\n"
+		"hor = %14.14e\r\n"
+		"vert = %14.14e",
+		centrex, centrey, gManp->mandel_width,
+		gManp->hor, gManp->vert);
 	}
     if (fractalspecific[gManp->type].flags & PixelEngineFlags)
 	{
@@ -2422,15 +2514,21 @@ static const char* PertSlopePlotModeName(PlotMode mode)
     sb.append("\r\nThreshold: %ld", gManp->threshold);
     sb.append("\r\nArith=%s", PrecisionStr);
     sb.append("\r\n%s", ParamStr);
-    sb.append("\r\nBailout: %f", gManp->rqlim);
+
+    static const char* BailoutNames[] = { "MOD", "REAL", "IMAG", "OR", "AND", "MANH", "MANR", "CONVERGE" };
+    int BailoutIndex = gManp->BailoutTestType;
+    const char* BailoutName = (BailoutIndex >= BAIL_MOD && BailoutIndex <= CONVERGE) ? BailoutNames[BailoutIndex]: "UNKNOWN";
+    sb.append("\r\nBailout: %s (%f)", BailoutName, gManp->rqlim);
+
     sb.append("\r\nImage Size: [%d][%d]", gManp->xdots, gManp->ydots);
 
     if (gManp->Fractal.NumFunct == 1)
 	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, "\r\nFn = %s", gManp->Fractal.Fn1);
     else if (gManp->Fractal.NumFunct == 2 && gManp->type != OSCILLATORS)			// we use NumFunct to display dimensions
-	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, "\r\nFn1 = %s,Fn2 = %s", gManp->Fractal.Fn1, gManp->Fractal.Fn2);
+	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, "\r\nFn1 = %s, Fn2 = %s", gManp->Fractal.Fn1, gManp->Fractal.Fn2);
     else
 	_snprintf_s(SubData, SUBTYPELENGTH, _TRUNCATE, " ");
+    sb.append("%s", SubData);
     if (gManp->RotationAngle != 0)
 	{
 	_snprintf_s(TempStr, TEMPLENGTH, _TRUNCATE, "\r\nRotation Angle: %d\r\nRotation Centre: %lf, %lf\r\nMagnification: %le", gManp->RotationAngle, gManp->RotationCentre.x, gManp->RotationCentre.y, (gManp->BigNumFlag) ? 1.0 / (double)gManp->precision : 2.0 / gManp->mandel_width);

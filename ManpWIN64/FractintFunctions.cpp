@@ -42,23 +42,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case COMPLEXMARKSMAND:					// Complex Mark's Mandelbrot
 	    Init_ComplexMarksMand<Complex, double>(this, z, q, param, juliaflag, &Coefficient);
 	    break;
-/*
-	    {
-	    Complex pwr;
 
-	    if (!juliaflag)
-		{
-		z->x = q->x + param[0];
-		z->y = q->y + param[1];
-		}
-	    sqr = 0;
-	    real_imag = 0.0;
-	    pwr.x = param[2] - 1.0;
-	    pwr.y = param[3];
-	    Coefficient = *q ^ pwr;
-	    break;
-	    }
-*/
 	case SPIDERFP:					// Spider(XAXIS) { c=z=pixel: z=z*z+c; c=c/2+z, |z|<=4 }
 	    Init_Spider<Complex, double>(this, z, q, param, juliaflag, temp);
 	    break;
@@ -68,7 +52,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case MANOWARJ:					// to handle fractint par files
 	case MANOWAR:					// to handle fractint par files
 	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
-	    Init_Manowar<Complex, double>(this, z, q, &c, param, juliaflag, invert, t, temp, temp1);
+	    Init_Manowar<Complex, double>(this, z, q, c, param, juliaflag, t, temp, temp1);
 	    break;
 
 	case BARNSLEYM1:
@@ -91,6 +75,22 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    temp2.y = 0.0;
 	    if (juliaflag)
 		*z = c;
+	    else
+		{
+		// Fractint Barnsley M: initial orbit = pixel + initial perturbation.
+		// Apply param[0..1] once, not during each iteration.
+		z->x = q->x + param[0];
+		z->y = q->y + param[1];
+		}
+	    break;
+
+	case MAGNET1:
+	case MAGNET1M:
+	case MAGNET1J:
+	case MAGNET2:
+	case MAGNET2M:
+	case MAGNET2J:
+	    Init_MagnetFractal<Complex, double>(this, z, q, param, juliaflag);
 	    break;
 
 	case COMPLEXNEWTON:
@@ -110,29 +110,11 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    Init_Lambda<Complex, double>(this, z, q, param, juliaflag, temp);
 	    break;
 
-/*
-	    if (juliaflag)
-		{
-		temp.x = q->x;
-		temp.y = q->y;
-		}
-	    else
-		{
-		z->x = q->x + param[0];
-		z->y = q->y + param[1];
-		temp.x = z->x;
-		temp.y = z->y;
-		*z = 0.5;
-		}
-	    sqr.x = sqr(z->x);  // precalculated value for regular Mandelbrot
-	    sqr.y = sqr(z->y);
-	    break;
-*/
 	case PHOENIXFP:
 	case PHOENIX:
 	case MANDPHOENIXFP:
 	case MANDPHOENIX:
-	    t = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
+	    t = TransformPointT<Complex, double>(c, TransformType, f_radius, f_xcenter, f_ycenter);
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -174,7 +156,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case MANDPHOENIXCPLX:
 	case PHOENIXCPLX:
 	case PHOENIXFPCPLX:
-	    t = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
+	    t = TransformPointT<Complex, double>(c, TransformType, f_radius, f_xcenter, f_ycenter);
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -232,83 +214,20 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case FPMANZTOZPLUSZPWR:
 	case FPJULZTOZPLUSZPWR:
 	case TETRATEFP:					// Tetrate(XAXIS) { c=z=pixel: z=c^z, |z|<=(P1+3)
-	    Init_ZPowerGroup<Complex, double>(this, z, q, c, param, juliaflag, invert, t, temp, temp1, temp2);
+	    Init_ZPowerGroup<Complex, double>(this, z, q, c, param, juliaflag, t, temp, temp1, temp2);
 	    break;
-/*
-	    t = (invert) ? invertz2(c) : c;
-	    temp.x = param[0];
-	    temp.y = param[1];
-	    temp2.x = param[2];
-	    temp2.y = param[3];
-	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
-	    if (juliaflag)
-		{
-		temp.x = q->x;
-		temp.y = q->y;
-		}
-	    else
-		{
-		z->x = t.x + param[0];
-		z->y = t.y + param[1];
-		}
-	    sqr.x = sqr(z->x);
-	    sqr.y = sqr(z->y);
-	    temp1 = *z;					// set temp3 to Y value
-	    break;
-*/
+
 	case MARKSMANDELFP:
 	case MARKSMANDEL:
 	case MARKSJULIAFP:
 	case MARKSJULIA:
-	    Init_Marks<Complex, double>(this, z, q, c, param, juliaflag, invert, t, Coefficient);
+	    Init_Marks<Complex, double>(this, z, q, c, param, juliaflag, t, Coefficient);
 	    break;
-/*
-	    {
-	    Complex pwr;
 
-	    t = (invert) ? invertz2(c) : c;
-	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
-	    if (juliaflag)
-		{
-		t.x = q->x;
-		t.y = q->y;
-		}
-	    else
-		{
-		z->x = t.x + param[0];
-		z->y = t.y + param[1];
-		}
-	    sqr = 0;
-	    real_imag = 0.0;
-	    pwr.x = param[2] - 1.0;
-	    pwr.y = 0;
-	    Coefficient = *q ^ pwr;
-	    break;
-	    }
-*/
 	case QUATFP:
 	case QUATJULFP:
-	    Init_Quat<Complex, double>(this, z, q, c, param, juliaflag, invert, t, qc, qci, qcj, qck);
+	    Init_Quat<Complex, double>(this, z, q, c, param, juliaflag, t, qc, qci, qcj, qck);
 	    break;
-/*
-	    t = (invert) ? invertz2(c) : c;
-	    temp = 0;
-	    if (juliaflag)
-		{
-		*z = t;
-		qc = q->x;
-		qci = q->y;
-		}
-	    else
-		{
-		*z = 0;
-		qc = t.x;
-		qci = t.y;
-		}
-	    qcj = param[2];
-	    qck = param[3];
-	    break;
-*/
 
 	case UNITYFP:					// Unity Fractal - brought to you by Mark Peterson - you won't find this in any fractal books unless they saw it here first - Mark invented it!
 	case SIERPINSKI:				// following code translated from basic - see "Fractals Everywhere" by Michael Barnsley, p. 251, Program 7.1.1
@@ -319,7 +238,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    break;
 
 	case VL:					// Beauty of Fractals pp. 125 - 127
-	    t = (invert) ? Invertz2T<Complex, double>(c, f_radius, f_xcenter, f_ycenter) : c;
+	    t = TransformPointT<Complex, double>(c, TransformType, f_radius, f_xcenter, f_ycenter);
 	    temp.x = param[0];
 	    temp.y = param[1];
 	    temp2.x = param[2];
@@ -342,16 +261,6 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    if (param[1] < 0.0) param[1] = 0.0;
 	    if (param[0] > 1.0) param[0] = 1.0;
 	    if (param[1] > 1.0) param[1] = 1.0;
-	    break;
-
-	case MAGNET1M:
-	case MAGNET1J:
-	    InitTierazonFunctions(102, z, q);
-	    break;
-
-	case MAGNET2M:
-	case MAGNET2J:
-	    InitTierazonFunctions(103, z, q);
 	    break;
 
 	/******************* standalone engine for "lyapunov" ********************
@@ -465,8 +374,8 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	    froth_altcolor = param[1] != 0;
 	    froth_shades = (potentialColours - 1) / (frothsix ? 6 : 3);
 	
-	    if (rqlim < 6.0)
-		rqlim = 6.0;				// rqlim needs to be at least 6 or so 
+	    if (rqlim < 7.0)
+		rqlim = 7.0;				// rqlim needs to be at least 6 or so 
 	    set_Froth_palette(hwnd);			// make the best of the .map situation 
 //	orbit_color = !frothsix && colors >= 16 ? (froth_shades<<1)+1 : colors-1;
 	    }
@@ -501,16 +410,16 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    return Iter_Newton<Complex, double>(this, z, q, z1, z2, zd, iteration, degree, subtype, roots, thresh, color, threshold);
 
 	case COMPLEXMARKSMAND:					// Complex Mark's Mandelbrot
-	    return Iter_ComplexMarksMandelbrot<Complex, double>(this, z, q, sqr, real_imag, Coefficient, BailoutTestType, rqlim);
+	    return Iter_ComplexMarksMandelbrot<Complex, double>(this, z, q, sqr, real_imag, Coefficient, BailoutTestType, rqlim, &OldZ);
 
 	case SPIDERFP:						// Spider(XAXIS) { c=z=pixel: z=z*z+c; c=c/2+z, |z|<=4 }
-	    return Iter_Spider<Complex, double>(this, z, q, temp, BailoutTestType, rqlim);
+	    return Iter_Spider<Complex, double>(this, z, q, temp, BailoutTestType, rqlim, &OldZ);
 
 	case MANOWARFP:						// From Art Matrix via Lee Skinner
 	case MANOWARJFP:					// to handle fractint par files
 	case MANOWARJ:						// to handle fractint par files
 	case MANOWAR:						// to handle fractint par files
-	    return Iter_ManOWar<Complex, double>(this, z, q, temp, temp1, temp3, param, BailoutTestType, rqlim);
+	    return Iter_ManOWar<Complex, double>(this, z, q, temp, temp1, temp3, param, BailoutTestType, rqlim, &OldZ);
 
 	case BARNSLEYM1:					// Barnsley's Mandelbrot type M1 from "Fractals Everywhere" by Michael Barnsley, p. 322
 	case BARNSLEYJ1:
@@ -538,7 +447,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		}
 	    *z = temp1;
 
-	    return DoBailout(BailoutTestType, z, rqlim);
+	    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
 
 	case BARNSLEYM2:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 331, example 4.2
 	case BARNSLEYJ2:
@@ -562,7 +471,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		temp1.y = foldyinitx + temp.y + foldxinity/* + param[1]*/;
 		}
 	    *z = temp1;
-	    return DoBailout(BailoutTestType, z, rqlim);
+	    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
 
 
 	case BARNSLEYM3:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 292, example 4.1 
@@ -589,7 +498,17 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		temp1.y += temp.y * z->x;
 		}
 	    *z = temp1;
-	    return DoBailout(BailoutTestType, z, rqlim);
+	    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
+
+	case MAGNET1:
+	case MAGNET1M:
+	case MAGNET1J:
+	    return Iter_Magnet1<Complex, double>(this, z, q, BailoutTestType, rqlim, &OldZ);
+
+	case MAGNET2:
+	case MAGNET2M:
+	case MAGNET2J:
+	    return Iter_Magnet2<Complex, double>(this, z, q, BailoutTestType, rqlim, &OldZ);
 
 	case COMPLEXNEWTON:
 	case COMPLEXBASIN:
@@ -625,7 +544,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    if (testsize > rqlim)
 		{
 		*z = temp;
-		return DoBailout(BailoutTestType, z, rqlim);
+		return DoBailout(BailoutTestType, z, rqlim, &OldZ);
 		}
 	    else							// make distinct level sets if point stayed in target set
 		{
@@ -639,7 +558,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	case MANDELLAMBDA:
 	case LAMBDAFP:
 	case LAMBDA:
-	    return Iter_Lambda<Complex, double>(this, z, q, temp, BailoutTestType, rqlim);
+	    return Iter_Lambda<Complex, double>(this, z, q, temp, BailoutTestType, rqlim, &OldZ);
 
 	case PHOENIXFP:
 	case PHOENIX:
@@ -669,18 +588,18 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	case LJULIAZPOWER:
 	case LMANDELZPOWER:
 	case FPMANDELZPOWER:
-	    return Iter_ZPower<Complex, double>(this, z, q, temp2, BailoutTestType, rqlim);
+	    return Iter_ZPower<Complex, double>(this, z, q, temp2, BailoutTestType, rqlim, &OldZ);
 
 	case FPMANZTOZPLUSZPWR:
 	case FPJULZTOZPLUSZPWR:
-	    return Iter_ZtoZPlusZPower<Complex, double>(this, z, q, temp, param, BailoutTestType, rqlim);
+	    return Iter_ZtoZPlusZPower<Complex, double>(this, z, q, temp, param, BailoutTestType, rqlim, &OldZ);
 
 	case MARKSMANDELFP:				// Mark Peterson's variation of "lambda" function
 	case MARKSMANDEL:
 	case MARKSJULIAFP:
 	case MARKSJULIA:
 	    // Z1 = (C^(exp-1) * Z**2) + C
-	    return Iter_MarksMandel<Complex, double>(this, z, q, /*sqr, */temp, temp1, Coefficient, t, BailoutTestType, rqlim);
+	    return Iter_MarksMandel<Complex, double>(this, z, q, /*sqr, */temp, temp1, Coefficient, t, BailoutTestType, rqlim, &OldZ);
 
 	case QUATFP:
 	case QUATJULFP:
@@ -696,13 +615,13 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		temp.x = temp.x - 1;
 	    // end barnsley code
 	    *z = temp;
-	    return DoBailout(BailoutTestType, z, rqlim);
+	    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
 
 	case TETRATEFP:					// Tetrate(XAXIS) { c=z=pixel: z=c^z, |z|<=(P1+3)
-	    return Iter_Tetrate<Complex, double>(this, z, q, BailoutTestType, rqlim);
+	    return Iter_Tetrate<Complex, double>(this, z, q, BailoutTestType, rqlim, &OldZ);
 
 	    *z = *q ^ *z;
-	    return DoBailout(BailoutTestType, z, rqlim);
+	    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
 
 	case UNITYFP:					// Unity Fractal - brought to you by Mark Peterson - you won't find this in any fractal books unless they saw it here first - Mark invented it!
 	    temp.x = sqr(z->x) + sqr(z->y);
@@ -728,44 +647,42 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    temp.x = z->x + half * (u + (a - ab));
 	    temp.y = z->y + half * (w + (-b + ab));
 	    *z = temp;
-	    return DoBailout(BailoutTestType, z, rqlim);
-	}
-
-
-	case MAGNET1M:
-	case MAGNET1J:
-	    return (RunTierazonFunctions(102, z, q, SpecialFlag, iteration));
-
-	case MAGNET2M:
-	case MAGNET2J:
-	    return (RunTierazonFunctions(103, z, q, SpecialFlag, iteration));
+	    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
+	    }
 
 	case LYAPUNOV:
 	    {
 	    double ra, rb, rc;			// r in the direction of x, y, and z or A, B, C
+	    Complex TransformedC;
 
 	    rc = param[2];			// add z component C - good for animation
 	    overflow = FALSE;
-	    if (param[0] == 1) 
+
+	    if (param[0] == 1)
 		Population = (1.0 + rand()) / (2.0 + RAND_MAX);
-	    else if (param[0] == 0) 
+	    else if (param[0] == 0)
 		{
 		if (fabs(Population) > BIG || Population == 0 || Population == 1)
 		    Population = (1.0 + rand()) / (2.0 + RAND_MAX);
 		}
-	    else Population = param[0];
-		{
-		ra = c.x;
-		rb = c.y;
-		}
+	    else
+		Population = param[0];
+
+	    TransformedC = TransformPointT<Complex, double>(c, TransformType, f_radius, f_xcenter, f_ycenter);
+
+	    ra = TransformedC.x;
+	    rb = TransformedC.y;
+
 	    color = lyapunov_cycles(filter_cycles, ra, rb, rc);
-	    z->x = Rate;						// sort of to allow filters and FwdDiff to give something!!!
+
+	    z->x = Rate;			// sort of to allow filters and FwdDiff to give something!!!
 	    z->y = Population;
+
 	    if (TrueCol->inside_colour > 0 && color == 0)
 		color = TrueCol->inside_colour;
 	    else if (color >= potentialColours)
 		color = potentialColours - 1;
-	//    (*plot)((WORD)col, (WORD)row, color);
+
 	    *iteration = color;
 	    return TRUE;
 	    }
@@ -799,7 +716,7 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    FPUsincos(&g_tmp_z.y, &siny, &cosy);
 	    z->x = z->x - siny * StepSize;
 	    z->y = z->y - g_sin_x * StepSize;
-	    return DoBailout(BailoutTestType, z, rqlim);
+	    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
 	    }
 
 	case FROTH:		// Froth Fractal type - per pixel 1/2/g, called with row & col set
@@ -830,13 +747,13 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    double	magnitude;
 	    double	x, y, nx, ny, x2, y2;
 	    double	close = CLOSE;
-	    double	a = A;
-	    double	b1 = B1;
+	    double	a = (param[2] != 0.0) ? param[2] : A;
+	    double	b1 = a / 2.0;
+	    double	m2 = SQRT3;
+	    double	b2 = -a;
+	    double	m3 = -SQRT3;
+	    double	b3 = -a;
 	    double	xmidt = XMIDT;
-	    double	m2 = M2;
-	    double	b2 = B2;
-	    double	m3 = M3;
-	    double	b3 = B3;
 	    double	x1min = X1MIN;
 	    double	x1max = X1MAX;
 	    double	x2max1 = X2MAX1;
@@ -848,8 +765,11 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 
 	    long	color = 0;
 
-	    x = c.x;
-	    y = c.y;
+	    Complex TransformedC = TransformPointT<Complex, double>(c, TransformType, f_radius, f_xcenter, f_ycenter);
+
+	    x = TransformedC.x;
+	    y = TransformedC.y;	    
+	    
 	    magnitude = (x2 = sqr(x)) + (y2 = sqr(y));
 	    while (!found_attractor && (magnitude < rqlim) && (color < threshold))
 		{
@@ -868,9 +788,6 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 		    }
 		magnitude = (x2 = sqr(x)) + (y2 = sqr(y));
 		color++;
-
-		//	 if (show_orbit)
-		//	    plot_orbit(x, y, -1);
 
 		if (x > x1min && x < x1max && fabs(b1 - y) < close)
 		    {
@@ -953,7 +870,6 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    else					// outside 
 		color = 0;				// all outside points are color 0 
 
-	  //   (*plot)((WORD)col, (WORD)row, color);
 	    *iteration = color;
 	    return TRUE;
 
@@ -977,10 +893,6 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 //#undef FROTH_BITSHIFT
 #undef D_TO_L
 	    }
-
-
-
-
 	}
     return 0;
     }
@@ -999,7 +911,7 @@ int	CPixel::PhoenixFractal(Complex *z, Complex *q)
     temp4.y = (temp1.x + temp1.x) + (temp.y * temp3.y);
     temp3 = *z;							// set temp3 to Y value
     *z = temp4;
-    return DoBailout(BailoutTestType, z, rqlim);
+    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
     }
 
 int	CPixel::PhoenixPlusFractal(Complex *z, Complex *q)
@@ -1019,7 +931,7 @@ int	CPixel::PhoenixPlusFractal(Complex *z, Complex *q)
     temp4.y = newminus.y + (temp.y * temp3.y);
     temp3 = *z;							// set temp3 to Y value
     *z = temp4;
-    return DoBailout(BailoutTestType, z, rqlim);
+    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
     }
 
 int	CPixel::PhoenixMinusFractal(Complex *z, Complex *q)
@@ -1038,7 +950,7 @@ int	CPixel::PhoenixMinusFractal(Complex *z, Complex *q)
     temp4.y = newminus.y + (temp.y * temp3.y);
     temp3 = *z;							// set temp3 to Y value
     *z = temp4;
-    return DoBailout(BailoutTestType, z, rqlim);
+    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
     }
 
 int	CPixel::PhoenixFractalcplx(Complex *z, Complex *q)
@@ -1051,7 +963,7 @@ int	CPixel::PhoenixFractalcplx(Complex *z, Complex *q)
     temp4.y = (temp1.x + temp1.x) + q->y + (temp2.x * temp3.y) + (temp2.y * temp3.x);
     temp3 = *z;							// set tmp3 to Y value
     *z = temp4;
-    return DoBailout(BailoutTestType, z, rqlim);
+    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
     }
 
 int	CPixel::PhoenixCplxPlusFractal(Complex *z, Complex *q)
@@ -1072,7 +984,7 @@ int	CPixel::PhoenixCplxPlusFractal(Complex *z, Complex *q)
     temp4.y = newminus.y + temp1.y;
     temp3 = *z;							// set temp3 to Y value
     *z = temp4;
-    return DoBailout(BailoutTestType, z, rqlim);
+    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
     }
 
 int	CPixel::PhoenixCplxMinusFractal(Complex *z, Complex *q)
@@ -1095,7 +1007,7 @@ int	CPixel::PhoenixCplxMinusFractal(Complex *z, Complex *q)
     temp4.y = newminus.y + temp1.y;
     temp3 = *z;							// set tmp2 to Y value
     *z = temp4;
-    return DoBailout(BailoutTestType, z, rqlim);
+    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
     }
 
 /**************************************************************************

@@ -9,6 +9,7 @@ body {
     color: #e0e0e0;
     font-family: Arial, sans-serif;
     line-height: 1.6;
+    max-width: 1000px;
     margin: 20px;
 }
 
@@ -113,24 +114,22 @@ RGB increment values
 </td></tr>
 
 <tr><td><code class="token">-s</code></td><td>Save image (PNG format)</td></tr>
-
-<tr><td><code class="token">-o</code></td><td>Rotation parameter (context-dependent)</td></tr>
-
+<tr><td><code class="token">-o</code></td><td>Rotation angle and, for rotated views, saved rotation centre</td></tr>
 <tr><td><code class="token">-e</code></td><td>Exit after completion</td></tr>
-
 <tr><td><code class="token">-p</code></td><td>Periodicity</td></tr>
-
 <tr><td><code class="token">-r</code></td><td>AutoStereo depth</td></tr>
-
 <tr><td><code class="token">-b</code></td><td>Biomorph colour</td></tr>
-
 <tr><td><code class="token">-k</code></td><td>Decomposition colours (power of 2)</td></tr>
-
 <tr><td><code class="token">-l</code></td><td>Logarithmic palette (with start value)</td></tr>
-
 <tr><td><code class="token">-a</code></td><td>Palette filename</td></tr>
 </table>
 
+<p>
+<b>Rotation:</b> The rotation angle is absolute relative to the standard
+unrotated fractal view. Rotations are not cumulative. For example, changing
+the rotation from 30&deg; to 45&deg; produces a view rotated 45&deg; from the
+standard orientation, not an additional 45&deg; rotation from the current view.
+</p>
 
 <h2>Extended Tokens</h2>
 
@@ -145,7 +144,8 @@ to control specialised behaviour.
 <tr><td><code class="token">-^</code></td><td>Palette shift</td></tr>
 <tr><td><code class="token">-@</code></td><td>Iteration scaling (divide iterations)</td></tr>
 <tr><td><code class="token">-#</code></td><td>Lyapunov sequence</td></tr>
-
+<tr><td><code class="token">-{</code></td><td>Clouds / TieraZon rendering mode</td></tr>
+<tr><td><code class="token">-!</code></td><td>Independent potential colouring</td></tr>
 <tr><td><code class="token">-$</code></td><td>Distance estimation</td></tr>
 <tr><td><code class="token">-2</code></td><td>3D oscillator rotation</td></tr>
 <tr><td><code class="token">-D</code></td><td>Filter method</td></tr>
@@ -158,7 +158,7 @@ to control specialised behaviour.
 
 <tr><td><code class="token">-V</code></td><td>Bailout limit</td></tr>
 <tr><td><code class="token">-W</code></td><td>Parameter list used by the selected fractal or rendering mode</td></tr>
-<tr><td><code class="token">-X</code></td><td>Invert fractal</td></tr>
+<tr><td><code class="token">-X</code></td><td>Fractal transformation parameters</td></tr>
 <tr><td><code class="token">-Y</code></td><td>Palette starting offset</td></tr>
 <tr><td><code class="token">-Z</code></td><td>Parameter requirements</td></tr>
 
@@ -171,6 +171,12 @@ These tokens are specified after the <code class="token">-</code> prefix in para
 <p>
 Some of these tokens originate from early versions of ManpWIN and Fractint,
 and remain for compatibility with existing parameter files.
+</p>
+
+<p>
+The <code class="token">-X</code> token stores the current fractal transformation.
+Supported transformation types include standard transformations, Affine,
+M&ouml;bius, Joukowski, and Twist.
 </p>
 
 <p>
@@ -333,7 +339,7 @@ not modified directly by users.
 </p>
 
 <footer>
-ManpWIN Help &copy; September 2026
+ManpWIN Help &copy; October 2026
 </footer>
 
 </body>

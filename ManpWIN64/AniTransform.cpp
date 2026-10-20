@@ -1,5 +1,5 @@
 /*
-    ANIINVERT.CPP  - a program to animate the Inversion.
+    ANITRANSFORM.CPP  - a program to animate the transformations.
     
     Written in Microsoft Visual C++ by Paul de Leeuw.
 */
@@ -28,7 +28,7 @@ extern	BOOL	WriteMPEGFrames;	// write frames directly to an MPEG file
 extern	char	*AnimData(void);
 static	int	frames = 100;
 static	double	ScaleFactor = 1.0;
-static	int	InvertAnimType = 0;	// 0 = linear
+static	int	TransformAnimType = 0;	// 0 = linear
 					// 1 = circular
 					// 2 = cardoid
 
@@ -49,7 +49,7 @@ static	double	CentreY = 0.0;
 static	double	radius = 0.25;
 
 static	double	Magnitude = 0.49;		// 0.5 sits neatly inside the Mandelbrot set. 0.49 gives great orbits
-static	double	InvertRadius = 1.0;		// inversion radius
+static	double	TransformRadius = 1.0;		// transformation radius
 
 extern	char	*GenerateMPEGFileName (char *, char *);
 extern	char	*GenerateAnimFileName (char *, char *);
@@ -85,7 +85,6 @@ int	CManp::CardioidInversionScript(HWND hwnd, char *filename)
 	}
 
     BigNumFlag = FALSE;							// we are starting at the shallow end of the pool
-    invert = TRUE;
 
     if ((out = fopen(filename, "w")) == NULL)
 	{
@@ -97,7 +96,7 @@ int	CManp::CardioidInversionScript(HWND hwnd, char *filename)
 
     fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimData());	// add quotes to filename to trap spaces in path
     fprintf(out, " -c%24.24f,%24.24f,%24.24f\n", hor, vert, mandel_width);
-    fprintf(out, "Inversion Animation: %ld %d\n", threshold, frames);
+    fprintf(out, "Transformation Animation: %ld %d\n", threshold, frames);
     fprintf(out, "Palette=\n");
     for (i = 0, k = 0; i < threshold; i++, k++)
 	{
@@ -116,7 +115,7 @@ int	CManp::CardioidInversionScript(HWND hwnd, char *filename)
 	    {
 	    a.x = (0.25 - cos(Divisor * (double)i) * (1.0 + cos(Divisor * (double)i)) * Magnitude);
 	    a.y = (sin(Divisor * (double)i) * (1.0 + cos(Divisor * (double)i)) * Magnitude);
-	    fprintf(out, "-x%6.6f,%24.24f,%24.24f,\n", InvertRadius, a.x, a.y);
+	    fprintf(out, "-x%d,%6.6f,%24.24f,%24.24f,\n", TransformType, TransformRadius, a.x, a.y);
 	    }
 	}
 
@@ -154,7 +153,6 @@ int	CManp::CircleInversionScript(HWND hwnd, char *filename)
 	}
 
     BigNumFlag = FALSE;							// we are starting at the shallow end of the pool
-    invert = TRUE;
 
     if ((out = fopen(filename, "w")) == NULL)
 	{
@@ -166,7 +164,7 @@ int	CManp::CircleInversionScript(HWND hwnd, char *filename)
 
     fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimData());	// add quotes to filename to trap spaces in path
     fprintf(out, " -c%24.24f,%24.24f,%24.24f\n", hor, vert, mandel_width);
-    fprintf(out, "Inversion Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
+    fprintf(out, "Transformation Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
     fprintf(out, "Palette=\n");
     for (i = 0, k = 0; i < threshold; i++, k++)
 	{
@@ -185,7 +183,7 @@ int	CManp::CircleInversionScript(HWND hwnd, char *filename)
 	    {
 	    a.x = cos(Divisor * (double)i) * radius + CentreX;
 	    a.y = sin(Divisor * (double)i) * radius + CentreY;
-	    fprintf(out, "-x%6.6f,%24.24f,%24.24f,\n", InvertRadius, a.x, a.y);
+	    fprintf(out, "-x%d,%6.6f,%24.24f,%24.24f,\n", TransformType, TransformRadius, a.x, a.y);
 	    }
 	}
     fclose(out);
@@ -223,7 +221,6 @@ int	CManp::GenInversionScript(HWND hwnd, char *filename)
 	}
 
     BigNumFlag = FALSE;							// we are starting at the shallow end of the pool
-    invert = TRUE;
 
     a.x = StartX;
     a.y = StartY;
@@ -238,7 +235,7 @@ int	CManp::GenInversionScript(HWND hwnd, char *filename)
 
     fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimData());	// add quotes to filename to trap spaces in path
     fprintf(out, " -c%24.24f,%24.24f,%24.24f\n", hor, vert, mandel_width);
-    fprintf(out, "Inversion Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
+    fprintf(out, "Transformation Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
     fprintf(out, "Palette=\n");
     for (i = 0, k = 0; i < threshold; i++, k++)
 	{
@@ -255,7 +252,7 @@ int	CManp::GenInversionScript(HWND hwnd, char *filename)
     for (i = steps; i > 0; i--) 
 	{
 	    {
-	    fprintf(out, "-x%6.6f,%24.24f,%24.24f,\n", InvertRadius, a.x, a.y);
+	    fprintf(out, "-x%d,%6.6f,%24.24f,%24.24f,\n", TransformType, TransformRadius, a.x, a.y);
 	    a.x += DivisorX;
 	    a.y += DivisorY;
 	    }
@@ -265,10 +262,10 @@ int	CManp::GenInversionScript(HWND hwnd, char *filename)
     }
 
 /**************************************************************************
-	Dialog For Setting Up Inversion Animation
+	Dialog For Setting Up Transformation Animation
 **************************************************************************/
 
-INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK TransformationAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
      {
      static     UINT	tempParam;
      static     BYTE	temp;
@@ -292,8 +289,8 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 		else
 		    Magnitude = 0.93 / ((double)gManp->degree + 2);
 
-		SetWindowText (hDlg, "Inversion Animation Setup");
-		CheckRadioButton(hDlg, IDC_LINEARJUL, IDC_CARDIOID, IDC_LINEARJUL + InvertAnimType);
+		SetWindowText (hDlg, "Transformation Animation Setup");
+		CheckRadioButton(hDlg, IDC_LINEARJUL, IDC_CARDIOID, IDC_LINEARJUL + TransformAnimType);
 		hCtrl = GetDlgItem (hDlg, IDC_STARTNOW);
 		SendMessage(hCtrl, BM_SETCHECK, gManp->StartImmediately, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_WRITEPNGDIRECT);
@@ -304,8 +301,8 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 		SendMessage(hCtrl, BM_SETCHECK, WritePNGList, 0L);
 		hCtrl = GetDlgItem (hDlg, IDC_WRITEMPEGDIRECT1);
 		SendMessage(hCtrl, BM_SETCHECK, WriteMPEGFrames, 0L);
-		SetUpFilename(ScriptFileName, "sci", "Invert");
-		SetUpFilename(PNGName, "animpng", "Invert");
+		SetUpFilename(ScriptFileName, "sci", "Transform");
+		SetUpFilename(PNGName, "animpng", "Transform");
 		SetDlgItemText(hDlg, IDC_SCRIPT_FILENAME, ScriptFileName);
 		SetDlgItemText(hDlg, IDC_SEQUENCE_NAME, PNGName);
 		SetDlgItemInt(hDlg, IDC_THRESHOLD_START, gManp->threshold, TRUE);
@@ -316,13 +313,13 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 		ShowWindow(hCtrl, SW_HIDE);
 		hCtrl = GetDlgItem (hDlg, IDC_INVERTRADIUS);
 		ShowWindow(hCtrl, SW_SHOWNORMAL);
-		SAFE_SPRINTF(s, "%f", InvertRadius);
+		SAFE_SPRINTF(s, "%f", TransformRadius);
 		SetDlgItemText(hDlg, IDC_INVERTRADIUS, s);
 		hCtrl = GetDlgItem (hDlg, IDC_INVERTTEXT);
 		ShowWindow(hCtrl, SW_SHOWNORMAL);
 		SetDlgItemText(hDlg, IDC_INVERTTEXT, "Inv Radius");
 		SetDlgItemInt(hDlg, IDC_PALETTESHIFT1, gManp->PaletteShift, TRUE);
-		switch (InvertAnimType)
+		switch (TransformAnimType)
 		    {
 		    case 0:						// Linear
 			SAFE_SPRINTF(s, "%18.18f", StartX);
@@ -430,7 +427,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 			return TRUE;
 
 		    case IDC_LINEARJUL:
-			InvertAnimType = LOWORD(wParam) - IDC_LINEARJUL;
+			TransformAnimType = LOWORD(wParam) - IDC_LINEARJUL;
 			CheckRadioButton(hDlg, IDC_LINEARJUL, IDC_CARDIOID, (int) LOWORD(wParam));
 			SAFE_SPRINTF(s, "%18.18f", StartX);
 			SetDlgItemText(hDlg, IDC_START_X, s);
@@ -455,7 +452,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 		        return TRUE ;
 
 		    case IDC_CIRCULAR:
-			InvertAnimType = LOWORD(wParam) - IDC_LINEARJUL;
+			TransformAnimType = LOWORD(wParam) - IDC_LINEARJUL;
 			CheckRadioButton(hDlg, IDC_LINEARJUL, IDC_CARDIOID, (int) LOWORD(wParam));
 			SAFE_SPRINTF(s, "%18.18f", CentreX);
 			SetDlgItemText(hDlg, IDC_START_X, s);
@@ -480,7 +477,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 		        return TRUE ;
 
 		    case IDC_CARDIOID:
-			InvertAnimType = LOWORD(wParam) - IDC_LINEARJUL;
+			TransformAnimType = LOWORD(wParam) - IDC_LINEARJUL;
 			CheckRadioButton(hDlg, IDC_LINEARJUL, IDC_CARDIOID, (int) LOWORD(wParam));
 			SAFE_SPRINTF(s, "     ");
 			SetDlgItemText(hDlg, IDC_START_X, s);
@@ -505,7 +502,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 		        return TRUE ;
 			    
 		    case IDC_TESTCURVE:
-			switch (InvertAnimType)
+			switch (TransformAnimType)
 			    {
 			    case 0:
 				GetDlgItemText(hDlg, IDC_START_X, s, 200);
@@ -530,7 +527,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 				sscanf(s, "%lf", &Magnitude);
 				break;
 			    }
-			gManp->displayCurve(gManp->GlobalHwnd, InvertAnimType);			// write to main window
+			gManp->displayCurve(gManp->GlobalHwnd, TransformAnimType);	// write to main window
 		        return TRUE ;
 
 		    case IDOK:
@@ -565,7 +562,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 			GetDlgItemText(hDlg, IDC_JULIAWIDTH, s, 200);
 			sscanf(s, "%lf", &ScaleFactor);
 			GetDlgItemText(hDlg, IDC_INVERTRADIUS, s, 200);
-			sscanf(s, "%lf", &InvertRadius);
+			sscanf(s, "%lf", &TransformRadius);
 			gManp->PaletteShift = GetDlgItemInt(hDlg, IDC_PALETTESHIFT1, &bTrans, TRUE);
 
 			if (frames <= 0)
@@ -576,7 +573,7 @@ INT_PTR CALLBACK InversionAnimDlg (HWND hDlg, UINT message, WPARAM wParam, LPARA
 			    _snprintf_s(MPGFile, _MAX_PATH, _TRUNCATE, "%s", GenerateMPEGFileName (MPGPath, TempFile));
 			    }
 
-			switch (InvertAnimType)
+			switch (TransformAnimType)
 			    {
 			    case 0:
 				GetDlgItemText(hDlg, IDC_START_X, s, 200);

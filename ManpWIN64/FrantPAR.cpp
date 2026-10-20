@@ -167,6 +167,80 @@ int	AnalyseFormula(char *FormulaData)
     }
 
 /**************************************************************************
+    Analyse Fractint PAR symmetry
+    Return the requested symmetry, or -1 if unrecognised.
+**************************************************************************/
+
+int CManp::FindSymmetry(char *s)
+    {
+    if (str_find_ci(s, "xyaxis"))
+	return XYAXIS;
+    if (str_find_ci(s, "xaxis"))
+	return XAXIS;
+    if (str_find_ci(s, "yaxis"))
+	return YAXIS;
+    if (str_find_ci(s, "origin"))
+	return ORIGIN;
+    if (str_find_ci(s, "pi"))
+	return PI_SYM;
+    if (str_find_ci(s, "none"))
+	return NOSYM;
+
+    return -1;
+    }
+
+/**************************************************************************
+    Analyse the miim type for Inverse Julia
+**************************************************************************/
+
+int	CManp::ProcessMIIM(char *MIIMData)
+    {
+    char	*Slash;
+
+    switch (tolower((unsigned char)MIIMData[0]))
+	{
+	case 'b':
+	    InverseJuliaMajorPAR = IJ_BREADTH_FIRST;
+	    break;
+
+	case 'd':
+	    InverseJuliaMajorPAR = IJ_DEPTH_FIRST;
+	    break;
+
+	case 'w':
+	    InverseJuliaMajorPAR = IJ_RANDOM_WALK;
+	    break;
+
+	case 'r':
+	    InverseJuliaMajorPAR = IJ_RANDOM_RUN;
+	    break;
+
+	default:
+	    return -1;
+	}
+
+    Slash = strchr(MIIMData, '/');
+    if (Slash == NULL)
+	return -1;
+
+    switch (tolower((unsigned char)Slash[1]))
+	{
+	case 'l':
+	    InverseJuliaMinorPAR = IJ_LEFT_FIRST;
+	    break;
+
+	case 'r':
+	    InverseJuliaMinorPAR = IJ_RIGHT_FIRST;
+	    break;
+
+	default:
+	    return -1;
+	}
+
+    return 0;
+    }
+
+/**************************************************************************
 	Analyse the IFS file and type
 **************************************************************************/
 
@@ -456,13 +530,31 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 	    strcpy(LyapSequence, TempLyapSequence);	// prevent it being splattered by the default in InitFract()
 	if (TempRqlim > 0.0)
 	    rqlim = TempRqlim;				// prevent it being splattered by the default in InitFract()
+
 	type = k;
-	gManp->param[0] = param1;				// this stuff is still experimental
-	gManp->param[1] = param2;
-	gManp->param[2] = param3;
-	gManp->param[3] = param4;
-	gManp->param[4] = param5;
-	gManp->param[5] = param6;
+
+	if (type == INVERSEJULIA || type == INVERSEJULIAFP)
+	    {
+	    // Fractint Inverse Julia uses params 1-3 for C and Max Hits,
+	    // while param 4 is the Random Run length.  The traversal method
+	    // and branch order come from miim= and must not be overwritten here.
+	    gManp->param[0] = param1;
+	    gManp->param[1] = param2;
+	    gManp->param[2] = param3;
+	    gManp->param[3] = InverseJuliaMajorPAR;
+	    gManp->param[4] = InverseJuliaMinorPAR;
+	    gManp->param[5] = param4;
+	    }
+	else
+	    {
+	    gManp->param[0] = param1;
+	    gManp->param[1] = param2;
+	    gManp->param[2] = param3;
+	    gManp->param[3] = param4;
+	    gManp->param[4] = param5;
+	    gManp->param[5] = param6;
+	    }
+
 	switch (type)
 	    {
 	    // start with Julia fractals
@@ -478,6 +570,8 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 	    case MANOWARJ:
 	    case MANOWARJFP:
 	    case LJULIAZPOWER:
+	    case LJULTRIGPLUSZSQRD:
+	    case FPJULTRIGPLUSZSQRD:
 		juliaflag = TRUE;
 		j.x = gManp->param[0];
 		j.y = gManp->param[1];
@@ -494,7 +588,6 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 	    case NEWTBASIN:
 		gManp->param[1] = (gManp->param[1] == 0.0) ? 2.0 : 1.0;	// don't blame me, I didn't invent Fractint
 		break;
-
 	    }
 
 	if (tok = str_find_ci(tmpstr.data(), "function="))
@@ -525,14 +618,12 @@ int	CManp::FindType(HWND hwnd, char *FractType, char *FractName, bool *IsFrm, do
 		}
 	    }
 
-	if (fractalspecific[k].juliaflag == JULIAFP)
+	if (fractalspecific[k].juliatype == JULIAFP)
 	    {
 	    juliaflag = TRUE;
 	    j.x = gManp->param[0];
 	    j.y = gManp->param[1];
 	    }
-	else
-	    juliaflag = FALSE;
 	}
     return 0;
     }
@@ -551,7 +642,7 @@ int	CManp::ProcessBailoutTest(char *value)
     else if (strncmp(value, "imag", 4) == 0)
 	test = BAIL_IMAG;
     else if (strncmp(value, "or", 2) == 0)
-	test = BAIL_AND;
+	test = BAIL_OR;
     else if (strncmp(value, "and", 3) == 0)
 	test = BAIL_AND;
     else if (strncmp(value, "manh", 4) == 0)
@@ -704,12 +795,14 @@ int	CManp::ParseColours(char *value)
 	TrueCol.PalettePtr[i].rgbtBlue <<= 2;
 	TrueCol.PalettePtr[i].rgbtGreen <<= 2;
 	TrueCol.PalettePtr[i].rgbtRed <<= 2;
+/*
 	if (i == TrueCol.inside_colour)
 	    {
-	    TrueCol.InsideRed = TrueCol.PalettePtr[i].rgbtBlue;		// values for r, g, b channels for inside colour
+	    TrueCol.InsideRed = TrueCol.PalettePtr[i].rgbtRed;		// values for r, g, b channels for inside colour
 	    TrueCol.InsideGreen = TrueCol.PalettePtr[i].rgbtGreen;
-	    TrueCol.InsideBlue = TrueCol.PalettePtr[i].rgbtRed;
+	    TrueCol.InsideBlue = TrueCol.PalettePtr[i].rgbtBlue;
 	    }
+*/
 	}
 
 #ifdef DEBUG
@@ -744,6 +837,61 @@ int	CManp::ProcessParams(char *s)
     }
 
 /**************************************************************************
+	Convert Fractint view parameters to affine transformation
+**************************************************************************/
+
+void CManp::SetFractintAffineParams(double CentreX, double CentreY, double Xmagfactor, double Rotation, double Skew)
+    {
+    if (Xmagfactor == 0.0)
+	Xmagfactor = 1.0;
+
+    double ScaleX = 1.0 / Xmagfactor;
+
+    double Angle = Rotation * PI / 180.0;
+    double TanSkew = tan(Skew * PI / 180.0);
+    double SinRot = sin(Angle);
+    double CosRot = cos(Angle);
+
+    AffineParams.a = ScaleX * CosRot;
+    AffineParams.b = TanSkew * CosRot + SinRot;
+
+    AffineParams.c = -ScaleX * SinRot;
+    AffineParams.d = CosRot - TanSkew * SinRot;
+
+    // Apply the transformation about the Fractint centre.
+    AffineParams.e = CentreX - AffineParams.a * CentreX - AffineParams.b * CentreY;
+    AffineParams.f = CentreY - AffineParams.c * CentreX - AffineParams.d * CentreY;
+
+    TransformType = TRANSFORM_AFFINE;
+    }
+
+/**************************************************************************
+    Process Fractint inversion parameters
+**************************************************************************/
+
+int CManp::ProcessInvert(char *s)
+    {
+    char *t;
+    int count;
+
+    t = s;
+
+    while (*s && *s != ' ')
+	{
+	if (!isdigit((unsigned char)*s) && *s != '.' && *s != '+' && *s != '-' && *s != 'e' && *s != 'E')
+	    *s = ' ';
+	s++;
+	}
+
+    count = sscanf_s(t, "%lf %lf %lf", &f_radius, &f_xcenter, &f_ycenter);
+
+    if (count >= 1 && f_radius != 0.0)
+	TransformType = TRANSFORM_INVERSION;
+
+    return 0;
+    }
+
+/**************************************************************************
 	Process Corners
 **************************************************************************/
 
@@ -766,23 +914,21 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
     double	Skew = 0.0;
     double	floatval[6]{ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };	// pre-parsed floating parms
     Complex	centre{ 0.0, 0.0 };
-    CMatrix	Mat;						// transformation and rotation matrix
 
     int		count, NumCorners = 0;
     BigDouble   BigMag, temp, OneOverMag;
+
+    // Assume a rectangular view unless the PAR supplies six corners.
+    FractintSixCorners = false;
+
+    HorStretchFactor = 1.0;
 
     strncpy_s(CoordText.data(), CoordText.size(), s, _TRUNCATE);
     char* p = CoordText.data();
     while (*p && *p != ' ')
 	{
-	if (!isdigit((unsigned char)*p) &&
-	    *p != '.' &&
-	    *p != '+' &&
-	    *p != '-' &&
-	    *p != 'e' &&
-	    *p != 'E')
+	if (!isdigit((unsigned char)*p) && *p != '.' && *p != '+' && *p != '-' && *p != 'e' && *p != 'E')
 	    *p = ' ';
-
 	p++;
 	}
 
@@ -799,18 +945,42 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
 	    }
 	RotationCentre.x = hor;
 	RotationCentre.y = vert;
+
+	centre.x = hor;
+	centre.y = vert;
+
 	hor -= (AspectRatio / Magnification);
 	vert -= (1.0 / Magnification);
 	mandel_width = 2.0 / Magnification;
+
+	SetFractintAffineParams(centre.x, centre.y, Xmagfactor, Rotation, Skew);
 	}
     else
 	{
 	NumCorners = sscanf_s(t, "%lf %lf %lf %lf %lf %lf", &floatval[0], &floatval[1], &floatval[2], &floatval[3], &floatval[4], &floatval[5]);
 	if (NumCorners == 4)										// no rotation or skew
 	    {
-	    hor = floatval[0];
-	    vert = floatval[2];
-	    mandel_width = vert - floatval[3];
+	    double XSpan = fabs(floatval[1] - floatval[0]);
+	    double YSpan = fabs(floatval[3] - floatval[2]);
+
+	    double CentreX = (floatval[0] + floatval[1]) / 2.0;
+	    double CentreY = (floatval[2] + floatval[3]) / 2.0;
+
+	    // Preserve Fractint's original vertical coordinate range.
+	    mandel_width = YSpan;
+
+	    // Fractint's original display has a 4:3 aspect ratio.
+	    HorStretchFactor = 1.0;
+
+	    if (YSpan > 0.0)
+		HorStretchFactor = XSpan / ((4.0 / 3.0) * YSpan);
+
+	    // Centre the horizontally stretched viewport.
+	    hor = CentreX
+		- AspectRatio * mandel_width * HorStretchFactor / 2.0;
+
+	    vert = CentreY - mandel_width / 2.0;
+
 	    Rotation = 0.0;
 	    Skew = 0.0;
 	    }
@@ -825,11 +995,17 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
 	    yy3rd = floatval[5];
 	    cvtcentermag(&centre.x, &centre.y, &mag, &Xmagfactor, &Rotation, &Skew);
 	    Magnification = mag;
+	    RotationAngle = (int)Rotation;
+	    if (type == INVERSEJULIA || type == INVERSEJULIAFP)
+		SetFractintAffineParams(centre.x, centre.y, Xmagfactor, Rotation, Skew);
 	    hor = centre.x - (AspectRatio / Magnification);
 	    vert = centre.y - (1.0 / Magnification);
 	    mandel_width = 2.0 / Magnification;
 	    RotationCentre.x = hor + (AspectRatio / Magnification);
 	    RotationCentre.y = vert + (1.0 / Magnification);
+
+	    // Preserve the original Fractint viewing parallelogram for IJ.
+	    FractintSixCorners = true;
 	    }
 	else
 	    {
@@ -838,15 +1014,14 @@ int	CManp::ProcessCorners(char *s, BOOL CentreFlag)
 	    }
 	}
 
+    // Retain the Fractint viewing geometry for affine rendering.
+    // The rotation angle remains an integer in ManpWIN.
     RotationAngle = (int)Rotation;
-    if (Rotation == 0.0 || Rotation == 90.0 || Rotation == 180.0 || Rotation == 270.0)		// save calcs in rotating, just remap
-	{
-	RotationCentre = 0.0;
-	}
-    else
-	{
-	Mat.InitTransformation(RotationCentre.x, RotationCentre.y, 0.0, 0.0, 0.0, Rotation);
-	}
+    FractintXmagfactor = Xmagfactor;
+    FractintSkew = Skew;
+
+    if (RotationAngle != NORMAL)
+	SetFractintViewAffine(Xmagfactor, Rotation, Skew);
 
     if (gManp->mandel_width < 0.0)
 	gManp->mandel_width = -gManp->mandel_width;
@@ -1016,6 +1191,7 @@ static	int	ReadParFile(HWND hwnd, char *filename)
     bool	IsFrm = false;		// do we have a formula?
     char	tmp[164];
     double	TempRqlim = -1.0;
+    bool	NoParams = false;
     std::vector<char> temp(BUFFERSIZE);
 
     gManp->param[0] = param1 = 0.0;
@@ -1024,7 +1200,25 @@ static	int	ReadParFile(HWND hwnd, char *filename)
     gManp->param[3] = param4 = 0.0;
     gManp->param[4] = param5 = 0.0;
     gManp->param[5] = param6 = 0.0;
-    gManp->invert = FALSE;
+    gManp->InverseJuliaMajorPAR = IJ_BREADTH_FIRST;
+    gManp->InverseJuliaMinorPAR = IJ_LEFT_FIRST;
+    gManp->TransformType = TRANSFORM_NONE;
+    gManp->FractintXmagfactor = 1.0;
+    gManp->FractintSkew = 0.0;
+    // Each Fractint PAR must start with a clean logarithmic
+    // colour mapping state. Prevent the previous fractal's
+    // colour settings leaking into the next PAR.
+    gManp->logval = 0;
+    gManp->logflag = FALSE;
+    gManp->FractintSymmetry = -1;
+
+    // Original Fractint CMDFILES.C initialises inside = 1.
+    // An explicit inside= parameter may override this default.
+    gManp->TrueCol.inside_colour = 1;
+
+    // Prevent six-corner geometry leaking into subsequent PAR files.
+    gManp->FractintSixCorners = false;
+
     if ((fp = fopen(filename, "r")) == NULL)
 	{
 	_snprintf_s(s, 200, _TRUNCATE, "Can't Open par File: <%s>", filename);
@@ -1058,8 +1252,8 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	}
 	while (_stricmp(tmp, lptr[lsys_ptr]) != 0);
 
-	std::vector<char> buffer(BUFFERSIZE);
-	buffer[0] = '\0';
+    std::vector<char> buffer(BUFFERSIZE);
+    buffer[0] = '\0';
 
     while(fgets(InLine1, 160, fp))		// Max line length 160 chars
 	{
@@ -1079,8 +1273,12 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	    }
 	}    
 
+    // Record whether the PAR file supplies parameters.
+    // If omitted, use the selected fractal's database defaults.
     if (tok = str_find_ci(buffer.data(), "params="))		// must be first
 	gManp->ProcessParams(tok);
+    else
+	NoParams = true;
     if (tok = str_find_ci(buffer.data(), "maxiter="))
 	{
 	gManp->threshold = atol(tok);
@@ -1096,8 +1294,12 @@ static	int	ReadParFile(HWND hwnd, char *filename)
     if (tok = str_find_ci(buffer.data(), "potential="))
 	{
 	gManp->ProcessPotential(tok);
-	gManp->OutsideMethod = POTENTIAL;
+	gManp->PotentialFlag = TRUE;
 	}
+    if (tok = str_find_ci(buffer.data(), "miim="))
+	gManp->ProcessMIIM(tok);
+    if (tok = str_find_ci(buffer.data(), "symmetry="))
+	gManp->FractintSymmetry = gManp->FindSymmetry(tok);
     if (tok = str_find_ci(buffer.data(), "corners="))
 	gManp->ProcessCorners(tok, FALSE);
     if (tok = str_find_ci(buffer.data(), "center-mag="))
@@ -1114,6 +1316,20 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	gManp->Processfilters(tok, OUTSIDE);
     if (tok = str_find_ci(buffer.data(), "bailoutest="))
 	gManp->BailoutTestType = gManp->ProcessBailoutTest(tok);
+    if (tok = str_find_ci(buffer.data(), "logmap="))
+	{
+	// Fractint logarithmic palette settings:
+	// yes = standard, no = disabled, old = legacy,
+	// otherwise use the numeric logmap value.
+	if (!_strnicmp(tok, "yes", 3))
+	    gManp->logval = 1;
+	else if (!_strnicmp(tok, "no", 2))
+	    gManp->logval = 0;
+	else if (!_strnicmp(tok, "old", 3))
+	    gManp->logval = -1;
+	else
+	    gManp->logval = atoi(tok);
+	}
     if (tok = str_find_ci(buffer.data(), "type="))		// must be the only one which is after strlwr
 	{
 	if (gManp->FindType(hwnd, tok, buffer.data(), &IsFrm, TempRqlim) < 0)
@@ -1245,6 +1461,27 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	MessageBox (hwnd, s, "Reading Fractint Par File", MB_ICONEXCLAMATION | MB_OK);
 	}
     fclose(fp);
+
+    // Fractint inside colours are palette indices, not fixed RGB values.
+    // After loading the PAR palette, resolve the selected inside index
+    // (default 0, or an explicit inside=nnn) into its RGB components.
+    int index = gManp->TrueCol.inside_colour % gManp->TrueCol.ColoursInPALFile;
+
+    gManp->TrueCol.InsideRed = gManp->TrueCol.PalettePtr[index].rgbtBlue;
+    gManp->TrueCol.InsideGreen = gManp->TrueCol.PalettePtr[index].rgbtGreen;
+    gManp->TrueCol.InsideBlue = gManp->TrueCol.PalettePtr[index].rgbtRed;
+
+    // FindType() has now identified the fractal.
+    // Restore its database defaults if the PAR file omitted params=.
+    if (NoParams)
+	{
+	gManp->param[0] = fractalspecific[gManp->type].paramvalue[0];
+	gManp->param[1] = fractalspecific[gManp->type].paramvalue[1];
+	gManp->param[2] = fractalspecific[gManp->type].paramvalue[2];
+	gManp->param[3] = fractalspecific[gManp->type].paramvalue[3];
+	gManp->param[4] = fractalspecific[gManp->type].paramvalue[4];
+	gManp->param[5] = fractalspecific[gManp->type].paramvalue[5];
+	}
     return 0;
     }
 

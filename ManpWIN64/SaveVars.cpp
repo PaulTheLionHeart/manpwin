@@ -36,6 +36,9 @@ int	CManp::ChangeBigPrecision(int dec)
     qBig.y.ChangePrecision(dec);
     cBig.x.ChangePrecision(dec);
     cBig.y.ChangePrecision(dec);
+
+    BigRotationCentre.x.ChangePrecision(dec);
+    BigRotationCentre.y.ChangePrecision(dec);
     return 0;
     }
 

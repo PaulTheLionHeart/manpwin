@@ -297,7 +297,7 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	case BURNINGSHIPPOWER:				// Burning Ship to higher power
 	case CUBIC:					// Art Matrix Cubic
 	    return FunctionsDispatch<Complex, double, WORD>(this, type, z, q, degree, sqr, real_imag, a, a2, aa3, b, v,
-		temp, param, SpecialFlag, iteration, SPECIALINDEX, subtype, BailoutTestType, rqlim);
+		temp, param, SpecialFlag, iteration, SPECIALINDEX, subtype, BailoutTestType, rqlim, &OldZ);
 
 	case SPECIALNEWT:				// Art Matrix Newton
 	    return Iter_SPECIALNEWT<Complex>(
@@ -307,7 +307,7 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	    return Iter_MATEIN<Complex>(z, q, oz, temp, distance, absolute, param, epsilon, escape, phaseflag);
 
 	case SINFRACTAL:				// Sine
-	    return Iter_SINFRACTAL<Complex>(this, z, q, param, BailoutTestType, rqlim);
+	    return Iter_SINFRACTAL<Complex>(this, z, q, param, BailoutTestType, rqlim, &OldZ);
 
 	case EXPFRACTAL:				// Exponential
 	    return Iter_EXP_FRACTAL<Complex>(z, q, param, degree, subtype, rqlim);
@@ -318,17 +318,17 @@ int	CPixel::RunFunctions(WORD type, Complex *z, Complex *q, BYTE *SpecialFlag, l
 	    double b1 = z->y;
 	    z->x = a1 / cos(b1) + q->x;
 	    z->y = b1 / sin(a1) + q->y;
-	    return DoBailout(BailoutTestType, z, rqlim);
+	    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
 	    }
 
 	case REDSHIFTRIDER:				// RedShiftRider    a*z^2 +/- z^n + c
-	    return Iter_REDSHIFTRIDER<Complex, double>(this, z, q, a, param, degree, BailoutTestType, rqlim);
+	    return Iter_REDSHIFTRIDER<Complex, double>(this, z, q, a, param, degree, BailoutTestType, rqlim, &OldZ);
 
 	case TALIS:					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
-	    return Iter_TALIS<Complex>(this, z, q, a, param, degree, BailoutTestType, rqlim);
+	    return Iter_TALIS<Complex>(this, z, q, a, param, degree, BailoutTestType, rqlim, &OldZ);
 
 	case POLYNOMIAL:				// Polynomial
-	    return Iter_POLYNOMIAL<Complex>(this, z, q, param, BailoutTestType, rqlim);
+	    return Iter_POLYNOMIAL<Complex>(this, z, q, param, BailoutTestType, rqlim, &OldZ);
 
 	case RATIONALMAP:				// Art Matrix Rational Map
 	    return Iter_RATIONALMAP<Complex, double>(this, z, q, a, b, param, der, escape, epsilon,

@@ -1,5 +1,9 @@
-/* Parser.cpp (C) 1990, Mark C. Peterson, CompuServe [70441,3353]
-   All rights reserved.
+/*
+    Parser.cpp - function definitions formula parser
+
+    Parser.cpp (C) 1990, Mark C. Peterson, CompuServe [70441,3353] All rights reserved.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
 
 extern	void RandomSeed(void);

@@ -83,7 +83,6 @@ BigDouble& BigDouble::operator*=(const double& rvalue)
     return *this;
     }
 
-
 int BigDouble::ChangePrecision(int n)
     {
     mpfr_prec_t newprec = (mpfr_prec_t)(n * SAFETYMARGIN);

@@ -942,6 +942,11 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 			gManp->CloudRenderMode = CLOUD_RENDER_LINEAR_PALETTE;
 		    break;
 		    }
+		case '!':				// independent potential colouring
+		    gManp->PotentialFlag = TRUE;
+		    if (*(token + 2))
+			sscanf(token + 2, "%lf,%lf,%lf", &gManp->potparam[0], &gManp->potparam[1], &gManp->potparam[2]);
+		    break;
 		case '2':				// rotate oscillator in 3D
 		    if (*(token + 2))			// modify 3d parameters?
 			gManp->analyse_3d(token + 2);
@@ -1105,7 +1110,7 @@ int	GetParamData(HWND hwnd, LPSTR filename, LPSTR string, LPSTR szSaveFileName, 
 		    break;
 		case 'O':				// rotation angle
 		    gManp->RotationAngle = atoi(token + 2);
-		    if (gManp->RotationAngle != 0 && gManp->RotationAngle != 90 && gManp->RotationAngle != 180 && gManp->RotationAngle != 270)		// get original rotation centre otherwise we can simply remap
+		    if (gManp->RotationAngle != 0)	// get saved rotation centre 
 			gManp->AnalyseRotation(token + 2);
 		    break;
 		case 'P':				// periodicity
@@ -1160,8 +1165,41 @@ gManp->AnalysePalette(token + 2);
 		case 'W':				// parameter list
 		    gManp->GetParamsList(token + 2);
 		    break;
-		case 'X':				// Invert fractal
-		    gManp->ProcessInvert(token + 2);
+
+		case 'X':				// Fractal transformation
+		    {
+		    int TransformError = gManp->ProcessTransformation(token + 2);
+
+		    switch (TransformError)
+			{
+			case TRANSFORMPAR_OK:
+			    break;
+
+			case TRANSFORMPAR_NO_TYPE:
+			    MessageBox(hwnd, "Error reading transformation type in PAR file.", "PAR File Error", MB_OK | MB_ICONEXCLAMATION);
+			    break;
+
+			case TRANSFORMPAR_NORMAL:
+			    MessageBox(hwnd, "Error reading standard transformation parameters in PAR file.", "PAR File Error", MB_OK | MB_ICONEXCLAMATION);
+			    break;
+
+			case TRANSFORMPAR_AFFINE:
+			    MessageBox(hwnd, "Error reading Affine transformation parameters in PAR file.", "PAR File Error", MB_OK | MB_ICONEXCLAMATION);
+			    break;
+
+			case TRANSFORMPAR_MOBIUS:
+			    MessageBox(hwnd, "Error reading Möbius transformation parameters in PAR file.", "PAR File Error", MB_OK | MB_ICONEXCLAMATION);
+			    break;
+
+			case TRANSFORMPAR_JOUKOWSKI:
+			    MessageBox(hwnd, "Error reading Joukowski transformation parameters in PAR file.", "PAR File Error", MB_OK | MB_ICONEXCLAMATION);
+			    break;
+
+			case TRANSFORMPAR_TWIST:
+			    MessageBox(hwnd, "Error reading Twist transformation parameters in PAR file.", "PAR File Error", MB_OK | MB_ICONEXCLAMATION);
+			    break;
+			}
+		    }
 		    break;
 		case 'Y':				// starting place in colour cycling
 		    StartColourCycling = atoi(token + 2);
@@ -1188,9 +1226,11 @@ gManp->AnalysePalette(token + 2);
 	token = strtok(NULL, seps);
 	}
 
-	gManp->RotationAngle = gManp->RotationAngle % 360;
-    if (gManp->RotationAngle == 0 || gManp->RotationAngle == 90 || gManp->RotationAngle == 180 || gManp->RotationAngle == 270)		// save calcs in rotating, just remap
+    gManp->RotationAngle = gManp->RotationAngle % 360;
+    if (gManp->RotationAngle == 0)
 	gManp->RotationCentre = 0.0;
+    else
+	gManp->SetViewAffineRotation();
 
     if (gManp->logval)
 	if (gManp->threshold >= MAXTHRESHOLD)
@@ -1254,6 +1294,61 @@ char	*FractData(void)
     }
 
 /**************************************************************************
+Append fractal transformation parameters to PAR data
+**************************************************************************/
+
+void CManp::AppendTransformationParams(StringBuilder& sb)
+    {
+    switch (TransformType)
+	{
+	case TRANSFORM_AFFINE:
+	    sb.append(" -x%d,%f,%f,%f,%f,%f,%f", TransformType, AffineParams.a, AffineParams.b, AffineParams.e, AffineParams.c, AffineParams.d, AffineParams.f);
+	    break;
+
+	case TRANSFORM_MOBIUS:
+	    sb.append(" -x%d,%f,%f,%f,%f,%f,%f,%f,%f", TransformType, MobiusParams.aReal, MobiusParams.aImag, MobiusParams.bReal, MobiusParams.bImag, MobiusParams.cReal, MobiusParams.cImag, MobiusParams.dReal, MobiusParams.dImag);
+	    break;
+
+	case TRANSFORM_JOUKOWSKI:
+	    sb.append(" -x%d,%f,%f", TransformType, JoukowskiParams.kReal, JoukowskiParams.kImag);
+	    break;
+
+	case TRANSFORM_TWIST:
+	    sb.append(" -x%d,%f,%f,%f,%f", TransformType, TwistParams.Strength, TwistParams.Radius, TwistParams.CentreX, TwistParams.CentreY);
+	    break;
+
+	default:
+	    sb.append(" -x%d,%f,%f,%f", TransformType, f_radius, f_xcenter, f_ycenter);
+	    break;
+	}
+    }
+
+/**************************************************************************
+    Append rotation parameter to PAR output.
+    For non-right-angle rotations, save the rotation centre as well.
+    Use BigRotationCentre when in bignum mode so deep zoom reloads correctly.
+**************************************************************************/
+
+void CManp::AppendRotationParameter(StringBuilder& sb)
+    {
+    if (RotationAngle == NORMAL)
+	return;
+    if (BigNumFlag)
+	{
+	char xbuf[SIZEOF_BF_VARS];
+	char ybuf[SIZEOF_BF_VARS];
+
+	BigRotationCentre.x.ToString(xbuf, sizeof(xbuf), false);
+	BigRotationCentre.y.ToString(ybuf, sizeof(ybuf), false);
+	sb.append(" -o%d,%s,%s", RotationAngle, xbuf, ybuf);
+	}
+    else
+	{
+	sb.append(" -o%d,%.17g,%.17g", RotationAngle, RotationCentre.x, RotationCentre.y);
+	}
+    }
+
+/**************************************************************************
 	Fractal data to string (used to build PNG file data)
 **************************************************************************/
 
@@ -1289,10 +1384,10 @@ void	BasicFractData(StringBuilder& sb, BOOL CreateAnim)
 	    {
 	    sb.append(",%f,%d,%d", gManp->dStrands, gManp->nFDOption, gManp->UseCurrentPalette);	// Parameters for the Tierazon filters
 	    }
-	else if (gManp->OutsideMethod == POTENTIAL)
-	    {
-	    sb.append(",%f,%f,%f", gManp->potparam[0], gManp->potparam[1], gManp->potparam[2]);		// Parameters for potential
-	    }
+	}
+    if (gManp->PotentialFlag)				    // Independent potential colouring
+	{
+	sb.append(" -!%f,%f,%f", gManp->potparam[0], gManp->potparam[1], gManp->potparam[2]);
 	}
     if (gManp->juliaflag)
 	{
@@ -1328,6 +1423,8 @@ void	BasicFractData(StringBuilder& sb, BOOL CreateAnim)
 	case LPOPCORN:
 	case FPPOPCORNJUL:
 	case LPOPCORNJUL:
+	case INVERSEJULIA:
+	case INVERSEJULIAFP:
 	    //	case PERPBURNINGSHIP:
 	    sb.append(" -f%03d", gManp->type);
 	    break;					// default
@@ -1416,10 +1513,7 @@ void	BasicFractData(StringBuilder& sb, BOOL CreateAnim)
 	}
     if (gManp->RotationAngle != NORMAL)
 	{
-	if (gManp->RotationAngle != 90 && gManp->RotationAngle != 180 && gManp->RotationAngle != 270)
-	    sb.append(" -o%d,%lf,%lf", gManp->RotationAngle, gManp->RotationCentre.x, gManp->RotationCentre.y);
-	else
-	    sb.append(" -o%d", gManp->RotationAngle);
+	gManp->AppendRotationParameter(sb);
 	}
     if (gManp->CloudsActive)				// Clouds Tierazon filter
 	{
@@ -1462,9 +1556,9 @@ void	BasicFractData(StringBuilder& sb, BOOL CreateAnim)
 	{
 	sb.append(" -q%d", gManp->CoordSystem);
 	}
-    if (gManp->invert)
+    if (gManp->TransformType != TRANSFORM_NONE)
 	{
-	sb.append(" -x%f,%f,%f", gManp->f_radius, gManp->f_xcenter, gManp->f_ycenter);
+	gManp->AppendTransformationParams(sb);
 	}
     if (StartColourCycling > 0)
 	{
@@ -1544,6 +1638,8 @@ void	CManp::setup_defaults(void)
     subtype = 0;
     gManp->exitflag = FALSE;
     RotationAngle = NORMAL;
+    FractintXmagfactor = 1.0;
+    FractintSkew = 0.0;
     TrueCol.RandomDivisor = 128;
     fillcolor = -1;			// tesseral fillcolor: -1=normal 0 means don't fill     
     period_level = 1;
@@ -1583,6 +1679,8 @@ void	CManp::setup_defaults(void)
     pairflag = FALSE;
     blockindex = 2;
     biomorph = -1;
+    PotentialFlag = FALSE;
+    FractintSymmetry = -1;		// symmetry from Fractint par file that overrides normal symmetry
     decomp = 0;
     juliaflag = FALSE;
     RealTimeJuliaFlag = FALSE;
@@ -1604,7 +1702,7 @@ void	CManp::setup_defaults(void)
     dStrands = 0.08;
     RGBFilter = FALSE;
     AutoStereo_value = 75;
-    invert = FALSE;
+    TransformType = TRANSFORM_NONE;
     f_radius = 1.0;			// inversion radius 
     f_xcenter = 0.0;			// inversion center 
     f_ycenter = 0.0;
@@ -1624,6 +1722,13 @@ void	CManp::setup_defaults(void)
 	if (threshold >= MAXTHRESHOLD)
 	    threshold = MAXTHRESHOLD;
     RealTimeJuliaFlag = 0;
+    ViewAffineParams.a = 1.0;
+    ViewAffineParams.b = 0.0;
+    ViewAffineParams.c = 0.0;
+    ViewAffineParams.d = 1.0;
+    ViewAffineParams.e = 0.0;
+    ViewAffineParams.f = 0.0;
+    FractintSixCorners = false;
     }
 
 

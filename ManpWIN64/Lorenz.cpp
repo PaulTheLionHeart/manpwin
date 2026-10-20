@@ -41,17 +41,6 @@ extern	char	*str_find_ci(char *, char *);
 #define	MaxIFSNameChoices   80
 extern	char	lptr[][100];
 
-struct affine
-    {
-    // weird order so a,b,e and c,d,f are vectors
-   double a;
-   double b;
-   double e;
-   double c;
-   double d;
-   double f;
-    };
-
 struct float3dvtinf /* data used by 3d view transform subroutine */
     {
    long ct;		/* iteration counter */
@@ -100,7 +89,7 @@ int  ifs3d(HWND);
 static int  ifs3dfloat(HWND);
 static double determinant(double mat[3][3]);
 static int  solve3x3(double mat[3][3],double vec[3],double ans[3]);
-	int  setup_convert_to_screen(struct affine *);
+	int  setup_convert_to_screen(struct affine *, bool UseFractintCorners);
 //static int  l_setup_convert_to_screen(struct l_affine *);
 static void setupmatrix(MATRIX);
 //static int  long3dviewtransf(struct long3dvtinf *inf);
@@ -208,81 +197,87 @@ static int solve3x3(double mat[3][3], double vec[3], double ans[3]) /* solve 3x3
     return(0);
 }
 
-int setup_convert_to_screen(struct affine *scrn_cnvt)
-{
-   /* we do this twice - rather than having six equations with six unknowns,
-      everything partitions to two sets of three equations with three
-      unknowns. Nice, because who wants to calculate a 6x6 determinant??
-    */
-   double mat[3][3];
-   double vec[3];
-   /*
-      first these equations - solve for a,b,e
-      a*xxmin+b*yymax+e == 0	    (upper left)
-      a*xx3rd+b*yy3rd+e == 0	    (lower left)
-      a*xxmax+b*yymin+e == xdots-1  (lower right)
-   */
+/**************************************************************************
+    Convert fractal coordinates to screen coordinates.
 
-   gManp->xxmin = gManp->hor;								// these ones are needed for lorenz type fractals
-   gManp->xxmax = gManp->hor + gManp->mandel_width * gManp->AspectRatio;
-   gManp->yymin = gManp->vert;
-   gManp->yymax = gManp->vert + gManp->mandel_width;
+    Lorenz uses a rectangular view constructed from ManpWIN's current
+    coordinates.
 
+    Fractint Inverse Julia can use the original six PAR corners to
+    preserve rotation, skew and stretching.
 
+    UseFractintCorners must only be true when those six coordinates
+    have already been initialised.
+**************************************************************************/
 
-   gManp->xx3rd = gManp->xxmin;
-   gManp->yy3rd = gManp->yymin;
+int setup_convert_to_screen(struct affine *scrn_cnvt, bool UseFractintCorners)
+    {
+    // we do this twice - rather than having six equations with six unknowns, everything partitions 
+    // to two sets of three equations with three unknowns. Nice, because who wants to calculate a 6x6 determinant??
 
-
-
-
+    double mat[3][3];
+    double vec[3];
    
-   mat[0][0] = gManp->xxmin;
-   mat[0][1] = gManp->yymax;
-   mat[0][2] = 1.0;
-   mat[1][0] = gManp->xx3rd;
-   mat[1][1] = gManp->yy3rd;
-   mat[1][2] = 1.0;
-   mat[2][0] = gManp->xxmax;
-   mat[2][1] = gManp->yymin;
-   mat[2][2] = 1.0;
-   vec[0]    = 0.0;
-   vec[1]    = 0.0;
-   vec[2]    = (double)(gManp->xdots-1);
+    // first these equations - solve for a,b,e
+    // a*xxmin+b*yymax+e == 0	    (upper left)
+    // a*xx3rd+b*yy3rd+e == 0	    (lower left)
+    // a*xxmax+b*yymin+e == xdots-1  (lower right)
+   
+    // Preserve Fractint's six corners when requested.
+    // Otherwise construct the normal ManpWIN rectangular view.
+    if (!UseFractintCorners)
+	{
+	gManp->xxmin = gManp->hor;								// these ones are needed for lorenz type fractals
+	gManp->xxmax = gManp->hor + gManp->mandel_width * gManp->AspectRatio;
+	gManp->yymin = gManp->vert;
+	gManp->yymax = gManp->vert + gManp->mandel_width;
+	gManp->xx3rd = gManp->xxmin;
+	gManp->yy3rd = gManp->yymin;
+	}
 
-   if(solve3x3(mat,vec, &(scrn_cnvt->a)))
-      return(-1);
-   /*
+    mat[0][0] = gManp->xxmin;
+    mat[0][1] = gManp->yymax;
+    mat[0][2] = 1.0;
+    mat[1][0] = gManp->xx3rd;
+    mat[1][1] = gManp->yy3rd;
+    mat[1][2] = 1.0;
+    mat[2][0] = gManp->xxmax;
+    mat[2][1] = gManp->yymin;
+    mat[2][2] = 1.0;
+    vec[0]    = 0.0;
+    vec[1]    = 0.0;
+    vec[2]    = (double)(gManp->xdots-1);
+    
+    if(solve3x3(mat,vec, &(scrn_cnvt->a)))
+	return(-1);
+    /*
       now solve these:
       c*xxmin+d*yymax+f == 0
       c*xx3rd+d*yy3rd+f == ydots-1
       c*xxmax+d*yymin+f == ydots-1
       (mat[][] has not changed - only vec[])
-   */
-   vec[0]    = 0.0;
-   vec[1]    = (double)(gManp->ydots-1);
-   vec[2]    = (double)(gManp->ydots-1);
+    */
+    vec[0]    = 0.0;
+    vec[1]    = (double)(gManp->ydots-1);
+    vec[2]    = (double)(gManp->ydots-1);
 
-   if(solve3x3(mat,vec, &scrn_cnvt->c))
-      return(-1);
-   return(0);
-}
+    if(solve3x3(mat,vec, &scrn_cnvt->c))
+	return(-1);
 
-/*
-static int l_setup_convert_to_screen(struct l_affine *l_cvt)
-{
-   struct affine cvt;
+    // Fractint's original view uses a 4:3 aspect ratio.
+    // Preserve its vertical scale and centre while adapting
+    // the horizontal viewing area to ManpWIN's display ratio.
+    if (UseFractintCorners)
+	{
+	double Correction = (4.0 / 3.0) / gManp->AspectRatio;
+	double ScreenCentre = (gManp->xdots - 1) / 2.0;
 
-   // MCP 7-7-91, This function should return a something!
-   if(setup_convert_to_screen(&cvt))
-      return(-1);
-   l_cvt->a = cvt.a*fudge; l_cvt->b = cvt.b*fudge; l_cvt->c = cvt.c*fudge;
-   l_cvt->d = cvt.d*fudge; l_cvt->e = cvt.e*fudge; l_cvt->f = cvt.f*fudge;
-
-   // MCP 7-7-91
-   return(0);
-}
-*/
+	scrn_cnvt->a *= Correction;
+	scrn_cnvt->b *= Correction;
+	scrn_cnvt->e = ScreenCentre + (scrn_cnvt->e - ScreenCentre) * Correction;
+	}
+    return(0);
+    }
 
 /******************************************************************/
 /*   setup functions - put in fractalspecific[fractype].per_image */
@@ -776,7 +771,7 @@ int orbit2dfloat(void)
    int ret;
    unsigned long maxct,ct;
 
-   setup_convert_to_screen(&cvt);
+   setup_convert_to_screen(&cvt, false);
 
    /* set up projection scheme */
 
@@ -939,7 +934,7 @@ int orbit3dfloatcalc(void)
    struct float3dvtinf inf;
 
    /* setup affine screen coord conversion */
-   setup_convert_to_screen(&inf.cvt);
+   setup_convert_to_screen(&inf.cvt, false);
 
    oldcol = oldrow = -1;
    oldcol1 = oldrow1 = -1;
@@ -1101,7 +1096,7 @@ int dynam2dfloat()
 
 //   fp = open_orbitsave();
    // setup affine screen coord conversion
-   setup_convert_to_screen(&cvt);
+   setup_convert_to_screen(&cvt, false);
 
    p0 = &x;
    p1 = &y;
@@ -1271,7 +1266,7 @@ static int ifs3dfloat(HWND hwnd)
    float  *ffptr;
 
    /* setup affine screen coord conversion */
-   setup_convert_to_screen(&inf.cvt);
+   setup_convert_to_screen(&inf.cvt, false);
    srand(1);
 
    inf.orbit[0] = 0;
@@ -1355,92 +1350,80 @@ int ifs(HWND hwnd)			// front-end for ifs2d and ifs3d
 
 
 int ifs2d(HWND hwnd)	// IFS logic shamelessly converted to integer math
-{
-//   FILE *fp;
-   unsigned long maxct,ct;
-   int col;
-   int row;
-   int color;
-   int ret;
-   float *ffptr;
+    {
+    unsigned long maxct,ct;
+    int col;
+    int row;
+    int color;
+    int ret;
+    float *ffptr;
 
-//   long localifs[NUMIFS][7];	    // local IFS values
-   float x,y,newx,newy,r,sum/*, tempr*/;
+    float x,y,newx,newy,r,sum/*, tempr*/;
 
-   int /*i,j,*/k;
-   struct affine cvt;
+    int /*i,j,*/k;
+    struct affine cvt;
 
-   // setup affine screen coord conversion
-   setup_convert_to_screen(&cvt);
-   srand(1);
+    // setup affine screen coord conversion
+    setup_convert_to_screen(&cvt, false);
+    srand(1);
 
-   /*
-   for (i = 0; i < NUMIFS; i++)    // fill in the local IFS array
-      for (j = 0; j < IFSPARM; j++)
-	 localifs[i][j] = ifs_defn[i*IFSPARM+j] * fudge;
+    // Fractint-compatible IFS point count.
+    // Generate 1024 points per iteration, with a cap to avoid overflow.
+    maxct = (gManp->threshold > 0x1fffffL) ? 0x7fffffffUL : (unsigned long)gManp->threshold * 1024UL;
 
-   tempr = fudge / 32767;	 // find the proper rand() fudge
+    ct = 0L;
+    x = y = (float)0.0;
+    ret = 0;
+    while(ct++ < maxct) // loop until keypress or threshold
+	{
+	if (user_data(hwnd) < 0)  // keypress bails out
+	    {
+	    ret = -1;
+	    break;
+	    }
+	r = (float)rand();	 // generate fudged random number between 0 and 1
+	r /= (float)32767.0;
 
-   fp = open_orbitsave();
-*/
-   // make maxct a function of screen size
-   // 1k times threshold at EGA resolution seems about right
-//   maxct = (float)threshold*(1024.0*xdots*ydots)/(640.0*350.0);
-   maxct = gManp->threshold * 40L;
-   ct = 0L;
-   x = y = (float)0.0;
-   ret = 0;
-   while(ct++ < maxct) // loop until keypress or threshold
-   {
-//      if( check_key() )  // keypress bails out
-      if (user_data(hwnd) < 0)  // keypress bails out
-      {
-	 ret = -1;
-	 break;
-      }
-      r = (float)rand();	 // generate fudged random number between 0 and 1
-      r /= (float)32767.0;
+	// pick which iterated function to execute, weighted by probability
+	if (ifs_defn == NULL)
+	    return -1;
+	sum = ifs_defn[6]; /* [0][6] */
+	k = 0;
+	while (sum < r)
+	    {
+	    k++;
+	    sum += ifs_defn[k*IFSPARM+6];
+	    if (ifs_defn[(k+1)*IFSPARM+6] == 0) break; // for safety
+	    }
 
-      // pick which iterated function to execute, weighted by probability
-      if (ifs_defn == NULL)
-	  return -1;
-      sum = ifs_defn[6]; /* [0][6] */
-      k = 0;
-      while (sum < r)
-      {
-	 k++;
-	 sum += ifs_defn[k*IFSPARM+6];
-	 if (ifs_defn[(k+1)*IFSPARM+6] == 0) break; /* for safety */
-      }
-
-      /* calculate image of last point under selected iterated function */
-      ffptr = ifs_defn + k*IFSPARM; /* point to first parm in row */
-      newx = *ffptr * x + *(ffptr+1) * y + *(ffptr+4);
-      newy = *(ffptr+2) * x + *(ffptr+3) * y + *(ffptr+5);
-      x = newx;
-      y = newy;
-      // plot if inside window
-      col = (int)(cvt.a * x + cvt.b * y + cvt.e);
-      row = (int)(cvt.c * x + cvt.d * y + cvt.f);
-      if (col >= 0 && col < gManp->xdots && row >= 0 && row < gManp->ydots)
-      {
-	 // color is count of hits on this pixel
-	 color = gManp->Plot.GetColour((WORD)col,(WORD)row) + 1;
-	 if (color < gManp->colors) // color sticks on last value
-	     gManp->Plot.PlotPoint((WORD)col,(WORD)row,color);
-      }
-   }
-   return(ret);
-}
+	// calculate image of last point under selected iterated function 
+	ffptr = ifs_defn + k*IFSPARM;		// point to first parm in row
+	newx = *ffptr * x + *(ffptr+1) * y + *(ffptr+4);
+	newy = *(ffptr+2) * x + *(ffptr+3) * y + *(ffptr+5);
+	x = newx;
+	y = newy;
+	// plot if inside window
+	col = (int)(cvt.a * x + cvt.b * y + cvt.e);
+	row = (int)(cvt.c * x + cvt.d * y + cvt.f);
+	if (col >= 0 && col < gManp->xdots && row >= 0 && row < gManp->ydots)
+	    {
+	    // color is count of hits on this pixel
+	    color = gManp->Plot.GetColour((WORD)col,(WORD)row) + 1;
+	    if (color < gManp->colors)		// color sticks on last value
+		gManp->Plot.PlotPoint((WORD)col,(WORD)row,color);
+	    }
+	}
+    return(ret);
+    }
 
 static void setupmatrix(MATRIX doublemat)
     {
-   /* build transformation matrix */
-   CMatrix  Mat;
+   // build transformation matrix
+    CMatrix  Mat;
 
-   Mat.identity (doublemat);
+    Mat.identity (doublemat);
 
-   /* apply rotations - uses the same rotation variables as line3d.c */
+    // apply rotations - uses the same rotation variables as line3d.c
     Mat.xrot ((double)XROT / 57.29577,doublemat);
     Mat.yrot ((double)YROT / 57.29577,doublemat);
     Mat.zrot ((double)ZROT / 57.29577,doublemat);
@@ -1452,7 +1435,7 @@ static void setupmatrix(MATRIX doublemat)
 
 int ifs3d(HWND hwnd)
     {
-    return(ifs3dfloat(hwnd)); /* double version of ifs3d */
+    return(ifs3dfloat(hwnd)); // double version of ifs3d
     }
 
 static int float3dviewtransf(struct float3dvtinf *inf)

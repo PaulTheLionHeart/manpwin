@@ -42,21 +42,9 @@ inline double LogT(const BigDouble& x)
 **************************************************************************/
 
 template<typename TComplex, typename TReal>
-long DoOutsideFilterT(long iteration, TComplex& z, int method, int hooper, long threshold, int paletteColours, int decomp,
-    int biomorph, double rqlim, int special, bool logval, BYTE* logtable, int potentialColours, CTrueCol *TrueCol, double* potparam)
+long DoOutsideFilterT(long iteration, TComplex& z, int method, int hooper, long threshold, int paletteColours, int decomp, int biomorph, double rqlim, int special, bool logval, BYTE* logtable, CTrueCol *TrueCol)
     {
-    double magnitude = 0.0;
-    CPotential Pot;
-
-    if (paletteColours == 256 && decomp > 0)
-	{
-	iteration = DecompositionT<TComplex, TReal>(z.x, z.y, decomp, paletteColours);
-	}
-    else if (logval)
-	{
-	iteration = (BYTE)(*(logtable + (iteration % MAXTHRESHOLD)));
-	}
-    else if (biomorph >= 0)
+    if (biomorph >= 0)
 	{
 	double rqlim2 = sqrt(rqlim);
 	if (fabs(z.x) < rqlim2 || fabs(z.y) < rqlim2)
@@ -64,8 +52,25 @@ long DoOutsideFilterT(long iteration, TComplex& z, int method, int hooper, long 
 	else
 	    iteration %= paletteColours;
 	}
+
+    // Apply logarithmic palette mapping before decomposition
+    // and the selected outside filter.
+    //
+    // This ordering has been verified experimentally against
+    // the current Fractint PAR regression examples.
+    if (logval && logtable)
+	{
+	iteration = logtable[iteration % MAXTHRESHOLD];
+	}
+    if (paletteColours == 256 && decomp > 0)
+	{
+	iteration = DecompositionT<TComplex, TReal>(z.x, z.y, decomp, paletteColours);
+	}
     else
 	{
+	// Apply the selected outside colouring method.
+	// The iteration value may already have been modified
+	// by biomorph and logarithmic palette mapping.
 	switch (method)
 	    {
 	    case EPSCROSS:
@@ -96,11 +101,6 @@ long DoOutsideFilterT(long iteration, TComplex& z, int method, int hooper, long 
 		iteration = (long)(fabs(atan2(ToDouble(z.y), ToDouble(z.x))) * 180.0 / PI);
 		break;
 
-	    case POTENTIAL:
-		magnitude = z.CSumSqr();
-		iteration = Pot.potential(magnitude, iteration, threshold, TrueCol, potentialColours, potparam);
-		break;
-
 	    case PERT1:
 		if (iteration != threshold)
 		    iteration = (int)((iteration - log2(log2((double)z.CSumSqr()))) * 5) % 256;
@@ -117,6 +117,11 @@ long DoOutsideFilterT(long iteration, TComplex& z, int method, int hooper, long 
 
 	if (iteration > threshold && decomp <= threshold)
 	    iteration = threshold;
+
+// Experimental: Iterated Dynamics outside-colour range handling.
+// Fractint excludes FMOD from this adjustment.
+//	if ((iteration <= 0 || iteration > threshold))
+//	    iteration = 1;
 	}
 
     return iteration;
@@ -289,13 +294,26 @@ struct MathOps<BigDouble>
 	}
     };
 
+/**************************************************************************
+    Compute pixel coordinates for exact right-angle rotations.
+
+    The normal and 90/180/270 degree cases are handled explicitly here
+    because they can be calculated with simple swaps and sign changes,
+    avoiding the per-pixel cost and rounding error of a general affine
+    transformation.
+
+    CentreX and CentreY specify the true centre of rotation so the fast
+    right-angle path also works correctly for off-centre views.
+**************************************************************************/
+
 template<typename T, typename GapType>
-void ComputeRotatedCoordsT(int row, int col, int& oldrow, int& oldcol, int RotationAngle, T& cx, T& cy, GapType& xgap, GapType& ygap, T& yymax, T& hor)
+void ComputeRotatedCoordsT(int row, int col, int& oldrow, int& oldcol, int RotationAngle, T& cx, T& cy, GapType& xgap, GapType& ygap, T& yymax, T& hor, const T& CentreX, const T& CentreY)
     {
     if (row != oldrow)
 	{
 	T temp;
 
+	// Update the coordinate component which changes when moving to a new row.
 	switch (RotationAngle)
 	    {
 	    case NORMAL:
@@ -304,18 +322,18 @@ void ComputeRotatedCoordsT(int row, int col, int& oldrow, int& oldcol, int Rotat
 		break;
 
 	    case 90:
-		MathOps<T>::MulInt(temp, xgap, row);
-		cx = yymax - temp;
+		MathOps<T>::MulInt(temp, ygap, row);
+		cx = CentreX + (yymax - temp) - CentreY;
 		break;
 
 	    case 180:
 		MathOps<T>::MulInt(temp, ygap, row);
-		cy = -(yymax - temp);
+		cy = CentreY + CentreY - (yymax - temp);
 		break;
 
 	    case 270:
-		MathOps<T>::MulInt(temp, xgap, row);
-		cx = -(yymax - temp);
+		MathOps<T>::MulInt(temp, ygap, row);
+		cx = CentreX + CentreY - (yymax - temp);
 		break;
 	    }
 
@@ -326,6 +344,7 @@ void ComputeRotatedCoordsT(int row, int col, int& oldrow, int& oldcol, int Rotat
 	{
 	T temp;
 
+	// Update the coordinate component which changes when moving to a new column.
 	switch (RotationAngle)
 	    {
 	    case NORMAL:
@@ -334,18 +353,18 @@ void ComputeRotatedCoordsT(int row, int col, int& oldrow, int& oldcol, int Rotat
 		break;
 
 	    case 90:
-		MathOps<T>::MulInt(temp, ygap, col);
-		cy = temp + hor;
+		MathOps<T>::MulInt(temp, xgap, col);
+		cy = CentreY + CentreX - (temp + hor);
 		break;
 
 	    case 180:
 		MathOps<T>::MulInt(temp, xgap, col);
-		cx = -(temp + hor);
+		cx = CentreX + CentreX - (temp + hor);
 		break;
 
 	    case 270:
-		MathOps<T>::MulInt(temp, ygap, col);
-		cy = -(temp + hor);
+		MathOps<T>::MulInt(temp, xgap, col);
+		cy = CentreY + (temp + hor) - CentreX;
 		break;
 	    }
 

@@ -1,8 +1,9 @@
-//////////////////////////////////////////////////////////////////////
-//
-// QDTrigFn.cpp: Function list. Quad-double version
-//
-//////////////////////////////////////////////////////////////////////
+/*
+    QDTrigFn.cpp - Function list. Quad-double version
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #pragma once
 
 #include <Windows.h>

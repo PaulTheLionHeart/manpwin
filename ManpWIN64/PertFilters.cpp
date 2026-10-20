@@ -143,8 +143,7 @@ int	CPerturbation::ColourProcessing(Complex z, long iteration, int x, int y, CTr
 	    }
 	else
 	    {
-	    index = DoOutsideFilterT<Complex, double>(iteration, z, OutsideMethod, hooper, MaxIteration, paletteColours, decomp, biomorph,
-		bailout, special, logval, logtable, potentialColours, &TrueCol, potparam);
+	    index = DoOutsideFilterT<Complex, double>(iteration, z, OutsideMethod, hooper, MaxIteration, paletteColours, decomp, biomorph, bailout, special, logval, logtable, &TrueCol);
 	    }
 
 
@@ -289,8 +288,7 @@ int	CPerturbation::ColourProcessingExp(ExpComplex ExpW, long iteration, int x, i
 	    }
 	else
 	    {
-	    index = DoOutsideFilterT<Complex, double>(iteration, z, OutsideMethod, hooper, MaxIteration, paletteColours, decomp, biomorph,
-		bailout, special, logval, logtable, potentialColours, &TrueCol, potparam);
+	    index = DoOutsideFilterT<Complex, double>(iteration, z, OutsideMethod, hooper, MaxIteration, paletteColours, decomp, biomorph, bailout, special, logval, logtable, &TrueCol);
 	    }
 
 	// Tierazon filters provide both inside and outside colouring.

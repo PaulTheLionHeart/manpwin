@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Inverse Julia Fractals</title>
+
+<style>
+body {
+    background-color: #0a0a0a;
+    color: #e0e0e0;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    max-width: 1000px;
+    margin: 20px;
+}
+
+h1 { color: #ffd700; }
+h2 { color: #4fd1ff; }
+h3 { color: #88ff66; }
+
+code, pre {
+    background-color: #111;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+a {
+    color: #66ccff;
+    text-decoration: underline;
+}
+
+footer {
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #888888;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Inverse Julia Fractals</h1>
+
+<h2>Overview</h2>
+
+<p>
+Inverse Julia fractals generate points on a Julia set by repeatedly applying
+inverse forms of the Julia iteration rather than calculating whether each
+screen pixel escapes.
+</p>
+
+<p>
+ManpWIN provides an extended Inverse Julia implementation supporting powers
+from 2 through 20, several point-generation methods, animation, and
+Real-Time Inverse Julia exploration.
+</p>
+
+<hr>
+
+<h2>How Inverse Julia Works</h2>
+
+<p>
+For the ordinary quadratic Julia set:
+</p>
+
+<pre>
+z(n+1) = z(n)^2 + C
+</pre>
+
+<p>
+the inverse operation is:
+</p>
+
+<pre>
+z(n) = +/- sqrt(z(n+1) - C)
+</pre>
+
+<p>
+Each point can therefore have more than one inverse value. Repeatedly choosing
+between these inverse values generates points belonging to the Julia set.
+</p>
+
+<p>
+For higher powers, ManpWIN calculates the corresponding inverse roots.
+A power of <i>N</i> produces <i>N</i> possible inverse roots at each step.
+</p>
+
+<hr>
+
+<h2>Supported Powers</h2>
+
+<p>
+ManpWIN supports Inverse Julia fractals for powers from 2 through 20.
+</p>
+
+<p>
+The normal quadratic case uses power 2. Higher powers produce additional
+branches and increasingly complex rotational structures.
+</p>
+
+<p>
+Inverse Julia may be generated only from the Mandelbrot or Power fractals.
+The selected source fractal determines the power used.
+</p>
+
+<p>
+This is more restricted than ordinary Julia mode, which is available for many
+pixel-based fractal types.
+</p>
+
+<hr>
+
+<h2>Generation Methods</h2>
+
+<h3>Breadth First</h3>
+
+<p>
+Breadth First processing expands the inverse tree level by level. Points
+nearer the beginning of the tree are processed before deeper branches.
+</p>
+
+<h3>Depth First</h3>
+
+<p>
+Depth First processing follows one branch of the inverse tree before returning
+to explore alternative branches.
+</p>
+
+<p>
+The Left / Right option controls which branch is followed first where this
+choice is applicable.
+</p>
+
+<h3>Random Walk</h3>
+
+<p>
+Random Walk selects inverse branches randomly and follows a continuously
+evolving path through the Julia set.
+</p>
+
+<h3>Random Run</h3>
+
+<p>
+Random Run is similar to Random Walk, but continues along a selected branch
+for a configurable interval before choosing another branch.
+</p>
+
+<hr>
+
+<h2>Parameters</h2>
+
+<p>
+The Inverse Julia parameters include:
+</p>
+
+<ul>
+<li><b>Real C</b> &ndash; real part of the Julia constant</li>
+<li><b>Imaginary C</b> &ndash; imaginary part of the Julia constant</li>
+<li><b>Maximum Hits</b> &ndash; controls the number of times a screen point may be plotted</li>
+<li><b>Method</b> &ndash; Breadth First, Depth First, Random Walk, or Random Run</li>
+<li><b>Left / Right</b> &ndash; branch preference used by applicable methods</li>
+<li><b>Random Run Interval</b> &ndash; controls the run length used by Random Run</li>
+<li><b>Power</b> &ndash; order of the inverse Julia calculation</li>
+</ul>
+
+<hr>
+
+<h2>Real-Time Inverse Julia</h2>
+
+<p>
+Press <b>0</b> to toggle Real-Time Inverse Julia on or off.
+</p>
+
+<p>
+Real-Time Inverse Julia allows the Julia constant to be changed interactively
+while viewing the corresponding Inverse Julia image.
+</p>
+
+<p>
+The mouse position in the source Mandelbrot or Power fractal determines the
+Julia constant. This provides a rapid way to explore how the Inverse Julia
+structure changes throughout the source fractal.
+</p>
+
+<p>
+Real-Time Inverse Julia also works with rotated Mandelbrot views. The mouse
+position is transformed back into the corresponding fractal coordinate before
+the Inverse Julia image is calculated.
+</p>
+
+<hr>
+
+<h2>Inverse Julia Animation</h2>
+
+<p>
+Inverse Julia animation varies the Julia parameter over a sequence of frames,
+allowing the changing branch and spiral structures to be viewed as an
+animation.
+</p>
+
+<p>
+Use <b>Shift+J</b> to set up an Inverse Julia animation.
+</p>
+
+<p>
+The power is inherited from the source Mandelbrot or Power fractal and is
+preserved throughout the animation.
+</p>
+
+<p>
+When the animation is complete, ManpWIN restores the original source fractal.
+</p>
+
+<hr>
+
+<h2>Zooming</h2>
+
+<p>
+Inverse Julia images may be zoomed in the normal way. However, because the
+image is generated from sampled inverse-orbit points, zooming an existing
+Inverse Julia image may not always preserve the same level of fine detail as
+generating the Inverse Julia set directly at the new location.
+</p>
+
+<p>
+For the best detail, regenerate the Inverse Julia image after selecting the
+desired region.
+</p>
+
+<hr>
+
+<h2>Fractint Compatibility</h2>
+
+<p>
+ManpWIN supports the Fractint <code>julia_inverse</code> concept and can
+interpret the corresponding <code>miim=</code> parameter from Fractint
+parameter files.
+</p>
+
+<p>
+The ManpWIN implementation extends the original approach with higher powers,
+additional generation methods, animation, and Real-Time Inverse Julia.
+</p>
+
+<hr>
+
+<h2>Related Topics</h2>
+
+<ul>
+<li><a href="manp7vow.htm">Fractal Types Supported</a></li>
+<li><a href="manp7w1d.htm">Animation Menu</a></li>
+<li><a href="manp7yr4.htm">Keyboard Commands</a></li>
+<li><a href="manp7fra.htm">Fractint Fractal Documentation</a></li>
+</ul>
+
+<hr>
+
+<footer>
+ManpWIN Help &copy; October 2026
+</footer>
+
+</body>
+</html>

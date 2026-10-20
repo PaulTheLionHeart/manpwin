@@ -1,3 +1,9 @@
+/*
+    FormulaTemplate.h - Template for formulae used in formula parser.
+
+    Written in Microsoft Visual C++ by Paul de Leeuw.
+*/
+
 #include <cmath>
 
 #pragma once
@@ -1005,7 +1011,7 @@ inline void TStkSRand(TComplex* z)
     }
 
 /**************************************************************************
-Generic Complex Trig Dispatcher
+    Generic Complex Trig Dispatcher
 **************************************************************************/
 
 template<typename TComplex>

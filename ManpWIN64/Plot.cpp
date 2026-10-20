@@ -132,9 +132,6 @@ void	CPlot::PlotPoint(WORD x, WORD y, DWORD colour)
 
     if (x >= width || y >= height)
 	{
-#ifdef _DEBUG
-	OutputDebugStringA("PlotPoint OOB\n");
-#endif
 	return;
 	}
     if (Dib->DibPixels.empty())
@@ -362,7 +359,7 @@ void CPlot::OutputLine(WORD x0, WORD line, WORD length, DWORD *buffer)
 
 	(*wpixels)[k++] = (float)value;
 
-	if (value >= (DWORD)threshold)
+	if (value == (DWORD)threshold)
 	    {
 	    Dib->DibPixels[i + 0] = (BYTE)TrueCol->InsideBlue;
 	    Dib->DibPixels[i + 1] = (BYTE)TrueCol->InsideGreen;

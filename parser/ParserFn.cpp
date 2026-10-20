@@ -1,30 +1,10 @@
-/* Parser.cpp (C) 1990, Mark C. Peterson, CompuServe [70441,3353]
-   All rights reserved.
+/*
+    ParserFn.cpp - Parser function
 
-   Code may be used in any program provided the author is credited
-    either during program execution or in the documentation.  Source
-    code may be distributed only in combination with public domain or
-    shareware source code.  Source code may be modified provided the
-    copyright notice and this message is left unchanged and all
-    modifications are clearly documented.
-
-    I would appreciate a copy of any work which incorporates this code,
-    however this is optional.
-
-    Mark C. Peterson
-    405-C Queen St. Suite #181
-    Southington, CT 06489
-    (203) 276-9721
+    Written in Microsoft Visual C++ by Paul de Leeuw.
 */
 
-// Chuck Ebbert (CompuServe [76306,1226] ) changed code marked 'CAE fp' 
-// for fast 387 floating-point math.  See PARSERA.ASM and PARSERFP.C
-// (13 Dec 1992.) 
-
-// Modified 12 July 1993 by CAE to fix crash when formula not found.
-
 // Parser functions added PHD 09/06/2025
-
 
 #include <string.h>
 #include <ctype.h>
@@ -39,8 +19,6 @@
 #include "..\ManpWIN64\DDComplex.h"
 #include "..\ManpWIN64\fract.h"
 #include "..\ManpWIN64\Manp.h"
-
-//CParser* g_activeParser = nullptr;   // One pointer per thread later; single-thread for now
 
 extern	int Randomized;
 

@@ -1017,7 +1017,7 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 
 template<typename TComplex, typename TReal>
 inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TComplex* z4, TComplex& sqr, TReal& real_imag, BYTE* SpecialFlag,
-	long* iteration, TComplex caa3, TComplex cb, TComplex c1, TComplex c2, TComplex b, double rqlim, WORD* degree, long threshold, int bailout_type)
+	long* iteration, TComplex caa3, TComplex cb, TComplex c1, TComplex c2, TComplex b, double rqlim, WORD* degree, long threshold, int bailout_type, TComplex* oldZ)
     {
     double  d = 0.0;
     TComplex a, t, zd, z1, z3, zt;
@@ -1034,7 +1034,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    z->x = q->x + sqr.x - sqr.y;
 	    z->y = q->y + real_imag + real_imag;
 
-	    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim);
+	    return BailoutCore<TComplex>(bailout_type, z, &sqr, rqlim, oldZ);
 	    }
 
 	case 2:						// Nova, init: z=1; iterate: z=z-((z*z*z-1)/(3*z*z))+c
@@ -1052,11 +1052,11 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    z1 = z->CSqr() - *z2 * 0.5 + *q;
 	    *z2 = *z;
 	    *z = z1;
-	    return DoBailout(bailout_type, z, rqlim);
+	    return DoBailout(bailout_type, z, rqlim, oldZ);
 
 	case 4:						// Talis, z=((z*z)/(1+z))+c
 	    *z = z->CSqr() / (*z + 1) + *q;
-	    return DoBailout(bailout_type, z, rqlim);
+	    return DoBailout(bailout_type, z, rqlim, oldZ);
 
 	case 5:						// Newton variation, z=((z*z*z-z-1)/(3*z*z-1)-z)*c
 	    z1 = *z;
@@ -1103,32 +1103,32 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	case 12:					// z=z*z*z*z*z+c
 	case 13:					// z=z*z*z*z*z*z+c
 	    *z = z->CPolynomial(*degree) + *q;		// z^deg - function power
-	    return DoBailout(bailout_type, z, rqlim);
+	    return DoBailout(bailout_type, z, rqlim, oldZ);
 
 	case 14:					// z1=z*z+c; z=z*z+c*z2; z2=z
 	    z1 = z->CSqr() + *q;
 	    *z = z->CSqr() + *q * *z2;
 	    *z2 = z1;
-	    return DoBailout(bailout_type, z, rqlim);
+	    return DoBailout(bailout_type, z, rqlim, oldZ);
 
 	case 15:					// Phoenix II, z1=z; z=z*z + real(c) + imag(c)*z2; z2=z1
 	    z1 = *z;
 	    *z = z->CSqr() + q->x + *z2 * q->y;
 	    *z2 = z1;
-	    return DoBailout(bailout_type, z, rqlim);
+	    return DoBailout(bailout_type, z, rqlim, oldZ);
 
 	case 16:					// Phoenix III, z1=z; z=z*z*z +   real(c) + imag(c)*z2; z2=z1
 	    z1 = *z;
 	    *z = z->CCube() + q->x + *z2 * q->y;
 	    //z = z*z + __real__ c + __imag__ c * z2;
 	    *z2 = z1;
-	    return DoBailout(bailout_type, z, rqlim);
+	    return DoBailout(bailout_type, z, rqlim, oldZ);
 
 	case 17:					// Phoenix IV,  z1=z; z=z*z*z +.5*real(c) + imag(c)*z2; z2=z1
 	    z1 = *z;
 	    *z = z->CCube() + .5 * q->x + *z2 * q->y;
 	    *z2 = z1;
-	    return DoBailout(bailout_type, z, rqlim);
+	    return DoBailout(bailout_type, z, rqlim, oldZ);
 
 	case 18:					// Newton/Mandel, z=-z/3; iterate: z=z-(z*z*z+z*z*c-z+c)/(3*z*z+2*c*z-1)
 	    *z2 = *z;
@@ -1902,13 +1902,13 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 
 	case 108:					// More Fractals, z=(z*c)/(1+z)+c; [Talis II]
 	    *z = (*z * *q) / (*z + 1) + *q;
-	    return DoBailout(bailout_type, z, rqlim);
+	    return DoBailout(bailout_type, z, rqlim, oldZ);
 
 	case 109:					// More Fractals, z=(c+z*z*c)/(1-z*z*c)
 	    *z2 = z->CSqr() * *q;
 	    //    z2 = z*z*q;
 	    *z = (*q + *z2) / (-*z2 + 1);
-	    return DoBailout(bailout_type, z, rqlim);
+	    return DoBailout(bailout_type, z, rqlim, oldZ);
 
 	case 110:					// More Fractals, z = (c+(z^6))/(1+(z^2))
 	    z1 = *z;
@@ -1975,7 +1975,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z = *z - (*z*z1 - 1) / 3 * z1;
 	    *z = *z * *q;
 	    zd = *z - *z2;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	// Some Tierazon formulas require an earlier DD->QD transition because of their numerical sensitivity. 
 	// However, this fractal isn't particcularly interesting and doesn't really need QD
@@ -1983,7 +1983,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    z1 = *z;
 	    *z = (*z * *z + *q) ^ (*z2 + *q);
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 121:					// Flarium 08, Sharon Webb: z = z*z*z*z+1/c; [Sharon Star]
 	    z1 = *z;
@@ -1991,14 +1991,14 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z4 = z2->CSqr();
 	    *z = *z4 + q->CInvert();
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 122:					// Flarium 09, Sharon Webb: z = (z*z/2+c)*(z*z/2+c); [Sharon's Space Probe]
 	    z1 = *z;
 	    *z2 = z->CSqr() / 2 + *q;
 	    *z = z2->CSqr();
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 123:					// Flarium 10, Sharon Webb: z = z*z*z*z+((c/2)^2)+c; [Sharon08]
 	    {
@@ -2009,7 +2009,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z4 = z2a.CSqr();
 	    *z = *z4 + *z2 + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 	    }
 
 	case 124:					// Flarium 11, Sharon Webb: z = z*z*z*z+(z^(z+cn))+c
@@ -2021,14 +2021,14 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z4 = z2a.CSqr();
 	    *z = *z4 + *z2 + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 	    }
 
 	case 125:					// Flarium 12, Sharon Webb: z = (z+z*z/2)+c
 	    z1 = *z;
 	    *z = (*z + z->CSqr() / 2) + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 126:					// Flarium 13, Sharon Webb: z=(z*z*z*z-z2*z2*z2*z2+c)^2
 	    {
@@ -2044,7 +2044,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z = t.CSqr();
 	    *z2 = z1;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 	    }
 
 	case 127:					// Flarium 15, Newton Variations: z = z - (z*z*z*z-1)/(4*z*z*z) + c; [4th Order Nova]
@@ -2074,7 +2074,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z = *z4 + q->y + *z2 * q->x;
 	    *z2 = z1;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 	    }
 
 	case 130:					// Flarium 21, Sharon Webb: z=(1/z*z-c)*(z*z*z*z+c); [Sharon03]
@@ -2083,7 +2083,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z4 = z2->CSqr();
 	    *z = (z->CInvert() * *z - *q)*(*z4 + *q);
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 131:					// Flarium 25, Newton Variations: z=z-(z*z*z*z-z)/(4*z*z*z-z); z=z*c
 	    *z2 = *z;
@@ -2098,7 +2098,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    z1 = *z;
 	    *z = z->CSqr()*(*z2 + *z) / (*z2 + *z + *q) + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 133:					// Flarium 28, Derbyshire / Newton: z=z - (z*z*z-1)/(3*z*z)+c; [Nova-Mandelbrot-MultiFract]
 	    {
@@ -2124,7 +2124,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 		}
 	    *z = z->CSqr() + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 	    }
 
 	case 134:					// Flarium 29, Derbyshire / Newton: c = (z*z*z-1)/(3*z*z); z -= (z*z*z-1)/(3*z*z)*c
@@ -2145,14 +2145,14 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z2 = *z;
 	    *z = z->CCube() - caa3 * *z + b;
 	    zd = *z - *z2;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 137:					// Flarium 32, Derbyshire / Newton: 3rd Order Nova in a M-Set (Try single pass)
 	    *z2 = *z;
 	    z1 = z->CSqr();
 	    *z = *z - (*z*z1 - 1) / (z1 * 3) + *q;
 	    zd = *z - *z2;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 138:					// Flarium 34, Sharon Webb: z1= z*(z*z).csin()/2; z=z1*z1 + c; [Sharon14]
 	    *z2 = *z;
@@ -2160,33 +2160,33 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    z1 = *z * t.CSin() / 2;
 	    *z = z1.CSqr() + *q;
 	    zd = *z - *z2;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 139:					// Flarium 35, Polynomial: z=c*(z.csin())
 	   *z2 = *z;
 	    *z = *q * z->CSin();
 	    zd = *z - *z2;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 140:					// Flarium 36, Polynomial: z=(c*z).csin()
 	    *z2 = *z;
 	    t = *z * *q;
 	    *z = t.CSin();
 	    zd = *z - *z2;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 141:					// Flarium 37, Polynomial: z=(z*z*z-1)/(3*z*z); z = c*(z.csin() + z.ccos())
 	    *z2 = *z;
 	    *z = *q * (z->CSin() + z->CCos());
 	    zd = *z - *z2;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 142:					// Flarium 38, Polynomial: z = z*z+c; z.set_real(z.real()*z.real()); [Variation real]
 	    *z2 = *z;
 	    *z = *z * *z + *q;
 	    z->x = z->x*z->x;
 	    zd = *z - *z2;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 143:					// Flarium 40, Polynomial: z1 = z*z*z*z; z = c*z1/4*z1 + z
 	    z1 = *z;
@@ -2194,7 +2194,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z4 = z2->CSqr();
 	    *z = *q * *z4 / 4 * *z4 + *z;
 	    zd = *z - *z4;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 144:					// Flarium 41, Polynomial: z = c*(z*z*z*z).csin()
 	    z1 = *z;
@@ -2212,19 +2212,19 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    t = *z * *q;
 	    *z = *z4 + t.CSin() + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 146:					// Flarium 44, Polynomial: z=(z*z*z*z-z)/(4*z*z*z); z=c*z.csin()
 	    z1 = *z;
 	    *z = *q * z->CSin();
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 147:					// Flarium 45, Polynomial: z=(z*z*z*z-1)/(4*z*z*z); z=c*z.csin()
 	    z1 = *z;
 	    *z = *q * z->CSin();
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 148:					// Flarium 46, Sharon Webb: z1= z*(z*z).csin()/2; z=z1*z1 + c; [Sharon14 N-Method]
 	    z1 = *z;
@@ -2232,13 +2232,13 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z2 = t.CSin() * *z / 2;
 	    *z = z2->CSqr() + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 149:					// Flarium 49, Polynomial: z=(z*z*z*z-z)/((4*z*z*z)-z); z=c*z.csin()
 	    z1 = *z;
 	    *z = *q * z->CSin();
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 150:					// Flarium 50, Sharon Webb: z = z*z*z*z+1/c; [Sharon's Star M-Set]
 	    z1 = *z;
@@ -2246,14 +2246,14 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z4 = z2->CSqr();
 	    *z = *z4 + q->CInvert();
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 151:					// Flarium 51, Sharon Webb: z = (z*z/2+c)*(z*z/2+c); [Space Probe M-Set]
 	    z1 = *z;
 	    *z2 = z->CSqr() / 2 + *q;
 	    *z = z2->CSqr();
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 152:					// Flarium 52, Sharon Webb: z = z*z*z*z+t+c; [Sharon08 M-Set]
 	    {
@@ -2264,34 +2264,34 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z4 = z2a.CSqr();
 	    *z = *z4 + *z2 + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 	    }
 
 	case 153:					// Flarium 53, Sharon Webb: z = (z+z*z/2)+c; [M-Set]
 	    z1 = *z;
 	    *z = (*z + z->CSqr() / 2) + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 154:					// Flarium 54, Polynomial: z = z*z*c+c; [M-Set]
 	    z1 = *z;
 	    *z = z->CSqr() * *q + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 155:					// Flarium 55, Polynomial: z = (z*z).csin()*z*z*c+c; [M-Set]
 	    z1 = *z;
 	    *z2 = z->CSqr();
 	    *z = z2->CSin() * z->CSqr() * *q + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 156:					// Flarium 56, Polynomial: z = (z*z+c)/(z*z-c); [M-Set]
 	    z1 = *z;
 	    *z2 = z->CSqr();
 	    *z = (*z2 + *q) / (*z2 - *q);
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 157:					// Flarium 57, Derbyshire / Newton: z=z-(z*z1-z)/((5*z1)-z)+c; [5th Order Nova Variation]
 	    z1 = *z;
@@ -2333,13 +2333,13 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z4 = z2->CSqr();
 	    *z = *z4 + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 162:					// Flarium 62, Polynomial: z=z*z*(1+z)/(1+z+c)+c
 	    z1 = *z;
 	    *z = z->CSqr()*(*z + 1) / (*z + *q + 1) + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 163:					// Flarium 64, PHOENIX: z1=z; z=z*z*z*z+c.real()*z2/2+c.imag()*z2/2+c; z2=z1
 	    {
@@ -2351,7 +2351,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z = *z4 + ((*z2) * (q->x * q->y)) / 2 + *q;
 	    *z2 = z1;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 	    }
 
 	case 164:					// Flarium 66, Newton Variations: z = ((z-(((z^2)-1)/(2*z)))^2)*c
@@ -2359,7 +2359,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z = *z - (z->CSqr() - 1) / (*z * 2);
 	    *z = z->CSqr() * *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 165:					// Flarium 67-69, Newton Variations: z = ((z-(((z^n)-1)/(n*(z^(n-1)))))^2)*c
 	    {
@@ -2370,7 +2370,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z = *z - (fn - 1.0) / (f1n * (*degree));
 	    *z = z->CSqr() * *q;
 	    zd = *z - z_old;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 	    }
 
 	case 166:					// Flarium 80, Newton Variations: z=((z*z*z*z-1)/(1-(3*z*z*z)))*c
@@ -2390,7 +2390,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    s = *z * t.CSin() / 2;
 	    *z = s.CSin() + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 	    }
 
 	case 168:					// Flarium 91, Sharon Webb: z = (z*(z+z).ccos()/2); z = z*z+c; [Sharon16]
@@ -2399,7 +2399,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z = (*z*t.CCos() / 2);
 	    *z = z->CSqr() + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 169:					// Flarium 92, Sharon Webb: z = (z*(z+z).csin()/2); z = z*z+c; [Sharon17]
 	    z1 = *z;
@@ -2407,7 +2407,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z = (*z*t.CSin() / 2);
 	    *z = z->CSqr() + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 170:					// Flarium 93, Sharon Webb: z = (z*(z+z*z).csin()/2); z = z*z+c; [Sharon18]
 	    z1 = *z;
@@ -2415,7 +2415,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z = (*z*t.CSin() / 2);
 	    *z = z->CSqr() + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 171:					// Flarium 111, Sharon Webb: z1= z*(z*z).csin()/2; z=z1*z1 + c; [Alden's Ray Method]
 	    z1 = *z;
@@ -2424,7 +2424,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    *z2 = *z * t.CSin() / 2;
 	    *z = z2->CSqr() + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 172:					// Flarium 112-116, Polynomials: z=z^n*c+z*c; Dragon curve variations
 	    {
@@ -2434,7 +2434,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    fn = z->CPolynomial(*degree);
 	    *z = fn * *q + *z * *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 	    }
 
 	case 173:					// Flarium 117, Newton Variations: z = z-(z*z*z-z*c-1)/(3*z*z+c-1)
@@ -2450,20 +2450,20 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    t = z->CCube()*z->CSqr();
 	    *z = t.CSin() + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 175:					// Flarium 119, Sharon Webb: z = (z+(z*z)/.192).csin() + c; [Sharon's Butterfly]
 	    z1 = *z;
 	    t = *z + (*z * *z) / .192;
 	    *z = t.CSin() + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 176:					// Flarium 125, Sharon Webb: z = z+z*z*z/4 + c; [Sharon21]
 	    z1 = *z;
 	    *z = *z + z->CCube() / 4 + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 
 	case 177:					// Flarium 145, Polynomial: z=z^2+c [Jaenisch method]
 	    {
@@ -2539,7 +2539,7 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 		}
 	    *z = z->CPolynomial(*degree) + *q;
 	    zd = *z - z1;
-	    return DoBailout(bailout_type, &zd, rqlim);
+	    return DoBailout(bailout_type, &zd, rqlim, oldZ);
 	    }
 
 	default:

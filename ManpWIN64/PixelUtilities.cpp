@@ -106,6 +106,7 @@ void	CPixel::InitFractalDefinition(WORD typeIn, int subtypeIn, WORD *degreeIn, d
     subtype = subtypeIn;
     degree = degreeIn;
     rqlim = rqlimIn;
+    BailoutComponentLimit = sqrt(rqlim);
     threshold = thresholdIn;
     BailoutTestType = BailoutTestTypeIn;
     for (int i = 0; i < NUMPERTPARAM - 1; i++)	// NUMPERTPARAM - 1 because param[15] is reserved for start colour
@@ -134,12 +135,12 @@ void	CPixel::InitViewport(double horIn, double vertIn, double mandel_widthIn, Bi
     j = jIn;
     }
 
-void	CPixel::InitControlFlags(BYTE calcmodeIn, BYTE juliaflagIn, BOOL invertIn, BYTE phaseflagIn, BYTE pairflagIn, BYTE _3dflagIn, int period_levelIn, //int reset_periodIn, 
+void	CPixel::InitControlFlags(BYTE calcmodeIn, BYTE juliaflagIn, TRANSFORMTYPE transformIn, BYTE phaseflagIn, BYTE pairflagIn, BYTE _3dflagIn, int period_levelIn, //int reset_periodIn, 
 		int distestIn, int InsideMethodIn, int OutsideMethodIn, int biomorphIn, int nFDOptionIn, BYTE SpecialFlagIn)
     {
     calcmode = calcmodeIn;
     juliaflag = juliaflagIn;
-    invert = invertIn;
+    TransformType = transformIn;
     phaseflag = phaseflagIn;
     pairflag = pairflagIn;
     _3dflag = _3dflagIn;
@@ -319,7 +320,7 @@ int	CPixel::InitArithmetic()
 	BigDouble Bigtemp_x = BigScreenRatio / xdotsBig;
 	BigDouble Bigtemp_y = BigDouble(1.0) / ydotsBig;
 
-	Big_xgap = BigWidth * Bigtemp_x;
+	Big_xgap = BigWidth * Bigtemp_x * gManp->HorStretchFactor;
 	Big_ygap = BigWidth * Bigtemp_y;
 	BigCloseEnough = Big_ygap / 16.0;
 
@@ -356,11 +357,86 @@ int	CPixel::InitArithmetic()
 	temp_x = ScreenRatio / (double)(xdots - 1);
 	temp_y = 1.0 / (double)(ydots - 1);
 
-	xgap = mandel_width * temp_x;
+	xgap = mandel_width * temp_x * gManp->HorStretchFactor;
 	ygap = mandel_width * temp_y;
 	closenuff = ygap / 16.0;
 	}
     return 0;
+    }
+
+/**************************************************************************
+    Set affine viewing transformation for Fractint PAR geometry
+
+    Fractint uses a fixed screen aspect ratio of 0.75 (height/width).
+    ManpWIN uses the actual screen aspect ratio (width/height).
+
+    Combine X magnification, skew and rotation into a single affine
+    transformation, preserving the centre of the fractal.
+**************************************************************************/
+
+void CManp::SetFractintViewAffine(double Xmagfactor, double Rotation, double Skew)
+    {
+    if (Xmagfactor == 0.0)
+	Xmagfactor = 1.0;
+
+    double Angle = Rotation * PI / 180.0;
+    double SkewAngle = Skew * PI / 180.0;
+
+    double SinAngle = sin(Angle);
+    double CosAngle = cos(Angle);
+    double TanSkew = tan(SkewAngle);
+
+    // Convert Fractint's fixed 4:3 viewing geometry to ManpWIN's
+    // current screen aspect ratio.
+//    double XScale = 1.0 / (DEFAULTASPECT * AspectRatio * Xmagfactor);
+
+    // Preserve the fractal's proportions using ManpWIN's aspect ratio.
+    // The viewport is already centred on the Fractint coordinates.
+    double XScale = 1.0 / Xmagfactor;
+
+
+    double a = XScale * CosAngle;
+    double b = CosAngle * TanSkew + SinAngle;
+    double c = -XScale * SinAngle;
+    double d = CosAngle - SinAngle * TanSkew;
+
+    if (BigNumFlag)
+	{
+	BigComplex Centre;
+
+	Centre.x = BigHor + (BigWidth * AspectRatio) / 2.0;
+	Centre.y = BigVert + BigWidth / 2.0;
+
+	BigRotationCentre = Centre;
+
+	BigViewAffineParams.a.ChangePrecision(decimals);
+	BigViewAffineParams.b.ChangePrecision(decimals);
+	BigViewAffineParams.c.ChangePrecision(decimals);
+	BigViewAffineParams.d.ChangePrecision(decimals);
+	BigViewAffineParams.e.ChangePrecision(decimals);
+	BigViewAffineParams.f.ChangePrecision(decimals);
+
+	BigViewAffineParams.a = a;
+	BigViewAffineParams.b = b;
+	BigViewAffineParams.c = c;
+	BigViewAffineParams.d = d;
+
+	BigViewAffineParams.e = Centre.x - BigViewAffineParams.a * Centre.x - BigViewAffineParams.b * Centre.y;
+	BigViewAffineParams.f = Centre.y - BigViewAffineParams.c * Centre.x - BigViewAffineParams.d * Centre.y;
+	}
+    else
+	{
+	RotationCentre.x = hor + (mandel_width * AspectRatio) / 2.0;
+	RotationCentre.y = vert + mandel_width / 2.0;
+
+	ViewAffineParams.a = a;
+	ViewAffineParams.b = b;
+	ViewAffineParams.c = c;
+	ViewAffineParams.d = d;
+
+	ViewAffineParams.e = RotationCentre.x - ViewAffineParams.a * RotationCentre.x - ViewAffineParams.b * RotationCentre.y;
+	ViewAffineParams.f = RotationCentre.y - ViewAffineParams.c * RotationCentre.x - ViewAffineParams.d * RotationCentre.y;
+	}
     }
 
 /**************************************************************************
@@ -419,3 +495,53 @@ void	CPixel::ManageBignumPrecision(int precision)
     BigVert.ChangePrecision(precision);
     BigWidth.ChangePrecision(precision);
     }
+
+/**************************************************************************
+    Check for convergence to the finite attractor used by Fractint
+    Magnet Mandelbrot fractals.
+
+    First-pass implementation:
+    hard-wire the known attractor z = 1 + 0i.
+**************************************************************************/
+
+bool CPixel::CheckMagnetFiniteAttractor()
+    {
+    double dx = 0.0;
+    double dy = 0.0;
+
+    switch (MathType)
+	{
+	case DOUBLEFLOAT:
+	    dx = z.x - 1.0;
+	    dy = z.y;
+	    break;
+
+	case DOUBLEDOUBLE:
+	    dx = to_double(zDD.x) - 1.0;
+	    dy = to_double(zDD.y);
+	    break;
+
+	case QUADDOUBLE:
+	    dx = to_double(zQD.x) - 1.0;
+	    dy = to_double(zQD.y);
+	    break;
+
+	case ARBITRARYPREC:
+	{
+	Complex temp = zBig.CBig2Double();
+	dx = temp.x - 1.0;
+	dy = temp.y;
+	}
+	break;
+	}
+
+    double d = dx * dx + dy * dy;
+
+    // Temporary test radius.
+    // IMPORTANT: this is already a squared distance threshold.
+    const double AttractorRadiusSquared = 1.0 / 32768.0;
+
+    return (d < AttractorRadiusSquared);
+    }
+
+

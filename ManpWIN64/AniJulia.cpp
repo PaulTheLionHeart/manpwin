@@ -57,6 +57,60 @@ extern	char	*GenerateAnimFileName (char *, char *);
 extern	void	SetUpFilename(char *Filename, char *Folder, char *AnimType);
 
 /**************************************************************************
+	Build animation data for Julia or Inverse Julia
+	Temporarily substitutes Inverse Julia defaults and source power,
+	then restores the original fractal state.
+
+	Remember source fractal for Inverse Julia animation.
+
+	The animation script itself runs as INVERSEJULIA, so the source fractal
+	(Mandelbrot or Power) must be remembered and restored when playback ends.
+**************************************************************************/
+
+char *CManp::BuildJuliaAnimData(JULIA_ANIM_FRACTAL JuliaAnimFractal)
+    {
+    static char AnimString[MAXDATALINE];
+    int SaveType = type;
+    int SaveNumParam = Fractal.NumParam;
+    double SaveParam[NUMPARAM];
+    int i;
+
+    // Save current fractal parameters.
+    for (i = 0; i < NUMPARAM; i++)
+	SaveParam[i] = param[i];
+
+    if (JuliaAnimFractal == JULIA_ANIM_INVERSE)
+	{
+	// Load default Inverse Julia parameters.
+	for (i = 0; i < fractalspecific[INVERSEJULIA].numparams; i++)
+	    param[i] = fractalspecific[INVERSEJULIA].paramvalue[i];
+
+	// Remember the source fractal so it can be restored after animation.
+	JuliaAnimReturnType = SaveType;
+
+	// Use the power inherited from the source fractal.
+	if (SaveType == MANDELFP)
+	    param[6] = 2.0;
+	else if (SaveType == POWER)
+	    param[6] = SaveParam[0];
+
+	type = INVERSEJULIA;
+	Fractal.NumParam = fractalspecific[INVERSEJULIA].numparams;
+	}
+
+    strcpy_s(AnimString, sizeof(AnimString), AnimData());
+
+    // Restore the original fractal state.
+    type = SaveType;
+    Fractal.NumParam = SaveNumParam;
+
+    for (i = 0; i < NUMPARAM; i++)
+	param[i] = SaveParam[i];
+
+    return AnimString;
+    }
+
+/**************************************************************************
 	Cardiod Julia script generator
 x = a(2cos(t) - cos(2t)), 
 y = a(2sin(t) - sin(2t)).
@@ -65,8 +119,7 @@ x = a(3cos(t) - cos(3t)),
 y = a(3sin(t) - sin(3t)) 
 **************************************************************************/
 
-int	CManp::CardioidJuliaScript(HWND hwnd, char *filename, int PaletteShift)
-
+int	CManp::CardioidJuliaScript(HWND hwnd, char *filename, int PaletteShift, JULIA_ANIM_FRACTAL JuliaAnimFractal)
     {
     int		steps, i, k;
     double	Divisor;
@@ -102,9 +155,16 @@ int	CManp::CardioidJuliaScript(HWND hwnd, char *filename, int PaletteShift)
 	return -1;
 	}
 
-    fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimData());	// add quotes to filename to trap spaces in path
+    char *AnimString = gManp->BuildJuliaAnimData(JuliaAnimFractal);
+
+    fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimString);	// add quotes to filename to trap spaces in path
     fprintf(out, " -c%24.24f,%24.24f,%24.24f\n", hor, vert, mandel_width);
-    fprintf(out, "Julia Set Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
+
+    if (JuliaAnimFractal == JULIA_ANIM_INVERSE)
+	fprintf(out, "InverseJulia Set Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
+    else
+	fprintf(out, "Julia Set Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
+
     fprintf(out, "Palette=\n");
     for (i = 0, k = 0; i < threshold; i++, k++)
 	{
@@ -135,7 +195,7 @@ int	CManp::CardioidJuliaScript(HWND hwnd, char *filename, int PaletteShift)
 	Circle Julia script generator
 **************************************************************************/
 
-int	CManp::CircleJuliaScript(HWND hwnd, char *filename, int PaletteShift)
+int	CManp::CircleJuliaScript(HWND hwnd, char *filename, int PaletteShift, JULIA_ANIM_FRACTAL JuliaAnimFractal)
     {
     int		steps, i, k;
     double	Divisor;
@@ -170,9 +230,16 @@ int	CManp::CircleJuliaScript(HWND hwnd, char *filename, int PaletteShift)
 	return -1;
 	}
 
-    fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimData());	// add quotes to filename to trap spaces in path
+    char *AnimString = gManp->BuildJuliaAnimData(JuliaAnimFractal);
+
+    fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimString);	// add quotes to filename to trap spaces in path
     fprintf(out, " -c%24.24f,%24.24f,%24.24f\n", hor, vert, mandel_width);
-    fprintf(out, "Julia Set Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
+
+    if (JuliaAnimFractal == JULIA_ANIM_INVERSE)
+	fprintf(out, "InverseJulia Set Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
+    else
+	fprintf(out, "Julia Set Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
+
     fprintf(out, "Palette=\n");
     for (i = 0, k = 0; i < threshold; i++, k++)
 	{
@@ -202,7 +269,7 @@ int	CManp::CircleJuliaScript(HWND hwnd, char *filename, int PaletteShift)
 	General Linear Julia script generator
 **************************************************************************/
 
-int	CManp::GenJuliaScript(HWND hwnd, char *filename, int PaletteShift)
+int	CManp::GenJuliaScript(HWND hwnd, char *filename, int PaletteShift, JULIA_ANIM_FRACTAL JuliaAnimFractal)
     {
     int		steps, i, k;
     double	DivisorX, DivisorY;
@@ -241,9 +308,16 @@ int	CManp::GenJuliaScript(HWND hwnd, char *filename, int PaletteShift)
 	return -1;
 	}
 
-    fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimData());	// add quotes to filename to trap spaces in path
+    char *AnimString = gManp->BuildJuliaAnimData(JuliaAnimFractal);
+
+    fprintf(out, "-t%ld -s\"%s\" %s", threshold, PNGName, AnimString);	// add quotes to filename to trap spaces in path
     fprintf(out, " -c%24.24f,%24.24f,%24.24f\n", hor, vert, mandel_width);
-    fprintf(out, "Julia Set Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
+
+    if (JuliaAnimFractal == JULIA_ANIM_INVERSE)
+	fprintf(out, "InverseJulia Set Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
+    else
+	fprintf(out, "Julia Set Animation: %ld %d %d %d\n", threshold, frames, TrueCol.ScriptPaletteFlag, PaletteShift);
+
     fprintf(out, "Palette=\n");
     for (i = 0, k = 0; i < threshold; i++, k++)
 	{
@@ -332,20 +406,22 @@ int	CManp::displayCurve(HWND hwnd, int JuliaAnimType)
 
 INT_PTR CALLBACK JuliaAnimDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     {
-     static     UINT	tempParam;
-     static     BYTE	temp;
-     static     BYTE	temp_special;
-     static     char	buf[1024]; 
-     BOOL		TempCheck;
-     static	char	TempFile[MAX_PATH];
-     char		s[500];
-     BOOL		bTrans ;
-     char		*fileptr;
-     HWND		hCtrl;
+    static JULIA_ANIM_FRACTAL JuliaAnimFractal;
+    static     UINT	tempParam;
+    static     BYTE	temp;
+    static     BYTE	temp_special;
+    static     char	buf[1024];
+    BOOL		TempCheck;
+    static	char	TempFile[MAX_PATH];
+    char		s[500];
+    BOOL		bTrans;
+    char		*fileptr;
+    HWND		hCtrl;
 
-     switch (message)
-	  {
-	  case WM_INITDIALOG:
+    switch (message)
+	{
+	case WM_INITDIALOG:
+	    JuliaAnimFractal = (JULIA_ANIM_FRACTAL)lParam;
 	        if (gManp->type != POWER)
 		    {
 		    gManp->degree = 2;
@@ -646,7 +722,7 @@ INT_PTR CALLBACK JuliaAnimDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 				sscanf(s, "%lf", &EndX);
 				GetDlgItemText(hDlg, IDC_END_Y, s, 200);
 				sscanf(s, "%lf", &EndY);
-				gManp->GenJuliaScript(hDlg, ScriptFileName, gManp->PaletteShift);
+				gManp->GenJuliaScript(hDlg, ScriptFileName, gManp->PaletteShift, JuliaAnimFractal);
 				break;
 			    case 1:
 				GetDlgItemText(hDlg, IDC_START_X, s, 200);
@@ -655,12 +731,12 @@ INT_PTR CALLBACK JuliaAnimDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lPa
 				sscanf(s, "%lf", &CentreY);
 				GetDlgItemText(hDlg, IDC_END_Y, s, 200);
 				sscanf(s, "%lf", &radius);
-				gManp->CircleJuliaScript(hDlg, ScriptFileName, gManp->PaletteShift);
+				gManp->CircleJuliaScript(hDlg, ScriptFileName, gManp->PaletteShift, JuliaAnimFractal);
 				break;
 			    case 2:
 				GetDlgItemText(hDlg, IDC_END_Y, s, 200);
 				sscanf(s, "%lf", &Magnitude);
-				gManp->CardioidJuliaScript(hDlg, ScriptFileName, gManp->PaletteShift);
+				gManp->CardioidJuliaScript(hDlg, ScriptFileName, gManp->PaletteShift, JuliaAnimFractal);
 				break;
 			    }
 
