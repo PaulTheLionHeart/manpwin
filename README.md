@@ -57,7 +57,6 @@ reliability.
 * Restores the original Mandelbrot or Power fractal after an Inverse Julia animation
 * Added progress reporting, cancellation, and safeguards against runaway calculations
 * Improved compatibility with Fractint `julia_inverse` and `miim=` parameters
-
 * Added a dedicated Fractal Transformations system separate from ordinary Fractal Options
 * Added multiple coordinate systems and standard geometric transformations
 * Added Affine transformations with scaling, stretching, shearing, reflection, rotation, and translation
@@ -65,7 +64,6 @@ reliability.
 * Improved arbitrary-angle and quarter-turn rotation handling
 * Improved rotated zoom-in and zoom-out behaviour
 * Added transformation persistence in parameter files
-
 * Greatly improved Fractint viewport interpretation
 * Added support for six-corner geometry, rotation, skew, stretched axes, and horizontal magnification
 * Improved loading of rotated and transformed Fractint views
@@ -74,7 +72,6 @@ reliability.
 * Improved symmetry and block plotting for affected Fractint examples
 * Repaired a number of long-standing compatibility problems in individual PAR examples
 * Improved Inverse Julia compatibility for examples including SeaHorse and SeaShell
-
 * Added Magnet 1 and Magnet 2 support including finite-attractor handling
 * Added TieraZon Blob / Convergence bailout behaviour
 * Corrected Frothy Basin colouring so valid palette indices are preserved
