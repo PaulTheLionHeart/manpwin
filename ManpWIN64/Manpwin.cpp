@@ -149,8 +149,10 @@ extern	int	setup_SprottMaps(void);			// count how many Sprott map fractals there
 extern	int	setup_Surface(void);			// count how many Surface fractals there are
 extern	int	setup_Knot(void);			// count how many Knot fractals there are
 extern	int	setup_Curve(void);			// count how many Curve fractals there are
+extern	int	setup_Rings(void);			// count how many Rings fractals there are
 extern	void	LoadTierazonParams(void);		// get params from Tierazon database 
 extern	void	LoadMandelDerivParams(void);		// get params from Mandelbrot Derivatives database 
+extern	void	LoadRingsParams(void);			// get params from Rings database 
 extern	void	LoadSlopeDerivParams();			// get params from Slope database 
 extern	void	LoadSlopeFwdDiffParams();
 extern	int	EndSlope(void);				// end slope threads before exiting
@@ -199,12 +201,13 @@ extern	INT_PTR CALLBACK SpecialAnimDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK FourierTypeDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK FourierAnimDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK NewtonCmplxDlg(HWND, UINT, WPARAM, LPARAM);
-extern	INT_PTR CALLBACK SelectFracParams(HWND, UINT, WPARAM, LPARAM);
+//extern	INT_PTR CALLBACK SelectFracParams(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK SelectTierazonDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK SelectSlopeDerivDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK SelectSlopeFwdDiffDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK SelectMarcusDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK SelectMandelDerivDlg(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK SelectRingsDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK SelectPertDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK ThreadingDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK SelectOscillatorDlg(HWND, UINT, WPARAM, LPARAM);
@@ -1682,7 +1685,7 @@ BOOL	InitNewFractal(HWND hwnd)
 	    }
 	OldType = gManp->type;
 	if (gManp->type == FPPICKOVER || gManp->type == FPLORENZ3D || gManp->type == FPLORENZ3D1 || gManp->type == FPLORENZ3D3
-	    || gManp->type == FPLORENZ3D4 || gManp->type == FPROSSLER || gManp->type == IFS)
+	    || gManp->type == FPLORENZ3D4 || gManp->type == FPROSSLER || gManp->type == IFS || gManp->type == ICON3D)
 	    {
 	    gManp->x_rot = 60.0;
 	    gManp->y_rot = 30.0;
@@ -1798,6 +1801,24 @@ BOOL	InitNewFractal(HWND hwnd)
 			return FALSE;
 		    }
 		break;
+	    case RINGS:						// Paul Bourke Ring Fractals
+		gManp->type = RINGS;
+		setup_Rings();					// count number of Rings in database
+		if (DialogBox(hInst, "SelectTierazonDlg", hwnd, SelectRingsDlg) == FALSE)
+		    return FALSE;
+		else
+		    {
+		    gManp->InitFract(gManp->type);
+		    gManp->time_to_reinit = FALSE;
+		    gManp->time_to_restart = TRUE;
+		    gManp->time_to_load = FALSE;
+		    LoadRingsParams();				// get parameters  and other subtype specific stuff from Mandelbrot Derivatives database 
+		    gManp->RebuildFractalMetadata(gManp->type, gManp->subtype);		// load all the metadata for parameters
+		    if (DialogBox(hInst, fractalspecific[gManp->type].DialogueName, hwnd, fractalspecific[gManp->type].DialogueType) == FALSE)
+			return FALSE;
+		    }
+		break;
+
 	    case SLOPEDERIVATIVE:				// Generic Mandelbrot Derivatives Fractal
 		gManp->type = SLOPEDERIVATIVE;
 		setup_SlopeDeriv();				// count number of Madelbrot derivatives in database
@@ -2435,11 +2456,15 @@ static const char* PertSlopePlotModeName(PlotMode mode)
 
     _snprintf_s(FinishedStr, GENERALFIELDLENGTH, _TRUNCATE, "%s", (gManp->finished) ? ", Image Complete" : " ");
 
+    int ddPrecision;
+    int qdPrecision;
+
+    gManp->GetPrecisionLimits(gManp->type, ddPrecision, qdPrecision);
     if (!gManp->BigNumFlag)
 	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Double Precision");
-    else if (gManp->precision <= DDPRECISION && fractalspecific[gManp->type].flags & USEDOUBLEDOUBLE)
+    else if (gManp->precision <= ddPrecision && fractalspecific[gManp->type].flags & USEDOUBLEDOUBLE)
 	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Double Double (%d digits)", gManp->precision);
-    else if (gManp->precision <= QDPRECISION && fractalspecific[gManp->type].flags & USEDOUBLEDOUBLE)
+    else if (gManp->precision <= qdPrecision && fractalspecific[gManp->type].flags & USEDOUBLEDOUBLE)
 	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Quad Double (%d digits)", gManp->precision);
     else if ((fractalspecific[gManp->type].flags & FRACTINTINPIXEL) || (fractalspecific[gManp->type].flags & TRIGINPIXEL))    // Bignum versions not yet available
 	_snprintf_s(PrecisionStr, GENERALFIELDLENGTH, _TRUNCATE, "Quad Double (Arb unsupported)");

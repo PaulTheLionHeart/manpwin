@@ -1011,6 +1011,33 @@ WWW Fractal Galleries   http://sprott.physics.wisc.edu/carlson.htm
 	}
     }
 
+/**************************************************************************
+    TierazonLogSin()
+
+    DD and QD use their overflow-safe CLogSin() implementations.
+    Other arithmetic types retain the original calculation.
+**************************************************************************/
+
+inline Complex TierazonLogSin(Complex z)
+    {
+    return z.CSin().CLog();
+    }
+
+inline DDComplex TierazonLogSin(DDComplex z)
+    {
+    return z.CLogSin();
+    }
+
+inline QDComplex TierazonLogSin(QDComplex z)
+    {
+    return z.CLogSin();
+    }
+
+inline BigComplex TierazonLogSin(BigComplex z)
+    {
+    return z.CSin().CLog();
+    }
+
 // --------------------------------
 // ITERATION (per-iteration)
 // --------------------------------
@@ -1359,15 +1386,41 @@ inline int TierazonIter(int subtype, TComplex* z, TComplex* q, TComplex* z2, TCo
 	    d = zd.CSumSqr();
 	    return (d < MINSIZE || d > MAXSIZE);
 
-	case 48:					// Trig functions, z = ((z*z).csin()).clog()+c
+    /**************************************************************************
+	Tierazon 48: z = log(sin(z*z)) + c
+
+	DD and QD use CLogSin() to avoid overflow in the intermediate
+	complex sine when its imaginary argument is large.
+
+	In October 2026, both native and custom hyperbolic functions
+	were found to overflow at Im(z) approximately -954.
+
+	Computing log(sin(z)) directly avoids this overflow without
+	imposing an arbitrary bailout threshold.
+
+	The DOUBLE and MPFR paths currently retain their original
+	CSin().CLog() implementations.
+
+	Do not replace CLogSin() with separate CSin() and CLog()
+	calls without considering this numerical limitation.
+    **************************************************************************/
+
+	case 48:					// Trig functions, z = log(sin(z*z)) + c
 	    z1 = *z;
+
 	    *z = z->CSqr();
-	    *z = z->CSin();
-	    *z = z->CLog();
+	    // log(sin(z)) is undefined where sin(z) = 0.
+	    // At z = 0, avoid calling the logarithm.
+	    if (z->x == 0.0 && z->y == 0.0)
+		return true;
+
+	    *z = TierazonLogSin(*z);
 	    *z = *z + *q;
+
 	    zd = *z - z1;
 	    d = zd.CSumSqr();
-	    return (d < MINSIZE || d > MAXSIZE);
+
+	    return (!(d >= MINSIZE && d <= MAXSIZE));
 
 	case 49:					// Trig functions, z = z*z*sin(z.real()) + c*z*cos(z.imag()) + c
 		//  z = z*z*sin(z.real()) + c*z*cos(z.imag()) + c;

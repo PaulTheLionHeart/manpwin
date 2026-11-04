@@ -26,6 +26,10 @@
 			<param name="Local" value="html/manp7vow.htm">
 			</OBJECT>
 		<LI> <OBJECT type="text/sitemap">
+			<param name="Name" value="Rings Fractals">
+			<param name="Local" value="html/manpring.htm">
+			</OBJECT>
+		<LI> <OBJECT type="text/sitemap">
 			<param name="Name" value="Attractors from Oscillators">
 			<param name="Local" value="html/manp7osc.htm">
 			</OBJECT>

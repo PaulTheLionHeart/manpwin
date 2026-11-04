@@ -12,9 +12,9 @@
 #undef	PRINTOSC
 #pragma once
 
-//**************************************************************************
-#define	MAXTYPE	245				// Remember to edit this when we add fractals
-//**************************************************************************
+//*******************************************************************************************
+#define	MAXTYPE	247				// Remember to edit this when we add fractals
+//*******************************************************************************************
 
 #define	NUMPARAM		10
 
@@ -109,12 +109,33 @@ struct SlopeSpecificStuff			// database of Slope fractals
     double	rqlim;				// bailout value 
     };
 
+/**************************************************************************
+Database of Rings fractal formulas.
+
+Each entry defines the formula name, parameter labels,
+default values, number of active parameters and bailout value.
+**************************************************************************/
+
+struct RingSpecificStuff
+    {
+    char    *name;			// Name of the fractal
+    char    *paramname[NUMPARAM];	// Parameter names
+    double  paramvalue[NUMPARAM];	// Default parameter values
+    int     numparams;			// Number of active parameters
+    double  rqlim;			// Bailout value
+    long    maxIteration;		// Default maximum iterations
+    double  xmin;			// Initial left coordinate
+    double  ymin;			// Initial bottom coordinate
+    double  width;			// Initial view width
+    };
+
 //extern	struct	fractalspecificstuff	MarcusSpecific[];	// default values for each 
 extern	struct	AlternativeSpecificStuff	TierazonSpecific[];	// default values for each 
 extern	struct	AlternativeSpecificStuff	MandelDerivSpecific[];	// default values for each 
 extern	struct	SlopeSpecificStuff		SlopeDerivSpecific[];	// default values for each 
 extern	struct	SlopeSpecificStuff		SlopeFwdDiffSpecific[];	// default values for each 
 extern	struct	PerturbationSpecificStuff	PerturbationSpecific[];	// default values for each 
+extern	struct	RingSpecificStuff		RingSpecific[];		// default values for each 
 
 #define	ROTATION	0			// axes and animation schemes
 #define XAXIS		1
@@ -260,6 +281,7 @@ extern	int	NullSetup();				// sometimes we just don't want to do anything
 extern	int	SetupTetrate();
 extern	int	orbit3dfloatsetup();
 extern	int	orbit2dfloat();
+extern	int	orbit3dfloat();
 extern	int	orbit3dfloatcalc();
 extern	int	bifurcation();
 extern	int	DoTetration();
@@ -2096,6 +2118,7 @@ extern	int	DoCurves();
 // used in fractalp.cpp
 extern	INT_PTR CALLBACK	SelectOscParams(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	SelectFracParams(HWND, UINT, WPARAM, LPARAM);
+extern	INT_PTR CALLBACK	SelectJulibrotParams(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	ParamDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	LyapDlg(HWND, UINT, WPARAM, LPARAM);
 extern	INT_PTR CALLBACK	CellularDlg(HWND, UINT, WPARAM, LPARAM);

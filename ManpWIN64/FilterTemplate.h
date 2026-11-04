@@ -31,9 +31,10 @@ inline double LogT(const qd_real& x) { return to_double(log(x)); }
 inline double LogT(const BigDouble& x)
     {
     BigDouble result;
-    CBigTrig trig;
 
-    trig.log_bf(&result, x);
+    result.MatchPrecision(x);
+    mpfr_log(result.x, x.x, MPFR_RNDN);
+
     return result.BigDoubleToDouble();
     }
 

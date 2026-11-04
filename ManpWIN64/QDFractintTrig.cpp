@@ -66,6 +66,8 @@ int	CPixel::QDInitFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q)
 	case LLAMBDAFNFN:
 	case FPLAMBDAFNFN:
 	case FPMANLAMFNFN:				// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
+	case TIMSERRORFP:
+	case TIMSERROR:
 	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
 	    tQD = TransformPointT<QDComplex, qd_real>(cQD, TransformType, f_radius, f_xcenter, f_ycenter);
 	    InitFractintTrigFunctionsT<QDComplex, qd_real>(type, z, q, juliaflag, cQD, qcQD, qciQD, qcjQD, qckQD, tQD, tempQD, temp1QD, temp2QD, temp4QD, sqrQD, Fn2Index, param);
@@ -103,12 +105,14 @@ int	CPixel::QDRunFractintTrigFunctions(WORD type, QDComplex *z, QDComplex *q, BY
 	case TRIGXTRIG:						// to handle fractint par files
 	case ZXTRIGPLUSZFP:
 	case ZXTRIGPLUSZ:					// to handle fractint par files
-	{
-	qd_real rqlimQD = rqlim;
+	case TIMSERRORFP:
+	case TIMSERROR:
+	    {
+	    qd_real rqlimQD = rqlim;
 
-	return FractintTrigIterT<QDComplex, qd_real>(type, z, q, tempQD, temp1QD, temp2QD, temp3QD, sqrQD, qcQD, qciQD, qcjQD, qckQD,
-	    Fn1Index, Fn2Index, rqlimQD, BailoutTestType, &QDOldZ);
-	}
+	    return FractintTrigIterT<QDComplex, qd_real>(type, z, q, tempQD, temp1QD, temp2QD, temp3QD, sqrQD, qcQD, qciQD, qcjQD, qckQD,
+		Fn1Index, Fn2Index, rqlimQD, BailoutTestType, &QDOldZ);
+	    }
 
 	case TRIGPLUSTRIGFP:
 	case TRIGPLUSTRIG:

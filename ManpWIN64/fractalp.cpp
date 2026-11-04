@@ -347,7 +347,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_barnsleym1+1,  realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
 //   -2.0,  2.0, -1.5,  1.5, 1, BARNSLEYJ1,NOFRACTAL, BARNSLEYM1FP,  XYAXIS_NOPARM,
 //   Barnsley1Fractal,long_mandel_per_pixel,MandellongSetup,StandardFractal,STDBAILOUT,
-   -3.5,  -2.0,  4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   -3.5,  -2.0,  4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -355,7 +355,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_barnsleyj1+1, realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
    //   -2.0,  2.0, -1.5,  1.5, 1, BARNSLEYJ1,NOFRACTAL, BARNSLEYM1FP,  XYAXIS_NOPARM,
    //   Barnsley1Fractal,long_mandel_per_pixel,MandellongSetup,StandardFractal,STDBAILOUT,
-      -3.5,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+      -3.5,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
       NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -363,7 +363,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_barnsleym2+1,  realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
 //   -2.0,  2.0, -1.5,  1.5, 1, BARNSLEYJ2,NOFRACTAL, BARNSLEYM2FP,  YAXIS_NOPARM,
 //   Barnsley2Fractal,long_mandel_per_pixel,MandellongSetup,StandardFractal,STDBAILOUT,
-   -3.5, -2.0, 4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   -3.5, -2.0, 4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -371,7 +371,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_barnsleyj2+1, realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
    //   -2.0,  2.0, -1.5,  1.5, 1, BARNSLEYJ2,NOFRACTAL, BARNSLEYM2FP,  YAXIS_NOPARM,
    //   Barnsley2Fractal,long_mandel_per_pixel,MandellongSetup,StandardFractal,STDBAILOUT,
-      -3.5, -2.0, 4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+      -3.5, -2.0, 4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
       NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -468,7 +468,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_barnsleym3+1,  realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
 //   -2.0,  2.0, -1.5,  1.5, 1, BARNSLEYJ3,NOFRACTAL, BARNSLEYM3FP,  XAXIS_NOPARM,
 //   Barnsley3Fractal,long_mandel_per_pixel,MandellongSetup,StandardFractal,STDBAILOUT,
-   -3.5,  -2.0,  4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   -3.5,  -2.0,  4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -476,7 +476,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_barnsleyj3+1, realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
    //   -2.0,  2.0, -1.5,  1.5, 1, BARNSLEYJ3,NOFRACTAL, BARNSLEYM3FP,  XAXIS_NOPARM,
    //   Barnsley3Fractal,long_mandel_per_pixel,MandellongSetup,StandardFractal,STDBAILOUT,
-      -3.5,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+      -3.5,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
       NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -868,7 +868,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_barnsleym1,  realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
    //   -2.0,  2.0, -1.5,  1.5, 1, BARNSLEYJ1,NOFRACTAL, BARNSLEYM1FP,  XYAXIS_NOPARM,
    //   Barnsley1Fractal,long_mandel_per_pixel,MandellongSetup,StandardFractal,STDBAILOUT,
-      -3.5,  -2.0,  4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+      -3.5,  -2.0,  4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
       NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -876,7 +876,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_barnsleyj1,  realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
    //   -2.0,  2.0, -1.5,  1.5, 1, BARNSLEYJ1,NOFRACTAL, BARNSLEYM1FP,  XYAXIS_NOPARM,
    //   Barnsley1Fractal,long_mandel_per_pixel,MandellongSetup,StandardFractal,STDBAILOUT,
-      -3.5,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+      -3.5,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
       NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -884,7 +884,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_barnsleym2,  realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
    //   -2.0,  2.0, -1.5,  1.5, 1, BARNSLEYJ2,NOFRACTAL, BARNSLEYM2FP,  YAXIS_NOPARM,
    //   Barnsley2Fractal,long_mandel_per_pixel,MandellongSetup,StandardFractal,STDBAILOUT,
-      -3.5, -2.0, 4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+      -3.5, -2.0, 4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
       NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -892,7 +892,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_barnsleyj2,  realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
    //   -2.0,  2.0, -1.5,  1.5, 1, BARNSLEYJ2,NOFRACTAL, BARNSLEYM2FP,  YAXIS_NOPARM,
    //   Barnsley2Fractal,long_mandel_per_pixel,MandellongSetup,StandardFractal,STDBAILOUT,
-      -3.5, -2.0, 4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+      -3.5, -2.0, 4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
       NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -901,7 +901,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_barnsleym3, realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
 //   -2.0,  2.0, -1.5,  1.5, 0, BARNSLEYJ3FP, NOFRACTAL, BARNSLEYM3,  XAXIS_NOPARM,
 //   Barnsley3FPFractal,othermandelfp_per_pixel,MandelfpSetup,StandardFractal,STDBAILOUT,
-   -2.7,  -2.0,  4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   -2.7,  -2.0,  4.0, 0, 2, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL,NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -909,7 +909,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_barnsleyj3, realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
    //   -2.0,  2.0, -1.5,  1.5, 0, BARNSLEYJ3FP, NOFRACTAL, BARNSLEYM3,  XAXIS_NOPARM,
    //   Barnsley3FPFractal,othermandelfp_per_pixel,MandelfpSetup,StandardFractal,STDBAILOUT,
-      -2.7,  -2.0,  4.0, 0, 2, JULIAFP, 2, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+      -2.7,  -2.0,  4.0, 0, 2, JULIAFP, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
       NULL,NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -922,18 +922,18 @@ struct fractalspecificstuff fractalspecific[]=
    },
 
    {
-   t_julibrot+1, ES,ES,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
-//   -2.0, 2.0, -1.5, 1.5, 1, NOFRACTAL, NOFRACTAL, JULIBROTFP, NOSYM,
-//   JuliaFractal, jb_per_pixel, JulibrotSetup, Std4dFractal, STDBAILOUT,
-   -2.7, -2.0, 4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, do_mandel_df, "ParamDlg", ParamDlg, STDBAILOUT
+   t_julibrot + 1, "Power (2-20)", "From cx","From cy","To cx","To cy", "ZDots (Negative = Greyscale)", "ZOrigin", "ZDepth", "ScreenDist", "ScreenWidth", 2, -0.83, -0.25, -0.83, 0.25, 128, 8.0, 8.0, 24.0, 10.0,
+   //   -2.0, 2.0, -1.5, 1.5, 0, NOFRACTAL, NOFRACTAL, JULIBROT, NOSYM,
+   //   JuliafpFractal, jbfp_per_pixel, JulibrotSetup, Std4dfpFractal, STDBAILOUT,
+   -2.8, -1.5, 3.0, 0, NOFRACTAL, NOFRACTAL, 10, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
+   NULL, NULL, "SelectFracParams", SelectJulibrotParams, STDBAILOUT
    },
 
    {
    t_lorenz3d,timestep,A,B,C,ES,ES,ES, ES, ES, ES, 0.02,5,15,1,0,0,0,0,0,0,
 //   -30.0,  30.0,  -30.0,   30.0, 0, NOFRACTAL, NOFRACTAL, LLORENZ3D,   NOSYM,
 //   lorenz3dfloatorbit, NULL,	     orbit3dfloatsetup, orbit3dfloat,	 NOBAILOUT,
-   -28.0,  -15.0,  30.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, 0, NOSYM, 4.0,
+   -28.0, -15.0, 30.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, 0, NOSYM, 4.0,
    orbit3dfloatsetup, orbit3dfloatcalc, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -941,7 +941,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_rossler3d+1,timestep,A,B,C,ES,ES,ES, ES, ES, ES, 0.04, 0.2,.2,5.7,0,0,0,0,0,0,
 //   -30.0,  30.0,  -20.0,   40.0, 16, NOFRACTAL, NOFRACTAL, FPROSSLER,	NOSYM,
 //   rosslerlongorbit, NULL,	   orbit3dlongsetup, orbit3dlong,    NOBAILOUT,
-   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
+   -2.7, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
    init_mandel_df, do_mandel_df, "ParamDlg", ParamDlg, STDBAILOUT
    },
 
@@ -1190,16 +1190,16 @@ struct fractalspecificstuff fractalspecific[]=
    t_tims_error,    realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
 //   -2.5,  3.0, -2.0,  2.0, 0, NOFRACTAL,	 NOFRACTAL, TIMSERROR,	XAXIS_NOPARM,
 //   TimsErrorfpFractal,marks_mandelpwrfp_per_pixel, MandelfpSetup,StandardFractal,STDBAILOUT,
-   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, do_mandel_df, "ParamDlg", ParamDlg, STDBAILOUT
+   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, TRIGINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
    {
    t_tims_error+1,    realz0, imagz0,ES,ES,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
 //   -2.5,  3.0, -2.0,  2.0, 1, NOFRACTAL,	 NOFRACTAL, TIMSERRORFP,  XAXIS_NOPARM,
 //   TimsErrorFractal,marks_mandelpwr_per_pixel, MandelSetup,StandardFractal,STDBAILOUT,
-   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, do_mandel_df, "ParamDlg", ParamDlg, STDBAILOUT
+   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, TRIGINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
    {
@@ -1384,8 +1384,8 @@ struct fractalspecificstuff fractalspecific[]=
    t_halley, "+Order (integer > 1)", "Relaxation coefficient", "Epsilon", ES,ES,ES, ES, ES, ES, ES, 6, 1.0, 0.0001, 0,0,0,0,0,0,0,
 //   -2.0, 2.0, -1.3, 1.3, 0, NOFRACTAL, NOFRACTAL, MPHALLEY, XYAXIS,
 //   HalleyFractal, Halley_per_pixel, HalleySetup, StandardFractal, NOBAILOUT,
-   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, do_mandel_df, "ParamDlg", ParamDlg, STDBAILOUT
+   -3.5,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
+   NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
    {
@@ -1408,7 +1408,7 @@ struct fractalspecificstuff fractalspecific[]=
    {
    "quatjul", "notused", "notused",CJ,CK,ES,ES,ES, ES, ES, ES, 0,0,0,0,0,0,0,0,0,0,
    //   -2.0,  2.0, -1.5,  1.5, 0, QUATJULFP, NOFRACTAL, NOFRACTAL,  XAXIS,
-      -3.5,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 4, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
+      -3.5, -2.0, 4.0, 0, JULIAFP, NOFRACTAL, 4, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
       NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -1420,16 +1420,16 @@ struct fractalspecificstuff fractalspecific[]=
    11.0, 3311100320.0, 41.0, 0,0,0,0,0,0,0,
 //   -1.0,  1.0, -1.0,  1.0, 0, NOFRACTAL, NOFRACTAL, NOFRACTAL,  NOSYM,
 //   NULL,	   NULL,   CellularSetup,	 cellular,	  NOBAILOUT,
-   -4.0,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
+   -4.0, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 4, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
    NULL, NULL, "CellularDlg", CellularDlg, NOBAILOUT
    },
 
    {
-   t_julibrot, ES,ES,ES,ES,ES,ES,ES, ES, ES, ES, 0, 0, 0, 0,0,0,0,0,0,0,
+   t_julibrot, "Power (2-20)", "From cx","From cy","To cx","To cy", "ZDots (Negative = Greyscale)", "ZOrigin", "ZDepth", "ScreenDist", "ScreenWidth", 2, -0.83, -0.25, -0.83, 0.25, 128, 8.0, 8.0, 24.0, 10.0,
 //   -2.0, 2.0, -1.5, 1.5, 0, NOFRACTAL, NOFRACTAL, JULIBROT, NOSYM,
 //   JuliafpFractal, jbfp_per_pixel, JulibrotSetup, Std4dfpFractal, STDBAILOUT,
-   -2.7,  -2.0,  4.0, 0, JULIAFP, NOFRACTAL, 2, 0, NULL, NULL, 0, XAXIS, 4.0,
-   init_mandel_df, do_mandel_df, "ParamDlg", ParamDlg, STDBAILOUT
+   -2.8, -1.5, 3.0, 0, NOFRACTAL, NOFRACTAL, 10, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 4.0,
+   NULL, NULL, "SelectFracParams", SelectJulibrotParams, STDBAILOUT
    },
 
 #ifdef RANDOM_RUN
@@ -1486,7 +1486,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_phoenix+1, p1real,p2real,"Degree of Z = 0 | >= 2 | <= -3",ES,ES,ES,ES, ES, ES, ES, 0.56667,-0.5,0,0,0,0,0,0,0,0,
    //   -2.0, 2.0, -1.5, 1.5, 0, NOFRACTAL, MANDPHOENIXFP, PHOENIX, XAXIS,
    //   PhoenixFractal, phoenix_per_pixel, PhoenixSetup, StandardFractal, STDBAILOUT,
-      -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+      -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
       //   PhoenixSetup, DoPhoexnixFractal, "SelectFracParams", SelectFracParams, STDBAILOUT
 	 NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
@@ -1495,7 +1495,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_phoenix,p1real,p2real,"Degree of Z = 0 | >= 2 | <= -3",ES,ES,ES,ES, ES, ES, ES, 0.56667,-0.5,0,0,0,0,0,0,0,0,
 //   -2.0, 2.0, -1.5, 1.5, 0, NOFRACTAL, MANDPHOENIXFP, PHOENIX, XAXIS,
 //   PhoenixFractal, phoenix_per_pixel, PhoenixSetup, StandardFractal, STDBAILOUT,
-   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
 //   PhoenixSetup, DoPhoexnixFractal, "SelectFracParams", SelectFracParams, STDBAILOUT
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
@@ -1504,7 +1504,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_mandphoenix+1, realz0,imagz0,"Degree of Z = 0 | >= 2 | <= -3",ES,ES,ES,ES, ES, ES, ES, 0.0,0.0,0,0,0,0,0,0,0,0,
    //   -2.5, 1.5, -1.5, 1.5, 0, PHOENIXFP, NOFRACTAL, MANDPHOENIX, NOSYM,
    //   PhoenixFractal, mandphoenix_per_pixel, MandPhoenixSetup, StandardFractal, STDBAILOUT,
-      -3.5, -2.0, 4.0, 0, MANDELFP, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL, NOSYM, 4.0,
+      -3.5, -2.0, 4.0, 0, MANDELFP, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, NOSYM, 4.0,
       NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -1513,7 +1513,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_mandphoenix,realz0,imagz0,"Degree of Z = 0 | >= 2 | <= -3",ES,ES,ES,ES, ES, ES, ES, 0.0,0.0,0,0,0,0,0,0,0,0,
 //   -2.5, 1.5, -1.5, 1.5, 0, PHOENIXFP, NOFRACTAL, MANDPHOENIX, NOSYM,
 //   PhoenixFractal, mandphoenix_per_pixel, MandPhoenixSetup, StandardFractal, STDBAILOUT,
-   -3.5, -2.0, 4.0, 0, MANDELFP, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL, NOSYM, 4.0,
+   -3.5, -2.0, 4.0, 0, MANDELFP, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, NOSYM, 4.0,
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -1571,7 +1571,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_marksmandel, realz0, imagz0, exponent,ES,ES,ES,ES, ES, ES, ES, 0,0,1,0,0,0,0,0,0,0,
 //   -2.0,  2.0, -1.5,  1.5, 0, MARKSJULIAFP, NOFRACTAL, MARKSMANDEL,  NOSYM,
 //   MarksLambdafpFractal,marksmandelfp_per_pixel,MandelfpSetup,StandardFractal,STDBAILOUT,
-   -3.5,  -2.0,  4.0, 0, 2, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
+   -3.5, -2.0, 4.0, 0, 2, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -1579,7 +1579,7 @@ struct fractalspecificstuff fractalspecific[]=
    t_marksjulia, realz0, imagz0, exponent,ES,ES,ES,ES, ES, ES, ES, 0,0,1,0,0,0,0,0,0,0,
    //   -2.0,  2.0, -1.5,  1.5, 0, MARKSJULIAFP, NOFRACTAL, MARKSMANDEL,  NOSYM,
    //   MarksLambdafpFractal,marksmandelfp_per_pixel,MandelfpSetup,StandardFractal,STDBAILOUT,
-      -3.5,  -2.0,  4.0, 0, 2, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
+      -3.5, -2.0, 4.0, 0, 2, NOFRACTAL, 3, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
       NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -1588,18 +1588,18 @@ struct fractalspecificstuff fractalspecific[]=
    "icons", lambda, alpha,beta,gamma2,"omega","degree", ES, ES, ES, ES, -2.34, 2.0, 0.2, 0.1,0,3,0,0,0,0,
 //   -2.0,  2.0, -1.5,  1.5, 0, NOFRACTAL, NOFRACTAL,  NOFRACTAL, NOSYM,
 //   iconfloatorbit, NULL, orbit3dfloatsetup,  orbit2dfloat, NOBAILOUT,
-   -2.4,  -1.4,  2.8, 0, NOFRACTAL, NOFRACTAL, 6, 0, NULL, NULL, 0, XAXIS, 4.0,
+   -2.6, -1.4, 2.8, 0, NOFRACTAL, NOFRACTAL, 6, 0, NULL, NULL, 0, XAXIS, 4.0,
    orbit3dfloatsetup, orbit2dfloat, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
    {
 //#define ICON3D                 160
    // dmf 
-   "icons3d", lambda, alpha,beta,gamma2,"omega","degree", ES, ES, ES, ES, -2.34, 2.0, 0.2, 0.1,0,3,0,0,0,0,
+   "icons3d", lambda, alpha,beta,gamma2,"omega","degree", "x rotation", "y rotation", "z rotation", ES, -2.34, 2.0, 0.2, 0.1, 0, 3, 60.0, 30.0, 0.0, 0,
 //   -2.0,  2.0, -1.5,  1.5, 0, NOFRACTAL, NOFRACTAL,  NOFRACTAL, NOSYM,
 //   iconfloatorbit, NULL, orbit3dfloatsetup,  orbit3dfloat, NOBAILOUT,
-   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 6, 0, NULL, NULL, 0, XAXIS, 4.0,
-   orbit3dfloatsetup, orbit2dfloat, "SelectFracParams", SelectFracParams, STDBAILOUT
+   -2.6, -1.4, 2.8, 0, NOFRACTAL, NOFRACTAL, 9, 0, NULL, NULL, 0, XAXIS, 4.0,
+   orbit3dfloatsetup, orbit3dfloatcalc, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
    {
@@ -1609,7 +1609,7 @@ struct fractalspecificstuff fractalspecific[]=
     //      LongPhoenixFractalcplx, long_phoenix_per_pixel, PhoenixCplxSetup,
     //                                                           StandardFractal,
     //      STDBAILOUT
-       -2.7, -2.0, 4.0, 0, JULIAFP, PHOENIXCPLX, 4, 0, NULL, NULL, FRACTINTINPIXEL, ORIGIN, 4.0,
+       -2.7, -2.0, 4.0, 0, JULIAFP, PHOENIXCPLX, 4, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, ORIGIN, 4.0,
        NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -1622,36 +1622,36 @@ struct fractalspecificstuff fractalspecific[]=
       //      PhoenixFractalcplx, phoenix_per_pixel, PhoenixCplxSetup,
       //                                                   StandardFractal,
       //      STDBAILOUT
-	 -2.7, -2.0, 4.0, 0, JULIAFP, PHOENIXCPLX, 4, 0, NULL, NULL, FRACTINTINPIXEL, ORIGIN, 4.0,
+	 -2.7, -2.0, 4.0, 0, JULIAFP, PHOENIXCPLX, 4, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, ORIGIN, 4.0,
 	 NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
    {
-   t_mandphoenixcplx+1, realz0, imagz0, p2real, p2imag,"Degree",ES,ES, ES, ES, ES, 0, 0, 0.5, 0,0,0,0,0,0,0,
-      -3.8, -2.0, 4.0, 0, MANDELFP, NOFRACTAL, 5, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   t_mandphoenixcplx+1, realz0, imagz0, p2real, p2imag,"Degree of Z = 0 | >= 2 | <= -3",ES,ES, ES, ES, ES, 0, 0, 0.5, 0,0,0,0,0,0,0,
+      -3.8, -2.0, 4.0, 0, MANDELFP, NOFRACTAL, 5, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
       NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
    {
    t_mandphoenixcplx,
-      realz0, imagz0, p2real, p2imag,"Degree",ES,ES, ES, ES, ES, 0, 0, 0.5, 0,0,0,0,0,0,0,
+      realz0, imagz0, p2real, p2imag,"Degree of Z = 0 | >= 2 | <= -3",ES,ES, ES, ES, ES, 0, 0, 0.5, 0,0,0,0,0,0,0,
 //      (float)-2.5, (float)1.5, (float)-1.5, (float)1.5,
 //      0, PHOENIXFPCPLX, NOFRACTAL, MANDPHOENIXCPLX, XAXIS,
 //      PhoenixFractalcplx, mandphoenix_per_pixel, MandPhoenixCplxSetup,
 //                                                          StandardFractal,
 //      STDBAILOUT
-   -3.8, -2.0, 4.0, 0, MANDELFP, NOFRACTAL, 5, 0, NULL, NULL, FRACTINTINPIXEL, XAXIS, 4.0,
+   -3.8, -2.0, 4.0, 0, MANDELFP, NOFRACTAL, 5, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
    {
    "ant",
-	"Rule String (1's and non-1's, 0 rand)", "Max Points", "Number of Ants (max 256)", "Wrap?","Random Seed",ES,ES, ES, ES, ES, 1100, 1.0E6, 2, 1, 1, 0,0,0,0,0,
+	"Rule String (1's and non-1's, 0 rand)", "Max Points", "Number of Ants (max 256)", "Wrap?","Random Seed", ES, ES, ES, ES, ES, 1100, 1.0E9, 1, 1, 1, 0, 0, 0, 0, 0,
 //      (float)-1.0, (float)1.0, (float)-1.0, (float)1.0,
 //      0, NOFRACTAL, NOFRACTAL, NOFRACTAL, NOSYM,
 //      NULL, NULL, StandaloneSetup, ant,
 //      NOBAILOUT
-   -2.7,  -2.0,  4.0, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, OTHERFNINPIXEL, XAXIS, 4.0,
+   -2.7, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, OTHERFNINPIXEL, XAXIS, 4.0,
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -1663,7 +1663,7 @@ struct fractalspecificstuff fractalspecific[]=
 //      0, NOFRACTAL, NOFRACTAL, NOFRACTAL, NOSYM,
 //      (VF)chip2dfloatorbit, NULL, orbit3dfloatsetup, orbit2dfloat,
 //      NOBAILOUT
-   -450.0, -260.0,  520.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
+   -450.0, -260.0, 520.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, 0, XAXIS, 4.0,
    orbit3dfloatsetup, orbit2dfloat, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
@@ -2283,10 +2283,10 @@ struct fractalspecificstuff fractalspecific[]=
    },
 //#define TETRATION		236
     {
-   "Tetration", realz0, imagz0, "Bailout Method: 0-5",ES, ES, ES, ES, ES,ES,ES, 0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
+   "Tetration", realz0, imagz0, "Bailout: 0=Re 1=Im 2=Abs 3=Mag 4=Both 5=Theta",ES, ES, ES, ES, ES,ES,ES, 0.0, 0.0, 0.0, 0.0,0,0,0,0,0,0,
 //   -2.0,  2.0, -1.5,  1.5, 0, NOFRACTAL, NOFRACTAL, NOFRACTAL,	XAXIS,
 //   TetratefpFractal,othermandelfp_per_pixel,MandelfpSetup,StandardFractal,STDBAILOUT,
-   -4.0, -3.0, 6.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 10000.0,
+   -4.0, -3.0, 6.0, 0, NOFRACTAL, NOFRACTAL, 3, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 10000.0,
    NullSetup, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
     },
 //#define PERTURBATION		237
@@ -2300,7 +2300,7 @@ struct fractalspecificstuff fractalspecific[]=
     "Kleinian Maskit Parameterisation",
        "Moebius Transformation Real","Moebius Transformation Imaginary","Exponential Function Scale","Exponent", ES, ES, ES, ES, ES, ES,
        1.93, 0.04, 0.26, 4.9, 0.0, 0.0,0,0,0,0,
-    -0.5, -0.5, 3.0, 0, JULIAFP, NOFRACTAL, 4, 0, NULL, NULL, FUNCTIONINPIXEL, XAXIS, 1.0e-8,
+    -0.5, -0.5, 3.0, 0, JULIAFP, NOFRACTAL, 4, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, XAXIS, 1.0e-8,
     NullSetup, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
     },
     {
@@ -2342,7 +2342,7 @@ struct fractalspecificstuff fractalspecific[]=
    {
     // #define NUMFRACTAL	244	// dedicated to an 11 year old girl who "discovered" it
    "\"Num Fractal\"",
-	realz0, imagz0,"real value of base", "imaginaryvalue of base", ES, ES, ES, ES, ES, ES, 0,0,2,0,0,0,0,0,0,0,
+	realz0, imagz0,"real value of base", "imaginary value of base", ES, ES, ES, ES, ES, ES, 0,0,2,0,0,0,0,0,0,0,
    -3.5, -2.0, 4.0, 0, 2,   NOFRACTAL, 4, 1, "sin", NULL, TRIGINPIXEL + USEDOUBLEDOUBLE, NOSYM, 4.0,
    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
@@ -2352,6 +2352,22 @@ struct fractalspecificstuff fractalspecific[]=
    "Hailstone Sequence", "Start X", "Start Y", "Max Iterations", "Subtype", "Flags", ES, ES, ES, ES, ES, -10.0, 6.0, 150.0, 0,0,0,0,0,0,0,
    -20.0, -20.0, 40.0, 0, NOFRACTAL, NOFRACTAL, 5, 0, NULL, NULL, OTHERFNINPIXEL, NOSYM, 1.0,
    NULL, NULL, "HAILSTONEDLG", HailstoneDlg, STDBAILOUT
+   },
+
+   {
+	// #define DIVIDEBROT5		246	// DivideBrot5 formula by Jim Muth
+    "DivideBrot5", "Exponent a", "Denominator b", ES, ES, ES, ES, ES, ES, ES, ES, 5.0, -0.6, 0, 0, 0, 0, 0, 0, 0, 0,
+    -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 2, 0, NULL, NULL, FRACTINTINPIXEL + USEDOUBLEDOUBLE, XAXIS, 4.0,
+    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
+   },
+
+   {
+   // #define RINGS		247	// Written by Paul Bourke - Inspired by Roger Bagula - July 2019 and Herman Rings written by Paul Bourke - July 2019
+    "Rings", "0=Rings 1=Herman 2=Gen 3=Roger 4=McMul 5=SingPert", "Rings: Sigma", "Herman General: Degree (3-20) / McMullen-Sing: n", "Herman General: a / McMullen-Sing: m", 
+    "Herman General: b", "Herman: Tau / Sing: c Real", "Herman: c / Sing: c Imag", "Roger General G", "McM/Sing: Lambda Real", "McM/Sing: Lambda Imag",
+    0, sqrt(2.0), 4, (1.0 + sqrt(5.0)) / 2.0, 0.95, (sqrt(5.0) - 1.0) / 2.0, 4.0, 100.0, 0.001, 0,
+    -3.5, -2.0, 4.0, 0, NOFRACTAL, NOFRACTAL, 10, 0, NULL, NULL, FUNCTIONINPIXEL + USEDOUBLEDOUBLE, NOSYM, 4.0,
+    NULL, NULL, "SelectFracParams", SelectFracParams, STDBAILOUT
    },
 
 /*
@@ -2379,6 +2395,158 @@ struct fractalspecificstuff fractalspecific[]=
    NULL, NULL, 0
 
 };
+
+//////////////////////////////////////////////////////////////////
+// database of Ring fractals
+//////////////////////////////////////////////////////////////////
+
+//struct RingSpecificStuff
+//    {
+//    char    *name;			// Name of the fractal
+//    char    *paramname[NUMPARAM];	// Parameter names
+//    double  paramvalue[NUMPARAM];	// Default parameter values
+//    int     numparams;		// Number of active parameters
+//    double  rqlim;			// Bailout value
+//    long    maxIteration;		// Default maximum iterations
+//    double  xmin;			// Initial left coordinate
+//    double  ymin;			// Initial bottom coordinate
+//    double  width;			// Initial view width
+//    };
+
+struct RingSpecificStuff RingSpecific[] =
+    {
+    // 0 - Bourke / Bagula Rings
+    {
+    "Bourke / Bagula Rings",
+    "Sigma", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES, ES, ES, ES, ES,
+    sqrt(2.0), 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    3, 4.0, 250, -3.5, -2.0, 4.0
+    },
+
+    // 1 - Herman Rings
+    {
+    "Herman Rings",
+    "Tau", "c", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES, ES, ES, ES,
+    0.6151732, 4.0, 0, 0, 0, 0, 0, 0, 0, 0,
+    4, 4.0, 250, -2.5, -2.5, 5.0
+    },
+
+    // 2 - Generalised Herman Rings
+    {
+    "Generalised Herman Rings",
+    "Degree (3-20)", "a", "b", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES, ES, ES,
+    4.0, (1.0 + sqrt(5.0)) / 2.0, 0.95,
+    0, 0, 0, 0, 0, 0, 0,
+    5, 4.0, 250, -3.5, -2.0, 4.0
+    },
+
+    // 3 - Roger's Rational Rings
+    {
+    "Roger's Rational Rings",
+    "G", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES, ES, ES, ES, ES, ES,
+    10.0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    2, 4.0, 250, -3.5, -2.0, 4.0
+    },
+
+    // 4 - McMullen Rings
+    {
+    "McMullen Rings",
+    "n (2-20)", "m (1-20)", "Lambda Real", "Lambda Imag", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES, ES, ES,
+    2.0, 3.0, 0.001, 0.0, 0, 0, 0, 0, 0, 0,
+    5, 4.0, 250, -3.5, -2.0, 4.0
+    },
+
+    // 5 - Singular Perturbation
+    {
+    "Singular Perturbation",
+    "n (2-20)", "m (1-20)", "c Real", "c Imag", "Lambda Real", "Lambda Imag", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES,
+    2.0, 2.0, -1.0, 0.0, 0.001, 0.0, 0, 0, 0, 0,
+    8, 4.0, 250, -3.5, -2.0, 4.0
+    },
+
+    // 6 - Shifted-Pole McMullen Rings
+    {
+    "Shifted-Pole McMullen Rings",
+    "n (2-20)", "m (1-20)", "c Real", "c Imag", "Lambda Real", "Lambda Imag", "a Real", "a Imag", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)",
+    2.0, 3.0, 0, 0, 0.001, 0.0, 0.3, 0.2, 0, 0,
+    10, 4.0, 250, -3.5, -2.0, 4.0
+    },
+
+    // 7 - Multi-Ppole Rational Maps
+    {
+    "Multi-Ppole Rational Maps",
+    "n (2-20)", "m (1-20)", "c Real", "c Imag", "Lambda Real", "Lambda Imag", "Pole a Real", "Pole a Imag", "Pole b Real", "Pole b Imag",
+    2.0, 2.0, 0, 0, 0.001, 0.0, 0.3, 0.2, -0.3, -0.2,
+    10, 4.0, 250, -3.5, -2.0, 4.0
+    },
+
+    // 8 - Blaschke Products
+    {
+    "Blaschke Products",
+    "a (-1 to 1)", "b (-1 to 1)", "Rotation (turns)", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES, ES, ES,
+    0.35, -0.55, 0.20, 0.0, 0.0, 0.0, 0, 0, 0, 0,
+    5, 4.0, 250, -3.5, -2.0, 4.0
+    },
+
+    // 9 - Newton Rational Rings
+    {
+    "Newton Rational Rings",
+    "Degree n (2-20)", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES, ES, ES, ES, ES,
+    3.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0,
+    3, 4.0, 250, -6.5, -3.5, 7.0
+    },
+
+    // 10 - Basilica–Rabbit Rational Map
+    {
+    "Basilica–Rabbit Rational Map",
+    "a Real", "a Imag", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES, ES, ES, ES,
+    -0.5, -0.866025403784439, 0.20, 0.0, 0.0, 0.0, 0, 0, 0, 0,
+    4, 4.0, 250, -3.5, -2.0, 4.0
+    },
+
+    // 11 - Bicritical Rational Rings
+    {
+    "Bicritical Rational Rings",
+    "Degree n(2 - 20)", "a Real", "a Imag", "b Real", "b Imag", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES,
+    3.0, 0.30, 0.20, 0.60, -0.1, 0.0, 0, 0, 0, 0,
+    7, 4.0, 250, -10.0, -5.0, 10.0
+    },
+
+    // 12 - Chebyshev–Halley
+    {
+    "Chebyshev–Halley Rings",
+    "Degree n(2 - 20)", "Alpha", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES, ES, ES, ES,
+    3.0, -0.50, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0,
+    4, 4.0, 250, -9.0, -5.0, 10.0
+    },
+
+    // 13 - Joukowski Rational Rings
+    {
+    "Joukowski Rational Rings",
+    "a Real", "a Imag", "b Real", "b Imag", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES, ES,
+    0.5, 0.0, 0.0, 0.2, 0.0, 0.0, 0, 0, 0, 0,
+    6, 4.0, 250, -9.0, -5.0, 10.0
+    },
+
+    // 14 - Sierpinski Rational Rings
+    {
+    "Sierpinski Rational Rings",
+     "a Real", "a Imag", "b Real", "b Imag", "Bailout", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES, 
+    0.85, 0.0, 0.0, 0.15, 4.0, 0.0, 0, 0, 0, 0,
+    7, 4.0, 250, -6.5, -3.5, 7.0
+    },
+
+    // 15 - Perturbed Basilica Rings
+    {
+    "Perturbed Basilica Rings",
+    "Lambda Real", "Lambda Imag", "Four-Corner Mapping (0=No, 1=Yes)", "Colouring (0=Off, 1=Sum, 2=Contours, 3=Trap, 4=Conv)", ES, ES, ES, ES, ES, ES,
+    0.01, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0,
+    4, 4.0, 250, -3.5, -2.0, 4.0
+    },
+
+
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
 
 //////////////////////////////////////////////////////////////////
 // database of Perturbation fractals
@@ -4058,6 +4226,8 @@ struct BigFractalStuff BigFractalSpecific[]=
 	{ QUAD,		    NULL,			NullSetup },
 	{ TIERAZON,	    NULL,			NullSetup },
 	{ NOVA,		    NULL,			NullSetup },
+	{ RINGS,	    NULL,			NullSetup },
+
 // Fractint fractals
 	{ NEWTON,	    NULL,			NullSetup },
 	{ NEWTBASIN,	    NULL,			NullSetup },
@@ -4077,7 +4247,8 @@ struct BigFractalStuff BigFractalSpecific[]=
 	{ MARKSJULIAFP,	    NULL,			NullSetup },
 	{ QUATFP,	    NULL,			NullSetup },
 	{ QUATJULFP,	    NULL,			NullSetup },
-// Fractint Trig fractals
+	{ HALLEY,	    NULL,			NullSetup },
+	// Fractint Trig fractals
 	{ HYPERCMPLXFP,	    NULL,			NullSetup },
 	{ HYPERCMPLXJFP,    NULL,			NullSetup },
 	{ MARKSMANDELPWRFP, NULL,			NullSetup },
@@ -4101,10 +4272,24 @@ struct BigFractalStuff BigFractalSpecific[]=
 	{ NUMFRACTAL,	    NULL,			NullSetup },		// dedicated to an 11 year old girl who "discovered" it
 
 	{ BURNINGSHIP,	    NULL,			NullSetup },
-	{ SCREENFORMULA,    NULL,			NullSetup   },		// this is included here because all DD/QD operations are calculated from arbitrary precision.
-	{ FORMULA,	    NULL,			NullSetup   },		// as above.
+	{ SCREENFORMULA,    NULL,			NullSetup },		// this is included here because all DD/QD operations are calculated from arbitrary precision.
+	{ FORMULA,	    NULL,			NullSetup },		// as above.
 	{ BURNINGSHIPPOWER, NULL,			NullSetup },
 	{ MANDELDERIVATIVES,  NULL,			NullSetup },
+	{ TIMSERROR,	    NULL,			NullSetup },
+	{ DIVIDEBROT5,	    NULL,			NullSetup },
+
+	{ BARNSLEYM1,	    NULL,			NullSetup },
+	{ BARNSLEYM2,	    NULL,			NullSetup },
+	{ BARNSLEYM3,	    NULL,			NullSetup },
+
+	{ TETRATION,	    NULL,			NullSetup },		// a Paul Bourke fractal
+	{ KLEINIAN,	    NULL,			NullSetup },		// a Paul Bourke fractal
+
+	{ MANDPHOENIXFP,    NULL,			NullSetup },
+	{ PHOENIXFP,	    NULL,			NullSetup },
+	{ MANDPHOENIXFPCPLX, NULL,			NullSetup },
+
 	{ PERTURBATION,	    InitPerturbation,		DoPerturbation },	// this is included here because all operations are done in arbitrary precision. 
 //	{ PERPMANDEL,	    init_big_mandel,		Do_big_PerpMandelbrot },
 //	{ BUFFALO,	    init_big_mandel,		Do_big_Buffalo },

@@ -18,7 +18,6 @@
 #include "complex.h"
 #include "BigDouble.h"
 #include "BigComplex.h"
-#include "BigTrig.h"
 #include "mpfr.h"
 #include "slope.h"
 #include "pixel.h"
@@ -236,6 +235,8 @@ int	CManp::SpecialFractals(HWND hwnd/*, CPixel *Pix*/)
 	case LBIFMAY:
 	case QUADMAND:
 	case DIFFUSION:
+	case JULIBROT:
+	case JULIBROTFP:
 	case FOURIER:
 	case HENON:
 	case MALTHUS:
@@ -283,12 +284,14 @@ int	CManp::SpecialFractals(HWND hwnd/*, CPixel *Pix*/)
 	case LATOO:
 	case CHIP:
 	case ICON:
+	case ICON3D:
 	case QUADRUPTWO:
 	case THREEPLY:
 	case HAILSTONE:
 	    if (fractalspecific[type].flags & OTHERFNINPIXEL)
 		{
-		OthFn.InitOtherFunctions(type, subtype, hwnd, &TrueCol, &Dib, AntStatus, FrameEnd, FrameStart, mandel_width, hor, vert, AspectRatio, &curpass, &totpasses, user_data, CoordSystem, xAxis, yAxis, zAxis);
+		OthFn.InitOtherFunctions(type, subtype, hwnd, &TrueCol, &Dib, FractalStatus, FrameEnd, FrameStart, mandel_width, hor, vert, AspectRatio, &curpass, 
+				&totpasses, user_data, CoordSystem, xAxis, yAxis, zAxis, param);
 		OthFn.RunOtherFunctions(type, &SpecialFlag, &iteration, xdots, ydots, param, threshold, rotate);
 		}
 	    else
@@ -412,9 +415,13 @@ void	CManp::DisplayStatusBarInfo (int complete, char *text)
 	    SAFE_SPRINTF(FinishedStr, ", Time %s", ShowTime (ElapsedTime));
 	    if (BigNumFlag)	    // now we have double double and quad double...
 		{
-		if (precision <= DDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+		int ddPrecision;
+		int qdPrecision;
+
+		GetPrecisionLimits(type, ddPrecision, qdPrecision);
+		if (precision <= ddPrecision && fractalspecific[type].flags & USEDOUBLEDOUBLE)
 		    SAFE_SPRINTF(PrecisionStr, "DD Prec: %d", precision);
-		else if (precision <= QDPRECISION && fractalspecific[type].flags & USEDOUBLEDOUBLE)
+		else if (precision <= qdPrecision && fractalspecific[type].flags & USEDOUBLEDOUBLE)
 		    SAFE_SPRINTF(PrecisionStr, "QD Prec: %d", precision);
 		else
 		    { 
@@ -433,7 +440,9 @@ void	CManp::DisplayStatusBarInfo (int complete, char *text)
 	    else if (type == SLOPEDERIVATIVE || type == SLOPEFORWARDDIFF)
 		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s", SlopeStatus, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr);
 	    else if (type == ANT || type == TOWER)
-		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Progress = %s", AntStatus);
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Progress = %s", FractalStatus);
+	    else if (type == JULIBROT)
+		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "Progress = %s, %s", FractalStatus, PositionStr);
 	    else if (type == LYAPUNOV)
 		_snprintf_s(szStatus, STATUSSIZE, _TRUNCATE, "%s%s, Arith=%s, %s, Lyapunov Sequence='%s'", PassStr, FinishedStr, ((BigNumFlag) ? PrecisionStr : "Float"), PositionStr, LyapSequence);
 	    else
@@ -520,10 +529,10 @@ void	CManp::GenPositionStr (char *PositionStr)
 	    {
 	    centrex = hor + (mandel_width * ((double) width / (double) (2 * height)));
 	    centrey = vert + (mandel_width / 2.0);
-	    if (mandel_width > 1e-13)
+	    if (mandel_width > 1e-8)
 		_snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X=%14.14f,Y=%14.14f,Width=%14.14f", centrex, centrey, mandel_width);
 	    else
-		_snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X=%14.14f,Y=%14.14f,BigWidth=%14e", centrex, centrey, mandel_width);
+		_snprintf_s(PositionStr, POSITIONSIZE, _TRUNCATE, "X=%14.14f,Y=%14.14f,Width=%14e", centrex, centrey, mandel_width);
 	    }
 	}
     }
@@ -621,6 +630,93 @@ void	CManp::CreateFractalName(BOOL UseszAppName, char *Name)
     }
 
 /**************************************************************************
+    Return TRUE if this Fractint function has a Bignum implementation
+**************************************************************************/
+
+BOOL	CManp::BigFractintFunctionSupported(WORD type)
+    {
+    switch (type)
+	{
+	case NEWTON:
+	case NEWTBASIN:
+	case MPNEWTBASIN:
+	case MPNEWTON:
+
+	case MAGNET1:
+	case MAGNET1M:
+	case MAGNET1J:
+	case MAGNET2:
+	case MAGNET2M:
+	case MAGNET2J:
+
+	case COMPLEXMARKSMAND:
+	case SPIDERFP:
+
+	case MANOWARFP:
+	case MANOWARJFP:
+	case MANOWARJ:
+	case MANOWAR:
+
+	case BARNSLEYM1:
+	case BARNSLEYM2:
+	case BARNSLEYM3:
+	case BARNSLEYJ1:
+	case BARNSLEYJ2:
+	case BARNSLEYJ3:
+	case BARNSLEYM1FP:
+	case BARNSLEYM2FP:
+	case BARNSLEYM3FP:
+	case BARNSLEYJ1FP:
+	case BARNSLEYJ2FP:
+	case BARNSLEYJ3FP:
+
+	case PHOENIXFP:
+	case PHOENIX:
+	case MANDPHOENIXFP:
+	case MANDPHOENIX:
+
+	case MANDPHOENIXFPCPLX:
+	case MANDPHOENIXCPLX:
+	case PHOENIXCPLX:
+	case PHOENIXFPCPLX:
+
+	case TETRATION:
+	case KLEINIAN:
+	case RINGS:
+
+	case COMPLEXNEWTON:
+	case COMPLEXBASIN:
+
+	case MANDELLAMBDAFP:
+	case MANDELLAMBDA:
+	case LAMBDAFP:
+	case LAMBDA:
+
+	case FPMANDELZPOWER:
+	case LMANDELZPOWER:
+	case LJULIAZPOWER:
+	case FPMANZTOZPLUSZPWR:
+	case FPJULZTOZPLUSZPWR:
+	case TETRATEFP:
+
+	case MARKSMANDELFP:
+	case MARKSMANDEL:
+	case MARKSJULIAFP:
+	case MARKSJULIA:
+
+	case QUATFP:
+	case QUATJULFP:
+
+	case HALLEY:
+	case DIVIDEBROT5:
+	    return TRUE;
+
+	default:
+	    return FALSE;
+	}
+    }
+
+/**************************************************************************
 	Get Arith Type
 **************************************************************************/
 
@@ -629,9 +725,13 @@ int 	 CManp::GetArithType()
     int	flags = fractalspecific[type].flags;
     if (BigNumFlag)
 	{
-	if (precision <= DDPRECISION)
+	int ddPrecision;
+	int qdPrecision;
+
+	GetPrecisionLimits(type, ddPrecision, qdPrecision);
+	if (precision <= ddPrecision)
 	    MathType = DOUBLEDOUBLE;
-	else if (precision <= QDPRECISION || fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
+	else if (precision <= qdPrecision || ((fractalspecific[type].flags & FRACTINTINPIXEL) && !BigFractintFunctionSupported(type)) || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
 	    MathType = QUADDOUBLE;
 	else
 	    MathType = ARBITRARYPREC;
@@ -1118,6 +1218,13 @@ void CManp::RebuildFractalMetadata(WORD type, int subtype)
 		    break;
 		}
 	    break;
+	case RINGS:
+	    {
+	    Fractal.NumParam = RingSpecific[subtype].numparams;
+	    for (int i = 0; i < NUMPARAM; i++)
+		Fractal.ParamName[i] = RingSpecific[subtype].paramname[i];
+	    break;
+	    }
 	case MANDELDERIVATIVES:
 	    Fractal.NumParam = fractalspecific[type].numparams;
 	    for (int i = 0; i < NUMALTERNATIVEPARAM; i++)
@@ -1369,6 +1476,33 @@ void CManp::DumpStartupState(const char *where)
 #endif
     }
 
+/**************************************************************************
+    Some Fractals need more precision than others
+**************************************************************************/
 
+void CManp::GetPrecisionLimits(WORD type, int& ddPrecision, int& qdPrecision)
+    {
+    ddPrecision = DDPRECISION;
+    qdPrecision = QDPRECISION;
+
+    switch (type)
+	{
+	case TETRATION:
+	    ddPrecision = 18;
+	    qdPrecision = 40;
+	    break;
+
+	case SINFRACTAL:
+	case EXPFRACTAL:
+	    ddPrecision = 25;
+	    qdPrecision = 42;
+	    break;
+
+	case TETRATEFP:
+	    ddPrecision = 20;
+	    qdPrecision = 50;
+	    break;
+	}
+    }
 
 

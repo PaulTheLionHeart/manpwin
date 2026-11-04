@@ -55,7 +55,6 @@ int	CPixel::QDInitFractintFunctions(WORD type, QDComplex *z, QDComplex *q)
 	    Init_Manowar<QDComplex, qd_real>(this, z, q, cQD, param, juliaflag, tQD, tempQD, temp1QD);
 	    break;
 
-#ifdef ALLOWALLFRACTINTFUNCTIONS
 	case BARNSLEYM1:
 	case BARNSLEYM2:
 	case BARNSLEYM3:
@@ -68,8 +67,9 @@ int	CPixel::QDInitFractintFunctions(WORD type, QDComplex *z, QDComplex *q)
 	case BARNSLEYJ1FP:
 	case BARNSLEYJ2FP:
 	case BARNSLEYJ3FP:
+	    period_level = FALSE;
+	    Init_Barnsley<QDComplex, qd_real>(this, z, q, cQD, param, juliaflag, tempQD);
 	    break;
-#endif
 
 	case MAGNET1:
 	case MAGNET1M:
@@ -97,19 +97,19 @@ int	CPixel::QDInitFractintFunctions(WORD type, QDComplex *z, QDComplex *q)
 	    Init_Lambda<QDComplex, qd_real>(this, z, q, param, juliaflag, tempQD);
 	    break;
 
-#ifdef ALLOWALLFRACTINTFUNCTIONS
 	case PHOENIXFP:
 	case PHOENIX:
 	case MANDPHOENIXFP:
 	case MANDPHOENIX:
+	    period_level = FALSE;
+	    Init_Phoenix<QDComplex, qd_real>(this, z, q, cQD, param, juliaflag, type, tQD, tempQD, temp2QD, temp3QD, PhoenixDegree, PhoenixType, symmetry, false);
 	    break;
 
 	case MANDPHOENIXFPCPLX:
 	case MANDPHOENIXCPLX:
 	case PHOENIXCPLX:
 	case PHOENIXFPCPLX:
-	    break;
-#endif
+	    Init_PhoenixCplx<QDComplex, qd_real>(this, z, q, cQD, param, juliaflag, tQD, tempQD, temp2QD, temp3QD, PhoenixDegree, PhoenixType, symmetry);
 
 	case FPMANDELZPOWER:
 	case LMANDELZPOWER:
@@ -131,6 +131,15 @@ int	CPixel::QDInitFractintFunctions(WORD type, QDComplex *z, QDComplex *q)
 	case QUATJULFP:
 	    Init_Quat<QDComplex, qd_real>(this, z, q, cQD, param, juliaflag, tQD, qcQD, qciQD, qcjQD, qckQD);
 	    break;
+
+	case HALLEY:
+	    Init_Halley<QDComplex, qd_real>(this, z, q, param, degree);
+	    break;
+
+	case DIVIDEBROT5:
+	    Init_DivideBrot5<QDComplex, qd_real>(this, z, q, param, juliaflag);
+	    break;
+
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
 	case UNITYFP:					// Unity Fractal - brought to you by Mark Peterson - you won't find this in any fractal books unless they saw it here first - Mark invented it!
@@ -180,25 +189,23 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 	case MANOWAR:						// to handle fractint par files
 	    return Iter_ManOWar<QDComplex, qd_real>(this, z, q, tempQD, temp1QD, temp3QD, param, BailoutTestType, rqlim, &QDOldZ);
 
-#ifdef ALLOWALLFRACTINTFUNCTIONS
 	case BARNSLEYM1:					// Barnsley's Mandelbrot type M1 from "Fractals Everywhere" by Michael Barnsley, p. 322
 	case BARNSLEYJ1:
 	case BARNSLEYM1FP:
 	case BARNSLEYJ1FP:
-	    return DoBailout(bailout_type, z, rqlim, &QDOldZ);
+	    return Iter_Barnsley1<QDComplex, qd_real>(this, z, q, tempQD, BailoutTestType, rqlim, &QDOldZ);
 
 	case BARNSLEYM2:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 331, example 4.2
 	case BARNSLEYJ2:
 	case BARNSLEYM2FP:
 	case BARNSLEYJ2FP:
-	    return DoBailout(bailout_type, z, rqlim, &QDOldZ);
+	    return Iter_Barnsley2<QDComplex, qd_real>(this, z, q, tempQD, BailoutTestType, rqlim, &QDOldZ);
 
 	case BARNSLEYM3:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 292, example 4.1 
 	case BARNSLEYJ3:
 	case BARNSLEYM3FP:
 	case BARNSLEYJ3FP:
-	    return DoBailout(bailout_type, z, rqlim, &QDOldZ);
-#endif
+	    return Iter_Barnsley3<QDComplex, qd_real>(this, z, q, tempQD, BailoutTestType, rqlim, &QDOldZ);
 
 	case MAGNET1:
 	case MAGNET1M:
@@ -224,19 +231,27 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 	case LAMBDA:
 	    return Iter_Lambda<QDComplex, qd_real>(this, z, q, tempQD, BailoutTestType, rqlim, &QDOldZ);
 
-#ifdef ALLOWALLFRACTINTFUNCTIONS
 	case PHOENIXFP:
 	case PHOENIX:
 	case MANDPHOENIXFP:
 	case MANDPHOENIX:
-	    return 1;					// just to shut up compiler warnings
+	    if (PhoenixType == ZERO)
+		return Iter_Phoenix<QDComplex, qd_real>(this, z, q, tempQD, temp3QD, BailoutTestType, rqlim, &QDOldZ);
+	    else if (PhoenixType == PLUS)
+		return Iter_PhoenixPlus<QDComplex, qd_real>(this, z, tempQD, temp3QD, PhoenixDegree, BailoutTestType, rqlim, &QDOldZ);
+	    else
+		return Iter_PhoenixMinus<QDComplex, qd_real>(this, z, tempQD, temp3QD, PhoenixDegree, BailoutTestType, rqlim, &QDOldZ);
 
 	case MANDPHOENIXFPCPLX:
 	case MANDPHOENIXCPLX:
 	case PHOENIXCPLX:
 	case PHOENIXFPCPLX:
-	    return 1;					// just to shut up compiler warnings
-#endif
+	    if (PhoenixType == ZERO)
+		return Iter_PhoenixCplx<QDComplex, qd_real>(this, z, q, temp2QD, temp3QD, BailoutTestType, rqlim, &QDOldZ);
+	    else if (PhoenixType == PLUS)
+		return Iter_PhoenixCplxPlus<QDComplex, qd_real>(this, z, q, temp2QD, temp3QD, PhoenixDegree, BailoutTestType, rqlim, &QDOldZ);
+	    else
+		return Iter_PhoenixCplxMinus<QDComplex, qd_real>(this, z, q, temp2QD, temp3QD, PhoenixDegree, BailoutTestType, rqlim, &QDOldZ);
 
 	case LJULIAZPOWER:
 	case LMANDELZPOWER:
@@ -257,6 +272,12 @@ int	CPixel::QDRunFractintFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *
 	case QUATFP:
 	case QUATJULFP:
 	    return Iter_Quat<QDComplex, qd_real>(this, z, tempQD, qcQD, qciQD, qcjQD, qckQD, rqlim);
+
+	case HALLEY:
+	    return Iter_Halley<QDComplex, qd_real>(this, z, param, *degree);
+
+	case DIVIDEBROT5:
+	    return Iter_DivideBrot5<QDComplex, qd_real>(this, z, q, BailoutTestType, rqlim, &QDOldZ);
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
 	case SIERPINSKI:				// following code translated from basic - see "Fractals Everywhere" by Michael Barnsley, p. 251, Program 7.1.1

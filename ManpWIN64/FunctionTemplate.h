@@ -6,11 +6,25 @@
 
 #include <windows.h>
 #include <functional>
+#include "DDTrig.h"
+#include "QDTrig.h"
 
 #pragma once
 
 /**************************************************************************
 	Initialise functions for each pixel
+**************************************************************************/
+
+/**************************************************************************
+    Initialise basic Mandelbrot / Julia style functions.
+
+    Mandelbrot:
+	z = pixel + initial perturbation
+
+    Julia:
+	preserve the supplied starting value
+
+    sqr and real_imag are cleared ready for the iteration loop.
 **************************************************************************/
 
 template<typename TComplex, typename TReal>
@@ -25,6 +39,19 @@ void Init_Basic(TComplex* z, TComplex* q, double* param, bool juliaflag, TComple
     sqr = 0.0;
     real_imag = 0.0;
     }
+
+/**************************************************************************
+    Initialise integer-power Mandelbrot / Julia functions.
+
+    param[0] specifies the power, with a minimum value of 1.
+    The fourth-power fractal types force the degree to 4.
+
+    Mandelbrot:
+	z = pixel + initial perturbation
+
+    Julia:
+	preserve the supplied starting value.
+**************************************************************************/
 
 template<typename TComplex>
 void Init_Power(WORD type, TComplex* z, TComplex* q, double* param, bool juliaflag, WORD* degree)
@@ -43,6 +70,21 @@ void Init_Power(WORD type, TComplex* z, TComplex* q, double* param, bool juliafl
 	z->y = q->y + param[2];
 	}
     }
+
+/**************************************************************************
+    Initialise the Art Matrix Cubic fractals.
+
+    The selected subtype determines the coefficients used by the cubic
+    recurrence:
+
+	B = basic cubic
+	C = cubic variant
+	F = Fatou-style variant
+	K = CKIN variant
+
+    The required coefficients and working values are precomputed here
+    so the iteration routine contains only the recurrence itself.
+**************************************************************************/
 
 template<typename TComplex>
 void Init_Cubic(TComplex* z, TComplex* q, double* param, BYTE juliaflag, int& subtype, TComplex& a, TComplex& b, TComplex& a2, TComplex& aa3, TComplex& t2, TComplex& t3, TComplex& temp, TComplex& v)
@@ -96,6 +138,13 @@ void Init_Cubic(TComplex* z, TComplex* q, double* param, BYTE juliaflag, int& su
 	*z = -a;
     }
 
+/**************************************************************************
+    Initialise the Art Matrix Special Newton fractal.
+
+    Precompute the constants used by the Newton iteration from the
+    pixel coordinate q, including the three convergence targets.
+**************************************************************************/
+
 template<typename TComplex>
 void Init_SPECIALNEWT(TComplex* z, TComplex* q, TComplex& a, TComplex& b, TComplex& lm5, TComplex& lp5)
     {
@@ -108,6 +157,16 @@ void Init_SPECIALNEWT(TComplex* z, TComplex* q, TComplex& a, TComplex& b, TCompl
     lp5 = (*q) + TComplex(0.5);
     }
 
+/**************************************************************************
+    Initialise the sine fractal.
+
+    Mandelbrot:
+	z is initialised from param[3] on the real axis.
+
+    Julia:
+	preserve the supplied starting value.
+**************************************************************************/
+
 template<typename TComplex>
 void Init_SINFRACTAL(TComplex* z, TComplex* q, double* param, bool juliaflag)
     {
@@ -116,6 +175,18 @@ void Init_SINFRACTAL(TComplex* z, TComplex* q, double* param, bool juliaflag)
 	*z = TComplex(param[3]);  // real only, imag = 0
 	}
     }
+
+/**************************************************************************
+    Initialise the Talis power fractal.
+
+    param[0] specifies the integer degree, with a minimum value of 1.
+
+    Mandelbrot:
+	z = pixel + initial perturbation
+
+    Julia:
+	preserve the supplied starting value.
+**************************************************************************/
 
 template<typename TComplex, typename TDegree>
 void Init_TALIS(TComplex* z, TComplex* q, double* param, bool juliaflag, TDegree* degree)
@@ -132,6 +203,19 @@ void Init_TALIS(TComplex* z, TComplex* q, double* param, bool juliaflag, TDegree
 	}
     }
 
+/**************************************************************************
+    Initialise the polynomial fractal.
+
+    Mandelbrot:
+	z = pixel + initial perturbation
+
+    Julia:
+	preserve the supplied starting value.
+
+    Polynomial coefficients are read directly from param[] during
+    iteration.
+**************************************************************************/
+
 template<typename TComplex>
 void Init_POLYNOMIAL(TComplex* z, TComplex* q, double* param, bool juliaflag)
     {
@@ -141,6 +225,16 @@ void Init_POLYNOMIAL(TComplex* z, TComplex* q, double* param, bool juliaflag)
 	z->y = q->y + param[1];
 	}
     }
+
+/**************************************************************************
+    Initialise the Art Matrix Matein fractal.
+
+    Reject pixels outside the unit circle, then perform the original
+    100-step pre-iteration used to establish the starting orbit.
+
+    oz stores the inverse of the resulting z and distance begins at 1
+    for the convergence / escape calculation used during iteration.
+**************************************************************************/
 
 template<typename TComplex, typename TReal>
 int Init_MATEIN(TComplex* z, TComplex* q, double* param, bool juliaflag, TComplex& oz, TComplex& temp, double& distance, double& absolute)
@@ -166,6 +260,19 @@ int Init_MATEIN(TComplex* z, TComplex* q, double* param, bool juliaflag, TComple
     return 0;
     }
 
+/**************************************************************************
+    Initialise the Red Shift Rider fractal.
+
+    param[0], param[1] define the complex coefficient a.
+    param[2] defines the integer degree.
+
+    Mandelbrot:
+	z = pixel + initial perturbation
+
+    Julia:
+	preserve the supplied starting value.
+**************************************************************************/
+
 template<typename TComplex, typename TDegree>
 void Init_REDSHIFTRIDER(TComplex* z, TComplex* q, double* param, bool juliaflag, TComplex& a, TDegree* degree)
     {
@@ -183,6 +290,20 @@ void Init_REDSHIFTRIDER(TComplex* z, TComplex* q, double* param, bool juliaflag,
 	z->y = q->y + param[4];
 	}
     }
+
+/**************************************************************************
+    Initialise the Art Matrix Rational Map.
+
+    Subtype A and subtype B use different coefficient constructions.
+    The required constants a, b and alpha are calculated here before
+    the orbit begins.
+
+    The routine also performs the subtype-specific pre-iterations used
+    to establish the initial z value.
+
+    Returns -1 when the selected subtype or resulting coefficients are
+    invalid, otherwise returns 0.
+**************************************************************************/
 
 template<typename TComplex, typename TReal>
 int Init_RATIONALMAP(TComplex* z, TComplex* q, double* param, bool juliaflag, char subtype, TComplex& a, TComplex& b, TComplex& alpha, TComplex& temp, TComplex& temp1, TComplex& temp3)
@@ -248,9 +369,55 @@ int Init_RATIONALMAP(TComplex* z, TComplex* q, double* param, bool juliaflag, ch
     return 0;
     }
 
+/**************************************************************************
+    Initialise Kleinian fractal.
+
+    Original implementation by Paul de Leeuw,
+    based on work by hrkalona.
+
+    Copyright (C) 2019 hrkalona.
+
+    param[0] = u
+    param[1] = v1
+    param[2] = K
+    param[3] = M
+    param[4] = real initial perturbation
+    param[5] = imaginary initial perturbation
+**************************************************************************/
+
+template <typename TComplex, typename TReal>
+inline void Init_Kleinian(CPixel* self, TComplex* z, TComplex* q,
+    double* param, bool juliaflag,
+    TReal& u, TReal& v1, TReal& K, TReal& M,
+    TComplex& t)
+    {
+    u = TReal(param[0]);
+    v1 = TReal(param[1]);
+    K = TReal(param[2]);
+    M = TReal(param[3]);
+
+    t.x = u;
+    t.y = v1;
+
+    if (!juliaflag)
+	{
+	z->x = q->x + TReal(param[4]);
+	z->y = q->y + TReal(param[5]);
+	}
+    }
+
 // ------------------------------------------------------------
 // Template version of RunFunctions 
 // ------------------------------------------------------------
+
+/**************************************************************************
+    Dispatch the common native ManpWIN fractal iterations.
+
+    Handles the closely related Mandelbrot, Julia, Power, Burning Ship
+    and Cubic families using the arithmetic type selected by the caller.
+
+    Returns the bailout / completion state for the current iteration.
+**************************************************************************/
 
 template<typename TComplex, typename TReal, typename TDegree>
 inline int FunctionsDispatch(CPixel* self, WORD type, TComplex* z, TComplex* q, TDegree* degree, TComplex& sqr, TReal& real_imag, TComplex& a, TComplex& a2, TComplex& aa3,
@@ -372,6 +539,15 @@ inline int FunctionsDispatch(CPixel* self, WORD type, TComplex* z, TComplex* q, 
     return 0;
     }
 
+/**************************************************************************
+    Iterate the Art Matrix Special Newton fractal.
+
+    Apply the Newton recurrence and test the resulting point against
+    each of the three convergence targets.
+
+    phaseflag identifies which target was reached.
+**************************************************************************/
+
 template<typename TComplex>				// Art Matrix Newton
 BOOL Iter_SPECIALNEWT(TComplex* z, const TComplex* q, TComplex& a, TComplex& b, TComplex& lm5, TComplex& lp5, TComplex& v, double* param, BYTE& phaseflag, WORD& special)
     {
@@ -415,6 +591,15 @@ BOOL Iter_SPECIALNEWT(TComplex* z, const TComplex* q, TComplex& a, TComplex& b, 
     return FALSE;
     }
 
+/**************************************************************************
+    Iterate the Art Matrix Matein fractal.
+
+    Update z and its inverse, then accumulate the orbit distance.
+
+    phaseflag = 0 when the orbit converges below epsilon.
+    phaseflag = 1 when the accumulated distance exceeds escape.
+**************************************************************************/
+
 template<typename TComplex>					// Art Matriuc Matein fractal
 BOOL Iter_MATEIN(TComplex* z, TComplex* q, TComplex& oz, TComplex& temp, double& distance, double absolute, double* param, double& epsilon, double& escape, BYTE& phaseflag)
     {
@@ -452,6 +637,7 @@ BOOL Iter_MATEIN(TComplex* z, TComplex* q, TComplex& oz, TComplex& temp, double&
     Z = L*SIN(Z)
     sin(x+iy)  = sin(x)cosh(y) + icos(x)sinh(y)
 ***************************************************************************/
+
 template<typename TComplex, typename TReal>					// Sine
 bool Iter_SINFRACTAL(CPixel* self, TComplex* z, TComplex* q, double* param, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
@@ -465,6 +651,16 @@ bool Iter_SINFRACTAL(CPixel* self, TComplex* z, TComplex* q, double* param, int 
 
     return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
     }
+
+/**************************************************************************
+    Iterate the exponential fractal.
+
+    Apply the complex exponential repeatedly according to the selected
+    degree, then either multiply by or add the complex parameter q.
+
+    The selected subtype determines whether bailout is tested against
+    the real component, imaginary component, or both components.
+**************************************************************************/
 
 template<typename TComplex>					// Exponential
 BOOL Iter_EXP_FRACTAL(TComplex* z, TComplex* q, double* param, WORD* degree, int& subtype, double rqlim)
@@ -511,6 +707,14 @@ BOOL Iter_EXP_FRACTAL(TComplex* z, TComplex* q, double* param, WORD* degree, int
     return compare ? TRUE : FALSE;
     }
 
+/**************************************************************************
+    Iterate the Red Shift Rider fractal.
+
+    z(n+1) = a*z(n)^2 +/- z(n)^degree + c
+
+    param[5] selects the sign of the power term.
+    Standard ManpWIN bailout processing is applied to the result.
+**************************************************************************/
 
 template<typename TComplex, typename TReal>
 bool Iter_REDSHIFTRIDER(CPixel* self, TComplex* z, TComplex* q, TComplex& a, double* param, WORD* degree, int bailout_type, TReal rqlim, TComplex* oldZ)
@@ -525,6 +729,16 @@ bool Iter_REDSHIFTRIDER(CPixel* self, TComplex* z, TComplex* q, TComplex& a, dou
     return DoBailout<TComplex>(bailout_type, z, rqlim, oldZ);
     }
 
+/**************************************************************************
+    Iterate the Talis power fractal.
+
+		    z^N
+	z' = ---------------- + c
+	     M + z^(N-1)
+
+    The previously calculated z^(N-1) is reused to form the numerator.
+**************************************************************************/
+
 template<typename TComplex, typename TReal>					// Talis Power    Z = Z^N/(M + Z^(N-1)) + C
 bool Iter_TALIS(CPixel* self, TComplex* z, TComplex* q, TComplex& a, double* param, WORD* degree, int bailout_type, TReal rqlim, TComplex* oldZ)
     {
@@ -536,6 +750,15 @@ bool Iter_TALIS(CPixel* self, TComplex* z, TComplex* q, TComplex& a, double* par
 
     return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
     }
+
+/**************************************************************************
+    Iterate the polynomial fractal.
+
+    Evaluate the polynomial defined by param[2...] at the current z,
+    then add the complex parameter q.
+
+    Terms whose coefficient is zero are skipped.
+**************************************************************************/
 
 template<typename TComplex, typename TReal>					// Polynomial
 bool Iter_POLYNOMIAL(CPixel* self, TComplex* z, TComplex* q, double* param, int bailout_type, TReal rqlim, TComplex* oldZ)
@@ -560,6 +783,19 @@ bool Iter_POLYNOMIAL(CPixel* self, TComplex* z, TComplex* q, double* param, int 
 
     return (BailoutCore<TComplex>(bailout_type, z, nullptr, rqlim, oldZ));
     }
+
+/**************************************************************************
+    Iterate the Art Matrix Rational Map.
+
+    Apply the rational-map recurrence, update the derivative estimate,
+    and test for escape or convergence.
+
+    Escaping points are assigned one of the positive or negative colour
+    sequences according to their position relative to alpha.
+
+    Converged points and points reaching the iteration limit are given
+    their corresponding special values.
+**************************************************************************/
 
 template<typename TComplex, typename  TReal>					// Art Matrix Rational Map
 bool Iter_RATIONALMAP(CPixel* self, TComplex* z, TComplex* q, TComplex& a, TComplex& b, double* param, TReal& der, TReal escape, TReal epsilon, long* iteration, long threshold, WORD special, TComplex& alpha, long* color)
@@ -606,4 +842,134 @@ bool Iter_RATIONALMAP(CPixel* self, TComplex* z, TComplex* q, TComplex& a, TComp
 
     return false;
     }
+
+/**************************************************************************
+    Kleinian exponential helper.
+
+    Standard arithmetic types use exp() directly.
+**************************************************************************/
+
+template <typename TReal>
+inline void KleinianExp(TReal* out, TReal& x)
+    {
+    *out = exp(x);
+    }
+
+/**************************************************************************
+    Kleinian exponential helper for BigDouble.
+    Uses native MPFR exponential.
+**************************************************************************/
+
+inline void KleinianExp(BigDouble* out, BigDouble& x)
+    {
+    if (!out)
+	return;
+
+    out->MatchPrecision(x);
+
+    mpfr_exp(out->x, x.x, MPFR_RNDN);
+    }
+
+/**************************************************************************
+    Wrap a Kleinian real value into the interval [0, 2).
+
+    This avoids fmod(), which is not available uniformly for all
+    arithmetic types.
+**************************************************************************/
+
+template <typename TReal>
+inline void KleinianMod2(TReal& value)
+    {
+    TReal zero = TReal(0.0);
+    TReal two = TReal(2.0);
+
+    while (value < zero)
+	value += two;
+
+    while (value >= two)
+	value -= two;
+    }
+
+/**************************************************************************
+    Apply one Kleinian transformation.
+
+    Original implementation by Paul de Leeuw,
+    based on work by hrkalona.
+
+    The point is first reduced to the fundamental strip, then one of
+    two Mobius transformations is selected according to its position
+    relative to the boundary curve.
+**************************************************************************/
+
+template <typename TComplex, typename TReal>
+inline TComplex KleinianFunctionT(TComplex* z, TReal& u, TReal& v1, TReal& K, TReal& M, TComplex& t)
+    {
+    TReal re = z->x;
+    TReal im = z->y;
+
+    TComplex i;
+    i.x = TReal(0.0);
+    i.y = TReal(1.0);
+
+    TReal offset = v1 * im / u;
+
+    TReal wrapped = re + offset + TReal(1.0);
+
+    KleinianMod2(wrapped);
+
+    re = wrapped - TReal(1.0) - offset;
+
+    TReal f;
+
+    if (re >= -v1 * TReal(0.5))
+	f = TReal(1.0);
+    else
+	f = TReal(-1.0);
+
+    TReal absValue = re + v1 * TReal(0.5);
+
+    if (absValue < TReal(0.0))
+	absValue = -absValue;
+
+    TReal exponent = -M * absValue;
+    TReal expValue;
+
+    KleinianExp(&expValue, exponent);
+
+    TReal line3_im = u * TReal(0.5) + f * K * u * (TReal(1.0) - expValue);
+
+    z->x = re;
+    z->y = im;
+
+    if (im < line3_im)
+	*z = (t * *z - i) / (*z * -i);
+    else
+	*z = i / (*z * i + t);
+
+    return *z;
+    }
+
+/**************************************************************************
+    Kleinian iteration.
+
+    Bail out when the point leaves the vertical strip, or when an
+    iterated point enters the 2-cycle test region.
+**************************************************************************/
+
+template <typename TComplex, typename TReal>
+inline int Iter_Kleinian(CPixel* self, TComplex* z, TReal& u, TReal& v1, TReal& K, TReal& M, TComplex& t, long* iteration, TReal rqlim)
+    {
+    if (z->y < TReal(0.0) || z->y > u)
+	return TRUE;
+
+    TReal magnitude = z->CSumSqr();
+
+    if (*iteration != 0 && magnitude < rqlim)
+	return TRUE;
+
+    *z = KleinianFunctionT<TComplex, TReal>(z, u, v1, K, M, t);
+
+    return FALSE;
+    }
+
 

@@ -14,6 +14,7 @@
 #include "pixel.h"
 #include "FunctionTemplate.h"
 #include "BailoutTemplate.h"
+#include "TetrationTemplate.h"
 
 /**************************************************************************
 	Initialise functions for each pixel
@@ -188,6 +189,15 @@ int	CPixel::BigInitFunctions(WORD type, BigComplex *zBig, BigComplex *qBig)
 	case TEDDY:					// a specific Tierazon fractal
 	    BigInitTierazonFunctions(104, zBig, qBig);
 	    break;
+
+	case TETRATION:					// a Paul Bourke fractal
+	    Init_PBTetration<BigComplex, BigDouble>(this, zBig, qBig, param, juliaflag, tempBig, TetrationRadiusBig, TetrationThetaBig, BailoutMethod);
+	    break;
+
+	case KLEINIAN:					// Kleinian fractal
+	    Init_Kleinian<BigComplex, BigDouble>(this, zBig, qBig, param, juliaflag, uBig, v1Big, KBig, MBig, tBig);
+	    break;
+
 	}
     return 0;
     }
@@ -309,6 +319,13 @@ int	CPixel::BigRunFunctions(WORD type, BigComplex *zBig, BigComplex *qBig, BYTE 
 
 	case TIERAZON:					// a group of Tierazon Fractals
 	    return (BigRunTierazonFunctions(subtype, zBig, qBig, SpecialFlag, iteration));
+
+	case TETRATION:					// a Paul Bourke fractal
+	    return Iter_PBTetration<BigComplex, BigDouble>(this, tempBig, TetrationRadiusBig, TetrationThetaBig, BailoutMethod, iteration, threshold, rqlim);
+
+	case KLEINIAN:					// Kleinian fractal
+	    return Iter_Kleinian<BigComplex, BigDouble>(this, zBig, uBig, v1Big, KBig, MBig, tBig, iteration, rqlim);
+
 	}
     return 0;
     }

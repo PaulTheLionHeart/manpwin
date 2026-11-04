@@ -324,7 +324,11 @@ int	CPixel::InitArithmetic()
 	Big_ygap = BigWidth * Bigtemp_y;
 	BigCloseEnough = Big_ygap / 16.0;
 
-	if (precision <= DDPRECISION)
+	int ddPrecision;
+	int qdPrecision;
+
+	gManp->GetPrecisionLimits(type, ddPrecision, qdPrecision);
+	if (precision <= ddPrecision)
 	    {
 	    MathType = DOUBLEDOUBLE;
 	    if (BigWidth.BigDouble2DD(&DDWidth) < 0) return -1;
@@ -334,7 +338,7 @@ int	CPixel::InitArithmetic()
 	    if (Big_ygap.BigDouble2DD(&DDygap) < 0) return -1;
 	    if (BigCloseEnough.BigDouble2DD(&DDCloseEnough) < 0) return -1;
 	    }
-	else if (precision <= QDPRECISION || fractalspecific[type].flags & FRACTINTINPIXEL || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
+	else if (precision <= qdPrecision || ((fractalspecific[type].flags & FRACTINTINPIXEL) && !gManp->BigFractintFunctionSupported(type)) || fractalspecific[type].flags & TRIGINPIXEL)    // Bignum versions not yet available
 	    {
 	    MathType = QUADDOUBLE;
 	    if (BigWidth.BigDouble2QD(&QDWidth) < 0) return -1;

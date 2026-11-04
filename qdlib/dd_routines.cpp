@@ -8,9 +8,7 @@
 #include "FractalAbort.h"
 #include "..\ManpWIN64\Manp.h"
 
-//extern	HWND	GlobalHwnd;			// This is the main windows handle
-//extern	int	time_to_quit;			// time to quit?
-extern	std::atomic<bool> gStopRequested;	// force early exit
+extern	std::atomic<bool> gStopRequested;		// force early exit
 
 using namespace qd;
 
@@ -615,6 +613,14 @@ dd_real cos(const dd_real &a) {
 }
 
 void sincos(const dd_real &a, dd_real &sin_a, dd_real &cos_a) {
+
+    // Non-finite arguments cannot undergo angle reduction.
+    if (!std::isfinite(a.x[0]) || !std::isfinite(a.x[1]))
+	{
+	sin_a = dd_real::_nan;
+	cos_a = dd_real::_nan;
+	return;
+	}
 
   if (a.is_zero()) {
     sin_a = 0.0;

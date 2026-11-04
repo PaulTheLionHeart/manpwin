@@ -1144,6 +1144,16 @@ int	CManp::ProcessPotential(char *s)
     }
 
 /**************************************************************************
+	Process Rotation parameters
+**************************************************************************/
+
+void CManp::ProcessRotation(char *tok)
+    {
+    x_rot = y_rot = z_rot = 0.0;
+    sscanf_s(tok, "rotation=%lf/%lf/%lf", &x_rot, &y_rot, &z_rot);
+    }
+
+/**************************************************************************
 	    Read the par file
 **************************************************************************/
 
@@ -1316,6 +1326,8 @@ static	int	ReadParFile(HWND hwnd, char *filename)
 	gManp->Processfilters(tok, OUTSIDE);
     if (tok = str_find_ci(buffer.data(), "bailoutest="))
 	gManp->BailoutTestType = gManp->ProcessBailoutTest(tok);
+    if (tok = str_find_ci(buffer.data(), "rotation="))
+	gManp->ProcessRotation(tok);
     if (tok = str_find_ci(buffer.data(), "logmap="))
 	{
 	// Fractint logarithmic palette settings:

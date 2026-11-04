@@ -68,6 +68,18 @@ int	CPixel::RunThread(HWND hwnd, int ThreadNumberIn, int StripWidthIn, CSlope *S
     // This is required for symmetry, double-pass modes,
     // and full-screen Julia rendering.
 
+#ifdef _DEBUG
+    char DebugString[128];
+
+    _snprintf_s(DebugString, sizeof(DebugString), _TRUNCATE,
+	"Pixel thread %d running, Windows thread ID = %lu, MPFR TLS = %d\n",
+	ThreadNumberIn,
+	GetCurrentThreadId(),
+	mpfr_buildopt_tls_p());
+
+    OutputDebugStringA(DebugString);
+#endif
+
     if (NumberThreads <= 1)
 	{
 	xStart = 0;

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rings Fractals</title>
+<style>
+body { font-family: "Segoe UI", Arial, sans-serif; background-color: #000; color: #ddd; margin: 20px; max-width: 1000px; line-height: 1.6; }
+h1 { color: #ffd700; font-size: 32px; margin-bottom: 10px; }
+h2 { color: #4fd1ff; margin-top: 24px; }
+h3 { color: #88ff66; }
+a { color: #66ccff; text-decoration: underline; }
+a:hover { color: #00ffff; }
+pre { background: #111; padding: 10px; border-radius: 4px; overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; }
+th, td { padding: 7px 10px; border-bottom: 1px solid #444; text-align: left; vertical-align: top; }
+th { color: #99ddff; }
+th:first-child { width: 45px; }
+hr { border: 0; border-top: 1px solid #444; margin-top: 30px; }
+footer { text-align: center; font-size: 8pt; color: #666; }
+</style>
+</head>
+<body>
+<h1>Rings Fractals</h1>
+<p>ManpWIN 4.06a includes sixteen Rings subtypes, offering an experimental
+collection of complex rational maps. Some can produce ring-like structures,
+while others reveal root basins, branching boundaries, nested circles or
+chains of repeated forms. The name <b>Rings</b> describes this collection;
+it does not mean every subtype produces a mathematical Herman ring.</p>
+
+<p>Select <b>Rings</b> from the Fractal Type dialogue (press <b>T</b>).
+Choose the subtype and enter its parameters in the fractal parameter dialogue.
+Each subtype has different mathematical parameters and its own starting view.
+A change in parameter values may produce a very different image.</p>
+
+<h2>The Sixteen Rings Families</h2>
+<table>
+<tr><th>No.</th><th>Subtype</th><th>Description</th></tr>
+<tr><td>0</td><td>Bourke / Bagula Rings</td><td>The original Rings family, with an adjustable sigma parameter.</td></tr>
+<tr><td>1</td><td>Herman Rings</td><td>A rational-map family for investigating ring-like orbit behaviour and rotation.</td></tr>
+<tr><td>2</td><td>Generalised Herman Rings</td><td>A more adjustable Herman-type map with degree and additional coefficients.</td></tr>
+<tr><td>3</td><td>Roger&#x27;s Rational Rings</td><td>A rational variation with its own adjustable formula parameter.</td></tr>
+<tr><td>4</td><td>McMullen Rings</td><td>A family with positive and reciprocal powers. The degree parameters are n and m, together with a complex lambda.</td></tr>
+<tr><td>5</td><td>Singular Perturbation</td><td>A polynomial term combined with a reciprocal-power perturbation and an additive complex constant.</td></tr>
+<tr><td>6</td><td>Shifted-Pole McMullen</td><td>A McMullen-style rational map with an adjustable pole location.</td></tr>
+<tr><td>7</td><td>Blaschke Products</td><td>Finite products of factors acting on the complex plane; adjustable parameters change their internal orbit behaviour.</td></tr>
+<tr><td>8</td><td>Multi-Pole Rational</td><td>A rational map with two adjustable pole locations and complex coefficients.</td></tr>
+<tr><td>9</td><td>Newton Rational</td><td>Newton iteration applied to z^n = 1, with integer degree n.</td></tr>
+<tr><td>10</td><td>Basilica-Rabbit Rational</td><td>A quadratic rational map with a complex parameter a.</td></tr>
+<tr><td>11</td><td>Bicritical Rational</td><td>A quotient of two degree-n polynomial expressions with complex parameters a and b.</td></tr>
+<tr><td>12</td><td>Chebyshev-Halley Rational</td><td>A family of higher-order root-finding iterations controlled by a signed parameter alpha.</td></tr>
+<tr><td>13</td><td>Joukowski Rational</td><td>An iterated Joukowski-style map with complex scale a and offset b.</td></tr>
+<tr><td>14</td><td>Sierpinski Rational</td><td>An experimental reciprocal-square map. The name does not guarantee a Sierpinski-carpet Julia set.</td></tr>
+<tr><td>15</td><td>Perturbed Basilica</td><td>A Basilica polynomial with an additional reciprocal-square term controlled by complex lambda.</td></tr>
+</table>
+
+<h2>Selected Iteration Formulas</h2>
+<p>The following examples show some of the rational maps used by Rings.
+Here <i>z</i> is the current complex orbit value and the adjustable
+coefficients may be real or complex, as indicated in the parameter dialogue.</p>
+
+<h3>Newton Rational (subtype 9)</h3>
+<pre>z(n+1) = z(n) - (z(n)^n - 1) / (n * z(n)^(n-1))</pre>
+<p>The degree <i>n</i> selects the number of roots of unity.</p>
+
+<h3>Basilica-Rabbit Rational (subtype 10)</h3>
+<pre>z(n+1) = (z(n)^2 - a) / (z(n)^2 - 1)</pre>
+<p>The parameter <i>a</i> is complex; the denominator has poles at z = +1 and -1.</p>
+
+<h3>Bicritical Rational (subtype 11)</h3>
+<pre>z(n+1) = (z(n)^n + a) / (b * z(n)^n + 1)</pre>
+<p>The degree <i>n</i> and complex parameters <i>a</i> and <i>b</i> control the map.</p>
+
+<h3>Chebyshev-Halley Rational (subtype 12)</h3>
+<pre>f(z) = z^n - 1
+L(z) = f(z) * f''(z) / (f'(z) * f'(z))
+z(n+1) = z(n) - (1 + L(z)/(2 * (1 - alpha * L(z)))) * f(z)/f'(z)</pre>
+<p>The signed parameter <i>alpha</i> selects different methods:
+0 is Chebyshev, 0.5 is Halley and 1 is Super-Halley.
+Negative values are also available for experimentation.</p>
+
+<h3>Joukowski Rational (subtype 13)</h3>
+<pre>z(n+1) = a * (z(n) + 1/z(n)) + b</pre>
+<p>The coefficients <i>a</i> and <i>b</i> are complex; zero is a pole.</p>
+
+<h3>Sierpinski Rational (subtype 14)</h3>
+<pre>z(n+1) = a * (z(n) + 1/z(n)^2) + b</pre>
+<p>This is an experimental map with a pole at zero. Its subtype name
+is descriptive rather than a guarantee of Sierpinski geometry.</p>
+
+<h3>Perturbed Basilica (subtype 15)</h3>
+<pre>z(n+1) = z(n)^2 - 1 + lambda/z(n)^2</pre>
+<p>The perturbation <i>lambda</i> is complex. At lambda = 0 the formula
+reduces to the Basilica polynomial; nonzero lambda introduces a pole at zero.
+Both positive and negative lambda values can produce interesting results.</p>
+
+<h2>Colouring Options</h2>
+<p>Each Rings subtype provides a <b>Colouring</b> parameter. The available
+values are:</p>
+<table>
+<tr><th>Value</th><th>Mode</th><th>How it works</th></tr>
+<tr><td>0</td><td>Normal</td><td>Uses the ordinary Rings iteration colouring.</td></tr>
+<tr><td>1</td><td>Orbit Sum</td><td>Uses the magnitude of the accumulated orbit positions to select a palette colour.</td></tr>
+<tr><td>2</td><td>Orbit Sum Contours</td><td>Introduces narrow contour lines into orbit-sum colouring.</td></tr>
+<tr><td>3</td><td>Orbit Trap</td><td>Tracks the minimum squared distance of the orbit from the origin.</td></tr>
+<tr><td>4</td><td>Convergence</td><td>Tracks the minimum squared distance between consecutive orbit points.</td></tr>
+</table>
+<p>For orbit-trap and convergence modes, small distances are mapped
+logarithmically into palette colours. These measurements can reveal structures
+that are not obvious under normal colouring. They are colouring methods,
+not changes to the mathematical formula.</p>
+
+<h2>Four Corner Rendering</h2>
+<p>The separate <b>Four Corner</b> parameter enables an experimental
+orbit-separation renderer. Rather than following one orbit per pixel,
+ManpWIN follows four nearby starting points and records the largest
+separation reached between their orbits during iteration. This can
+highlight fine boundaries, repeating loops and interior structures.</p>
+<p>Four Corner is distinct from the Colouring parameter. It may take
+considerably longer to render than the ordinary method, particularly with
+higher arithmetic precision. Colouring combinations may behave differently
+in the Four Corner path because this method uses a separate orbit calculation.</p>
+
+<h2>Arithmetic and Limitations</h2>
+<p>Rings supports ordinary double, double-double (DD) and quad-double (QD)
+calculation paths. The specialised orbit-sum, orbit-trap and convergence
+colouring has been implemented for these three precisions. Some Rings
+operations do not have corresponding MPFR implementations; do not assume
+that every experimental colouring or rendering combination is available
+at arbitrary precision.</p>
+<p>Rational maps may have poles where a denominator becomes zero. Near
+such values, the orbit may grow very rapidly or terminate. Default values
+are starting points only; users are encouraged to experiment with
+parameters, colour palettes, iterations and zoom levels.</p>
+
+<h2>Related Topics</h2>
+<ul>
+<li><a href="manp7vow.htm">Fractal Types Supported</a></li>
+<li><a href="manp7pre.htm">Types of Arithmetic Supported</a></li>
+<li><a href="manp7col.htm">More About Colour</a></li>
+<li><a href="manp7opt.htm">Fractal Options</a></li>
+</ul>
+<hr>
+<footer>ManpWIN Help &copy; November 2026</footer>
+</body>
+</html>

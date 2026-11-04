@@ -93,9 +93,69 @@ ManpWIN has undergone continuous development over many years, with ongoing
 improvements to performance, precision, and fractal exploration capabilities.
 </p>
 
-<h2>Latest Release (October 2026)</h2>
+<h2>Latest Release (November 2026)</h2>
 
-<h2>ManpWIN 4.06</h2>
+<h2>ManpWIN 4.06a</h2>
+
+<p>
+ManpWIN 4.06a extends the fractal catalogue, adds a sixteen-member Rings
+family with new colouring methods, improves high-precision arithmetic and
+thread safety, and extends Fractint compatibility and rendering reliability.
+</p>
+
+<h3>New Fractals and Features</h3>
+<ul>
+<li>Added the Halley fractal and improved testing of Fractint fractals capable
+of using arbitrary precision.</li>
+<li>Added and completed Julibrot rendering for powers up to 20, including
+colour and greyscale modes, a colour/greyscale toggle, power-dependent default
+parameters, and streamlined arithmetic. Some higher-power defaults may still
+benefit from refinement.</li>
+<li>Added Tim's Error fractal.</li>
+<li>Added Icons3D and DivideBrot5 fractals; fixed Ant rendering and improved
+width reporting in the Status window.</li>
+<li>Added support for <code>rotation=</code> in Fractint PAR file handling.</li>
+</ul>
+
+<h3>Rings Fractal Family</h3>
+<ul>
+<li>Added Paul Bourke's Rings fractal and expanded the family to sixteen
+rational-map subtypes, each with subtype-specific parameter definitions and
+starting views.</li>
+<li>Added experimental four-corner orbit-separation rendering, initially in
+DOUBLE and double-double arithmetic, and subsequently expanded high-precision
+Rings rendering support.</li>
+<li>Added orbit-sum and orbit-sum contour colouring in DOUBLE, double-double
+and quad-double arithmetic.</li>
+<li>Added Orbit Trap (minimum distance to the origin) and Convergence
+(minimum distance between consecutive iterates) colouring modes.</li>
+<li>Unified Rings iteration and colouring calculations through templated
+precision-aware implementations.</li>
+<li>Fixed a crash in the Status Information dialogue (Tab) caused by null
+parameter-name pointers for unused Rings parameters.</li>
+</ul>
+
+<h3>Precision, Performance, and Reliability</h3>
+<ul>
+<li>Extended template-based arithmetic to Phoenix, Complex Phoenix, Mandel
+Phoenix, complex-powered, Barnsley, Tetration, and Kleinian fractals, with
+high-precision testing.</li>
+<li>Significantly accelerated Tetration and introduced fractal-specific
+precision cutover limits. Earlier large-magnitude failures in quad-double
+and MPFR arithmetic motivated further precision safeguards; some extreme
+cases remain subject to numerical limits.</li>
+<li>Rebuilt GMP/MPFR using the vcpkg workflow with thread-local support
+verified, improving multi-threaded numerical reliability.</li>
+<li>Removed the obsolete BigTrig implementation in favour of native MPFR
+mathematical functions.</li>
+<li>Fixed Tierazon subtype 48 double-double/quad-double failures through
+safer complex logarithmic/trigonometric and singularity handling, and
+completed the associated PAR test set.</li>
+</ul>
+
+<h2>Previous Releases</h2>
+
+<p><b>ManpWIN 4.06</b></p>
 
 <p>
 ManpWIN 4.06 expands fractal exploration with new fractal types, a broader
@@ -103,7 +163,6 @@ transformation system, and major improvements to Fractint PAR compatibility,
 animation, rendering, and reliability.
 </p>
 
-<h3>New Fractals and Capabilities</h3>
 <ul>
 <li>Added Inverse Julia rendering for powers 2 through 20, with Breadth First,
 Depth First, Random Walk, and Random Run methods.</li>
@@ -113,20 +172,14 @@ Julia exploration, including improved zoom and rotation handling.</li>
 Julia animation.</li>
 <li>Added Magnet 1 and Magnet 2, including finite-attractor handling.</li>
 <li>Added TieraZon blob (convergence) behaviour.</li>
-</ul>
 
-<h3>Fractal Transformations</h3>
-<ul>
 <li>Separated Fractal Options from Fractal Transformations.</li>
 <li>Added standard and non-standard transformations, including Affine and
 M&ouml;bius, with animation and parameter-file support.</li>
 <li>Improved rotation handling in double-double, quad-double, and arbitrary
 precision modes.</li>
 <li>Corrected rotated zoom-in/zoom-out behaviour and quarter-turn handling.</li>
-</ul>
 
-<h3>Fractint PAR Compatibility</h3>
-<ul>
 <li>Improved Fractint viewport interpretation, including six-corner geometry,
 rotation, skew, horizontal magnification, and rotated centres.</li>
 <li>Improved loading of Fractint Inverse Julia parameters and views, including
@@ -138,10 +191,7 @@ inside colour for imported PAR files.</li>
 <li>Repaired or improved handling for several legacy examples, including
 Barnsley M1, Rich8z3, Reach, Blue, and Newton.</li>
 <li>Improved symmetry and block plotting for affected Fractint PAR examples.</li>
-</ul>
 
-<h3>Rendering, Reliability, and Usability</h3>
-<ul>
 <li>Corrected Frothy Basin colouring so valid palette indices beyond the
 iteration threshold are retained.</li>
 <li>Increased IFS point-generation density to restore detail in examples such
@@ -155,8 +205,6 @@ correct radio-button selection and prevent incorrect bailout settings.</li>
 cancellation support, and a 3D projection status-display correction.</li>
 <li>Added safeguards against unbounded Inverse Julia iteration.</li>
 </ul>
-
-<h2>Previous Releases</h2>
 
 <p><b>ManpWIN 4.05b</b></p>
 
@@ -554,7 +602,7 @@ A detailed development history is maintained by the project owner and can be pro
 <hr>
 
 <footer>
-  ManpWIN Help &copy; October 2026
+  ManpWIN Help &copy; November 2026
 </footer>
 </body>
 </html>

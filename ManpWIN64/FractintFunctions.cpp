@@ -67,6 +67,10 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case BARNSLEYJ1FP:
 	case BARNSLEYJ2FP:
 	case BARNSLEYJ3FP:
+	    period_level = FALSE;
+	    Init_Barnsley<Complex, double>(this, z, q, c, param, juliaflag, temp);
+	    break;
+/*
 	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
 //	    t = (invert) ? invertz2(*c) : *c;
 	    temp.x = q->x;
@@ -83,7 +87,7 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 		z->y = q->y + param[1];
 		}
 	    break;
-
+*/
 	case MAGNET1:
 	case MAGNET1M:
 	case MAGNET1J:
@@ -114,98 +118,16 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case PHOENIX:
 	case MANDPHOENIXFP:
 	case MANDPHOENIX:
-	    t = TransformPointT<Complex, double>(c, TransformType, f_radius, f_xcenter, f_ycenter);
-	    temp.x = param[0];
-	    temp.y = param[1];
-	    temp2.x = param[2];
-	    temp2.y = param[3];
-	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
-	    if (juliaflag)
-		{
-		temp.x = q->x;
-		temp.y = q->y;
-		}
-	    else
-		{
-		if (type == MANDPHOENIXFP)
-		    *z = temp = t;
-		else
-		    *z = t;
-		}
-	    temp3 = 0;					// set temp3 to Y value
-	    PhoenixDegree = (int)temp2.x;
-	    if (PhoenixDegree < 2 && PhoenixDegree > -3)
-		PhoenixDegree = 0;
-	    param[2] = (double)PhoenixDegree;
-	    if (PhoenixDegree == 0)
-		PhoenixType = ZERO;
-	    if (PhoenixDegree >= 2)
-		{
-		PhoenixDegree = PhoenixDegree - 1;
-		PhoenixType = PLUS;
-		}
-	    if (PhoenixDegree <= -3)
-		{
-		PhoenixDegree = abs(PhoenixDegree);
-		PhoenixDegree -= 2;
-		PhoenixType = MINUS;
-		}
+	    period_level = FALSE;
+	    Init_Phoenix<Complex, double>(this, z, q, c, param, juliaflag, type, t, temp, temp2, temp3, PhoenixDegree, PhoenixType, symmetry, false);
 	    break;
 
 	case MANDPHOENIXFPCPLX:
 	case MANDPHOENIXCPLX:
 	case PHOENIXCPLX:
 	case PHOENIXFPCPLX:
-	    t = TransformPointT<Complex, double>(c, TransformType, f_radius, f_xcenter, f_ycenter);
-	    temp.x = param[0];
-	    temp.y = param[1];
-	    temp2.x = param[2];
-	    temp2.y = param[3];
-	    period_level = FALSE;			// no periodicity checking (get rid of bug 31/7/00 PHD)
-	    if (juliaflag)
-		{
-		temp.x = q->x;
-		temp.y = q->y;
-		}
-	    else
-		{
-		z->x = t.x + param[0];
-		z->y = t.y + param[1];
-		}
-	    temp3 = 0;					// set temp3 to Y value
-	    PhoenixDegree = (int)param[4];
-	    if (PhoenixDegree < 2 && PhoenixDegree > -3)
-		PhoenixDegree = 0;
-	    param[4] = (double)PhoenixDegree;
-	    if (PhoenixDegree == 0)
-		{
-		if (temp2.x != 0 || temp2.y != 0)
-		    *symmetry = NOSYM;
-		else
-		    *symmetry = ORIGIN;
-		if (temp.y == 0 && temp2.y == 0)
-		    *symmetry = XAXIS;
-		PhoenixType = ZERO;
-		}
-	    if (PhoenixDegree >= 2)
-		{
-		PhoenixDegree = PhoenixDegree - 1;
-		if (temp.y == 0 && temp2.y == 0)
-		    *symmetry = XAXIS;
-		else
-		    *symmetry = NOSYM;
-		PhoenixType = PLUS;
-		}
-	    if (PhoenixDegree <= -3)
-		{
-		PhoenixDegree = abs(PhoenixDegree);
-		PhoenixDegree -= 2;
-		if (temp.y == 0 && temp2.y == 0)
-		    *symmetry = XAXIS;
-		else
-		    *symmetry = NOSYM;
-		PhoenixType = MINUS;
-		}
+	    period_level = FALSE;
+	    Init_PhoenixCplx<Complex, double>(this, z, q, c, param, juliaflag, t, temp, temp2, temp3, PhoenixDegree, PhoenixType, symmetry);
 	    break;
 
 	case FPMANDELZPOWER:
@@ -227,6 +149,10 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case QUATFP:
 	case QUATJULFP:
 	    Init_Quat<Complex, double>(this, z, q, c, param, juliaflag, t, qc, qci, qcj, qck);
+	    break;
+
+	case HALLEY:
+	    Init_Halley<Complex, double>(this, z, q, param, degree);
 	    break;
 
 	case UNITYFP:					// Unity Fractal - brought to you by Mark Peterson - you won't find this in any fractal books unless they saw it here first - Mark invented it!
@@ -388,7 +314,9 @@ int	CPixel::InitFractintFunctions(WORD type, Complex *z, Complex *q)
 	case POPCORN:
 	    break;
 
-
+	case DIVIDEBROT5:
+	    Init_DivideBrot5<Complex, double>(this, z, q, param, juliaflag);
+	    break;
 
 
 	}
@@ -425,80 +353,19 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	case BARNSLEYJ1:
 	case BARNSLEYM1FP:
 	case BARNSLEYJ1FP:
-	    // calculate intermediate products
-	    foldxinitx = z->x * temp.x;
-	    foldyinity = z->y * temp.y;
-	    foldxinity = z->x * temp.y;
-	    foldyinitx = z->y * temp.x;
-	    // orbit calculation 
-	    if (z->x >= 0)
-		{
-//		z->x = (foldxinitx - q->x - foldyinity + param[0]);
-//		z->y = (foldyinitx - q->y + foldxinity + param[1]);
-		temp1.x = foldxinitx - temp.x - foldyinity/* + param[0]*/;	// param removed as it splatters julia
-		temp1.y = foldyinitx - temp.y + foldxinity/* + param[1]*/;
-		}
-	    else
-		{
-//		z->x = (foldxinitx + q->x - foldyinity + param[0]);
-//		z->y = (foldyinitx + q->y + foldxinity + param[1]);
-		temp1.x = foldxinitx + temp.x - foldyinity/* + param[0]*/;
-		temp1.y = foldyinitx + temp.y + foldxinity/* + param[1]*/;
-		}
-	    *z = temp1;
-
-	    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
+	    return Iter_Barnsley1<Complex, double>(this, z, q, temp, BailoutTestType, rqlim, &OldZ);
 
 	case BARNSLEYM2:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 331, example 4.2
 	case BARNSLEYJ2:
 	case BARNSLEYM2FP:
 	case BARNSLEYJ2FP:
-	    // calculate intermediate products
-	    foldxinitx = z->x * temp.x;
-	    foldyinity = z->y * temp.y;
-	    foldxinity = z->x * temp.y;
-	    foldyinitx = z->y * temp.x;
-
-		// orbit calculation
-	    if (foldxinity + foldyinitx >= 0)
-		{
-		temp1.x = foldxinitx - temp.x - foldyinity/* + param[0]*/;	// param removed as it splatters julia
-		temp1.y = foldyinitx - temp.y + foldxinity/* + param[1]*/;
-		}
-	    else
-		{
-		temp1.x = foldxinitx + temp.x - foldyinity/* + param[0]*/;
-		temp1.y = foldyinitx + temp.y + foldxinity/* + param[1]*/;
-		}
-	    *z = temp1;
-	    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
-
+	    return Iter_Barnsley2<Complex, double>(this, z, q, temp, BailoutTestType, rqlim, &OldZ);
 
 	case BARNSLEYM3:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 292, example 4.1 
 	case BARNSLEYJ3:
 	case BARNSLEYM3FP:
 	case BARNSLEYJ3FP:
-	    // calculate intermediate products
-	    foldxinitx = z->x * z->x;
-	    foldyinity = z->y * z->y;
-	    foldxinity = z->x * z->y;
-
-	    // orbit calculation
-	    if (z->x > 0)
-		{
-		temp1.x = foldxinitx - foldyinity - 1.0/* + param[0]*/;	// param removed as it splatters julia
-		temp1.y = foldxinity * 2/* + param[1]*/;
-		}
-	    else
-		{
-		temp1.x = foldxinitx - foldyinity - 1.0 + temp.x * z->x/* + param[0]*/;
-		temp1.y = foldxinity * 2/* + param[1]*/;
-
-		// This term added by Tim Wegner to make dependent on the imaginary part of the parameter. (Otherwise Mandelbrot is uninteresting).
-		temp1.y += temp.y * z->x;
-		}
-	    *z = temp1;
-	    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
+	    return Iter_Barnsley3<Complex, double>(this, z, q, temp, BailoutTestType, rqlim, &OldZ);
 
 	case MAGNET1:
 	case MAGNET1M:
@@ -565,25 +432,22 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	case MANDPHOENIXFP:
 	case MANDPHOENIX:
 	    if (PhoenixType == ZERO)
-		return(PhoenixFractal(z, q));
+		return Iter_Phoenix<Complex, double>(this, z, q, temp, temp3, BailoutTestType, rqlim, &OldZ);
 	    else if (PhoenixType == PLUS)
-		return(PhoenixPlusFractal(z, q));
+		return Iter_PhoenixPlus<Complex, double>(this, z, temp, temp3, PhoenixDegree, BailoutTestType, rqlim, &OldZ);
 	    else
-		return(PhoenixMinusFractal(z, q));
-	    return 1;					// just to shut up compiler warnings
+		return Iter_PhoenixMinus<Complex, double>(this, z, temp, temp3, PhoenixDegree, BailoutTestType, rqlim, &OldZ);
 
 	case MANDPHOENIXFPCPLX:
 	case MANDPHOENIXCPLX:
 	case PHOENIXCPLX:
 	case PHOENIXFPCPLX:
 	    if (PhoenixType == ZERO)
-		return(PhoenixFractalcplx(z, q));
+		return Iter_PhoenixCplx<Complex, double>(this, z, q, temp2, temp3, BailoutTestType, rqlim, &OldZ);
 	    else if (PhoenixType == PLUS)
-		return(PhoenixCplxPlusFractal(z, q));
+		return Iter_PhoenixCplxPlus<Complex, double>(this, z, q, temp2, temp3, PhoenixDegree, BailoutTestType, rqlim, &OldZ);
 	    else
-		return(PhoenixCplxMinusFractal(z, q));
-	    return 1;					// just to shut up compiler warnings
-
+		return Iter_PhoenixCplxMinus<Complex, double>(this, z, q, temp2, temp3, PhoenixDegree, BailoutTestType, rqlim, &OldZ);
 
 	case LJULIAZPOWER:
 	case LMANDELZPOWER:
@@ -604,6 +468,9 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	case QUATFP:
 	case QUATJULFP:
 	    return Iter_Quat<Complex, double>(this, z, temp, qc, qci, qcj, qck, rqlim);
+
+	case HALLEY:
+	    return Iter_Halley<Complex, double>(this, z, param, *degree);
 
 	case SIERPINSKI:				// following code translated from basic - see "Fractals Everywhere" by Michael Barnsley, p. 251, Program 7.1.1
 	case SIERPINSKIFP:
@@ -718,6 +585,9 @@ int	CPixel::RunFractintFunctions(WORD type, Complex *z, Complex *q, BYTE *Specia
 	    z->y = z->y - g_sin_x * StepSize;
 	    return DoBailout(BailoutTestType, z, rqlim, &OldZ);
 	    }
+
+	case DIVIDEBROT5:
+	    return Iter_DivideBrot5<Complex, double>(this, z, q, BailoutTestType, rqlim, &OldZ);
 
 	case FROTH:		// Froth Fractal type - per pixel 1/2/g, called with row & col set
 	    {

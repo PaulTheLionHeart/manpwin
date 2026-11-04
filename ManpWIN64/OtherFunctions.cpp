@@ -21,16 +21,16 @@ COtherFunctions::COtherFunctions(std::vector<float>& wp)
 	Initialise functions for each pixel
 **************************************************************************/
 
-int	COtherFunctions::InitOtherFunctions(WORD typeIn, int subtypeIn, HWND hwndIn, CTrueCol *TrueColIn, CDib *DibIn, char *AntStatusIn, struct __timeb64 FrameEndIn, struct __timeb64 FrameStartIn, double mandel_widthIn, 
+int	COtherFunctions::InitOtherFunctions(WORD typeIn, int subtypeIn, HWND hwndIn, CTrueCol *TrueColIn, CDib *DibIn, char *FractalStatusIn, struct __timeb64 FrameEndIn, struct __timeb64 FrameStartIn, double mandel_widthIn,
 		double horIn, double vertIn, double ScreenRatioIn, int *totpassesIn, int *curpassIn, int user_dataIn(HWND hwnd), /*std::vector<float> &wpixelsIn, */int CoordSystemIn, //COscProcess OscProcessIn, 
-		int xAxisIn, int yAxisIn, int zAxisIn)
+		int xAxisIn, int yAxisIn, int zAxisIn, double param[])
     {
     type = typeIn;
     subtype = subtypeIn;
     hwnd = hwndIn;
 //    wpixels = wpixelsIn;
     TrueCol = TrueColIn; 
-    AntStatus = AntStatusIn; 
+    FractalStatus = FractalStatusIn;
     FrameEnd = FrameEndIn; 
     FrameStart = FrameStartIn;
     Dib = DibIn;
@@ -76,6 +76,12 @@ int	COtherFunctions::InitOtherFunctions(WORD typeIn, int subtypeIn, HWND hwndIn,
 	case INVERSEJULIAFP:
 	    InitInverseJulia();
 	    break;
+
+	case JULIBROT:
+	case JULIBROTFP:
+	    InitJulibrot(param, ScreenRatio);
+	    break;
+
 	}
     return 0;
     }
@@ -988,7 +994,10 @@ int	COtherFunctions::RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *itera
 	case INVERSEJULIAFP:
 	    return InverseJuliaOrbit();
 
-
+	case JULIBROT:
+	case JULIBROTFP:
+	    RunJulibrot(xdots, ydots, threshold);
+	    break;
 
 	}
 

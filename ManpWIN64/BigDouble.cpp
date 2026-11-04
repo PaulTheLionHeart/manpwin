@@ -4,11 +4,11 @@
     Written in Microsoft Visual 'C++' by Paul de Leeuw.
 */
 
+#include <Windows.h>
 #include "BigDouble.h"
 #include "big.h"
 #include "mpfr.h"
 #include <mutex>
-#include "BigTrig.h"
 
 static std::mutex g_mpfr_printf_mutex;
 
@@ -650,12 +650,13 @@ BigDouble   BigDouble::BigSin()	const	// sin
     return a;
     }
 
+/**************************************************************************
+    sin(x) - Native MPFR
+***************************************************************************/
+
 BigDouble BigDouble::Sin() const
     {
-    BigDouble sine, dummy;
-    CBigTrig trig;
-    trig.sincos_bf(&sine, &dummy, *this); // or your sin-only path
-    return sine;
+    return BigSin();
     }
 
 /**************************************************************************
@@ -671,12 +672,13 @@ BigDouble   BigDouble::BigCos()	const	// cos
     return a;
     }
 
+/**************************************************************************
+    cos(x) - Native MPFR
+***************************************************************************/
+
 BigDouble BigDouble::Cos() const
     {
-    BigDouble cosine, dummy;
-    CBigTrig trig;
-    trig.sincos_bf(&dummy, &cosine, *this); // or your sin-only path
-    return cosine;
+    return BigCos();
     }
 
 /**************************************************************************

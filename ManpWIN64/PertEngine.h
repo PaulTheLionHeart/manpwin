@@ -121,7 +121,6 @@ class CPerturbation
 	int	iterateFractalWithPerturbationBLAExp(const std::vector<ExpComplex> *XSubN, int MaxIteration, double bailout, ExpComplex& DeltaSub0, const BLAS *Bla, /*CTZfilter &TZfilter, */ExpComplex &z, ExpComplex &dc, int user_data(HWND hwnd));
 	RGBTRIPLE GetSmoothedColour(double fIter, double color_speed, CTrueCol &TrueCol, CPlot *Plot);
 
-	CBigTrig	BigTrig;		// alternative thread-friendly trig functions
 	const	BLAS    *Bla = nullptr;		// Bilinear Approximation
 	bool	EnableApproximation = false;
 	int	MaxRefIteration = 0;

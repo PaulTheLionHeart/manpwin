@@ -29,7 +29,7 @@
 #define IFS3DPARM 13			// number of ifs 3D parameters
 #define XROT	  gManp->x_rot		// rotate x-axis 60 degrees
 #define YROT	  gManp->y_rot		// rotate y-axis 90 degrees
-#define ZROT	  gManp->z_rot		// rotate x-axis  0 degrees
+#define ZROT	  gManp->z_rot		// rotate z-axis  0 degrees
 
 #define COSB   dx
 #define SINABC dy
@@ -321,15 +321,7 @@ int orbit3dfloatsetup()
 //      initorbit[0] = -0.1;	/* initial conditions */
 //      initorbit[1] = 0.0;
    }
-/*
-   if (type == ICON || type == ICON3D)        // DMF
-       {
-       initorbit[0] = 0.01;  // initial conditions
-       initorbit[1] = 0.003;
-//       connect = 0;
-//       waste = 2000;
-       }
-*/
+
    if(gManp->type==FPHENON || gManp->type==FPPICKOVER)
    {
       a = gManp->param[0];
@@ -352,6 +344,12 @@ int orbit3dfloatsetup()
        b = gManp->param[1];
        c = gManp->param[2];
        d = gManp->param[3];
+       if (gManp->type == ICON3D)
+	   {
+	   gManp->x_rot = gManp->param[6];
+	   gManp->y_rot = gManp->param[7];
+	   gManp->z_rot = gManp->param[8];
+	   }
        }
    else if(gManp->type==KAMFP || gManp->type==KAM3DFP)
    {
@@ -954,7 +952,7 @@ int orbit3dfloatcalc(void)
 
    fp = open_orbitsave();
 */
-   maxct = gManp->threshold*40L;
+   maxct = gManp->threshold*400L;
    count = inf.ct = 0L;
    ret = 0;
    while(inf.ct++ < (long)maxct) /* loop until keypress or threshold */
@@ -992,6 +990,8 @@ int orbit3dfloatcalc(void)
 	lorenz3d4floatorbit(&inf.orbit[0],&inf.orbit[1],&inf.orbit[2]);
       else if (gManp->type == KAM3DFP)
 	kamtorusfloatorbit(&inf.orbit[0],&inf.orbit[1],&inf.orbit[2]);
+      else if (gManp->type == ICON3D)
+	  iconfloatorbit(&inf.orbit[0], &inf.orbit[1], &inf.orbit[2]);
 
       if (float3dviewtransf(&inf))
       {
@@ -1275,7 +1275,7 @@ static int ifs3dfloat(HWND hwnd)
 
 //   fp = open_orbitsave();
 
-   maxct = gManp->threshold*40L;
+   maxct = gManp->threshold*400L;
    inf.ct = 0L;
    ret = 0;
    while(inf.ct++ < (long)maxct) /* loop until keypress or threshold */

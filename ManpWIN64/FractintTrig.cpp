@@ -66,6 +66,8 @@ int	CPixel::InitFractintTrigFunctions(WORD type, Complex *z, Complex *q)
 	case LLAMBDAFNFN:
 	case FPLAMBDAFNFN:
 	case FPMANLAMFNFN:				// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
+	case TIMSERROR:
+	case TIMSERRORFP:
 	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
 	    t = TransformPointT<Complex, double>(c, TransformType, f_radius, f_xcenter, f_ycenter);
 	    InitFractintTrigFunctionsT<Complex, double>(type, z, q, juliaflag, c, qc, qci, qcj, qck, t, temp, temp1, temp2, temp4, sqr, Fn2Index, param);
@@ -98,6 +100,8 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 	case TRIGXTRIG:						// to handle fractint par files
 	case ZXTRIGPLUSZFP:
 	case ZXTRIGPLUSZ:					// to handle fractint par files
+	case TIMSERRORFP:
+	case TIMSERROR:
 	    return FractintTrigIterT<Complex, double>(type, z, q, temp, temp1, temp2, temp3, sqr, qc, qci, qcj, qck,
 		Fn1Index, Fn2Index, rqlim, BailoutTestType, &OldZ);
 
@@ -150,7 +154,7 @@ int	CPixel::RunFractintTrigFunctions(WORD type, Complex *z, Complex *q, BYTE *Sp
 
 	case NUMFRACTAL:
 	    return NumFractalT<Complex, double>(z, q, Fn1Index, rqlim, BailoutTestType, param, &OldZ);
-	    
+
 	}
     return 0;
     }

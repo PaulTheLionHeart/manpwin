@@ -14,7 +14,6 @@
 #include "Fractalp.h"
 #include "filter.h"
 #include "plot.h"
-#include "BigTrig.h"
 #include "Arithmetic.h"
 #include "PlotMode.h"
 
@@ -151,7 +150,6 @@ class CSlope
 	long	threshold;
 	CTrueCol *TrueCol;
 	CDib	*Dib;
-	CBigTrig	BigTrig;		// alternative thread-friendly trig functions
 	double	bump_transfer_factor, lightDirectionDegrees, bumpMappingDepth, bumpMappingStrength, LightHeight;
 	double	xgap, ygap;
 	BigDouble   Big_xgap, Big_ygap;

@@ -1,5 +1,5 @@
 /*
-    Pixel.cpp a module to handle per pixel functions 
+    Pixel.h a module to handle per pixel functions 
 
     Written in Microsoft Visual C++ by Paul de Leeuw.
 */
@@ -19,7 +19,6 @@
 #include "fractalp.h"
 #include "filter.h"
 #include "fract.h"
-#include "Tetration.h"
 #include "Fractype.h"
 #include "slope.h"
 #include "plot.h"
@@ -385,19 +384,6 @@ class CPixel
 	int	savedand, savedincr;
 	long	real_iteration;
 
-
-
-	PBCOMPLEX ComplexTetration(PBCOMPLEX a, int n);			// start Tetration procedures
-	PBCOMPLEX PBComplexPower(PBCOMPLEX w, PBCOMPLEX z);
-	void	Complex2Polar(PBCOMPLEX *a);
-	void	Complex2Cart(PBCOMPLEX *a);
-	double	RealTetration(double a, int n);
-	BOOL	TetrationBailout(PBCOMPLEX z);
-	int	InitTetration(Complex *z, Complex *q);
-	int	DoTetration(long *iteration);				// end Tetration stuff
-	int	InitKleinian(Complex *z, Complex *q);			// start Kleinian procedures
-	Complex KleinianFunction(Complex *z);
-	int	CalculateKleinian(Complex *z);
 	int	PhoenixFractal(Complex *z, Complex *q);
 	int	PhoenixPlusFractal(Complex *z, Complex *q);
 	int	PhoenixMinusFractal(Complex *z, Complex *q);
@@ -600,9 +586,16 @@ class CPixel
 
 							// Tetration stuff
 	int	BailoutMethod;				// bailout method
-	PBCOMPLEX	aPBC;				// PB Complex
+//	PBCOMPLEX	aPBC;				// PB Complex
+	double TetrationRadius, TetrationTheta;
+	dd_real	TetrationRadiusDD, TetrationThetaDD;
+	qd_real	TetrationRadiusQD, TetrationThetaQD;
+	BigDouble	TetrationRadiusBig, TetrationThetaBig;
 
 	double	u, v1, K, M;				// Kleinian stuff
+	dd_real	uDD, v1DD, KDD, MDD;
+	qd_real	uQD, v1QD, KQD, MQD;
+	BigDouble	uBig, v1Big, KBig, MBig;
 
 							// stuff for Fractint functions
 	Complex	Coefficient;
@@ -676,5 +669,22 @@ class CPixel
 	double	bumpMappingDepth;
 	double	bumpMappingStrength;
 
+	// stuff for rings
+	Complex	    RingsOrbitSum;
+	Complex	    RingsRotation;
+	DDComplex   RingsOrbitSumDD;
+	DDComplex   RingsRotationDD;
+	QDComplex   RingsOrbitSumQD;
+	QDComplex   RingsRotationQD;
+
+	double	    RingsOrbitTrapMin = DBL_MAX;
+	double	    RingsMinDeltaSqr = DBL_MAX;
+	dd_real	    RingsOrbitTrapMinDD = DBL_MAX;
+	dd_real	    RingsMinDeltaSqrDD = DBL_MAX;
+	qd_real	    RingsOrbitTrapMinQD = DBL_MAX;
+	qd_real	    RingsMinDeltaSqrQD = DBL_MAX;
+
+	bool	    FourCorner = false;
+	int	    OrbitSumColouring = 0;    // 0 = Off, 1 = Orbit Sum, 2 = Contours
     };
 

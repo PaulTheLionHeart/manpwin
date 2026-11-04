@@ -47,6 +47,18 @@ target_link_libraries(parser PUBLIC
     MPFR::MPFR
 )
 
+# QD arithmetic routines also require GMP and MPFR headers.
+target_link_libraries(qdlib PRIVATE
+    GMP::GMP
+    MPFR::MPFR
+)
+
+# MPEG sources also encounter the MPFR/GMP headers.
+target_link_libraries(mpeg PRIVATE
+    GMP::GMP
+    MPFR::MPFR
+)
+
 target_link_libraries(ManpWIN64 PRIVATE
     pnglib
     zlib

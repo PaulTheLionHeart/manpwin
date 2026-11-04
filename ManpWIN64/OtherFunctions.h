@@ -18,6 +18,7 @@
 #include "Pixel.h"
 #include "polygon.h"
 #include "preview.h"
+#include "jb.h"
 
 // Error codes for Cellular
 #define BAD_T         1
@@ -72,7 +73,7 @@ class COtherFunctions
 	COtherFunctions();
 	COtherFunctions(std::vector<float>& wp);
 	int	InitOtherFunctions(WORD type, int subtypeIn, HWND hwndIn, CTrueCol *TrueColIn, CDib *DibIn, char *AntStatusIn, struct __timeb64 FrameEndIn, struct __timeb64 FrameStartIn, double mandel_widthIn,
-		double horIn, double vertIn, double ScreenRatioIn, int *totpassesIn, int *curpassIn, int user_dataIn(HWND hwnd), int CoordSystemIn, int xAxisIn, int yAxisIn, int zAxisIn);
+		double horIn, double vertIn, double ScreenRatioIn, int *totpassesIn, int *curpassIn, int user_dataIn(HWND hwnd), int CoordSystemIn, int xAxisIn, int yAxisIn, int zAxisIn, double param[]);
 	int	RunOtherFunctions(WORD type, BYTE *SpecialFlag, long *iteration, int xdots, int ydots, double param[], long threshold, int rotate(int dir));
 
 	// stuff for Triangles
@@ -139,7 +140,6 @@ class COtherFunctions
 	Complex	c, z;
 	HWND	hwnd;
 
-
     // Stuff for Cellular
 	void	abort_cellular(int err, int t);
 	void	thinking(HWND hwnd, int count);
@@ -187,10 +187,10 @@ class COtherFunctions
 	std::vector<int> incyStorage;
 	short	AntRseed;
 	short	AntRflag;
-	char	*AntStatus;
+	char	*FractalStatus;
 	struct __timeb64 	FrameEnd;
 	struct __timeb64 	FrameStart;
-	//	void	TurkMite2(int maxtur, size_t rule_len, char *ru, long maxpts, long wait);
+//	void	TurkMite2(int maxtur, size_t rule_len, char *ru, long maxpts, long wait);
 	void	TurkMite1(int maxtur, size_t rule_len, char *ru, long maxpts, long wait);
 	int	ant(void);
 	int	tower(void);
@@ -283,5 +283,16 @@ class COtherFunctions
 	InverseJuliaMinorMethod InverseJuliaMinor = IJ_LEFT_FIRST;
 	struct affine InverseJuliaScreen;
 
+	// stuff for Julibrot
+	JulibrotData JB;
+	int	InitJulibrot(double param[], double ScreenRatio);
+	int	RunJulibrot(int xdots, int ydots, long threshold);
+	void	JulibrotPerPixel(double xPixel, double yPixel, double& jx, double& jy, double& deltaJX, double& deltaJY);
+#ifdef JULIBROT_OPTIMISER
+	JulibrotScore ScoreJulibrotSlice(int power, double cx, double yRange);
+	double	FindJulibrotDefaultX(int power, double yRange);
+	double	FindJulibrotDefaultY(int power, double cx);
+
+#endif
     };
 

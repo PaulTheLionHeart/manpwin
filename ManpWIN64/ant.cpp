@@ -98,7 +98,7 @@ void	COtherFunctions::TurkMite1(int maxtur, size_t rule_len, char *ru, long maxp
 	    lastChecked = int(progress * 100);
 	    _ftime64(&FrameEnd);					// initialise time counter
 	    ElapsedTime = (double)(FrameEnd.time) + (double)(FrameEnd.millitm) / 1000.0 - (double)(FrameStart.time) - (double)(FrameStart.millitm) / 1000.0;
-	    _snprintf_s(AntStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), gManp->ShowTime(ElapsedTime));
+	    _snprintf_s(FractalStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), gManp->ShowTime(ElapsedTime));
 	    if (AntTime < FrameEnd.time)
 		gManp->DisplayStatusBarInfo(INCOMPLETE, "");
 	    }
@@ -304,7 +304,7 @@ int	COtherFunctions::tower(void)
 	    lastChecked = int(progress * 100);
 	    _ftime64(&FrameEnd);					// initialise time counter
 	    ElapsedTime = (double)(FrameEnd.time) + (double)(FrameEnd.millitm) / 1000.0 - (double)(FrameStart.time) - (double)(FrameStart.millitm) / 1000.0;
-	    _snprintf_s(AntStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), gManp->ShowTime(ElapsedTime));
+	    _snprintf_s(FractalStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), gManp->ShowTime(ElapsedTime));
 	    if (AntTime < FrameEnd.time)
 		gManp->DisplayStatusBarInfo(INCOMPLETE, "");
 	    }
@@ -410,7 +410,7 @@ int	COtherFunctions::tower(void)
 	    lastChecked = int(progress * 100);
 	    _ftime64(&FrameEnd);					// initialise time counter
 	    ElapsedTime = (double)(FrameEnd.time) + (double)(FrameEnd.millitm) / 1000.0 - (double)(FrameStart.time) - (double)(FrameStart.millitm) / 1000.0;
-	    _snprintf_s(AntStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), gManp->ShowTime(ElapsedTime));
+	    _snprintf_s(FractalStatus, 200, _TRUNCATE, "Progress = (%d%%), Time %s", int(progress * 100), gManp->ShowTime(ElapsedTime));
 	    if (AntTime < FrameEnd.time)
 		gManp->DisplayStatusBarInfo(INCOMPLETE, "");
 	    }

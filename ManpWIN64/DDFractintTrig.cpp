@@ -66,6 +66,9 @@ int	CPixel::DDInitFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q)
 	case LLAMBDAFNFN:
 	case FPLAMBDAFNFN:
 	case FPMANLAMFNFN:				// z = trig0(z)*p1 if mod(old) < p2.x and trig1(z)*p1 if mod(old) >= p2.x
+	case TIMSERRORFP:
+	case TIMSERROR:
+
 	    period_level = FALSE;			// no periodicity checking (get rid of bug PHD 2009-10-16)
 	    tDD = TransformPointT<DDComplex, dd_real>(cDD, TransformType, f_radius, f_xcenter, f_ycenter);
 	    InitFractintTrigFunctionsT<DDComplex, dd_real>(type, z, q, juliaflag, cDD, qcDD, qciDD, qcjDD, qckDD, tDD, tempDD, temp1DD, temp2DD, temp4DD, sqrDD, Fn2Index, param);
@@ -103,6 +106,8 @@ int	CPixel::DDRunFractintTrigFunctions(WORD type, DDComplex *z, DDComplex *q, BY
 	case TRIGXTRIG:						// to handle fractint par files
 	case ZXTRIGPLUSZFP:
 	case ZXTRIGPLUSZ:					// to handle fractint par files
+	case TIMSERRORFP:
+	case TIMSERROR:
 	    {
 	    dd_real rqlimDD = rqlim;
 

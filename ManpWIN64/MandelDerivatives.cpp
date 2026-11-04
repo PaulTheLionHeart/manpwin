@@ -41,11 +41,9 @@ void	LoadMandelDerivParams(void)
 **************************************************************************/
 
 INT_PTR CALLBACK SelectMandelDerivDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-
-{
-static	int	i;
-static	int	index;
-//		HWND    hCtrl; 
+    {
+    static	int	i;
+    static	int	index;
 
     switch (message) 
 	{

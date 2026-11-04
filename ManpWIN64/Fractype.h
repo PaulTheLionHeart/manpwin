@@ -289,6 +289,8 @@
 #define TOWER			243
 #define NUMFRACTAL		244	// dedicated to an 11 year old girl who "discovered" it
 #define HAILSTONE		245	// 2D Hailstone sequence visualization with cycle detection
+#define DIVIDEBROT5		246	// DivideBrot5 formula by Jim Muth
+#define RINGS			247	// Written by Paul Bourke - Inspired by Roger Bagula - July 2019
 //#define CELTIC			235
 //#define MANDELBARCELTIC		236
 //#define PERPCELTIC		237

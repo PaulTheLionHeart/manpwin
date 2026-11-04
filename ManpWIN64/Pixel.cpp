@@ -18,6 +18,7 @@
 #include "pixel.h"
 #include "Potential.h"
 #include "FilterTemplate.h"
+#include "RingsTemplate.h"
 #include "FractalMathsTemplate.h"
 
 /**************************************************************************
@@ -434,6 +435,10 @@ void	CPixel::InitialisePixelRuntime(Complex& saved, DDComplex& DDSaved, QDComple
 
 int CPixel::InitialisePixelFractal(double (&tantable)[16])
     {
+    int ddPrecision;
+    int qdPrecision;
+
+    gManp->GetPrecisionLimits(type, ddPrecision, qdPrecision);
     if (!BigNumFlag)
 	{
 	if (OutsideMethod == STARTRAIL)
@@ -450,7 +455,7 @@ int CPixel::InitialisePixelFractal(double (&tantable)[16])
 	if (InitFractal(&z, &q) < 0)
 	    return PIXEL_BLUE;
 	}
-    else if (precision <= DDPRECISION)
+    else if (precision <= ddPrecision)
 	{
 	if (cBig.x.BigDouble2DD(&cDD.x) < 0)
 	    return PIXEL_ZERO;
@@ -462,7 +467,7 @@ int CPixel::InitialisePixelFractal(double (&tantable)[16])
 	InitTierazonFiltersDD();
 	DDInitFractal(&zDD, &qDD);
 	}
-    else if (precision <= QDPRECISION)
+    else if (precision <= qdPrecision)
 	{
 	if (cBig.x.BigDouble2QD(&cQD.x) < 0)
 	    return PIXEL_ZERO;
@@ -1115,6 +1120,92 @@ long CPixel::ApplyFinalColour(long iteration, int hooper, double min_orbit, long
     // Do not apply ordinary escape-time inside/outside colouring.
     if (type == FROTH || type == FROTHFP)
 	return iteration;
+
+/**************************************************************************
+    Rings colouring
+
+    0 - Normal
+    1 - Orbit Sum
+    2 - Orbit Sum Contours
+    3 - Orbit Trap
+    4 - Convergence
+
+    DOUBLE, DD and QD arithmetic.
+**************************************************************************/
+
+if (type == RINGS)
+    {
+    switch (OrbitSumColouring)
+        {
+        case 1:     // Orbit Sum
+        case 2:     // Orbit Sum Contours
+            {
+            switch (MathType)
+                {
+                case DOUBLEFLOAT:
+                    {
+                    double magnitude = sqrt(RingsOrbitSum.x * RingsOrbitSum.x + RingsOrbitSum.y * RingsOrbitSum.y);
+                    if (std::isfinite(magnitude))
+                        return ColourRingsOrbitSum(magnitude, OrbitSumColouring);
+                    break;
+                    }
+
+                case DOUBLEDOUBLE:
+                    {
+                    dd_real magnitude = sqrt(RingsOrbitSumDD.x * RingsOrbitSumDD.x + RingsOrbitSumDD.y * RingsOrbitSumDD.y);
+                    if (std::isfinite(RingsColourToDouble(magnitude)))
+                        return ColourRingsOrbitSum(magnitude, OrbitSumColouring);
+                    break;
+                    }
+
+                case QUADDOUBLE:
+                    {
+                    qd_real magnitude = sqrt(RingsOrbitSumQD.x * RingsOrbitSumQD.x + RingsOrbitSumQD.y * RingsOrbitSumQD.y);
+                    if (std::isfinite(RingsColourToDouble(magnitude)))
+                        return ColourRingsOrbitSum(magnitude, OrbitSumColouring);
+                    break;
+                    }
+                }
+            break;
+            }
+
+        case 3:     // Orbit Trap
+        case 4:     // Convergence
+            {
+            switch (MathType)
+                {
+                case DOUBLEFLOAT:
+                    {
+                    double minimum = (OrbitSumColouring == 3) ? RingsOrbitTrapMin : RingsMinDeltaSqr;
+                    if (std::isfinite(minimum) && minimum < DBL_MAX)
+                        return ColourRingsDistance(minimum);
+                    break;
+                    }
+
+                case DOUBLEDOUBLE:
+                    {
+                    dd_real minimum = (OrbitSumColouring == 3) ? RingsOrbitTrapMinDD : RingsMinDeltaSqrDD;
+                    if (std::isfinite(RingsColourToDouble(minimum)) && minimum < DBL_MAX)
+                        return ColourRingsDistance(minimum);
+                    break;
+                    }
+
+                case QUADDOUBLE:
+                    {
+                    qd_real minimum = (OrbitSumColouring == 3) ? RingsOrbitTrapMinQD : RingsMinDeltaSqrQD;
+                    if (std::isfinite(RingsColourToDouble(minimum)) && minimum < DBL_MAX)
+                        return ColourRingsDistance(minimum);
+                    break;
+                    }
+                }
+            break;
+            }
+
+        default:    // Normal colouring
+            break;
+        }
+    }
+
     if (iteration < threshold)
 	{
 	switch (MathType)
@@ -1231,7 +1322,142 @@ long	CPixel::calc_frac(HWND hwnd, int row, int col, int user_data(HWND hwnd))
 	}
     else
 	{
-	color = dofract(hwnd, row, col);
+	FourCorner = false;
+	OrbitSumColouring = 0;
+
+	if (type == RINGS)
+	    {
+	    FourCorner = UseFourCornerRings(gManp->subtype, param);
+	    OrbitSumColouring = UseOrbitSumColouringRings(gManp->subtype, param);
+	    }
+	if (type == RINGS && FourCorner && RotationAngle == 0)
+	    {
+	    /******************************************************************
+		Experimental four-corner orbit-separation mapping.
+
+		DOUBLE and DD precision, unrotated views only.
+
+		Each corner follows an independent Herman Rings orbit.
+		The result is converted into a palette index.
+
+		The normal fractal renderer is used if the four-corner
+		calculation fails.
+	    ******************************************************************/
+
+	    double separation = 0.0;
+	    bool success = false;
+
+	    if (!BigNumFlag)
+		{
+		/**************************************************************
+		    DOUBLE precision.
+		**************************************************************/
+
+		Complex corners[4];
+
+		corners[0] = c;
+
+		corners[1] = c;
+		corners[1].x += xgap;
+
+		corners[2] = c;
+		corners[2].y -= ygap;
+
+		corners[3] = c;
+		corners[3].x += xgap;
+		corners[3].y -= ygap;
+
+		// Herman rotation: exp(2*pi*i*tau)
+
+		const double angle = TWO_PI * param[0];
+
+		Complex rotation;
+		rotation.x = cos(angle);
+		rotation.y = sin(angle);
+
+		success = MeasureFourCornerRings<Complex, double>(corners, gManp->subtype, param, rotation, 250, 1.0e8, separation);
+		}
+	    else
+		{
+		/**************************************************************
+		    DD precision.
+
+		    Generate four corners using BigDouble coordinates,
+		    then convert each corner to DDComplex.
+
+		    Do not use the ordinary double coordinate c here.
+		**************************************************************/
+
+		BigComplex bigCorners[4];
+
+		bigCorners[0] = cBig;
+
+		bigCorners[1] = cBig;
+		bigCorners[1].x = bigCorners[1].x + Big_xgap;
+
+		bigCorners[2] = cBig;
+		bigCorners[2].y = bigCorners[2].y - Big_ygap;
+
+		bigCorners[3] = cBig;
+		bigCorners[3].x = bigCorners[3].x + Big_xgap;
+		bigCorners[3].y = bigCorners[3].y - Big_ygap;
+
+		DDComplex corners[4];
+
+		bool conversionOK = true;
+
+		for (int i = 0; i < 4; i++)
+		    {
+		    if (bigCorners[i].x.BigDouble2DD(&corners[i].x) < 0 ||
+			bigCorners[i].y.BigDouble2DD(&corners[i].y) < 0)
+			{
+			conversionOK = false;
+			break;
+			}
+		    }
+
+		if (conversionOK)
+		    {
+		    // Herman rotation: exp(2*pi*i*tau)
+
+		    const double angle = TWO_PI * param[0];
+
+		    DDComplex rotation;
+		    rotation.x = dd_real(cos(angle));
+		    rotation.y = dd_real(sin(angle));
+
+		    success = MeasureFourCornerRings<DDComplex, dd_real>(corners, gManp->subtype, param, rotation, 250, 1.0e8, separation);
+		    }
+		}
+
+	    /******************************************************************
+		Convert orbit separation to a palette colour.
+
+		Shared by DOUBLE and DD.
+	    ******************************************************************/
+
+	    if (success && std::isfinite(separation))
+		{
+		double value = -log10(max(separation, 1.0e-300)) * 16.0;
+
+		if (value < 1.0)
+		    value = 1.0;
+
+		if (value > threshold - 1)
+		    value = (double)(threshold - 1);
+
+		color = (long)value;
+		}
+	    else
+		{
+		// Temporary fallback to ordinary rendering.
+		color = dofract(hwnd, row, col);
+		}
+	    }
+	else
+	    {
+	    color = dofract(hwnd, row, col);
+	    }
 	}
 
     reset_period = 0;

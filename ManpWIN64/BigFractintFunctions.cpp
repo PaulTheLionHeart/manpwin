@@ -71,7 +71,6 @@ int	CPixel::BigInitFractintFunctions(WORD type, BigComplex *z, BigComplex *q)
 	    Init_Manowar<BigComplex, BigDouble>(this, z, q, cBig, param, juliaflag, tBig, tempBig, temp1Big);
 	    break;
 
-#ifdef ALLOWALLFRACTINTFUNCTIONS
 	case BARNSLEYM1:
 	case BARNSLEYM2:
 	case BARNSLEYM3:
@@ -84,8 +83,10 @@ int	CPixel::BigInitFractintFunctions(WORD type, BigComplex *z, BigComplex *q)
 	case BARNSLEYJ1FP:
 	case BARNSLEYJ2FP:
 	case BARNSLEYJ3FP:
+	    period_level = FALSE;
+	    Init_Barnsley<BigComplex, BigDouble>(this, z, q, cBig, param, juliaflag, tempBig);
 	    break;
-#endif
+
 	case COMPLEXNEWTON:
 	case COMPLEXBASIN:
 	    Init_ComplexNewton<BigComplex, BigDouble>(this, z, q, param, crootBig, cdegreeBig, subtype);
@@ -103,20 +104,21 @@ int	CPixel::BigInitFractintFunctions(WORD type, BigComplex *z, BigComplex *q)
 	    Init_Lambda<BigComplex, BigDouble>(this, z, q, param, juliaflag, tempBig);
 	    break;
 
-#ifdef ALLOWALLFRACTINTFUNCTIONS
 	case PHOENIXFP:
 	case PHOENIX:
 	case MANDPHOENIXFP:
 	case MANDPHOENIX:
+	    period_level = FALSE;
+	    Init_Phoenix<BigComplex, BigDouble>(this, z, q, cBig, param, juliaflag, type, tBig, tempBig, temp2Big, temp3Big, PhoenixDegree, PhoenixType, symmetry, false);
 	    break;
 
 	case MANDPHOENIXFPCPLX:
 	case MANDPHOENIXCPLX:
 	case PHOENIXCPLX:
 	case PHOENIXFPCPLX:
+	    period_level = FALSE;
+	    Init_PhoenixCplx<BigComplex, BigDouble>(this, z, q, cBig, param, juliaflag, tBig, tempBig, temp2Big, temp3Big, PhoenixDegree, PhoenixType, symmetry);
 	    break;
-#endif
-
 	case FPMANDELZPOWER:
 	case LMANDELZPOWER:
 	case LJULIAZPOWER:
@@ -136,6 +138,14 @@ int	CPixel::BigInitFractintFunctions(WORD type, BigComplex *z, BigComplex *q)
 	case QUATFP:
 	case QUATJULFP:
 	    Init_Quat<BigComplex, BigDouble>(this, z, q, cBig, param, juliaflag, tBig, qcBig, qciBig, qcjBig, qckBig);
+	    break;
+
+	case HALLEY:
+	    Init_Halley<BigComplex, BigDouble>(this, z, q, param, degree);
+	    break;
+
+	case DIVIDEBROT5:
+	    Init_DivideBrot5<BigComplex, BigDouble>(this, z, q, param, juliaflag);
 	    break;
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
@@ -187,25 +197,23 @@ int	CPixel::BigRunFractintFunctions(WORD type, BigComplex *z, BigComplex *q, BYT
 	case MANOWAR:						// to handle fractint par files
 	    return Iter_ManOWar<BigComplex, BigDouble>(this, z, q, tempBig, temp1Big, temp3Big, param, BailoutTestType, rqlim, &BigOldZ);
 
-#ifdef ALLOWALLFRACTINTFUNCTIONS
 	case BARNSLEYM1:					// Barnsley's Mandelbrot type M1 from "Fractals Everywhere" by Michael Barnsley, p. 322
 	case BARNSLEYJ1:
 	case BARNSLEYM1FP:
 	case BARNSLEYJ1FP:
-	    return DoBailout(bailout_type, z, rqlim, &BigOldZ);
+	    return Iter_Barnsley1<BigComplex, BigDouble>(this, z, q, tempBig, BailoutTestType, rqlim, &BigOldZ);
 
 	case BARNSLEYM2:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 331, example 4.2
 	case BARNSLEYJ2:
 	case BARNSLEYM2FP:
 	case BARNSLEYJ2FP:
-	    return DoBailout(bailout_type, z, rqlim, &BigOldZ);
+	    return Iter_Barnsley2<BigComplex, BigDouble>(this, z, q, tempBig, BailoutTestType, rqlim, &BigOldZ);
 
 	case BARNSLEYM3:					// An unnamed Mandelbrot/Julia function from "Fractals Everywhere" by Michael Barnsley, p. 292, example 4.1 
 	case BARNSLEYJ3:
 	case BARNSLEYM3FP:
 	case BARNSLEYJ3FP:
-	    return DoBailout(bailout_type, z, rqlim, &BigOldZ);
-#endif
+	    return Iter_Barnsley3<BigComplex, BigDouble>(this, z, q, tempBig, BailoutTestType, rqlim, &BigOldZ);
 
 	case MAGNET1:
 	case MAGNET1M:
@@ -231,19 +239,27 @@ int	CPixel::BigRunFractintFunctions(WORD type, BigComplex *z, BigComplex *q, BYT
 	case LAMBDA:
 	    return Iter_Lambda<BigComplex, BigDouble>(this, z, q, tempBig, BailoutTestType, rqlim, &BigOldZ);
 
-#ifdef ALLOWALLFRACTINTFUNCTIONS
 	case PHOENIXFP:
 	case PHOENIX:
 	case MANDPHOENIXFP:
 	case MANDPHOENIX:
-	    return 1;					// just to shut up compiler warnings
+	    if (PhoenixType == ZERO)
+		return Iter_Phoenix<BigComplex, BigDouble>(this, z, q, tempBig, temp3Big, BailoutTestType, rqlim, &BigOldZ);
+	    else if (PhoenixType == PLUS)
+		return Iter_PhoenixPlus<BigComplex, BigDouble>(this, z, tempBig, temp3Big, PhoenixDegree, BailoutTestType, rqlim, &BigOldZ);
+	    else
+		return Iter_PhoenixMinus<BigComplex, BigDouble>(this, z, tempBig, temp3Big, PhoenixDegree, BailoutTestType, rqlim, &BigOldZ);
 
 	case MANDPHOENIXFPCPLX:
 	case MANDPHOENIXCPLX:
 	case PHOENIXCPLX:
 	case PHOENIXFPCPLX:
-	    return 1;					// just to shut up compiler warnings
-#endif
+	    if (PhoenixType == ZERO)
+		return Iter_PhoenixCplx<BigComplex, BigDouble>(this, z, q, temp2Big, temp3Big, BailoutTestType, rqlim, &BigOldZ);
+	    else if (PhoenixType == PLUS)
+		return Iter_PhoenixCplxPlus<BigComplex, BigDouble>(this, z, q, temp2Big, temp3Big, PhoenixDegree, BailoutTestType, rqlim, &BigOldZ);
+	    else
+		return Iter_PhoenixCplxMinus<BigComplex, BigDouble>(this, z, q, temp2Big, temp3Big, PhoenixDegree, BailoutTestType, rqlim, &BigOldZ);
 
 	case LJULIAZPOWER:
 	case LMANDELZPOWER:
@@ -264,6 +280,13 @@ int	CPixel::BigRunFractintFunctions(WORD type, BigComplex *z, BigComplex *q, BYT
 	case QUATFP:
 	case QUATJULFP:
 	    return Iter_Quat<BigComplex, BigDouble>(this, z, tempBig, qcBig, qciBig, qcjBig, qckBig, rqlim);
+
+	case HALLEY:
+	    return Iter_Halley<BigComplex, BigDouble>(this, z, param, *degree);
+
+	case DIVIDEBROT5:
+	    return Iter_DivideBrot5<BigComplex, BigDouble>(this, z, q, BailoutTestType, rqlim, &BigOldZ);
+
 
 #ifdef ALLOWALLFRACTINTFUNCTIONS
 	case SIERPINSKI:				// following code translated from basic - see "Fractals Everywhere" by Michael Barnsley, p. 251, Program 7.1.1

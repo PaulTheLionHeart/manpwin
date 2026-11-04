@@ -1504,6 +1504,9 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		    case FPHOPALONG:
 			tempParam = IDC_HOPALONG;
 			break;
+		    case HALLEY:
+			tempParam = IDC_HALLEY;
+			break;
 		    case IFS:
 			tempParam = IDC_IFS;
 			break;
@@ -1884,6 +1887,9 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		    case ICON:
 			tempParam = IDC_ICONS;
 			break;
+		    case ICON3D:
+			tempParam = IDC_ICONS3D;
+			break;
 		    case DYNAMICFP:
 			tempParam = IDC_DYNAMIC;
 			break;
@@ -1899,6 +1905,15 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		    case INVERSEJULIA:
 			tempParam = IDC_INV_JULIA;
 			break;
+		    case JULIBROT:
+			tempParam = IDC_JULIBROT;
+			break;
+		    case TIMSERROR:
+			tempParam = IDC_TIMSERROR;
+		    case DIVIDEBROT5:
+			tempParam = IDC_DIVIDEBROT5;
+		    case RINGS:
+			tempParam = IDC_RINGS;
 
 		    }
 		CheckRadioButton(hDlg, IDC_MANDEL, IDC_TEST, tempParam);
@@ -1986,6 +2001,9 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			break;
 		    case IDC_HOPALONG:
 			temp = FPHOPALONG;
+			break;
+		    case IDC_HALLEY:
+			temp = HALLEY;
 			break;
 		    case IDC_IFS:
 			temp = IFS;
@@ -2362,6 +2380,9 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 		    case IDC_ICONS:
 			temp = ICON;
 			break;
+		    case IDC_ICONS3D:
+			temp = ICON3D;
+			break;
 		    case IDC_DYNAMIC:
 			temp = DYNAMICFP;
 			break;
@@ -2376,6 +2397,18 @@ INT_PTR CALLBACK FractTypeDlg (HWND hDlg, UINT message, WPARAM wParam, LPARAM lP
 			break;
 		    case IDC_INV_JULIA:
 			temp = INVERSEJULIA;
+			break;
+		    case IDC_JULIBROT:
+			temp = JULIBROT;
+			break;
+		    case IDC_TIMSERROR:
+			temp = TIMSERROR;
+			break;
+		    case IDC_DIVIDEBROT5:
+			temp = DIVIDEBROT5;
+			break;
+		    case IDC_RINGS:
+			temp = RINGS;
 			break;
 
 		    CheckRadioButton(hDlg, IDC_MANDEL, IDC_TEST, (int)LOWORD(wParam));

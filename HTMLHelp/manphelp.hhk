@@ -2044,4 +2044,39 @@
     <param name="Name" value="Inverse Julia Animation">
     <param name="Local" value="html\manpinvj.htm">
 </OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Rings">
+    <param name="Local" value="html\manpring.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Rings Fractals">
+    <param name="Local" value="html\manpring.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Four Corner">
+    <param name="Local" value="html\manpring.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Orbit Sum">
+    <param name="Local" value="html\manpring.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Orbit Trap">
+    <param name="Local" value="html\manpring.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="Convergence Colouring">
+    <param name="Local" value="html\manpring.htm">
+</OBJECT>
+
+<LI> <OBJECT type="text/sitemap">
+    <param name="Name" value="DivideBrot5">
+    <param name="Local" value="html\manp7fra.htm">
+</OBJECT>
 </UL>

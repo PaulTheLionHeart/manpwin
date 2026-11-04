@@ -98,6 +98,7 @@ class CManp
 	void	GetBailout(char *s);
 	int	ProcessTransformation(char *s);
 	void	AnalyseFwdDiff(char *s);
+	void	ProcessRotation(char *tok);
 	int	ProcessCorners(char *s, BOOL CentreFlag);
 	int	ProcessParams(char *s);
 	int	AnalyseFunction(char *Trigdata);
@@ -118,6 +119,8 @@ class CManp
 	void	AppendRotationParameter(StringBuilder& sb);
 	int	DrawJuliaOther(HWND hwnd);
 	int	DrawJuliaPixel(HWND hwnd, POINTS ptCurrent);
+	BOOL	BigFractintFunctionSupported(WORD type);
+	void	GetPrecisionLimits(WORD type, int& ddPrecision, int& qdPrecision);
 
 	// some transformation stuff
 	void	AppendTransformationParams(StringBuilder& sb);
@@ -253,7 +256,7 @@ class CManp
 	int		screenx, screeny;
 	int		caption;			// size of windows caption and scroll bars
 	int		scroll_width;			// size of horizontal scroll bars
-	char		AntStatus[200];			// display the progress of ant()
+	char		FractalStatus[240];		// display the progress of ant()
 	char		LyapSequence[120];		// hold the AB sequence for Lyapunov fractals
 	double		rqlim;				// bailout level
 	int		period_level;			// 0 for no periodicity checking

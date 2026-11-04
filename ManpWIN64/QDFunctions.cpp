@@ -8,6 +8,8 @@
 #include "pixel.h"
 #include "FunctionTemplate.h"
 #include "BailoutTemplate.h"
+#include "TetrationTemplate.h"
+#include "RingsTemplate.h"
 
 /**************************************************************************
 	Initialise functions for each pixel
@@ -270,15 +272,34 @@ int	CPixel::QDInitFunctions(WORD type, QDComplex *z, QDComplex *q)
 #define TEDDY			189
 
 */
-/*
+
 	case TETRATION:					// a Paul Bourke fractal
-	    InitTetration(z, q);
+	    Init_PBTetration<QDComplex, qd_real>(this, z, q, param, juliaflag, tempQD, TetrationRadiusQD, TetrationThetaQD, BailoutMethod);
 	    break;
 
 	case KLEINIAN:					// a Paul Bourke fractal
-	    InitKleinian(z, q);
+	    Init_Kleinian<QDComplex, qd_real>(this, z, q, param, juliaflag, uQD, v1QD, KQD, MQD, tQD);
 	    break;
-*/
+	case RINGS:
+	    RingsOrbitTrapMinQD = DBL_MAX;
+	    RingsMinDeltaSqrQD = DBL_MAX;
+	    /**************************************************************************
+		Initialise Bourke/Bagula Rings or Herman Rings.
+
+		IMPORTANT:
+		The Rings subtype now comes from the Rings subtype database
+		selection, not from param[0].
+
+		param[] now contains only the parameters for the selected
+		Rings subtype, packed from param[0] upward.
+
+		Precompute the complex rotation once per pixel rather than
+		recalculating the trigonometric functions every iteration.
+	    **************************************************************************/
+
+	    Init_PBRings<QDComplex, qd_real>(z, q, RingsOrbitSumQD, RingsRotationQD, subtype, param);
+	    break;
+
 	}
     return 0;
     }
@@ -391,6 +412,35 @@ int	CPixel::QDRunFunctions(WORD type, QDComplex *z, QDComplex *q, BYTE *SpecialF
 
 	case MANDELDERIVATIVES:				// a group of Mandelbrot Derivatives
 	    return (QDRunManDerFunctions(subtype, z, q));
+
+	case TETRATION:					// a Paul Bourke fractal
+	    return Iter_PBTetration<QDComplex, qd_real>(this, tempQD, TetrationRadiusQD, TetrationThetaQD, BailoutMethod, iteration, threshold, rqlim);
+
+	case KLEINIAN:					// Kleinian fractal
+	    return Iter_Kleinian<QDComplex, qd_real>(this, z, uQD, v1QD, KQD, MQD, tQD, iteration, rqlim);
+
+	case RINGS:                         // Paul Bourke's Rings fractal (2019) and other members of the Rings family
+	    /**************************************************************************
+		Rings formula selection
+
+		0 - Bourke / Bagula Rings
+		1 - Herman Rings
+		2 - Generalised Herman Rings
+		3 - Generalised Roger's Rational Rings
+		4 - McMullen Rings
+		5 - Singular Perturbation
+		6 - Shifted-Pole McMullen Rings
+		7 - Multi-Ppole Rational Maps
+		8 - Blaschke Products
+		9 - Newton Rational Rings
+		10 - Basilica–Rabbit Rational Map
+		11 - Bicritical Rational Rings
+		12 - Chebyshev–Halley
+		13 - Joukowski Rational Rings
+		14 - Sierpinski Rational Rings
+		15 - Perturbed Basilica Rings
+	    **************************************************************************/
+	    return IterateRingsWithColour<QDComplex, qd_real>(*z, subtype, param, RingsRotationQD, RingsOrbitSumQD, OrbitSumColouring, RingsOrbitTrapMinQD, RingsMinDeltaSqrQD, rqlim);
 
 //	case FORMULA:
 //	case SCREENFORMULA:

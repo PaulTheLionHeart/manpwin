@@ -8,16 +8,46 @@ This repository contains a fully reproducible CMake-based build system supportin
 
 ---
 
-## Version 4.06
+## Version 4.06a
 
-ManpWIN 4.06 is a major feature and compatibility release introducing a new
-Inverse Julia implementation, a substantially expanded fractal transformation
-system, and major improvements to Fractint PAR compatibility, rendering, and
-reliability.
+ManpWIN 4.06a expands the collection of fractal families, adds new Rings
+rendering and colouring options, and improves precision, multithreaded MPFR
+stability, Fractint compatibility, and documentation.
 
 ---
 
-## Recent Improvements (4.06)
+## Recent Improvements (4.06a)
+
+### New and Extended Fractals
+
+* Added five classic Fractint fractal types: Halley, Julibrot, Tim's Error, Icons3D, and DivideBrot5 fractals.
+* Completed the basic Julibrot implementation for powers up to 20, with power-dependent defaults and a colour/greyscale toggle. Some higher-power starting values may still benefit from refinement.
+* Added Paul Bourke-inspired Rings and expanded it into a family of 16 rational fractal subtypes, each with appropriate parameters and starting views.
+* Extended templated arithmetic to Phoenix, Complex Phoenix, Mandel Phoenix, Barnsley, Tetration, Kleinian, and other fractal families, improving support for higher-precision calculations.
+
+### Rings Rendering and Colouring
+
+* Added experimental Four Corner orbit-separation rendering.
+* Added five colouring selections: Normal, Orbit Sum, Orbit Sum Contours, Orbit Trap, and Convergence.
+* Extended Rings colour measurements and rendering to double, double-double (DD), and quad-double (QD) arithmetic.
+* Unified Rings iteration and colour processing, and fixed a NULL parameter-name crash in the Status Information dialogue.
+* Added dedicated Rings help, updated the Fractal Types and Fractint help pages, and refreshed the CHM contents and index.
+
+### Arithmetic, Performance, and Reliability
+
+* Greatly improved Tetration performance and introduced fractal-specific precision cutovers. Very large intermediate values remain a limitation in some configurations.
+* Rebuilt GMP/MPFR using a thread-safe MPFR configuration with thread-local storage support; removed the obsolete BigTrig implementation in favour of native MPFR functions.
+* Improved DD/QD handling of complex logarithms, trigonometry, and singularities, including repairs to Tierazon 48.
+* Improved Fractint fractal testing at higher precision and extended handling of rotation parameters in PAR files.
+* Cleaned up superseded Kleinian and Tetration implementations and verified both Debug and Release CMake builds.
+
+---
+
+## Previous Release Highlights (4.06)
+
+ManpWIN 4.06 introduced Inverse Julia for powers 2–20, an expanded transformation
+system, and major improvements to Fractint PAR compatibility, rendering, and
+reliability.
 
 ### Inverse Julia
 
@@ -63,34 +93,6 @@ reliability.
 
 ---
 
-## Previous Release Highlights (4.05b)
-
-### TieraZon and Flarium Filters
-
-* Fixed TieraZon filter behaviour across pixel-based fractals
-* Added a number of additional filters adapted from Stephen C. Ferguson's Flarium program
-* Fixed incorrect red/blue channel ordering in TieraZon and Flarium filters
-* Repaired several legacy TieraZon and Flarium filters which were not producing correct results
-* Corrected TieraZon filter precedence so TieraZon colouring takes priority over ordinary inside filters when appropriate
-
-### Clouds Orbit-Density Rendering
-
-* Added Clouds, an orbit-density rendering method based on an idea from Flarium
-* Added Clouds support to both ordinary and perturbation rendering
-* Added Linear Greyscale, Log Greyscale, Linear Palette, and Log Palette rendering modes
-* Added a Clouds colour selector to the Fractal Options dialog
-* Added palette colour support to Clouds rendering
-* Automatically disables Bilinear Approximation (BLA) acceleration while Clouds is active so that all orbit visits are preserved in the density calculation
-* Added saving and restoration of Clouds rendering settings in PAR files and animation scripts
-* Added Clouds density-map merge progress reporting to the status bar
-
-### Rendering and Documentation
-
-* Fixed the status-bar pass display which could incorrectly report `Pass 0 of n` during multi-pass rendering
-* Added new Help documentation for TieraZon, Flarium, and Clouds filters
-
----
-
 ## ✨ Features
 
 * Mandelbrot and related fractals
@@ -106,9 +108,10 @@ reliability.
 * Template-based parser and arithmetic framework supporting unified fractal semantics
 * Preservation of legacy algorithms with modern execution architecture
 * True colour rendering
-* Support for many fractal types including Mandelbrot, Julia, Burning Ship, and more
+* Support for many fractal types including Mandelbrot, Julia, Burning Ship, Julibrot, and the 16 Rings subtypes
 * TieraZon and Flarium orbit-based colouring filters
 * Clouds orbit-density rendering with greyscale and palette-based display modes
+* Rings Orbit Sum, Contours, Orbit Trap, Convergence, and experimental Four Corner rendering
 
 ---
 
@@ -340,6 +343,14 @@ A chronological record of major battles during the ManpWIN modernisation.
 - 🧮 Newton finally cornered — resolved a long-standing Fractint compatibility problem
 - 🐚 SeaHorse and SeaShell expedition — greatly improved six-corner Inverse Julia compatibility
 - 🎨 Inside colour archaeology — verified the original DOS Fractint source and restored its historical default inside colour
+- 🧩 New fractal expedition — Halley, Julibrot, Tim's Error, Icons3D, and DivideBrot5 join the collection
+- 🦑 Sixteen Rings of FireEater — expanded rational fractals with Four Corner and five colouring modes
+- 🧵 MPFR thread-safety dragon slain — rebuilt GMP/MPFR with TLS support and retired BigTrig
+- 🧮 Precision workshop — templated additional fractal families and refined DD/QD cutovers
+- ⚡ Tetration accelerated — substantially improved performance while tracking extreme-magnitude limits
+- 🛠 Tierazon 48 rescued — improved DD/QD complex logarithms and singularity handling
+- 📚 Rings documentation — new help topic, updated Contents and Index, and corrected the Status dialogue crash
+- 🏗 CMake cleanup — retired obsolete implementations and verified Debug and Release builds
 
 ---
 

@@ -390,6 +390,7 @@ int	analyse_fractal(HWND hwnd, char *str, char *SaveString, char *PastQuote)
 	case SLOPEDERIVATIVE:
 	case SLOPEFORWARDDIFF:
 	case MANDELDERIVATIVES:
+	case RINGS:
 	    if (*(str + 3) != '\0')
 		gManp->subtype = atoi(str + 3);
 	    break;

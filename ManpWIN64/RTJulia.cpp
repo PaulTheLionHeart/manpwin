@@ -135,7 +135,7 @@ int CManp::DrawJuliaOther(HWND hwnd)
     RTIJPixels.assign((size_t)Jwidth * Jheight, 0.0f);
     wpixels.swap(RTIJPixels);
 
-    OthFn.InitOtherFunctions((WORD)type, subtype, hwnd, &TrueCol, &Dib, AntStatus, DummyTime, DummyTime, mandel_width, hor, vert, AspectRatio, &totpasses, &curpass, nullptr, CoordSystem, xAxis, yAxis, zAxis);
+    OthFn.InitOtherFunctions((WORD)type, subtype, hwnd, &TrueCol, &Dib, FractalStatus, DummyTime, DummyTime, mandel_width, hor, vert, AspectRatio, &totpasses, &curpass, nullptr, CoordSystem, xAxis, yAxis, zAxis, param);
     OthFn.RunOtherFunctions((WORD)type, &TempSpecialFlag, &TempIteration, xdots, ydots, param, threshold, nullptr);
 
     wpixels.swap(RTIJPixels);

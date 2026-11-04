@@ -276,13 +276,19 @@ int	CPixel::FindSymmetry(BYTE _3dflag, int decomp, BYTE pairflag, int method, TR
 	    case FORMULA05:
 	    case SHARON:
 	    case QUAD:
+	    case TIMSERROR:
 	    case NUMFRACTAL:
+	    case DIVIDEBROT5:
 		if (param[0] != 0.0 || param[1] != 0.0)
 		    fract_sym = NOSYM;
 		else if (juliaflag)
 		    fract_sym = NOSYM;
 		else
 		    fract_sym = fractalspecific[type].symmetry;
+		break;
+
+	    case RINGS:
+		fract_sym = NOSYM;
 		break;
 
 	    case TIERAZON:

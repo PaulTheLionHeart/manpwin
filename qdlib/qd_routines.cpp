@@ -2048,9 +2048,18 @@ qd_real atan2(const qd_real &y, const qd_real &x) {
     return (y.is_positive()) ? qd_real::_3pi4 : -qd_real::_pi4;
   }
 
-  qd_real r = sqrt(sqr(x) + sqr(y));
-  qd_real xx = x / r;
-  qd_real yy = y / r;
+  // Normalize without squaring large or tiny values.
+  qd_real ax = abs(x);
+  qd_real ay = abs(y);
+  qd_real scale = (ax > ay) ? ax : ay;
+
+  qd_real xx = x / scale;
+  qd_real yy = y / scale;
+
+  qd_real r = sqrt(sqr(xx) + sqr(yy));
+
+  xx /= r;
+  yy /= r;
 
   // Compute double precision approximation to atan.
   qd_real z = std::atan2(to_double(y), to_double(x));

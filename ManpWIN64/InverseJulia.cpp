@@ -9,7 +9,7 @@
 #include "manp.h"
 #include "TransformTemplate.h"
 
-extern	int  setup_convert_to_screen(struct affine *, bool UseFractintCorners);
+extern	int	setup_convert_to_screen(struct affine *, bool UseFractintCorners);
 extern	int	user_data(HWND hwnd);
 
 DWORD lastUpdateTick = GetTickCount();

@@ -88,6 +88,8 @@ void InitFractintTrigFunctionsT(WORD type, TComplex *z, TComplex *q,    // expli
 	case MARKSMANDELPWRFP:
 	case MARKSMANDELPWR:
 	case NUMFRACTAL:
+	case TIMSERRORFP:
+	case TIMSERROR:
 	    {
 	    // t already computed before switch
 
@@ -403,6 +405,23 @@ int FractintTrigIterT(int type, TComplex* z, TComplex* q, TComplex& temp, TCompl
 		z, q, temp, temp1, temp2, temp3, Fn1Index, rqlim, BailoutTestType, oldZ);
 	    }
 
+	case TIMSERRORFP:
+	case TIMSERROR:
+	    {
+	    TrigCaller<TComplex>::Call(TrigFn, z, &temp2, Fn1Index);
+
+	    // Deliberately preserve Tim Wegner's original error:
+	    // temp2.x is changed before it is used to calculate temp2.y.
+	    temp2.x = temp2.x * temp1.x - temp2.y * temp1.y;
+	    temp2.y = temp2.x * temp1.y - temp2.y * temp1.x;
+
+	    temp2.x += q->x;
+	    temp2.y += q->y;
+
+	    *z = temp2;
+
+	    return DoBailout<TComplex, TReal>(BailoutTestType, z, rqlim, oldZ);
+	    }
 
 	}
     return 0;

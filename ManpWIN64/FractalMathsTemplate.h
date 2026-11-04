@@ -393,14 +393,14 @@ TComplex ComplexLogT(const TComplex& Cmplx1, double f_radius, double f_xcenter, 
     }
 
 /**************************************************************************
-    Complex logarithm transformation for arbitrary precision
+    Complex logarithm transformation for arbitrary precision.
+    Uses BigComplex::CLog().
 **************************************************************************/
 
 template<>
 inline BigComplex ComplexLogT<BigComplex, BigDouble>(const BigComplex& Cmplx1, double f_radius, double f_xcenter, double f_ycenter)
     {
     BigComplex temp;
-    CBigTrig trig;
 
     BigDouble x = Cmplx1.x - f_xcenter;
     BigDouble y = Cmplx1.y - f_ycenter;
@@ -411,15 +411,18 @@ inline BigComplex ComplexLogT<BigComplex, BigDouble>(const BigComplex& Cmplx1, d
 	{
 	double radiusSquared = f_radius * f_radius;
 
-	BigDouble LogArgument = modulusSquared / radiusSquared;
-	BigDouble LogValue;
-	BigDouble Angle;
+	BigComplex z;
+	z.x = x;
+	z.y = y;
 
-	trig.log_bf(&LogValue, LogArgument);
-	trig.atan2_bf(&Angle, y, x);
+	BigComplex logValue = z.CLog();
 
-	temp.x = f_xcenter + f_radius * 0.5 * LogValue;
-	temp.y = f_ycenter + f_radius * Angle;
+	// Preserve the original radius normalisation.
+	BigDouble logRadius(radiusSquared);
+	BigDouble radiusLog = logRadius.BigLog();
+
+	temp.x = f_xcenter + f_radius * 0.5 * (2.0 * logValue.x - radiusLog);
+	temp.y = f_ycenter + f_radius * logValue.y;
 	}
     else
 	{

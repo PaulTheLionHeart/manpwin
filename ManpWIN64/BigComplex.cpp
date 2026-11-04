@@ -6,50 +6,6 @@
 
 #include "BigComplex.h"
 #include "Complex.h"
-#include "BigTrig.h"
-
-//Complex::Complex(void)
-//    {
-//    }
-
-//extern	void	ShowBignum(BigDouble, char *);			// diagnostic tool only
-
-// NOTE:
-// MPFR is very expensive to allocate/free repeatedly.
-// We use thread-local scratch variables so each thread
-// reuses MPFR storage instead of allocating per iteration.
-// This is critical for stability and performance.
-
-// Thread-local MPFR scratch storage
-struct MPFRTmp
-    {
-    mpfr_t t1, t2, t3, t4;
-
-    MPFRTmp()
-	{
-	mpfr_init(t1);
-	mpfr_init(t2);
-	mpfr_init(t3);
-	mpfr_init(t4);
-	}
-
-    ~MPFRTmp()
-	{
-	mpfr_clear(t1);
-	mpfr_clear(t2);
-	mpfr_clear(t3);
-	mpfr_clear(t4);
-	}
-    };
-
-thread_local MPFRTmp g_mpfrTmp;
-
-//#define MPFR_TRIG_MUTEX_DEBUG
-
-#ifdef MPFR_TRIG_MUTEX_DEBUG
-#include <mutex>
-static std::mutex g_mpfr_trig_mutex;
-#endif
 
 BigComplex::~BigComplex(void)
     {
@@ -641,32 +597,87 @@ Complex	BigComplex::CBig2Double(void)
     }
 
 /**************************************************************************
-	sin(x+iy)  = sin(x)cosh(y) + icos(x)sinh(y)
-***************************************************************************/
+    Complex Sine:
+    sin(x+iy) = sin(x)cosh(y) + i cos(x)sinh(y)
 
-// NOTE:
-// MPFR trig functions are extremely expensive when using temporary objects.
-// This implementation uses thread-local scratch variables to avoid repeated
-// mpfr_init/mpfr_clear calls inside tight iteration loops.
-// This significantly improves stability and performance.
+    Native MPFR implementation.
+***************************************************************************/
 
 BigComplex BigComplex::CSin() const
     {
     BigComplex result;
-    CBigTrig trig;
-    trig.CSin(&result, *this);
+
+    // Use a common precision for all intermediate calculations.
+    mpfr_prec_t prec = mpfr_get_prec(x.x);
+
+    if (mpfr_get_prec(y.x) > prec)
+	prec = mpfr_get_prec(y.x);
+
+    result.x.MatchPrecision(x);
+    result.y.MatchPrecision(y);
+
+    BigDouble sinx, cosx, sinhy, coshy;
+
+    mpfr_set_prec(sinx.x, prec);
+    mpfr_set_prec(cosx.x, prec);
+    mpfr_set_prec(sinhy.x, prec);
+    mpfr_set_prec(coshy.x, prec);
+
+    // Calculate sine and cosine of the real component.
+    mpfr_sin_cos(sinx.x, cosx.x, x.x, MPFR_RNDN);
+
+    // Calculate hyperbolic sine and cosine of the imaginary component.
+    mpfr_sinh_cosh(sinhy.x, coshy.x, y.x, MPFR_RNDN);
+
+    // Real = sin(x) * cosh(y)
+    mpfr_mul(result.x.x, sinx.x, coshy.x, MPFR_RNDN);
+
+    // Imaginary = cos(x) * sinh(y)
+    mpfr_mul(result.y.x, cosx.x, sinhy.x, MPFR_RNDN);
+
     return result;
     }
-
+    
 /**************************************************************************
-	cos(x+iy)  = cos(x)cosh(y) - isin(x)sinh(y)
+    Complex Cosine:
+    cos(x+iy) = cos(x)cosh(y) - i sin(x)sinh(y)
+
+    Native MPFR implementation.
 ***************************************************************************/
 
 BigComplex BigComplex::CCos() const
     {
     BigComplex result;
-    CBigTrig trig;
-    trig.CCos(&result, *this);
+
+    // Use a common precision for all intermediate calculations.
+    mpfr_prec_t prec = mpfr_get_prec(x.x);
+
+    if (mpfr_get_prec(y.x) > prec)
+	prec = mpfr_get_prec(y.x);
+
+    result.x.MatchPrecision(x);
+    result.y.MatchPrecision(y);
+
+    BigDouble sinx, cosx, sinhy, coshy;
+
+    mpfr_set_prec(sinx.x, prec);
+    mpfr_set_prec(cosx.x, prec);
+    mpfr_set_prec(sinhy.x, prec);
+    mpfr_set_prec(coshy.x, prec);
+
+    // Calculate sine and cosine of the real component.
+    mpfr_sin_cos(sinx.x, cosx.x, x.x, MPFR_RNDN);
+
+    // Calculate hyperbolic sine and cosine of the imaginary component.
+    mpfr_sinh_cosh(sinhy.x, coshy.x, y.x, MPFR_RNDN);
+
+    // Real = cos(x) * cosh(y)
+    mpfr_mul(result.x.x, cosx.x, coshy.x, MPFR_RNDN);
+
+    // Imaginary = -sin(x) * sinh(y)
+    mpfr_mul(result.y.x, sinx.x, sinhy.x, MPFR_RNDN);
+    mpfr_neg(result.y.x, result.y.x, MPFR_RNDN);
+
     return result;
     }
 
@@ -688,50 +699,88 @@ BigComplex	BigComplex::CTan(void)
     }
 
 /**************************************************************************
-	sinh(x+iy)  = sinh(x)cos(y) + icosh(x)sin(y)
+    Complex Hyperbolic Sine:
+    sinh(x+iy) = sinh(x)cos(y) + i cosh(x)sin(y)
+
+    Native MPFR implementation.
 ***************************************************************************/
 
 BigComplex BigComplex::CSinh() const
     {
     BigComplex result;
-    CBigTrig trig;
-    trig.CSinh(&result, *this);
+
+    // Use a common precision for intermediate calculations.
+    mpfr_prec_t prec = mpfr_get_prec(x.x);
+
+    if (mpfr_get_prec(y.x) > prec)
+	prec = mpfr_get_prec(y.x);
+
+    BigDouble sinhx, coshx, siny, cosy;
+
+    mpfr_set_prec(sinhx.x, prec);
+    mpfr_set_prec(coshx.x, prec);
+    mpfr_set_prec(siny.x, prec);
+    mpfr_set_prec(cosy.x, prec);
+
+    result.x.MatchPrecision(x);
+    result.y.MatchPrecision(y);
+
+    // Hyperbolic sine and cosine of the real component.
+    mpfr_sinh_cosh(sinhx.x, coshx.x, x.x, MPFR_RNDN);
+
+    // Sine and cosine of the imaginary component.
+    mpfr_sin_cos(siny.x, cosy.x, y.x, MPFR_RNDN);
+
+    // Real = sinh(x) * cos(y)
+    mpfr_mul(result.x.x, sinhx.x, cosy.x, MPFR_RNDN);
+
+    // Imaginary = cosh(x) * sin(y)
+    mpfr_mul(result.y.x, coshx.x, siny.x, MPFR_RNDN);
+
     return result;
     }
 
-/*
-BigComplex	BigComplex::CSinh(void) const
-    {
-    BigComplex a;
-
-    a.x = x.BigSinh() * y.BigCos();
-    a.y = x.BigCosh() * y.BigSin();
-    return a;
-    }
-*/
-
 /**************************************************************************
-	cosh(x+iy)  = cosh(x)cos(y) - isinh(x)sin(y)
+    Complex Hyperbolic Cosine:
+    cosh(x+iy) = cosh(x)cos(y) + i sinh(x)sin(y)
+
+    Native MPFR implementation.
 ***************************************************************************/
 
 BigComplex BigComplex::CCosh() const
     {
     BigComplex result;
-    CBigTrig trig;
-    trig.CCosh(&result, *this);
+
+    // Use a common precision for intermediate calculations.
+    mpfr_prec_t prec = mpfr_get_prec(x.x);
+
+    if (mpfr_get_prec(y.x) > prec)
+	prec = mpfr_get_prec(y.x);
+
+    BigDouble sinhx, coshx, siny, cosy;
+
+    mpfr_set_prec(sinhx.x, prec);
+    mpfr_set_prec(coshx.x, prec);
+    mpfr_set_prec(siny.x, prec);
+    mpfr_set_prec(cosy.x, prec);
+
+    result.x.MatchPrecision(x);
+    result.y.MatchPrecision(y);
+
+    // Hyperbolic sine and cosine of the real component.
+    mpfr_sinh_cosh(sinhx.x, coshx.x, x.x, MPFR_RNDN);
+
+    // Sine and cosine of the imaginary component.
+    mpfr_sin_cos(siny.x, cosy.x, y.x, MPFR_RNDN);
+
+    // Real = cosh(x) * cos(y)
+    mpfr_mul(result.x.x, coshx.x, cosy.x, MPFR_RNDN);
+
+    // Imaginary = sinh(x) * sin(y)
+    mpfr_mul(result.y.x, sinhx.x, siny.x, MPFR_RNDN);
+
     return result;
     }
-
-/*
-BigComplex	BigComplex::CCosh(void) const
-    {
-    BigComplex a;
-
-    a.x = x.BigCosh() * y.BigCos();
-    a.y = -x.BigSinh() * y.BigSin();
-    return a;
-    }
-*/
 
 /**************************************************************************
 	tanh(x+iy)  = (tanh(x) + i tan(y)) / (1 +i tanh(x) tan(y))
@@ -752,17 +801,32 @@ BigComplex	BigComplex::CTanh(void)
     }
 
 /**************************************************************************
-	Complex Exponent: e^(x+iy) = (e^x) * cos(y) + i * (e^x) * sin(y)
+    Complex Exponent: e^(x+iy) = e^x * (cos(y) + i sin(y))
+    Native MPFR implementation.
 ***************************************************************************/
 
 BigComplex BigComplex::CExp() const
     {
     BigComplex result;
-    CBigTrig trig;
-    trig.CExp(&result, *this);
+
+    result.x.MatchPrecision(x);
+    result.y.MatchPrecision(y);
+
+    BigDouble expx, siny, cosy;
+
+    expx.MatchPrecision(x);
+    siny.MatchPrecision(y);
+    cosy.MatchPrecision(y);
+
+    mpfr_exp(expx.x, x.x, MPFR_RNDN);
+    mpfr_sin_cos(siny.x, cosy.x, y.x, MPFR_RNDN);
+
+    mpfr_mul(result.x.x, expx.x, cosy.x, MPFR_RNDN);
+    mpfr_mul(result.y.x, expx.x, siny.x, MPFR_RNDN);
+
     return result;
     }
-
+    
 /**************************************************************************
 	Abs(x+iy)  = sqrt(x*x+y*y)
 ***************************************************************************/
@@ -781,234 +845,39 @@ BigDouble	BigComplex::CFabs()
     }
 
 /**************************************************************************
-	sin(x+iy)  = sin(x)cosh(y) + icos(x)sinh(y)
+    Complex Logarithm:
+    log(x+iy) = log(hypot(x,y)) + i atan2(y,x)
+
+    Native MPFR implementation.
 ***************************************************************************/
-
-/*
-//extern	bf_t	sinhcosh_bf(bf_t, bf_t, bf_t);
-
-BigComplex	CSin(BigComplex  & Cmplx1)
-    {
-    BigComplex	a;
-    BigDouble	t1, t2, t3, t4;
-
-    mpfr_sin_cos(t1.x, t3.x, Cmplx1.x.x, MPFR_RNDN);
-    mpfr_sinh_cosh(t4.x, t2.x, Cmplx1.y.x, MPFR_RNDN);
-    mpfr_mul(a.x.x, t1.x, t2.x, MPFR_RNDN);
-    mpfr_mul(a.y.x, t3.x, t4.x, MPFR_RNDN);
-
-    return a;
-    }
-*/
-
-/**************************************************************************
-	cos(x+iy)  = cos(x)cosh(y) - isin(x)sinh(y)
-***************************************************************************/
-
-/*
-BigComplex	CCos(BigComplex  & Cmplx1)
-    {
-    BigComplex a;
-    BigDouble	t1, t2, t3, t4;
-
-    mpfr_sin_cos(t3.x, t1.x, Cmplx1.x.x, MPFR_RNDN);
-    mpfr_sinh_cosh(t4.x, t2.x, Cmplx1.y.x, MPFR_RNDN);
-    mpfr_neg(t3.x, t3.x, MPFR_RNDN);
-    mpfr_mul(a.x.x, t1.x, t2.x, MPFR_RNDN);
-    mpfr_mul(a.y.x, t3.x, t4.x, MPFR_RNDN);
-
-    return a;
-    }
-*/
-
-/**************************************************************************
-	Complex Exponent: e^(x+iy) = (e^x) * cos(y) + i * (e^x) * sin(y)
-***************************************************************************/
-
-/*
-BigComplex	CExp(BigComplex  & Cmplx1)
-    {
-    BigComplex a;
-    BigDouble	t1, t2, t3, t4;
-
-    mpfr_sin_cos(t1.x, t2.x, Cmplx1.y.x, MPFR_RNDN);	// BigTemp1 = sin(z), BigTemp2 = cos(z)
-    mpfr_exp(t3.x, Cmplx1.x.x, MPFR_RNDN);		// a = exp(a);
-    mpfr_mul(a.x.x, t2.x, t3.x, MPFR_RNDN);	// a.x = t2*t3
-    mpfr_mul(a.y.x, t1.x, t3.x, MPFR_RNDN);	// a.y = t1*t3
-    return a;
-    }
-*/
-
-/**************************************************************************
-	sqr(x+iy)  = x*x-y*y + i(x*y)*2
-***************************************************************************/
-
-/*
-BigComplex	CSqr(BigComplex  & Cmplx1)
-    {
-    BigComplex a;
-
-    a.x = (Cmplx1.x * Cmplx1.x) - (Cmplx1.y * Cmplx1.y);
-    a.y = Cmplx1.x * Cmplx1.y * 2.0;
-    return a;
-    }
-*/
-
-/**************************************************************************
-	sumsqr(x+iy)  = x*x+y*y
-***************************************************************************/
-
-/*
-BigDouble	BigCSumSqr(BigComplex  & Cmplx1)
-    {
-    return (Cmplx1.x * Cmplx1.x) + (Cmplx1.y * Cmplx1.y);
-    }
-
-double	CSumSqr(BigComplex  & Cmplx1)
-    {
-    BigDouble	t = ((Cmplx1.x * Cmplx1.x) + (Cmplx1.y * Cmplx1.y));
-    return ((double)bftofloat(t.x));
-    }
-*/
-
-/**************************************************************************
-	Evaluate a Complex Polynomial
-**************************************************************************/
-
-/*
-extern	void	BigComplexPower(bf_t, bf_t, bf_t, bf_t, int);
-
-BigComplex	CPolynomial(BigComplex  & Cmplx1, int degree)
-
-    {
-    BigComplex	temp;
-
-    if (degree < 0)
-	degree = 0;
-    BigComplexPower(temp.x.x, temp.y.x, Cmplx1.x.x, Cmplx1.y.x, degree);
-    return  temp;
-    }
-*/
-
-/**************************************************************************
-	invert c + jd = (1 + j0) / (a + jb)
-***************************************************************************/
-
-/*
-BigComplex	CInvert(BigComplex  & Cmplx1)
-
-    {
-    BigDouble	d;
-    BigComplex	temp;
-
-    if (is_bf_zero(Cmplx1.x.x) && is_bf_zero(Cmplx1.y.x))
-	d = zerotol;						// prevent divide by zero
-    else
-	d = Cmplx1.x * Cmplx1.x + Cmplx1.y * Cmplx1.y;
-    temp.x = Cmplx1.x / d;
-    temp.y = - Cmplx1.y / d;
-    return  temp;
-    }
-*/
-
-/**************************************************************************
-	Cube c + jd = (a + jb) * (a + jb) * (a + jb) 
-***************************************************************************/
-
-/*
-BigComplex	CCube(BigComplex  & Cmplx1)
-
-    {
-    BigComplex	temp;
-    BigDouble	sqr_real, sqr_imag;
-
-    sqr_real = Cmplx1.x * Cmplx1.x;
-    sqr_imag = Cmplx1.y * Cmplx1.y;
-    temp.x = Cmplx1.x * (sqr_real - (sqr_imag + sqr_imag + sqr_imag));
-    temp.y = Cmplx1.y * ((sqr_real + sqr_real + sqr_real) - sqr_imag);
-    return  temp;
-    }
-*/
-
-//#ifdef	ALLOWBIGCOMPLEXFUNCTIONS
-/**************************************************************************
-	Evaluate a Complex Log: ln(x+i y) = 0.5*ln(x²+y²) + i atan(x/y) 
-**************************************************************************/
-
-//#include <mutex>
-
-//static std::mutex g_mpfr_log_atan_mutex;
 
 BigComplex BigComplex::CLog() const
     {
-//    std::lock_guard<std::mutex> lock(g_mpfr_log_atan_mutex);
+    BigComplex result;
 
-    BigComplex a;
-    CBigTrig trig;
+    // Use the greater precision of the two components.
+    mpfr_prec_t prec = mpfr_get_prec(x.x);
 
-    BigDouble mag2 = x * x + y * y;
-    trig.log_bf(&a.x, mag2);
-    a.x = a.x.BigHalf();
-    trig.atan2_bf(&a.y, y, x);
+    if (mpfr_get_prec(y.x) > prec)
+	prec = mpfr_get_prec(y.x);
 
-    return a;
+    BigDouble magnitude;
+    mpfr_set_prec(magnitude.x, prec);
+
+    result.x.MatchPrecision(x);
+    result.y.MatchPrecision(y);
+
+    // Calculate magnitude without explicitly squaring components.
+    mpfr_hypot(magnitude.x, x.x, y.x, MPFR_RNDN);
+
+    // Real component = log(|z|)
+    mpfr_log(result.x.x, magnitude.x, MPFR_RNDN);
+
+    // Imaginary component = principal argument of z
+    mpfr_atan2(result.y.x, y.x, x.x, MPFR_RNDN);
+
+    return result;
     }
-
-
-
-
-/*
-BigComplex BigComplex::CLog() const
-    {
-    BigComplex a;
-    CBigTrig trig;
-
-    BigDouble mag2 = x * x + y * y;
-
-    trig.log_bf(&a.x, mag2);
-    a.x = a.x.BigHalf();
-
-    trig.atan2_bf(&a.y, y, x);
-
-    return a;
-    }
-
-
-BigComplex BigComplex::CLog() const
-    {
-    BigComplex a;
-
-    BigDouble mag2 = x * x + y * y;
-    a.x = mag2.BigLog();
-    a.x = a.x.BigHalf();
-
-    mpfr_atan2(a.y.x, y.x, x.x, MPFR_RNDN);
-
-    return a;
-    }
-    
-
-BigComplex	BigComplex::CLog()
-
-    {
-    BigComplex a;
-
-    mpfr_sqr(a.x.x,x.x, MPFR_RNDN);
-    mpfr_sqr(a.y.x,y.x, MPFR_RNDN);
-    mpfr_add(a.x.x, a.x.x, a.y.x, MPFR_RNDN);
-
-    BigDouble mag2 = x * x + y * y;
-    char buf[256];
-    mag2.ToString(buf, sizeof(buf), true);
-    OutputDebugStringA(("CLog mag2 = " + std::string(buf) + "\n").c_str());
-
-
-    mpfr_log(a.x.x,a.x.x, MPFR_RNDN);
-    mpfr_div_si(a.x.x, a.x.x, 2, MPFR_RNDN);
-    mpfr_atan2(a.y.x,y.x,x.x, MPFR_RNDN);
-    return a;
-    }
-*/
 
 /**************************************************************************
 	Evaluate a Complex Polynomial with a complex power

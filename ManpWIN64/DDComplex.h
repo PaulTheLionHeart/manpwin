@@ -94,8 +94,7 @@ class DDComplex
 //	void		DDComplexPower(DDComplex  & result, DDComplex x, DDComplex y);
 	DDComplex	DDComplexPower(DDComplex x, DDComplex y);
 	double		CSumSqr();		// real squared + imaginary squared
-	DDComplex	CSinUnSafe(void);	// sine of a complex number
-	DDComplex	CCosUnSafe(void);	// cosine
+	DDComplex	CLogSin();		// Calculate log(sin(z)) without overflowing the intermediate sine.
 
 	dd_real	x, y;
     };
