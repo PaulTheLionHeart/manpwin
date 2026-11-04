@@ -20,7 +20,7 @@ stability, Fractint compatibility, and documentation.
 
 ### New and Extended Fractals
 
-* Added five classic Fractint fractal types: Halley, Julibrot, Tim's Error, Icons3D, and DivideBrot5 fractals.
+* Added five classic Fractint fractal types: Halley, Julibrot, Tim's Error, Icons3D, and DivideBrot5.
 * Completed the basic Julibrot implementation for powers up to 20, with power-dependent defaults and a colour/greyscale toggle. Some higher-power starting values may still benefit from refinement.
 * Added Paul Bourke-inspired Rings and expanded it into a family of 16 rational fractal subtypes, each with appropriate parameters and starting views.
 * Extended templated arithmetic to Phoenix, Complex Phoenix, Mandel Phoenix, Barnsley, Tetration, Kleinian, and other fractal families, improving support for higher-precision calculations.
@@ -49,8 +49,6 @@ ManpWIN 4.06 introduced Inverse Julia for powers 2–20, an expanded transformat
 system, and major improvements to Fractint PAR compatibility, rendering, and
 reliability.
 
-### Inverse Julia
-
 * Added a new Inverse Julia implementation supporting powers from 2 through 20
 * Added Breadth First, Depth First, Random Walk, and Random Run generation methods
 * Added Inverse Julia animation across all supported powers
@@ -60,8 +58,6 @@ reliability.
 * Added progress reporting, cancellation, and safeguards against runaway calculations
 * Improved compatibility with Fractint `julia_inverse` and `miim=` parameters
 
-### Fractal Transformations
-
 * Added a dedicated Fractal Transformations system separate from ordinary Fractal Options
 * Added multiple coordinate systems and standard geometric transformations
 * Added Affine transformations with scaling, stretching, shearing, reflection, rotation, and translation
@@ -69,8 +65,6 @@ reliability.
 * Improved arbitrary-angle and quarter-turn rotation handling
 * Improved rotated zoom-in and zoom-out behaviour
 * Added transformation persistence in parameter files
-
-### Fractint PAR Compatibility
 
 * Greatly improved Fractint viewport interpretation
 * Added support for six-corner geometry, rotation, skew, stretched axes, and horizontal magnification
@@ -80,8 +74,6 @@ reliability.
 * Improved symmetry and block plotting for affected Fractint examples
 * Repaired a number of long-standing compatibility problems in individual PAR examples
 * Improved Inverse Julia compatibility for examples including SeaHorse and SeaShell
-
-### Fractal and Rendering Improvements
 
 * Added Magnet 1 and Magnet 2 support including finite-attractor handling
 * Added TieraZon Blob / Convergence bailout behaviour
